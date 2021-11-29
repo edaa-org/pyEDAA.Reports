@@ -1,41 +1,73 @@
 # pyEDAA.Reports
 
-Proposal to define an XML-based logging format for outputs from EDA tools and logging libraries.
+Proposal to define an abstract model for outputs from EDA tools and logging libraries.
+
+The main intended use case of pyEDAA.Reports is to import multiple log/report formats (raw logs, CSVs, YAML, JSON, etc.)
+and provide a unified model that can generate reports using popular formats such as XUnit or Cobertura.
+Since most vendors, CI services and monitoring tools support XML, the internals of pyEDAA.Reports are to be based on
+XML transformations.
+
+As an abstract model, the main capability of pyEDAA.Reports is handling messages using an structured format.
+The readers categorize messages by IDs and append attributes such as the severity, which allow complex filtering and
+fancy coloring for better human readability.
 
 ## Report Kinds
 
 ### Test Report Summary
 
-* Test Suite
-* Test Case
-* Test Parameter
+- Test Suite
+- Test Case
+- Test Parameter
 
 ### Code Coverage Report
 
-* Line Coverage
-* Statement Coverage
-* Branch Coverage
-* Expression Coverage
-* State Coverage
-* Transition Coverage
+- Line Coverage
+- Statement Coverage
+- Branch Coverage
+- Expression Coverage
+- State Coverage
+- Transition Coverage
 
 ### Functional Coverage
 
-* Coverage Model
-  * Dimension
-  * Bin
-    * Item
-    * Range
+- Coverage Model
+  - Dimension
+  - Bin
+    - Item
+    - Range
 
 ### Synthesis
 
-* Area/resources
-* Timing
+- Area/resources
+- Timing
 
 ### Implementation
 
-* Area/resources
-* Timing
+- Area/resources
+- Timing
+
+## Target input logs/formats
+
+- ActiveHDL
+- CoCoTb
+- Diamond
+- GHDL
+- Icarus Verilog
+- ISE
+- ModelSim/QuestaSim
+- nextpnr
+- OSVVM
+- RivieraPRO
+- SymbiYosys
+- Synplify
+- Quartus
+- Verilator
+- Verilog-to-Routing
+- Vivado
+- VUnit
+- Xcelium
+- Yosys
+- ...
 
 # References
 
