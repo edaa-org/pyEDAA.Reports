@@ -73,6 +73,7 @@ fancy coloring for better human readability.
 
 - [OSVB: Open Source Verification Report (OSVR)](https://umarcor.github.io/osvb/apis/logging.html#open-source-verification-report)
 - [olofk/edalize](https://github.com/olofk/edalize/) (see `edalize.reporting`, `edalize.vivado_reporting`, `edalize.quartus_reporting`, `edalize.ise_reporting`, ...)
+- [librecores/eda-log-parser](https://github.com/librecores/eda-log-parser)
 - [SymbiFlow/fpga-tool-perf](https://github.com/SymbiFlow/fpga-tool-perf)
 - [mattvenn/logLUTs](https://github.com/mattvenn/logLUTs)
 - [tiagolascasas/Vivado-HLS-Report-Parser](https://github.com/tiagolascasas/Vivado-HLS-Report-Parser)
