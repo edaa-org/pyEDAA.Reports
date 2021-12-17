@@ -106,3 +106,8 @@ fancy coloring for better human readability.
 - [SymbiFlow/fpga-tool-perf](https://github.com/SymbiFlow/fpga-tool-perf)
 - [mattvenn/logLUTs](https://github.com/mattvenn/logLUTs)
 - [tiagolascasas/Vivado-HLS-Report-Parser](https://github.com/tiagolascasas/Vivado-HLS-Report-Parser)
+- [cuelang.org/](https://cuelang.org/)
+  - [cuelang.org/docs/tutorials](https://cuelang.org/docs/tutorials/)
+  - [cue-lang/cue#162](https://github.com/cue-lang/cue/issues/162)
+    - [pypi.org/project/pycue](https://pypi.org/project/pycue/)
+    - [philipdexter/pycue](https://github.com/philipdexter/pycue)
