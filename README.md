@@ -1,4 +1,29 @@
-# pyEDAA.Reports
+<p align="center">
+  <a title="edaa-org.github.io/pyEDAA.Reports" href="https://edaa-org.github.io/pyEDAA.Reports"><img height="80px" src="doc/_static/logo.svg"/></a>
+</p>
+
+[![Sourcecode on GitHub](https://img.shields.io/badge/pyEDAA-pyEDAA.Reports-29b6f6.svg?longCache=true&style=flat-square&logo=GitHub&labelColor=0277bd)](https://GitHub.com/edaa-org/pyEDAA.Reports)
+[![Documentation](https://img.shields.io/website?longCache=true&style=flat-square&label=edaa-org.github.io%2FpyEDAA.Reports&logo=GitHub&logoColor=fff&up_color=blueviolet&up_message=Read%20now%20%E2%9E%9A&url=https%3A%2F%2Fedaa-org.github.io%2FpyEDAA.Reports%2Findex.html)](https://edaa-org.github.io/pyEDAA.Reports/)
+[![Gitter](https://img.shields.io/badge/chat-on%20gitter-4db797.svg?longCache=true&style=flat-square&logo=gitter&logoColor=e8ecef)](https://gitter.im/hdl/community)  
+[![GitHub Workflow - Build and Test Status](https://img.shields.io/github/workflow/status/edaa-org/pyEDAA.Reports/Pipeline/main?longCache=true&style=flat-square&label=Build%20and%20Test&logo=GitHub%20Actions&logoColor=FFFFFF)](https://GitHub.com/edaa-org/pyEDAA.Reports/actions/workflows/Pipeline.yml)
+
+<!--
+[![Sourcecode License](https://img.shields.io/pypi/l/pyEDAA.Reports?longCache=true&style=flat-square&logo=Apache&label=code)](LICENSE.md)
+[![Documentation License](https://img.shields.io/badge/doc-CC--BY%204.0-green?longCache=true&style=flat-square&logo=CreativeCommons&logoColor=fff)](LICENSE.md)
+
+[![PyPI](https://img.shields.io/pypi/v/pyEDAA.Reports?longCache=true&style=flat-square&logo=PyPI&logoColor=FBE072)](https://pypi.org/project/pyEDAA.Reports/)
+![PyPI - Status](https://img.shields.io/pypi/status/pyEDAA.Reports?longCache=true&style=flat-square&logo=PyPI&logoColor=FBE072)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyEDAA.Reports?longCache=true&style=flat-square&logo=PyPI&logoColor=FBE072)
+
+[![Libraries.io status for latest release](https://img.shields.io/librariesio/release/pypi/pyEDAA.Reports?longCache=true&style=flat-square&logo=Libraries.io&logoColor=fff)](https://libraries.io/github/edaa-org/pyEDAA.Reports)
+[![Codacy - Quality](https://img.shields.io/codacy/grade/39d312bf98244961975559f141c3e000?longCache=true&style=flat-square&logo=Codacy)](https://app.codacy.com/gh/edaa-org/pyEDAA.Reports)
+[![Codacy - Coverage](https://img.shields.io/codacy/coverage/39d312bf98244961975559f141c3e000?longCache=true&style=flat-square&logo=Codacy)](https://app.codacy.com/gh/edaa-org/pyEDAA.Reports)
+[![Codecov - Branch Coverage](https://img.shields.io/codecov/c/github/edaa-org/pyEDAA.Reports?longCache=true&style=flat-square&logo=Codecov)](https://codecov.io/gh/edaa-org/pyEDAA.Reports)
+
+[![Dependent repos (via libraries.io)](https://img.shields.io/librariesio/dependent-repos/pypi/pyEDAA.Reports?longCache=true&style=flat-square&logo=GitHub)](https://GitHub.com/edaa-org/pyEDAA.Reports/network/dependents)
+[![Requires.io](https://img.shields.io/requires/github/edaa-org/pyEDAA.Reports?longCache=true&style=flat-square)](https://requires.io/github/EDAA-ORG/pyEDAA.Reports/requirements/?branch=main)
+[![Libraries.io SourceRank](https://img.shields.io/librariesio/sourcerank/pypi/pyEDAA.Reports?longCache=true&style=flat-square)](https://libraries.io/github/edaa-org/pyEDAA.Reports/sourcerank)
+-->
 
 Proposal to define an abstract model for outputs from EDA tools and logging libraries.
 
@@ -11,15 +36,19 @@ As an abstract model, the main capability of pyEDAA.Reports is handling messages
 The readers categorize messages by IDs and append attributes such as the severity, which allow complex filtering and
 fancy coloring for better human readability.
 
-## Report Kinds
+<p align="center">
+  <a title="edaa-org.github.io/pyEDAA.UCIS" href="https://edaa-org.github.io/pyEDAA.UCIS"><img height="275px" src="doc/_static/work-in-progress.png"/></a>
+</p>
 
-### Test Report Summary
+# Report Kinds
+
+## Test Report Summary
 
 - Test Suite
 - Test Case
 - Test Parameter
 
-### Code Coverage Report
+## Code Coverage Report
 
 - Line Coverage
 - Statement Coverage
@@ -28,7 +57,7 @@ fancy coloring for better human readability.
 - State Coverage
 - Transition Coverage
 
-### Functional Coverage
+## Functional Coverage
 
 - Coverage Model
   - Dimension
@@ -36,17 +65,17 @@ fancy coloring for better human readability.
     - Item
     - Range
 
-### Synthesis
+## Synthesis
 
 - Area/resources
 - Timing
 
-### Implementation
+## Implementation
 
 - Area/resources
 - Timing
 
-## Target input logs/formats
+# Target input logs/formats
 
 - ActiveHDL
 - CoCoTb
