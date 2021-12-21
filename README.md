@@ -37,7 +37,7 @@ The readers categorize messages by IDs and append attributes such as the severit
 fancy coloring for better human readability.
 
 <p align="center">
-  <a title="edaa-org.github.io/pyEDAA.UCIS" href="https://edaa-org.github.io/pyEDAA.UCIS"><img height="275px" src="doc/_static/work-in-progress.png"/></a>
+  <a title="edaa-org.github.io/pyEDAA.Reports" href="https://edaa-org.github.io/pyEDAA.Reports"><img height="275px" src="doc/_static/work-in-progress.png"/></a>
 </p>
 
 # Report Kinds
