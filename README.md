@@ -2,7 +2,7 @@
   <a title="edaa-org.github.io/pyEDAA.Reports" href="https://edaa-org.github.io/pyEDAA.Reports"><img height="80px" src="doc/_static/logo.svg"/></a>
 </p>
 
-[![Sourcecode on GitHub](https://img.shields.io/badge/pyEDAA-pyEDAA.Reports-29b6f6.svg?longCache=true&style=flat-square&logo=GitHub&labelColor=0277bd)](https://GitHub.com/edaa-org/pyEDAA.Reports)
+[![Sourcecode on GitHub](https://img.shields.io/badge/pyEDAA-Reports-29b6f6.svg?longCache=true&style=flat-square&logo=GitHub&labelColor=0277bd)](https://GitHub.com/edaa-org/pyEDAA.Reports)
 [![Documentation](https://img.shields.io/website?longCache=true&style=flat-square&label=edaa-org.github.io%2FpyEDAA.Reports&logo=GitHub&logoColor=fff&up_color=blueviolet&up_message=Read%20now%20%E2%9E%9A&url=https%3A%2F%2Fedaa-org.github.io%2FpyEDAA.Reports%2Findex.html)](https://edaa-org.github.io/pyEDAA.Reports/)
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-4db797.svg?longCache=true&style=flat-square&logo=gitter&logoColor=e8ecef)](https://gitter.im/hdl/community)  
 [![GitHub Workflow - Build and Test Status](https://img.shields.io/github/workflow/status/edaa-org/pyEDAA.Reports/Pipeline/main?longCache=true&style=flat-square&label=Build%20and%20Test&logo=GitHub%20Actions&logoColor=FFFFFF)](https://GitHub.com/edaa-org/pyEDAA.Reports/actions/workflows/Pipeline.yml)
@@ -37,7 +37,7 @@ The readers categorize messages by IDs and append attributes such as the severit
 fancy coloring for better human readability.
 
 <p align="center">
-  <a title="edaa-org.github.io/pyEDAA.UCIS" href="https://edaa-org.github.io/pyEDAA.UCIS"><img height="275px" src="doc/_static/work-in-progress.png"/></a>
+  <a title="edaa-org.github.io/pyEDAA.Reports" href="https://edaa-org.github.io/pyEDAA.Reports"><img height="275px" src="doc/_static/work-in-progress.png"/></a>
 </p>
 
 # Report Kinds
@@ -106,3 +106,8 @@ fancy coloring for better human readability.
 - [SymbiFlow/fpga-tool-perf](https://github.com/SymbiFlow/fpga-tool-perf)
 - [mattvenn/logLUTs](https://github.com/mattvenn/logLUTs)
 - [tiagolascasas/Vivado-HLS-Report-Parser](https://github.com/tiagolascasas/Vivado-HLS-Report-Parser)
+- [cuelang.org/](https://cuelang.org/)
+  - [cuelang.org/docs/tutorials](https://cuelang.org/docs/tutorials/)
+  - [cue-lang/cue#162](https://github.com/cue-lang/cue/issues/162)
+    - [pypi.org/project/pycue](https://pypi.org/project/pycue/)
+    - [philipdexter/pycue](https://github.com/philipdexter/pycue)
