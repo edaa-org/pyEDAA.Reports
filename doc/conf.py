@@ -149,16 +149,23 @@ latex_documents = [
 # Extensions
 # ==============================================================================
 extensions = [
+	"sphinx.ext.autodoc",
 	'sphinx.ext.extlinks',
 	'sphinx.ext.intersphinx',
 ]
 
+autodoc_default_options = {
+    "members": True,
+    #"private-members": True,
+    "undoc-members": True,
+}
 
 # ==============================================================================
 # Sphinx.Ext.InterSphinx
 # ==============================================================================
 intersphinx_mapping = {
 	'python':   ('https://docs.python.org/3', None),
+	"ghdl":     ("https://ghdl.github.io/ghdl", None),
 }
 
 
