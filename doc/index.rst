@@ -50,20 +50,41 @@ Contributors
 * `Unai Martinez-Corral <https://GitHub.com/umarcor/>`__
 * `and more... <https://GitHub.com/edaa-org/pyEDAA.Reports/graphs/contributors>`__
 
+
 .. toctree::
    :hidden:
 
    Used as a layer of EDA² ➚ <https://edaa-org.github.io/>
 
+
+.. toctree::
+   :caption: References
+   :hidden:
+
+   Reference
+
+
+.. toctree::
+   :caption: About
+   :hidden:
+
+   Introduction
+   FunctionalCoverage
+   LineCoverage
+   Resources
+   RichLogging
+   Tracking
+   Frontends
+
+
 .. raw:: latex
 
    \part{Appendix}
+
 
 .. toctree::
    :caption: Appendix
    :hidden:
 
    genindex
-
-.. #
    py-modindex
