@@ -44,70 +44,69 @@ fancy coloring for better human readability.
 
 ## Test Report Summary
 
-- Test Suite
-- Test Case
-- Test Parameter
+* Test Suite
+* Test Case
+* Test Parameter
 
 ## Code Coverage Report
 
-- Line Coverage
-- Statement Coverage
-- Branch Coverage
-- Expression Coverage
-- State Coverage
-- Transition Coverage
+* Line Coverage
+* Statement Coverage
+* Branch Coverage
+* Expression Coverage
+* State Coverage
+* Transition Coverage
 
 ## Functional Coverage
 
-- Coverage Model
-  - Dimension
-  - Bin
-    - Item
-    - Range
+* Coverage Model
+  * Dimension
+  * Bin
+    * Item
+    * Range
 
 ## Synthesis
 
-- Area/resources
-- Timing
+* Area/resources
+* Timing
 
 ## Implementation
 
-- Area/resources
-- Timing
+* Area/resources
+* Timing
 
 # Target input logs/formats
 
-- ActiveHDL
-- CoCoTb
-- Diamond
-- GHDL
-- Icarus Verilog
-- ISE
-- ModelSim/QuestaSim
-- nextpnr
-- OSVVM
-- RivieraPRO
-- SymbiYosys
-- Synplify
-- Quartus
-- Verilator
-- Verilog-to-Routing
-- Vivado
-- VUnit
-- Xcelium
-- Yosys
-- ...
+* ActiveHDL
+* CoCoTb
+* Diamond
+* GHDL
+* Icarus Verilog
+* ISE
+* ModelSim/QuestaSim
+* nextpnr
+* OSVVM
+* RivieraPRO
+* SymbiYosys
+* Synplify
+* Quartus
+* Verilator
+* Verilog-to-Routing
+* Vivado
+* VUnit
+* Xcelium
+* Yosys
+* ...
 
 # References
 
-- [OSVB: Open Source Verification Report (OSVR)](https://umarcor.github.io/osvb/apis/logging.html#open-source-verification-report)
-- [olofk/edalize](https://github.com/olofk/edalize/) (see `edalize.reporting`, `edalize.vivado_reporting`, `edalize.quartus_reporting`, `edalize.ise_reporting`, ...)
-- [librecores/eda-log-parser](https://github.com/librecores/eda-log-parser)
-- [SymbiFlow/fpga-tool-perf](https://github.com/SymbiFlow/fpga-tool-perf)
-- [mattvenn/logLUTs](https://github.com/mattvenn/logLUTs)
-- [tiagolascasas/Vivado-HLS-Report-Parser](https://github.com/tiagolascasas/Vivado-HLS-Report-Parser)
-- [cuelang.org/](https://cuelang.org/)
-  - [cuelang.org/docs/tutorials](https://cuelang.org/docs/tutorials/)
-  - [cue-lang/cue#162](https://github.com/cue-lang/cue/issues/162)
-    - [pypi.org/project/pycue](https://pypi.org/project/pycue/)
-    - [philipdexter/pycue](https://github.com/philipdexter/pycue)
+* [olofk/edalize](https://github.com/olofk/edalize/) (see `edalize.reporting`, `edalize.vivado_reporting`, `edalize.quartus_reporting`, `edalize.ise_reporting`, ...)
+* [librecores/eda-log-parser](https://github.com/librecores/eda-log-parser)
+* [SymbiFlow/fpga-tool-perf](https://github.com/SymbiFlow/fpga-tool-perf)
+* [mattvenn/logLUTs](https://github.com/mattvenn/logLUTs)
+* [tiagolascasas/Vivado-HLS-Report-Parser](https://github.com/tiagolascasas/Vivado-HLS-Report-Parser)
+* [cuelang.org/](https://cuelang.org/)
+  * [cuelang.org/docs/tutorials](https://cuelang.org/docs/tutorials/)
+  * [cue-lang/cue#162](https://github.com/cue-lang/cue/issues/162)
+    * [pypi.org/project/pycue](https://pypi.org/project/pycue/)
+    * [philipdexter/pycue](https://github.com/philipdexter/pycue)
