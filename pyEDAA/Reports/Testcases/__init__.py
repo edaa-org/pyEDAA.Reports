@@ -28,27 +28,127 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Various report abstract data models and report format converters."""
-__author__ =    "Patrick Lehmann"
-__email__ =     "Paebbels@gmail.com"
-__copyright__ = "2021-2022, Electronic Design Automation Abstraction (EDA²)"
-__license__ =   "Apache License, Version 2.0"
-__version__ =   "0.1.0"
-__keywords__ =  ["Reports", "Abstract Model", "Data Model", "Test Case", "Test Suite", "OSVVM", "YAML", "XML"]
-
+"""Abstraction of testsuits and testcases."""
 from enum import Enum
+from typing import Dict, Iterator
 
 from pyTooling.Decorators import export
 
 
 @export
-class Severity(Enum):
-	Unknown = 0
-	Debug = 5
-	Verbose = 10
-	Normal = 20
-	Info = 25
-	Warning = 50
-	CriticalWarning = 55
-	Error = 60
-	Fatal = 70
+class Status(Enum):
+	Passed = 0
+	Failed = 1
+	XFailed = 2
+	Skipped = 3
+
+
+@export
+class Base:
+	pass
+
+
+@export
+class Parameter(Base):
+	_name: str
+
+
+@export
+class Testsuite(Base):
+	_name: str
+	_testsuites: Dict[str, 'Testsuite']
+	_testcases:  Dict[str, 'Testcase']
+
+	def __init__(self, name: str):
+		self._name = name
+		self._testsuites = {}
+		self._testcases = {}
+
+	@property
+	def Name(self) -> str:
+		return self._name
+
+	@property
+	def AssertionCount(self) -> int:
+		raise NotImplementedError()
+		# return self._assertionCount
+
+	@property
+	def PassedCount(self) -> int:
+		raise NotImplementedError()
+		# return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
+
+	@property
+	def WarningCount(self) -> int:
+		raise NotImplementedError()
+		# return self._warningCount
+
+	@property
+	def ErrorCount(self) -> int:
+		raise NotImplementedError()
+		# return self._errorCount
+
+	@property
+	def FatalCount(self) -> int:
+		raise NotImplementedError()
+		# return self._fatalCount
+
+	def __contains__(self, key: str) -> bool:
+		return key in self._testcases
+
+	def __iter__(self) -> Iterator["Testcase"]:
+		return iter(self._testcases.values())
+
+	def __getitem__(self, key: str) -> "Testcase":
+		return self._testcases[key]
+
+	def __len__(self) -> int:
+		return self._testcases.__len__()
+
+
+@export
+class Testcase(Base):
+	_name: str
+	_subtests:  Dict[str, 'Subtest']
+	_assertionCount: int
+	_warningCount: int
+	_errorCount: int
+	_fatalCount: int
+
+	def __init__(self, name: str, assertionCount: int, warningCount: int, errorCount: int, fatalCount: int):
+		self._name = name
+		self._subtests = {}
+
+		self._assertionCount = assertionCount
+		self._warningCount = warningCount
+		self._errorCount = errorCount
+		self._fatalCount = fatalCount
+
+	@property
+	def Name(self) -> str:
+		return self._name
+
+	@property
+	def AssertionCount(self) -> int:
+		return self._assertionCount
+
+	@property
+	def PassedCount(self) -> int:
+		return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
+
+	@property
+	def WarningCount(self) -> int:
+		return self._warningCount
+
+	@property
+	def ErrorCount(self) -> int:
+		return self._errorCount
+
+	@property
+	def FatalCount(self) -> int:
+		return self._fatalCount
+
+
+@export
+class Subtest(Base):
+	_name: str
