@@ -18,7 +18,7 @@ sys_path.insert(0, abspath('..'))
 # Project information
 # ==============================================================================
 project =   "pyEDAA.Reports"
-copyright = "2021-2021 Patrick Lehmann - Boetzingen, Germany"
+copyright = "2021-2022 Patrick Lehmann - Boetzingen, Germany"
 author =    "Patrick Lehmann"
 
 version = "latest"     # The short X.Y version.
