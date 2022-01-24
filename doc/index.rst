@@ -86,5 +86,11 @@ Contributors
    :caption: Appendix
    :hidden:
 
+   Coverage Report ➚ <coverage/index>
+   Static Type Check Report ➚ <typing/index>
+   License
+   Doc-License
+   Glossary
    genindex
+.. #
    py-modindex
