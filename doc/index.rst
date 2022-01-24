@@ -56,6 +56,13 @@ Contributors
 
    Used as a layer of EDA² ➚ <https://edaa-org.github.io/>
 
+.. toctree::
+   :caption: Introduction
+   :hidden:
+
+   Installation
+   Dependency
+
 
 .. toctree::
    :caption: References
