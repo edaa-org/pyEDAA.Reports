@@ -20,6 +20,13 @@ jobs:
     with:
       jobs: ${{ needs.Params.outputs.python_jobs }}
       artifact: ${{ fromJson(needs.Params.outputs.params).artifacts.unittesting }}
+      pacboy: >-
+        python-pip:p
+        python-wheel:p
+        python-coverage:p
+        python-lxml:p
+        python-ruamel-yaml:p
+        python-ruamel.yaml.clib:p
 
   Coverage:
     uses: pyTooling/Actions/.github/workflows/CoverageCollection.yml@r0
