@@ -28,27 +28,22 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Various report abstract data models and report format converters."""
-__author__ =    "Patrick Lehmann"
-__email__ =     "Paebbels@gmail.com"
-__copyright__ = "2021-2022, Electronic Design Automation Abstraction (EDA²)"
-__license__ =   "Apache License, Version 2.0"
-__version__ =   "0.1.0"
-__keywords__ =  ["Reports", "Abstract Model", "Data Model", "Test Case", "Test Suite", "OSVVM", "YAML", "XML"]
+"""Package installer for 'Various report abstract data models and report format converters'."""
+from pathlib             import Path
+from pyTooling.Packaging import DescribePythonPackageHostedOnGitHub
 
-from enum import Enum
+gitHubNamespace =        "pyEDAA"
+packageName =            "pyEDAA.Reports"
+packageDirectory =       packageName.replace(".", "/")
+packageInformationFile = Path(f"{packageDirectory}/__init__.py")
 
-from pyTooling.Decorators import export
-
-
-@export
-class Severity(Enum):
-	Unknown = 0
-	Debug = 5
-	Verbose = 10
-	Normal = 20
-	Info = 25
-	Warning = 50
-	CriticalWarning = 55
-	Error = 60
-	Fatal = 70
+DescribePythonPackageHostedOnGitHub(
+	packageName=packageName,
+	description="Various report abstract data models and report format converters.",
+	gitHubNamespace=gitHubNamespace,
+	sourceFileWithVersion=packageInformationFile,
+	developmentStatus="pre-alpha",
+	classifiers=[
+		"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+	]
+)
