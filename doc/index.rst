@@ -56,6 +56,13 @@ Contributors
 
    Used as a layer of EDA² ➚ <https://edaa-org.github.io/>
 
+.. toctree::
+   :caption: Introduction
+   :hidden:
+
+   Installation
+   Dependency
+
 
 .. toctree::
    :caption: References
@@ -86,5 +93,11 @@ Contributors
    :caption: Appendix
    :hidden:
 
+   Coverage Report ➚ <coverage/index>
+   Static Type Check Report ➚ <typing/index>
+   License
+   Doc-License
+   Glossary
    genindex
+.. #
    py-modindex
