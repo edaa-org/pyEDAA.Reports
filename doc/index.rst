@@ -68,6 +68,7 @@ Contributors
    :caption: References
    :hidden:
 
+   pyEDAA.Reports/index
    Reference
 
 
