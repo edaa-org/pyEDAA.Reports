@@ -1,4 +1,4 @@
 pyTooling>=1.9.5
-pyAttributes>=2.5.0
+pyAttributes>=2.5.1
 ruamel.yaml>=0.17
 lxml>=4.8
