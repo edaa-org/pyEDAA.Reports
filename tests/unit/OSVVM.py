@@ -43,7 +43,7 @@ if __name__ == "__main__": # pragma: no cover
 
 class TestResults(TestCase):
 	def test_ReadOSVVMTestSummaryYAML(self):
-		yamlPath = Path("tests/data/OSVVM/Libraries_RunAllTests.yml")
+		yamlPath = Path("data/OSVVM/Libraries_RunAllTests.yml")
 
 		osvvmTestSummary = Document(yamlPath)
 
