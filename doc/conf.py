@@ -206,7 +206,7 @@ autodoc_typehints = "both"
 extlinks = {
 	"ghissue": ("https://GitHub.com/edaa-org/pyEDAA.Reports/issues/%s", "issue #"),
 	"ghpull":  ("https://GitHub.com/edaa-org/pyEDAA.Reports/pull/%s", "pull request #"),
-	"ghsrc":   ("https://GitHub.com/edaa-org/pyEDAA.Reports/blob/main/%s", ""),
+	"ghsrc":   ("https://GitHub.com/edaa-org/pyEDAA.Reports/blob/main/%s", None),
 }
 
 
