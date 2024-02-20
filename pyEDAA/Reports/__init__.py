@@ -41,6 +41,10 @@ from enum import Enum
 from pyTooling.Decorators import export
 
 
+class ReportException(Exception):
+	pass
+
+
 @export
 class Severity(Enum):
 	Unknown = 0
