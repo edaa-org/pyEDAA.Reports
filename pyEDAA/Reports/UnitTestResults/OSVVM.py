@@ -28,54 +28,87 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Testcase for OSVVM specific file formats."""
-from pathlib      import Path
-from unittest     import TestCase
+"""Reader for OSVVM test report summary files in YAML format."""
+from pathlib import Path
+from typing import Dict
 
-from pyEDAA.Reports.Testcases.OSVVM import Document, Testsuite, Testcase
+from pyTooling.Decorators import export
+from ruamel.yaml import YAML
 
-
-if __name__ == "__main__": # pragma: no cover
-	print("ERROR: you called a testcase declaration file as an executable module.")
-	print("Use: 'python -m unitest <testcase module>'")
-	exit(1)
+from . import Testsuite as Abstract_Testsuite, Testcase as Abstract_Testcase, Status
 
 
-class TestResults(TestCase):
-	def test_ReadOSVVMTestSummaryYAML(self):
-		yamlPath = Path("data/OSVVM/Libraries_RunAllTests.yml")
+@export
+class Testsuite(Abstract_Testsuite):
+	pass
 
-		osvvmTestSummary = Document(yamlPath)
 
-		self.assertIsNotNone(osvvmTestSummary)
+@export
+class Testcase(Abstract_Testcase):
+	pass
 
-		self.assertEqual(4, len(osvvmTestSummary))
-		self.assertIn("Axi4Lite", osvvmTestSummary)
-		self.assertIn("Axi4Full", osvvmTestSummary)
-		self.assertIn("AxiStream", osvvmTestSummary)
-		self.assertIn("Uart", osvvmTestSummary)
 
-		axi4lite = osvvmTestSummary["Axi4Lite"]
-		self.assertEqual(9, len(axi4lite))
+@export
+class Document:
+	_yamlDocument: YAML
+	_testsuites: Dict[str, Testsuite]
 
-		axi4 = osvvmTestSummary["Axi4Full"]
-		self.assertEqual(55, len(axi4))
+	def __init__(self, yamlReportFile: Path):
+		yamlReader = YAML()
+		self._yamlDocument = yamlReader.load(yamlReportFile)
+		yamlBuild = self._yamlDocument["Build"]
 
-		axi4stream = osvvmTestSummary["AxiStream"]
-		self.assertEqual(60, len(axi4stream))
+		self._testsuites = {}
 
-		uart = osvvmTestSummary["Uart"]
-		self.assertEqual(8, len(uart))
+		self.translateDocument()
 
-	# 	for suite in osvvmTestSummary:
-	# 		self.printTestsuite(suite)
-	#
-	# def printTestsuite(self, testsuite: Testsuite, indent: int = 0):
-	# 	print(f"{'  '*indent}{testsuite.Name}")
-	# 	for suite in testsuite._testsuites.values():
-	# 		self.printTestsuite(suite, indent + 2)
-	# 	for case in testsuite:
-	# 		self.printTestcase(case, indent + 2)
-	#
-	# def printTestcase(self, testcase: Testcase, indent: int = 0):
-	# 	print(f"{'  ' * indent}{testcase.Name}")
+	def translateDocument(self):
+		for yamlTestsuite in self._yamlDocument['TestSuites']:
+			name = yamlTestsuite["Name"]
+			self._testsuites[name] = self.translateTestsuite(yamlTestsuite, name)
+
+	def translateTestsuite(self, yamlTestsuite, name) -> Testsuite:
+		testsuite = Testsuite(name)
+
+		for yamlTestcase in yamlTestsuite['TestCases']:
+			testcaseName = yamlTestcase["Name"]
+			testsuite._testcases[testcaseName] = self.translateTestcase(yamlTestcase, testcaseName)
+
+		return testsuite
+
+	def translateTestcase(self, yamlTestcase, name) -> Testcase:
+		yamlStatus = yamlTestcase["Status"].lower()
+
+		assertionCount = 0
+		warningCount = 0
+		errorCount = 0
+		fatalCount = 0
+
+		if yamlStatus == "passed":
+			status = Status.Passed
+
+			yamlResults = yamlTestcase["Results"]
+			assertionCount = yamlResults["AffirmCount"]
+
+		elif yamlStatus == "skipped":
+			status = Status.Skipped
+
+		elif yamlStatus == "failed":
+			status = Status.Failed
+
+		else:
+			print(f"ERROR: Unknown testcase status '{yamlStatus}'.")
+
+		return Testcase(name, assertionCount, warningCount, errorCount, fatalCount)
+
+	def __contains__(self, key: str) -> bool:
+		return key in self._testsuites
+
+	def __iter__(self):
+		return iter(self._testsuites.values())
+
+	def __getitem__(self, key: str) -> Testsuite:
+		return self._testsuites[key]
+
+	def __len__(self) -> int:
+		return self._testsuites.__len__()
