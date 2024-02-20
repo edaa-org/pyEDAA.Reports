@@ -16,7 +16,7 @@ class TestcaseInstantiation(ut_TestCase):
 		self.assertEqual(Status.Unknown, tc.Status)
 
 	def test_Testcase_WithAssertionCounts(self):
-		tc = Testcase("test", 5, 1, 4)
+		tc = Testcase("test", assertionCount=5, failedAssertionCount=1, passedAssertionCount=4)
 
 		self.assertEqual("test", tc.Name)
 		self.assertEqual(Status.Unknown, tc.Status)
@@ -35,11 +35,11 @@ class TestcaseInstantiation(ut_TestCase):
 
 	def test_Testcase_WithWrongCounts(self):
 		with self.assertRaises(ValueError):
-			_ = Testcase("test", 5, 2, 4)
+			_ = Testcase("test", assertionCount=5, failedAssertionCount=2, passedAssertionCount=4)
 
 	def test_Testcase_OnlyAssertionCount(self):
 		with self.assertRaises(ValueError):
-			_ = Testcase("test", 5)
+			_ = Testcase("test", assertionCount=5)
 
 	def test_Testcase_OnlyFailedAssertionCount(self):
 		with self.assertRaises(ValueError):
@@ -50,7 +50,7 @@ class TestcaseInstantiation(ut_TestCase):
 			_ = Testcase("test", passedAssertionCount=4)
 
 	def test_Testcase_NoFailedAssertionCount(self):
-		tc = Testcase("test", 5, passedAssertionCount=4)
+		tc = Testcase("test", assertionCount=5, passedAssertionCount=4)
 
 		self.assertEqual("test", tc.Name)
 		self.assertEqual(Status.Unknown, tc.Status)
@@ -59,7 +59,7 @@ class TestcaseInstantiation(ut_TestCase):
 		self.assertEqual(4, tc.PassedAssertionCount)
 
 	def test_Testcase_NoPassedAssertionCount(self):
-		tc = Testcase("test", 5, 1)
+		tc = Testcase("test", assertionCount=5, failedAssertionCount=1)
 
 		self.assertEqual("test", tc.Name)
 		self.assertEqual(Status.Unknown, tc.Status)
@@ -224,3 +224,13 @@ class Duplicates(ut_TestCase):
 
 		with self.assertRaises(DuplicateTestcaseException):
 			_ = Testsuite("root", testcases=(tc1, tc2))
+
+
+class Aggregate(ut_TestCase):
+	def test_AggregateAssertions(self):
+		tc1 = Testcase("tc1", 5, 1, 4)
+		tc2 = Testcase("tc2", 10, 0, 10)
+		ts = Testsuite("root", testcases=(tc1, tc2))
+
+		ts.Aggregate()
+

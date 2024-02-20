@@ -29,11 +29,13 @@
 # ==================================================================================================================== #
 #
 """Abstraction of testsuites and testcases."""
+from datetime import timedelta
+
 from enum   import Flag
-from typing import Dict, Iterator, Optional as Nullable, Iterable
+from typing import Dict, Iterator, Optional as Nullable, Iterable, Any
 
 from pyTooling.Decorators  import export
-from pyTooling.MetaClasses import abstractmethod
+from pyTooling.MetaClasses import abstractmethod, ExtendedType
 
 from pyEDAA.Reports        import ReportException
 
@@ -65,7 +67,7 @@ class Status(Flag):
 
 
 @export
-class Base:
+class Base(metaclass=ExtendedType, slots=True):
 	_parent: Nullable["Testsuite"]
 	_name:   str
 	_status: Status
@@ -219,18 +221,28 @@ class Testsuite(Base):
 
 @export
 class Testcase(Base):
-	_name: str
+	_setupDuration:    Nullable[timedelta]
+	_testDuration:     Nullable[timedelta]
+	_teardownDuration: Nullable[timedelta]
+	_totalDuration:    Nullable[timedelta]
 
-	_assertionCount: Nullable[int]
+	_assertionCount:       Nullable[int]
 	_failedAssertionCount: Nullable[int]
 	_passedAssertionCount: Nullable[int]
+
 	_warningCount: int
-	_errorCount: int
-	_fatalCount: int
+	_errorCount:   int
+	_fatalCount:   int
+
+	_dict:         Dict[str, Any]
 
 	def __init__(
 		self,
 		name: str,
+		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
+		teardownDuration: Nullable[timedelta] = None,
+		totalDuration:  Nullable[timedelta] = None,
 		assertionCount: Nullable[int] = None,
 		failedAssertionCount: Nullable[int] = None,
 		passedAssertionCount: Nullable[int] = None,
@@ -240,6 +252,12 @@ class Testcase(Base):
 		parent: Nullable["Testsuite"] = None
 	):
 		super().__init__(name, parent)
+
+		self._setupDuration = setupDuration
+		self._testDuration = testDuration
+		self._teardownDuration = teardownDuration
+		self._totalDuration = totalDuration
+		# if totalDuration is not None:
 
 		self._assertionCount = assertionCount
 		if assertionCount is not None:
@@ -296,3 +314,6 @@ class Testcase(Base):
 	@property
 	def FatalCount(self) -> int:
 		return self._fatalCount
+
+	def Aggregate(self):
+		pass

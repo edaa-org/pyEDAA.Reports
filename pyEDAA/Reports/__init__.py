@@ -36,13 +36,26 @@ __license__ =   "Apache License, Version 2.0"
 __version__ =   "0.1.0"
 __keywords__ =  ["Reports", "Abstract Model", "Data Model", "Test Case", "Test Suite", "OSVVM", "YAML", "XML"]
 
+from sys import version_info
+
+from typing import List
+
 from enum import Enum
 
 from pyTooling.Decorators import export
 
 
 class ReportException(Exception):
-	pass
+
+	# WORKAROUND: for Python <3.11
+	# Implementing a dummy method for Python versions before
+	__notes__: List[str]
+	if version_info < (3, 11):  # pragma: no cover
+		def add_note(self, message: str):
+			try:
+				self.__notes__.append(message)
+			except AttributeError:
+				self.__notes__ = [message]
 
 
 @export
