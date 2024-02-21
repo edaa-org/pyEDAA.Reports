@@ -264,7 +264,7 @@ _coverageLevels = {
 report_unittest_testsuites = {
 	"src": {
 		"name":        f"{project}",
-		"xml_report":  "../report/unit/unittest.xml",
+		"xml_report":  "../report/unit/TestReportSummary.xml",
 	}
 }
 report_codecov_packages = {

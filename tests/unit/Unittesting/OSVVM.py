@@ -43,26 +43,26 @@ if __name__ == "__main__": # pragma: no cover
 
 class TestResults(TestCase):
 	def test_ReadOSVVMTestSummaryYAML(self) -> None:
-		yamlPath = Path("tests/data/OSVVM/Libraries_RunAllTests.yml")
+		yamlPath = Path("tests/data/OSVVM/osvvm.Summary.yml")
 
 		osvvmTestSummary = Document(yamlPath)
 
 		self.assertIsNotNone(osvvmTestSummary)
 
-		self.assertEqual(4, len(osvvmTestSummary))
+		self.assertEqual(14, len(osvvmTestSummary))
 		self.assertIn("Axi4Lite", osvvmTestSummary)
 		self.assertIn("Axi4Full", osvvmTestSummary)
 		self.assertIn("AxiStream", osvvmTestSummary)
 		self.assertIn("Uart", osvvmTestSummary)
 
 		axi4lite = osvvmTestSummary["Axi4Lite"]
-		self.assertEqual(9, len(axi4lite))
+		self.assertEqual(17, len(axi4lite))
 
 		axi4 = osvvmTestSummary["Axi4Full"]
-		self.assertEqual(55, len(axi4))
+		self.assertEqual(68, len(axi4))
 
 		axi4stream = osvvmTestSummary["AxiStream"]
-		self.assertEqual(60, len(axi4stream))
+		self.assertEqual(65, len(axi4stream))
 
 		uart = osvvmTestSummary["Uart"]
 		self.assertEqual(8, len(uart))

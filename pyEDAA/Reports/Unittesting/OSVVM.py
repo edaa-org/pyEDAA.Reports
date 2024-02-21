@@ -56,7 +56,7 @@ class Document:
 	def __init__(self, yamlReportFile: Path) -> None:
 		yamlReader = YAML()
 		self._yamlDocument = yamlReader.load(yamlReportFile)
-		yamlBuild = self._yamlDocument["Build"]
+		yamlBuild = self._yamlDocument["BuildInfo"]
 
 		self._testsuites = {}
 

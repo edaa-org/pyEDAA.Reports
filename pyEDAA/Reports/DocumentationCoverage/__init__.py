@@ -28,87 +28,19 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Reader for OSVVM test report summary files in YAML format."""
-from pathlib import Path
-from typing import Dict
+"""Abstraction of code documentation coverage."""
+from enum                 import Flag
 
 from pyTooling.Decorators import export
-from ruamel.yaml import YAML
-
-from . import Testsuite as Abstract_Testsuite, Testcase as Abstract_Testcase, Status
 
 
 @export
-class Testsuite(Abstract_Testsuite):
-	pass
+class Status(Flag):
+	Unknown = 0
+	Ignored = 1
+	Undocumented = 2
+	Documented = 4
+	Inherited = 12
 
-
-@export
-class Testcase(Abstract_Testcase):
-	pass
-
-
-@export
-class Document:
-	_yamlDocument: YAML
-	_testsuites: Dict[str, Testsuite]
-
-	def __init__(self, yamlReportFile: Path):
-		yamlReader = YAML()
-		self._yamlDocument = yamlReader.load(yamlReportFile)
-		yamlBuild = self._yamlDocument["Build"]
-
-		self._testsuites = {}
-
-		self.translateDocument()
-
-	def translateDocument(self):
-		for yamlTestsuite in self._yamlDocument['TestSuites']:
-			name = yamlTestsuite["Name"]
-			self._testsuites[name] = self.translateTestsuite(yamlTestsuite, name)
-
-	def translateTestsuite(self, yamlTestsuite, name) -> Testsuite:
-		testsuite = Testsuite(name)
-
-		for yamlTestcase in yamlTestsuite['TestCases']:
-			testcaseName = yamlTestcase["Name"]
-			testsuite._testcases[testcaseName] = self.translateTestcase(yamlTestcase, testcaseName)
-
-		return testsuite
-
-	def translateTestcase(self, yamlTestcase, name) -> Testcase:
-		yamlStatus = yamlTestcase["Status"].lower()
-
-		assertionCount = 0
-		warningCount = 0
-		errorCount = 0
-		fatalCount = 0
-
-		if yamlStatus == "passed":
-			status = Status.Passed
-
-			yamlResults = yamlTestcase["Results"]
-			assertionCount = yamlResults["AffirmCount"]
-
-		elif yamlStatus == "skipped":
-			status = Status.Skipped
-
-		elif yamlStatus == "failed":
-			status = Status.Failed
-
-		else:
-			print(f"ERROR: Unknown testcase status '{yamlStatus}'.")
-
-		return Testcase(name, assertionCount, warningCount, errorCount, fatalCount)
-
-	def __contains__(self, key: str) -> bool:
-		return key in self._testsuites
-
-	def __iter__(self):
-		return iter(self._testsuites.values())
-
-	def __getitem__(self, key: str) -> Testsuite:
-		return self._testsuites[key]
-
-	def __len__(self) -> int:
-		return self._testsuites.__len__()
+# unrequiredButDocumented
+# wrongly documented
