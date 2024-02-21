@@ -53,7 +53,7 @@ class Document:
 	_yamlDocument: YAML
 	_testsuites: Dict[str, Testsuite]
 
-	def __init__(self, yamlReportFile: Path):
+	def __init__(self, yamlReportFile: Path) -> None:
 		yamlReader = YAML()
 		self._yamlDocument = yamlReader.load(yamlReportFile)
 		yamlBuild = self._yamlDocument["Build"]
@@ -62,7 +62,7 @@ class Document:
 
 		self.translateDocument()
 
-	def translateDocument(self):
+	def translateDocument(self) -> None:
 		for yamlTestsuite in self._yamlDocument['TestSuites']:
 			name = yamlTestsuite["Name"]
 			self._testsuites[name] = self.translateTestsuite(yamlTestsuite, name)

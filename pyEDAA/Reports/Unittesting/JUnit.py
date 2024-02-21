@@ -41,6 +41,7 @@ from pyTooling.Decorators import export, readonly
 from pyTooling.MetaClasses import ExtendedType
 
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException
+from pyEDAA.Reports.Unittesting import Testsuite as gen_Testsuite, Testcase as gen_Testcase
 
 
 @export
@@ -289,6 +290,25 @@ class TestsuiteSummary(TestsuiteBase):
 			self._state = TestcaseState.Unknown
 
 		return tests, skipped, errored, failed, passed
+
+	def ConvertToGeneric(self) -> gen_Testsuite:
+		def convertTestsuite(testsuite: Testsuite) -> gen_Testsuite:
+			newTestsuite = gen_Testsuite(testsuite._name)
+
+			for testsuite in testsuite._testsuites.values():
+				newTestsuite.AddTestsuite(convertTestsuite(testsuite))
+
+			for testcase in testsuite._testcases.values():
+				newTestsuite.AddTestcase(gen_Testcase(testcase._name))
+
+			return newTestsuite
+
+		rootTS = gen_Testsuite(self._name)
+
+		for testsuite in self._testsuites.values():
+			rootTS.AddTestsuite(convertTestsuite(testsuite))
+
+		return rootTS
 
 
 @export

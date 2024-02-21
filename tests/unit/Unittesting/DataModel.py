@@ -5,17 +5,17 @@ from pyEDAA.Reports.Unittesting import Testcase, Status, Testsuite, DuplicateTes
 
 
 class TestcaseInstantiation(ut_TestCase):
-	def test_Testcase_NoName(self):
+	def test_Testcase_NoName(self) -> None:
 		with self.assertRaises(TypeError):
 			_ = Testcase(None)
 
-	def test_Testcase_OnlyName(self):
+	def test_Testcase_OnlyName(self) -> None:
 		tc = Testcase("test")
 
 		self.assertEqual("test", tc.Name)
 		self.assertEqual(Status.Unknown, tc.Status)
 
-	def test_Testcase_WithAssertionCounts(self):
+	def test_Testcase_WithAssertionCounts(self) -> None:
 		tc = Testcase("test", assertionCount=5, failedAssertionCount=1, passedAssertionCount=4)
 
 		self.assertEqual("test", tc.Name)
@@ -24,7 +24,7 @@ class TestcaseInstantiation(ut_TestCase):
 		self.assertEqual(1, tc.FailedAssertionCount)
 		self.assertEqual(4, tc.PassedAssertionCount)
 
-	def test_Testcase_WithErrorCounts(self):
+	def test_Testcase_WithErrorCounts(self) -> None:
 		tc = Testcase("test", warningCount=1, errorCount=2, fatalCount=3)
 
 		self.assertEqual("test", tc.Name)
@@ -33,23 +33,23 @@ class TestcaseInstantiation(ut_TestCase):
 		self.assertEqual(2, tc.ErrorCount)
 		self.assertEqual(3, tc.FatalCount)
 
-	def test_Testcase_WithWrongCounts(self):
+	def test_Testcase_WithWrongCounts(self) -> None:
 		with self.assertRaises(ValueError):
 			_ = Testcase("test", assertionCount=5, failedAssertionCount=2, passedAssertionCount=4)
 
-	def test_Testcase_OnlyAssertionCount(self):
+	def test_Testcase_OnlyAssertionCount(self) -> None:
 		with self.assertRaises(ValueError):
 			_ = Testcase("test", assertionCount=5)
 
-	def test_Testcase_OnlyFailedAssertionCount(self):
+	def test_Testcase_OnlyFailedAssertionCount(self) -> None:
 		with self.assertRaises(ValueError):
 			_ = Testcase("test", failedAssertionCount=1)
 
-	def test_Testcase_OnlyPassedAssertionCount(self):
+	def test_Testcase_OnlyPassedAssertionCount(self) -> None:
 		with self.assertRaises(ValueError):
 			_ = Testcase("test", passedAssertionCount=4)
 
-	def test_Testcase_NoFailedAssertionCount(self):
+	def test_Testcase_NoFailedAssertionCount(self) -> None:
 		tc = Testcase("test", assertionCount=5, passedAssertionCount=4)
 
 		self.assertEqual("test", tc.Name)
@@ -58,7 +58,7 @@ class TestcaseInstantiation(ut_TestCase):
 		self.assertEqual(1, tc.FailedAssertionCount)
 		self.assertEqual(4, tc.PassedAssertionCount)
 
-	def test_Testcase_NoPassedAssertionCount(self):
+	def test_Testcase_NoPassedAssertionCount(self) -> None:
 		tc = Testcase("test", assertionCount=5, failedAssertionCount=1)
 
 		self.assertEqual("test", tc.Name)
@@ -67,7 +67,7 @@ class TestcaseInstantiation(ut_TestCase):
 		self.assertEqual(1, tc.FailedAssertionCount)
 		self.assertEqual(4, tc.PassedAssertionCount)
 
-	def test_Testcase_NoAssertionCount(self):
+	def test_Testcase_NoAssertionCount(self) -> None:
 		tc = Testcase("test", failedAssertionCount=1, passedAssertionCount=4)
 
 		self.assertEqual("test", tc.Name)
@@ -78,11 +78,11 @@ class TestcaseInstantiation(ut_TestCase):
 
 
 class TestsuiteInstantiation(ut_TestCase):
-	def test_Testsuite_NoName(self):
+	def test_Testsuite_NoName(self) -> None:
 		with self.assertRaises(TypeError):
 			_ = Testsuite(None)
 
-	def test_Testsuite_OnlyName(self):
+	def test_Testsuite_OnlyName(self) -> None:
 		ts = Testsuite("test")
 
 		self.assertEqual("test", ts.Name)
@@ -90,7 +90,7 @@ class TestsuiteInstantiation(ut_TestCase):
 
 
 class Hierarchy(ut_TestCase):
-	def test_Testsuites(self):
+	def test_Testsuites(self) -> None:
 		ts1 = Testsuite("ts1")
 		ts2 = Testsuite("ts2")
 
@@ -105,7 +105,7 @@ class Hierarchy(ut_TestCase):
 		self.assertEqual(ts, ts1.Parent)
 		self.assertEqual(ts, ts2.Parent)
 
-	def test_Testcases(self):
+	def test_Testcases(self) -> None:
 		tc1 = Testcase("tc1")
 		tc2 = Testcase("tc2")
 
@@ -120,7 +120,7 @@ class Hierarchy(ut_TestCase):
 		self.assertEqual(ts, tc1.Parent)
 		self.assertEqual(ts, tc2.Parent)
 
-	def test_AddTestsuite(self):
+	def test_AddTestsuite(self) -> None:
 		ts = Testsuite("root")
 		ts1 = Testsuite("ts1")
 
@@ -135,7 +135,7 @@ class Hierarchy(ut_TestCase):
 		self.assertEqual(ts1, ts.Testsuites["ts1"])
 		self.assertEqual(ts, ts1.Parent)
 
-	def test_AddTestsuites(self):
+	def test_AddTestsuites(self) -> None:
 		ts = Testsuite("root")
 		ts1 = Testsuite("ts1")
 		ts2 = Testsuite("ts2")
@@ -154,7 +154,7 @@ class Hierarchy(ut_TestCase):
 		self.assertEqual(ts, ts1.Parent)
 		self.assertEqual(ts, ts2.Parent)
 
-	def test_AddTestcase(self):
+	def test_AddTestcase(self) -> None:
 		ts = Testsuite("root")
 		tc1 = Testcase("tc1")
 
@@ -169,7 +169,7 @@ class Hierarchy(ut_TestCase):
 		self.assertEqual(tc1, ts.Testcases["tc1"])
 		self.assertEqual(ts, tc1.Parent)
 
-	def test_AddTestcases(self):
+	def test_AddTestcases(self) -> None:
 		ts = Testsuite("root")
 		tc1 = Testcase("tc1")
 		tc2 = Testcase("tc2")
@@ -191,7 +191,7 @@ class Hierarchy(ut_TestCase):
 
 
 class Duplicates(ut_TestCase):
-	def test_DuplicateTestsuite(self):
+	def test_DuplicateTestsuite(self) -> None:
 		ts = Testsuite("root")
 
 		ts1 = Testsuite("ts1")
@@ -201,14 +201,14 @@ class Duplicates(ut_TestCase):
 		with self.assertRaises(DuplicateTestsuiteException):
 			ts.AddTestsuite(ts2)
 
-	def test_DuplicateTestsuites(self):
+	def test_DuplicateTestsuites(self) -> None:
 		ts1 = Testsuite("ts1")
 		ts2 = Testsuite("ts1")
 
 		with self.assertRaises(DuplicateTestsuiteException):
 			_ = Testsuite("root", testsuites=(ts1, ts2))
 
-	def test_DuplicateTestcase(self):
+	def test_DuplicateTestcase(self) -> None:
 		ts = Testsuite("root")
 
 		tc1 = Testcase("tc1")
@@ -218,7 +218,7 @@ class Duplicates(ut_TestCase):
 		with self.assertRaises(DuplicateTestcaseException):
 			ts.AddTestcase(tc2)
 
-	def test_DuplicateTestcases(self):
+	def test_DuplicateTestcases(self) -> None:
 		tc1 = Testcase("tc1")
 		tc2 = Testcase("tc1")
 
@@ -227,7 +227,7 @@ class Duplicates(ut_TestCase):
 
 
 class Aggregate(ut_TestCase):
-	def test_AggregateAssertions(self):
+	def test_AggregateAssertions(self) -> None:
 		tc1 = Testcase("tc1", 5, 1, 4)
 		tc2 = Testcase("tc2", 10, 0, 10)
 		ts = Testsuite("root", testcases=(tc1, tc2))

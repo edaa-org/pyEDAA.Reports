@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2021-2023 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2021-2024 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -28,127 +28,54 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Abstraction of testsuits and testcases."""
-from enum import Enum
-from typing import Dict, Iterator
+"""Testcase for OSVVM specific file formats."""
+from pathlib      import Path
+from unittest     import TestCase
 
-from pyTooling.Decorators import export
-
-
-@export
-class Status(Enum):
-	Passed = 0
-	Failed = 1
-	XFailed = 2
-	Skipped = 3
+from pyEDAA.Reports.Unittesting.OSVVM import Document
 
 
-@export
-class Base:
-	pass
+if __name__ == "__main__": # pragma: no cover
+	print("ERROR: you called a testcase declaration file as an executable module.")
+	print("Use: 'python -m unitest <testcase module>'")
+	exit(1)
 
 
-@export
-class Parameter(Base):
-	_name: str
+class TestResults(TestCase):
+	def test_ReadOSVVMTestSummaryYAML(self) -> None:
+		yamlPath = Path("tests/data/OSVVM/Libraries_RunAllTests.yml")
 
+		osvvmTestSummary = Document(yamlPath)
 
-@export
-class Testsuite(Base):
-	_name: str
-	_testsuites: Dict[str, 'Testsuite']
-	_testcases:  Dict[str, 'Testcase']
+		self.assertIsNotNone(osvvmTestSummary)
 
-	def __init__(self, name: str):
-		self._name = name
-		self._testsuites = {}
-		self._testcases = {}
+		self.assertEqual(4, len(osvvmTestSummary))
+		self.assertIn("Axi4Lite", osvvmTestSummary)
+		self.assertIn("Axi4Full", osvvmTestSummary)
+		self.assertIn("AxiStream", osvvmTestSummary)
+		self.assertIn("Uart", osvvmTestSummary)
 
-	@property
-	def Name(self) -> str:
-		return self._name
+		axi4lite = osvvmTestSummary["Axi4Lite"]
+		self.assertEqual(9, len(axi4lite))
 
-	@property
-	def AssertionCount(self) -> int:
-		raise NotImplementedError()
-		# return self._assertionCount
+		axi4 = osvvmTestSummary["Axi4Full"]
+		self.assertEqual(55, len(axi4))
 
-	@property
-	def PassedCount(self) -> int:
-		raise NotImplementedError()
-		# return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
+		axi4stream = osvvmTestSummary["AxiStream"]
+		self.assertEqual(60, len(axi4stream))
 
-	@property
-	def WarningCount(self) -> int:
-		raise NotImplementedError()
-		# return self._warningCount
+		uart = osvvmTestSummary["Uart"]
+		self.assertEqual(8, len(uart))
 
-	@property
-	def ErrorCount(self) -> int:
-		raise NotImplementedError()
-		# return self._errorCount
-
-	@property
-	def FatalCount(self) -> int:
-		raise NotImplementedError()
-		# return self._fatalCount
-
-	def __contains__(self, key: str) -> bool:
-		return key in self._testcases
-
-	def __iter__(self) -> Iterator["Testcase"]:
-		return iter(self._testcases.values())
-
-	def __getitem__(self, key: str) -> "Testcase":
-		return self._testcases[key]
-
-	def __len__(self) -> int:
-		return self._testcases.__len__()
-
-
-@export
-class Testcase(Base):
-	_name: str
-	_subtests:  Dict[str, 'Subtest']
-	_assertionCount: int
-	_warningCount: int
-	_errorCount: int
-	_fatalCount: int
-
-	def __init__(self, name: str, assertionCount: int, warningCount: int, errorCount: int, fatalCount: int):
-		self._name = name
-		self._subtests = {}
-
-		self._assertionCount = assertionCount
-		self._warningCount = warningCount
-		self._errorCount = errorCount
-		self._fatalCount = fatalCount
-
-	@property
-	def Name(self) -> str:
-		return self._name
-
-	@property
-	def AssertionCount(self) -> int:
-		return self._assertionCount
-
-	@property
-	def PassedCount(self) -> int:
-		return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
-
-	@property
-	def WarningCount(self) -> int:
-		return self._warningCount
-
-	@property
-	def ErrorCount(self) -> int:
-		return self._errorCount
-
-	@property
-	def FatalCount(self) -> int:
-		return self._fatalCount
-
-
-@export
-class Subtest(Base):
-	_name: str
+	# 	for suite in osvvmTestSummary:
+	# 		self.printTestsuite(suite)
+	#
+	# def printTestsuite(self, testsuite: Testsuite, indent: int = 0):
+	# 	print(f"{'  '*indent}{testsuite.Name}")
+	# 	for suite in testsuite._testsuites.values():
+	# 		self.printTestsuite(suite, indent + 2)
+	# 	for case in testsuite:
+	# 		self.printTestcase(case, indent + 2)
+	#
+	# def printTestcase(self, testcase: Testcase, indent: int = 0):
+	# 	print(f"{'  ' * indent}{testcase.Name}")

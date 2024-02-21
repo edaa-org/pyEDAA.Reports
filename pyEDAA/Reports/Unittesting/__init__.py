@@ -190,7 +190,7 @@ class Testsuite(Base):
 		for testcase in self._testcases.values():
 			testcase.Aggregate()
 
-	def AddTestsuite(self, testsuite: "Testsuite"):
+	def AddTestsuite(self, testsuite: "Testsuite") -> None:
 		if testsuite._parent is not None:
 			raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
@@ -200,11 +200,11 @@ class Testsuite(Base):
 		testsuite._parent = self
 		self._testsuites[testsuite._name] = testsuite
 
-	def AddTestsuites(self, testsuites: Iterable["Testsuite"]):
+	def AddTestsuites(self, testsuites: Iterable["Testsuite"]) -> None:
 		for testsuite in testsuites:
 			self.AddTestsuite(testsuite)
 
-	def AddTestcase(self, testcase: "Testcase"):
+	def AddTestcase(self, testcase: "Testcase") -> None:
 		if testcase._parent is not None:
 			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
@@ -214,7 +214,7 @@ class Testsuite(Base):
 		testcase._parent = self
 		self._testcases[testcase._name] = testcase
 
-	def AddTestcases(self, testcases: Iterable["Testcase"]):
+	def AddTestcases(self, testcases: Iterable["Testcase"]) -> None:
 		for testcase in testcases:
 			self.AddTestcase(testcase)
 
@@ -315,5 +315,5 @@ class Testcase(Base):
 	def FatalCount(self) -> int:
 		return self._fatalCount
 
-	def Aggregate(self):
+	def Aggregate(self) -> None:
 		pass
