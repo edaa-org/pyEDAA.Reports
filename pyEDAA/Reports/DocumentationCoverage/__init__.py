@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2021-2022 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2021-2024 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -28,54 +28,19 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Testcase for OSVVM specific file formats."""
-from pathlib      import Path
-from unittest     import TestCase
+"""Abstraction of code documentation coverage."""
+from enum                 import Flag
 
-from pyEDAA.Reports.Testcases.OSVVM import Document, Testsuite, Testcase
-
-
-if __name__ == "__main__": # pragma: no cover
-	print("ERROR: you called a testcase declaration file as an executable module.")
-	print("Use: 'python -m unitest <testcase module>'")
-	exit(1)
+from pyTooling.Decorators import export
 
 
-class TestResults(TestCase):
-	def test_ReadOSVVMTestSummaryYAML(self):
-		yamlPath = Path("tests/data/OSVVM/Libraries_RunAllTests.yml")
+@export
+class Status(Flag):
+	Unknown = 0
+	Ignored = 1
+	Undocumented = 2
+	Documented = 4
+	Inherited = 12
 
-		osvvmTestSummary = Document(yamlPath)
-
-		self.assertIsNotNone(osvvmTestSummary)
-
-		self.assertEqual(4, len(osvvmTestSummary))
-		self.assertIn("Axi4Lite", osvvmTestSummary)
-		self.assertIn("Axi4Full", osvvmTestSummary)
-		self.assertIn("AxiStream", osvvmTestSummary)
-		self.assertIn("Uart", osvvmTestSummary)
-
-		axi4lite = osvvmTestSummary["Axi4Lite"]
-		self.assertEqual(9, len(axi4lite))
-
-		axi4 = osvvmTestSummary["Axi4Full"]
-		self.assertEqual(55, len(axi4))
-
-		axi4stream = osvvmTestSummary["AxiStream"]
-		self.assertEqual(60, len(axi4stream))
-
-		uart = osvvmTestSummary["Uart"]
-		self.assertEqual(8, len(uart))
-
-	# 	for suite in osvvmTestSummary:
-	# 		self.printTestsuite(suite)
-	#
-	# def printTestsuite(self, testsuite: Testsuite, indent: int = 0):
-	# 	print(f"{'  '*indent}{testsuite.Name}")
-	# 	for suite in testsuite._testsuites.values():
-	# 		self.printTestsuite(suite, indent + 2)
-	# 	for case in testsuite:
-	# 		self.printTestcase(case, indent + 2)
-	#
-	# def printTestcase(self, testcase: Testcase, indent: int = 0):
-	# 	print(f"{'  ' * indent}{testcase.Name}")
+# unrequiredButDocumented
+# wrongly documented

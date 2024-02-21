@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2021-2022 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2021-2024 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -53,16 +53,16 @@ class Document:
 	_yamlDocument: YAML
 	_testsuites: Dict[str, Testsuite]
 
-	def __init__(self, yamlReportFile: Path):
+	def __init__(self, yamlReportFile: Path) -> None:
 		yamlReader = YAML()
 		self._yamlDocument = yamlReader.load(yamlReportFile)
-		yamlBuild = self._yamlDocument["Build"]
+		yamlBuild = self._yamlDocument["BuildInfo"]
 
 		self._testsuites = {}
 
 		self.translateDocument()
 
-	def translateDocument(self):
+	def translateDocument(self) -> None:
 		for yamlTestsuite in self._yamlDocument['TestSuites']:
 			name = yamlTestsuite["Name"]
 			self._testsuites[name] = self.translateTestsuite(yamlTestsuite, name)

@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2021-2022 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2021-2024 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -31,14 +31,32 @@
 """Various report abstract data models and report format converters."""
 __author__ =    "Patrick Lehmann"
 __email__ =     "Paebbels@gmail.com"
-__copyright__ = "2021-2022, Electronic Design Automation Abstraction (EDA²)"
+__copyright__ = "2021-2024, Electronic Design Automation Abstraction (EDA²)"
 __license__ =   "Apache License, Version 2.0"
 __version__ =   "0.1.0"
 __keywords__ =  ["Reports", "Abstract Model", "Data Model", "Test Case", "Test Suite", "OSVVM", "YAML", "XML"]
 
+from sys import version_info
+
+from typing import List
+
 from enum import Enum
 
 from pyTooling.Decorators import export
+
+
+@export
+class ReportException(Exception):
+
+	# WORKAROUND: for Python <3.11
+	# Implementing a dummy method for Python versions before
+	__notes__: List[str]
+	if version_info < (3, 11):  # pragma: no cover
+		def add_note(self, message: str) -> None:
+			try:
+				self.__notes__.append(message)
+			except AttributeError:
+				self.__notes__ = [message]
 
 
 @export
