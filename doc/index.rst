@@ -65,12 +65,20 @@ Contributors
 
 
 .. toctree::
-   :caption: References
+   :caption: Report Formats
    :hidden:
 
-   pyEDAA.Reports/index
-   Reference
+   CodeCoverage/index
+   DocCoverage/index
+   Unittesting/index
 
+
+.. #toctree::
+   :caption: Tools
+   :hidden:
+
+   Converting
+   Merging
 
 .. toctree::
    :caption: About
@@ -87,18 +95,30 @@ Contributors
 
 .. raw:: latex
 
-   \part{Appendix}
+   \part{References and Reports}
 
+.. toctree::
+   :caption: References and Reports
+   :hidden:
+
+   pyEDAA.Reports/pyEDAA.Reports
+   reports/unittests
+   reports/coverage/index
+   Doc. Coverage Report <reports/doccoverage>
+   Static Type Check Report ➚ <reports/typing/index>
+
+
+.. raw:: latex
+
+   \part{Appendix}
 
 .. toctree::
    :caption: Appendix
    :hidden:
 
-   Coverage Report ➚ <coverage/index>
-   Static Type Check Report ➚ <typing/index>
    License
    Doc-License
    Glossary
    genindex
-.. #
-   py-modindex
+   Python Module Index <modindex>
+   TODO

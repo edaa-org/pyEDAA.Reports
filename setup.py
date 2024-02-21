@@ -30,6 +30,8 @@
 #
 """Package installer for 'Various report abstract data models and report format converters'."""
 from pathlib             import Path
+
+from setuptools          import setup
 from pyTooling.Packaging import DescribePythonPackageHostedOnGitHub
 
 gitHubNamespace =        "pyEDAA"
@@ -37,13 +39,17 @@ packageName =            "pyEDAA.Reports"
 packageDirectory =       packageName.replace(".", "/")
 packageInformationFile = Path(f"{packageDirectory}/__init__.py")
 
-DescribePythonPackageHostedOnGitHub(
+setup(**DescribePythonPackageHostedOnGitHub(
 	packageName=packageName,
 	description="Various report abstract data models and report format converters.",
 	gitHubNamespace=gitHubNamespace,
-	sourceFileWithVersion=packageInformationFile,
+	unittestRequirementsFile=Path("tests/requirements.txt"),
 	developmentStatus="pre-alpha",
 	classifiers=[
 		"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
-	]
-)
+	],
+	sourceFileWithVersion=packageInformationFile,
+	dataFiles={
+		packageName[:-2]: ["py.typed"]
+	}
+))
