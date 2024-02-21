@@ -16,16 +16,16 @@
 .. only:: html
 
    |  |SHIELD:svg:Reports-github| |SHIELD:svg:Reports-ghp-doc| |SHIELD:svg:Reports-gitter|
-   |  |SHIELD:svg:Reports-gha-test|
+   |  |SHIELD:svg:Reports-gha-test| |SHIELD:svg:Reports-codacy-quality|
 
-.. Disabled shields: |SHIELD:svg:Reports-src-license| |SHIELD:svg:Reports-doc-license| |SHIELD:svg:Reports-pypi-tag| |SHIELD:svg:Reports-pypi-status| |SHIELD:svg:Reports-pypi-python| |SHIELD:svg:Reports-lib-status| |SHIELD:svg:Reports-codacy-quality| |SHIELD:svg:Reports-codacy-coverage| |SHIELD:svg:Reports-codecov-coverage| |SHIELD:svg:Reports-lib-dep| |SHIELD:svg:Reports-req-status| |SHIELD:svg:Reports-lib-rank|
+.. Disabled shields: |SHIELD:svg:Reports-src-license| |SHIELD:svg:Reports-doc-license| |SHIELD:svg:Reports-pypi-tag| |SHIELD:svg:Reports-pypi-status| |SHIELD:svg:Reports-pypi-python| |SHIELD:svg:Reports-lib-status| |SHIELD:svg:Reports-codacy-coverage| |SHIELD:svg:Reports-codecov-coverage| |SHIELD:svg:Reports-lib-dep| |SHIELD:svg:Reports-req-status| |SHIELD:svg:Reports-lib-rank|
 
 .. only:: latex
 
    |SHIELD:png:Reports-github| |SHIELD:png:Reports-ghp-doc| |SHIELD:png:Reports-gitter|
-   |SHIELD:png:Reports-gha-test|
+   |SHIELD:png:Reports-gha-test| |SHIELD:png:Reports-codacy-quality|
 
-.. Disabled shields: |SHIELD:png:Reports-src-license| |SHIELD:png:Reports-doc-license| |SHIELD:png:Reports-pypi-tag| |SHIELD:png:Reports-pypi-status| |SHIELD:png:Reports-pypi-python| |SHIELD:png:Reports-lib-status| |SHIELD:png:Reports-codacy-quality| |SHIELD:png:Reports-codacy-coverage| |SHIELD:png:Reports-codecov-coverage| |SHIELD:png:Reports-lib-dep| |SHIELD:png:Reports-req-status| |SHIELD:png:Reports-lib-rank|
+.. Disabled shields: |SHIELD:png:Reports-src-license| |SHIELD:png:Reports-doc-license| |SHIELD:png:Reports-pypi-tag| |SHIELD:png:Reports-pypi-status| |SHIELD:png:Reports-pypi-python| |SHIELD:png:Reports-lib-status| |SHIELD:png:Reports-codacy-coverage| |SHIELD:png:Reports-codecov-coverage| |SHIELD:png:Reports-lib-dep| |SHIELD:png:Reports-req-status| |SHIELD:png:Reports-lib-rank|
 
 The pyEDAA.Reports Documentation
 ################################
@@ -56,13 +56,29 @@ Contributors
 
    Used as a layer of EDA² ➚ <https://edaa-org.github.io/>
 
-
 .. toctree::
-   :caption: References
+   :caption: Introduction
    :hidden:
 
-   Reference
+   Installation
+   Dependency
 
+
+.. toctree::
+   :caption: Report Formats
+   :hidden:
+
+   CodeCoverage/index
+   DocCoverage/index
+   Unittesting/index
+
+
+.. #toctree::
+   :caption: Tools
+   :hidden:
+
+   Converting
+   Merging
 
 .. toctree::
    :caption: About
@@ -79,12 +95,30 @@ Contributors
 
 .. raw:: latex
 
-   \part{Appendix}
+   \part{References and Reports}
 
+.. toctree::
+   :caption: References and Reports
+   :hidden:
+
+   pyEDAA.Reports/pyEDAA.Reports
+   reports/unittests
+   reports/coverage/index
+   Doc. Coverage Report <reports/doccoverage>
+   Static Type Check Report ➚ <reports/typing/index>
+
+
+.. raw:: latex
+
+   \part{Appendix}
 
 .. toctree::
    :caption: Appendix
    :hidden:
 
+   License
+   Doc-License
+   Glossary
    genindex
-   py-modindex
+   Python Module Index <modindex>
+   TODO

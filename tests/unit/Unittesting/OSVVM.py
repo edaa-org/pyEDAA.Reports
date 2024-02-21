@@ -28,45 +28,54 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Various report abstract data models and report format converters."""
-__author__ =    "Patrick Lehmann"
-__email__ =     "Paebbels@gmail.com"
-__copyright__ = "2021-2024, Electronic Design Automation Abstraction (EDA²)"
-__license__ =   "Apache License, Version 2.0"
-__version__ =   "0.1.0"
-__keywords__ =  ["Reports", "Abstract Model", "Data Model", "Test Case", "Test Suite", "OSVVM", "YAML", "XML"]
+"""Testcase for OSVVM specific file formats."""
+from pathlib      import Path
+from unittest     import TestCase
 
-from sys import version_info
-
-from typing import List
-
-from enum import Enum
-
-from pyTooling.Decorators import export
+from pyEDAA.Reports.Unittesting.OSVVM import Document
 
 
-@export
-class ReportException(Exception):
-
-	# WORKAROUND: for Python <3.11
-	# Implementing a dummy method for Python versions before
-	__notes__: List[str]
-	if version_info < (3, 11):  # pragma: no cover
-		def add_note(self, message: str) -> None:
-			try:
-				self.__notes__.append(message)
-			except AttributeError:
-				self.__notes__ = [message]
+if __name__ == "__main__": # pragma: no cover
+	print("ERROR: you called a testcase declaration file as an executable module.")
+	print("Use: 'python -m unitest <testcase module>'")
+	exit(1)
 
 
-@export
-class Severity(Enum):
-	Unknown = 0
-	Debug = 5
-	Verbose = 10
-	Normal = 20
-	Info = 25
-	Warning = 50
-	CriticalWarning = 55
-	Error = 60
-	Fatal = 70
+class TestResults(TestCase):
+	def test_ReadOSVVMTestSummaryYAML(self) -> None:
+		yamlPath = Path("tests/data/OSVVM/osvvm.Summary.yml")
+
+		osvvmTestSummary = Document(yamlPath)
+
+		self.assertIsNotNone(osvvmTestSummary)
+
+		self.assertEqual(14, len(osvvmTestSummary))
+		self.assertIn("Axi4Lite", osvvmTestSummary)
+		self.assertIn("Axi4Full", osvvmTestSummary)
+		self.assertIn("AxiStream", osvvmTestSummary)
+		self.assertIn("Uart", osvvmTestSummary)
+
+		axi4lite = osvvmTestSummary["Axi4Lite"]
+		self.assertEqual(17, len(axi4lite))
+
+		axi4 = osvvmTestSummary["Axi4Full"]
+		self.assertEqual(68, len(axi4))
+
+		axi4stream = osvvmTestSummary["AxiStream"]
+		self.assertEqual(65, len(axi4stream))
+
+		uart = osvvmTestSummary["Uart"]
+		self.assertEqual(8, len(uart))
+
+	# 	for suite in osvvmTestSummary:
+	# 		self.printTestsuite(suite)
+	#
+	# def printTestsuite(self, testsuite: Testsuite, indent: int = 0):
+	# 	print(f"{'  '*indent}{testsuite.Name}")
+	# 	for suite in testsuite._testsuites.values():
+	# 		self.printTestsuite(suite, indent + 2)
+	# 	for case in testsuite:
+	# 		self.printTestcase(case, indent + 2)
+	#
+	# def printTestcase(self, testcase: Testcase, indent: int = 0):
+	# 	print(f"{'  ' * indent}{testcase.Name}")

@@ -28,45 +28,87 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Various report abstract data models and report format converters."""
-__author__ =    "Patrick Lehmann"
-__email__ =     "Paebbels@gmail.com"
-__copyright__ = "2021-2024, Electronic Design Automation Abstraction (EDA²)"
-__license__ =   "Apache License, Version 2.0"
-__version__ =   "0.1.0"
-__keywords__ =  ["Reports", "Abstract Model", "Data Model", "Test Case", "Test Suite", "OSVVM", "YAML", "XML"]
-
-from sys import version_info
-
-from typing import List
-
-from enum import Enum
+"""Reader for OSVVM test report summary files in YAML format."""
+from pathlib import Path
+from typing import Dict
 
 from pyTooling.Decorators import export
+from ruamel.yaml import YAML
+
+from . import Testsuite as Abstract_Testsuite, Testcase as Abstract_Testcase, Status
 
 
 @export
-class ReportException(Exception):
-
-	# WORKAROUND: for Python <3.11
-	# Implementing a dummy method for Python versions before
-	__notes__: List[str]
-	if version_info < (3, 11):  # pragma: no cover
-		def add_note(self, message: str) -> None:
-			try:
-				self.__notes__.append(message)
-			except AttributeError:
-				self.__notes__ = [message]
+class Testsuite(Abstract_Testsuite):
+	pass
 
 
 @export
-class Severity(Enum):
-	Unknown = 0
-	Debug = 5
-	Verbose = 10
-	Normal = 20
-	Info = 25
-	Warning = 50
-	CriticalWarning = 55
-	Error = 60
-	Fatal = 70
+class Testcase(Abstract_Testcase):
+	pass
+
+
+@export
+class Document:
+	_yamlDocument: YAML
+	_testsuites: Dict[str, Testsuite]
+
+	def __init__(self, yamlReportFile: Path) -> None:
+		yamlReader = YAML()
+		self._yamlDocument = yamlReader.load(yamlReportFile)
+		yamlBuild = self._yamlDocument["BuildInfo"]
+
+		self._testsuites = {}
+
+		self.translateDocument()
+
+	def translateDocument(self) -> None:
+		for yamlTestsuite in self._yamlDocument['TestSuites']:
+			name = yamlTestsuite["Name"]
+			self._testsuites[name] = self.translateTestsuite(yamlTestsuite, name)
+
+	def translateTestsuite(self, yamlTestsuite, name) -> Testsuite:
+		testsuite = Testsuite(name)
+
+		for yamlTestcase in yamlTestsuite['TestCases']:
+			testcaseName = yamlTestcase["Name"]
+			testsuite._testcases[testcaseName] = self.translateTestcase(yamlTestcase, testcaseName)
+
+		return testsuite
+
+	def translateTestcase(self, yamlTestcase, name) -> Testcase:
+		yamlStatus = yamlTestcase["Status"].lower()
+
+		assertionCount = 0
+		warningCount = 0
+		errorCount = 0
+		fatalCount = 0
+
+		if yamlStatus == "passed":
+			status = Status.Passed
+
+			yamlResults = yamlTestcase["Results"]
+			assertionCount = yamlResults["AffirmCount"]
+
+		elif yamlStatus == "skipped":
+			status = Status.Skipped
+
+		elif yamlStatus == "failed":
+			status = Status.Failed
+
+		else:
+			print(f"ERROR: Unknown testcase status '{yamlStatus}'.")
+
+		return Testcase(name, assertionCount, warningCount, errorCount, fatalCount)
+
+	def __contains__(self, key: str) -> bool:
+		return key in self._testsuites
+
+	def __iter__(self):
+		return iter(self._testsuites.values())
+
+	def __getitem__(self, key: str) -> Testsuite:
+		return self._testsuites[key]
+
+	def __len__(self) -> int:
+		return self._testsuites.__len__()

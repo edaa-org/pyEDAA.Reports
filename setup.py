@@ -28,45 +28,28 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Various report abstract data models and report format converters."""
-__author__ =    "Patrick Lehmann"
-__email__ =     "Paebbels@gmail.com"
-__copyright__ = "2021-2024, Electronic Design Automation Abstraction (EDA²)"
-__license__ =   "Apache License, Version 2.0"
-__version__ =   "0.1.0"
-__keywords__ =  ["Reports", "Abstract Model", "Data Model", "Test Case", "Test Suite", "OSVVM", "YAML", "XML"]
+"""Package installer for 'Various report abstract data models and report format converters'."""
+from pathlib             import Path
 
-from sys import version_info
+from setuptools          import setup
+from pyTooling.Packaging import DescribePythonPackageHostedOnGitHub
 
-from typing import List
+gitHubNamespace =        "pyEDAA"
+packageName =            "pyEDAA.Reports"
+packageDirectory =       packageName.replace(".", "/")
+packageInformationFile = Path(f"{packageDirectory}/__init__.py")
 
-from enum import Enum
-
-from pyTooling.Decorators import export
-
-
-@export
-class ReportException(Exception):
-
-	# WORKAROUND: for Python <3.11
-	# Implementing a dummy method for Python versions before
-	__notes__: List[str]
-	if version_info < (3, 11):  # pragma: no cover
-		def add_note(self, message: str) -> None:
-			try:
-				self.__notes__.append(message)
-			except AttributeError:
-				self.__notes__ = [message]
-
-
-@export
-class Severity(Enum):
-	Unknown = 0
-	Debug = 5
-	Verbose = 10
-	Normal = 20
-	Info = 25
-	Warning = 50
-	CriticalWarning = 55
-	Error = 60
-	Fatal = 70
+setup(**DescribePythonPackageHostedOnGitHub(
+	packageName=packageName,
+	description="Various report abstract data models and report format converters.",
+	gitHubNamespace=gitHubNamespace,
+	unittestRequirementsFile=Path("tests/requirements.txt"),
+	developmentStatus="pre-alpha",
+	classifiers=[
+		"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+	],
+	sourceFileWithVersion=packageInformationFile,
+	dataFiles={
+		packageName[:-2]: ["py.typed"]
+	}
+))
