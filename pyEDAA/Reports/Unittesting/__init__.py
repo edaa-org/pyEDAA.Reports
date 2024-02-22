@@ -540,3 +540,37 @@ class TestsuiteSummary(TestsuiteBase):
 			self._state = TestcaseState.Unknown
 
 		return tests, skipped, errored, failed, passed
+
+
+@export
+class Merged(metaclass=ExtendedType, mixin=True):
+	pass
+
+
+@export
+class MergedTestcase(Testcase, Merged):
+	pass
+
+
+@export
+class MergedTestsuite(Testsuite, Merged):
+	pass
+
+
+@export
+class MergedTestsuiteSummary(TestsuiteSummary, Merged):
+	_mergedFiles: Dict[Path, TestsuiteSummary]
+
+	def __init__(self, name: str) -> None:
+		super().__init__(name)
+
+		self._mergedFiles = {}
+
+	def Merge(self, summary: TestsuiteSummary) -> None:
+		# if summary.File in self._mergedFiles:
+		# 	raise
+
+		self._mergedFiles[summary.Name] = summary
+
+	def Aggregate(self) -> None:
+		pass
