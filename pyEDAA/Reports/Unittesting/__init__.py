@@ -31,10 +31,11 @@
 """Abstraction of testsuites and testcases."""
 from datetime import timedelta
 
-from enum   import Flag
-from typing import Dict, Iterator, Optional as Nullable, Iterable, Any
+from enum    import Flag
+from pathlib import Path
+from typing  import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator
 
-from pyTooling.Decorators  import export
+from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import abstractmethod, ExtendedType
 
 from pyEDAA.Reports        import ReportException
@@ -56,41 +57,129 @@ class DuplicateTestcaseException(UnittestException):
 
 
 @export
-class Status(Flag):
-	Unknown = 0
-	Skipped = 1
-	Passed = 2
-	Failed = 4
-	UnexpectedPassed = 10
-	ExpectedFailed = 12
-	Errored = 16
+class TestcaseState(Flag):
+	Unknown =    0
+	Excluded =   1                         #: testcase was permanently excluded / disabled
+	Skipped =    2                         #: testcase was temporarily skipped (e.g. based on a condition)
+	Weak =       4                         #: no assertions
+	Passed =     8                         #: passed testcase, because all assertions succeeded
+	Failed =    16                         #: failed testcase due to failing assertions
+
+	Inverted = 128                         #: to mark inverted results
+	UnexpectedPassed = Failed | Inverted
+	ExpectedFailed =   Passed | Inverted
+
+	Warned =  1024                         #: runtime warning
+	Errored = 2048                         #: runtime error (mostly caught exceptions)
+	Aborted = 4096                         #: uncaught runtime exception
+
+	SetupError =     8192                  #: preparation / compilation error
+	TearDownError = 16384                  #: cleanup error / resource release error
+
+	# TODO: timed out ?
 
 
 @export
 class Base(metaclass=ExtendedType, slots=True):
 	_parent: Nullable["Testsuite"]
 	_name:   str
-	_status: Status
+	_state:  TestcaseState
 
-	def __init__(self, name: str, parent: Nullable["Testsuite"] = None):
+	_setupDuration:    Nullable[timedelta]
+	_teardownDuration: Nullable[timedelta]
+	_totalDuration:    Nullable[timedelta]
+
+	_warningCount: int
+	_errorCount:   int
+	_fatalCount:   int
+
+	_dict:         Dict[str, Any]
+
+	def __init__(
+		self,
+		name: str,
+		setupDuration: Nullable[timedelta] = None,
+		teardownDuration: Nullable[timedelta] = None,
+		totalDuration:  Nullable[timedelta] = None,
+		warningCount: int = 0,
+		errorCount: int = 0,
+		fatalCount: int = 0,
+		parent: Nullable["Testsuite"] = None
+	):
 		if name is None:
-			raise TypeError(f"Parameter 'name' must not be None.")
+			raise ValueError(f"Parameter 'name' is None.")
+		elif not isinstance(name, str):
+			raise TypeError(f"Parameter 'name' is not of type 'str'.")
 
 		self._parent = parent
 		self._name = name
-		self._status = Status.Unknown
+		self._state = TestcaseState.Unknown
 
-	@property
+		self._setupDuration = setupDuration
+		self._teardownDuration = teardownDuration
+		self._totalDuration = totalDuration
+
+		self._warningCount = warningCount
+		self._errorCount = errorCount
+		self._fatalCount = fatalCount
+
+		self._dict = {}
+
+	@readonly
 	def Parent(self) -> Nullable["Testsuite"]:
 		return self._parent
 
-	@property
+	# QUESTION: allow Parent as setter?
+
+	@readonly
 	def Name(self) -> str:
 		return self._name
 
-	@property
-	def Status(self) -> Status:
-		return self._status
+	@readonly
+	def State(self) -> TestcaseState:
+		return self._state
+
+	@readonly
+	def SetupDuration(self) -> timedelta:
+		return self._setupDuration
+
+	@readonly
+	def TeardownDuration(self) -> timedelta:
+		return self._teardownDuration
+
+	@readonly
+	def TotalDuration(self) -> timedelta:
+		return self._totalDuration
+
+	@readonly
+	def WarningCount(self) -> int:
+		return self._warningCount
+
+	@readonly
+	def ErrorCount(self) -> int:
+		return self._errorCount
+
+	@readonly
+	def FatalCount(self) -> int:
+		return self._fatalCount
+
+	def __len__(self) -> int:
+		return len(self._dict)
+
+	def __getitem__(self, key: str) -> Any:
+		return self._dict[key]
+
+	def __setitem__(self, key: str, value: Any) -> None:
+		self._dict[key] = value
+
+	def __delitem__(self, key: str) -> None:
+		del self._dict[key]
+
+	def __contains__(self, key: str) -> bool:
+		return key in self._dict
+
+	def __iter__(self) -> Generator[Tuple[str, Any], None, None]:
+		yield from self._dict.items()
 
 	@abstractmethod
 	def Aggregate(self):
@@ -98,17 +187,135 @@ class Base(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Testsuite(Base):
-	_testsuites: Dict[str, "Testsuite"]
-	_testcases:  Dict[str, "Testcase"]
+class Testcase(Base):
+	_testDuration:     Nullable[timedelta]
+
+	_assertionCount:       Nullable[int]
+	_failedAssertionCount: Nullable[int]
+	_passedAssertionCount: Nullable[int]
 
 	def __init__(
 		self,
 		name: str,
+		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
+		teardownDuration: Nullable[timedelta] = None,
+		totalDuration:  Nullable[timedelta] = None,
+		assertionCount: Nullable[int] = None,
+		failedAssertionCount: Nullable[int] = None,
+		passedAssertionCount: Nullable[int] = None,
+		warningCount: int = 0,
+		errorCount: int = 0,
+		fatalCount: int = 0,
+		parent: Nullable["Testsuite"] = None
+	):
+		if parent is not None:
+			if not isinstance(parent, Testsuite):
+				raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+
+			parent._testcases[name] = self
+
+		super().__init__(name, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+
+		self._testDuration = testDuration
+		# if totalDuration is not None:
+
+		self._assertionCount = assertionCount
+		if assertionCount is not None:
+			if failedAssertionCount is not None:
+				self._failedAssertionCount = failedAssertionCount
+
+				if passedAssertionCount is not None:
+					if passedAssertionCount + failedAssertionCount != assertionCount:
+						raise ValueError(f"passed assertion count ({passedAssertionCount}) + failed assertion count ({failedAssertionCount} != assertion count ({assertionCount}")
+
+					self._passedAssertionCount = passedAssertionCount
+				else:
+					self._passedAssertionCount = assertionCount - failedAssertionCount
+			elif passedAssertionCount is not None:
+				self._passedAssertionCount = passedAssertionCount
+				self._failedAssertionCount = assertionCount - passedAssertionCount
+			else:
+				raise ValueError(f"Neither passed assertion count nor failed assertion count are provided.")
+		elif failedAssertionCount is not None:
+			self._failedAssertionCount = failedAssertionCount
+
+			if passedAssertionCount is not None:
+				self._passedAssertionCount = passedAssertionCount
+				self._assertionCount = passedAssertionCount + failedAssertionCount
+			else:
+				raise ValueError(f"Passed assertion count is mandatory, if failed assertion count is provided instead of assertion count.")
+		elif passedAssertionCount is not None:
+			raise ValueError(f"Assertion count or failed assertion count is mandatory, if passed assertion count is provided.")
+		else:
+			self._passedAssertionCount = None
+			self._failedAssertionCount = None
+
+	@readonly
+	def TestDuration(self) -> timedelta:
+		return self._testDuration
+
+	@readonly
+	def AssertionCount(self) -> int:
+		return self._assertionCount
+
+	@readonly
+	def FailedAssertionCount(self) -> int:
+		return self._failedAssertionCount
+
+	@readonly
+	def PassedAssertionCount(self) -> int:
+		return self._passedAssertionCount
+
+	def Aggregate(self, strict: bool = True) -> None:
+		if self._state is not TestcaseState.Unknown:
+			return
+
+		if self._assertionCount is None or self._assertionCount == 0:
+			self._state = TestcaseState.Weak | (TestcaseState.Failed if strict else TestcaseState.Passed)
+		elif self._failedAssertionCount == 0:
+			self._state = TestcaseState.Passed
+		else:
+			self._state = TestcaseState.Failed
+
+		if self._warningCount > 0:
+			self._state |= TestcaseState.Warned
+
+		if self._errorCount > 0:
+			self._state |= TestcaseState.Errored
+
+		if self._fatalCount > 0:
+			self._state |= TestcaseState.Aborted
+
+			if strict:
+				self._state = self._state & ~TestcaseState.Passed | TestcaseState.Failed
+
+		# TODO: check for setup errors
+		# TODO: check for teardown errors
+
+
+@export
+class TestsuiteBase(Base):
+	_testsuites: Dict[str, "Testsuite"]
+
+	_skipped: int
+	_errored: int
+	_failed:  int
+	_passed:  int
+
+	def __init__(
+		self,
+		name: str,
+		setupDuration: Nullable[timedelta] = None,
+		teardownDuration: Nullable[timedelta] = None,
+		totalDuration:  Nullable[timedelta] = None,
+		warningCount: int = 0,
+		errorCount: int = 0,
+		fatalCount: int = 0,
 		testsuites: Nullable[Iterable["Testsuite"]] = None,
-		testcases: Nullable[Iterable["Testcase"]] = None,
-		parent: Nullable["Testsuite"] = None):
-		super().__init__(name, parent)
+		parent: Nullable["Testsuite"] = None
+	):
+		super().__init__(name, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
 
 		self._testsuites = {}
 		if testsuites is not None:
@@ -122,73 +329,77 @@ class Testsuite(Base):
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
 
-		self._testcases = {}
-		if testcases is not None:
-			for testcase in testcases:
-				if testcase._parent is not None:
-					raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+		self._skipped = 0
+		self._errored = 0
+		self._failed =  0
+		self._passed =  0
 
-				if testcase._name in self._testcases:
-					raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
-
-				testcase._parent = self
-				self._testcases[testcase._name] = testcase
-
-	@property
+	@readonly
 	def Testsuites(self) -> Dict[str, "Testsuite"]:
 		return self._testsuites
 
-	@property
-	def Testcases(self) -> Dict[str, "Testcase"]:
-		return self._testcases
-
-	@property
+	@readonly
 	def AssertionCount(self) -> int:
 		raise NotImplementedError()
 		# return self._assertionCount
 
-	@property
+	@readonly
 	def FailedAssertionCount(self) -> int:
 		raise NotImplementedError()
 		# return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
 
-	@property
+	@readonly
 	def PassedAssertionCount(self) -> int:
 		raise NotImplementedError()
 		# return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
 
-	@property
+	@readonly
 	def WarningCount(self) -> int:
 		raise NotImplementedError()
 		# return self._warningCount
 
-	@property
+	@readonly
 	def ErrorCount(self) -> int:
 		raise NotImplementedError()
 		# return self._errorCount
 
-	@property
+	@readonly
 	def FatalCount(self) -> int:
 		raise NotImplementedError()
 		# return self._fatalCount
 
-	def __contains__(self, key: str) -> bool:
-		return key in self._testcases
+	@readonly
+	def Skipped(self) -> int:
+		return self._skipped
 
-	def __iter__(self) -> Iterator["Testcase"]:
-		return iter(self._testcases.values())
+	@readonly
+	def Errored(self) -> int:
+		return self._errored
 
-	def __getitem__(self, key: str) -> "Testcase":
-		return self._testcases[key]
+	@readonly
+	def Failed(self) -> int:
+		return self._failed
 
-	def __len__(self) -> int:
-		return self._testcases.__len__()
+	@readonly
+	def Passed(self) -> int:
+		return self._passed
 
-	def Aggregate(self) -> None:
+	def Aggregate(self) -> Tuple[int, int, int, int, int]:
+		tests = 0
+		skipped = 0
+		errored = 0
+		failed = 0
+		passed = 0
+
 		for testsuite in self._testsuites.values():
-			testsuite.Aggregate()
-		for testcase in self._testcases.values():
-			testcase.Aggregate()
+			t, s, e, f, p = testsuite.Aggregate()
+			tests += t
+			skipped += s
+			errored += e
+			failed += f
+			passed += p
+
+		return tests, skipped, errored, failed, passed
 
 	def AddTestsuite(self, testsuite: "Testsuite") -> None:
 		if testsuite._parent is not None:
@@ -220,100 +431,112 @@ class Testsuite(Base):
 
 
 @export
-class Testcase(Base):
-	_setupDuration:    Nullable[timedelta]
-	_testDuration:     Nullable[timedelta]
-	_teardownDuration: Nullable[timedelta]
-	_totalDuration:    Nullable[timedelta]
-
-	_assertionCount:       Nullable[int]
-	_failedAssertionCount: Nullable[int]
-	_passedAssertionCount: Nullable[int]
-
-	_warningCount: int
-	_errorCount:   int
-	_fatalCount:   int
-
-	_dict:         Dict[str, Any]
+class Testsuite(TestsuiteBase):
+	_testcases:  Dict[str, "Testcase"]
 
 	def __init__(
 		self,
 		name: str,
 		setupDuration: Nullable[timedelta] = None,
-		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
-		assertionCount: Nullable[int] = None,
-		failedAssertionCount: Nullable[int] = None,
-		passedAssertionCount: Nullable[int] = None,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
+		testsuites: Nullable[Iterable["Testsuite"]] = None,
+		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
-		super().__init__(name, parent)
+		super().__init__(name, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, testsuites, parent)
 
-		self._setupDuration = setupDuration
-		self._testDuration = testDuration
-		self._teardownDuration = teardownDuration
-		self._totalDuration = totalDuration
-		# if totalDuration is not None:
+		self._testcases = {}
+		if testcases is not None:
+			for testcase in testcases:
+				if testcase._parent is not None:
+					raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
-		self._assertionCount = assertionCount
-		if assertionCount is not None:
-			if failedAssertionCount is not None:
-				self._failedAssertionCount = failedAssertionCount
+				if testcase._name in self._testcases:
+					raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
 
-				if passedAssertionCount is not None:
-					if passedAssertionCount + failedAssertionCount != assertionCount:
-						raise ValueError(f"passed assertion count ({passedAssertionCount}) + failed assertion count ({failedAssertionCount} != assertion count ({assertionCount}")
+				testcase._parent = self
+				self._testcases[testcase._name] = testcase
 
-					self._passedAssertionCount = passedAssertionCount
-				else:
-					self._passedAssertionCount = assertionCount - failedAssertionCount
-			elif passedAssertionCount is not None:
-				self._passedAssertionCount = passedAssertionCount
-				self._failedAssertionCount = assertionCount - passedAssertionCount
-			else:
-				raise ValueError(f"Neither passed assertion count nor failed assertion count are provided.")
-		elif failedAssertionCount is not None:
-			self._failedAssertionCount = failedAssertionCount
+	@readonly
+	def Testcases(self) -> Dict[str, "Testcase"]:
+		return self._testcases
 
-			if passedAssertionCount is not None:
-				self._passedAssertionCount = passedAssertionCount
-				self._assertionCount = passedAssertionCount + failedAssertionCount
-			else:
-				raise ValueError(f"Passed assertion count is mandatory, if failed assertion count is provided instead of assertion count.")
-		elif passedAssertionCount is not None:
-			raise ValueError(f"Assertion count or failed assertion count is mandatory, if passed assertion count is provided.")
+	def Aggregate(self, strict: bool = True) -> Tuple[int, int, int, int, int]:
+		tests, skipped, errored, failed, passed = super().Aggregate()
 
-		self._warningCount = warningCount
-		self._errorCount = errorCount
-		self._fatalCount = fatalCount
+		for testcase in self._testcases.values():
+			testcase.Aggregate(strict)
+			if testcase._state is TestcaseState.Passed:
+				tests += 1
+				passed += 1
+			elif testcase._state is TestcaseState.Failed:
+				tests += 1
+				failed += 1
+			elif testcase._state is TestcaseState.Skipped:
+				tests += 1
+				skipped += 1
+			elif testcase._state is TestcaseState.Errored:
+				tests += 1
+				errored += 1
+			elif testcase._state is TestcaseState.Unknown:
+				raise UnittestException(f"Found testcase '{testcase._name}' with unknown state.")
 
-	@property
-	def AssertionCount(self) -> int:
-		return self._assertionCount
+		self._skipped = skipped
+		self._errored = errored
+		self._failed = failed
+		self._passed = passed
 
-	@property
-	def FailedAssertionCount(self) -> int:
-		return self._failedAssertionCount
+		if errored > 0:
+			self._state = TestcaseState.Errored
+		elif failed > 0:
+			self._state = TestcaseState.Failed
+		elif tests - skipped == passed:
+			self._state = TestcaseState.Passed
+		elif tests == skipped:
+			self._state = TestcaseState.Skipped
+		else:
+			self._state = TestcaseState.Unknown
 
-	@property
-	def PassedAssertionCount(self) -> int:
-		return self._passedAssertionCount
+		return tests, skipped, errored, failed, passed
 
-	@property
-	def WarningCount(self) -> int:
-		return self._warningCount
 
-	@property
-	def ErrorCount(self) -> int:
-		return self._errorCount
+@export
+class TestsuiteSummary(TestsuiteBase):
+	def __init__(
+		self,
+		name: str,
+		setupDuration: Nullable[timedelta] = None,
+		teardownDuration: Nullable[timedelta] = None,
+		totalDuration:  Nullable[timedelta] = None,
+		warningCount: int = 0,
+		errorCount: int = 0,
+		fatalCount: int = 0,
+		testsuites: Nullable[Iterable["Testsuite"]] = None,
+		parent: Nullable["Testsuite"] = None
+	):
+		super().__init__(name, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, testsuites, parent)
 
-	@property
-	def FatalCount(self) -> int:
-		return self._fatalCount
+	def Aggregate(self) -> Tuple[int, int, int, int, int]:
+		tests, skipped, errored, failed, passed = super().Aggregate()
 
-	def Aggregate(self) -> None:
-		pass
+		self._skipped = skipped
+		self._errored = errored
+		self._failed = failed
+		self._passed = passed
+
+		if errored > 0:
+			self._state = TestcaseState.Errored
+		elif failed > 0:
+			self._state = TestcaseState.Failed
+		elif tests - skipped == passed:
+			self._state = TestcaseState.Passed
+		elif tests == skipped:
+			self._state = TestcaseState.Skipped
+		else:
+			self._state = TestcaseState.Unknown
+
+		return tests, skipped, errored, failed, passed

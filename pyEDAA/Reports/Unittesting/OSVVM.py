@@ -35,7 +35,7 @@ from typing               import Dict
 from ruamel.yaml          import YAML
 from pyTooling.Decorators import export
 
-from pyEDAA.Reports.Unittesting import Testsuite as Abstract_Testsuite, Testcase as Abstract_Testcase, Status
+from pyEDAA.Reports.Unittesting import Testsuite as Abstract_Testsuite, Testcase as Abstract_Testcase, TestcaseState
 
 
 @export
@@ -85,16 +85,16 @@ class Document:
 		fatalCount = 0
 
 		if yamlStatus == "passed":
-			status = Status.Passed
+			status = TestcaseState.Passed
 
 			yamlResults = yamlTestcase["Results"]
 			assertionCount = yamlResults["AffirmCount"]
 
 		elif yamlStatus == "skipped":
-			status = Status.Skipped
+			status = TestcaseState.Skipped
 
 		elif yamlStatus == "failed":
-			status = Status.Failed
+			status = TestcaseState.Failed
 
 		else:
 			print(f"ERROR: Unknown testcase status '{yamlStatus}'.")

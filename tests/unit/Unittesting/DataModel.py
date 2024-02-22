@@ -30,25 +30,25 @@
 #
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting import Testcase, Status, Testsuite, DuplicateTestsuiteException, DuplicateTestcaseException
+from pyEDAA.Reports.Unittesting import TestcaseState, Testcase, Testsuite, DuplicateTestsuiteException, DuplicateTestcaseException
 
 
 class TestcaseInstantiation(ut_TestCase):
 	def test_Testcase_NoName(self) -> None:
-		with self.assertRaises(TypeError):
+		with self.assertRaises(ValueError):
 			_ = Testcase(None)
 
 	def test_Testcase_OnlyName(self) -> None:
 		tc = Testcase("test")
 
 		self.assertEqual("test", tc.Name)
-		self.assertEqual(Status.Unknown, tc.Status)
+		self.assertEqual(TestcaseState.Unknown, tc.State)
 
 	def test_Testcase_WithAssertionCounts(self) -> None:
 		tc = Testcase("test", assertionCount=5, failedAssertionCount=1, passedAssertionCount=4)
 
 		self.assertEqual("test", tc.Name)
-		self.assertEqual(Status.Unknown, tc.Status)
+		self.assertEqual(TestcaseState.Unknown, tc.State)
 		self.assertEqual(5, tc.AssertionCount)
 		self.assertEqual(1, tc.FailedAssertionCount)
 		self.assertEqual(4, tc.PassedAssertionCount)
@@ -57,7 +57,7 @@ class TestcaseInstantiation(ut_TestCase):
 		tc = Testcase("test", warningCount=1, errorCount=2, fatalCount=3)
 
 		self.assertEqual("test", tc.Name)
-		self.assertEqual(Status.Unknown, tc.Status)
+		self.assertEqual(TestcaseState.Unknown, tc.State)
 		self.assertEqual(1, tc.WarningCount)
 		self.assertEqual(2, tc.ErrorCount)
 		self.assertEqual(3, tc.FatalCount)
@@ -82,7 +82,7 @@ class TestcaseInstantiation(ut_TestCase):
 		tc = Testcase("test", assertionCount=5, passedAssertionCount=4)
 
 		self.assertEqual("test", tc.Name)
-		self.assertEqual(Status.Unknown, tc.Status)
+		self.assertEqual(TestcaseState.Unknown, tc.State)
 		self.assertEqual(5, tc.AssertionCount)
 		self.assertEqual(1, tc.FailedAssertionCount)
 		self.assertEqual(4, tc.PassedAssertionCount)
@@ -91,7 +91,7 @@ class TestcaseInstantiation(ut_TestCase):
 		tc = Testcase("test", assertionCount=5, failedAssertionCount=1)
 
 		self.assertEqual("test", tc.Name)
-		self.assertEqual(Status.Unknown, tc.Status)
+		self.assertEqual(TestcaseState.Unknown, tc.State)
 		self.assertEqual(5, tc.AssertionCount)
 		self.assertEqual(1, tc.FailedAssertionCount)
 		self.assertEqual(4, tc.PassedAssertionCount)
@@ -100,7 +100,7 @@ class TestcaseInstantiation(ut_TestCase):
 		tc = Testcase("test", failedAssertionCount=1, passedAssertionCount=4)
 
 		self.assertEqual("test", tc.Name)
-		self.assertEqual(Status.Unknown, tc.Status)
+		self.assertEqual(TestcaseState.Unknown, tc.State)
 		self.assertEqual(5, tc.AssertionCount)
 		self.assertEqual(1, tc.FailedAssertionCount)
 		self.assertEqual(4, tc.PassedAssertionCount)
@@ -108,18 +108,25 @@ class TestcaseInstantiation(ut_TestCase):
 
 class TestsuiteInstantiation(ut_TestCase):
 	def test_Testsuite_NoName(self) -> None:
-		with self.assertRaises(TypeError):
+		with self.assertRaises(ValueError):
 			_ = Testsuite(None)
 
 	def test_Testsuite_OnlyName(self) -> None:
 		ts = Testsuite("test")
 
 		self.assertEqual("test", ts.Name)
-		self.assertEqual(Status.Unknown, ts.Status)
+		self.assertEqual(TestcaseState.Unknown, ts.State)
 
 
 class Hierarchy(ut_TestCase):
-	def test_Testsuites(self) -> None:
+	def test_TestsuiteParentIsTestsuite(self) -> None:
+		ts1 = Testsuite("ts1")
+		ts2 = Testcase("ts2", parent=ts1)
+
+		self.assertEqual(ts1, ts2.Parent)
+		self.assertEqual(ts2, ts1.Testcases["ts2"])
+
+	def test_TestsuitesInTestsuite(self) -> None:
 		ts1 = Testsuite("ts1")
 		ts2 = Testsuite("ts2")
 
@@ -134,7 +141,20 @@ class Hierarchy(ut_TestCase):
 		self.assertEqual(ts, ts1.Parent)
 		self.assertEqual(ts, ts2.Parent)
 
-	def test_Testcases(self) -> None:
+	def test_TestcaseParentIsTestcase(self) -> None:
+		tc1 = Testcase("tc1")
+
+		with self.assertRaises(TypeError):
+			_ = Testcase("tc2", parent=tc1)
+
+	def test_TestcaseParentIsTestsuite(self) -> None:
+		ts = Testsuite("ts")
+		tc1 = Testcase("tc1", parent=ts)
+
+		self.assertEqual(ts, tc1.Parent)
+		self.assertEqual(tc1, ts.Testcases["tc1"])
+
+	def test_TestcasesInTestsuite(self) -> None:
 		tc1 = Testcase("tc1")
 		tc2 = Testcase("tc2")
 
@@ -257,8 +277,8 @@ class Duplicates(ut_TestCase):
 
 class Aggregate(ut_TestCase):
 	def test_AggregateAssertions(self) -> None:
-		tc1 = Testcase("tc1", 5, 1, 4)
-		tc2 = Testcase("tc2", 10, 0, 10)
+		tc1 = Testcase("tc1", assertionCount=5, failedAssertionCount=1, passedAssertionCount=4)
+		tc2 = Testcase("tc2", assertionCount=10, failedAssertionCount=0, passedAssertionCount=10)
 		ts = Testsuite("root", testcases=(tc1, tc2))
 
 		ts.Aggregate()
