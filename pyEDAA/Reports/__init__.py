@@ -28,26 +28,25 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Various report abstract data models and report format converters."""
+"""
+Various report abstract data models and report format converters.
+"""
 __author__ =    "Patrick Lehmann"
 __email__ =     "Paebbels@gmail.com"
 __copyright__ = "2021-2024, Electronic Design Automation Abstraction (EDA²)"
 __license__ =   "Apache License, Version 2.0"
-__version__ =   "0.1.0"
+__version__ =   "0.2.0"
 __keywords__ =  ["Reports", "Abstract Model", "Data Model", "Test Case", "Test Suite", "OSVVM", "YAML", "XML"]
 
-from sys import version_info
-
+from enum   import Enum
+from sys    import version_info
 from typing import List
-
-from enum import Enum
 
 from pyTooling.Decorators import export
 
 
 @export
 class ReportException(Exception):
-
 	# WORKAROUND: for Python <3.11
 	# Implementing a dummy method for Python versions before
 	__notes__: List[str]

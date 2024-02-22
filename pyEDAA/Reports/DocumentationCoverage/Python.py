@@ -30,7 +30,7 @@
 # ==================================================================================================================== #
 #
 """
-**Abstract documentation coverage data model for Python code.**
+**Abstract code documentation coverage data model for Python code.**
 """
 from pathlib                              import Path
 from typing                               import Optional as Nullable, Iterable, Dict, Union, Tuple, List

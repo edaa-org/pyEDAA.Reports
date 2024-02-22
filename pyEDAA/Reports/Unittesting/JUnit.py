@@ -29,16 +29,18 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-from enum import Flag
-
-from datetime import datetime, timedelta
-from pathlib import Path
-from time import perf_counter_ns
-from typing import Tuple, List, Dict, Optional as Nullable, Union
-from xml.dom import minidom, Node
+"""
+Reader for JUnit unit testing summary files in XML format.
+"""
+from enum            import Flag
+from datetime        import datetime, timedelta
+from pathlib         import Path
+from time            import perf_counter_ns
+from typing          import Tuple, Dict, Optional as Nullable, Union
+from xml.dom         import minidom, Node
 from xml.dom.minidom import Element
 
-from pyTooling.Decorators import export, readonly
+from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType
 
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException

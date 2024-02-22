@@ -28,7 +28,7 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Abstraction of code documentation coverage."""
+"""Abstraction of code documentation coverage data model."""
 from enum                  import Flag
 from typing                import Optional as Nullable
 
