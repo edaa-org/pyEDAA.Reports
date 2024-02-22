@@ -30,10 +30,17 @@
 #
 """Abstraction of code documentation coverage."""
 from enum                  import Flag
-from typing                import Dict, Iterator, Optional as Nullable
+from typing                import Optional as Nullable
 
 from pyTooling.Decorators  import export
 from pyTooling.MetaClasses import ExtendedType
+
+from pyEDAA.Reports        import ReportException
+
+
+@export
+class DocCoverageException(ReportException):
+	pass
 
 
 @export

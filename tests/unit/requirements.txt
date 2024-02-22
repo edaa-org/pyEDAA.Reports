@@ -1,3 +1,3 @@
 -r ../requirements.txt
 
-setuptools >= 69.0.0
+docstr_coverage ~= 2.3

@@ -14,6 +14,9 @@
 
    <hr />
 
+.. |%| unicode:: U+2009 %
+   :trim:
+
 .. # define additional CSS based styles and ReST roles for HTML
 .. raw:: html
 

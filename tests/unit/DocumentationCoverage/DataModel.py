@@ -14,7 +14,7 @@ class ClassCoverageInstantiation(TestCase):
 
 		self.assertIsNone(cc.Parent)
 		self.assertEqual("class", cc.Name)
-		# self.assertEqual(CoverageState.Unknown, cc.Status)
+		self.assertEqual(CoverageState.Unknown, cc.Status)
 		self.assertEqual(0, len(cc.Fields))
 		self.assertEqual(0, len(cc.Methods))
 		self.assertEqual(0, len(cc.Classes))
@@ -30,7 +30,7 @@ class ModuleCoverageInstantiation(TestCase):
 
 		self.assertIsNone(mc.Parent)
 		self.assertEqual("module", mc.Name)
-		# self.assertEqual(CoverageState.Unknown, mc.Status)
+		self.assertEqual(CoverageState.Unknown, mc.Status)
 
 
 class PackageCoverageInstantiation(TestCase):
@@ -43,7 +43,7 @@ class PackageCoverageInstantiation(TestCase):
 
 		self.assertIsNone(pc.Parent)
 		self.assertEqual("package", pc.Name)
-		# self.assertEqual(CoverageState.Unknown, pc.Status)
+		self.assertEqual(CoverageState.Unknown, pc.Status)
 
 
 class Hierarchy(TestCase):
@@ -57,5 +57,3 @@ class Hierarchy(TestCase):
 		cc22 = ClassCoverage("class22", parent=mc2)
 
 		pc.Aggregate()
-
-

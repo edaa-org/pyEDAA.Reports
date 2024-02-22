@@ -32,17 +32,33 @@
 """
 **Abstract documentation coverage data model for Python code.**
 """
-from pathlib                       import Path
-from typing                        import Optional as Nullable, Iterable, Dict, Union, Tuple
+from pathlib                              import Path
+from typing                               import Optional as Nullable, Iterable, Dict, Union, Tuple, List
 
-from pyTooling.Decorators          import export, readonly
-from pyTooling.MetaClasses         import ExtendedType
+from pyTooling.Decorators                 import export, readonly
+from pyTooling.MetaClasses                import ExtendedType
 
-from pyEDAA.Reports.DocumentationCoverage import Class, Module, Package, CoverageState
+from pyEDAA.Reports.DocumentationCoverage import Class, Module, Package, CoverageState, DocCoverageException
 
 
 @export
 class Coverage(metaclass=ExtendedType, mixin=True):
+	"""
+	This base-class for :class:`ClassCoverage` and :class:`AggregatedCoverage` represents a basic set of documentation coverage metrics.
+
+	Besides the *total* number of coverable items, it distinguishes items as *excluded*, *ignored*, and *expected*. |br|
+	Expected items are further distinguished into *covered* and *uncovered* items. |br|
+	If no item is expected, then *coverage* is always 100 |%|.
+
+	All coverable items
+	  total = excluded + ignored + expected
+
+	All expected items
+	  expected = covered + uncovered
+
+	Coverage [0.00..1.00]
+	  coverage = covered / expected
+	"""
 	_total:     int
 	_excluded:  int
 	_ignored:   int
@@ -123,6 +139,25 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 
 @export
 class AggregatedCoverage(Coverage, mixin=True):
+	"""
+	This base-class for :class:`ModuleCoverage` and :class:`PackageCoverage` represents an extended set of documentation coverage metrics, especially with aggregated metrics.
+
+	As inherited from :class:`~Coverage`, it provides the *total* number of coverable items, which are distinguished into
+	*excluded*, *ignored*, and *expected* items. |br|
+	Expected items are further distinguished into *covered* and *uncovered* items. |br|
+	If no item is expected, then *coverage* and *aggregated coverage* are always 100 |%|.
+
+	In addition, all previously mentioned metrics are collected as *aggregated...*, too. |br|
+
+	All coverable items
+	  total = excluded + ignored + expected
+
+	All expected items
+	  expected = covered + uncovered
+
+	Coverage [0.00..1.00]
+	  coverage = covered / expected
+	"""
 	_file:                Path
 
 	_aggregatedTotal:     int
@@ -181,6 +216,9 @@ class AggregatedCoverage(Coverage, mixin=True):
 
 @export
 class ClassCoverage(Class, Coverage):
+	"""
+	This class represents the class documentation coverage for Python classes.
+	"""
 	_fields:  Dict[str, CoverageState]
 	_methods: Dict[str, CoverageState]
 	_classes: Dict[str, "ClassCoverage"]
@@ -226,6 +264,9 @@ class ClassCoverage(Class, Coverage):
 
 @export
 class ModuleCoverage(Module, AggregatedCoverage):
+	"""
+	This class represents the module documentation coverage for Python modules.
+	"""
 	_variables: Dict[str, CoverageState]
 	_functions: Dict[str, CoverageState]
 	_classes:   Dict[str, ClassCoverage]
@@ -290,6 +331,9 @@ class ModuleCoverage(Module, AggregatedCoverage):
 
 @export
 class PackageCoverage(Package, AggregatedCoverage):
+	"""
+	This class represents the package documentation coverage for Python packages.
+	"""
 	_fileCount: int
 	_variables: Dict[str, CoverageState]
 	_functions: Dict[str, CoverageState]
@@ -392,3 +436,89 @@ class PackageCoverage(Package, AggregatedCoverage):
 
 	def __str__(self) -> str:
 		return f"<PackageCoverage - tot:{self._total}|{self._aggregatedTotal}, ex:{self._excluded}|{self._aggregatedExcluded}, ig:{self._ignored}|{self._aggregatedIgnored}, exp:{self._expected}|{self._aggregatedExpected}, cov:{self._covered}|{self._aggregatedCovered}, un:{self._uncovered}|{self._aggregatedUncovered} => {self._coverage:.1%}|{self._aggregatedCoverage:.1%}>"
+
+
+@export
+class DocStrCoverageError(DocCoverageException):
+	pass
+
+
+@export
+class DocStrCoverage(metaclass=ExtendedType):
+	"""
+	A wrapper class for the docstr_coverage package and it's analyzer producing a documentation coverage model.
+	"""
+	from docstr_coverage import ResultCollection
+
+	_packageName:     str
+	_searchDirectory: Path
+	_moduleFiles:     List[Path]
+	_coverageReport:  ResultCollection
+
+	def __init__(self, packageName: str, directory: Path) -> None:
+		if not directory.exists():
+			raise DocStrCoverageError(f"Package source directory '{directory}' does not exist.") from FileNotFoundError(f"Directory '{directory}' does not exist.")
+
+		self._searchDirectory = directory
+		self._packageName = packageName
+		self._moduleFiles = [file for file in directory.glob("**/*.py")]
+
+	@readonly
+	def SearchDirectories(self) -> Path:
+		return self._searchDirectory
+
+	@readonly
+	def PackageName(self) -> str:
+		return self._packageName
+
+	@readonly
+	def ModuleFiles(self) -> List[Path]:
+		return self._moduleFiles
+
+	@readonly
+	def CoverageReport(self) -> ResultCollection:
+		return self._coverageReport
+
+	def Analyze(self) -> ResultCollection:
+		from docstr_coverage import analyze, ResultCollection
+
+		self._coverageReport: ResultCollection = analyze(self._moduleFiles, show_progress=False)
+		return self._coverageReport
+
+	def Convert(self) -> PackageCoverage:
+		from docstr_coverage.result_collection import FileCount
+
+		rootPackageCoverage = PackageCoverage(self._packageName, self._searchDirectory / "__init__.py")
+
+		for key, value in self._coverageReport.files():
+			path: Path = key.relative_to(self._searchDirectory)
+			perFileResult: FileCount = value.count_aggregate()
+
+			moduleName = path.stem
+			modulePath = path.parent.parts
+
+			currentCoverageObject: AggregatedCoverage = rootPackageCoverage
+			for packageName in modulePath:
+				try:
+					currentCoverageObject = currentCoverageObject[packageName]
+				except KeyError:
+					currentCoverageObject = PackageCoverage(packageName, path, currentCoverageObject)
+
+			if moduleName != "__init__":
+				currentCoverageObject = ModuleCoverage(moduleName, path, currentCoverageObject)
+
+			currentCoverageObject._expected = perFileResult.needed
+			currentCoverageObject._covered = perFileResult.found
+			currentCoverageObject._uncovered = perFileResult.missing
+
+			if currentCoverageObject._expected != 0:
+				currentCoverageObject._coverage = currentCoverageObject._covered / currentCoverageObject._expected
+			else:
+				currentCoverageObject._coverage = 1.0
+
+			if currentCoverageObject._uncovered != currentCoverageObject._expected - currentCoverageObject._covered:
+				currentCoverageObject._coverage = -2.0
+
+		return rootPackageCoverage
+
+	del ResultCollection
