@@ -182,7 +182,10 @@ extensions = [
 # Sphinx.Ext.InterSphinx
 # ==============================================================================
 intersphinx_mapping = {
-	"python":   ("https://docs.python.org/3", None),
+	"python":    ("https://docs.python.org/3", None),
+	"pytooling": ("https://pytooling.github.io/pyTooling", None),
+	"ucis":      ("https://edaa-org.github.io/pyEDAA.UCIS", None),
+	"ghdl":      ("https://ghdl.github.io/ghdl", None),
 }
 
 

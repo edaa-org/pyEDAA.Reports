@@ -29,13 +29,13 @@
 # ==================================================================================================================== #
 #
 """Reader for OSVVM test report summary files in YAML format."""
-from pathlib import Path
-from typing import Dict
+from pathlib              import Path
+from typing               import Dict
 
+from ruamel.yaml          import YAML
 from pyTooling.Decorators import export
-from ruamel.yaml import YAML
 
-from . import Testsuite as Abstract_Testsuite, Testcase as Abstract_Testcase, Status
+from pyEDAA.Reports.Unittesting import Testsuite as Abstract_Testsuite, Testcase as Abstract_Testcase, Status
 
 
 @export
