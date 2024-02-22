@@ -29,18 +29,85 @@
 # ==================================================================================================================== #
 #
 """Abstraction of code documentation coverage."""
-from enum                 import Flag
+from enum                  import Flag
+from typing                import Dict, Iterator, Optional as Nullable
 
-from pyTooling.Decorators import export
+from pyTooling.Decorators  import export
+from pyTooling.MetaClasses import ExtendedType
 
 
 @export
-class Status(Flag):
+class CoverageState(Flag):
 	Unknown = 0
-	Ignored = 1
-	Undocumented = 2
-	Documented = 4
-	Inherited = 12
+	Excluded = 1
+	Ignored = 2
+	Empty = 4
+	Covered = 8
+
+	Weak = 16
+	Incomplete = 32
+	Inherited = 64
+	Detailed = 128
+
+	Undocumented = 256
+	Documented = 512
+
+	Parameters = 1024
+	ReturnValue = 2048
+	Exceptions = 8192
+	Types = 16384
 
 # unrequiredButDocumented
 # wrongly documented
+
+
+@export
+class Base(metaclass=ExtendedType, slots=True):
+	_parent: Nullable["Base"]
+	_name:   str
+	_status: CoverageState
+
+	def __init__(self, name: str, parent: Nullable["Base"] = None):
+		if name is None:
+			raise TypeError(f"Parameter 'name' must not be None.")
+
+		self._parent = parent
+		self._name = name
+		self._status = CoverageState.Unknown
+
+	@property
+	def Parent(self) -> Nullable["Base"]:
+		return self._parent
+
+	@property
+	def Name(self) -> str:
+		return self._name
+
+	@property
+	def Status(self) -> CoverageState:
+		return self._status
+
+
+@export
+class _Type(Base):
+	pass
+
+
+@export
+class Class(_Type):
+	pass
+
+
+@export
+class _Unit(Base):
+	pass
+
+
+@export
+class Module(_Unit):
+	pass
+
+
+@export
+class Package(_Unit):
+	pass

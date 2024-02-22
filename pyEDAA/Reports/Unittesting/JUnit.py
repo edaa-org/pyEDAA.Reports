@@ -11,7 +11,8 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2021-2024 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2024-2024 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2023-2023 Patrick Lehmann - Bötzingen, Germany                                                             #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
