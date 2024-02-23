@@ -33,10 +33,10 @@ from datetime import timedelta, datetime
 
 from enum    import Flag
 from pathlib import Path
-from typing  import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator
+from typing  import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union
 
 from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import abstractmethod, ExtendedType
+from pyTooling.MetaClasses import abstractmethod, ExtendedType, mustoverride
 
 from pyEDAA.Reports        import ReportException
 
@@ -77,6 +77,21 @@ class TestcaseState(Flag):
 	TearDownError = 16384                  #: cleanup error / resource release error
 
 	# TODO: timed out ?
+
+
+@export
+class IterationScheme(Flag):
+	Unknown =           0
+	IncludeSelf =       1
+	IncludeTestsuites = 2
+	IncludeTestcases =  4
+
+	PreOrder =         16
+	PostOrder =        32
+
+	Default =          IncludeTestsuites | IncludeTestcases | PreOrder
+	TestsuiteDefault = IncludeTestsuites | PreOrder
+	TestcaseDefault =  IncludeTestcases  | PreOrder
 
 
 @export
@@ -356,6 +371,14 @@ class TestsuiteBase(Base):
 		return self._testsuites
 
 	@readonly
+	def TestsuiteCount(self) -> int:
+		return 1 + sum(testsuite.TestsuiteCount for testsuite in self._testsuites.values())
+
+	@readonly
+	def TestcaseCount(self) -> int:
+		return sum(testsuite.TestcaseCount for testsuite in self._testsuites.values())
+
+	@readonly
 	def AssertionCount(self) -> int:
 		raise NotImplementedError()
 		# return self._assertionCount
@@ -458,6 +481,16 @@ class TestsuiteBase(Base):
 		for testcase in testcases:
 			self.AddTestcase(testcase)
 
+	@mustoverride
+	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union["Testsuite", Testcase], None, None]:
+		pass
+
+	def IterateTestsuites(self, scheme: IterationScheme = IterationScheme.TestsuiteDefault) -> Generator["Testsuite", None, None]:
+		return self.Iterate(scheme)
+
+	def IterateTestcases(self, scheme: IterationScheme = IterationScheme.TestcaseDefault) -> Generator[Testcase, None, None]:
+		return self.Iterate(scheme)
+
 
 @export
 class Testsuite(TestsuiteBase):
@@ -497,6 +530,10 @@ class Testsuite(TestsuiteBase):
 	@readonly
 	def Testcases(self) -> Dict[str, "Testcase"]:
 		return self._testcases
+
+	@readonly
+	def TestcaseCount(self) -> int:
+		return super().TestcaseCount + len(self._testcases)
 
 	def Aggregate(self, strict: bool = True) -> Tuple[int, int, int, int, int, int, int, int, int]:
 		tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
@@ -547,6 +584,28 @@ class Testsuite(TestsuiteBase):
 
 		return tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount
 
+	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union["Testsuite", Testcase], None, None]:
+		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
+
+		if IterationScheme.PreOrder in scheme:
+			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
+				yield self
+
+			if IterationScheme.IncludeTestcases in scheme:
+				for testcase in self._testcases.values():
+					yield testcase
+
+		for testsuite in self._testsuites.values():
+			yield from testsuite.Iterate(scheme | IterationScheme.IncludeSelf)
+
+		if IterationScheme.PostOrder in scheme:
+			if IterationScheme.IncludeTestcases in scheme:
+				for testcase in self._testcases.values():
+					yield testcase
+
+			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
+				yield self
+
 
 @export
 class TestsuiteSummary(TestsuiteBase):
@@ -592,29 +651,39 @@ class TestsuiteSummary(TestsuiteBase):
 
 		return tests, excluded, skipped, errored, failed, passed
 
+	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union["Testsuite", Testcase], None, None]:
+		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
+			yield self
+
+		for testsuite in self._testsuites.values():
+			yield from testsuite.IterateTestsuites(scheme | IterationScheme.IncludeSelf)
+
+		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PostOrder in scheme:
+			yield self
+
 
 @export
 class Merged(metaclass=ExtendedType, mixin=True):
-	_mergeCount: int
+	_mergedCount: int
 
-	def __init__(self):
-		self._mergeCount = 1
+	def __init__(self, mergedCount: int = 1):
+		self._mergedCount = mergedCount
 
 	@readonly
-	def MergeCount(self) -> int:
-		return self._mergeCount
+	def MergedCount(self) -> int:
+		return self._mergedCount
 
 
 @export
 class Combined(metaclass=ExtendedType, mixin=True):
-	_combineCount: int
+	_combinedCount: int
 
-	def __init__(self):
-		self._combineCount = 1
+	def __init__(self, combinedCound: int = 1):
+		self._combinedCount = combinedCound
 
 	@readonly
-	def CombineCount(self) -> int:
-		return self._combineCount
+	def CombinedCount(self) -> int:
+		return self._combinedCount
 
 
 @export
@@ -645,7 +714,7 @@ class MergedTestcase(Testcase, Merged):
 		Merged.__init__(self)
 
 	def Merge(self, tc: Testcase) -> None:
-		self._mergeCount += 1
+		self._mergedCount += 1
 
 		self._warningCount += tc._warningCount
 		self._errorCount += tc._errorCount
@@ -763,7 +832,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 
 	def __init__(self, name: str) -> None:
 		super().__init__(name)
-		Merged.__init__(self)
+		Merged.__init__(self, mergedCount=0)
 
 		self._mergedFiles = {}
 
@@ -771,7 +840,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 		# if summary.File in self._mergedFiles:
 		# 	raise
 
-		self._mergeCount += 1
+		self._mergedCount += 1
 		self._mergedFiles[summary.Name] = summary
 
 		for testsuite in summary._testsuites.values():

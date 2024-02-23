@@ -33,6 +33,7 @@
 Reader for JUnit unit testing summary files in XML format.
 """
 from datetime        import datetime, timedelta
+from enum import Enum, Flag
 from pathlib         import Path
 from time            import perf_counter_ns
 from xml.dom         import minidom, Node
@@ -66,17 +67,25 @@ class DuplicateTestcaseException(DuplicateTestcaseException, JUnitException):
 
 
 @export
+class JUnitReaderMode(Flag):
+	Default = 0
+	DecoupleTestsuiteHierarchyAndTestcaseClassName = 1
+
+
+@export
 class JUnitDocument(TestsuiteSummary):
+	_readerMode:       JUnitReaderMode
 	_path:             Path
 	_documentElement:  Element
 
 	_readingByMiniDom: float  #: TODO: replace by Timer; should be timedelta?
 	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
 
-	def __init__(self, path: Path):
+	def __init__(self, path: Path, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
 		if not path.exists():
 			raise UnittestException(f"JUnit XML file '{path}' does not exist.") from FileNotFoundError(f"File '{path}' not found.")
 
+		self._readerMode = readerMode
 		self._path = path
 
 		try:
@@ -94,7 +103,10 @@ class JUnitDocument(TestsuiteSummary):
 		testsuiteRuntime = float(rootElement.getAttribute("time")) if rootElement.hasAttribute("time") else -1.0
 		timestamp = datetime.fromisoformat(rootElement.getAttribute("timestamp")) if rootElement.hasAttribute("timestamp") else None
 
-		super().__init__(name, timedelta(seconds=testsuiteRuntime))
+		super().__init__(
+			name,
+			startTime=timestamp,
+			totalDuration=timedelta(seconds=testsuiteRuntime))
 
 		tests = rootElement.getAttribute("tests")
 		skipped = rootElement.getAttribute("skipped")
@@ -104,38 +116,63 @@ class JUnitDocument(TestsuiteSummary):
 
 		for rootNode in rootElement.childNodes:
 			if rootNode.nodeName == "testsuite":
-				self._ParseTestsuite(rootNode)
+				self._ParseTestsuite(self, rootNode)
 
 		self.Aggregate()
 		endConversation = perf_counter_ns()
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
-	def _ParseTestsuite(self, testsuitesNode: Element) -> None:
+	def _ParseTestsuite(self, parentTestsuite: Testsuite, testsuitesNode: Element) -> None:
+		name = testsuitesNode.getAttribute("name")
+
+		kwargs = {}
+		if testsuitesNode.hasAttribute("timestamp"):
+			kwargs["startTime"] = datetime.fromisoformat(testsuitesNode.getAttribute("timestamp"))
+		if testsuitesNode.hasAttribute("time"):
+			kwargs["totalDuration"] = timedelta(seconds=float(testsuitesNode.getAttribute("time")))
+
+		newTestsuite = Testsuite(
+			name,
+			**kwargs,
+			parent=parentTestsuite
+		)
+
+		if self._readerMode is JUnitReaderMode.Default:
+			currentTestsuite = parentTestsuite
+		elif self._readerMode is JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName:
+			currentTestsuite = newTestsuite
+		else:
+			raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
+
 		for node in testsuitesNode.childNodes:
 			if node.nodeType == Node.ELEMENT_NODE:
 				if node.tagName == "testsuite":
-					self._ParseTestsuite(node)
+					self._ParseTestsuite(currentTestsuite, node)
 				elif node.tagName == "testcase":
-					self._ParseTestcase(node)
+					self._ParseTestcase(currentTestsuite, node)
 
-	def _ParseTestcase(self, testsuiteNode: Element) -> None:
+	def _ParseTestcase(self, parentTestsuite: Testsuite, testsuiteNode: Element) -> None:
 		className = testsuiteNode.getAttribute("classname")
 		name = testsuiteNode.getAttribute("name")
 		time = float(testsuiteNode.getAttribute("time"))
 
-		concurrentSuite = self
+		if self._readerMode is JUnitReaderMode.Default:
+			currentTestsuite = self
+		elif self._readerMode is JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName:
+			currentTestsuite = parentTestsuite
+		else:
+			raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
 
 		testsuitePath = className.split(".")
 		for testsuiteName in testsuitePath:
 			try:
-				concurrentSuite = concurrentSuite[testsuiteName]
+				currentTestsuite = currentTestsuite._testsuites[testsuiteName]
 			except KeyError:
-				new = Testsuite(testsuiteName, totalDuration=timedelta(seconds=time))
-				concurrentSuite._testsuites[testsuiteName] = new
-				concurrentSuite = new
+				currentTestsuite._testsuites[testsuiteName] = new = Testsuite(testsuiteName)
+				currentTestsuite = new
 
 		testcase = Testcase(name, totalDuration=timedelta(seconds=time))
-		concurrentSuite._testcases[name] = testcase
+		currentTestsuite._testcases[name] = testcase
 
 		for node in testsuiteNode.childNodes:
 			if node.nodeType == Node.ELEMENT_NODE:

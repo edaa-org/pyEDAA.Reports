@@ -50,6 +50,13 @@ class PyTooling(ut_TestCase):
 		mergingDuration = (endMerging - startMerging) / 1e9
 
 		print()
+		print(f"Suites    Cases")
+		for summary in junitDocuments:
+			print(f"{summary.TestsuiteCount:>6}    {summary.TestcaseCount:>5}")
+		print(f"merged:")
+		print(f"{merged.TestsuiteCount:>6}    {merged.TestcaseCount:>5}")
+
+		print()
 		print(f"Aggregating datapoints in testsuite ...")
 		startAggregate = perf_counter_ns()
 		merged.Aggregate()
