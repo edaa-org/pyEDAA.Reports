@@ -298,10 +298,11 @@ class Testcase(Base):
 class TestsuiteBase(Base):
 	_testsuites: Dict[str, "Testsuite"]
 
-	_skipped: int
-	_errored: int
-	_failed:  int
-	_passed:  int
+	_excluded: int
+	_skipped:  int
+	_errored:  int
+	_failed:   int
+	_passed:   int
 
 	def __init__(
 		self,
@@ -329,10 +330,11 @@ class TestsuiteBase(Base):
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
 
-		self._skipped = 0
-		self._errored = 0
-		self._failed =  0
-		self._passed =  0
+		self._excluded = 0
+		self._skipped =  0
+		self._errored =  0
+		self._failed =   0
+		self._passed =   0
 
 	@readonly
 	def Testsuites(self) -> Dict[str, "Testsuite"]:
@@ -369,6 +371,10 @@ class TestsuiteBase(Base):
 		# return self._fatalCount
 
 	@readonly
+	def Excluded(self) -> int:
+		return self._excluded
+
+	@readonly
 	def Skipped(self) -> int:
 		return self._skipped
 
@@ -384,22 +390,30 @@ class TestsuiteBase(Base):
 	def Passed(self) -> int:
 		return self._passed
 
-	def Aggregate(self) -> Tuple[int, int, int, int, int]:
+	def Aggregate(self) -> Tuple[int, int, int, int, int, int, int, int, int]:
 		tests = 0
+		excluded = 0
 		skipped = 0
 		errored = 0
 		failed = 0
 		passed = 0
+		warningCount = 0
+		errorCount = 0
+		fatalCount = 0
 
 		for testsuite in self._testsuites.values():
-			t, s, e, f, p = testsuite.Aggregate()
+			t, ex, s, e, f, p, wc, ec, fc = testsuite.Aggregate()
 			tests += t
+			excluded += ex
 			skipped += s
 			errored += e
 			failed += f
 			passed += p
+			warningCount += wc
+			errorCount += ec
+			fatalCount += fc
 
-		return tests, skipped, errored, failed, passed
+		return tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount
 
 	def AddTestsuite(self, testsuite: "Testsuite") -> None:
 		if testsuite._parent is not None:
@@ -465,8 +479,8 @@ class Testsuite(TestsuiteBase):
 	def Testcases(self) -> Dict[str, "Testcase"]:
 		return self._testcases
 
-	def Aggregate(self, strict: bool = True) -> Tuple[int, int, int, int, int]:
-		tests, skipped, errored, failed, passed = super().Aggregate()
+	def Aggregate(self, strict: bool = True) -> Tuple[int, int, int, int, int, int, int, int, int]:
+		tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
 
 		for testcase in self._testcases.values():
 			testcase.Aggregate(strict)
@@ -479,16 +493,27 @@ class Testsuite(TestsuiteBase):
 			elif testcase._state is TestcaseState.Skipped:
 				tests += 1
 				skipped += 1
+			elif testcase._state is TestcaseState.Excluded:
+				tests += 1
+				excluded += 1
 			elif testcase._state is TestcaseState.Errored:
 				tests += 1
 				errored += 1
 			elif testcase._state is TestcaseState.Unknown:
 				raise UnittestException(f"Found testcase '{testcase._name}' with unknown state.")
 
+			warningCount += testcase._warningCount
+			errorCount +=   testcase._errorCount
+			fatalCount +=   testcase._fatalCount
+
+		self._excluded = excluded
 		self._skipped = skipped
 		self._errored = errored
 		self._failed = failed
 		self._passed = passed
+		self._warningCount = warningCount
+		self._errorCount = errorCount
+		self._fatalCount = fatalCount
 
 		if errored > 0:
 			self._state = TestcaseState.Errored
@@ -501,7 +526,7 @@ class Testsuite(TestsuiteBase):
 		else:
 			self._state = TestcaseState.Unknown
 
-		return tests, skipped, errored, failed, passed
+		return tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount
 
 
 @export
@@ -520,13 +545,17 @@ class TestsuiteSummary(TestsuiteBase):
 	):
 		super().__init__(name, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, testsuites, parent)
 
-	def Aggregate(self) -> Tuple[int, int, int, int, int]:
-		tests, skipped, errored, failed, passed = super().Aggregate()
+	def Aggregate(self) -> Tuple[int, int, int, int, int, int]:
+		tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
 
+		self._excluded = excluded
 		self._skipped = skipped
 		self._errored = errored
 		self._failed = failed
 		self._passed = passed
+		self._warningCount = warningCount
+		self._errorCount = errorCount
+		self._fatalCount = fatalCount
 
 		if errored > 0:
 			self._state = TestcaseState.Errored
@@ -536,10 +565,12 @@ class TestsuiteSummary(TestsuiteBase):
 			self._state = TestcaseState.Passed
 		elif tests == skipped:
 			self._state = TestcaseState.Skipped
+		elif tests == excluded:
+			self._state = TestcaseState.Excluded
 		else:
 			self._state = TestcaseState.Unknown
 
-		return tests, skipped, errored, failed, passed
+		return tests, excluded, skipped, errored, failed, passed
 
 
 @export
