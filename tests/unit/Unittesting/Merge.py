@@ -44,6 +44,7 @@ class PyTooling(ut_TestCase):
 		startMerging = perf_counter_ns()
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
+			print(f"  merging {summary.Path}")
 			merged.Merge(summary)
 		endMerging = perf_counter_ns()
 		mergingDuration = (endMerging - startMerging) / 1e9
@@ -71,8 +72,7 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			print(f"  Parsing {file}")
-			junitDocument = JUnitDocument(file)
-			junitDocuments.append(junitDocument)
+			junitDocuments.append(JUnitDocument(file))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 
@@ -89,8 +89,7 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			print(f"  Parsing {file}")
-			junitDocument = JUnitDocument(file)
-			junitDocuments.append(junitDocument)
+			junitDocuments.append(JUnitDocument(file))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 

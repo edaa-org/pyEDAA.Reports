@@ -29,7 +29,7 @@
 # ==================================================================================================================== #
 #
 """Abstraction of testsuites and testcases."""
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from enum    import Flag
 from pathlib import Path
@@ -85,6 +85,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	_name:   str
 	_state:  TestcaseState
 
+	_startTime:        datetime
 	_setupDuration:    Nullable[timedelta]
 	_teardownDuration: Nullable[timedelta]
 	_totalDuration:    Nullable[timedelta]
@@ -98,6 +99,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	def __init__(
 		self,
 		name: str,
+		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
@@ -115,6 +117,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._name = name
 		self._state = TestcaseState.Unknown
 
+		self._startTime = startTime
 		self._setupDuration = setupDuration
 		self._teardownDuration = teardownDuration
 		self._totalDuration = totalDuration
@@ -138,6 +141,10 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def State(self) -> TestcaseState:
 		return self._state
+
+	@readonly
+	def StartTime(self) -> datetime:
+		return self._startTime
 
 	@readonly
 	def SetupDuration(self) -> timedelta:
@@ -197,6 +204,7 @@ class Testcase(Base):
 	def __init__(
 		self,
 		name: str,
+		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
@@ -215,7 +223,7 @@ class Testcase(Base):
 
 			parent._testcases[name] = self
 
-		super().__init__(name, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
 
 		self._testDuration = testDuration
 		# if totalDuration is not None:
@@ -307,6 +315,7 @@ class TestsuiteBase(Base):
 	def __init__(
 		self,
 		name: str,
+		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
@@ -316,7 +325,13 @@ class TestsuiteBase(Base):
 		testsuites: Nullable[Iterable["Testsuite"]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
-		super().__init__(name, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		if parent is not None:
+			if not isinstance(parent, TestsuiteBase):
+				raise TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
+
+			parent._testsuites[name] = self
+
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
 
 		self._testsuites = {}
 		if testsuites is not None:
@@ -451,7 +466,9 @@ class Testsuite(TestsuiteBase):
 	def __init__(
 		self,
 		name: str,
+		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
+		# testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		warningCount: int = 0,
@@ -461,7 +478,9 @@ class Testsuite(TestsuiteBase):
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
-		super().__init__(name, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, testsuites, parent)
+
+		# self._testDuration = testDuration
 
 		self._testcases = {}
 		if testcases is not None:
@@ -534,6 +553,7 @@ class TestsuiteSummary(TestsuiteBase):
 	def __init__(
 		self,
 		name: str,
+		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
@@ -543,7 +563,7 @@ class TestsuiteSummary(TestsuiteBase):
 		testsuites: Nullable[Iterable["Testsuite"]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
-		super().__init__(name, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, testsuites, parent)
 
 	def Aggregate(self) -> Tuple[int, int, int, int, int, int]:
 		tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
@@ -575,17 +595,166 @@ class TestsuiteSummary(TestsuiteBase):
 
 @export
 class Merged(metaclass=ExtendedType, mixin=True):
-	pass
+	_mergeCount: int
+
+	def __init__(self):
+		self._mergeCount = 1
+
+	@readonly
+	def MergeCount(self) -> int:
+		return self._mergeCount
+
+
+@export
+class Combined(metaclass=ExtendedType, mixin=True):
+	_combineCount: int
+
+	def __init__(self):
+		self._combineCount = 1
+
+	@readonly
+	def CombineCount(self) -> int:
+		return self._combineCount
 
 
 @export
 class MergedTestcase(Testcase, Merged):
-	pass
+	def __init__(
+		self,
+		name: str,
+		startTime: Nullable[datetime] = None,
+		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
+		teardownDuration: Nullable[timedelta] = None,
+		totalDuration:  Nullable[timedelta] = None,
+		assertionCount: Nullable[int] = None,
+		failedAssertionCount: Nullable[int] = None,
+		passedAssertionCount: Nullable[int] = None,
+		warningCount: int = 0,
+		errorCount: int = 0,
+		fatalCount: int = 0,
+		parent: Nullable["Testsuite"] = None
+	):
+		super().__init__(
+			name,
+			startTime, setupDuration, testDuration, teardownDuration, totalDuration,
+			assertionCount, failedAssertionCount, passedAssertionCount,
+			warningCount, errorCount, fatalCount,
+			parent
+		)
+		Merged.__init__(self)
+
+	def Merge(self, tc: Testcase) -> None:
+		self._mergeCount += 1
+
+		self._warningCount += tc._warningCount
+		self._errorCount += tc._errorCount
+		self._fatalCount += tc._fatalCount
+
+	def Copy(self, tc: Testcase) -> None:
+		pass
 
 
 @export
 class MergedTestsuite(Testsuite, Merged):
-	pass
+	def __init__(
+		self,
+		name: str,
+		startTime: Nullable[datetime] = None,
+		setupDuration: Nullable[timedelta] = None,
+		# testDuration: Nullable[timedelta] = None,
+		teardownDuration: Nullable[timedelta] = None,
+		totalDuration:  Nullable[timedelta] = None,
+		warningCount: int = 0,
+		errorCount: int = 0,
+		fatalCount: int = 0,
+		testsuites: Nullable[Iterable["Testsuite"]] = None,
+		testcases: Nullable[Iterable["Testcase"]] = None,
+		parent: Nullable["Testsuite"] = None
+	):
+		super().__init__(
+			name,
+			# startTime, setupDuration, testDuration, teardownDuration, totalDuration,
+			startTime, setupDuration, teardownDuration, totalDuration,
+			warningCount, errorCount, fatalCount,
+			testsuites, testcases,
+			parent
+		)
+		Merged.__init__(self)
+
+	def Merge(self, ts: Testsuite) -> None:
+		for testsuite in ts._testsuites.values():
+			try:
+				mergedTestsuite: MergedTestsuite = self._testsuites[testsuite._name]
+				mergedTestsuite.Merge(testsuite)
+			except KeyError:
+				mergedTestsuite = MergedTestsuite(
+					testsuite._name,
+					testsuite._startTime,
+					testsuite._setupDuration,
+					testsuite._teardownDuration,
+					testsuite._totalDuration,
+					testsuite._warningCount,
+					testsuite._errorCount,
+					testsuite._fatalCount,
+					parent=self
+				)
+				mergedTestsuite.Copy(testsuite)
+
+		for testcase in ts._testcases.values():
+			try:
+				mergedTestcase: MergedTestcase = self._testcases[testcase._name]
+				mergedTestcase.Merge(testcase)
+			except KeyError:
+				mergedTestcase = MergedTestcase(
+				testcase._name,
+				testcase._startTime,
+				testcase._setupDuration,
+				testcase._testDuration,
+				testcase._teardownDuration,
+				testcase._totalDuration,
+				testcase._assertionCount,
+				testcase._failedAssertionCount,
+				testcase._passedAssertionCount,
+				testcase._warningCount,
+				testcase._errorCount,
+				testcase._fatalCount,
+				parent=self
+				)
+				mergedTestcase.Copy(testcase)
+
+	def Copy(self, ts: Testsuite) -> None:
+		for testsuite in ts._testsuites.values():
+			mergedTestsuite = MergedTestsuite(
+					testsuite._name,
+					testsuite._startTime,
+					testsuite._setupDuration,
+					testsuite._teardownDuration,
+					testsuite._totalDuration,
+					testsuite._warningCount,
+					testsuite._errorCount,
+					testsuite._fatalCount,
+					parent=self
+			)
+			mergedTestsuite.Copy(testsuite)
+
+		for testcase in ts._testcases.values():
+			mergedTestcase = MergedTestcase(
+				testcase._name,
+				testcase._startTime,
+				testcase._setupDuration,
+				testcase._testDuration,
+				testcase._teardownDuration,
+				testcase._totalDuration,
+				testcase._assertionCount,
+				testcase._failedAssertionCount,
+				testcase._passedAssertionCount,
+				testcase._warningCount,
+				testcase._errorCount,
+				testcase._fatalCount,
+				parent=self
+			)
+			mergedTestcase.Copy(testcase)
 
 
 @export
@@ -594,6 +763,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 
 	def __init__(self, name: str) -> None:
 		super().__init__(name)
+		Merged.__init__(self)
 
 		self._mergedFiles = {}
 
@@ -601,7 +771,26 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 		# if summary.File in self._mergedFiles:
 		# 	raise
 
+		self._mergeCount += 1
 		self._mergedFiles[summary.Name] = summary
+
+		for testsuite in summary._testsuites.values():
+			try:
+				mergedTestsuite: MergedTestsuite = self._testsuites[testsuite._name]
+				mergedTestsuite.Merge(testsuite)
+			except KeyError:
+				mergedTestsuite = MergedTestsuite(
+					testsuite._name,
+					testsuite._startTime,
+					testsuite._setupDuration,
+					testsuite._teardownDuration,
+					testsuite._totalDuration,
+					testsuite._warningCount,
+					testsuite._errorCount,
+					testsuite._fatalCount,
+					parent=self
+				)
+				mergedTestsuite.Copy(testsuite)
 
 	def Aggregate(self) -> None:
 		pass
