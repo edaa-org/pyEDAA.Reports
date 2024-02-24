@@ -33,41 +33,11 @@ from time     import perf_counter_ns
 from typing   import List
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting import Testsuite, MergedTestsuiteSummary
+from pyEDAA.Reports.Unittesting       import MergedTestsuiteSummary, IterationScheme
 from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument
 
 
 class PyTooling(ut_TestCase):
-	def merge(self, junitDocuments: List[JUnitDocument], parsingDuration: float):
-		print()
-		print(f"Merging generic testsuites ...")
-		startMerging = perf_counter_ns()
-		merged = MergedTestsuiteSummary("PlatformTesting")
-		for summary in junitDocuments:
-			print(f"  merging {summary.Path}")
-			merged.Merge(summary)
-		endMerging = perf_counter_ns()
-		mergingDuration = (endMerging - startMerging) / 1e9
-
-		print()
-		print(f"Suites    Cases")
-		for summary in junitDocuments:
-			print(f"{summary.TestsuiteCount:>6}    {summary.TestcaseCount:>5}")
-		print(f"merged:")
-		print(f"{merged.TestsuiteCount:>6}    {merged.TestcaseCount:>5}")
-
-		print()
-		print(f"Aggregating datapoints in testsuite ...")
-		startAggregate = perf_counter_ns()
-		merged.Aggregate()
-		endAggregate = perf_counter_ns()
-		aggregateDuration = (endAggregate - startAggregate) / 1e9
-
-		print()
-		print(f"Parsing:    {parsingDuration:.3f} ms")
-		print(f"Merging:    {mergingDuration:.3f} ms")
-		print(f"Aggregate:  {aggregateDuration:.3f} ms")
-
 	def test_PlatformTesting(self) -> None:
 		print()
 
@@ -78,12 +48,40 @@ class PyTooling(ut_TestCase):
 		files = directory.glob("PlatformTesting-*.xml")
 		startParsing = perf_counter_ns()
 		for file in files:
-			print(f"  Parsing {file}")
+			# print(f"  Parsing {file}")
 			junitDocuments.append(JUnitDocument(file))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 
-		self.merge(junitDocuments, parsingDuration)
+		print()
+		print(f"Merging generic testsuites ...")
+		startMerging = perf_counter_ns()
+		merged = MergedTestsuiteSummary("PlatformTesting")
+		for summary in junitDocuments:
+			# print(f"  merging {summary.Path}")
+			merged.Merge(summary)
+		endMerging = perf_counter_ns()
+		mergingDuration = (endMerging - startMerging) / 1e9
+
+		for summary in junitDocuments:
+			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount)
+			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount)
+
+		mergedCount = len(junitDocuments)
+		for item in merged.Iterate(IterationScheme.Default | IterationScheme.IncludeSelf):
+			self.assertEqual(mergedCount, item.MergedCount)
+
+		print()
+		print(f"Aggregating datapoints in testsuite ...")
+		startAggregate = perf_counter_ns()
+		merged.Aggregate()
+		endAggregate = perf_counter_ns()
+		aggregateDuration = (endAggregate - startAggregate) / 1e9
+
+		print()
+		print(f"Parsing:    {parsingDuration :.3f} ms")
+		print(f"Merging:    {mergingDuration:.3f} ms")
+		print(f"Aggregate:  {aggregateDuration:.3f} ms")
 
 	def test_Unittesting(self) -> None:
 		print()
@@ -95,9 +93,37 @@ class PyTooling(ut_TestCase):
 		files = directory.glob("Unittesting-*.xml")
 		startParsing = perf_counter_ns()
 		for file in files:
-			print(f"  Parsing {file}")
+			# print(f"  Parsing {file}")
 			junitDocuments.append(JUnitDocument(file))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 
-		self.merge(junitDocuments, parsingDuration)
+		print()
+		print(f"Merging generic testsuites ...")
+		startMerging = perf_counter_ns()
+		merged = MergedTestsuiteSummary("PlatformTesting")
+		for summary in junitDocuments:
+			# print(f"  merging {summary.Path}")
+			merged.Merge(summary)
+		endMerging = perf_counter_ns()
+		mergingDuration = (endMerging - startMerging) / 1e9
+
+		for summary in junitDocuments:
+			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount)
+			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount)
+
+		mergedCount = len(junitDocuments)
+		for item in merged.Iterate(IterationScheme.Default | IterationScheme.IncludeSelf):
+			self.assertEqual(mergedCount, item.MergedCount)
+
+		print()
+		print(f"Aggregating datapoints in testsuite ...")
+		startAggregate = perf_counter_ns()
+		merged.Aggregate()
+		endAggregate = perf_counter_ns()
+		aggregateDuration = (endAggregate - startAggregate) / 1e9
+
+		print()
+		print(f"Parsing:    {parsingDuration :.3f} ms")
+		print(f"Merging:    {mergingDuration:.3f} ms")
+		print(f"Aggregate:  {aggregateDuration:.3f} ms")

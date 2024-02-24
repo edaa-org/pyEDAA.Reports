@@ -752,6 +752,8 @@ class MergedTestsuite(Testsuite, Merged):
 		Merged.__init__(self)
 
 	def Merge(self, ts: Testsuite) -> None:
+		self._mergedCount += 1
+
 		for testsuite in ts._testsuites.values():
 			try:
 				mergedTestsuite: MergedTestsuite = self._testsuites[testsuite._name]
