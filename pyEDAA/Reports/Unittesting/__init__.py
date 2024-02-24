@@ -79,6 +79,8 @@ class TestcaseState(Flag):
 	SetupError =     8192                  #: preparation / compilation error
 	TearDownError = 16384                  #: cleanup error / resource release error
 
+	Flags = Warned | Errored | Aborted | SetupError | TearDownError
+
 	# TODO: timed out ?
 
 	__MATRIX = (
@@ -99,7 +101,9 @@ class TestcaseState(Flag):
 			return 0
 
 	def __matmul__(self, other: "TestcaseState") -> "TestcaseState":
-		return self.__class__(self.__MATRIX[self.__conv(self)][self.__conv(other)])
+		resolved = self.__class__(self.__MATRIX[self.__conv(self)][self.__conv(other)])
+		resolved |= (self & self.Flags) | (other & self.Flags)
+		return resolved
 
 
 @export

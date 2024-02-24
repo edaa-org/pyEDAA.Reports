@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <testsuites>
-	<testsuite name="pytest" errors="0" failures="0" skipped="23" tests="632" time="7.397" timestamp="2024-02-22T16:57:11.387621" hostname="Mac-1708619923685.local">
+	<testsuite name="pytest" errors="0" failures="0" skipped="22" tests="632" time="6.455" timestamp="2024-02-22T16:56:15.970764" hostname="Mac-1708619869040.local">
 		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_DefaultHelpLong" time="0.004"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_DefaultHelpShort" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_Help" time="0.002"/>
@@ -9,30 +9,30 @@
 		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_HelpPlusArgWithoutArg" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_HelpShort" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_NoArgs" time="0.001"/>
-		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_VerboseShortWithV" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_VerboseShortWithV" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_VerboseShortWithoutV" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Commands" name="test_TwoCommands" time="0.003"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_Float" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_Integer" time="0.001"/>
-		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_Path" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_Path" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_Positional" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_String" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_FloatList" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_IntegerList" time="0.001"/>
-		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_Lists" time="0.002"/>
-		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_PathList" time="0.001"/>
-		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_StringList" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_Lists" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_PathList" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_StringList" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_CommandHandler_Long" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_CommandHandler_Short" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_CommandHandler_ShortAndLong" time="0.002"/>
-		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_DefaultHandler_Long" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_DefaultHandler_Long" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_DefaultHandler_Short" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_DefaultHandler_ShortAndLong" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_CommandHandler_Long" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_CommandHandler_Short" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_CommandHandler_ShortAndLong" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_DefaultHandler_Long" time="0.001"/>
-		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_DefaultHandler_Short" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_DefaultHandler_Short" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_DefaultHandler_ShortAndLong" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.ArgParse.UserManager" name="test_UserManager" time="0.003"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnClasses.ApplyClassAttributes" name="test_AttributeAndDerivedAttribute" time="0.001"/>
@@ -51,7 +51,7 @@
 		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_Scope_Module" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_Scope_Nested" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_Scope_SubclassOf_Nested" time="0.001"/>
-		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_SubclassOf" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_SubclassOf" time="0.002"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnFunctions.ApplyFunctionAttributes" name="test_MultipleFunctions" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnFunctions.ApplyFunctionAttributes" name="test_SingleFunction" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnFunctions.Filtering" name="test_Scope_Local" time="0.000">
@@ -70,16 +70,12 @@
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_SingleAttribute_MultipleClasses_MultipleMethods" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_SingleAttribute_MultipleClasses_SingleMethod" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_SingleAttribute_SingleClass_MultipleMethods" time="0.001"/>
-		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_SingleAttribute_SingleClass_SingleMethod" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_SingleAttribute_SingleClass_SingleMethod" time="0.013"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_MultipleAttributes_MultipleClasses_MultipleMethods" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_MultipleAttributes_MultipleClasses_SingleMethod" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_MultipleAttributes_SingleClass_MultipleMethods" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_MultipleAttributes_SingleClass_SingleMethod" time="0.001"/>
-		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_NoAttribute" time="0.000">
-			<skipped type="pytest.skip" message="Disabled on Python 3.8.">
-				/Users/runner/work/pyTooling/pyTooling/tests/unit/Attributes/AttributesOnMethods.py:485: Disabled on Python 3.8.
-			</skipped>
-		</testcase>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_NoAttribute" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_SingleAttribute_MultipleClasses_MultipleMethods" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_SingleAttribute_MultipleClasses_SingleMethod" time="0.001"/>
 		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_SingleAttribute_SingleClass_MultipleMethods" time="0.001"/>
@@ -171,15 +167,15 @@
 		<testcase classname="tests.unit.CLIAbstraction.Environment.DefaultEnvironment" name="test_Empty" time="0.001"/>
 		<testcase classname="tests.unit.CLIAbstraction.Environment.DefaultEnvironment" name="test_SystemDefault" time="0.001"/>
 		<testcase classname="tests.unit.CLIAbstraction.Environment.ArtificialEnvironment" name="test_Simple" time="0.001"/>
-		<testcase classname="tests.unit.CLIAbstraction.Executable.ExplicitBinaryDirectoryOnLinux" name="test_VersionFlag" time="2.148"/>
+		<testcase classname="tests.unit.CLIAbstraction.Executable.ExplicitBinaryDirectoryOnLinux" name="test_VersionFlag" time="2.125"/>
 		<testcase classname="tests.unit.CLIAbstraction.Executable.ExplicitBinaryDirectoryOnWindows" name="test_VersionFlag" time="0.000">
 			<skipped type="pytest.skip" message="Don't run these tests on Linux or macOS.">
 				/Users/runner/work/pyTooling/pyTooling/tests/unit/CLIAbstraction/Executable.py:89: Don't run these tests on
 				Linux or macOS.
 			</skipped>
 		</testcase>
-		<testcase classname="tests.unit.CLIAbstraction.Executable.CommonOptions" name="test_HelpCommand" time="0.011"/>
-		<testcase classname="tests.unit.CLIAbstraction.Executable.CommonOptions" name="test_HelpFlag" time="0.010"/>
+		<testcase classname="tests.unit.CLIAbstraction.Executable.CommonOptions" name="test_HelpCommand" time="0.010"/>
+		<testcase classname="tests.unit.CLIAbstraction.Executable.CommonOptions" name="test_HelpFlag" time="0.009"/>
 		<testcase classname="tests.unit.CLIAbstraction.Executable.CommonOptions" name="test_VersionFlag" time="0.010"/>
 		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnLinux" name="test_BinaryDirectory" time="0.001"/>
 		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnLinux" name="test_BinaryDirectory_DoesNotExist" time="0.001"/>
@@ -205,7 +201,7 @@
 				or macOS.
 			</skipped>
 		</testcase>
-		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnWindows" name="test_ExecutablePath" time="0.001">
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnWindows" name="test_ExecutablePath" time="0.000">
 			<skipped type="pytest.skip" message="Don't run these tests on Linux or macOS.">
 				/Users/runner/work/pyTooling/pyTooling/tests/unit/CLIAbstraction/Program.py:143: Don't run these tests on Linux
 				or macOS.
@@ -306,25 +302,25 @@
 		<testcase classname="tests.unit.Common.SizeOf.ObjectSizes" name="test_ClassWith2DictMembers" time="0.001"/>
 		<testcase classname="tests.unit.Common.SizeOf.ObjectSizes" name="test_ClassWith2SlotMembers" time="0.001"/>
 		<testcase classname="tests.unit.Common.SizeOf.ObjectSizes" name="test_EmptyClass" time="0.001"/>
-		<testcase classname="tests.unit.Common.Timer.Timing" name="test_ContextManager" time="0.208"/>
-		<testcase classname="tests.unit.Common.Timer.Timing" name="test_PauseResume" time="0.959"/>
-		<testcase classname="tests.unit.Common.Timer.Timing" name="test_StartStop" time="0.226"/>
-		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_Dictionary" time="0.003"/>
-		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_NestedVariables" time="0.002"/>
+		<testcase classname="tests.unit.Common.Timer.Timing" name="test_ContextManager" time="0.247"/>
+		<testcase classname="tests.unit.Common.Timer.Timing" name="test_PauseResume" time="0.829"/>
+		<testcase classname="tests.unit.Common.Timer.Timing" name="test_StartStop" time="0.168"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_Dictionary" time="0.002"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_NestedVariables" time="0.001"/>
 		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_PathExpressionToNode" time="0.001"/>
-		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_PathExpressionToValue" time="0.002"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_PathExpressionToValue" time="0.001"/>
 		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_Root" time="0.001"/>
 		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_Sequence" time="0.001"/>
 		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_SimpleString" time="0.001"/>
 		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_Variables" time="0.001"/>
-		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Dictionary" time="0.022"/>
-		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_NestedVariables" time="0.019"/>
-		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_PathExpressionToNode" time="0.025"/>
-		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_PathExpressionToValue" time="0.024"/>
-		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Root" time="0.019"/>
-		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Sequence" time="0.019"/>
-		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_SimpleString" time="0.018"/>
-		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Variables" time="0.018"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Dictionary" time="0.020"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_NestedVariables" time="0.016"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_PathExpressionToNode" time="0.016"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_PathExpressionToValue" time="0.018"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Root" time="0.017"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Sequence" time="0.017"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_SimpleString" time="0.017"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Variables" time="0.017"/>
 		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportLocalClass" time="0.001"/>
 		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportLocalFunction" time="0.001"/>
 		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportTopLevelClass" time="0.001"/>
@@ -332,7 +328,7 @@
 		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportTopLevelLambda" time="0.001"/>
 		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportedClass" time="0.001"/>
 		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportedFunction" time="0.001"/>
-		<testcase classname="tests.unit.Decorators.Decorators.ReadOnly" name="test_Deleter" time="0.001">
+		<testcase classname="tests.unit.Decorators.Decorators.ReadOnly" name="test_Deleter" time="0.000">
 			<skipped type="pytest.skip" message="EXPECTED ERROR IS NOT RAISED">
 				/Users/runner/work/pyTooling/pyTooling/tests/unit/Decorators/Decorators.py:150: EXPECTED ERROR IS NOT RAISED
 			</skipped>
@@ -394,7 +390,7 @@
 		<testcase classname="tests.unit.Graph.__init__.Dicts" name="test_SubgraphDict" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.Dicts" name="test_VertexDict" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.Dicts" name="test_ViewDict" time="0.001"/>
-		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_DuplicateEdgeID" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_DuplicateEdgeID" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeFromVertex" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeFromVertexWithID" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeFromVertexWithValue" time="0.001"/>
@@ -406,11 +402,11 @@
 		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Edges" time="0.002"/>
 		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Leafs" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Roots" time="0.001"/>
-		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Topologically" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Topologically" time="0.002"/>
 		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Vertices" time="0.002"/>
-		<testcase classname="tests.unit.Graph.__init__.GraphOperations" name="test_CopyVertices" time="0.029"/>
-		<testcase classname="tests.unit.Graph.__init__.GraphOperations" name="test_RemoveEdges" time="0.009"/>
-		<testcase classname="tests.unit.Graph.__init__.GraphOperations" name="test_ReverseEdges" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.GraphOperations" name="test_CopyVertices" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.GraphOperations" name="test_RemoveEdges" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.GraphOperations" name="test_ReverseEdges" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.VertexOperations" name="test_Copy" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.VertexOperations" name="test_CopyAddBackwardLink" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.VertexOperations" name="test_CopyAddForwardLink" time="0.001"/>
@@ -419,7 +415,7 @@
 		<testcase classname="tests.unit.Graph.__init__.GraphProperties" name="test_HasCycle" time="0.002"/>
 		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_BFS" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_DFS" time="0.001"/>
-		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_IterateAllOutboundPathsAsVertexList" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_IterateAllOutboundPathsAsVertexList" time="0.001"/>
 		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_ShortestPathByFixedWeight" time="0.002"/>
 		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_ShortestPathByHops" time="0.002"/>
 		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_ShortestPathByWeight" time="0.002"/>
@@ -432,10 +428,10 @@
 		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_GraphWithNodesAndEdges" time="0.001"/>
 		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_GraphWithSubgraph" time="0.001"/>
 		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_Key" time="0.001"/>
-		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_Node" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_Node" time="0.002"/>
 		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_NodeWithData" time="0.001"/>
 		<testcase classname="tests.unit.Graph.GraphML.pyToolingGraph" name="test_ConvertGraph" time="0.001"/>
-		<testcase classname="tests.unit.Graph.GraphML.pyToolingGraph" name="test_ConvertSubgraph" time="0.002"/>
+		<testcase classname="tests.unit.Graph.GraphML.pyToolingGraph" name="test_ConvertSubgraph" time="0.001"/>
 		<testcase classname="tests.unit.Graph.GraphML.pyToolingTree" name="test_Conversion" time="0.001"/>
 		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_ClassifierConversion" time="0.001"/>
 		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_ClassifierConversionException" time="0.001"/>
@@ -444,7 +440,7 @@
 		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_Properies" time="0.001"/>
 		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_ToString" time="0.001"/>
 		<testcase classname="tests.unit.Licensing.Licensing.SPDXLicenses" name="test_Apache" time="0.001"/>
-		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_AbstractBase" time="0.002"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_AbstractBase" time="0.001"/>
 		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_AbstractClass" time="0.001"/>
 		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_DerivedAbstractBase" time="0.001"/>
 		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_DerivedAbstractClass" time="0.001"/>
@@ -493,7 +489,7 @@
 			<skipped type="pytest.xfail" message="This case is not yet supported."/>
 		</testcase>
 		<testcase classname="tests.unit.MetaClasses.Singleton.Singleton" name="test_SecondInstanceWithParameters" time="0.001"/>
-		<testcase classname="tests.unit.MetaClasses.SlottedType.ObjectSizes" name="test_ClassSizes" time="0.005"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.ObjectSizes" name="test_ClassSizes" time="0.010"/>
 		<testcase classname="tests.unit.MetaClasses.SlottedType.ObjectSizes" name="test_SizeOfSlotted1" time="0.001"/>
 		<testcase classname="tests.unit.MetaClasses.SlottedType.ObjectSizes" name="test_SizeOfSlotted2" time="0.001"/>
 		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_AddNewFieldByCode_1" time="0.001"/>
@@ -532,7 +528,7 @@
 		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_VInheritance_SecondaryExtended" time="0.001"/>
 		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_YInheritance_PrimaryExtended" time="0.001"/>
 		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_YInheritance_PrimaryExtended_Mixin" time="0.001"/>
-		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_YInheritance_SecondaryExtended" time="0.002"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_YInheritance_SecondaryExtended" time="0.001"/>
 		<testcase classname="tests.unit.MetaClasses.SlottedType.Hierarchy" name="test_GraphMLInheritanceHierarchy" time="0.002"/>
 		<testcase classname="tests.unit.MetaClasses.SlottedType.Hierarchy" name="test_YAMLConfigurationInheritanceHierarchy" time="0.001"/>
 		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_VersionInformation" time="0.013"/>
@@ -543,7 +539,7 @@
 		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_loadRequirementsRecursive" time="0.001"/>
 		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_loadRequirementsRemoteZIP" time="0.001"/>
 		<testcase classname="tests.unit.Packaging.__init__.VersionInformation" name="test_VersionInformation" time="0.001"/>
-		<testcase classname="tests.unit.Packaging.__init__.DescribePackage" name="test_PythonPackage" time="0.757"/>
+		<testcase classname="tests.unit.Packaging.__init__.DescribePackage" name="test_PythonPackage" time="0.515"/>
 		<testcase classname="tests.unit.Packaging.__init__.DescribePackage" name="test_PythonPackageFromGitHub" time="0.002"/>
 		<testcase classname="tests.unit.Path.URL.GenericPath" name="test_Hostname" time="0.001"/>
 		<testcase classname="tests.unit.Path.URL.GenericPath" name="test_Port" time="0.001"/>
@@ -579,7 +575,7 @@
 				environment variable 'ENVIRONMENT_NAME' doesn't match. MacOS (x86-64)
 			</skipped>
 		</testcase>
-		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_NativeLinux" time="0.001">
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_NativeLinux" time="0.000">
 			<skipped type="pytest.skip" message="Skipped 'test_NativeLinux', if environment variable 'ENVIRONMENT_NAME' doesn't match. MacOS (x86-64)">
 				/Users/runner/work/pyTooling/pyTooling/tests/unit/Platform/__init__.py:55: Skipped 'test_NativeLinux', if
 				environment variable 'ENVIRONMENT_NAME' doesn't match. MacOS (x86-64)
@@ -610,12 +606,12 @@
 		<testcase classname="tests.unit.TerminalUI.Severity.Exceptions" name="test_Less" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.Severity.Exceptions" name="test_LessOrEqual" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.Severity.Exceptions" name="test_Unequal" time="0.001"/>
-		<testcase classname="tests.unit.TerminalUI.Terminal.Instantiation" name="test_ApplicationConfiguration" time="0.006"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.Instantiation" name="test_ApplicationConfiguration" time="0.002"/>
 		<testcase classname="tests.unit.TerminalUI.Terminal.Instantiation" name="test_DerivedApplication" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.Terminal.Instantiation" name="test_LineTerminal" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.Terminal.Properties" name="test_BaseIndent" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.Terminal.Properties" name="test_LogLevel" time="0.001"/>
-		<testcase classname="tests.unit.TerminalUI.Terminal.ExitOnCounters" name="test_Errors" time="0.002"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ExitOnCounters" name="test_Errors" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.Terminal.ExitOnCounters" name="test_Warnings" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteDebugDefault" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteDryRun" time="0.001"/>
@@ -661,10 +657,10 @@
 		<testcase classname="tests.unit.TerminalUI.TerminalBase.Exiting" name="test_FatalExit254" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.TerminalBase.Exiting" name="test_FatalExit4" time="0.001"/>
 		<testcase classname="tests.unit.TerminalUI.TerminalBase.Exiting" name="test_FatalExitDefault" time="0.001"/>
-		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_Exception" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_Exception" time="0.002"/>
 		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_ExceptionBase" time="0.002"/>
-		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_ExceptionBaseWithNestedException" time="0.001"/>
-		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_ExceptionWithNestedException" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_ExceptionBaseWithNestedException" time="0.002"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_ExceptionWithNestedException" time="0.002"/>
 		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_NotImplemented" time="0.001"/>
 		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_AddChild" time="0.001"/>
 		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_AddChildTree" time="0.001"/>
@@ -723,7 +719,7 @@
 		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_GetRightSiblingsOfRoot" time="0.001"/>
 		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_GetSiblingsOfRoot" time="0.001"/>
 		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_NewNodeWithDuplicateID" time="0.001"/>
-		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_NewNodeWithNonIterableChildren" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_NewNodeWithNonIterableChildren" time="0.002"/>
 		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_NewNodeWithWrongChildInChildren" time="0.001"/>
 		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_NewNodeWithWrongParent" time="0.001"/>
 		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_SetParentWithDuplicateIDs" time="0.001"/>
