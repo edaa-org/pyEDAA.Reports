@@ -120,7 +120,7 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 			raise ex
 
 		with path.open("w") as file:
-			self._xmlDocument.writexml(file, addindent="\t", encoding="utf-8", standalone=True, newl="\n")
+			self._xmlDocument.writexml(file, addindent="\t", encoding="utf-8", newl="\n")
 
 	def Parse(self) -> None:
 		if self._xmlDocument is None:

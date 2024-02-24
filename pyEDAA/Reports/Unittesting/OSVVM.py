@@ -29,10 +29,10 @@
 # ==================================================================================================================== #
 #
 """Reader for OSVVM test report summary files in YAML format."""
-from datetime import timedelta, datetime
+from datetime             import timedelta, datetime
 from pathlib              import Path
-from time import perf_counter_ns
-from typing               import Dict, Optional as Nullable
+from time                 import perf_counter_ns
+from typing               import Optional as Nullable
 
 from ruamel.yaml          import YAML
 from pyTooling.Decorators import export, notimplemented
@@ -114,7 +114,7 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 			raise ex
 
 		# with path.open("w") as file:
-		# 	self._yamlDocument.writexml(file, addindent="\t", encoding="utf-8", standalone=True, newl="\n")
+		# 	self._yamlDocument.writexml(file, addindent="\t", encoding="utf-8", newl="\n")
 
 	def Parse(self) -> None:
 		if self._yamlDocument is None:
