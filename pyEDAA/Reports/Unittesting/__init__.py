@@ -84,7 +84,7 @@ class TestcaseStatus(Flag):
 
 	# TODO: timed out ?
 
-	__MATRIX = (
+	_MATRIX = (
 	#  unknown  excluded  skipped  weak     passed   failed  < other / self vv
 		(Unknown, Unknown,  Unknown, Unknown, Unknown, Unknown),       # unknown
 		(Unknown, Excluded, Unknown, Unknown, Unknown, Unknown),       # excluded
@@ -102,7 +102,7 @@ class TestcaseStatus(Flag):
 			return 0
 
 	def __matmul__(self, other: "TestcaseStatus") -> "TestcaseStatus":
-		resolved = self.__class__(self.__MATRIX[self.__conv(self)][self.__conv(other)])
+		resolved = self.__class__(self._MATRIX[self.__conv(self)][self.__conv(other)])
 		resolved |= (self & self.Flags) | (other & self.Flags)
 		return resolved
 
