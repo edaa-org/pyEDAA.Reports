@@ -247,7 +247,7 @@ class JUnitDocument(TestsuiteSummary):
 	def _GenerateTestsuite(self, testsuite: Testsuite, parentElement: Element):
 		xmlDocument = parentElement.ownerDocument
 
-		testsuiteElement = xmlDocument.createElement(testsuite._name)
+		testsuiteElement = xmlDocument.createElement("testsuite")
 		testsuiteElement.setAttribute("name", testsuite._name)
 		if testsuite._startTime is not None:
 			testsuiteElement.setAttribute("timestamp", f"{testsuite._startTime.isoformat()}")
@@ -265,7 +265,7 @@ class JUnitDocument(TestsuiteSummary):
 	def _GenerateTestcase(self, testcase: Testcase, parentElement: Element):
 		xmlDocument = parentElement.ownerDocument
 
-		testcaseElement = xmlDocument.createElement(testcase._name)
+		testcaseElement = xmlDocument.createElement("testcase")
 		testcaseElement.setAttribute("name", testcase._name)
 		if testcase._totalDuration is not None:
 			testcaseElement.setAttribute("time", f"{testcase._totalDuration.total_seconds():.6f}")
