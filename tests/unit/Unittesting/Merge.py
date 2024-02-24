@@ -33,7 +33,7 @@ from time     import perf_counter_ns
 from typing   import List
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting       import MergedTestsuiteSummary, IterationScheme, TestcaseState
+from pyEDAA.Reports.Unittesting       import MergedTestsuiteSummary, IterationScheme, TestcaseStatus
 from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument
 
 
@@ -72,7 +72,7 @@ class PyTooling(ut_TestCase):
 			self.assertEqual(mergedCount, item.MergedCount)
 
 		for testcase in (tc for tc in merged.IterateTestcases() if tc.Name not in ("test_NativeMacOS", "test_MSYS", "test_MinGW32", "test_Clang32")):
-			self.assertEqual(TestcaseState.Passed, testcase.State)
+			self.assertEqual(TestcaseStatus.Passed, testcase.Status)
 
 		print()
 		print(f"Aggregating datapoints in testsuite ...")

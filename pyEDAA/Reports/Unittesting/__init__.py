@@ -59,7 +59,7 @@ class DuplicateTestcaseException(UnittestException):
 
 
 @export
-class TestcaseState(Flag):
+class TestcaseStatus(Flag):
 	Unknown =    0
 	Excluded =   1                         #: testcase was permanently excluded / disabled
 	Skipped =    2                         #: testcase was temporarily skipped (e.g. based on a condition)
@@ -101,7 +101,7 @@ class TestcaseState(Flag):
 		except ValueError:
 			return 0
 
-	def __matmul__(self, other: "TestcaseState") -> "TestcaseState":
+	def __matmul__(self, other: "TestcaseStatus") -> "TestcaseStatus":
 		resolved = self.__class__(self.__MATRIX[self.__conv(self)][self.__conv(other)])
 		resolved |= (self & self.Flags) | (other & self.Flags)
 		return resolved
@@ -126,7 +126,7 @@ class IterationScheme(Flag):
 class Base(metaclass=ExtendedType, slots=True):
 	_parent: Nullable["Testsuite"]
 	_name:   str
-	_state:  TestcaseState
+	_status: TestcaseStatus
 
 	_startTime:        datetime
 	_setupDuration:    Nullable[timedelta]
@@ -146,6 +146,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
+		status: TestcaseStatus = TestcaseStatus.Unknown,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
@@ -158,7 +159,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		self._parent = parent
 		self._name = name
-		self._state = TestcaseState.Unknown
+		self._status = status
 
 		self._startTime = startTime
 		self._setupDuration = setupDuration
@@ -182,8 +183,8 @@ class Base(metaclass=ExtendedType, slots=True):
 		return self._name
 
 	@readonly
-	def State(self) -> TestcaseState:
-		return self._state
+	def Status(self) -> TestcaseStatus:
+		return self._status
 
 	@readonly
 	def StartTime(self) -> datetime:
@@ -252,6 +253,7 @@ class Testcase(Base):
 		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
+		status: TestcaseStatus = TestcaseStatus.Unknown,
 		assertionCount: Nullable[int] = None,
 		failedAssertionCount: Nullable[int] = None,
 		passedAssertionCount: Nullable[int] = None,
@@ -266,7 +268,7 @@ class Testcase(Base):
 
 			parent._testcases[name] = self
 
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, parent)
 
 		self._testDuration = testDuration
 		# if totalDuration is not None:
@@ -319,34 +321,34 @@ class Testcase(Base):
 		return self._passedAssertionCount
 
 	def Aggregate(self, strict: bool = True) -> None:
-		if self._state is not TestcaseState.Unknown:
+		if self._status is not TestcaseStatus.Unknown:
 			return
 
 		if self._assertionCount is None or self._assertionCount == 0:
-			self._state = TestcaseState.Weak | (TestcaseState.Failed if strict else TestcaseState.Passed)
+			self._status = TestcaseStatus.Weak | (TestcaseStatus.Failed if strict else TestcaseStatus.Passed)
 		elif self._failedAssertionCount == 0:
-			self._state = TestcaseState.Passed
+			self._status = TestcaseStatus.Passed
 		else:
-			self._state = TestcaseState.Failed
+			self._status = TestcaseStatus.Failed
 
 		if self._warningCount > 0:
-			self._state |= TestcaseState.Warned
+			self._status |= TestcaseStatus.Warned
 
 		if self._errorCount > 0:
-			self._state |= TestcaseState.Errored
+			self._status |= TestcaseStatus.Errored
 
 		if self._fatalCount > 0:
-			self._state |= TestcaseState.Aborted
+			self._status |= TestcaseStatus.Aborted
 
 			if strict:
-				self._state = self._state & ~TestcaseState.Passed | TestcaseState.Failed
+				self._status = self._status & ~TestcaseStatus.Passed | TestcaseStatus.Failed
 
 		# TODO: check for setup errors
 		# TODO: check for teardown errors
 
 	def __str__(self) -> str:
 		return (
-			f"<Testcase {self._name}: {self._state.name} -"
+			f"<Testcase {self._name}: {self._status.name} -"
 			f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
 			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount}>"
 		)
@@ -369,6 +371,7 @@ class TestsuiteBase(Base):
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
+		status: TestcaseStatus = TestcaseStatus.Unknown,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
@@ -381,7 +384,7 @@ class TestsuiteBase(Base):
 
 			parent._testsuites[name] = self
 
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, parent)
 
 		self._testsuites = {}
 		if testsuites is not None:
@@ -559,6 +562,7 @@ class Testsuite(TestsuiteBase):
 		# testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
+		status: TestcaseStatus = TestcaseStatus.Unknown,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
@@ -566,7 +570,7 @@ class Testsuite(TestsuiteBase):
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 		# self._testDuration = testDuration
 
@@ -595,22 +599,22 @@ class Testsuite(TestsuiteBase):
 
 		for testcase in self._testcases.values():
 			testcase.Aggregate(strict)
-			if testcase._state is TestcaseState.Passed:
+			if testcase._status is TestcaseStatus.Passed:
 				tests += 1
 				passed += 1
-			elif testcase._state is TestcaseState.Failed:
+			elif testcase._status is TestcaseStatus.Failed:
 				tests += 1
 				failed += 1
-			elif testcase._state is TestcaseState.Skipped:
+			elif testcase._status is TestcaseStatus.Skipped:
 				tests += 1
 				skipped += 1
-			elif testcase._state is TestcaseState.Excluded:
+			elif testcase._status is TestcaseStatus.Excluded:
 				tests += 1
 				excluded += 1
-			elif testcase._state is TestcaseState.Errored:
+			elif testcase._status is TestcaseStatus.Errored:
 				tests += 1
 				errored += 1
-			elif testcase._state is TestcaseState.Unknown:
+			elif testcase._status is TestcaseStatus.Unknown:
 				raise UnittestException(f"Found testcase '{testcase._name}' with unknown state.")
 
 			warningCount += testcase._warningCount
@@ -627,15 +631,15 @@ class Testsuite(TestsuiteBase):
 		self._fatalCount = fatalCount
 
 		if errored > 0:
-			self._state = TestcaseState.Errored
+			self._status = TestcaseStatus.Errored
 		elif failed > 0:
-			self._state = TestcaseState.Failed
+			self._status = TestcaseStatus.Failed
 		elif tests - skipped == passed:
-			self._state = TestcaseState.Passed
+			self._status = TestcaseStatus.Passed
 		elif tests == skipped:
-			self._state = TestcaseState.Skipped
+			self._status = TestcaseStatus.Skipped
 		else:
-			self._state = TestcaseState.Unknown
+			self._status = TestcaseStatus.Unknown
 
 		return tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount
 
@@ -663,7 +667,7 @@ class Testsuite(TestsuiteBase):
 
 	def __str__(self) -> str:
 		return (
-			f"<Testsuite {self._name}: {self._state.name} -"
+			f"<Testsuite {self._name}: {self._status.name} -"
 			# f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
 			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount}>"
 		)
@@ -678,13 +682,14 @@ class TestsuiteSummary(TestsuiteBase):
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
+		status: TestcaseStatus = TestcaseStatus.Unknown,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable["Testsuite"]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 	def Aggregate(self) -> Tuple[int, int, int, int, int, int]:
 		tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
@@ -699,17 +704,17 @@ class TestsuiteSummary(TestsuiteBase):
 		self._fatalCount = fatalCount
 
 		if errored > 0:
-			self._state = TestcaseState.Errored
+			self._status = TestcaseStatus.Errored
 		elif failed > 0:
-			self._state = TestcaseState.Failed
+			self._status = TestcaseStatus.Failed
 		elif tests - skipped == passed:
-			self._state = TestcaseState.Passed
+			self._status = TestcaseStatus.Passed
 		elif tests == skipped:
-			self._state = TestcaseState.Skipped
+			self._status = TestcaseStatus.Skipped
 		elif tests == excluded:
-			self._state = TestcaseState.Excluded
+			self._status = TestcaseStatus.Excluded
 		else:
-			self._state = TestcaseState.Unknown
+			self._status = TestcaseStatus.Unknown
 
 		return tests, excluded, skipped, errored, failed, passed
 
@@ -725,10 +730,48 @@ class TestsuiteSummary(TestsuiteBase):
 
 	def __str__(self) -> str:
 		return (
-			f"<TestsuiteSummary {self._name}: {self._state.name} -"
+			f"<TestsuiteSummary {self._name}: {self._status.name} -"
 			# f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
 			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount}>"
 		)
+
+
+@export
+class Document(metaclass=ExtendedType, mixin=True):
+	_path:             Path
+
+	_analysisDuration: float  #: TODO: replace by Timer; should be timedelta?
+	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
+
+	def __init__(self, path: Path):
+		self._path = path
+
+		self._analysisDuration = -1.0
+		self._modelConversion = -1.0
+
+	@readonly
+	def Path(self) -> Path:
+		return self._path
+
+	@readonly
+	def AnalysisDuration(self) -> timedelta:
+		return timedelta(seconds=self._analysisDuration)
+
+	@readonly
+	def ModelConversionDuration(self) -> timedelta:
+		return timedelta(seconds=self._modelConversion)
+
+	@abstractmethod
+	def Read(self) -> None:
+		pass
+
+	@abstractmethod
+	def Write(self, path: Nullable[Path] = None, overwrite: bool = False):
+		pass
+
+	@abstractmethod
+	def Parse(self):
+		pass
 
 
 @export
@@ -767,6 +810,7 @@ class MergedTestcase(Testcase, Merged):
 		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
+		status: TestcaseStatus = TestcaseStatus.Unknown,
 		assertionCount: Nullable[int] = None,
 		failedAssertionCount: Nullable[int] = None,
 		passedAssertionCount: Nullable[int] = None,
@@ -778,7 +822,7 @@ class MergedTestcase(Testcase, Merged):
 		super().__init__(
 			name,
 			startTime, setupDuration, testDuration, teardownDuration, totalDuration,
-			assertionCount, failedAssertionCount, passedAssertionCount,
+			status, assertionCount, failedAssertionCount, passedAssertionCount,
 			warningCount, errorCount, fatalCount,
 			parent
 		)
@@ -799,9 +843,9 @@ class MergedTestcase(Testcase, Merged):
 		pass
 
 	@readonly
-	def State(self) -> TestcaseState:
-		result = self._mergedTestcases[0]._state
-		for state in (tc._state for tc in self._mergedTestcases):
+	def Status(self) -> TestcaseStatus:
+		result = self._mergedTestcases[0]._status
+		for state in (tc._status for tc in self._mergedTestcases):
 			result @= state
 
 		return result
@@ -829,6 +873,7 @@ class MergedTestsuite(Testsuite, Merged):
 		# testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
+		status: TestcaseStatus = TestcaseStatus.Unknown,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
@@ -839,7 +884,7 @@ class MergedTestsuite(Testsuite, Merged):
 		super().__init__(
 			name,
 			# startTime, setupDuration, testDuration, teardownDuration, totalDuration,
-			startTime, setupDuration, teardownDuration, totalDuration,
+			status, startTime, setupDuration, teardownDuration, totalDuration,
 			warningCount, errorCount, fatalCount,
 			testsuites, testcases,
 			parent
@@ -860,6 +905,7 @@ class MergedTestsuite(Testsuite, Merged):
 					testsuite._setupDuration,
 					testsuite._teardownDuration,
 					testsuite._totalDuration,
+					testsuite._status,
 					testsuite._warningCount,
 					testsuite._errorCount,
 					testsuite._fatalCount,
@@ -879,6 +925,7 @@ class MergedTestsuite(Testsuite, Merged):
 				testcase._testDuration,
 				testcase._teardownDuration,
 				testcase._totalDuration,
+				testcase._status,
 				testcase._assertionCount,
 				testcase._failedAssertionCount,
 				testcase._passedAssertionCount,
@@ -897,6 +944,7 @@ class MergedTestsuite(Testsuite, Merged):
 					testsuite._setupDuration,
 					testsuite._teardownDuration,
 					testsuite._totalDuration,
+					testsuite._status,
 					testsuite._warningCount,
 					testsuite._errorCount,
 					testsuite._fatalCount,
@@ -912,6 +960,7 @@ class MergedTestsuite(Testsuite, Merged):
 				testcase._testDuration,
 				testcase._teardownDuration,
 				testcase._totalDuration,
+				testcase._status,
 				testcase._assertionCount,
 				testcase._failedAssertionCount,
 				testcase._passedAssertionCount,
@@ -951,6 +1000,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 					testsuite._setupDuration,
 					testsuite._teardownDuration,
 					testsuite._totalDuration,
+					testsuite._status,
 					testsuite._warningCount,
 					testsuite._errorCount,
 					testsuite._fatalCount,

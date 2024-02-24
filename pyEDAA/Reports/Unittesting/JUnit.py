@@ -43,7 +43,8 @@ from xml.dom.minidom import Element, Document
 from pyTooling.Decorators       import export, readonly
 
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException
-from pyEDAA.Reports.Unittesting import TestsuiteSummary, Testsuite, Testcase, TestcaseState
+from pyEDAA.Reports.Unittesting import Document as ut_Document
+from pyEDAA.Reports.Unittesting import TestsuiteSummary, Testsuite, Testcase, TestcaseStatus
 
 
 @export
@@ -73,23 +74,16 @@ class JUnitReaderMode(Flag):
 
 
 @export
-class JUnitDocument(TestsuiteSummary):
+class JUnitDocument(TestsuiteSummary, ut_Document):
 	_readerMode:       JUnitReaderMode
-	_path:             Path
 	_xmlDocument:      Nullable[Document]
 
-	_readingByMiniDom: float  #: TODO: replace by Timer; should be timedelta?
-	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
-
-	def __init__(self, path: Path, parse: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
-		self._path = path
-		self._readerMode = readerMode
-
+	def __init__(self, xmlReportFile: Path, parse: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
 		super().__init__("Unread JUnit XML file")
+		ut_Document.__init__(self, xmlReportFile)
 
+		self._readerMode = readerMode
 		self._xmlDocument = None
-		self._readingByMiniDom = -1.0
-		self._modelConversion = -1.0
 
 		if parse:
 			self.Read()
@@ -100,14 +94,14 @@ class JUnitDocument(TestsuiteSummary):
 			raise UnittestException(f"JUnit XML file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
 
-		startMiniDom = perf_counter_ns()
+		startAnalysis = perf_counter_ns()
 		try:
 			self._xmlDocument = minidom.parse(str(self._path))
 		except Exception as ex:
 			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
 
-		endMiniDom = perf_counter_ns()
-		self._readingByMiniDom = (endMiniDom - startMiniDom) / 1e9
+		endAnalysis = perf_counter_ns()
+		self._analysisDuration = (endAnalysis - startAnalysis) / 1e9
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
 		if path is None:
@@ -122,7 +116,7 @@ class JUnitDocument(TestsuiteSummary):
 
 		if self._xmlDocument is None:
 			ex = UnittestException(f"Internal XML document tree is empty and needs to be generated before write is possible.")
-			# ex.add_note(f"Call 'JUnitDocument.FromTestsuiteSummary()'.")
+			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
 			raise ex
 
 		with path.open("w") as file:
@@ -210,11 +204,11 @@ class JUnitDocument(TestsuiteSummary):
 		for node in testsuiteNode.childNodes:
 			if node.nodeType == Node.ELEMENT_NODE:
 				if node.tagName == "skipped":
-					testcase._state = TestcaseState.Skipped
+					testcase._status = TestcaseStatus.Skipped
 				elif node.tagName == "failure":
-					testcase._state = TestcaseState.Failed
+					testcase._status = TestcaseStatus.Failed
 				elif node.tagName == "error":
-					testcase._state = TestcaseState.Errored
+					testcase._status = TestcaseStatus.Errored
 				elif node.tagName == "system-out":
 					pass
 				elif node.tagName == "system-err":
@@ -224,8 +218,8 @@ class JUnitDocument(TestsuiteSummary):
 				else:
 					raise UnittestException(f"Unknown element '{node.tagName}' in junit file.")
 
-		if testcase._state is TestcaseState.Unknown:
-			testcase._state = TestcaseState.Passed
+		if testcase._status is TestcaseStatus.Unknown:
+			testcase._status = TestcaseStatus.Passed
 
 	def Generate(self, overwrite: bool = False) -> None:
 		if self._xmlDocument is not None:
@@ -272,12 +266,12 @@ class JUnitDocument(TestsuiteSummary):
 		if testcase._assertionCount is not None:
 			testcaseElement.setAttribute("assertions", f"{testcase._assertionCount}")
 
-		if testcase._state is TestcaseState.Passed:
+		if testcase._status is TestcaseStatus.Passed:
 			pass
-		elif testcase._state is TestcaseState.Failed:
+		elif testcase._status is TestcaseStatus.Failed:
 			failureElement = xmlDocument.createElement("failure")
 			testcaseElement.appendChild(failureElement)
-		elif testcase._state is TestcaseState.Skipped:
+		elif testcase._status is TestcaseStatus.Skipped:
 			skippedElement = xmlDocument.createElement("skipped")
 			testcaseElement.appendChild(skippedElement)
 		else:
@@ -286,15 +280,3 @@ class JUnitDocument(TestsuiteSummary):
 			testcaseElement.appendChild(errorElement)
 
 		parentElement.appendChild(testcaseElement)
-
-	@readonly
-	def Path(self) -> Path:
-		return self._path
-
-	@readonly
-	def AnalysisDuration(self) -> timedelta:
-		return timedelta(seconds=self._readingByMiniDom)
-
-	@readonly
-	def ModelConversionDuration(self) -> timedelta:
-		return timedelta(seconds=self._modelConversion)
