@@ -28,10 +28,57 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
+from datetime import timedelta
 from pathlib  import Path
 from unittest import TestCase as ut_TestCase
 
 from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument
+
+
+class Document(ut_TestCase):
+	_outputDirectory = Path("tests/output")
+
+	@classmethod
+	def setUpClass(cls):
+		if cls._outputDirectory.exists():
+			print(f"Output directory '{cls._outputDirectory}' already exists.")
+		else:
+			print(f"Creating output directory '{cls._outputDirectory}' ...")
+			cls._outputDirectory.mkdir(parents=True)
+
+	def setUp(self):
+		print(f"Cleaning XML files from '{self._outputDirectory}' ...")
+		for file in self._outputDirectory.glob("*.xml"):
+			print(f"  unlinking file: {file}")
+			file.unlink()
+
+	def test_Create_WithoutParse(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		doc = JUnitDocument(junitExampleFile)
+
+		self.assertEqual(junitExampleFile, doc.Path)
+		self.assertLess(doc.AnalysisDuration, timedelta(seconds=0))
+		self.assertLess(doc.ModelConversionDuration, timedelta(seconds=0))
+
+		doc.Read()
+		doc.Parse()
+
+		self.assertGreaterEqual(doc.AnalysisDuration, timedelta(seconds=0))
+		self.assertGreaterEqual(doc.ModelConversionDuration, timedelta(seconds=0))
+
+	def test_Create_WithParse(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		doc = JUnitDocument(junitExampleFile, parse=True)
+
+		self.assertEqual(junitExampleFile, doc.Path)
+		self.assertGreaterEqual(doc.AnalysisDuration, timedelta(seconds=0))
+		self.assertGreaterEqual(doc.ModelConversionDuration, timedelta(seconds=0))
+
+	def test_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		doc = JUnitDocument(junitExampleFile, parse=True)
+
+		doc.Write(self._outputDirectory / "ReadWrite.xml")
 
 
 class ExampleFiles(ut_TestCase):
@@ -39,7 +86,10 @@ class ExampleFiles(ut_TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
-		doc = JUnitDocument(junitExampleFile)
+		doc = JUnitDocument(junitExampleFile, parse=True)
+
+		self.assertGreater(doc.TestsuiteCount, 0)
+		self.assertGreater(doc.TestcaseCount, 0)
 
 		print(f"JUnit file:")
 		print(f"  Testsuites: {len(doc.Testsuites)}")
@@ -53,7 +103,10 @@ class ExampleFiles(ut_TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/osvvm.Libraries.xml")
-		doc = JUnitDocument(junitExampleFile)
+		doc = JUnitDocument(junitExampleFile, parse=True)
+
+		self.assertGreater(doc.TestsuiteCount, 0)
+		self.assertGreater(doc.TestcaseCount, 0)
 
 		print(f"JUnit file:")
 		print(f"  Testsuites: {len(doc.Testsuites)}")

@@ -33,17 +33,17 @@
 Reader for JUnit unit testing summary files in XML format.
 """
 from datetime        import datetime, timedelta
-from enum import Enum, Flag
+from enum            import Flag
 from pathlib         import Path
 from time            import perf_counter_ns
+from typing          import Optional as Nullable
 from xml.dom         import minidom, Node
-from xml.dom.minidom import Element
+from xml.dom.minidom import Element, Document
 
-from pyTooling.Decorators  import export, readonly
+from pyTooling.Decorators       import export, readonly
 
-from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, \
-	TestsuiteSummary, Testsuite, Testcase, TestcaseState
-
+from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException
+from pyEDAA.Reports.Unittesting import TestsuiteSummary, Testsuite, Testcase, TestcaseState
 
 
 @export
@@ -76,43 +76,73 @@ class JUnitReaderMode(Flag):
 class JUnitDocument(TestsuiteSummary):
 	_readerMode:       JUnitReaderMode
 	_path:             Path
-	_documentElement:  Element
+	_xmlDocument:      Nullable[Document]
 
 	_readingByMiniDom: float  #: TODO: replace by Timer; should be timedelta?
 	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
 
-	def __init__(self, path: Path, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
-		if not path.exists():
-			raise UnittestException(f"JUnit XML file '{path}' does not exist.") from FileNotFoundError(f"File '{path}' not found.")
-
-		self._readerMode = readerMode
+	def __init__(self, path: Path, parse: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
 		self._path = path
+		self._readerMode = readerMode
 
+		super().__init__("Unread JUnit XML file")
+
+		self._xmlDocument = None
+		self._readingByMiniDom = -1.0
+		self._modelConversion = -1.0
+
+		if parse:
+			self.Read()
+			self.Parse()
+
+	def Read(self) -> None:
+		if not self._path.exists():
+			raise UnittestException(f"JUnit XML file '{self._path}' does not exist.") \
+				from FileNotFoundError(f"File '{self._path}' not found.")
+
+		startMiniDom = perf_counter_ns()
 		try:
-			startMiniDom = perf_counter_ns()
-			rootElement = minidom.parse(str(path)).documentElement
-			endMiniDom = perf_counter_ns()
+			self._xmlDocument = minidom.parse(str(self._path))
 		except Exception as ex:
-			raise UnittestException(f"Couldn't open '{path}'.") from ex
+			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
 
-		self._documentElement = rootElement
+		endMiniDom = perf_counter_ns()
 		self._readingByMiniDom = (endMiniDom - startMiniDom) / 1e9
 
+	def Write(self, path: Nullable[Path] = None, overwrite: bool = False) -> None:
+		if path is None:
+			path = self._path
+
+		if not overwrite and path.exists():
+			raise UnittestException(f"JUnit XML file '{path}' can not be written.") \
+				from FileExistsError(f"File '{path}' already exists.")
+
+		if self._xmlDocument is None:
+			ex = UnittestException(f"Internal XML document tree is empty and needs to be generated before write is possible.")
+			# ex.add_note(f"Call 'JUnitDocument.FromTestsuiteSummary()'.")
+			raise ex
+
+		with path.open("w") as file:
+			self._xmlDocument.writexml(file, encoding="utf-8", standalone=True, newl="")
+
+	def Parse(self) -> None:
+		if self._xmlDocument is None:
+			ex = UnittestException(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
+			ex.add_note(f"Call 'JUnitDocument.Read()' or create document using 'JUnitDocument(path, parse=True)'.")
+			raise ex
+
 		startConversion = perf_counter_ns()
-		name = rootElement.getAttribute("name") if rootElement.hasAttribute("name") else "root"
-		testsuiteRuntime = float(rootElement.getAttribute("time")) if rootElement.hasAttribute("time") else -1.0
-		timestamp = datetime.fromisoformat(rootElement.getAttribute("timestamp")) if rootElement.hasAttribute("timestamp") else None
+		rootElement = self._xmlDocument.documentElement
 
-		super().__init__(
-			name,
-			startTime=timestamp,
-			totalDuration=timedelta(seconds=testsuiteRuntime))
+		self._name =          rootElement.getAttribute("name")                              if rootElement.hasAttribute("name")      else "root"
+		self._startTime =     datetime.fromisoformat(rootElement.getAttribute("timestamp")) if rootElement.hasAttribute("timestamp") else None
+		self._totalDuration = timedelta(seconds=float(rootElement.getAttribute("time")))    if rootElement.hasAttribute("time")      else None
 
-		tests = rootElement.getAttribute("tests")
-		skipped = rootElement.getAttribute("skipped")
-		errors = rootElement.getAttribute("errors")
-		failures = rootElement.getAttribute("failures")
-		assertions = rootElement.getAttribute("assertions")
+		# tests = rootElement.getAttribute("tests")
+		# skipped = rootElement.getAttribute("skipped")
+		# errors = rootElement.getAttribute("errors")
+		# failures = rootElement.getAttribute("failures")
+		# assertions = rootElement.getAttribute("assertions")
 
 		for rootNode in rootElement.childNodes:
 			if rootNode.nodeName == "testsuite":
