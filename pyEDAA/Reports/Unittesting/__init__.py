@@ -32,8 +32,9 @@
 from datetime import timedelta, datetime
 
 from enum    import Flag
+from math    import log2
 from pathlib import Path
-from typing  import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union
+from typing  import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List
 
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import abstractmethod, ExtendedType, mustoverride
@@ -65,6 +66,8 @@ class TestcaseState(Flag):
 	Passed =     8                         #: passed testcase, because all assertions succeeded
 	Failed =    16                         #: failed testcase due to failing assertions
 
+	Mask = Excluded | Skipped | Weak | Passed | Failed
+
 	Inverted = 128                         #: to mark inverted results
 	UnexpectedPassed = Failed | Inverted
 	ExpectedFailed =   Passed | Inverted
@@ -77,6 +80,26 @@ class TestcaseState(Flag):
 	TearDownError = 16384                  #: cleanup error / resource release error
 
 	# TODO: timed out ?
+
+	__MATRIX = (
+	#  unknown  excluded  skipped  weak     passed   failed  < other / self vv
+		(Unknown, Unknown,  Unknown, Unknown, Unknown, Unknown),       # unknown
+		(Unknown, Excluded, Unknown, Unknown, Unknown, Unknown),       # excluded
+		(Unknown, Unknown,  Skipped, Weak,    Passed,  Failed),        # skipped
+		(Unknown, Unknown,  Unknown, Weak,    Unknown, Unknown),       # weak
+		(Unknown, Unknown,  Passed,  Unknown, Passed,  Unknown),       # passed
+		(Unknown, Unknown,  Failed,  Unknown, Unknown, Failed),        # failed
+	)
+
+	@classmethod
+	def __conv(cls, value) -> int:
+		try:
+			return int(log2((value & cls.Mask).value)) + 1
+		except ValueError:
+			return 0
+
+	def __matmul__(self, other: "TestcaseState") -> "TestcaseState":
+		return self.__class__(self.__MATRIX[self.__conv(self)][self.__conv(other)])
 
 
 @export
@@ -688,6 +711,8 @@ class Combined(metaclass=ExtendedType, mixin=True):
 
 @export
 class MergedTestcase(Testcase, Merged):
+	_mergedTestcases: List[Testcase]
+
 	def __init__(
 		self,
 		name: str,
@@ -713,8 +738,12 @@ class MergedTestcase(Testcase, Merged):
 		)
 		Merged.__init__(self)
 
+		self._mergedTestcases = []
+
 	def Merge(self, tc: Testcase) -> None:
 		self._mergedCount += 1
+
+		self._mergedTestcases.append(tc)
 
 		self._warningCount += tc._warningCount
 		self._errorCount += tc._errorCount
@@ -722,6 +751,26 @@ class MergedTestcase(Testcase, Merged):
 
 	def Copy(self, tc: Testcase) -> None:
 		pass
+
+	@readonly
+	def State(self) -> TestcaseState:
+		result = self._mergedTestcases[0]._state
+		for state in (tc._state for tc in self._mergedTestcases):
+			result @= state
+
+		return result
+
+	@readonly
+	def SummedAssertionCount(self) -> int:
+		return sum(tc._assertionCount for tc in self._mergedTestcases)
+
+	@readonly
+	def SummedPassedAssertionCount(self) -> int:
+		return sum(tc._passedAssertionCount for tc in self._mergedTestcases)
+
+	@readonly
+	def SummedFailedAssertionCount(self) -> int:
+		return sum(tc._failedAssertionCount for tc in self._mergedTestcases)
 
 
 @export
