@@ -84,25 +84,22 @@ class TestcaseStatus(Flag):
 
 	# TODO: timed out ?
 
-	_MATRIX = (
-	#  unknown  excluded  skipped  weak     passed   failed  < other / self vv
-		(Unknown, Unknown,  Unknown, Unknown, Unknown, Unknown),       # unknown
-		(Unknown, Excluded, Unknown, Unknown, Unknown, Unknown),       # excluded
-		(Unknown, Unknown,  Skipped, Weak,    Passed,  Failed),        # skipped
-		(Unknown, Unknown,  Unknown, Weak,    Unknown, Unknown),       # weak
-		(Unknown, Unknown,  Passed,  Unknown, Passed,  Unknown),       # passed
-		(Unknown, Unknown,  Failed,  Unknown, Unknown, Failed),        # failed
-	)
-
-	@classmethod
-	def __conv(cls, value) -> int:
-		try:
-			return int(log2((value & cls.Mask).value)) + 1
-		except ValueError:
-			return 0
-
 	def __matmul__(self, other: "TestcaseStatus") -> "TestcaseStatus":
-		resolved = self.__class__(self._MATRIX[self.__conv(self)][self.__conv(other)])
+		s = self & self.Mask
+		o = other & self.Mask
+		if s is self.Excluded:
+			resolved = self.Excluded if o is self.Excluded else self.Unknown
+		elif s is self.Skipped:
+			resolved = self.Unknown if (o is self.Unknown) or (o is self.Excluded) else o
+		elif s is self.Weak:
+			resolved = self.Weak if o is self.Weak else self.Unknown
+		elif s is self.Passed:
+			resolved = self.Passed if (o is self.Skipped) or (o is self.Passed) else self.Unknown
+		elif s is self.Failed:
+			resolved = self.Failed if (o is self.Skipped) or (o is self.Failed) else self.Unknown
+		else:
+			resolved = self.Unknown
+
 		resolved |= (self & self.Flags) | (other & self.Flags)
 		return resolved
 
@@ -765,9 +762,9 @@ class Document(metaclass=ExtendedType, mixin=True):
 	def Read(self) -> None:
 		pass
 
-	@abstractmethod
-	def Write(self, path: Nullable[Path] = None, overwrite: bool = False):
-		pass
+	# @abstractmethod
+	# def Write(self, path: Nullable[Path] = None, overwrite: bool = False):
+	# 	pass
 
 	@abstractmethod
 	def Parse(self):
