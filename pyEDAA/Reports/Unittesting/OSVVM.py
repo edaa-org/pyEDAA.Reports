@@ -29,77 +29,161 @@
 # ==================================================================================================================== #
 #
 """Reader for OSVVM test report summary files in YAML format."""
+from datetime             import timedelta, datetime
 from pathlib              import Path
-from typing               import Dict
+from time                 import perf_counter_ns
+from typing               import Optional as Nullable
 
 from ruamel.yaml          import YAML
-from pyTooling.Decorators import export
+from pyTooling.Decorators import export, notimplemented
 
-from pyEDAA.Reports.Unittesting import Testsuite as Abstract_Testsuite, Testcase as Abstract_Testcase, Status
+from pyEDAA.Reports.Unittesting import UnittestException, Document, TestcaseStatus
+from pyEDAA.Reports.Unittesting import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
+from pyEDAA.Reports.Unittesting import Testcase as ut_Testcase
 
 
 @export
-class Testsuite(Abstract_Testsuite):
+class OsvvmException:
 	pass
 
 
 @export
-class Testcase(Abstract_Testcase):
+class UnittestException(UnittestException, OsvvmException):
 	pass
 
 
 @export
-class Document:
-	_yamlDocument: YAML
-	_testsuites: Dict[str, Testsuite]
+class TestsuiteSummary(ut_TestsuiteSummary):
+	pass
 
-	def __init__(self, yamlReportFile: Path) -> None:
-		yamlReader = YAML()
-		self._yamlDocument = yamlReader.load(yamlReportFile)
-		yamlBuild = self._yamlDocument["BuildInfo"]
 
-		self._testsuites = {}
+@export
+class Testsuite(ut_Testsuite):
+	pass
 
-		self.translateDocument()
 
-	def translateDocument(self) -> None:
+@export
+class Testcase(ut_Testcase):
+	pass
+
+
+@export
+class OsvvmYamlDocument(TestsuiteSummary, Document):
+	_yamlDocument: Nullable[YAML]
+
+	def __init__(self, yamlReportFile: Path, parse: bool = False) -> None:
+		super().__init__("Unread JUnit XML file")
+		Document.__init__(self, yamlReportFile)
+
+		self._yamlDocument = None
+
+		if parse:
+			self.Read()
+			self.Parse()
+
+	def Read(self) -> None:
+		if not self._path.exists():
+			raise UnittestException(f"OSVVM YAML file '{self._path}' does not exist.") \
+				from FileNotFoundError(f"File '{self._path}' not found.")
+
+		startAnalysis = perf_counter_ns()
+		try:
+			yamlReader = YAML()
+			self._yamlDocument = yamlReader.load(self._path)
+		except Exception as ex:
+			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
+
+		endAnalysis = perf_counter_ns()
+		self._analysisDuration = (endAnalysis - startAnalysis) / 1e9
+
+	@notimplemented
+	def Write(self, path: Nullable[Path] = None, overwrite: bool = False) -> None:
+		if path is None:
+			path = self._path
+
+		if not overwrite and path.exists():
+			raise UnittestException(f"OSVVM YAML file '{path}' can not be written.") \
+				from FileExistsError(f"File '{path}' already exists.")
+
+		# if regenerate:
+		# 	self.Generate(overwrite=True)
+
+		if self._yamlDocument is None:
+			ex = UnittestException(f"Internal YAML document tree is empty and needs to be generated before write is possible.")
+			ex.add_note(f"Call 'OsvvmYamlDocument.Generate()' or 'OsvvmYamlDocument.Write(..., regenerate=True)'.")
+			raise ex
+
+		# with path.open("w") as file:
+		# 	self._yamlDocument.writexml(file, addindent="\t", encoding="utf-8", newl="\n")
+
+	def Parse(self) -> None:
+		if self._yamlDocument is None:
+			ex = UnittestException(f"OSVVM YAML file '{self._path}' needs to be read and analyzed by a YAML parser.")
+			ex.add_note(f"Call 'OsvvmYamlDocument.Read()' or create document using 'OsvvmYamlDocument(path, parse=True)'.")
+			raise ex
+
+		startConversion = perf_counter_ns()
+		self._startTime = datetime.fromisoformat(self._yamlDocument["Date"])
+		# yamlBuild = self._yamlDocument["BuildInfo"]
+
 		for yamlTestsuite in self._yamlDocument['TestSuites']:
-			name = yamlTestsuite["Name"]
-			self._testsuites[name] = self.translateTestsuite(yamlTestsuite, name)
+			self._ParseTestsuite(self, yamlTestsuite)
 
-	def translateTestsuite(self, yamlTestsuite, name) -> Testsuite:
-		testsuite = Testsuite(name)
+		self.Aggregate()
+		endConversation = perf_counter_ns()
+		self._modelConversion = (endConversation - startConversion) / 1e9
+
+	def _ParseTestsuite(self, parentTestsuite: Testsuite, yamlTestsuite) -> None:
+		testsuiteName = yamlTestsuite["Name"]
+		totalDuration = timedelta(seconds=float(yamlTestsuite["ElapsedTime"]))
+
+		testsuite = Testsuite(
+			testsuiteName,
+			totalDuration=totalDuration,
+			parent=parentTestsuite
+		)
 
 		for yamlTestcase in yamlTestsuite['TestCases']:
-			testcaseName = yamlTestcase["Name"]
-			testsuite._testcases[testcaseName] = self.translateTestcase(yamlTestcase, testcaseName)
+			self._ParseTestcase(testsuite, yamlTestcase)
 
-		return testsuite
-
-	def translateTestcase(self, yamlTestcase, name) -> Testcase:
+	def _ParseTestcase(self, parentTestsuite: Testsuite, yamlTestcase) -> None:
+		testcaseName = yamlTestcase["Name"]
+		totalDuration = timedelta(seconds=float(yamlTestcase["ElapsedTime"]))
 		yamlStatus = yamlTestcase["Status"].lower()
-
-		assertionCount = 0
-		warningCount = 0
-		errorCount = 0
-		fatalCount = 0
+		yamlResults = yamlTestcase["Results"]
+		assertionCount = int(yamlResults["AffirmCount"])
+		passedAssertionCount = int(yamlResults["PassedCount"])
+		warningCount = int(yamlResults["AlertCount"]["Warning"])
+		errorCount = int(yamlResults["AlertCount"]["Error"])
+		fatalCount = int(yamlResults["AlertCount"]["Failure"])
 
 		if yamlStatus == "passed":
-			status = Status.Passed
-
-			yamlResults = yamlTestcase["Results"]
-			assertionCount = yamlResults["AffirmCount"]
-
+			status = TestcaseStatus.Passed
 		elif yamlStatus == "skipped":
-			status = Status.Skipped
-
+			status = TestcaseStatus.Skipped
 		elif yamlStatus == "failed":
-			status = Status.Failed
-
+			status = TestcaseStatus.Failed
 		else:
-			print(f"ERROR: Unknown testcase status '{yamlStatus}'.")
+			status = TestcaseStatus.Unknown
 
-		return Testcase(name, assertionCount, warningCount, errorCount, fatalCount)
+		if warningCount > 0:
+			status |= TestcaseStatus.Warned
+		if errorCount > 0:
+			status |= TestcaseStatus.Errored
+		if fatalCount > 0:
+			status |= TestcaseStatus.Aborted
+
+		testcase = Testcase(
+			testcaseName,
+			totalDuration=totalDuration,
+			assertionCount=assertionCount,
+			passedAssertionCount=passedAssertionCount,
+			warningCount=warningCount,
+			status=status,
+			errorCount=errorCount,
+			fatalCount=fatalCount,
+			parent=parentTestsuite
+		)
 
 	def __contains__(self, key: str) -> bool:
 		return key in self._testsuites

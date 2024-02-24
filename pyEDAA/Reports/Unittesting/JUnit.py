@@ -32,19 +32,19 @@
 """
 Reader for JUnit unit testing summary files in XML format.
 """
-from enum            import Flag
 from datetime        import datetime, timedelta
+from enum            import Flag
 from pathlib         import Path
 from time            import perf_counter_ns
-from typing          import Tuple, Dict, Optional as Nullable, Union
+from typing          import Optional as Nullable
 from xml.dom         import minidom, Node
-from xml.dom.minidom import Element
+from xml.dom.minidom import Element, Document
 
-from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import ExtendedType
+from pyTooling.Decorators       import export, readonly
 
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException
-from pyEDAA.Reports.Unittesting import Testsuite as gen_Testsuite, Testcase as gen_Testcase
+from pyEDAA.Reports.Unittesting import Document as ut_Document
+from pyEDAA.Reports.Unittesting import TestsuiteSummary, Testsuite, Testcase, TestcaseStatus
 
 
 @export
@@ -68,332 +68,147 @@ class DuplicateTestcaseException(DuplicateTestcaseException, JUnitException):
 
 
 @export
-class TestcaseState(Flag):
-	Unknown = 0
-	Failed =  1
-	Error =   2
-	Skipped = 4
-	Passed =  8
+class JUnitReaderMode(Flag):
+	Default = 0
+	DecoupleTestsuiteHierarchyAndTestcaseClassName = 1
 
 
 @export
-class Base(metaclass=ExtendedType, slots=True):
-	_parent: Nullable["TestsuiteBase"]
-	_name:   str
-	_state:  TestcaseState
-	_time:   timedelta
+class JUnitDocument(TestsuiteSummary, ut_Document):
+	_readerMode:       JUnitReaderMode
+	_xmlDocument:      Nullable[Document]
 
-	def __init__(self, name: str, time: timedelta, parent: Nullable["TestsuiteBase"] = None) -> None:
-		self._parent = parent
-		self._name = name
-		self._state = TestcaseState.Unknown
-		self._time = time
+	def __init__(self, xmlReportFile: Path, parse: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
+		super().__init__("Unread JUnit XML file")
+		ut_Document.__init__(self, xmlReportFile)
 
-	@readonly
-	def Parent(self) -> Nullable["TestsuiteBase"]:
-		return self._parent
+		self._readerMode = readerMode
+		self._xmlDocument = None
 
-	# QUESTION: allow Parent as setter?
+		if parse:
+			self.Read()
+			self.Parse()
 
-	@readonly
-	def Name(self) -> str:
-		return self._name
+	def Read(self) -> None:
+		if not self._path.exists():
+			raise UnittestException(f"JUnit XML file '{self._path}' does not exist.") \
+				from FileNotFoundError(f"File '{self._path}' not found.")
 
-	@readonly
-	def State(self) -> TestcaseState:
-		return self._state
-
-	@readonly
-	def Time(self) -> timedelta:
-		return self._time
-
-
-@export
-class Testcase(Base):
-	_assertions: int
-
-	def __init__(self, name: str, time: timedelta, parent: Nullable["Testsuite"] = None) -> None:
-		if parent is not None:
-			if not isinstance(parent, TestsuiteBase):
-				raise UnittestException(f"Parameter 'parent' is not of type TestsuiteBase.")
-
-			parent._testcases[name] = self
-
-		super().__init__(name, time, parent)
-
-		self._assertions = 0
-
-	@readonly
-	def Assertions(self) -> int:
-		return self._assertions
-
-
-@export
-class TestsuiteBase(Base):
-	_testsuites: Dict[str, "Testsuite"]
-
-	_tests:   int
-	_skipped: int
-	_errored: int
-	_failed:  int
-	_passed:  int
-
-	def __init__(self, name: str, time: timedelta, parent: Nullable["TestsuiteBase"] = None) -> None:
-		if parent is not None:
-			if not isinstance(parent, TestsuiteBase):
-				raise UnittestException(f"Parameter 'parent' is not of type TestsuiteBase.")
-
-			parent._testsuites[name] = self
-
-		super().__init__(name, time, parent)
-
-		self._testsuites = {}
-
-		self._tests =   0
-		self._skipped = 0
-		self._errored = 0
-		self._failed =  0
-		self._passed =  0
-
-	def __getitem__(self, key: str) -> "Testsuite":
-		return self._testsuites[key]
-
-	def __contains__(self, key: str) -> bool:
-		return key in self._testsuites
-
-	@readonly
-	def Testsuites(self) -> Dict[str, "Testsuite"]:
-		return self._testsuites
-
-	@readonly
-	def Tests(self) -> int:
-		return self._tests
-
-	@readonly
-	def Skipped(self) -> int:
-		return self._skipped
-
-	@readonly
-	def Errored(self) -> int:
-		return self._errored
-
-	@readonly
-	def Failed(self) -> int:
-		return self._failed
-
-	@readonly
-	def Passed(self) -> int:
-		return self._passed
-
-	def Aggregate(self) -> Tuple[int, int, int, int, int]:
-		tests = 0
-		skipped = 0
-		errored = 0
-		failed = 0
-		passed = 0
-
-		for testsuite in self._testsuites.values():
-			t, s, e, f, p = testsuite.Aggregate()
-			tests += t
-			skipped += s
-			errored += e
-			failed += f
-			passed += p
-
-		return tests, skipped, errored, failed, passed
-
-
-@export
-class Testsuite(TestsuiteBase):
-	_testcases:  Dict[str, Testcase]
-
-	def __init__(self, name: str, time: timedelta, parent: Nullable["Base"] = None) -> None:
-		super().__init__(name, time, parent)
-
-		self._testcases = {}
-
-	def __getitem__(self, key: str) -> Union["Testsuite", Testcase]:
+		startAnalysis = perf_counter_ns()
 		try:
-			return self._testsuites[key]
-		except KeyError:
-			return self._testcases[key]
-
-	def __contains__(self, key: str) -> bool:
-		if key not in self._testsuites:
-			return key in self._testcases
-
-		return False
-
-	@readonly
-	def Testcases(self) -> Dict[str, Testcase]:
-		return self._testcases
-
-	def Aggregate(self) -> Tuple[int, int, int, int, int]:
-		tests, skipped, errored, failed, passed = super().Aggregate()
-
-		for testcase in self._testcases.values():
-			if testcase._state is TestcaseState.Passed:
-				tests += 1
-				passed += 1
-			elif testcase._state is TestcaseState.Failed:
-				tests += 1
-				failed += 1
-			elif testcase._state is TestcaseState.Skipped:
-				tests += 1
-				skipped += 1
-			elif testcase._state is TestcaseState.Error:
-				tests += 1
-				errored += 1
-			elif testcase._state is TestcaseState.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with unknown state.")
-
-		self._tests = tests
-		self._skipped = skipped
-		self._errored = errored
-		self._failed = failed
-		self._passed = passed
-
-		if errored > 0:
-			self._state = TestcaseState.Error
-		elif failed > 0:
-			self._state = TestcaseState.Failed
-		elif tests - skipped == passed:
-			self._state = TestcaseState.Passed
-		elif tests == skipped:
-			self._state = TestcaseState.Skipped
-		else:
-			self._state = TestcaseState.Unknown
-
-		return tests, skipped, errored, failed, passed
-
-
-@export
-class TestsuiteSummary(TestsuiteBase):
-	def __init__(self, name: str, time: timedelta):
-		super().__init__(name, time)
-
-	def Aggregate(self) -> Tuple[int, int, int, int, int]:
-		tests, skipped, errored, failed, passed = super().Aggregate()
-
-		self._tests = tests
-		self._skipped = skipped
-		self._errored = errored
-		self._failed = failed
-		self._passed = passed
-
-		if errored > 0:
-			self._state = TestcaseState.Error
-		elif failed > 0:
-			self._state = TestcaseState.Failed
-		elif tests - skipped == passed:
-			self._state = TestcaseState.Passed
-		elif tests == skipped:
-			self._state = TestcaseState.Skipped
-		else:
-			self._state = TestcaseState.Unknown
-
-		return tests, skipped, errored, failed, passed
-
-	def ConvertToGeneric(self) -> gen_Testsuite:
-		def convertTestsuite(testsuite: Testsuite) -> gen_Testsuite:
-			newTestsuite = gen_Testsuite(testsuite._name)
-
-			for testsuite in testsuite._testsuites.values():
-				newTestsuite.AddTestsuite(convertTestsuite(testsuite))
-
-			for testcase in testsuite._testcases.values():
-				newTestsuite.AddTestcase(gen_Testcase(testcase._name))
-
-			return newTestsuite
-
-		rootTS = gen_Testsuite(self._name)
-
-		for testsuite in self._testsuites.values():
-			rootTS.AddTestsuite(convertTestsuite(testsuite))
-
-		return rootTS
-
-
-@export
-class Document(TestsuiteSummary):
-	_path:             Path
-	_documentElement:  Element
-
-	_readingByMiniDom: float  #: TODO: replace by Timer; should be timedelta?
-	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
-
-	def __init__(self, path: Path):
-		if not path.exists():
-			raise UnittestException(f"JUnit XML file '{path}' does not exist.") from FileNotFoundError(f"File '{path}' not found.")
-
-		self._path = path
-
-		try:
-			startMiniDom = perf_counter_ns()
-			rootElement = minidom.parse(str(path)).documentElement
-			endMiniDom = perf_counter_ns()
+			self._xmlDocument = minidom.parse(str(self._path))
 		except Exception as ex:
-			raise UnittestException(f"Couldn't open '{path}'.") from ex
+			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
 
-		self._documentElement = rootElement
-		self._readingByMiniDom = (endMiniDom - startMiniDom) / 1e9
+		endAnalysis = perf_counter_ns()
+		self._analysisDuration = (endAnalysis - startAnalysis) / 1e9
+
+	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
+		if path is None:
+			path = self._path
+
+		if not overwrite and path.exists():
+			raise UnittestException(f"JUnit XML file '{path}' can not be written.") \
+				from FileExistsError(f"File '{path}' already exists.")
+
+		if regenerate:
+			self.Generate(overwrite=True)
+
+		if self._xmlDocument is None:
+			ex = UnittestException(f"Internal XML document tree is empty and needs to be generated before write is possible.")
+			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
+			raise ex
+
+		with path.open("w") as file:
+			self._xmlDocument.writexml(file, addindent="\t", encoding="utf-8", newl="\n")
+
+	def Parse(self) -> None:
+		if self._xmlDocument is None:
+			ex = UnittestException(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
+			ex.add_note(f"Call 'JUnitDocument.Read()' or create document using 'JUnitDocument(path, parse=True)'.")
+			raise ex
 
 		startConversion = perf_counter_ns()
-		name = rootElement.getAttribute("name") if rootElement.hasAttribute("name") else "root"
-		testsuiteRuntime = float(rootElement.getAttribute("time")) if rootElement.hasAttribute("time") else -1.0
-		timestamp = datetime.fromisoformat(rootElement.getAttribute("timestamp")) if rootElement.hasAttribute("timestamp") else None
+		rootElement = self._xmlDocument.documentElement
 
-		super().__init__(name, timedelta(seconds=testsuiteRuntime))
+		self._name =          rootElement.getAttribute("name")                              if rootElement.hasAttribute("name")      else "root"
+		self._startTime =     datetime.fromisoformat(rootElement.getAttribute("timestamp")) if rootElement.hasAttribute("timestamp") else None
+		self._totalDuration = timedelta(seconds=float(rootElement.getAttribute("time")))    if rootElement.hasAttribute("time")      else None
 
-		tests = rootElement.getAttribute("tests")
-		skipped = rootElement.getAttribute("skipped")
-		errors = rootElement.getAttribute("errors")
-		failures = rootElement.getAttribute("failures")
-		assertions = rootElement.getAttribute("assertions")
+		# tests = rootElement.getAttribute("tests")
+		# skipped = rootElement.getAttribute("skipped")
+		# errors = rootElement.getAttribute("errors")
+		# failures = rootElement.getAttribute("failures")
+		# assertions = rootElement.getAttribute("assertions")
 
 		for rootNode in rootElement.childNodes:
 			if rootNode.nodeName == "testsuite":
-				self._ParseTestsuite(rootNode)
+				self._ParseTestsuite(self, rootNode)
 
 		self.Aggregate()
 		endConversation = perf_counter_ns()
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
-	def _ParseTestsuite(self, testsuitesNode: Element) -> None:
+	def _ParseTestsuite(self, parentTestsuite: Testsuite, testsuitesNode: Element) -> None:
+		name = testsuitesNode.getAttribute("name")
+
+		kwargs = {}
+		if testsuitesNode.hasAttribute("timestamp"):
+			kwargs["startTime"] = datetime.fromisoformat(testsuitesNode.getAttribute("timestamp"))
+		if testsuitesNode.hasAttribute("time"):
+			kwargs["totalDuration"] = timedelta(seconds=float(testsuitesNode.getAttribute("time")))
+
+		newTestsuite = Testsuite(
+			name,
+			**kwargs,
+			parent=parentTestsuite
+		)
+
+		if self._readerMode is JUnitReaderMode.Default:
+			currentTestsuite = parentTestsuite
+		elif self._readerMode is JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName:
+			currentTestsuite = newTestsuite
+		else:
+			raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
+
 		for node in testsuitesNode.childNodes:
 			if node.nodeType == Node.ELEMENT_NODE:
 				if node.tagName == "testsuite":
-					self._ParseTestsuite(node)
+					self._ParseTestsuite(currentTestsuite, node)
 				elif node.tagName == "testcase":
-					self._ParseTestcase(node)
+					self._ParseTestcase(currentTestsuite, node)
 
-	def _ParseTestcase(self, testsuiteNode: Element) -> None:
+	def _ParseTestcase(self, parentTestsuite: Testsuite, testsuiteNode: Element) -> None:
 		className = testsuiteNode.getAttribute("classname")
 		name = testsuiteNode.getAttribute("name")
 		time = float(testsuiteNode.getAttribute("time"))
 
-		concurrentSuite = self
+		if self._readerMode is JUnitReaderMode.Default:
+			currentTestsuite = self
+		elif self._readerMode is JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName:
+			currentTestsuite = parentTestsuite
+		else:
+			raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
 
 		testsuitePath = className.split(".")
 		for testsuiteName in testsuitePath:
 			try:
-				concurrentSuite = concurrentSuite[testsuiteName]
+				currentTestsuite = currentTestsuite._testsuites[testsuiteName]
 			except KeyError:
-				new = Testsuite(testsuiteName, timedelta(seconds=time))
-				concurrentSuite._testsuites[testsuiteName] = new
-				concurrentSuite = new
+				currentTestsuite._testsuites[testsuiteName] = new = Testsuite(testsuiteName)
+				currentTestsuite = new
 
-		testcase = Testcase(name, timedelta(seconds=time))
-		concurrentSuite._testcases[name] = testcase
+		testcase = Testcase(name, totalDuration=timedelta(seconds=time))
+		currentTestsuite._testcases[name] = testcase
 
 		for node in testsuiteNode.childNodes:
 			if node.nodeType == Node.ELEMENT_NODE:
 				if node.tagName == "skipped":
-					testcase._state = TestcaseState.Skipped
+					testcase._status = TestcaseStatus.Skipped
 				elif node.tagName == "failure":
-					testcase._state = TestcaseState.Failed
+					testcase._status = TestcaseStatus.Failed
 				elif node.tagName == "error":
-					testcase._state = TestcaseState.Error
+					testcase._status = TestcaseStatus.Errored
 				elif node.tagName == "system-out":
 					pass
 				elif node.tagName == "system-err":
@@ -403,5 +218,65 @@ class Document(TestsuiteSummary):
 				else:
 					raise UnittestException(f"Unknown element '{node.tagName}' in junit file.")
 
-		if testcase._state is TestcaseState.Unknown:
-			testcase._state = TestcaseState.Passed
+		if testcase._status is TestcaseStatus.Unknown:
+			testcase._status = TestcaseStatus.Passed
+
+	def Generate(self, overwrite: bool = False) -> None:
+		if self._xmlDocument is not None:
+			raise UnittestException(f"Internal XML document is populated with data.")
+
+		self._xmlDocument = xmlDocument = Document()
+		rootElement = xmlDocument.createElement("testsuites")
+		rootElement.setAttribute("name", self._name)
+		if self._startTime is not None:
+			rootElement.setAttribute("timestamp", f"{self._startTime.isoformat()}")
+		if self._totalDuration is not None:
+			rootElement.setAttribute("time", f"{self._totalDuration.total_seconds():.6f}")
+
+		xmlDocument.appendChild(rootElement)
+
+		for testsuite in self._testsuites.values():
+			self._GenerateTestsuite(testsuite, rootElement)
+
+	def _GenerateTestsuite(self, testsuite: Testsuite, parentElement: Element):
+		xmlDocument = parentElement.ownerDocument
+
+		testsuiteElement = xmlDocument.createElement("testsuite")
+		testsuiteElement.setAttribute("name", testsuite._name)
+		if testsuite._startTime is not None:
+			testsuiteElement.setAttribute("timestamp", f"{testsuite._startTime.isoformat()}")
+		if testsuite._totalDuration is not None:
+			testsuiteElement.setAttribute("time", f"{testsuite._totalDuration.total_seconds():.6f}")
+
+		parentElement.appendChild(testsuiteElement)
+
+		for testsuite in testsuite._testsuites.values():
+			self._GenerateTestsuite(testsuite, testsuiteElement)
+
+		for testcase in testsuite._testcases.values():
+			self._GenerateTestcase(testcase, testsuiteElement)
+
+	def _GenerateTestcase(self, testcase: Testcase, parentElement: Element):
+		xmlDocument = parentElement.ownerDocument
+
+		testcaseElement = xmlDocument.createElement("testcase")
+		testcaseElement.setAttribute("name", testcase._name)
+		if testcase._totalDuration is not None:
+			testcaseElement.setAttribute("time", f"{testcase._totalDuration.total_seconds():.6f}")
+		if testcase._assertionCount is not None:
+			testcaseElement.setAttribute("assertions", f"{testcase._assertionCount}")
+
+		if testcase._status is TestcaseStatus.Passed:
+			pass
+		elif testcase._status is TestcaseStatus.Failed:
+			failureElement = xmlDocument.createElement("failure")
+			testcaseElement.appendChild(failureElement)
+		elif testcase._status is TestcaseStatus.Skipped:
+			skippedElement = xmlDocument.createElement("skipped")
+			testcaseElement.appendChild(skippedElement)
+		else:
+			errorElement = xmlDocument.createElement("error")
+
+			testcaseElement.appendChild(errorElement)
+
+		parentElement.appendChild(testcaseElement)

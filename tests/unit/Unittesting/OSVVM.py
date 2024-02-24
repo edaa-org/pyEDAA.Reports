@@ -32,7 +32,7 @@
 from pathlib      import Path
 from unittest     import TestCase
 
-from pyEDAA.Reports.Unittesting.OSVVM import Document
+from pyEDAA.Reports.Unittesting.OSVVM import OsvvmYamlDocument
 
 
 if __name__ == "__main__": # pragma: no cover
@@ -45,27 +45,26 @@ class TestResults(TestCase):
 	def test_ReadOSVVMTestSummaryYAML(self) -> None:
 		yamlPath = Path("tests/data/OSVVM/osvvm.Summary.yml")
 
-		osvvmTestSummary = Document(yamlPath)
+		osvvmTestSummary = OsvvmYamlDocument(yamlPath, parse=True)
+		print(osvvmTestSummary.ToTree().Render())
 
-		self.assertIsNotNone(osvvmTestSummary)
-
-		self.assertEqual(14, len(osvvmTestSummary))
+		self.assertEqual(14, len(osvvmTestSummary.Testsuites))
 		self.assertIn("Axi4Lite", osvvmTestSummary)
 		self.assertIn("Axi4Full", osvvmTestSummary)
 		self.assertIn("AxiStream", osvvmTestSummary)
 		self.assertIn("Uart", osvvmTestSummary)
 
 		axi4lite = osvvmTestSummary["Axi4Lite"]
-		self.assertEqual(17, len(axi4lite))
+		self.assertEqual(17, len(axi4lite.Testcases))
 
 		axi4 = osvvmTestSummary["Axi4Full"]
-		self.assertEqual(68, len(axi4))
+		self.assertEqual(68, len(axi4.Testcases))
 
 		axi4stream = osvvmTestSummary["AxiStream"]
-		self.assertEqual(65, len(axi4stream))
+		self.assertEqual(65, len(axi4stream.Testcases))
 
 		uart = osvvmTestSummary["Uart"]
-		self.assertEqual(8, len(uart))
+		self.assertEqual(8, len(uart.Testcases))
 
 	# 	for suite in osvvmTestSummary:
 	# 		self.printTestsuite(suite)

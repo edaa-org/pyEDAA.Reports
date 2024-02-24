@@ -1,0 +1,733 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testsuite name="pytest" errors="0" failures="0" skipped="22" tests="632" time="6.441" timestamp="2024-02-22T16:57:16.425245" hostname="fv-az731-276">
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_DefaultHelpLong" time="0.004"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_DefaultHelpShort" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_Help" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_HelpLong" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_HelpPlusArgWithArg" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_HelpPlusArgWithoutArg" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_HelpShort" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_NoArgs" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_VerboseShortWithV" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Common" name="test_VerboseShortWithoutV" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Commands" name="test_TwoCommands" time="0.003"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_Float" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_Integer" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_Path" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_Positional" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Values" name="test_String" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_FloatList" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_IntegerList" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_Lists" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_PathList" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValueLists" name="test_StringList" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_CommandHandler_Long" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_CommandHandler_Short" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_CommandHandler_ShortAndLong" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_DefaultHandler_Long" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_DefaultHandler_Short" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.Flags" name="test_DefaultHandler_ShortAndLong" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_CommandHandler_Long" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_CommandHandler_Short" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_CommandHandler_ShortAndLong" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_DefaultHandler_Long" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_DefaultHandler_Short" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.ValuedFlags" name="test_DefaultHandler_ShortAndLong" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.ArgParse.UserManager" name="test_UserManager" time="0.002"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.ApplyClassAttributes" name="test_AttributeAndDerivedAttribute" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.ApplyClassAttributes" name="test_DerivedAttributes" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.ApplyClassAttributes" name="test_DoubleAppliedAttribute" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.ApplyClassAttributes" name="test_MultipleAttributes" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.ApplyClassAttributes" name="test_MultipleClasses" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.ApplyClassAttributes" name="test_MultipleClassesAndAttributes" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.ApplyClassAttributes" name="test_SingleClass" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_Scope_Local" time="0.000">
+			<skipped type="pytest.skip" message="Unclear how to get a local scope object.">
+				D:\a\pyTooling\pyTooling\tests\unit\Attributes\AttributesOnClasses.py:233: Unclear how to get a local scope
+				object.
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_Scope_Module" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_Scope_Nested" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_Scope_SubclassOf_Nested" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnClasses.Filtering" name="test_SubclassOf" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnFunctions.ApplyFunctionAttributes" name="test_MultipleFunctions" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnFunctions.ApplyFunctionAttributes" name="test_SingleFunction" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnFunctions.Filtering" name="test_Scope_Local" time="0.000">
+			<skipped type="pytest.skip" message="Unclear how to get a local scope object.">
+				D:\a\pyTooling\pyTooling\tests\unit\Attributes\AttributesOnFunctions.py:111: Unclear how to get a local scope
+				object.
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Attributes.AttributesOnFunctions.Filtering" name="test_Scope_Module" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnFunctions.Filtering" name="test_Scope_Nested" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_MultipleAttributes_MultipleClasses_MultipleMethods" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_MultipleAttributes_MultipleClasses_SingleMethod" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_MultipleAttributes_SingleClass_MultipleMethods" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_MultipleAttributes_SingleClass_SingleMethod" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_NoAttribute" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_SingleAttribute_MultipleClasses_MultipleMethods" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_SingleAttribute_MultipleClasses_SingleMethod" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_SingleAttribute_SingleClass_MultipleMethods" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_NoMetaClass" name="test_SingleAttribute_SingleClass_SingleMethod" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_MultipleAttributes_MultipleClasses_MultipleMethods" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_MultipleAttributes_MultipleClasses_SingleMethod" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_MultipleAttributes_SingleClass_MultipleMethods" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_MultipleAttributes_SingleClass_SingleMethod" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_NoAttribute" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_SingleAttribute_MultipleClasses_MultipleMethods" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_SingleAttribute_MultipleClasses_SingleMethod" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_SingleAttribute_SingleClass_MultipleMethods" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.ApplyMethodAttributes_WithMetaClass" name="test_SingleAttribute_SingleClass_SingleMethod" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.MetaTesting" name="test_Meta" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.Filtering" name="test_Scope_Class" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.AttributesOnMethods.Attribute_GetAttributes_Filtering" name="test_1" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.PredefinedAttributes.Simple" name="test_ClassAttribute" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.PredefinedAttributes.Simple" name="test_FunctionAttribute" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.PredefinedAttributes.Simple" name="test_MethodAttribute" time="0.001"/>
+		<testcase classname="tests.unit.Attributes.PredefinedAttributes.Grouped" name="test_Group_Simple" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_AbstractCommandArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_CommandArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_CommandLineArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_DelimiterArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_DerivedDelimiterArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_DerivedNamedAndValuedArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_DerivedNamedArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_ExecutableArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_NamedAndValuedArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_NamedArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_PathArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_PathListArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_StringArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_StringListArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.WithoutPrefix" name="test_ValuedArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Commands" name="test_DerivedLongCommand" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Commands" name="test_DerivedShortCommand" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Commands" name="test_DerivedWindowsCommand" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Commands" name="test_LongCommand" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Commands" name="test_ShortCommand" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Commands" name="test_WindowsCommand" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Flags" name="test_DerivedFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Flags" name="test_DerivedLongFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Flags" name="test_DerivedShortFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Flags" name="test_DerivedWindowsFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Flags" name="test_FlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Flags" name="test_LongFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Flags" name="test_ShortFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.Flags" name="test_WindowsFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.BooleanFlags" name="test_BooleanFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.BooleanFlags" name="test_DerivedBooleanFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.BooleanFlags" name="test_DerivedLongBooleanFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.BooleanFlags" name="test_DerivedShortBooleanFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.BooleanFlags" name="test_DerivedWindowsBooleanFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.BooleanFlags" name="test_LongBooleanFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.BooleanFlags" name="test_ShortBooleanFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.BooleanFlags" name="test_WindowsBooleanFlagArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.OptionalValuedFlags" name="test_DerivedLongOptionalValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.OptionalValuedFlags" name="test_DerivedOptionalValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.OptionalValuedFlags" name="test_DerivedShortOptionalValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.OptionalValuedFlags" name="test_DerivedWindowsOptionalValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.OptionalValuedFlags" name="test_LongOptionalValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.OptionalValuedFlags" name="test_OptionalValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.OptionalValuedFlags" name="test_ShortOptionalValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.OptionalValuedFlags" name="test_WindowsOptionalValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlags" name="test_DerivedLongValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlags" name="test_DerivedShortValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlags" name="test_DerivedValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlags" name="test_DerivedWindowsValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlags" name="test_LongValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlags" name="test_ShortValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlags" name="test_ValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlags" name="test_WindowsValuedFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlagLists" name="test_DerivedLongValuedFlagList" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlagLists" name="test_DerivedShortValuedFlagList" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlagLists" name="test_DerivedValuedFlagList" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlagLists" name="test_DerivedWindowsValuedFlagList" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlagLists" name="test_LongValuedFlagList" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlagLists" name="test_ShortValuedFlagList" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlagLists" name="test_ValuedFlagList" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedFlagLists" name="test_WindowsValuedFlagList" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedTupleFlags" name="test_DerivedLongTupleFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedTupleFlags" name="test_DerivedShortTupleFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedTupleFlags" name="test_DerivedValuedTupleArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedTupleFlags" name="test_DerivedWindowsTupleFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedTupleFlags" name="test_LongTupleFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedTupleFlags" name="test_ShortTupleFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedTupleFlags" name="test_ValuedTupleArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.ValuedTupleFlags" name="test_WindowsTupleFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.KeyValueFlags" name="test_DerivedLongKeyValueFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.KeyValueFlags" name="test_DerivedNamedKeyValuePairsArgument" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.KeyValueFlags" name="test_DerivedShortKeyValueFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.KeyValueFlags" name="test_DerivedWindowsKeyValueFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.KeyValueFlags" name="test_KeyValueFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.KeyValueFlags" name="test_LongKeyValueFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.KeyValueFlags" name="test_ShortKeyValueFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Argument.KeyValueFlags" name="test_WindowsKeyValueFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Environment.DefaultEnvironment" name="test_Empty" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Environment.DefaultEnvironment" name="test_SystemDefault" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Environment.ArtificialEnvironment" name="test_Simple" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Executable.ExplicitBinaryDirectoryOnLinux" name="test_VersionFlag" time="0.000">
+			<skipped type="pytest.skip" message="Don't run these tests on Windows.">
+				D:\a\pyTooling\pyTooling\tests\unit\CLIAbstraction\Executable.py:76: Don't run these tests on Windows.
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.CLIAbstraction.Executable.ExplicitBinaryDirectoryOnWindows" name="test_VersionFlag" time="0.062"/>
+		<testcase classname="tests.unit.CLIAbstraction.Executable.CommonOptions" name="test_HelpCommand" time="0.027"/>
+		<testcase classname="tests.unit.CLIAbstraction.Executable.CommonOptions" name="test_HelpFlag" time="0.020"/>
+		<testcase classname="tests.unit.CLIAbstraction.Executable.CommonOptions" name="test_VersionFlag" time="0.021"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnLinux" name="test_BinaryDirectory" time="0.000">
+			<skipped type="pytest.skip" message="Don't run these tests on Windows.">
+				D:\a\pyTooling\pyTooling\tests\unit\CLIAbstraction\Program.py:87: Don't run these tests on Windows.
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnLinux" name="test_BinaryDirectory_DoesNotExist" time="0.000">
+			<skipped type="pytest.skip" message="Don't run these tests on Windows.">
+				D:\a\pyTooling\pyTooling\tests\unit\CLIAbstraction\Program.py:100: Don't run these tests on Windows.
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnLinux" name="test_BinaryDirectory_NotAPath" time="0.001">
+			<skipped type="pytest.skip" message="Don't run these tests on Windows.">
+				D:\a\pyTooling\pyTooling\tests\unit\CLIAbstraction\Program.py:96: Don't run these tests on Windows.
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnLinux" name="test_ExecutablePath" time="0.000">
+			<skipped type="pytest.skip" message="Don't run these tests on Windows.">
+				D:\a\pyTooling\pyTooling\tests\unit\CLIAbstraction\Program.py:104: Don't run these tests on Windows.
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnLinux" name="test_ExecutablePath_DoesNotExist" time="0.000">
+			<skipped type="pytest.skip" message="Don't run these tests on Windows.">
+				D:\a\pyTooling\pyTooling\tests\unit\CLIAbstraction\Program.py:117: Don't run these tests on Windows.
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnLinux" name="test_ExecutablePath_NotAPath" time="0.000">
+			<skipped type="pytest.skip" message="Don't run these tests on Windows.">
+				D:\a\pyTooling\pyTooling\tests\unit\CLIAbstraction\Program.py:113: Don't run these tests on Windows.
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnWindows" name="test_BinaryDirectory" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnWindows" name="test_BinaryDirectory_DoesNotExist" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnWindows" name="test_BinaryDirectory_NotAPath" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnWindows" name="test_ExecutablePath" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnWindows" name="test_ExecutablePath_DoesNotExist" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.ExplicitPathsOnWindows" name="test_ExecutablePath_NotAPath" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.CommonOptions" name="test_BinaryDirectory_UnknownOS" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.CommonOptions" name="test_GetUnknownFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.CommonOptions" name="test_HelpCommand" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.CommonOptions" name="test_HelpFlag" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.CommonOptions" name="test_NotInPath" time="0.003"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.CommonOptions" name="test_SetUnknownFlag" time="0.002"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.CommonOptions" name="test_UnknownOS" time="0.001"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.CommonOptions" name="test_VersionFlag" time="0.002"/>
+		<testcase classname="tests.unit.CLIAbstraction.Program.Commit" name="test_CommitWithMessage" time="0.002"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Any" name="test_Equal" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Any" name="test_Unequal" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Any" name="test_Value" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Boolean" name="test_Equal" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Boolean" name="test_TypeConvertToBool" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Boolean" name="test_TypeConvertToInt" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Boolean" name="test_Unequal" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Boolean" name="test_Value" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Addition" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_And" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Decrement" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Division" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Equal" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_FloorDivision" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_GeaterThanOrEqual" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_GreaterThan" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Increment" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_InplaceAnd" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_InplaceDivision" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_InplaceFloorDivision" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_InplaceModulo" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_InplaceMultiplication" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_InplaceOr" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_InplacePower" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_InplaceXor" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Invert" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_LessThan" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_LessThanOrEqual" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Modulo" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Multiplication" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Negate" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Or" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Positive" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Power" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Subtraction" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_TypeConvertToBool" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_TypeConvertToInt" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Unequal" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Value" time="0.001"/>
+		<testcase classname="tests.unit.CallByRef.CallByRef.Integer" name="test_Xor" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.First" name="test_FirstKey0" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.First" name="test_FirstKey1" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.First" name="test_FirstKey2" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.First" name="test_FirstPair0" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.First" name="test_FirstPair1" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.First" name="test_FirstPair2" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.First" name="test_FirstValue0" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.First" name="test_FirstValue1" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.First" name="test_FirstValue2" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Merge" name="test_Merge1" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Merge" name="test_Merge2" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Merge" name="test_Merge2Filter" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Merge" name="test_Merge3" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Merge" name="test_NoDicts" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Zip" name="test_Iterate" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Zip" name="test_NoDicts" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Zip" name="test_Zip1_1" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Zip" name="test_Zip1_2" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Zip" name="test_Zip2_1" time="0.001"/>
+		<testcase classname="tests.unit.Common.Dictionary.Zip" name="test_Zip2_2" time="0.001"/>
+		<testcase classname="tests.unit.Common.IsNestedClass.IsNestedClass" name="test_DerivedClass" time="0.001"/>
+		<testcase classname="tests.unit.Common.IsNestedClass.IsNestedClass" name="test_DoubleNestedClass" time="0.001"/>
+		<testcase classname="tests.unit.Common.IsNestedClass.IsNestedClass" name="test_NestedClass" time="0.001"/>
+		<testcase classname="tests.unit.Common.IsNestedClass.IsNestedClass" name="test_ParallelClass" time="0.001"/>
+		<testcase classname="tests.unit.Common.IsNestedClass.IsNestedClass" name="test_SameClass" time="0.001"/>
+		<testcase classname="tests.unit.Common.Iterable.First" name="test_FirstItem0" time="0.001"/>
+		<testcase classname="tests.unit.Common.Iterable.First" name="test_FirstItem1" time="0.001"/>
+		<testcase classname="tests.unit.Common.Iterable.First" name="test_FirstItem2" time="0.001"/>
+		<testcase classname="tests.unit.Common.Iterable.Last" name="test_LastItem0" time="0.001"/>
+		<testcase classname="tests.unit.Common.Iterable.Last" name="test_LastItem1" time="0.001"/>
+		<testcase classname="tests.unit.Common.Iterable.Last" name="test_LastItem2" time="0.001"/>
+		<testcase classname="tests.unit.Common.SizeOf.ObjectSizes" name="test_ClassWith2DictMembers" time="0.001"/>
+		<testcase classname="tests.unit.Common.SizeOf.ObjectSizes" name="test_ClassWith2SlotMembers" time="0.001"/>
+		<testcase classname="tests.unit.Common.SizeOf.ObjectSizes" name="test_EmptyClass" time="0.001"/>
+		<testcase classname="tests.unit.Common.Timer.Timing" name="test_ContextManager" time="0.103"/>
+		<testcase classname="tests.unit.Common.Timer.Timing" name="test_PauseResume" time="0.718"/>
+		<testcase classname="tests.unit.Common.Timer.Timing" name="test_StartStop" time="0.108"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_Dictionary" time="0.002"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_NestedVariables" time="0.001"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_PathExpressionToNode" time="0.001"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_PathExpressionToValue" time="0.001"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_Root" time="0.001"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_Sequence" time="0.001"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_SimpleString" time="0.001"/>
+		<testcase classname="tests.unit.Configuration.JSON.ReadingValues" name="test_Variables" time="0.001"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Dictionary" time="0.016"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_NestedVariables" time="0.013"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_PathExpressionToNode" time="0.013"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_PathExpressionToValue" time="0.013"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Root" time="0.013"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Sequence" time="0.013"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_SimpleString" time="0.013"/>
+		<testcase classname="tests.unit.Configuration.YAML.ReadingValues" name="test_Variables" time="0.013"/>
+		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportLocalClass" time="0.001"/>
+		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportLocalFunction" time="0.001"/>
+		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportTopLevelClass" time="0.001"/>
+		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportTopLevelFunction" time="0.001"/>
+		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportTopLevelLambda" time="0.001"/>
+		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportedClass" time="0.001"/>
+		<testcase classname="tests.unit.Decorators.Decorators.Export" name="test_ExportedFunction" time="0.001"/>
+		<testcase classname="tests.unit.Decorators.Decorators.ReadOnly" name="test_Deleter" time="0.000">
+			<skipped type="pytest.skip" message="EXPECTED ERROR IS NOT RAISED">
+				D:\a\pyTooling\pyTooling\tests\unit\Decorators\Decorators.py:150: EXPECTED ERROR IS NOT RAISED
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Decorators.Decorators.ReadOnly" name="test_ReadOnly" time="0.001"/>
+		<testcase classname="tests.unit.Decorators.Decorators.ReadOnly" name="test_Setter" time="0.000">
+			<skipped type="pytest.skip" message="EXPECTED ERROR IS NOT RAISED">
+				D:\a\pyTooling\pyTooling\tests\unit\Decorators\Decorators.py:129: EXPECTED ERROR IS NOT RAISED
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Decorators.Decorators.InheritDocStrings" name="test_InheritDocString" time="0.001"/>
+		<testcase classname="tests.unit.Decorators.Decorators.Descriptors" name="test_ClassProperty" time="0.001"/>
+		<testcase classname="tests.unit.Exceptions.Exceptions.Exceptions" name="test_EnvironmentException" time="0.001"/>
+		<testcase classname="tests.unit.Exceptions.Exceptions.Exceptions" name="test_NotConfiguredException" time="0.001"/>
+		<testcase classname="tests.unit.Exceptions.Exceptions.Exceptions" name="test_PlatformNotSupportedException" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_EdgeFromNewVertex" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_EdgeFromVertex" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_EdgeToNewVertex" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_EdgeToVertex" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_Graph" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_GraphWithName" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_LinkFromVertex" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_LinkToVertex" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_SimpleTree" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_SingleVertexForExistingGraph" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_StandaloneEdge" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_StandaloneLink" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_StandaloneVertex" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_Subgraph" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_SubgraphWithName" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_View" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Construction" name="test_ViewWithName" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Subgraphs" name="test_InnerEdges" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Subgraphs" name="test_InnerVertices" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Subgraphs" name="test_OuterAndInnerVertices" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Subgraphs" name="test_OuterEdges" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Subgraphs" name="test_OuterToInnerEdges" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Subgraphs" name="test_OuterVertices" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Names" name="test_Graph_NoName" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Names" name="test_Graph_WithName" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Names" name="test_Graph_WrongName" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IDs" name="test_GetVertexByID" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IDs" name="test_GetVertexByNoneID" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IDs" name="test_VertexID" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IDs" name="test_VertexNoneID" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Values" name="test_EdgeNoneValue" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Values" name="test_EdgeValue" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Values" name="test_GetVertexByNoneValue" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Values" name="test_GetVertexByValue" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Values" name="test_VertexNoneValue" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Values" name="test_VertexValue" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Weights" name="test_EdgeNoneWeight" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Weights" name="test_EdgeWeight" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Weights" name="test_VertexNoneWeight" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Weights" name="test_VertexWeight" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Dicts" name="test_ComponentDict" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Dicts" name="test_EdgeDict" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Dicts" name="test_GraphDict" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Dicts" name="test_SubgraphDict" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Dicts" name="test_VertexDict" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.Dicts" name="test_ViewDict" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_DuplicateEdgeID" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeFromVertex" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeFromVertexWithID" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeFromVertexWithValue" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeFromVertexWithWeight" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeToVertex" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeToVertexWithID" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeToVertexWithValue" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.EdgesAndLinks" name="test_EdgeToVertexWithWeight" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Edges" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Leafs" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Roots" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Topologically" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateOnGraph" name="test_Vertices" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.GraphOperations" name="test_CopyVertices" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.GraphOperations" name="test_RemoveEdges" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.GraphOperations" name="test_ReverseEdges" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.VertexOperations" name="test_Copy" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.VertexOperations" name="test_CopyAddBackwardLink" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.VertexOperations" name="test_CopyAddForwardLink" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.VertexOperations" name="test_CopyIntoSameGraph" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.VertexOperations" name="test_CopyWithDict" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.GraphProperties" name="test_HasCycle" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_BFS" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_DFS" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_IterateAllOutboundPathsAsVertexList" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_ShortestPathByFixedWeight" time="0.001"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_ShortestPathByHops" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.IterateStartingFromVertex" name="test_ShortestPathByWeight" time="0.002"/>
+		<testcase classname="tests.unit.Graph.__init__.GraphToTree" name="test_ConvertToTree" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_Data" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_Edge" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_EdgeWithData" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_Graph" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_GraphML" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_GraphWithNodesAndEdges" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_GraphWithSubgraph" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_Key" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_Node" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.Construction" name="test_NodeWithData" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.pyToolingGraph" name="test_ConvertGraph" time="0.001"/>
+		<testcase classname="tests.unit.Graph.GraphML.pyToolingGraph" name="test_ConvertSubgraph" time="0.002"/>
+		<testcase classname="tests.unit.Graph.GraphML.pyToolingTree" name="test_Conversion" time="0.001"/>
+		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_ClassifierConversion" time="0.001"/>
+		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_ClassifierConversionException" time="0.001"/>
+		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_Compatibility" time="0.001"/>
+		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_Equalality" time="0.001"/>
+		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_Properies" time="0.001"/>
+		<testcase classname="tests.unit.Licensing.Licensing.LicenseDataClass" name="test_ToString" time="0.001"/>
+		<testcase classname="tests.unit.Licensing.Licensing.SPDXLicenses" name="test_Apache" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_AbstractBase" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_AbstractClass" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_DerivedAbstractBase" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_DerivedAbstractClass" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_DoubleDerivedAbstractBase" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.AbstractMethod" name="test_MultipleInheritance" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.MustOverride" name="test_DerivedMustOverride" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.MustOverride" name="test_MustOverrideBase" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.MustOverride" name="test_MustOverrideClass" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Abstract.NotImplemented" name="test_NotImplementedBase" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_LinearInheritance_1" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_LinearInheritance_2" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_NoInheritance" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_NoInheritance_Init1" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_OInheritance_BaseExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_OInheritance_MergedExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_OInheritance_PrimaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_OInheritance_SecondaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_QInheritance_BaseExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_QInheritance_FinalExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_VInheritance_PrimaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_VInheritance_SecondaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_YInheritance_PrimaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.Normal" name="test_YInheritance_SecondaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Extended" name="test_InitValue_DunderInit_InstCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Extended" name="test_InitValue_InitOverwrite_InstCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Extended" name="test_InitValue_NoDunderInit_InstCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Extended" name="test_NoInitValue_DunderInit_ClassCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Extended" name="test_NoInitValue_DunderInit_InstCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Extended" name="test_NoInitValue_NoDunderInit_ClassCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Extended" name="test_NoInitValue_NoDunderInit_InstCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Slotted" name="test_InitValue_InitOverwrite_InstCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Slotted" name="test_NoInitValue_DunderInit_InstCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ObjectFieldInitializers_Slotted" name="test_NoInitValue_NoDunderInit_InstCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ClassFieldInitializers_Extended" name="test_InitValue_DunderInit_ClassCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ClassFieldInitializers_Extended" name="test_InitValue_NoDunderInit_ClassCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ClassFieldInitializers_Extended" name="test_NoInitValue_NoDunderInit_ClassCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ClassFieldInitializers_Extended" name="test_NoInitValue_NoDunderInit_InstCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ClassFieldInitializers_Slotted" name="test_InitValue_DunderInit_ClassCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ClassFieldInitializers_Slotted" name="test_InitValue_InitOverwrite_InstantiationCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Extended.ClassFieldInitializers_Slotted" name="test_InitValue_NoDunderInit_ClassCheck" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Overloading.Overloading" name="test_OverloadingByTypeSignature" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Singleton.Singleton" name="test_CrossRelations" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Singleton.Singleton" name="test_DerivedClassNoParameters" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Singleton.Singleton" name="test_DerivedClassWithInnerParameters" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.Singleton.Singleton" name="test_DerivedClassWithOuterParameters" time="0.001">
+			<skipped type="pytest.xfail" message="This case is not yet supported."/>
+		</testcase>
+		<testcase classname="tests.unit.MetaClasses.Singleton.Singleton" name="test_SecondInstanceWithParameters" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.ObjectSizes" name="test_ClassSizes" time="0.005"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.ObjectSizes" name="test_SizeOfSlotted1" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.ObjectSizes" name="test_SizeOfSlotted2" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_AddNewFieldByCode_1" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_AddNewFieldByCode_2" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_AddNewFieldInMethod_1" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_AddNewFieldInMethod_2" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_NormalField_1" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_NormalField_2" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_ReadNonExistingFieldByCode_1" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_ReadNonExistingFieldByCode_2" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_ReadNonExistingFieldInMethod_1" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_ReadNonExistingFieldInMethod_2" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.AttributeErrors" name="test_UninitializedSlot" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_LinearInheritance_1_BaseMixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_LinearInheritance_1_BaseMixin_FinalSlotted" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_LinearInheritance_1_BaseSlotted" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_LinearInheritance_1_BaseSlottedMixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_LinearInheritance_2_BaseMixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_LinearInheritance_2_BaseMixin_FinalSlotted" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_LinearInheritance_2_BaseSlotted" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_LinearInheritance_2_BaseSlottedMixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_OInheritance_BaseExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_OInheritance_BaseExtended_PrimaryMixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_OInheritance_BaseExtended_SecondaryMixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_OInheritance_MergedExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_OInheritance_PrimaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_OInheritance_PrimaryExtended_Slots_Mixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_OInheritance_SecondaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_OInheritance_SecondaryExtended_Slots_Slots" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_QInheritance_BaseExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_QInheritance_BaseExtended_PrimaryMixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_QInheritance_BaseExtended_SecondaryMixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_QInheritance_FinalExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_VInheritance_PrimaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_VInheritance_PrimaryExtended_Mixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_VInheritance_SecondaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_YInheritance_PrimaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_YInheritance_PrimaryExtended_Mixin" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Inheritance" name="test_YInheritance_SecondaryExtended" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Hierarchy" name="test_GraphMLInheritanceHierarchy" time="0.001"/>
+		<testcase classname="tests.unit.MetaClasses.SlottedType.Hierarchy" name="test_YAMLConfigurationInheritanceHierarchy" time="0.001"/>
+		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_VersionInformation" time="0.013"/>
+		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_loadReadmeMD" time="0.001"/>
+		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_loadReadmeReST" time="0.001"/>
+		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_loadRequirements" time="0.001"/>
+		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_loadRequirementsGit" time="0.001"/>
+		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_loadRequirementsRecursive" time="0.002"/>
+		<testcase classname="tests.unit.Packaging.__init__.HelperFunctions" name="test_loadRequirementsRemoteZIP" time="0.001"/>
+		<testcase classname="tests.unit.Packaging.__init__.VersionInformation" name="test_VersionInformation" time="0.001"/>
+		<testcase classname="tests.unit.Packaging.__init__.DescribePackage" name="test_PythonPackage" time="2.375"/>
+		<testcase classname="tests.unit.Packaging.__init__.DescribePackage" name="test_PythonPackageFromGitHub" time="0.002"/>
+		<testcase classname="tests.unit.Path.URL.GenericPath" name="test_Hostname" time="0.001"/>
+		<testcase classname="tests.unit.Path.URL.GenericPath" name="test_Port" time="0.001"/>
+		<testcase classname="tests.unit.Path.URL.GenericPath" name="test_Protocol" time="0.001"/>
+		<testcase classname="tests.unit.Path.URL.GenericPath" name="test_str" time="0.001"/>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_Clang32" time="0.000">
+			<skipped type="pytest.skip" message="Skipped 'test_Clang32', if environment variable 'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)">
+				D:\a\pyTooling\pyTooling\tests\unit\Platform\__init__.py:212: Skipped 'test_Clang32', if environment variable
+				'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_Clang64" time="0.000">
+			<skipped type="pytest.skip" message="Skipped 'test_Clang64', if environment variable 'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)">
+				D:\a\pyTooling\pyTooling\tests\unit\Platform\__init__.py:234: Skipped 'test_Clang64', if environment variable
+				'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_MSYS" time="0.000">
+			<skipped type="pytest.skip" message="Skipped 'test_MSYS', if environment variable 'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)">
+				D:\a\pyTooling\pyTooling\tests\unit\Platform\__init__.py:124: Skipped 'test_MSYS', if environment variable
+				'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_MinGW32" time="0.000">
+			<skipped type="pytest.skip" message="Skipped 'test_MinGW32', if environment variable 'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)">
+				D:\a\pyTooling\pyTooling\tests\unit\Platform\__init__.py:146: Skipped 'test_MinGW32', if environment variable
+				'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_MinGW64" time="0.000">
+			<skipped type="pytest.skip" message="Skipped 'test_MinGW64', if environment variable 'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)">
+				D:\a\pyTooling\pyTooling\tests\unit\Platform\__init__.py:168: Skipped 'test_MinGW64', if environment variable
+				'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_NativeLinux" time="0.000">
+			<skipped type="pytest.skip" message="Skipped 'test_NativeLinux', if environment variable 'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)">
+				D:\a\pyTooling\pyTooling\tests\unit\Platform\__init__.py:55: Skipped 'test_NativeLinux', if environment variable
+				'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_NativeMacOS" time="0.000">
+			<skipped type="pytest.skip" message="Skipped 'test_NativeMacOS', if environment variable 'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)">
+				D:\a\pyTooling\pyTooling\tests\unit\Platform\__init__.py:78: Skipped 'test_NativeMacOS', if environment variable
+				'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_NativeWindows" time="0.001"/>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_PlatformString" time="0.001"/>
+		<testcase classname="tests.unit.Platform.__init__.AnyPlatform" name="test_UCRT64" time="0.000">
+			<skipped type="pytest.skip" message="Skipped 'test_UCRT64', if environment variable 'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)">
+				D:\a\pyTooling\pyTooling\tests\unit\Platform\__init__.py:190: Skipped 'test_UCRT64', if environment variable
+				'ENVIRONMENT_NAME' doesn't match. Windows (x86-64)
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.TerminalUI.Line.Instantiation" name="test_Default" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Line.Instantiation" name="test_Indentation" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Line.Instantiation" name="test_Severity" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Line.Indentation" name="test_IndentationChange" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Severity.Comparison" name="test_Normal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Severity.Exceptions" name="test_Equal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Severity.Exceptions" name="test_Greater" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Severity.Exceptions" name="test_GreaterOrEqual" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Severity.Exceptions" name="test_Less" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Severity.Exceptions" name="test_LessOrEqual" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Severity.Exceptions" name="test_Unequal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.Instantiation" name="test_ApplicationConfiguration" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.Instantiation" name="test_DerivedApplication" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.Instantiation" name="test_LineTerminal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.Properties" name="test_BaseIndent" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.Properties" name="test_LogLevel" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ExitOnCounters" name="test_Errors" time="0.002"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ExitOnCounters" name="test_Warnings" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteDebugDefault" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteDryRun" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteError" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteFatal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteFatalNoExit" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteInfo" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteNormal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteQuiet" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteVerboseDefault" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut" name="test_WriteWarning" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteDebugDefault" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteDryRun" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteError" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteFatal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteFatalNoExit" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteInfo" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteNormal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteQuiet" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteVerboseDefault" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.ToStdOut_ToStdErr" name="test_WriteWarning" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteDebugDefault" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteDryRun" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteError" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteFatal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteFatalNoExit" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteInfo" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteNormal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteQuiet" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteVerboseDefault" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.Terminal.DataToStdOut" name="test_WriteWarning" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Instantiate" name="test_ApplicationDerivedFromTerminal" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Instantiate" name="test_InitializeColors" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Instantiate" name="test_NoConfigure" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Instantiate" name="test_UninitializeColors" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.WriteMessages" name="test_WriteLineToStdErr" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.WriteMessages" name="test_WriteLineToStdOut" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.WriteMessages" name="test_WriteToStdErr" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.WriteMessages" name="test_WriteToStdOut" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Exiting" name="test_CheckPythonVersion3" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Exiting" name="test_CheckPythonVersion4" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Exiting" name="test_Exit" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Exiting" name="test_FatalExit254" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Exiting" name="test_FatalExit4" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.Exiting" name="test_FatalExitDefault" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_Exception" time="0.002"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_ExceptionBase" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_ExceptionBaseWithNestedException" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_ExceptionWithNestedException" time="0.001"/>
+		<testcase classname="tests.unit.TerminalUI.TerminalBase.ExceptionHandling" name="test_NotImplemented" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_AddChild" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_AddChildTree" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_AddChildren" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_GrandChildren" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_NewNodeWithChildren" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_NewNodeWithParent" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_SetParent" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Construction" name="test_SingleNode" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.MergeTree" name="test_AddChild" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.MergeTree" name="test_AddChildren" time="0.000">
+			<skipped type="pytest.skip" message="Not yet implemented!">
+				D:\a\pyTooling\pyTooling\tests\unit\Tree\__init__.py:294: Not yet implemented!
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Tree.__init__.MergeTree" name="test_SetParent" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.SplitTree" name="test_DeleteChild" time="0.000">
+			<skipped type="pytest.skip" message="Not yet implemented!">
+				D:\a\pyTooling\pyTooling\tests\unit\Tree\__init__.py:354: Not yet implemented!
+			</skipped>
+		</testcase>
+		<testcase classname="tests.unit.Tree.__init__.SplitTree" name="test_SplitTreeWithIDs" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.SplitTree" name="test_SplitTreeWithoutIDs" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Loops" name="test_InternalLoop" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Loops" name="test_MinimalLoop" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Loops" name="test_SelfLoop" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Loops" name="test_SideLoop" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_Iterator" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_LeftSiblings" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_Length" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_NodeWithDictionary" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_NodeWithID" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_NodeWithValue" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_Repr" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_RightSiblings" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_Siblings" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_Size" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Features" name="test_Str" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_GetLeftRelatives" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_GetLeftSiblings" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_GetRightRelatives" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_GetRightSiblings" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_GetSiblings" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_IterateLeafs" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_IterateLevelOrder" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_IteratePostOrder" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_IteratePreOrder" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_LeftSiblings" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_RightSiblings" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Iteration" name="test_Siblings" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_AddExistingChildInChildren" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_AddWrongChild" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_AddWrongChildInChildren" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_GetLeftSiblingsOfRoot" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_GetNodeByIDNone" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_GetRightSiblingsOfRoot" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_GetSiblingsOfRoot" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_NewNodeWithDuplicateID" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_NewNodeWithNonIterableChildren" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_NewNodeWithWrongChildInChildren" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_NewNodeWithWrongParent" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_SetParentWithDuplicateIDs" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Exceptions" name="test_SetWrongParent" time="0.001"/>
+		<testcase classname="tests.unit.Tree.__init__.Rendering" name="test_Render" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_CreateFromEmptyString" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_CreateFromIntegers1" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_CreateFromIntegers2" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_CreateFromSomeString" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_CreateFromString1" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_Equal" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_GreaterEqual" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_GreaterThan" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_LessEqual" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_LessThan" time="0.001"/>
+		<testcase classname="tests.unit.Versioning.Version.Version" name="test_Unequal" time="0.001"/>
+	</testsuite>
+</testsuites>

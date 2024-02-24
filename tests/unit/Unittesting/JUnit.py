@@ -28,59 +28,78 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-from datetime import timedelta
+from datetime import timedelta, datetime
 from pathlib  import Path
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting.JUnit import Document, Testcase, TestcaseState, Testsuite, TestsuiteSummary
+from pyEDAA.Reports.Unittesting       import Testsuite, Testcase
+from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument
 
 
-class Instantiation(ut_TestCase):
-	def test_Summary(self) -> None:
-		tss = TestsuiteSummary("tss", timedelta(milliseconds=9831))
+class Document(ut_TestCase):
+	_outputDirectory = Path("tests/output")
 
-		self.assertEqual("tss", tss.Name)
-		self.assertEqual(TestcaseState.Unknown, tss.State)
-		self.assertEqual(0, len(tss.Testsuites))
-		self.assertEqual(9.831, tss.Time.total_seconds())
+	@classmethod
+	def setUpClass(cls):
+		print()
+		if cls._outputDirectory.exists():
+			print(f"Output directory '{cls._outputDirectory}' already exists.")
+			print(f"Cleaning XML files from '{cls._outputDirectory}' ...")
+			for file in cls._outputDirectory.glob("*.xml"):
+				print(f"  unlinking file: {file}")
+				file.unlink()
+		else:
+			print(f"Creating output directory '{cls._outputDirectory}' ...")
+			cls._outputDirectory.mkdir(parents=True)
 
-	def test_Testsuite(self) -> None:
-		ts = Testsuite("ts", timedelta(milliseconds=4206))
+	def test_Create_WithoutParse(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		doc = JUnitDocument(junitExampleFile)
 
-		self.assertEqual("ts", ts.Name)
-		self.assertEqual(TestcaseState.Unknown, ts.State)
-		self.assertEqual(0, len(ts.Testsuites))
-		self.assertEqual(0, len(ts.Testcases))
-		self.assertEqual(4.206, ts.Time.total_seconds())
+		self.assertEqual(junitExampleFile, doc.Path)
+		self.assertLess(doc.AnalysisDuration, timedelta(seconds=0))
+		self.assertLess(doc.ModelConversionDuration, timedelta(seconds=0))
 
-	def test_Testcase(self) -> None:
-		tc = Testcase("tc", timedelta(milliseconds=1505))
+		doc.Read()
+		doc.Parse()
 
-		self.assertEqual("tc", tc.Name)
-		self.assertEqual(TestcaseState.Unknown, tc.State)
-		self.assertEqual(0, tc.Assertions)
-		self.assertEqual(1.505, tc.Time.total_seconds())
+		self.assertGreaterEqual(doc.AnalysisDuration, timedelta(seconds=0))
+		self.assertGreaterEqual(doc.ModelConversionDuration, timedelta(seconds=0))
 
+	def test_Create_WithParse(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		doc = JUnitDocument(junitExampleFile, parse=True)
 
-class Transformation(ut_TestCase):
-	def test_JUnit2Unittesting(self) -> None:
-		tss = TestsuiteSummary("tss", timedelta(milliseconds=9831))
-		ts1 = Testsuite("ts1", timedelta(milliseconds=4206), parent=tss)
-		ts2 = Testsuite("ts2", timedelta(milliseconds=4206), parent=tss)
-		tc11 = Testcase("tc11", timedelta(milliseconds=1505), parent=ts1)
-		tc12 = Testcase("tc12", timedelta(milliseconds=1505), parent=ts1)
-		tc21 = Testcase("tc21", timedelta(milliseconds=1505), parent=ts2)
-		tc22 = Testcase("tc22", timedelta(milliseconds=1505), parent=ts2)
+		self.assertEqual(junitExampleFile, doc.Path)
+		self.assertGreaterEqual(doc.AnalysisDuration, timedelta(seconds=0))
+		self.assertGreaterEqual(doc.ModelConversionDuration, timedelta(seconds=0))
 
-		tts = tss.ConvertToGeneric()
+	def test_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		doc = JUnitDocument(junitExampleFile, parse=True)
 
-		self.assertEqual("tss", tts.Name)
-		self.assertEqual("ts1", tts.Testsuites[ts1.Name].Name)
-		self.assertEqual("ts2", tts.Testsuites[ts2.Name].Name)
-		self.assertEqual("tc11", tts.Testsuites[ts1.Name].Testcases[tc11.Name].Name)
-		self.assertEqual("tc12", tts.Testsuites[ts1.Name].Testcases[tc12.Name].Name)
-		self.assertEqual("tc21", tts.Testsuites[ts2.Name].Testcases[tc21.Name].Name)
-		self.assertEqual("tc22", tts.Testsuites[ts2.Name].Testcases[tc22.Name].Name)
+		doc.Write(self._outputDirectory / "ReadWrite.xml")
+
+	def test_Generate(self) -> None:
+		print()
+		doc = JUnitDocument(self._outputDirectory / "Generate.xml")
+		doc._name = "root"
+		doc._startTime = datetime.fromisoformat("2024-02-24T12:12:12+01:00")
+		ts1 = Testsuite("ts1", startTime=datetime.fromisoformat("2024-02-24T12:12:12+01:00"))
+		ts11 = Testsuite("ts11", startTime=datetime.fromisoformat("2024-02-24T12:12:12+01:00"), parent=ts1)
+		tc111 = Testcase("tc111", assertionCount=10, passedAssertionCount=10, totalDuration=timedelta(seconds=0.005), parent=ts11)
+		tc112 = Testcase("tc112", assertionCount=24, passedAssertionCount=24, totalDuration=timedelta(seconds=0.859), parent=ts11)
+		ts2 = Testsuite("ts2", startTime=datetime.fromisoformat("2024-02-24T12:12:13+01:00"))
+		tc21 = Testcase("tc21", assertionCount=13, failedAssertionCount=1, totalDuration=timedelta(seconds=3.637), parent=ts2)
+		tc22 = Testcase("tc22", assertionCount=48, failedAssertionCount=15, totalDuration=timedelta(seconds=2.473), parent=ts2)
+		doc.AddTestsuite(ts1)
+		doc.AddTestsuite(ts2)
+		doc.Aggregate()
+
+		tree = doc.ToTree()
+		print(tree.Render())
+
+		doc.Write(regenerate=True)
 
 
 class ExampleFiles(ut_TestCase):
@@ -88,7 +107,10 @@ class ExampleFiles(ut_TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
-		doc = Document(junitExampleFile)
+		doc = JUnitDocument(junitExampleFile, parse=True)
+
+		self.assertGreater(doc.TestsuiteCount, 0)
+		self.assertGreater(doc.TestcaseCount, 0)
 
 		print(f"JUnit file:")
 		print(f"  Testsuites: {len(doc.Testsuites)}")
@@ -96,13 +118,16 @@ class ExampleFiles(ut_TestCase):
 
 		print()
 		print(f"Statistics:")
-		print(f"  Times: MiniDOM: {doc._readingByMiniDom:.3f}s   convert: {doc._modelConversion:.3f}s")
+		print(f"  Times: MiniDOM: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
 	def test_OSVVM_Libraries(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/osvvm.Libraries.xml")
-		doc = Document(junitExampleFile)
+		doc = JUnitDocument(junitExampleFile, parse=True)
+
+		self.assertGreater(doc.TestsuiteCount, 0)
+		self.assertGreater(doc.TestcaseCount, 0)
 
 		print(f"JUnit file:")
 		print(f"  Testsuites: {len(doc.Testsuites)}")
@@ -110,4 +135,4 @@ class ExampleFiles(ut_TestCase):
 
 		print()
 		print(f"Statistics:")
-		print(f"  Times: MiniDOM: {doc._readingByMiniDom:.3f}s   convert: {doc._modelConversion:.3f}s")
+		print(f"  Times: MiniDOM: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
