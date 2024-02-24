@@ -38,6 +38,7 @@ from typing  import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator,
 
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import abstractmethod, ExtendedType, mustoverride
+from pyTooling.Tree        import Node
 
 from pyEDAA.Reports        import ReportException
 
@@ -343,6 +344,13 @@ class Testcase(Base):
 		# TODO: check for setup errors
 		# TODO: check for teardown errors
 
+	def __str__(self) -> str:
+		return (
+			f"<Testcase {self._name}: {self._state.name} -"
+			f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
+			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount}>"
+		)
+
 
 @export
 class TestsuiteBase(Base):
@@ -518,6 +526,26 @@ class TestsuiteBase(Base):
 	def IterateTestcases(self, scheme: IterationScheme = IterationScheme.TestcaseDefault) -> Generator[Testcase, None, None]:
 		return self.Iterate(scheme)
 
+	def ToTree(self) -> Node:
+		rootNode = Node(value=self._name)
+
+		def convertTestcase(testcase: Testcase, parentNode: Node) -> None:
+			testcaseNode = Node(value=testcase._name, parent=parentNode)
+
+		def convertTestsuite(testsuite: Testsuite, parentNode: Node) -> None:
+			testsuiteNode = Node(value=testsuite._name, parent=parentNode)
+
+			for testsuite in testsuite._testsuites.values():
+				convertTestsuite(testsuite, testsuiteNode)
+
+			for testcase in testsuite._testcases.values():
+				convertTestcase(testcase, testsuiteNode)
+
+		for testsuite in self._testsuites.values():
+			convertTestsuite(testsuite, rootNode)
+
+		return rootNode
+
 
 @export
 class Testsuite(TestsuiteBase):
@@ -633,6 +661,13 @@ class Testsuite(TestsuiteBase):
 			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
 				yield self
 
+	def __str__(self) -> str:
+		return (
+			f"<Testsuite {self._name}: {self._state.name} -"
+			# f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
+			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount}>"
+		)
+
 
 @export
 class TestsuiteSummary(TestsuiteBase):
@@ -687,6 +722,13 @@ class TestsuiteSummary(TestsuiteBase):
 
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PostOrder in scheme:
 			yield self
+
+	def __str__(self) -> str:
+		return (
+			f"<TestsuiteSummary {self._name}: {self._state.name} -"
+			# f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
+			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount}>"
+		)
 
 
 @export

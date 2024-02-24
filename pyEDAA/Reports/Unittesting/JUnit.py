@@ -109,7 +109,7 @@ class JUnitDocument(TestsuiteSummary):
 		endMiniDom = perf_counter_ns()
 		self._readingByMiniDom = (endMiniDom - startMiniDom) / 1e9
 
-	def Write(self, path: Nullable[Path] = None, overwrite: bool = False) -> None:
+	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
 		if path is None:
 			path = self._path
 
@@ -117,13 +117,16 @@ class JUnitDocument(TestsuiteSummary):
 			raise UnittestException(f"JUnit XML file '{path}' can not be written.") \
 				from FileExistsError(f"File '{path}' already exists.")
 
+		if regenerate:
+			self.Generate(overwrite=True)
+
 		if self._xmlDocument is None:
 			ex = UnittestException(f"Internal XML document tree is empty and needs to be generated before write is possible.")
 			# ex.add_note(f"Call 'JUnitDocument.FromTestsuiteSummary()'.")
 			raise ex
 
 		with path.open("w") as file:
-			self._xmlDocument.writexml(file, encoding="utf-8", standalone=True, newl="")
+			self._xmlDocument.writexml(file, addindent="\t", encoding="utf-8", standalone=True, newl="\n")
 
 	def Parse(self) -> None:
 		if self._xmlDocument is None:
@@ -223,6 +226,66 @@ class JUnitDocument(TestsuiteSummary):
 
 		if testcase._state is TestcaseState.Unknown:
 			testcase._state = TestcaseState.Passed
+
+	def Generate(self, overwrite: bool = False) -> None:
+		if self._xmlDocument is not None:
+			raise UnittestException(f"Internal XML document is populated with data.")
+
+		self._xmlDocument = xmlDocument = Document()
+		rootElement = xmlDocument.createElement("testsuites")
+		rootElement.setAttribute("name", self._name)
+		if self._startTime is not None:
+			rootElement.setAttribute("timestamp", f"{self._startTime.isoformat()}")
+		if self._totalDuration is not None:
+			rootElement.setAttribute("time", f"{self._totalDuration.total_seconds():.6f}")
+
+		xmlDocument.appendChild(rootElement)
+
+		for testsuite in self._testsuites.values():
+			self._GenerateTestsuite(testsuite, rootElement)
+
+	def _GenerateTestsuite(self, testsuite: Testsuite, parentElement: Element):
+		xmlDocument = parentElement.ownerDocument
+
+		testsuiteElement = xmlDocument.createElement(testsuite._name)
+		testsuiteElement.setAttribute("name", testsuite._name)
+		if testsuite._startTime is not None:
+			testsuiteElement.setAttribute("timestamp", f"{testsuite._startTime.isoformat()}")
+		if testsuite._totalDuration is not None:
+			testsuiteElement.setAttribute("time", f"{testsuite._totalDuration.total_seconds():.6f}")
+
+		parentElement.appendChild(testsuiteElement)
+
+		for testsuite in testsuite._testsuites.values():
+			self._GenerateTestsuite(testsuite, testsuiteElement)
+
+		for testcase in testsuite._testcases.values():
+			self._GenerateTestcase(testcase, testsuiteElement)
+
+	def _GenerateTestcase(self, testcase: Testcase, parentElement: Element):
+		xmlDocument = parentElement.ownerDocument
+
+		testcaseElement = xmlDocument.createElement(testcase._name)
+		testcaseElement.setAttribute("name", testcase._name)
+		if testcase._totalDuration is not None:
+			testcaseElement.setAttribute("time", f"{testcase._totalDuration.total_seconds():.6f}")
+		if testcase._assertionCount is not None:
+			testcaseElement.setAttribute("assertions", f"{testcase._assertionCount}")
+
+		if testcase._state is TestcaseState.Passed:
+			pass
+		elif testcase._state is TestcaseState.Failed:
+			failureElement = xmlDocument.createElement("failure")
+			testcaseElement.appendChild(failureElement)
+		elif testcase._state is TestcaseState.Skipped:
+			skippedElement = xmlDocument.createElement("skipped")
+			testcaseElement.appendChild(skippedElement)
+		else:
+			errorElement = xmlDocument.createElement("error")
+
+			testcaseElement.appendChild(errorElement)
+
+		parentElement.appendChild(testcaseElement)
 
 	@readonly
 	def Path(self) -> Path:
