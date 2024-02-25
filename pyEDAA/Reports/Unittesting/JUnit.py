@@ -89,6 +89,36 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 			self.Read()
 			self.Parse()
 
+	@classmethod
+	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: TestsuiteSummary):
+		doc = cls(xmlReportFile)
+		doc._name = testsuiteSummary._name
+		doc._startTime = testsuiteSummary._startTime
+		doc._setupDuration = testsuiteSummary._setupDuration
+		doc._teardownDuration = testsuiteSummary._teardownDuration
+		doc._totalDuration = testsuiteSummary._totalDuration
+		doc._status = testsuiteSummary._status
+		doc._warningCount = testsuiteSummary._warningCount
+		doc._errorCount = testsuiteSummary._errorCount
+		doc._fatalCount = testsuiteSummary._fatalCount
+
+		for testsuite in testsuiteSummary._testsuites.values():
+			newTestsuite = Testsuite(
+				testsuite._name,
+				testsuite._startTime,
+				testsuite._setupDuration,
+				testsuite._teardownDuration,
+				testsuite._totalDuration,
+				testsuite._status,
+				testsuite._warningCount,
+				testsuite._errorCount,
+				testsuite._fatalCount,
+				parent=doc
+			)
+			newTestsuite.Copy(testsuite)
+
+		return doc
+
 	def Read(self) -> None:
 		if not self._path.exists():
 			raise UnittestException(f"JUnit XML file '{self._path}' does not exist.") \

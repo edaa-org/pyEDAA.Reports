@@ -341,6 +341,9 @@ class Testcase(Base):
 		# TODO: check for setup errors
 		# TODO: check for teardown errors
 
+	def Copy(self, testcase: "Testcase"):
+		pass
+
 	def __str__(self) -> str:
 		return (
 			f"<Testcase {self._name}: {self._status.name} -"
@@ -658,6 +661,38 @@ class Testsuite(TestsuiteBase):
 
 			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
 				yield self
+
+	def Copy(self, testsuite: "Testsuite"):
+		for ts in testsuite._testsuites.values():
+			newTestsuite = Testsuite(
+				ts._name,
+				ts._startTime,
+				ts._setupDuration,
+				ts._teardownDuration,
+				ts._totalDuration,
+				ts._status,
+				ts._warningCount,
+				ts._errorCount,
+				ts._fatalCount,
+				parent=self
+			)
+			newTestsuite.Copy(ts)
+
+		for tc in testsuite._testcases.values():
+			newTestcase = Testcase(
+				tc._name,
+				tc._startTime,
+				tc._setupDuration,
+				tc._testDuration,
+				tc._teardownDuration,
+				tc._totalDuration,
+				tc._status,
+				tc._warningCount,
+				tc._errorCount,
+				tc._fatalCount,
+				parent=self
+			)
+			newTestcase.Copy(tc)
 
 	def __str__(self) -> str:
 		return (

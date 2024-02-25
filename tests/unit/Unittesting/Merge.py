@@ -102,8 +102,7 @@ class PyTooling(ut_TestCase):
 
 		print(f"Writing merged data as JUnit XML ...")
 		startWrite = perf_counter_ns()
-		junitDocument = JUnitDocument(self._outputDirectory / "Platform.xml")
-		junitDocument.AddTestsuite(merged)
+		junitDocument = JUnitDocument.FromTestsuiteSummary(self._outputDirectory / "Platform.xml", merged)
 		junitDocument.Write(regenerate=True)
 		endWrite = perf_counter_ns()
 		writeDuration = (endWrite - startWrite) / 1e9
@@ -159,7 +158,7 @@ class PyTooling(ut_TestCase):
 
 		print(f"Writing merged data as JUnit XML ...")
 		startWrite = perf_counter_ns()
-		junitDocument = JUnitDocument(self._outputDirectory / "Unittesting.xml")
+		junitDocument = JUnitDocument.FromTestsuiteSummary(self._outputDirectory / "Unittesting.xml", merged)
 		junitDocument.Write(regenerate=True)
 		endWrite = perf_counter_ns()
 		writeDuration = (endWrite - startWrite) / 1e9
