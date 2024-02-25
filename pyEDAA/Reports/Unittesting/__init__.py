@@ -30,11 +30,9 @@
 #
 """Abstraction of testsuites and testcases."""
 from datetime import timedelta, datetime
-
-from enum    import Flag
-from math    import log2
-from pathlib import Path
-from typing  import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List
+from enum     import Flag
+from pathlib  import Path
+from typing   import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List
 
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import abstractmethod, ExtendedType, mustoverride
@@ -556,7 +554,6 @@ class Testsuite(TestsuiteBase):
 		name: str,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
-		# testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		status: TestcaseStatus = TestcaseStatus.Unknown,
@@ -867,7 +864,6 @@ class MergedTestsuite(Testsuite, Merged):
 		name: str,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
-		# testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		status: TestcaseStatus = TestcaseStatus.Unknown,
@@ -880,8 +876,8 @@ class MergedTestsuite(Testsuite, Merged):
 	):
 		super().__init__(
 			name,
-			# startTime, setupDuration, testDuration, teardownDuration, totalDuration,
-			status, startTime, setupDuration, teardownDuration, totalDuration,
+			startTime, setupDuration, teardownDuration, totalDuration,
+			status,
 			warningCount, errorCount, fatalCount,
 			testsuites, testcases,
 			parent

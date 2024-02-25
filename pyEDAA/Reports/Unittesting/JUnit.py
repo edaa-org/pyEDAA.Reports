@@ -250,11 +250,11 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 
 		parentElement.appendChild(testsuiteElement)
 
-		for testsuite in testsuite._testsuites.values():
-			self._GenerateTestsuite(testsuite, testsuiteElement)
+		for ts in testsuite._testsuites.values():
+			self._GenerateTestsuite(ts, testsuiteElement)
 
-		for testcase in testsuite._testcases.values():
-			self._GenerateTestcase(testcase, testsuiteElement)
+		for tc in testsuite._testcases.values():
+			self._GenerateTestcase(tc, testsuiteElement)
 
 	def _GenerateTestcase(self, testcase: Testcase, parentElement: Element):
 		xmlDocument = parentElement.ownerDocument
