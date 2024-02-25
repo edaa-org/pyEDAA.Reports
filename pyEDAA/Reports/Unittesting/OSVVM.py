@@ -72,7 +72,7 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 	_yamlDocument: Nullable[YAML]
 
 	def __init__(self, yamlReportFile: Path, parse: bool = False) -> None:
-		super().__init__("Unread JUnit XML file")
+		super().__init__("Unprocessed JUnit XML file")
 		Document.__init__(self, yamlReportFile)
 
 		self._yamlDocument = None

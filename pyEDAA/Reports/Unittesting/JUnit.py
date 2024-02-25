@@ -79,7 +79,7 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 	_xmlDocument:      Nullable[Document]
 
 	def __init__(self, xmlReportFile: Path, parse: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
-		super().__init__("Unread JUnit XML file")
+		super().__init__("Unprocessed JUnit XML file")
 		ut_Document.__init__(self, xmlReportFile)
 
 		self._readerMode = readerMode

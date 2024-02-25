@@ -535,11 +535,11 @@ class TestsuiteBase(Base):
 		def convertTestsuite(testsuite: Testsuite, parentNode: Node) -> None:
 			testsuiteNode = Node(value=testsuite._name, parent=parentNode)
 
-			for testsuite in testsuite._testsuites.values():
-				convertTestsuite(testsuite, testsuiteNode)
+			for ts in testsuite._testsuites.values():
+				convertTestsuite(ts, testsuiteNode)
 
-			for testcase in testsuite._testcases.values():
-				convertTestcase(testcase, testsuiteNode)
+			for tc in testsuite._testcases.values():
+				convertTestcase(tc, testsuiteNode)
 
 		for testsuite in self._testsuites.values():
 			convertTestsuite(testsuite, rootNode)
@@ -916,20 +916,20 @@ class MergedTestsuite(Testsuite, Merged):
 				mergedTestcase.Merge(testcase)
 			except KeyError:
 				mergedTestcase = MergedTestcase(
-				testcase._name,
-				testcase._startTime,
-				testcase._setupDuration,
-				testcase._testDuration,
-				testcase._teardownDuration,
-				testcase._totalDuration,
-				testcase._status,
-				testcase._assertionCount,
-				testcase._failedAssertionCount,
-				testcase._passedAssertionCount,
-				testcase._warningCount,
-				testcase._errorCount,
-				testcase._fatalCount,
-				parent=self
+					testcase._name,
+					testcase._startTime,
+					testcase._setupDuration,
+					testcase._testDuration,
+					testcase._teardownDuration,
+					testcase._totalDuration,
+					testcase._status,
+					testcase._assertionCount,
+					testcase._failedAssertionCount,
+					testcase._passedAssertionCount,
+					testcase._warningCount,
+					testcase._errorCount,
+					testcase._fatalCount,
+					parent=self
 				)
 				mergedTestcase.Copy(testcase)
 

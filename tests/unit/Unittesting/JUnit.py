@@ -37,7 +37,7 @@ from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument
 
 
 class Document(ut_TestCase):
-	_outputDirectory = Path("tests/output")
+	_outputDirectory = Path("tests/output/JUnit_Document")
 
 	@classmethod
 	def setUpClass(cls):
