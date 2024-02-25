@@ -84,15 +84,15 @@ class PyTooling(ut_TestCase):
 		print("-" * 40)
 
 		for summary in junitDocuments:
-			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount)
-			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount)
+			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount, f"{summary.Path}")
+			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount, f"{summary.Path}")
 
 		mergedCount = len(junitDocuments)
 		for item in merged.Iterate(IterationScheme.Default | IterationScheme.IncludeSelf):
-			self.assertEqual(mergedCount, item.MergedCount)
+			self.assertEqual(mergedCount, item.MergedCount, f"{item.Name}")
 
 		for testcase in (tc for tc in merged.IterateTestcases() if tc.Name not in ("test_NativeMacOS", "test_MSYS", "test_MinGW32", "test_Clang32")):
-			self.assertEqual(TestcaseStatus.Passed, testcase.Status)
+			self.assertEqual(TestcaseStatus.Passed, testcase.Status, f"{testcase.Parent.Name}.{testcase.Name}")
 
 		print(f"Aggregating datapoints in testsuite ...")
 		startAggregate = perf_counter_ns()
@@ -143,12 +143,12 @@ class PyTooling(ut_TestCase):
 		print("-" * 40)
 
 		for summary in junitDocuments:
-			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount)
-			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount)
+			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount, f"{summary.Path}")
+			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount, f"{summary.Path}")
 
 		mergedCount = len(junitDocuments)
 		for item in merged.Iterate(IterationScheme.Default | IterationScheme.IncludeSelf):
-			self.assertEqual(mergedCount, item.MergedCount)
+			self.assertEqual(mergedCount, item.MergedCount, f"{item.Name}")
 
 		print(f"Aggregating datapoints in testsuite ...")
 		startAggregate = perf_counter_ns()
