@@ -874,7 +874,7 @@ class MergedTestcase(Testcase, Merged):
 	@readonly
 	def Status(self) -> TestcaseStatus:
 		result = self._mergedTestcases[0]._status
-		for state in (tc._status for tc in self._mergedTestcases):
+		for state in (tc._status for tc in self._mergedTestcases[1:]):
 			result @= state
 
 		return result
@@ -962,6 +962,7 @@ class MergedTestsuite(Testsuite, Merged):
 					testcase._fatalCount,
 					parent=self
 				)
+				mergedTestcase._mergedTestcases.append(testcase)
 				mergedTestcase.Copy(testcase)
 
 	def Copy(self, ts: Testsuite) -> None:
@@ -997,6 +998,7 @@ class MergedTestsuite(Testsuite, Merged):
 				testcase._fatalCount,
 				parent=self
 			)
+			mergedTestcase._mergedTestcases.append(testcase)
 			mergedTestcase.Copy(testcase)
 
 
