@@ -100,9 +100,11 @@ class PyTooling(ut_TestCase):
 		endAggregate = perf_counter_ns()
 		aggregateDuration = (endAggregate - startAggregate) / 1e9
 
+		result = merged.ToTestsuiteSummary()
+
 		print(f"Writing merged data as JUnit XML ...")
 		startWrite = perf_counter_ns()
-		junitDocument = JUnitDocument.FromTestsuiteSummary(self._outputDirectory / "Platform.xml", merged)
+		junitDocument = JUnitDocument.FromTestsuiteSummary(self._outputDirectory / "Platform.xml", result)
 		junitDocument.Write(regenerate=True)
 		endWrite = perf_counter_ns()
 		writeDuration = (endWrite - startWrite) / 1e9

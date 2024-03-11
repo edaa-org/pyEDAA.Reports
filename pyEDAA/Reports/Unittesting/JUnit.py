@@ -40,8 +40,10 @@ from typing          import Optional as Nullable
 from xml.dom         import minidom, Node
 from xml.dom.minidom import Element, Document
 
-from pyTooling.Decorators       import export, readonly
+from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError
+from pyTooling.Decorators       import export
 
+from pyEDAA.Reports             import resources, getResourceFile
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException
 from pyEDAA.Reports.Unittesting import Document as ut_Document
 from pyEDAA.Reports.Unittesting import TestsuiteSummary, Testsuite, Testcase, TestcaseStatus
@@ -102,20 +104,9 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 		doc._errorCount = testsuiteSummary._errorCount
 		doc._fatalCount = testsuiteSummary._fatalCount
 
-		for testsuite in testsuiteSummary._testsuites.values():
-			newTestsuite = Testsuite(
-				testsuite._name,
-				testsuite._startTime,
-				testsuite._setupDuration,
-				testsuite._teardownDuration,
-				testsuite._totalDuration,
-				testsuite._status,
-				testsuite._warningCount,
-				testsuite._errorCount,
-				testsuite._fatalCount,
-				parent=doc
-			)
-			newTestsuite.Copy(testsuite)
+		for name, testsuite in testsuiteSummary._testsuites.items():
+			doc._testsuites[name] = testsuite
+			testsuite._parent = doc
 
 		return doc
 
@@ -126,7 +117,19 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 
 		startAnalysis = perf_counter_ns()
 		try:
+			xmlSchemaFile = getResourceFile(resources, "JUnit.xsd")
+			schemaParser = XMLParser(ns_clean=True)
+			schemaRoot = parse(xmlSchemaFile, schemaParser)
+
+			junitSchema = XMLSchema(schemaRoot)
+			junitParser = XMLParser(schema=junitSchema, ns_clean=True)
+			junitDocument = parse(self._path, parser=junitParser)
+
 			self._xmlDocument = minidom.parse(str(self._path))
+		except XMLSyntaxError as ex:
+			print(ex)
+
+			print(junitParser.error_log)
 		except Exception as ex:
 			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
 

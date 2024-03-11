@@ -38,11 +38,19 @@ __license__ =   "Apache License, Version 2.0"
 __version__ =   "0.4.0"
 __keywords__ =  ["Reports", "Abstract Model", "Data Model", "Test Case", "Test Suite", "OSVVM", "YAML", "XML"]
 
-from enum   import Enum
-from sys    import version_info
-from typing import List
+from enum                 import Enum
+from importlib.resources  import files
+from pathlib              import Path
+from sys                  import version_info
+from types                import ModuleType
+from typing               import List, Union
 
 from pyTooling.Decorators import export
+
+
+@export
+def getResourceFile(module: Union[str, ModuleType], filename: str) -> Path:
+	return files(module) / filename
 
 
 @export
