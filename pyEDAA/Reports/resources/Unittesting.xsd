@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xsd:schema
+	targetNamespace="pyEDAA.Reports/schema/v0/junit"
+	version="0.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="pyEDAA.Reports/schema/v0/junit">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">Reversed engineered schema description for JUnit-like unit test summary files.</xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:simpleType name="literalblock">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="preserve" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="testcase">
+		<xsd:choice minOccurs="0">
+			<xsd:element name="skipped" type="literalblock">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="error" type="literalblock">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="failure" type="literalblock">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:choice>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuite">
+		<xsd:sequence>
+			<xsd:element name="testcase" type="testcase">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuites">
+		<xsd:sequence>
+			<xsd:element name="testsuite" type="testsuite">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Describes the aggregated results of multiple testcase.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:element name="testsuites" type="testsuites">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Describes the overall result of all testcases in all testsuites.</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+</xsd:schema>

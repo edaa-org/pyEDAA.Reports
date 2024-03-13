@@ -37,10 +37,9 @@ from enum            import Flag
 from pathlib         import Path
 from time            import perf_counter_ns
 from typing          import Optional as Nullable
-from xml.dom         import minidom, Node
 from xml.dom.minidom import Element, Document
 
-from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError
+from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element
 from pyTooling.Decorators       import export
 
 from pyEDAA.Reports             import resources, getResourceFile
@@ -78,7 +77,7 @@ class JUnitReaderMode(Flag):
 @export
 class JUnitDocument(TestsuiteSummary, ut_Document):
 	_readerMode:       JUnitReaderMode
-	_xmlDocument:      Nullable[Document]
+	_xmlDocument:      Nullable[_ElementTree]
 
 	def __init__(self, xmlReportFile: Path, parse: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
 		super().__init__("Unprocessed JUnit XML file")
@@ -117,7 +116,8 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 
 		startAnalysis = perf_counter_ns()
 		try:
-			xmlSchemaFile = getResourceFile(resources, "JUnit.xsd")
+			# xmlSchemaFile = getResourceFile(resources, "JUnit.xsd")
+			xmlSchemaFile = getResourceFile(resources, "Unittesting.xsd")
 			schemaParser = XMLParser(ns_clean=True)
 			schemaRoot = parse(xmlSchemaFile, schemaParser)
 
@@ -125,7 +125,7 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 			junitParser = XMLParser(schema=junitSchema, ns_clean=True)
 			junitDocument = parse(self._path, parser=junitParser)
 
-			self._xmlDocument = minidom.parse(str(self._path))
+			self._xmlDocument = junitDocument
 		except XMLSyntaxError as ex:
 			print(ex)
 
@@ -162,11 +162,11 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 			raise ex
 
 		startConversion = perf_counter_ns()
-		rootElement = self._xmlDocument.documentElement
+		rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name =          rootElement.getAttribute("name")                              if rootElement.hasAttribute("name")      else "root"
-		self._startTime =     datetime.fromisoformat(rootElement.getAttribute("timestamp")) if rootElement.hasAttribute("timestamp") else None
-		self._totalDuration = timedelta(seconds=float(rootElement.getAttribute("time")))    if rootElement.hasAttribute("time")      else None
+		self._name =          rootElement.attrib["name"]                              if "name"      in rootElement.attrib else "root"
+		self._startTime =     datetime.fromisoformat(rootElement.attrib["timestamp"]) if "timestamp" in rootElement.attrib else None
+		self._totalDuration = timedelta(seconds=float(rootElement.attrib["time"]))    if "time"      in rootElement.attrib else None
 
 		# tests = rootElement.getAttribute("tests")
 		# skipped = rootElement.getAttribute("skipped")
@@ -174,22 +174,21 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 		# failures = rootElement.getAttribute("failures")
 		# assertions = rootElement.getAttribute("assertions")
 
-		for rootNode in rootElement.childNodes:
-			if rootNode.nodeName == "testsuite":
-				self._ParseTestsuite(self, rootNode)
+		for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
+			self._ParseTestsuite(self, rootNode)
 
 		self.Aggregate()
 		endConversation = perf_counter_ns()
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
-	def _ParseTestsuite(self, parentTestsuite: Testsuite, testsuitesNode: Element) -> None:
-		name = testsuitesNode.getAttribute("name")
+	def _ParseTestsuite(self, parentTestsuite: Testsuite, testsuitesNode: _Element) -> None:
+		name = testsuitesNode.attrib["name"]
 
 		kwargs = {}
-		if testsuitesNode.hasAttribute("timestamp"):
-			kwargs["startTime"] = datetime.fromisoformat(testsuitesNode.getAttribute("timestamp"))
-		if testsuitesNode.hasAttribute("time"):
-			kwargs["totalDuration"] = timedelta(seconds=float(testsuitesNode.getAttribute("time")))
+		if "timestamp" in testsuitesNode.attrib:
+			kwargs["startTime"] = datetime.fromisoformat(testsuitesNode.attrib["timestamp"])
+		if "time" in testsuitesNode.attrib:
+			kwargs["totalDuration"] = timedelta(seconds=float(testsuitesNode.attrib["time"]))
 
 		newTestsuite = Testsuite(
 			name,
@@ -204,17 +203,16 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 		else:
 			raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
 
-		for node in testsuitesNode.childNodes:
-			if node.nodeType == Node.ELEMENT_NODE:
-				if node.tagName == "testsuite":
-					self._ParseTestsuite(currentTestsuite, node)
-				elif node.tagName == "testcase":
-					self._ParseTestcase(currentTestsuite, node)
+		for node in testsuitesNode.iterchildren():   # type: _Element
+			if node.tag == "testsuite":
+				self._ParseTestsuite(currentTestsuite, node)
+			elif node.tag == "testcase":
+				self._ParseTestcase(currentTestsuite, node)
 
-	def _ParseTestcase(self, parentTestsuite: Testsuite, testsuiteNode: Element) -> None:
-		className = testsuiteNode.getAttribute("classname")
-		name = testsuiteNode.getAttribute("name")
-		time = float(testsuiteNode.getAttribute("time"))
+	def _ParseTestcase(self, parentTestsuite: Testsuite, testsuiteNode: _Element) -> None:
+		className = testsuiteNode.attrib["classname"]
+		name = testsuiteNode.attrib["name"]
+		time = float(testsuiteNode.attrib["time"])
 
 		if self._readerMode is JUnitReaderMode.Default:
 			currentTestsuite = self
@@ -234,22 +232,21 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 		testcase = Testcase(name, totalDuration=timedelta(seconds=time))
 		currentTestsuite._testcases[name] = testcase
 
-		for node in testsuiteNode.childNodes:
-			if node.nodeType == Node.ELEMENT_NODE:
-				if node.tagName == "skipped":
-					testcase._status = TestcaseStatus.Skipped
-				elif node.tagName == "failure":
-					testcase._status = TestcaseStatus.Failed
-				elif node.tagName == "error":
-					testcase._status = TestcaseStatus.Errored
-				elif node.tagName == "system-out":
-					pass
-				elif node.tagName == "system-err":
-					pass
-				elif node.tagName == "properties":
-					pass
-				else:
-					raise UnittestException(f"Unknown element '{node.tagName}' in junit file.")
+		for node in testsuiteNode.iterchildren():   # type: _Element
+			if node.tag == "skipped":
+				testcase._status = TestcaseStatus.Skipped
+			elif node.tag == "failure":
+				testcase._status = TestcaseStatus.Failed
+			elif node.tag == "error":
+				testcase._status = TestcaseStatus.Errored
+			elif node.tag == "system-out":
+				pass
+			elif node.tag == "system-err":
+				pass
+			elif node.tag == "properties":
+				pass
+			else:
+				raise UnittestException(f"Unknown element '{node.tag}' in junit file.")
 
 		if testcase._status is TestcaseStatus.Unknown:
 			testcase._status = TestcaseStatus.Passed
