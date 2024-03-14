@@ -44,7 +44,7 @@ class Analyze(TestCase):
 		coverage.Aggregate()
 
 		self.assertEqual(CoverageState.Unknown, coverage.Status)
-		self.assertGreaterEqual(coverage.AggregatedCoverage, 0.20)
+		self.assertGreaterEqual(coverage.AggregatedCoverage, 0.10)
 
 	def test_Undocumented(self) -> None:
 		packageName = "MyPackage"

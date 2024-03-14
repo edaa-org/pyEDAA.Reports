@@ -39,7 +39,7 @@ from time            import perf_counter_ns
 from typing          import Optional as Nullable
 from xml.dom.minidom import Element, Document
 
-from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element
+from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element, _Comment
 from pyTooling.Decorators       import export
 
 from pyEDAA.Reports             import resources, getResourceFile
@@ -233,20 +233,25 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 		currentTestsuite._testcases[name] = testcase
 
 		for node in testsuiteNode.iterchildren():   # type: _Element
-			if node.tag == "skipped":
-				testcase._status = TestcaseStatus.Skipped
-			elif node.tag == "failure":
-				testcase._status = TestcaseStatus.Failed
-			elif node.tag == "error":
-				testcase._status = TestcaseStatus.Errored
-			elif node.tag == "system-out":
+			if isinstance(node, _Comment):
 				pass
-			elif node.tag == "system-err":
-				pass
-			elif node.tag == "properties":
-				pass
+			elif isinstance(node, _Element):
+				if node.tag == "skipped":
+					testcase._status = TestcaseStatus.Skipped
+				elif node.tag == "failure":
+					testcase._status = TestcaseStatus.Failed
+				elif node.tag == "error":
+					testcase._status = TestcaseStatus.Errored
+				elif node.tag == "system-out":
+					pass
+				elif node.tag == "system-err":
+					pass
+				elif node.tag == "properties":
+					pass
+				else:
+					raise UnittestException(f"Unknown element '{node.tag}' in junit file.")
 			else:
-				raise UnittestException(f"Unknown element '{node.tag}' in junit file.")
+				pass
 
 		if testcase._status is TestcaseStatus.Unknown:
 			testcase._status = TestcaseStatus.Passed
