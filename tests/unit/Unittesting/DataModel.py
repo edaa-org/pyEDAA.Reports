@@ -30,7 +30,7 @@
 #
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting import DuplicateTestsuiteException, DuplicateTestcaseException
+from pyEDAA.Reports.Unittesting import DuplicateTestsuiteException, DuplicateTestcaseException, TestsuiteStatus
 from pyEDAA.Reports.Unittesting import TestcaseStatus, Testcase, Testsuite, TestsuiteSummary, IterationScheme
 
 
@@ -116,7 +116,7 @@ class TestsuiteInstantiation(ut_TestCase):
 		ts = Testsuite("test")
 
 		self.assertEqual("test", ts.Name)
-		self.assertEqual(TestcaseStatus.Unknown, ts.Status)
+		self.assertEqual(TestsuiteStatus.Unknown, ts.Status)
 
 
 class Hierarchy(ut_TestCase):

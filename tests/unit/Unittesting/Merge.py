@@ -34,10 +34,25 @@ from typing   import List
 from unittest import TestCase as ut_TestCase
 
 from pyEDAA.Reports.Unittesting       import MergedTestsuiteSummary, IterationScheme, TestcaseStatus
-from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument, JUnitReaderMode
 
 
 class PyTooling(ut_TestCase):
+	_outputDirectory = Path("tests/output/Merge_PyTooling")
+
+	@classmethod
+	def setUpClass(cls):
+		print()
+		if cls._outputDirectory.exists():
+			print(f"Output directory '{cls._outputDirectory}' already exists.")
+			print(f"Cleaning XML files from '{cls._outputDirectory}' ...")
+			for file in cls._outputDirectory.glob("*.xml"):
+				print(f"  unlinking file: {file}")
+				file.unlink()
+		else:
+			print(f"Creating output directory '{cls._outputDirectory}' ...")
+			cls._outputDirectory.mkdir(parents=True)
+
 	def test_PlatformTesting(self) -> None:
 		print()
 
@@ -49,42 +64,56 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			# print(f"  Parsing {file}")
-			junitDocuments.append(JUnitDocument(file))
+			junitDocuments.append(JUnitDocument(file, parse=True))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 
-		print()
 		print(f"Merging generic testsuites ...")
 		startMerging = perf_counter_ns()
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
 			# print(f"  merging {summary.Path}")
 			merged.Merge(summary)
+
 		endMerging = perf_counter_ns()
 		mergingDuration = (endMerging - startMerging) / 1e9
 
+		print("Structure of merged testcases:")
+		print("-" * 40)
+		print(merged.ToTree().Render(prefix="  "), end="")
+		print("-" * 40)
+
 		for summary in junitDocuments:
-			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount)
-			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount)
+			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount, f"{summary.Path}")
+			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount, f"{summary.Path}")
 
 		mergedCount = len(junitDocuments)
 		for item in merged.Iterate(IterationScheme.Default | IterationScheme.IncludeSelf):
-			self.assertEqual(mergedCount, item.MergedCount)
+			self.assertEqual(mergedCount, item.MergedCount, f"{item.Name}")
 
 		for testcase in (tc for tc in merged.IterateTestcases() if tc.Name not in ("test_NativeMacOS", "test_MSYS", "test_MinGW32", "test_Clang32")):
-			self.assertEqual(TestcaseStatus.Passed, testcase.Status)
+			self.assertEqual(TestcaseStatus.Passed, testcase.Status, f"{testcase.Parent.Name}.{testcase.Name}")
 
-		print()
 		print(f"Aggregating datapoints in testsuite ...")
 		startAggregate = perf_counter_ns()
 		merged.Aggregate()
 		endAggregate = perf_counter_ns()
 		aggregateDuration = (endAggregate - startAggregate) / 1e9
 
+		result = merged.ToTestsuiteSummary()
+
+		print(f"Writing merged data as JUnit XML ...")
+		startWrite = perf_counter_ns()
+		junitDocument = JUnitDocument.FromTestsuiteSummary(self._outputDirectory / "Platform.xml", result)
+		junitDocument.Write(regenerate=True)
+		endWrite = perf_counter_ns()
+		writeDuration = (endWrite - startWrite) / 1e9
+
 		print()
 		print(f"Parsing:    {parsingDuration :.3f} ms")
 		print(f"Merging:    {mergingDuration:.3f} ms")
 		print(f"Aggregate:  {aggregateDuration:.3f} ms")
+		print(f"Writing:    {writeDuration:.3f} ms")
 
 	def test_Unittesting(self) -> None:
 		print()
@@ -97,11 +126,10 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			# print(f"  Parsing {file}")
-			junitDocuments.append(JUnitDocument(file))
+			junitDocuments.append(JUnitDocument(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 
-		print()
 		print(f"Merging generic testsuites ...")
 		startMerging = perf_counter_ns()
 		merged = MergedTestsuiteSummary("PlatformTesting")
@@ -111,22 +139,34 @@ class PyTooling(ut_TestCase):
 		endMerging = perf_counter_ns()
 		mergingDuration = (endMerging - startMerging) / 1e9
 
+		print("Structure of merged testcases:")
+		print("-" * 40)
+		print(merged.ToTree().Render(prefix="  "), end="")
+		print("-" * 40)
+
 		for summary in junitDocuments:
-			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount)
-			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount)
+			self.assertGreaterEqual(merged.TestsuiteCount, summary.TestsuiteCount, f"{summary.Path}")
+			self.assertGreaterEqual(merged.TestcaseCount, summary.TestcaseCount, f"{summary.Path}")
 
 		mergedCount = len(junitDocuments)
 		for item in merged.Iterate(IterationScheme.Default | IterationScheme.IncludeSelf):
-			self.assertEqual(mergedCount, item.MergedCount)
+			self.assertEqual(mergedCount, item.MergedCount, f"{item.Name}")
 
-		print()
 		print(f"Aggregating datapoints in testsuite ...")
 		startAggregate = perf_counter_ns()
 		merged.Aggregate()
 		endAggregate = perf_counter_ns()
 		aggregateDuration = (endAggregate - startAggregate) / 1e9
 
+		print(f"Writing merged data as JUnit XML ...")
+		startWrite = perf_counter_ns()
+		junitDocument = JUnitDocument.FromTestsuiteSummary(self._outputDirectory / "Unittesting.xml", merged)
+		junitDocument.Write(regenerate=True)
+		endWrite = perf_counter_ns()
+		writeDuration = (endWrite - startWrite) / 1e9
+
 		print()
 		print(f"Parsing:    {parsingDuration :.3f} ms")
 		print(f"Merging:    {mergingDuration:.3f} ms")
 		print(f"Aggregate:  {aggregateDuration:.3f} ms")
+		print(f"Writing:    {writeDuration:.3f} ms")

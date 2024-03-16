@@ -29,12 +29,10 @@
 # ==================================================================================================================== #
 #
 """Abstraction of testsuites and testcases."""
-from datetime import timedelta, datetime
-
-from enum    import Flag
-from math    import log2
-from pathlib import Path
-from typing  import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List
+from datetime              import timedelta, datetime
+from enum                  import Flag
+from pathlib               import Path
+from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar
 
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import abstractmethod, ExtendedType, mustoverride
@@ -60,12 +58,12 @@ class DuplicateTestcaseException(UnittestException):
 
 @export
 class TestcaseStatus(Flag):
-	Unknown =    0
-	Excluded =   1                         #: testcase was permanently excluded / disabled
-	Skipped =    2                         #: testcase was temporarily skipped (e.g. based on a condition)
-	Weak =       4                         #: no assertions
-	Passed =     8                         #: passed testcase, because all assertions succeeded
-	Failed =    16                         #: failed testcase due to failing assertions
+	Unknown =    0                         #: Testcase status is uninitialized and therefore unknown.
+	Excluded =   1                         #: Testcase was permanently excluded / disabled
+	Skipped =    2                         #: Testcase was temporarily skipped (e.g. based on a condition)
+	Weak =       4                         #: No assertions were recorded.
+	Passed =     8                         #: A passed testcase, because all assertions were successful.
+	Failed =    16                         #: A failed testcase due to at least one failed assertion.
 
 	Mask = Excluded | Skipped | Weak | Passed | Failed
 
@@ -79,8 +77,9 @@ class TestcaseStatus(Flag):
 
 	SetupError =     8192                  #: preparation / compilation error
 	TearDownError = 16384                  #: cleanup error / resource release error
+	Inconsistent = 32768                   #: Dataset is inconsistent
 
-	Flags = Warned | Errored | Aborted | SetupError | TearDownError
+	Flags = Warned | Errored | Aborted | SetupError | TearDownError | Inconsistent
 
 	# TODO: timed out ?
 
@@ -105,6 +104,31 @@ class TestcaseStatus(Flag):
 
 
 @export
+class TestsuiteStatus(Flag):
+	Unknown =    0
+	Excluded =   1                         #: testcase was permanently excluded / disabled
+	Skipped =    2                         #: testcase was temporarily skipped (e.g. based on a condition)
+	Empty =      4                         #: no tests in suite
+	Passed =     8                         #: passed testcase, because all assertions succeeded
+	Failed =    16                         #: failed testcase due to failing assertions
+
+	Mask = Excluded | Skipped | Empty | Passed | Failed
+
+	Inverted = 128                         #: to mark inverted results
+	UnexpectedPassed = Failed | Inverted
+	ExpectedFailed =   Passed | Inverted
+
+	Warned =  1024                         #: runtime warning
+	Errored = 2048                         #: runtime error (mostly caught exceptions)
+	Aborted = 4096                         #: uncaught runtime exception
+
+	SetupError =     8192                  #: preparation / compilation error
+	TearDownError = 16384                  #: cleanup error / resource release error
+
+	Flags = Warned | Errored | Aborted | SetupError | TearDownError
+
+
+@export
 class IterationScheme(Flag):
 	Unknown =           0
 	IncludeSelf =       1
@@ -119,11 +143,15 @@ class IterationScheme(Flag):
 	TestcaseDefault =  IncludeTestcases  | PreOrder
 
 
+TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
+TestcaseAggregateReturnType = Tuple[int, int, int]
+TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int, int, int]
+
+
 @export
 class Base(metaclass=ExtendedType, slots=True):
 	_parent: Nullable["Testsuite"]
 	_name:   str
-	_status: TestcaseStatus
 
 	_startTime:        datetime
 	_setupDuration:    Nullable[timedelta]
@@ -143,7 +171,6 @@ class Base(metaclass=ExtendedType, slots=True):
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
-		status: TestcaseStatus = TestcaseStatus.Unknown,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
@@ -156,7 +183,6 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		self._parent = parent
 		self._name = name
-		self._status = status
 
 		self._startTime = startTime
 		self._setupDuration = setupDuration
@@ -178,10 +204,6 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def Name(self) -> str:
 		return self._name
-
-	@readonly
-	def Status(self) -> TestcaseStatus:
-		return self._status
 
 	@readonly
 	def StartTime(self) -> datetime:
@@ -236,8 +258,8 @@ class Base(metaclass=ExtendedType, slots=True):
 
 @export
 class Testcase(Base):
-	_testDuration:     Nullable[timedelta]
-
+	_status:               TestcaseStatus
+	_testDuration:         Nullable[timedelta]
 	_assertionCount:       Nullable[int]
 	_failedAssertionCount: Nullable[int]
 	_passedAssertionCount: Nullable[int]
@@ -265,8 +287,9 @@ class Testcase(Base):
 
 			parent._testcases[name] = self
 
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, parent)
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
 
+		self._status = status
 		self._testDuration = testDuration
 		# if totalDuration is not None:
 
@@ -302,6 +325,10 @@ class Testcase(Base):
 			self._failedAssertionCount = None
 
 	@readonly
+	def Status(self) -> TestcaseStatus:
+		return self._status
+
+	@readonly
 	def TestDuration(self) -> timedelta:
 		return self._testDuration
 
@@ -317,31 +344,47 @@ class Testcase(Base):
 	def PassedAssertionCount(self) -> int:
 		return self._passedAssertionCount
 
-	def Aggregate(self, strict: bool = True) -> None:
-		if self._status is not TestcaseStatus.Unknown:
-			return
+	def Copy(self) -> "Testcase":
+		return self.__class__(
+			self._name,
+			self._startTime,
+			self._setupDuration,
+			self._testDuration,
+			self._teardownDuration,
+			self._totalDuration,
+			self._status,
+			self._warningCount,
+			self._errorCount,
+			self._fatalCount,
+		)
 
-		if self._assertionCount is None or self._assertionCount == 0:
-			self._status = TestcaseStatus.Weak | (TestcaseStatus.Failed if strict else TestcaseStatus.Passed)
-		elif self._failedAssertionCount == 0:
-			self._status = TestcaseStatus.Passed
-		else:
-			self._status = TestcaseStatus.Failed
+	def Aggregate(self, strict: bool = True) -> TestcaseAggregateReturnType:
+		if self._status is TestcaseStatus.Unknown:
+			if self._assertionCount is None:
+				self._status = TestcaseStatus.Passed
+			elif self._assertionCount == 0:
+				self._status = TestcaseStatus.Weak
+			elif self._failedAssertionCount == 0:
+				self._status = TestcaseStatus.Passed
+			else:
+				self._status = TestcaseStatus.Failed
 
-		if self._warningCount > 0:
-			self._status |= TestcaseStatus.Warned
+			if self._warningCount > 0:
+				self._status |= TestcaseStatus.Warned
 
-		if self._errorCount > 0:
-			self._status |= TestcaseStatus.Errored
+			if self._errorCount > 0:
+				self._status |= TestcaseStatus.Errored
 
-		if self._fatalCount > 0:
-			self._status |= TestcaseStatus.Aborted
+			if self._fatalCount > 0:
+				self._status |= TestcaseStatus.Aborted
 
-			if strict:
-				self._status = self._status & ~TestcaseStatus.Passed | TestcaseStatus.Failed
+				if strict:
+					self._status = self._status & ~TestcaseStatus.Passed | TestcaseStatus.Failed
 
-		# TODO: check for setup errors
-		# TODO: check for teardown errors
+			# TODO: check for setup errors
+			# TODO: check for teardown errors
+
+		return self._warningCount, self._errorCount, self._fatalCount
 
 	def __str__(self) -> str:
 		return (
@@ -352,14 +395,17 @@ class Testcase(Base):
 
 
 @export
-class TestsuiteBase(Base):
-	_testsuites: Dict[str, "Testsuite"]
+class TestsuiteBase(Base, Generic[TestsuiteType]):
+	_status:     TestsuiteStatus
+	_testsuites: Dict[str, TestsuiteType]
 
-	_excluded: int
-	_skipped:  int
-	_errored:  int
-	_failed:   int
-	_passed:   int
+	_inconsistent: int
+	_excluded:     int
+	_skipped:      int
+	_errored:      int
+	_weak:         int
+	_failed:       int
+	_passed:       int
 
 	def __init__(
 		self,
@@ -368,11 +414,11 @@ class TestsuiteBase(Base):
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
-		status: TestcaseStatus = TestcaseStatus.Unknown,
+		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
-		testsuites: Nullable[Iterable["Testsuite"]] = None,
+		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
 		if parent is not None:
@@ -381,7 +427,9 @@ class TestsuiteBase(Base):
 
 			parent._testsuites[name] = self
 
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, parent)
+		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+
+		self._status = status
 
 		self._testsuites = {}
 		if testsuites is not None:
@@ -395,6 +443,7 @@ class TestsuiteBase(Base):
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
 
+		self._status = TestsuiteStatus.Unknown
 		self._excluded = 0
 		self._skipped =  0
 		self._errored =  0
@@ -402,7 +451,11 @@ class TestsuiteBase(Base):
 		self._passed =   0
 
 	@readonly
-	def Testsuites(self) -> Dict[str, "Testsuite"]:
+	def Status(self) -> TestsuiteStatus:
+		return self._status
+
+	@readonly
+	def Testsuites(self) -> Dict[str, TestsuiteType]:
 		return self._testsuites
 
 	@readonly
@@ -463,11 +516,13 @@ class TestsuiteBase(Base):
 	def Passed(self) -> int:
 		return self._passed
 
-	def Aggregate(self) -> Tuple[int, int, int, int, int, int, int, int, int]:
+	def Aggregate(self) -> TestsuiteAggregateReturnType:
 		tests = 0
+		inconsistent = 0
 		excluded = 0
 		skipped = 0
 		errored = 0
+		weak = 0
 		failed = 0
 		passed = 0
 		warningCount = 0
@@ -475,20 +530,22 @@ class TestsuiteBase(Base):
 		fatalCount = 0
 
 		for testsuite in self._testsuites.values():
-			t, ex, s, e, f, p, wc, ec, fc = testsuite.Aggregate()
+			t, i, ex, s, e, w, f, p, wc, ec, fc = testsuite.Aggregate()
 			tests += t
+			inconsistent += i
 			excluded += ex
 			skipped += s
 			errored += e
+			weak += w
 			failed += f
 			passed += p
 			warningCount += wc
 			errorCount += ec
 			fatalCount += fc
 
-		return tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
 
-	def AddTestsuite(self, testsuite: "Testsuite") -> None:
+	def AddTestsuite(self, testsuite: TestsuiteType) -> None:
 		if testsuite._parent is not None:
 			raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
@@ -498,7 +555,7 @@ class TestsuiteBase(Base):
 		testsuite._parent = self
 		self._testsuites[testsuite._name] = testsuite
 
-	def AddTestsuites(self, testsuites: Iterable["Testsuite"]) -> None:
+	def AddTestsuites(self, testsuites: Iterable[TestsuiteType]) -> None:
 		for testsuite in testsuites:
 			self.AddTestsuite(testsuite)
 
@@ -517,10 +574,10 @@ class TestsuiteBase(Base):
 			self.AddTestcase(testcase)
 
 	@mustoverride
-	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union["Testsuite", Testcase], None, None]:
+	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		pass
 
-	def IterateTestsuites(self, scheme: IterationScheme = IterationScheme.TestsuiteDefault) -> Generator["Testsuite", None, None]:
+	def IterateTestsuites(self, scheme: IterationScheme = IterationScheme.TestsuiteDefault) -> Generator[TestsuiteType, None, None]:
 		return self.Iterate(scheme)
 
 	def IterateTestcases(self, scheme: IterationScheme = IterationScheme.TestcaseDefault) -> Generator[Testcase, None, None]:
@@ -530,16 +587,16 @@ class TestsuiteBase(Base):
 		rootNode = Node(value=self._name)
 
 		def convertTestcase(testcase: Testcase, parentNode: Node) -> None:
-			testcaseNode = Node(value=testcase._name, parent=parentNode)
+			_ = Node(value=testcase._name, parent=parentNode)
 
 		def convertTestsuite(testsuite: Testsuite, parentNode: Node) -> None:
 			testsuiteNode = Node(value=testsuite._name, parent=parentNode)
 
-			for testsuite in testsuite._testsuites.values():
-				convertTestsuite(testsuite, testsuiteNode)
+			for ts in testsuite._testsuites.values():
+				convertTestsuite(ts, testsuiteNode)
 
-			for testcase in testsuite._testcases.values():
-				convertTestcase(testcase, testsuiteNode)
+			for tc in testsuite._testcases.values():
+				convertTestcase(tc, testsuiteNode)
 
 		for testsuite in self._testsuites.values():
 			convertTestsuite(testsuite, rootNode)
@@ -548,7 +605,7 @@ class TestsuiteBase(Base):
 
 
 @export
-class Testsuite(TestsuiteBase):
+class Testsuite(TestsuiteBase[TestsuiteType]):
 	_testcases:  Dict[str, "Testcase"]
 
 	def __init__(
@@ -556,16 +613,15 @@ class Testsuite(TestsuiteBase):
 		name: str,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
-		# testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
-		status: TestcaseStatus = TestcaseStatus.Unknown,
+		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
-		testsuites: Nullable[Iterable["Testsuite"]] = None,
+		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		testcases: Nullable[Iterable["Testcase"]] = None,
-		parent: Nullable["Testsuite"] = None
+		parent: Nullable[TestsuiteType] = None
 	):
 		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
@@ -591,36 +647,57 @@ class Testsuite(TestsuiteBase):
 	def TestcaseCount(self) -> int:
 		return super().TestcaseCount + len(self._testcases)
 
-	def Aggregate(self, strict: bool = True) -> Tuple[int, int, int, int, int, int, int, int, int]:
-		tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
+	def Copy(self) -> "Testsuite":
+		return self.__class__(
+			self._name,
+			self._startTime,
+			self._setupDuration,
+			self._teardownDuration,
+			self._totalDuration,
+			self._status,
+			self._warningCount,
+			self._errorCount,
+			self._fatalCount
+		)
+
+	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
 
 		for testcase in self._testcases.values():
-			testcase.Aggregate(strict)
-			if testcase._status is TestcaseStatus.Passed:
-				tests += 1
-				passed += 1
-			elif testcase._status is TestcaseStatus.Failed:
-				tests += 1
-				failed += 1
-			elif testcase._status is TestcaseStatus.Skipped:
-				tests += 1
-				skipped += 1
-			elif testcase._status is TestcaseStatus.Excluded:
-				tests += 1
+			wc, ec, fc = testcase.Aggregate(strict)
+
+			tests += 1
+			warningCount += wc
+			errorCount +=   ec
+			fatalCount +=   fc
+
+			status = testcase._status
+			if status is TestcaseStatus.Unknown:
+				raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+			elif TestcaseStatus.Inconsistent in status:
+				inconsistent += 1
+			elif status is TestcaseStatus.Excluded:
 				excluded += 1
-			elif testcase._status is TestcaseStatus.Errored:
-				tests += 1
+			elif status is TestcaseStatus.Skipped:
+				skipped += 1
+			elif status is TestcaseStatus.Errored:
 				errored += 1
-			elif testcase._status is TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with unknown state.")
+			elif status is TestcaseStatus.Weak:
+				weak += 1
+			elif status is TestcaseStatus.Passed:
+				passed += 1
+			elif status is TestcaseStatus.Failed:
+				failed += 1
+			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
+				raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+			else:
+				raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
-			warningCount += testcase._warningCount
-			errorCount +=   testcase._errorCount
-			fatalCount +=   testcase._fatalCount
-
+		self._inconsistent = inconsistent
 		self._excluded = excluded
 		self._skipped = skipped
 		self._errored = errored
+		self._weak = weak
 		self._failed = failed
 		self._passed = passed
 		self._warningCount = warningCount
@@ -628,19 +705,21 @@ class Testsuite(TestsuiteBase):
 		self._fatalCount = fatalCount
 
 		if errored > 0:
-			self._status = TestcaseStatus.Errored
+			self._status = TestsuiteStatus.Errored
 		elif failed > 0:
-			self._status = TestcaseStatus.Failed
+			self._status = TestsuiteStatus.Failed
+		elif tests == 0:
+			self._status = TestsuiteStatus.Empty
 		elif tests - skipped == passed:
-			self._status = TestcaseStatus.Passed
+			self._status = TestsuiteStatus.Passed
 		elif tests == skipped:
-			self._status = TestcaseStatus.Skipped
+			self._status = TestsuiteStatus.Skipped
 		else:
-			self._status = TestcaseStatus.Unknown
+			self._status = TestsuiteStatus.Unknown
 
-		return tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
 
-	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union["Testsuite", Testcase], None, None]:
+	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
 
 		if IterationScheme.PreOrder in scheme:
@@ -671,7 +750,7 @@ class Testsuite(TestsuiteBase):
 
 
 @export
-class TestsuiteSummary(TestsuiteBase):
+class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 	def __init__(
 		self,
 		name: str,
@@ -679,21 +758,23 @@ class TestsuiteSummary(TestsuiteBase):
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
-		status: TestcaseStatus = TestcaseStatus.Unknown,
+		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
-		testsuites: Nullable[Iterable["Testsuite"]] = None,
-		parent: Nullable["Testsuite"] = None
+		testsuites: Nullable[Iterable[TestsuiteType]] = None,
+		parent: Nullable[TestsuiteType] = None
 	):
 		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
-	def Aggregate(self) -> Tuple[int, int, int, int, int, int]:
-		tests, excluded, skipped, errored, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
+	def Aggregate(self) -> TestsuiteAggregateReturnType:
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
 
+		self._inconsistent = inconsistent
 		self._excluded = excluded
 		self._skipped = skipped
 		self._errored = errored
+		self._weak = weak
 		self._failed = failed
 		self._passed = passed
 		self._warningCount = warningCount
@@ -701,21 +782,23 @@ class TestsuiteSummary(TestsuiteBase):
 		self._fatalCount = fatalCount
 
 		if errored > 0:
-			self._status = TestcaseStatus.Errored
+			self._status = TestsuiteStatus.Errored
 		elif failed > 0:
-			self._status = TestcaseStatus.Failed
+			self._status = TestsuiteStatus.Failed
+		elif tests == 0:
+			self._status = TestsuiteStatus.Empty
 		elif tests - skipped == passed:
-			self._status = TestcaseStatus.Passed
+			self._status = TestsuiteStatus.Passed
 		elif tests == skipped:
-			self._status = TestcaseStatus.Skipped
+			self._status = TestsuiteStatus.Skipped
 		elif tests == excluded:
-			self._status = TestcaseStatus.Excluded
+			self._status = TestsuiteStatus.Excluded
 		else:
-			self._status = TestcaseStatus.Unknown
+			self._status = TestsuiteStatus.Unknown
 
-		return tests, excluded, skipped, errored, failed, passed
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
 
-	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union["Testsuite", Testcase], None, None]:
+	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
 			yield self
 
@@ -801,51 +884,35 @@ class MergedTestcase(Testcase, Merged):
 
 	def __init__(
 		self,
-		name: str,
-		startTime: Nullable[datetime] = None,
-		setupDuration: Nullable[timedelta] = None,
-		testDuration: Nullable[timedelta] = None,
-		teardownDuration: Nullable[timedelta] = None,
-		totalDuration:  Nullable[timedelta] = None,
-		status: TestcaseStatus = TestcaseStatus.Unknown,
-		assertionCount: Nullable[int] = None,
-		failedAssertionCount: Nullable[int] = None,
-		passedAssertionCount: Nullable[int] = None,
-		warningCount: int = 0,
-		errorCount: int = 0,
-		fatalCount: int = 0,
+		testcase: Testcase,
 		parent: Nullable["Testsuite"] = None
 	):
+		if testcase is None:
+			raise TypeError(f"Parameter 'testcase' is None.")
+
 		super().__init__(
-			name,
-			startTime, setupDuration, testDuration, teardownDuration, totalDuration,
-			status, assertionCount, failedAssertionCount, passedAssertionCount,
-			warningCount, errorCount, fatalCount,
+			testcase._name,
+			testcase._startTime,
+			testcase._setupDuration, testcase._testDuration, testcase._teardownDuration, testcase._totalDuration,
+			TestcaseStatus.Unknown,
+			testcase._assertionCount, testcase._failedAssertionCount, testcase._passedAssertionCount,
+			testcase._warningCount, testcase._errorCount, testcase._fatalCount,
 			parent
 		)
 		Merged.__init__(self)
 
-		self._mergedTestcases = []
-
-	def Merge(self, tc: Testcase) -> None:
-		self._mergedCount += 1
-
-		self._mergedTestcases.append(tc)
-
-		self._warningCount += tc._warningCount
-		self._errorCount += tc._errorCount
-		self._fatalCount += tc._fatalCount
-
-	def Copy(self, tc: Testcase) -> None:
-		pass
+		self._mergedTestcases = [testcase]
 
 	@readonly
 	def Status(self) -> TestcaseStatus:
-		result = self._mergedTestcases[0]._status
-		for state in (tc._status for tc in self._mergedTestcases):
-			result @= state
+		if self._status is TestcaseStatus.Unknown:
+			status = self._mergedTestcases[0]._status
+			for mtc in self._mergedTestcases[1:]:
+				status @= mtc._status
 
-		return result
+			self._status = status
+
+		return self._status
 
 	@readonly
 	def SummedAssertionCount(self) -> int:
@@ -859,114 +926,116 @@ class MergedTestcase(Testcase, Merged):
 	def SummedFailedAssertionCount(self) -> int:
 		return sum(tc._failedAssertionCount for tc in self._mergedTestcases)
 
+	def Aggregate(self, strict: bool = True) -> TestcaseAggregateReturnType:
+		firstMTC = self._mergedTestcases[0]
+
+		status =       firstMTC._status
+		warningCount = firstMTC._warningCount
+		errorCount =   firstMTC._errorCount
+		fatalCount =   firstMTC._fatalCount
+
+		for mtc in self._mergedTestcases[1:]:
+			status @=       mtc._status
+			warningCount += mtc._warningCount
+			errorCount +=   mtc._errorCount
+			fatalCount +=   mtc._fatalCount
+
+		self._status = status
+
+		return warningCount, errorCount, fatalCount
+
+	def Merge(self, tc: Testcase) -> None:
+		self._mergedCount += 1
+
+		self._mergedTestcases.append(tc)
+
+		self._warningCount += tc._warningCount
+		self._errorCount += tc._errorCount
+		self._fatalCount += tc._fatalCount
+
+	def ToTestcase(self) -> Testcase:
+		testcase = Testcase(
+			self._name,
+			self._startTime,
+			self._setupDuration,
+			self._testDuration,
+			self._teardownDuration,
+			self._totalDuration,
+			self._status,
+			self._warningCount,
+			self._errorCount,
+			self._fatalCount
+		)
+		return testcase
+
 
 @export
 class MergedTestsuite(Testsuite, Merged):
 	def __init__(
 		self,
-		name: str,
-		startTime: Nullable[datetime] = None,
-		setupDuration: Nullable[timedelta] = None,
-		# testDuration: Nullable[timedelta] = None,
-		teardownDuration: Nullable[timedelta] = None,
-		totalDuration:  Nullable[timedelta] = None,
-		status: TestcaseStatus = TestcaseStatus.Unknown,
-		warningCount: int = 0,
-		errorCount: int = 0,
-		fatalCount: int = 0,
-		testsuites: Nullable[Iterable["Testsuite"]] = None,
-		testcases: Nullable[Iterable["Testcase"]] = None,
+		testsuite: Testsuite,
+		addTestsuites: bool = False,
+		addTestcases: bool = False,
 		parent: Nullable["Testsuite"] = None
 	):
+		if testsuite is None:
+			raise TypeError(f"Parameter 'testsuite' is None.")
+
 		super().__init__(
-			name,
-			# startTime, setupDuration, testDuration, teardownDuration, totalDuration,
-			status, startTime, setupDuration, teardownDuration, totalDuration,
-			warningCount, errorCount, fatalCount,
-			testsuites, testcases,
+			testsuite._name,
+			testsuite._startTime,
+			testsuite._setupDuration, testsuite._teardownDuration, testsuite._totalDuration,
+			TestsuiteStatus.Unknown,
+			testsuite._warningCount, testsuite._errorCount, testsuite._fatalCount,
 			parent
 		)
 		Merged.__init__(self)
 
-	def Merge(self, ts: Testsuite) -> None:
+		if addTestsuites:
+			for ts in testsuite._testsuites.values():
+				mergedTestsuite = MergedTestsuite(ts, addTestsuites, addTestcases)
+				self.AddTestsuite(mergedTestsuite)
+
+		if addTestcases:
+			for tc in testsuite._testcases.values():
+				mergedTestcase = MergedTestcase(tc)
+				self.AddTestcase(mergedTestcase)
+
+	def Merge(self, testsuite: Testsuite) -> None:
 		self._mergedCount += 1
 
-		for testsuite in ts._testsuites.values():
-			try:
-				mergedTestsuite: MergedTestsuite = self._testsuites[testsuite._name]
-				mergedTestsuite.Merge(testsuite)
-			except KeyError:
-				mergedTestsuite = MergedTestsuite(
-					testsuite._name,
-					testsuite._startTime,
-					testsuite._setupDuration,
-					testsuite._teardownDuration,
-					testsuite._totalDuration,
-					testsuite._status,
-					testsuite._warningCount,
-					testsuite._errorCount,
-					testsuite._fatalCount,
-					parent=self
-				)
-				mergedTestsuite.Copy(testsuite)
+		for ts in testsuite._testsuites.values():
+			if ts._name in self._testsuites:
+				self._testsuites[ts._name].Merge(ts)
+			else:
+				mergedTestsuite = MergedTestsuite(ts, addTestsuites=True, addTestcases=True)
+				self.AddTestsuite(mergedTestsuite)
 
-		for testcase in ts._testcases.values():
-			try:
-				mergedTestcase: MergedTestcase = self._testcases[testcase._name]
-				mergedTestcase.Merge(testcase)
-			except KeyError:
-				mergedTestcase = MergedTestcase(
-				testcase._name,
-				testcase._startTime,
-				testcase._setupDuration,
-				testcase._testDuration,
-				testcase._teardownDuration,
-				testcase._totalDuration,
-				testcase._status,
-				testcase._assertionCount,
-				testcase._failedAssertionCount,
-				testcase._passedAssertionCount,
-				testcase._warningCount,
-				testcase._errorCount,
-				testcase._fatalCount,
-				parent=self
-				)
-				mergedTestcase.Copy(testcase)
+		for tc in testsuite._testcases.values():
+			if tc._name in self._testcases:
+				self._testcases[tc._name].Merge(tc)
+			else:
+				mergedTestcase = MergedTestcase(tc)
+				self.AddTestcase(mergedTestcase)
 
-	def Copy(self, ts: Testsuite) -> None:
-		for testsuite in ts._testsuites.values():
-			mergedTestsuite = MergedTestsuite(
-					testsuite._name,
-					testsuite._startTime,
-					testsuite._setupDuration,
-					testsuite._teardownDuration,
-					testsuite._totalDuration,
-					testsuite._status,
-					testsuite._warningCount,
-					testsuite._errorCount,
-					testsuite._fatalCount,
-					parent=self
-			)
-			mergedTestsuite.Copy(testsuite)
+	def ToTestsuite(self) -> Testsuite:
+		testsuite = Testsuite(
+			self._name,
+			self._startTime,
+			self._setupDuration,
+			self._teardownDuration,
+			self._totalDuration,
+			self._status,
+			self._warningCount,
+			self._errorCount,
+			self._fatalCount
+		)
+		for ts in self._testsuites.values():
+			testsuite.AddTestsuite(ts.ToTestsuite())
+		for tc in self._testcases.values():
+			testsuite.AddTestcase(tc.ToTestcase())
 
-		for testcase in ts._testcases.values():
-			mergedTestcase = MergedTestcase(
-				testcase._name,
-				testcase._startTime,
-				testcase._setupDuration,
-				testcase._testDuration,
-				testcase._teardownDuration,
-				testcase._totalDuration,
-				testcase._status,
-				testcase._assertionCount,
-				testcase._failedAssertionCount,
-				testcase._passedAssertionCount,
-				testcase._warningCount,
-				testcase._errorCount,
-				testcase._fatalCount,
-				parent=self
-			)
-			mergedTestcase.Copy(testcase)
+		return testsuite
 
 
 @export
@@ -979,31 +1048,34 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 
 		self._mergedFiles = {}
 
-	def Merge(self, summary: TestsuiteSummary) -> None:
+	def Merge(self, testsuiteSummary: TestsuiteSummary) -> None:
 		# if summary.File in self._mergedFiles:
 		# 	raise
 
+		# FIXME: a summary is not necessarily a file
 		self._mergedCount += 1
-		self._mergedFiles[summary.Name] = summary
+		self._mergedFiles[testsuiteSummary._name] = testsuiteSummary
 
-		for testsuite in summary._testsuites.values():
-			try:
-				mergedTestsuite: MergedTestsuite = self._testsuites[testsuite._name]
-				mergedTestsuite.Merge(testsuite)
-			except KeyError:
-				mergedTestsuite = MergedTestsuite(
-					testsuite._name,
-					testsuite._startTime,
-					testsuite._setupDuration,
-					testsuite._teardownDuration,
-					testsuite._totalDuration,
-					testsuite._status,
-					testsuite._warningCount,
-					testsuite._errorCount,
-					testsuite._fatalCount,
-					parent=self
-				)
-				mergedTestsuite.Copy(testsuite)
+		for testsuite in testsuiteSummary._testsuites.values():
+			if testsuite._name in self._testsuites:
+				self._testsuites[testsuite._name].Merge(testsuite)
+			else:
+				mergedTestsuite = MergedTestsuite(testsuite, addTestsuites=True, addTestcases=True)
+				self.AddTestsuite(mergedTestsuite)
 
-	def Aggregate(self) -> None:
-		pass
+	def ToTestsuiteSummary(self) -> TestsuiteSummary:
+		testsuiteSummary = TestsuiteSummary(
+			self._name,
+			self._startTime,
+			self._setupDuration,
+			self._teardownDuration,
+			self._totalDuration,
+			self._status,
+			self._warningCount,
+			self._errorCount,
+			self._fatalCount
+		)
+		for ts in self._testsuites.values():
+			testsuiteSummary.AddTestsuite(ts.ToTestsuite())
+
+		return testsuiteSummary
