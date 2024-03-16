@@ -153,6 +153,7 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 		yamlResults = yamlTestcase["Results"]
 		assertionCount = int(yamlResults["AffirmCount"])
 		passedAssertionCount = int(yamlResults["PassedCount"])
+		totalErrors = int(yamlResults["TotalErrors"])
 		warningCount = int(yamlResults["AlertCount"]["Warning"])
 		errorCount = int(yamlResults["AlertCount"]["Error"])
 		fatalCount = int(yamlResults["AlertCount"]["Failure"])
@@ -166,12 +167,15 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 		else:
 			status = TestcaseStatus.Unknown
 
-		if warningCount > 0:
-			status |= TestcaseStatus.Warned
-		if errorCount > 0:
-			status |= TestcaseStatus.Errored
-		if fatalCount > 0:
-			status |= TestcaseStatus.Aborted
+		if totalErrors == warningCount + errorCount + fatalCount:
+			if warningCount > 0:
+				status |= TestcaseStatus.Warned
+			if errorCount > 0:
+				status |= TestcaseStatus.Errored
+			if fatalCount > 0:
+				status |= TestcaseStatus.Aborted
+		else:
+			status |= TestcaseStatus.Inconsistent
 
 		testcase = Testcase(
 			testcaseName,

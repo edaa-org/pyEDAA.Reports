@@ -1,4 +1,4 @@
-<testsuites name=".github_OsvvmRegression" timestamp="2024-02-21T15:12+00:00" id="2024.01" time="385.579" tests="285" failures="0" errors="0" skipped="0">
+<testsuites name=".github_OsvvmRegression" timestamp="2024-02-21T15:12:00+00:00" id="2024.01" time="385.579" tests="285" failures="0" errors="0" skipped="0">
 	<testsuite name="StreamTransactionPkg" time="15.461" tests="15" failures="0" errors="0" skipped="0">
 		<testcase name="TbStream_SendGet1" classname="TbStream_SendGet1" time="0.774" />
 		<testcase name="TbStream_SendGetAsync1" classname="TbStream_SendGetAsync1" time="0.750" />

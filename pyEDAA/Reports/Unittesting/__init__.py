@@ -29,12 +29,12 @@
 # ==================================================================================================================== #
 #
 """Abstraction of testsuites and testcases."""
-from datetime import timedelta, datetime
-from enum     import Flag
-from pathlib  import Path
-from typing   import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar
+from datetime              import timedelta, datetime
+from enum                  import Flag
+from pathlib               import Path
+from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar
 
-from pyTooling.Decorators  import export, readonly, notimplemented
+from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import abstractmethod, ExtendedType, mustoverride
 from pyTooling.Tree        import Node
 
@@ -77,8 +77,9 @@ class TestcaseStatus(Flag):
 
 	SetupError =     8192                  #: preparation / compilation error
 	TearDownError = 16384                  #: cleanup error / resource release error
+	Inconsistent = 32768                   #: Dataset is inconsistent
 
-	Flags = Warned | Errored | Aborted | SetupError | TearDownError
+	Flags = Warned | Errored | Aborted | SetupError | TearDownError | Inconsistent
 
 	# TODO: timed out ?
 
@@ -144,7 +145,7 @@ class IterationScheme(Flag):
 
 TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
 TestcaseAggregateReturnType = Tuple[int, int, int]
-TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int, int]
+TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int, int, int]
 
 
 @export
@@ -398,12 +399,13 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	_status:     TestsuiteStatus
 	_testsuites: Dict[str, TestsuiteType]
 
-	_excluded: int
-	_skipped:  int
-	_errored:  int
-	_weak:     int
-	_failed:   int
-	_passed:   int
+	_inconsistent: int
+	_excluded:     int
+	_skipped:      int
+	_errored:      int
+	_weak:         int
+	_failed:       int
+	_passed:       int
 
 	def __init__(
 		self,
@@ -516,6 +518,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
 		tests = 0
+		inconsistent = 0
 		excluded = 0
 		skipped = 0
 		errored = 0
@@ -527,8 +530,9 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		fatalCount = 0
 
 		for testsuite in self._testsuites.values():
-			t, ex, s, e, w, f, p, wc, ec, fc = testsuite.Aggregate()
+			t, i, ex, s, e, w, f, p, wc, ec, fc = testsuite.Aggregate()
 			tests += t
+			inconsistent += i
 			excluded += ex
 			skipped += s
 			errored += e
@@ -539,7 +543,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			errorCount += ec
 			fatalCount += fc
 
-		return tests, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
 
 	def AddTestsuite(self, testsuite: TestsuiteType) -> None:
 		if testsuite._parent is not None:
@@ -657,11 +661,12 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
 
 		for testcase in self._testcases.values():
 			wc, ec, fc = testcase.Aggregate(strict)
 
+			tests += 1
 			warningCount += wc
 			errorCount +=   ec
 			fatalCount +=   fc
@@ -669,29 +674,26 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			status = testcase._status
 			if status is TestcaseStatus.Unknown:
 				raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+			elif TestcaseStatus.Inconsistent in status:
+				inconsistent += 1
 			elif status is TestcaseStatus.Excluded:
-				tests += 1
 				excluded += 1
 			elif status is TestcaseStatus.Skipped:
-				tests += 1
 				skipped += 1
 			elif status is TestcaseStatus.Errored:
-				tests += 1
 				errored += 1
 			elif status is TestcaseStatus.Weak:
-				tests += 1
 				weak += 1
 			elif status is TestcaseStatus.Passed:
-				tests += 1
 				passed += 1
 			elif status is TestcaseStatus.Failed:
-				tests += 1
 				failed += 1
 			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
 				raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
 			else:
 				raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
+		self._inconsistent = inconsistent
 		self._excluded = excluded
 		self._skipped = skipped
 		self._errored = errored
@@ -715,7 +717,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
@@ -766,8 +768,9 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
-		tests, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
 
+		self._inconsistent = inconsistent
 		self._excluded = excluded
 		self._skipped = skipped
 		self._errored = errored
@@ -793,7 +796,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
