@@ -50,6 +50,9 @@ setup(**DescribePythonPackageHostedOnGitHub(
 	],
 	sourceFileWithVersion=packageInformationFile,
 	dataFiles={
-		packageName[:-2]: ["py.typed"]
+		packageName: [
+			f"py.typed",
+			f"resources/*.xsd"
+		]
 	}
 ))
