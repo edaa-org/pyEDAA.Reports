@@ -1,0 +1,89 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="451pt" height="83pt" viewBox="0.00 0.00 451.00 83.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 79)">
+<ns0:title>inheritance388fdbb4d1</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Base</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Base" ns1:title="Base" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="54,-75 0,-75 0,-56 54,-56 54,-75" />
+<ns0:text text-anchor="middle" x="27" y="-63" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Base</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>TestsuiteBase</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteBase" ns1:title="TestsuiteBase" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="174,-56 90,-56 90,-37 174,-37 174,-56" />
+<ns0:text text-anchor="middle" x="132" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TestsuiteBase</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>Base-&gt;TestsuiteBase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.26,-60.66C63.58,-58.94 74.37,-56.95 84.86,-55.01" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="85.37,-56.7 89.97,-54.07 84.74,-53.25 85.37,-56.7" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>Document</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Document" ns1:title="Document" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="297,-19 230,-19 230,0 297,0 297,-19" />
+<ns0:text text-anchor="middle" x="263.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Document</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>JUnitDocument</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.JUnitDocument" ns1:title="JUnitDocument" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="443,-37 353,-37 353,-18 443,-18 443,-37" />
+<ns0:text text-anchor="middle" x="398" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">JUnitDocument</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>Document-&gt;JUnitDocument</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M297.25,-13.95C312.39,-16.01 330.7,-18.49 347.48,-20.77" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="347.44,-22.53 352.63,-21.47 347.91,-19.07 347.44,-22.53" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>Generic</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="https://docs.python.org/3/library/typing.html#typing.Generic" ns1:title="Abstract base class for generic types." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="54,-38 0,-38 0,-19 54,-19 54,-38" />
+<ns0:text text-anchor="middle" x="27" y="-26" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Generic</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>Generic-&gt;TestsuiteBase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.26,-33.09C63.58,-34.72 74.37,-36.6 84.86,-38.44" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="84.75,-40.19 89.97,-39.33 85.35,-36.75 84.75,-40.19" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>TestsuiteSummary</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteSummary" ns1:title="TestsuiteSummary" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="317,-56 210,-56 210,-37 317,-37 317,-56" />
+<ns0:text text-anchor="middle" x="263.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TestsuiteSummary</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>TestsuiteSummary-&gt;JUnitDocument</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M317.25,-38.94C327.33,-37.49 337.84,-35.98 347.8,-34.55" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="348.26,-36.26 352.96,-33.82 347.76,-32.79 348.26,-36.26" />
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>TestsuiteBase-&gt;TestsuiteSummary</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M174.33,-46.5C184,-46.5 194.47,-46.5 204.71,-46.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="204.72,-48.25 209.72,-46.5 204.72,-44.75 204.72,-48.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

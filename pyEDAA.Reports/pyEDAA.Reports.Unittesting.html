@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyEDAA.Reports.Unittesting &mdash; pyEDAA.Reports 0.4.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=77553476" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-reports.e44b1595f1e09d5e109d001839ba3f42.css?v=0b41afa8" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/override.css?v=d48d1b8b" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.svg"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=c87aa342"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+        <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyEDAA.Reports.Unittesting.JUnit" href="pyEDAA.Reports.Unittesting.JUnit.html" />
+    <link rel="prev" title="pyEDAA.Reports.DocumentationCoverage.Python" href="pyEDAA.Reports.DocumentationCoverage.Python.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="https://edaa-org.github.io/">Used as a layer of EDA² ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation/Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Dependency.html">Dependency</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Report Formats</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../CodeCoverage/index.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DocCoverage/index.html">Documentation Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Unittesting/index.html">Unittesting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FunctionalCoverage.html">Functional coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../LineCoverage.html">Line coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Resources.html">Synthesis and implementation results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../RichLogging.html">Semantic/rich logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tracking.html">Tracking requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frontends.html">Frontends</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References and Reports</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pyEDAA.Reports.html">Python Class Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html">pyEDAA.Reports.DocumentationCoverage</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pyEDAA.Reports.Unittesting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.html">pyEDAA.Reports.Unittesting.JUnit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.OSVVM.html">pyEDAA.Reports.Unittesting.OSVVM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.UnittestException"><code class="docutils literal notranslate"><span class="pre">UnittestException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.DuplicateTestsuiteException"><code class="docutils literal notranslate"><span class="pre">DuplicateTestsuiteException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.DuplicateTestcaseException"><code class="docutils literal notranslate"><span class="pre">DuplicateTestcaseException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Unknown"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Unknown</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Excluded"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Excluded</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Skipped"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Skipped</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Weak"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Weak</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Passed"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Passed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Failed"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Failed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Inverted"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Inverted</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Warned"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Warned</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Errored"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Errored</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Aborted"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Aborted</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.SetupError"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.SetupError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.TearDownError"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.TearDownError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Inconsistent"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.Inconsistent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.__contains__"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.__contains__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.__iter__"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.__iter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.__len__"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus.__len__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Excluded"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.Excluded</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Skipped"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.Skipped</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Empty"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.Empty</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Passed"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.Passed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Failed"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.Failed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Inverted"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.Inverted</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Warned"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.Warned</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Errored"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.Errored</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Aborted"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.Aborted</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.SetupError"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.SetupError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.TearDownError"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.TearDownError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.__contains__"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.__contains__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.__iter__"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.__iter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.__len__"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus.__len__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.IterationScheme"><code class="docutils literal notranslate"><span class="pre">IterationScheme</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.IterationScheme.__contains__"><code class="docutils literal notranslate"><span class="pre">IterationScheme.__contains__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.IterationScheme.__iter__"><code class="docutils literal notranslate"><span class="pre">IterationScheme.__iter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.IterationScheme.__len__"><code class="docutils literal notranslate"><span class="pre">IterationScheme.__len__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Base.__init__"><code class="docutils literal notranslate"><span class="pre">Base.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Base.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Base.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Base.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Base.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Base.__new__"><code class="docutils literal notranslate"><span class="pre">Base.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase"><code class="docutils literal notranslate"><span class="pre">Testcase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase.__init__"><code class="docutils literal notranslate"><span class="pre">Testcase.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase.__str__"><code class="docutils literal notranslate"><span class="pre">Testcase.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Testcase.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Testcase.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase.__new__"><code class="docutils literal notranslate"><span class="pre">Testcase.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteBase"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.__init__"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.__class_getitem__"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.__class_getitem__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.__init_subclass__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.__new__"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite"><code class="docutils literal notranslate"><span class="pre">Testsuite</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite.__init__"><code class="docutils literal notranslate"><span class="pre">Testsuite.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite.__str__"><code class="docutils literal notranslate"><span class="pre">Testsuite.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Testsuite.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Testsuite.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite.__class_getitem__"><code class="docutils literal notranslate"><span class="pre">Testsuite.__class_getitem__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">Testsuite.__init_subclass__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite.__new__"><code class="docutils literal notranslate"><span class="pre">Testsuite.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__init__"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__str__"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__class_getitem__"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.__class_getitem__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.__init_subclass__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__new__"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Document"><code class="docutils literal notranslate"><span class="pre">Document</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Document.__init__"><code class="docutils literal notranslate"><span class="pre">Document.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Document.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Document.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Document.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Document.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Document.__new__"><code class="docutils literal notranslate"><span class="pre">Document.__new__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Document._analysisDuration"><code class="docutils literal notranslate"><span class="pre">Document._analysisDuration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Document._modelConversion"><code class="docutils literal notranslate"><span class="pre">Document._modelConversion</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Merged"><code class="docutils literal notranslate"><span class="pre">Merged</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Merged.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Merged.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Merged.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Merged.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Merged.__init__"><code class="docutils literal notranslate"><span class="pre">Merged.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Combined"><code class="docutils literal notranslate"><span class="pre">Combined</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Combined.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Combined.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Combined.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Combined.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Combined.__init__"><code class="docutils literal notranslate"><span class="pre">Combined.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestcase"><code class="docutils literal notranslate"><span class="pre">MergedTestcase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestcase.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">MergedTestcase.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestcase.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">MergedTestcase.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestcase.__new__"><code class="docutils literal notranslate"><span class="pre">MergedTestcase.__new__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestcase.__str__"><code class="docutils literal notranslate"><span class="pre">MergedTestcase.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestcase.__init__"><code class="docutils literal notranslate"><span class="pre">MergedTestcase.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuite"><code class="docutils literal notranslate"><span class="pre">MergedTestsuite</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">MergedTestsuite.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">MergedTestsuite.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__class_getitem__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuite.__class_getitem__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuite.__init_subclass__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__new__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuite.__new__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__str__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuite.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__init__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuite.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary"><code class="docutils literal notranslate"><span class="pre">MergedTestsuiteSummary</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">MergedTestsuiteSummary.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">MergedTestsuiteSummary.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__class_getitem__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuiteSummary.__class_getitem__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuiteSummary.__init_subclass__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__new__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuiteSummary.__new__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__str__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuiteSummary.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__init__"><code class="docutils literal notranslate"><span class="pre">MergedTestsuiteSummary.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.resources.html">pyEDAA.Reports.resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/unittests.html">Unittest Summary Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/coverage/index.html">Code Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/doccoverage.html">Doc. Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/typing/index.html">Static Type Check Report ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../License.html">Apache License 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Doc-License.html">Creative Commons Attribution 4.0 International</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Python Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TODO.html">TODOs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyEDAA.Reports</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pyEDAA.Reports.html">Python Class Reference</a></li>
+      <li class="breadcrumb-item active">pyEDAA.Reports.Unittesting</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pyEDAA.Reports/pyEDAA.Reports.Unittesting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <style type="text/css">
+  span.bolditalic {font-weight: bold; font-style: italic; }
+  span.underline {text-decoration: underline; }
+  span.strike {text-decoration: line-through; }
+  span.xlarge {font-size: x-large; }
+  span.colorred {color: #CC0000; }
+  span.colorgreen {color: #009933; }
+  span.colorblue {color: #0066FF; }
+  span.colorpurple {color: #9900CC; }
+</style><section id="module-pyEDAA.Reports.Unittesting">
+<span id="pyedaa-reports-unittesting"></span><h1>pyEDAA.Reports.Unittesting<a class="headerlink" href="#module-pyEDAA.Reports.Unittesting" title="Link to this heading"></a></h1>
+<p>Abstraction of testsuites and testcases.</p>
+<p><strong>Submodules</strong></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.html">pyEDAA.Reports.Unittesting.JUnit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyEDAA.Reports.Unittesting.OSVVM.html">pyEDAA.Reports.Unittesting.OSVVM</a></li>
+</ul>
+</div>
+<p><strong>Exceptions</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.UnittestException" title="pyEDAA.Reports.Unittesting.UnittestException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnittestException</span></code></a>:
+Common base class for all non-exit exceptions.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.DuplicateTestsuiteException" title="pyEDAA.Reports.Unittesting.DuplicateTestsuiteException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DuplicateTestsuiteException</span></code></a>:
+Common base class for all non-exit exceptions.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.DuplicateTestcaseException" title="pyEDAA.Reports.Unittesting.DuplicateTestcaseException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DuplicateTestcaseException</span></code></a>:
+Common base class for all non-exit exceptions.</p></li>
+</ul>
+<p><strong>Classes</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus" title="pyEDAA.Reports.Unittesting.TestcaseStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestcaseStatus</span></code></a>:
+Support for flags</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus" title="pyEDAA.Reports.Unittesting.TestsuiteStatus"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestsuiteStatus</span></code></a>:
+Support for flags</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.IterationScheme" title="pyEDAA.Reports.Unittesting.IterationScheme"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterationScheme</span></code></a>:
+Support for flags</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Base" title="pyEDAA.Reports.Unittesting.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase" title="pyEDAA.Reports.Unittesting.Testcase"><code class="xref py py-class docutils literal notranslate"><span class="pre">Testcase</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteBase" title="pyEDAA.Reports.Unittesting.TestsuiteBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestsuiteBase</span></code></a>:
+Abstract base class for generic types.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><code class="xref py py-class docutils literal notranslate"><span class="pre">Testsuite</span></code></a>:
+Abstract base class for generic types.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary" title="pyEDAA.Reports.Unittesting.TestsuiteSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestsuiteSummary</span></code></a>:
+Abstract base class for generic types.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Document" title="pyEDAA.Reports.Unittesting.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Merged" title="pyEDAA.Reports.Unittesting.Merged"><code class="xref py py-class docutils literal notranslate"><span class="pre">Merged</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Combined" title="pyEDAA.Reports.Unittesting.Combined"><code class="xref py py-class docutils literal notranslate"><span class="pre">Combined</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestcase" title="pyEDAA.Reports.Unittesting.MergedTestcase"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergedTestcase</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuite" title="pyEDAA.Reports.Unittesting.MergedTestsuite"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergedTestsuite</span></code></a>:
+Abstract base class for generic types.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary" title="pyEDAA.Reports.Unittesting.MergedTestsuiteSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergedTestsuiteSummary</span></code></a>:
+Abstract base class for generic types.</p></li>
+</ul>
+<hr class="docutils" />
+<p><strong>Exceptions</strong></p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.UnittestException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">UnittestException</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#UnittestException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.UnittestException" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-12cb024a68d70cd2bd0f6f23ede463064bcceb37.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of UnittestException</p></object></div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.DuplicateTestsuiteException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">DuplicateTestsuiteException</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#DuplicateTestsuiteException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.DuplicateTestsuiteException" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-6c23d38d583700f352096a17c7f4f4ab4b939985.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of DuplicateTestsuiteException</p></object></div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.DuplicateTestcaseException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">DuplicateTestcaseException</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#DuplicateTestcaseException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.DuplicateTestcaseException" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-8a744d640c06efe4867ee3c63cde5106f59ccde3.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of DuplicateTestcaseException</p></object></div>
+</dd></dl>
+
+<hr class="docutils" />
+<p><strong>Classes</strong></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">TestcaseStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#TestcaseStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-e50f567f7eea7639f7ef64978e8b63feed7ea3f4.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of TestcaseStatus</p></object></div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Unknown">
+<span class="sig-name descname"><span class="pre">Unknown</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Unknown" title="Link to this definition"></a></dt>
+<dd><p>Testcase status is uninitialized and therefore unknown.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Excluded">
+<span class="sig-name descname"><span class="pre">Excluded</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Excluded" title="Link to this definition"></a></dt>
+<dd><p>Testcase was permanently excluded / disabled</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Skipped">
+<span class="sig-name descname"><span class="pre">Skipped</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Skipped" title="Link to this definition"></a></dt>
+<dd><p>Testcase was temporarily skipped (e.g. based on a condition)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Weak">
+<span class="sig-name descname"><span class="pre">Weak</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Weak" title="Link to this definition"></a></dt>
+<dd><p>No assertions were recorded.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Passed">
+<span class="sig-name descname"><span class="pre">Passed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Passed" title="Link to this definition"></a></dt>
+<dd><p>A passed testcase, because all assertions were successful.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Failed">
+<span class="sig-name descname"><span class="pre">Failed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Failed" title="Link to this definition"></a></dt>
+<dd><p>A failed testcase due to at least one failed assertion.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Inverted">
+<span class="sig-name descname"><span class="pre">Inverted</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">128</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Inverted" title="Link to this definition"></a></dt>
+<dd><p>to mark inverted results</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Warned">
+<span class="sig-name descname"><span class="pre">Warned</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1024</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Warned" title="Link to this definition"></a></dt>
+<dd><p>runtime warning</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Errored">
+<span class="sig-name descname"><span class="pre">Errored</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2048</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Errored" title="Link to this definition"></a></dt>
+<dd><p>runtime error (mostly caught exceptions)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Aborted">
+<span class="sig-name descname"><span class="pre">Aborted</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4096</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Aborted" title="Link to this definition"></a></dt>
+<dd><p>uncaught runtime exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.SetupError">
+<span class="sig-name descname"><span class="pre">SetupError</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8192</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.SetupError" title="Link to this definition"></a></dt>
+<dd><p>preparation / compilation error</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.TearDownError">
+<span class="sig-name descname"><span class="pre">TearDownError</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16384</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.TearDownError" title="Link to this definition"></a></dt>
+<dd><p>cleanup error / resource release error</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.Inconsistent">
+<span class="sig-name descname"><span class="pre">Inconsistent</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32768</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.Inconsistent" title="Link to this definition"></a></dt>
+<dd><p>Dataset is inconsistent</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.__contains__" title="Link to this definition"></a></dt>
+<dd><p>Returns True if self has at least the same flags set as other.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Returns flags in definition order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestcaseStatus.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestcaseStatus.__len__" title="Link to this definition"></a></dt>
+<dd><p>Return the number of members (no aliases)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">TestsuiteStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#TestsuiteStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-b81e05ce628f75d80bff77742b469899a7f25201.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of TestsuiteStatus</p></object></div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.Excluded">
+<span class="sig-name descname"><span class="pre">Excluded</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Excluded" title="Link to this definition"></a></dt>
+<dd><p>testcase was permanently excluded / disabled</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.Skipped">
+<span class="sig-name descname"><span class="pre">Skipped</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Skipped" title="Link to this definition"></a></dt>
+<dd><p>testcase was temporarily skipped (e.g. based on a condition)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.Empty">
+<span class="sig-name descname"><span class="pre">Empty</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Empty" title="Link to this definition"></a></dt>
+<dd><p>no tests in suite</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.Passed">
+<span class="sig-name descname"><span class="pre">Passed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Passed" title="Link to this definition"></a></dt>
+<dd><p>passed testcase, because all assertions succeeded</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.Failed">
+<span class="sig-name descname"><span class="pre">Failed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Failed" title="Link to this definition"></a></dt>
+<dd><p>failed testcase due to failing assertions</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.Inverted">
+<span class="sig-name descname"><span class="pre">Inverted</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">128</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Inverted" title="Link to this definition"></a></dt>
+<dd><p>to mark inverted results</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.Warned">
+<span class="sig-name descname"><span class="pre">Warned</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1024</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Warned" title="Link to this definition"></a></dt>
+<dd><p>runtime warning</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.Errored">
+<span class="sig-name descname"><span class="pre">Errored</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2048</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Errored" title="Link to this definition"></a></dt>
+<dd><p>runtime error (mostly caught exceptions)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.Aborted">
+<span class="sig-name descname"><span class="pre">Aborted</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4096</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.Aborted" title="Link to this definition"></a></dt>
+<dd><p>uncaught runtime exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.SetupError">
+<span class="sig-name descname"><span class="pre">SetupError</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8192</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.SetupError" title="Link to this definition"></a></dt>
+<dd><p>preparation / compilation error</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.TearDownError">
+<span class="sig-name descname"><span class="pre">TearDownError</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16384</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.TearDownError" title="Link to this definition"></a></dt>
+<dd><p>cleanup error / resource release error</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.__contains__" title="Link to this definition"></a></dt>
+<dd><p>Returns True if self has at least the same flags set as other.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Returns flags in definition order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteStatus.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus.__len__" title="Link to this definition"></a></dt>
+<dd><p>Return the number of members (no aliases)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.IterationScheme">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">IterationScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#IterationScheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.IterationScheme" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-ab9d2e747d29dc665e7b8ecb019377211b3b1207.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of IterationScheme</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.IterationScheme.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.IterationScheme.__contains__" title="Link to this definition"></a></dt>
+<dd><p>Returns True if self has at least the same flags set as other.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.IterationScheme.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.IterationScheme.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Returns flags in definition order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.IterationScheme.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.IterationScheme.__len__" title="Link to this definition"></a></dt>
+<dd><p>Return the number of members (no aliases)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Base">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Base" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-4e6b6aed3b8676bd080865480a6e9726f62cb464.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Base</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Base.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Base.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Base.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>startTime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.12)"><em>datetime</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>setupDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>teardownDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>totalDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>warningCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>errorCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>fatalCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Base.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Base.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Base.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Base.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Base.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Base.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testcase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">Testcase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TestcaseStatus.Unknown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assertionCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">failedAssertionCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passedAssertionCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Testcase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testcase" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-a1ac9b646c420aaaa3dbc67349ce62227ea42ebf.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Testcase</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testcase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TestcaseStatus.Unknown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assertionCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">failedAssertionCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passedAssertionCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Testcase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testcase.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>startTime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.12)"><em>datetime</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>setupDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>testDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>teardownDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>totalDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestcaseStatus" title="pyEDAA.Reports.Unittesting.TestcaseStatus"><em>TestcaseStatus</em></a>) – </p></li>
+<li><p><strong>assertionCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>failedAssertionCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>passedAssertionCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>warningCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>errorCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>fatalCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testcase.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Testcase.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testcase.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).
+:rtype: <span class="sphinx_autodoc_typehints-type"># Load pre-defined aliases and graphical characters like © from docutils
+# &lt;file&gt; is used to denote the special path
+# &lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testcase.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testcase.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testcase.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testcase.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testcase.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testcase.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">TestsuiteBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TestsuiteStatus.Unknown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testsuites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#TestsuiteBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteBase" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-aa6645a5428523334f11483df18f6387aae49f4b.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of TestsuiteBase</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteBase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TestsuiteStatus.Unknown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testsuites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#TestsuiteBase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>startTime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.12)"><em>datetime</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>setupDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>teardownDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>totalDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus" title="pyEDAA.Reports.Unittesting.TestsuiteStatus"><em>TestsuiteStatus</em></a>) – </p></li>
+<li><p><strong>warningCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>errorCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>fatalCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>testsuites</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.12)"><em>Iterable</em></a><em>[</em><em>TestsuiteType</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteBase.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteBase.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteBase.__class_getitem__">
+<span class="sig-name descname"><span class="pre">__class_getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.__class_getitem__" title="Link to this definition"></a></dt>
+<dd><p>Parameterizes a generic class.</p>
+<p>At least, parameterizing a generic class is the <em>main</em> thing this
+method does. For example, for some generic class <cite>Foo</cite>, this is called
+when we do <cite>Foo[int]</cite> - there, with <cite>cls=Foo</cite> and <cite>params=int</cite>.</p>
+<p>However, note that this method is also called when defining generic
+classes in the first place with <cite>class Foo[T]: …</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteBase.__init_subclass__">
+<span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.__init_subclass__" title="Link to this definition"></a></dt>
+<dd><p>Function to initialize subclasses.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteBase.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteBase.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testsuite">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">Testsuite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TestsuiteStatus.Unknown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testsuites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testcases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Testsuite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testsuite" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-70cdc23d7ff3afd8a999168f91f612569fd2be42.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Testsuite</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testsuite.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TestsuiteStatus.Unknown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testsuites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testcases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Testsuite.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testsuite.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>startTime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.12)"><em>datetime</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>setupDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>teardownDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>totalDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus" title="pyEDAA.Reports.Unittesting.TestsuiteStatus"><em>TestsuiteStatus</em></a>) – </p></li>
+<li><p><strong>warningCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>errorCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>fatalCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>testsuites</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.12)"><em>Iterable</em></a><em>[</em><em>TestsuiteType</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>testcases</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.12)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase" title="pyEDAA.Reports.Unittesting.Testcase"><em>Testcase</em></a><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>parent</strong> (<em>TestsuiteType</em><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testsuite.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Testsuite.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testsuite.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).
+:rtype: <span class="sphinx_autodoc_typehints-type"># Load pre-defined aliases and graphical characters like © from docutils
+# &lt;file&gt; is used to denote the special path
+# &lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testsuite.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testsuite.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testsuite.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testsuite.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testsuite.__class_getitem__">
+<span class="sig-name descname"><span class="pre">__class_getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testsuite.__class_getitem__" title="Link to this definition"></a></dt>
+<dd><p>Parameterizes a generic class.</p>
+<p>At least, parameterizing a generic class is the <em>main</em> thing this
+method does. For example, for some generic class <cite>Foo</cite>, this is called
+when we do <cite>Foo[int]</cite> - there, with <cite>cls=Foo</cite> and <cite>params=int</cite>.</p>
+<p>However, note that this method is also called when defining generic
+classes in the first place with <cite>class Foo[T]: …</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testsuite.__init_subclass__">
+<span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testsuite.__init_subclass__" title="Link to this definition"></a></dt>
+<dd><p>Function to initialize subclasses.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Testsuite.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Testsuite.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteSummary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">TestsuiteSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TestsuiteStatus.Unknown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testsuites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#TestsuiteSummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-99719be036a2290021b167a8b3ffff3ba86abea1.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of TestsuiteSummary</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteSummary.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setupDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teardownDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">totalDuration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TestsuiteStatus.Unknown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warningCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errorCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatalCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testsuites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#TestsuiteSummary.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>startTime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.12)"><em>datetime</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>setupDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>teardownDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>totalDuration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>) – </p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.TestsuiteStatus" title="pyEDAA.Reports.Unittesting.TestsuiteStatus"><em>TestsuiteStatus</em></a>) – </p></li>
+<li><p><strong>warningCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>errorCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>fatalCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p></li>
+<li><p><strong>testsuites</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.12)"><em>Iterable</em></a><em>[</em><em>TestsuiteType</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+<li><p><strong>parent</strong> (<em>TestsuiteType</em><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteSummary.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#TestsuiteSummary.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).
+:rtype: <span class="sphinx_autodoc_typehints-type"># Load pre-defined aliases and graphical characters like © from docutils
+# &lt;file&gt; is used to denote the special path
+# &lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteSummary.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteSummary.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteSummary.__class_getitem__">
+<span class="sig-name descname"><span class="pre">__class_getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__class_getitem__" title="Link to this definition"></a></dt>
+<dd><p>Parameterizes a generic class.</p>
+<p>At least, parameterizing a generic class is the <em>main</em> thing this
+method does. For example, for some generic class <cite>Foo</cite>, this is called
+when we do <cite>Foo[int]</cite> - there, with <cite>cls=Foo</cite> and <cite>params=int</cite>.</p>
+<p>However, note that this method is also called when defining generic
+classes in the first place with <cite>class Foo[T]: …</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteSummary.__init_subclass__">
+<span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__init_subclass__" title="Link to this definition"></a></dt>
+<dd><p>Function to initialize subclasses.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.TestsuiteSummary.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.TestsuiteSummary.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Document">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">Document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Document" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-d814c73340eb6b09f2d4c878b4cf34365249d2a8.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Document</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Document.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Document.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Document.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Document.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Document.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Document.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Document.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Document.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Document.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Document._analysisDuration">
+<span class="sig-name descname"><span class="pre">_analysisDuration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">#</span> <span class="pre">Load</span> <span class="pre">pre-defined</span> <span class="pre">aliases</span> <span class="pre">and</span> <span class="pre">graphical</span> <span class="pre">characters</span> <span class="pre">like</span> <span class="pre">©</span> <span class="pre">from</span> <span class="pre">docutils</span>
+<span class="pre">#</span> <span class="pre">&lt;file&gt;</span> <span class="pre">is</span> <span class="pre">used</span> <span class="pre">to</span> <span class="pre">denote</span> <span class="pre">the</span> <span class="pre">special</span> <span class="pre">path</span>
+<span class="pre">#</span> <span class="pre">&lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Document._analysisDuration" title="Link to this definition"></a></dt>
+<dd><p>TODO: replace by Timer; should be timedelta?</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Document._modelConversion">
+<span class="sig-name descname"><span class="pre">_modelConversion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">#</span> <span class="pre">Load</span> <span class="pre">pre-defined</span> <span class="pre">aliases</span> <span class="pre">and</span> <span class="pre">graphical</span> <span class="pre">characters</span> <span class="pre">like</span> <span class="pre">©</span> <span class="pre">from</span> <span class="pre">docutils</span>
+<span class="pre">#</span> <span class="pre">&lt;file&gt;</span> <span class="pre">is</span> <span class="pre">used</span> <span class="pre">to</span> <span class="pre">denote</span> <span class="pre">the</span> <span class="pre">special</span> <span class="pre">path</span>
+<span class="pre">#</span> <span class="pre">&lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Document._modelConversion" title="Link to this definition"></a></dt>
+<dd><p>TODO: replace by Timer; should be timedelta?</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Merged">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">Merged</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mergedCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Merged"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Merged" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-6056fe0d310cf0970b99a452eb8ab66f4322759f.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Merged</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mergedCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Merged.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Merged.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Merged.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Merged.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Merged.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mergedCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Merged.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Merged.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mergedCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Combined">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">Combined</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">combinedCound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Combined"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Combined" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-0d9d1e228f2331e61819e736891bacd280cb4412.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Combined</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>combinedCound</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Combined.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Combined.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Combined.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Combined.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.Combined.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">combinedCound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#Combined.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.Combined.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>combinedCound</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestcase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">MergedTestcase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">testcase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#MergedTestcase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestcase" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-a81c7772d27dcb061e16ca5a4eb4b7994117a815.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of MergedTestcase</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testcase</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase" title="pyEDAA.Reports.Unittesting.Testcase"><em>Testcase</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestcase.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestcase.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestcase.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestcase.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestcase.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestcase.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestcase.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestcase.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).
+:rtype: <span class="sphinx_autodoc_typehints-type"># Load pre-defined aliases and graphical characters like © from docutils
+# &lt;file&gt; is used to denote the special path
+# &lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestcase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">testcase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#MergedTestcase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestcase.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testcase</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testcase" title="pyEDAA.Reports.Unittesting.Testcase"><em>Testcase</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuite">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">MergedTestsuite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">testsuite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addTestsuites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addTestcases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#MergedTestsuite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuite" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-7635af075d4ae3595e010cf8ec6715fe08d7526b.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of MergedTestsuite</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testsuite</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><em>Testsuite</em></a>) – </p></li>
+<li><p><strong>addTestsuites</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – </p></li>
+<li><p><strong>addTestcases</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuite.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuite.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuite.__class_getitem__">
+<span class="sig-name descname"><span class="pre">__class_getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__class_getitem__" title="Link to this definition"></a></dt>
+<dd><p>Parameterizes a generic class.</p>
+<p>At least, parameterizing a generic class is the <em>main</em> thing this
+method does. For example, for some generic class <cite>Foo</cite>, this is called
+when we do <cite>Foo[int]</cite> - there, with <cite>cls=Foo</cite> and <cite>params=int</cite>.</p>
+<p>However, note that this method is also called when defining generic
+classes in the first place with <cite>class Foo[T]: …</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuite.__init_subclass__">
+<span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__init_subclass__" title="Link to this definition"></a></dt>
+<dd><p>Function to initialize subclasses.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuite.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuite.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).
+:rtype: <span class="sphinx_autodoc_typehints-type"># Load pre-defined aliases and graphical characters like © from docutils
+# &lt;file&gt; is used to denote the special path
+# &lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuite.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">testsuite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addTestsuites</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addTestcases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#MergedTestsuite.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuite.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testsuite</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><em>Testsuite</em></a>) – </p></li>
+<li><p><strong>addTestsuites</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – </p></li>
+<li><p><strong>addTestcases</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.Testsuite" title="pyEDAA.Reports.Unittesting.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuiteSummary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.</span></span><span class="sig-name descname"><span class="pre">MergedTestsuiteSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#MergedTestsuiteSummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-9b0166256fcfaa6f5390232733b9b741c38dbeaf.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of MergedTestsuiteSummary</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__class_getitem__">
+<span class="sig-name descname"><span class="pre">__class_getitem__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__class_getitem__" title="Link to this definition"></a></dt>
+<dd><p>Parameterizes a generic class.</p>
+<p>At least, parameterizing a generic class is the <em>main</em> thing this
+method does. For example, for some generic class <cite>Foo</cite>, this is called
+when we do <cite>Foo[int]</cite> - there, with <cite>cls=Foo</cite> and <cite>params=int</cite>.</p>
+<p>However, note that this method is also called when defining generic
+classes in the first place with <cite>class Foo[T]: …</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__init_subclass__">
+<span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__init_subclass__" title="Link to this definition"></a></dt>
+<dd><p>Function to initialize subclasses.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).
+:rtype: <span class="sphinx_autodoc_typehints-type"># Load pre-defined aliases and graphical characters like © from docutils
+# &lt;file&gt; is used to denote the special path
+# &lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting.html#MergedTestsuiteSummary.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyEDAA.Reports.DocumentationCoverage.Python.html" class="btn btn-neutral float-left" title="pyEDAA.Reports.DocumentationCoverage.Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyEDAA.Reports.Unittesting.JUnit.html" class="btn btn-neutral float-right" title="pyEDAA.Reports.Unittesting.JUnit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2024, Electronic Design Automation Abstraction (EDA²).
+      <span class="lastupdated">Last updated on 22.03.2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

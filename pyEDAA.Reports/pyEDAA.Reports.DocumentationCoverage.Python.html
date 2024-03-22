@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyEDAA.Reports.DocumentationCoverage.Python &mdash; pyEDAA.Reports 0.4.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=77553476" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-reports.e44b1595f1e09d5e109d001839ba3f42.css?v=0b41afa8" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/override.css?v=d48d1b8b" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.svg"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=c87aa342"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+        <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyEDAA.Reports.Unittesting" href="pyEDAA.Reports.Unittesting.html" />
+    <link rel="prev" title="pyEDAA.Reports.DocumentationCoverage" href="pyEDAA.Reports.DocumentationCoverage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="https://edaa-org.github.io/">Used as a layer of EDA² ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation/Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Dependency.html">Dependency</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Report Formats</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../CodeCoverage/index.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DocCoverage/index.html">Documentation Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Unittesting/index.html">Unittesting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FunctionalCoverage.html">Functional coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../LineCoverage.html">Line coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Resources.html">Synthesis and implementation results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../RichLogging.html">Semantic/rich logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tracking.html">Tracking requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frontends.html">Frontends</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References and Reports</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pyEDAA.Reports.html">Python Class Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html">pyEDAA.Reports.DocumentationCoverage</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pyEDAA.Reports.DocumentationCoverage.Python</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverageError"><code class="docutils literal notranslate"><span class="pre">DocStrCoverageError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage"><code class="docutils literal notranslate"><span class="pre">Coverage</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage.__init__"><code class="docutils literal notranslate"><span class="pre">Coverage.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Coverage.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Coverage.HasMethodAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage"><code class="docutils literal notranslate"><span class="pre">AggregatedCoverage</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.__init__"><code class="docutils literal notranslate"><span class="pre">AggregatedCoverage.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">AggregatedCoverage.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">AggregatedCoverage.HasMethodAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage"><code class="docutils literal notranslate"><span class="pre">ClassCoverage</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.__init__"><code class="docutils literal notranslate"><span class="pre">ClassCoverage.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.__str__"><code class="docutils literal notranslate"><span class="pre">ClassCoverage.__str__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">ClassCoverage.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">ClassCoverage.HasMethodAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage"><code class="docutils literal notranslate"><span class="pre">ModuleCoverage</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.__init__"><code class="docutils literal notranslate"><span class="pre">ModuleCoverage.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.__str__"><code class="docutils literal notranslate"><span class="pre">ModuleCoverage.__str__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">ModuleCoverage.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">ModuleCoverage.HasMethodAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><code class="docutils literal notranslate"><span class="pre">PackageCoverage</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.__init__"><code class="docutils literal notranslate"><span class="pre">PackageCoverage.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">PackageCoverage.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">PackageCoverage.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.__str__"><code class="docutils literal notranslate"><span class="pre">PackageCoverage.__str__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage"><code class="docutils literal notranslate"><span class="pre">DocStrCoverage</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">DocStrCoverage.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">DocStrCoverage.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.__init__"><code class="docutils literal notranslate"><span class="pre">DocStrCoverage.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.DocCoverageException"><code class="docutils literal notranslate"><span class="pre">DocCoverageException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.CoverageState"><code class="docutils literal notranslate"><span class="pre">CoverageState</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage._Type"><code class="docutils literal notranslate"><span class="pre">_Type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Class"><code class="docutils literal notranslate"><span class="pre">Class</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage._Unit"><code class="docutils literal notranslate"><span class="pre">_Unit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Module"><code class="docutils literal notranslate"><span class="pre">Module</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Package"><code class="docutils literal notranslate"><span class="pre">Package</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html">pyEDAA.Reports.Unittesting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.resources.html">pyEDAA.Reports.resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/unittests.html">Unittest Summary Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/coverage/index.html">Code Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/doccoverage.html">Doc. Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/typing/index.html">Static Type Check Report ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../License.html">Apache License 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Doc-License.html">Creative Commons Attribution 4.0 International</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Python Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TODO.html">TODOs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyEDAA.Reports</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pyEDAA.Reports.html">Python Class Reference</a></li>
+          <li class="breadcrumb-item"><a href="pyEDAA.Reports.DocumentationCoverage.html">pyEDAA.Reports.DocumentationCoverage</a></li>
+      <li class="breadcrumb-item active">pyEDAA.Reports.DocumentationCoverage.Python</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <style type="text/css">
+  span.bolditalic {font-weight: bold; font-style: italic; }
+  span.underline {text-decoration: underline; }
+  span.strike {text-decoration: line-through; }
+  span.xlarge {font-size: x-large; }
+  span.colorred {color: #CC0000; }
+  span.colorgreen {color: #009933; }
+  span.colorblue {color: #0066FF; }
+  span.colorpurple {color: #9900CC; }
+</style><section id="module-pyEDAA.Reports.DocumentationCoverage.Python">
+<span id="pyedaa-reports-documentationcoverage-python"></span><h1>pyEDAA.Reports.DocumentationCoverage.Python<a class="headerlink" href="#module-pyEDAA.Reports.DocumentationCoverage.Python" title="Link to this heading"></a></h1>
+<p><strong>Abstract code documentation coverage data model for Python code.</strong></p>
+<p><strong>Exceptions</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverageError" title="pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverageError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DocStrCoverageError</span></code></a>:
+Common base class for all non-exit exceptions.</p></li>
+</ul>
+<p><strong>Classes</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage" title="pyEDAA.Reports.DocumentationCoverage.Python.Coverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Coverage</span></code></a>:
+This base-class for <a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassCoverage</span></code></a> and <a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">AggregatedCoverage</span></code></a> represents a basic set of documentation coverage metrics.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">AggregatedCoverage</span></code></a>:
+This base-class for <a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleCoverage</span></code></a> and <a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">PackageCoverage</span></code></a> represents an extended set of documentation coverage metrics, especially with aggregated metrics.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassCoverage</span></code></a>:
+This class represents the class documentation coverage for Python classes.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleCoverage</span></code></a>:
+This class represents the module documentation coverage for Python modules.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">PackageCoverage</span></code></a>:
+This class represents the package documentation coverage for Python packages.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">DocStrCoverage</span></code></a>:
+A wrapper class for the docstr_coverage package and it’s analyzer producing a documentation coverage model.</p></li>
+</ul>
+<hr class="docutils" />
+<p><strong>Exceptions</strong></p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverageError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.Python.</span></span><span class="sig-name descname"><span class="pre">DocStrCoverageError</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#DocStrCoverageError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverageError" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-c3e4b02e4877d40ec48411a502a67396641cca13.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of DocStrCoverageError</p></object></div>
+</dd></dl>
+
+<hr class="docutils" />
+<p><strong>Classes</strong></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.Coverage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.Python.</span></span><span class="sig-name descname"><span class="pre">Coverage</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#Coverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage" title="Link to this definition"></a></dt>
+<dd><p>This base-class for <a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassCoverage</span></code></a> and <a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">AggregatedCoverage</span></code></a> represents a basic set of documentation coverage metrics.</p>
+<p>Besides the <em>total</em> number of coverable items, it distinguishes items as <em>excluded</em>, <em>ignored</em>, and <em>expected</em>. <br />
+Expected items are further distinguished into <em>covered</em> and <em>uncovered</em> items. <br />
+If no item is expected, then <em>coverage</em> is always 100 %.</p>
+<dl class="simple">
+<dt>All coverable items</dt><dd><p>total = excluded + ignored + expected</p>
+</dd>
+<dt>All expected items</dt><dd><p>expected = covered + uncovered</p>
+</dd>
+<dt>Coverage [0.00..1.00]</dt><dd><p>coverage = covered / expected</p>
+</dd>
+</dl>
+<p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-d796feaaeb095be08fe9ad1934e5c074a523ac99.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Coverage</p></object></div>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.Coverage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#Coverage.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.Coverage.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.Coverage.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.Python.</span></span><span class="sig-name descname"><span class="pre">AggregatedCoverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#AggregatedCoverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage" title="Link to this definition"></a></dt>
+<dd><p>This base-class for <a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleCoverage</span></code></a> and <a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">PackageCoverage</span></code></a> represents an extended set of documentation coverage metrics, especially with aggregated metrics.</p>
+<p>As inherited from <a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.Coverage" title="pyEDAA.Reports.DocumentationCoverage.Python.Coverage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Coverage</span></code></a>, it provides the <em>total</em> number of coverable items, which are distinguished into
+<em>excluded</em>, <em>ignored</em>, and <em>expected</em> items. <br />
+Expected items are further distinguished into <em>covered</em> and <em>uncovered</em> items. <br />
+If no item is expected, then <em>coverage</em> and <em>aggregated coverage</em> are always 100 %.</p>
+<p>In addition, all previously mentioned metrics are collected as <em>aggregated…</em>, too. <br /></p>
+<dl class="simple">
+<dt>All coverable items</dt><dd><p>total = excluded + ignored + expected</p>
+</dd>
+<dt>All expected items</dt><dd><p>expected = covered + uncovered</p>
+</dd>
+<dt>Coverage [0.00..1.00]</dt><dd><p>coverage = covered / expected</p>
+</dd>
+</dl>
+<p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-39ea2cb9409c99890fca1136f48c241f5b8ff2e2.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of AggregatedCoverage</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>) – </p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#AggregatedCoverage.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.Python.</span></span><span class="sig-name descname"><span class="pre">ClassCoverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#ClassCoverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage" title="Link to this definition"></a></dt>
+<dd><p>This class represents the class documentation coverage for Python classes.</p>
+<p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-2dec61a3c9505fa1b48634218e955e6f20f9fd2b.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of ClassCoverage</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><em>PackageCoverage</em></a><em> | </em><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage"><em>ClassCoverage</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#ClassCoverage.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><em>PackageCoverage</em></a><em> | </em><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage"><em>ClassCoverage</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#ClassCoverage.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).
+:rtype: <span class="sphinx_autodoc_typehints-type"># Load pre-defined aliases and graphical characters like © from docutils
+# &lt;file&gt; is used to denote the special path
+# &lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.Python.</span></span><span class="sig-name descname"><span class="pre">ModuleCoverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#ModuleCoverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage" title="Link to this definition"></a></dt>
+<dd><p>This class represents the module documentation coverage for Python modules.</p>
+<p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-57c03c053fd4d7a08f5aa448fa50f8ecaf75d00b.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of ModuleCoverage</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><em>PackageCoverage</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#ModuleCoverage.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><em>PackageCoverage</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#ModuleCoverage.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).
+:rtype: <span class="sphinx_autodoc_typehints-type"># Load pre-defined aliases and graphical characters like © from docutils
+# &lt;file&gt; is used to denote the special path
+# &lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.Python.</span></span><span class="sig-name descname"><span class="pre">PackageCoverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#PackageCoverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="Link to this definition"></a></dt>
+<dd><p>This class represents the package documentation coverage for Python packages.</p>
+<p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-7ad3cb9d428d82d0d0a59b88cada23cc67da85dc.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of PackageCoverage</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><em>PackageCoverage</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#PackageCoverage.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>) – </p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" title="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage"><em>PackageCoverage</em></a><em> | </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#PackageCoverage.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).
+:rtype: <span class="sphinx_autodoc_typehints-type"># Load pre-defined aliases and graphical characters like © from docutils
+# &lt;file&gt; is used to denote the special path
+# &lt;Python&gt;\Lib\site-packages\docutils\parsers\rst\include</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.Python.</span></span><span class="sig-name descname"><span class="pre">DocStrCoverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packageName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#DocStrCoverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage" title="Link to this definition"></a></dt>
+<dd><p>A wrapper class for the docstr_coverage package and it’s analyzer producing a documentation coverage model.</p>
+<p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-0e168f8503e17cab80d44eca747f2f0f7393fb19.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of DocStrCoverage</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packageName</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packageName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage/Python.html#DocStrCoverage.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>packageName</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – </p></li>
+<li><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyEDAA.Reports.DocumentationCoverage.html" class="btn btn-neutral float-left" title="pyEDAA.Reports.DocumentationCoverage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyEDAA.Reports.Unittesting.html" class="btn btn-neutral float-right" title="pyEDAA.Reports.Unittesting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2024, Electronic Design Automation Abstraction (EDA²).
+      <span class="lastupdated">Last updated on 22.03.2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

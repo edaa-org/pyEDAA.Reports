@@ -1,0 +1,105 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+================================
+pyEDAA.Reports.Unittesting.JUnit
+================================
+
+.. automodule:: pyEDAA.Reports.Unittesting.JUnit
+
+
+.. currentmodule:: pyEDAA.Reports.Unittesting.JUnit
+
+
+**Exceptions**
+
+- :py:exc:`UnittestException`:
+  Common base class for all non-exit exceptions.
+
+- :py:exc:`DuplicateTestsuiteException`:
+  Common base class for all non-exit exceptions.
+
+- :py:exc:`DuplicateTestcaseException`:
+  Common base class for all non-exit exceptions.
+
+
+
+**Classes**
+
+- :py:class:`JUnitException`:
+  Undocumented.
+
+- :py:class:`JUnitReaderMode`:
+  Support for flags
+
+- :py:class:`JUnitDocument`:
+  Abstract base class for generic types.
+
+
+
+---------------------
+
+**Exceptions**
+
+
+
+
+.. autoexception:: UnittestException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: UnittestException
+      :parts: 1
+
+.. autoexception:: DuplicateTestsuiteException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: DuplicateTestsuiteException
+      :parts: 1
+
+.. autoexception:: DuplicateTestcaseException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: DuplicateTestcaseException
+      :parts: 1
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: JUnitException
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: JUnitException
+      :parts: 1
+
+.. autoclass:: JUnitReaderMode
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: JUnitReaderMode
+      :parts: 1
+
+.. autoclass:: JUnitDocument
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: JUnitDocument
+      :parts: 1
