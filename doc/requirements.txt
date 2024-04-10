@@ -1,6 +1,6 @@
 -r ../requirements.txt
 
-pyTooling ~= 6.0
+pyTooling ~= 6.1
 colorama >= 0.4.6
 ruamel.yaml >= 0.18.5
 setuptools >= 69.0.0
