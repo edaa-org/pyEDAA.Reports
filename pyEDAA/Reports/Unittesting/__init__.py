@@ -399,6 +399,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	_status:     TestsuiteStatus
 	_testsuites: Dict[str, TestsuiteType]
 
+	_tests:        int
 	_inconsistent: int
 	_excluded:     int
 	_skipped:      int
