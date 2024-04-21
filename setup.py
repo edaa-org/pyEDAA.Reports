@@ -54,5 +54,8 @@ setup(**DescribePythonPackageHostedOnGitHub(
 			f"py.typed",
 			f"resources/*.xsd"
 		]
+	},
+	consoleScripts={
+		"pyedaa-reports": "pyEDAA.Reports.CLI:main"
 	}
 ))

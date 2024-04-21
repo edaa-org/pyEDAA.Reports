@@ -158,7 +158,14 @@ def main() -> NoReturn:
 	This function creates an instance of :class:`Program` in a ``try ... except`` environment. Any exception caught is
 	formatted and printed before the program returns with a non-zero exit code.
 	"""
+	from sys import argv
+
 	program = Program()
+	program.Configure(
+		verbose=("-v" in argv or "--verbose" in argv),
+		debug=("-d" in argv or "--debug" in argv),
+		quiet=("-q" in argv or "--quiet" in argv)
+	)
 	try:
 		program.Run()
 	except FileNotFoundError as ex:

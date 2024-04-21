@@ -19,30 +19,37 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 		returnCode = 0
 		if args.junit is None:
-			print(f"Option '--junit <JUnitFile' is missing.")
+			self.WriteError(f"Option '--junit <JUnitFile' is missing.")
 			returnCode = 3
 
 		if returnCode != 0:
-			exit(returnCode)
+			self.Exit(returnCode)
 
-		print(f"Merging unit test summary files to a single file ...")
+		foundFiles = [f for f in Path.cwd().glob(args.junit)]
+		self.WriteNormal(f"Reading {len(foundFiles)} unit test summary files ...")
 
 		junitDocuments: List[JUnitDocument] = []
-		print(f"  IN (JUnit)  -> Common Data Model:      {args.junit}")
-		for file in Path.cwd().glob(args.junit):
-			print(f"    reading {file}")
+		self.WriteVerbose(f"IN (JUnit)  -> Common Data Model:      {args.junit}")
+		for file in foundFiles:
+			self.WriteVerbose(f"  reading {file}")
 			junitDocuments.append(JUnitDocument(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+
+		self.WriteNormal(f"Merging unit test summary files to a single file ...")
 
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
-			print(f"    merging {summary.Path}")
+			self.WriteVerbose(f"  merging {summary.Path}")
 			merged.Merge(summary)
 
-		print(f"  Common Data Model -> OUT (JUnit):      Unittesting.xml")
-		junitDocument = JUnitDocument.FromTestsuiteSummary(Path.cwd() / "Unittesting.xml", merged)
+		self.WriteNormal(f"Writing merged unit test summaries to file ...")
+		mergedFile = Path.cwd() / Path("Unittesting.xml")
+		self.WriteVerbose(f"  Common Data Model -> OUT (JUnit):      {mergedFile}")
+		junitDocument = JUnitDocument.FromTestsuiteSummary(mergedFile, merged)
 		try:
 			junitDocument.Write(regenerate=True, overwrite=True)
 		except UnittestException as ex:
 			self.WriteError(str(ex))
 			if ex.__cause__ is not None:
 				self.WriteError(f"  {ex.__cause__}")
+
+		self.WriteNormal(f"Output written to '{mergedFile}'.")
