@@ -28,34 +28,47 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Package installer for 'Various report abstract data models and report format converters'."""
-from pathlib             import Path
+from pathlib import Path
+from re      import compile as re_compile
 
-from setuptools          import setup
-from pyTooling.Packaging import DescribePythonPackageHostedOnGitHub
+from pyTooling.Decorators import export
 
-gitHubNamespace =        "pyEDAA"
-packageName =            "pyEDAA.Reports"
-packageDirectory =       packageName.replace(".", "/")
-packageInformationFile = Path(f"{packageDirectory}/__init__.py")
 
-setup(**DescribePythonPackageHostedOnGitHub(
-	packageName=packageName,
-	description="Various report abstract data models and report format converters.",
-	gitHubNamespace=gitHubNamespace,
-	unittestRequirementsFile=Path("tests/requirements.txt"),
-	developmentStatus="pre-alpha",
-	classifiers=[
-		"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
-	],
-	sourceFileWithVersion=packageInformationFile,
-	dataFiles={
-		packageName: [
-			f"py.typed",
-			f"resources/*.xsd"
-		]
-	},
-	consoleScripts={
-		"pyedaa-reports": "pyEDAA.Reports.CLI:main"
-	}
-))
+@export
+class Requirement:
+	_package: str
+
+	EXTRA_PATTERN = re_compile(r"""^\s*extra\s*==\s*(?P<quote>['"])(?P<key>\w+)(?P=quote))?$""")
+
+	# python_version
+	# platform_python_implementation
+	# platform_system
+	# python_full_version
+	# sys_platform
+
+	def __init__(self, rule: str) -> None:
+		extraKey = None
+		for rulePart in (part.strip() for part in rule.split(";")):
+			match = self.EXTRA_PATTERN.match(rulePart)
+			if match:
+				extraKey = match["key"]
+				continue
+
+
+
+@export
+class RequirementsFile:
+	_path: Path
+
+	def __init__(self, path: Path, parse: bool = False) -> None:
+		self._path = path
+
+		if parse:
+			self.Parse()
+
+	def Parse(self) -> None:
+		with self._path.open("r") as file:
+			lines = file.readline()
+
+		for line in lines:
+			pass

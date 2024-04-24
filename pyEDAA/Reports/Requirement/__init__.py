@@ -28,34 +28,3 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Package installer for 'Various report abstract data models and report format converters'."""
-from pathlib             import Path
-
-from setuptools          import setup
-from pyTooling.Packaging import DescribePythonPackageHostedOnGitHub
-
-gitHubNamespace =        "pyEDAA"
-packageName =            "pyEDAA.Reports"
-packageDirectory =       packageName.replace(".", "/")
-packageInformationFile = Path(f"{packageDirectory}/__init__.py")
-
-setup(**DescribePythonPackageHostedOnGitHub(
-	packageName=packageName,
-	description="Various report abstract data models and report format converters.",
-	gitHubNamespace=gitHubNamespace,
-	unittestRequirementsFile=Path("tests/requirements.txt"),
-	developmentStatus="pre-alpha",
-	classifiers=[
-		"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
-	],
-	sourceFileWithVersion=packageInformationFile,
-	dataFiles={
-		packageName: [
-			f"py.typed",
-			f"resources/*.xsd"
-		]
-	},
-	consoleScripts={
-		"pyedaa-reports": "pyEDAA.Reports.CLI:main"
-	}
-))
