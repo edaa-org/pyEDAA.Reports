@@ -41,6 +41,9 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  merging {summary.Path}")
 			merged.Merge(summary)
 
+		self.WriteNormal(f"Aggregating unit test metrics ...")
+		merged.Aggregate()
+
 		self.WriteNormal(f"Writing merged unit test summaries to file ...")
 		mergedFile = Path.cwd() / Path("Unittesting.xml")
 		self.WriteVerbose(f"  Common Data Model -> OUT (JUnit):      {mergedFile}")
