@@ -266,6 +266,12 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 			rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
 		if self._totalDuration is not None:
 			rootElement.attrib["time"] = f"{self._totalDuration.total_seconds():.6f}"
+		rootElement.attrib["tests"] = str(self._tests)
+		rootElement.attrib["failures"] = str(self._failed)
+		rootElement.attrib["errors"] = str(self._errored)
+		rootElement.attrib["skipped"] = str(self._skipped)
+		# if self._assertionCount is not None:
+		# 	rootElement.attrib["assertions"] = f"{self._assertionCount}"
 
 		self._xmlDocument = ElementTree(rootElement)
 
@@ -279,6 +285,12 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 			testsuiteElement.attrib["timestamp"] = f"{testsuite._startTime.isoformat()}"
 		if testsuite._totalDuration is not None:
 			testsuiteElement.attrib["time"] = f"{testsuite._totalDuration.total_seconds():.6f}"
+		testsuiteElement.attrib["tests"] = str(testsuite._tests)
+		testsuiteElement.attrib["failures"] = str(testsuite._failed)
+		testsuiteElement.attrib["errors"] = str(testsuite._errored)
+		testsuiteElement.attrib["skipped"] = str(testsuite._skipped)
+		# if testsuite._assertionCount is not None:
+		# 	testsuiteElement.attrib["assertions"] = f"{testsuite._assertionCount}"
 
 		for ts in testsuite._testsuites.values():
 			self._GenerateTestsuite(ts, testsuiteElement)

@@ -445,11 +445,14 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 				self._testsuites[testsuite._name] = testsuite
 
 		self._status = TestsuiteStatus.Unknown
-		self._excluded = 0
-		self._skipped =  0
-		self._errored =  0
-		self._failed =   0
-		self._passed =   0
+		self._tests =        0
+		self._inconsistent = 0
+		self._excluded =     0
+		self._skipped =      0
+		self._errored =      0
+		self._weak =         0
+		self._failed =       0
+		self._passed =       0
 
 	@readonly
 	def Status(self) -> TestsuiteStatus:
@@ -483,19 +486,12 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		# return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
 
 	@readonly
-	def WarningCount(self) -> int:
-		raise NotImplementedError()
-		# return self._warningCount
+	def Tests(self) -> int:
+		return self._tests
 
 	@readonly
-	def ErrorCount(self) -> int:
-		raise NotImplementedError()
-		# return self._errorCount
-
-	@readonly
-	def FatalCount(self) -> int:
-		raise NotImplementedError()
-		# return self._fatalCount
+	def Inconsistent(self) -> int:
+		return self._inconsistent
 
 	@readonly
 	def Excluded(self) -> int:
@@ -510,12 +506,31 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		return self._errored
 
 	@readonly
+	def Weak(self) -> int:
+		return self._weak
+
+	@readonly
 	def Failed(self) -> int:
 		return self._failed
 
 	@readonly
 	def Passed(self) -> int:
 		return self._passed
+
+	@readonly
+	def WarningCount(self) -> int:
+		raise NotImplementedError()
+		# return self._warningCount
+
+	@readonly
+	def ErrorCount(self) -> int:
+		raise NotImplementedError()
+		# return self._errorCount
+
+	@readonly
+	def FatalCount(self) -> int:
+		raise NotImplementedError()
+		# return self._fatalCount
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
 		tests = 0
@@ -694,6 +709,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			else:
 				raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
+		self._tests = tests
 		self._inconsistent = inconsistent
 		self._excluded = excluded
 		self._skipped = skipped
@@ -771,6 +787,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
 		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
 
+		self._tests = tests
 		self._inconsistent = inconsistent
 		self._excluded = excluded
 		self._skipped = skipped
