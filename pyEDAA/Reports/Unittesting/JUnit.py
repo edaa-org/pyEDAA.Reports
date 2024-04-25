@@ -99,6 +99,14 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 		doc._teardownDuration = testsuiteSummary._teardownDuration
 		doc._totalDuration = testsuiteSummary._totalDuration
 		doc._status = testsuiteSummary._status
+		doc._tests = testsuiteSummary._tests
+		doc._inconsistent = testsuiteSummary._inconsistent
+		doc._excluded = testsuiteSummary._excluded
+		doc._skipped = testsuiteSummary._skipped
+		doc._errored = testsuiteSummary._errored
+		doc._weak = testsuiteSummary._weak
+		doc._failed = testsuiteSummary._failed
+		doc._passed = testsuiteSummary._passed
 		doc._warningCount = testsuiteSummary._warningCount
 		doc._errorCount = testsuiteSummary._errorCount
 		doc._fatalCount = testsuiteSummary._fatalCount
