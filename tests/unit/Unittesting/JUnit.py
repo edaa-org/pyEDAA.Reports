@@ -33,11 +33,13 @@ from pathlib  import Path
 from unittest import TestCase as py_TestCase
 
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus
-from pyEDAA.Reports.Unittesting.JUnit import Testcase, Testsuite, TestsuiteSummary, JUnitDocument
+from pyEDAA.Reports.Unittesting       import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
+from pyEDAA.Reports.Unittesting       import Testsuite as ut_Testsuite, Testcase as ut_Testcase
+from pyEDAA.Reports.Unittesting.JUnit import Testcase, Testsuite, TestsuiteSummary, Document as JUnitDocument
 
 
 class Instantiation(py_TestCase):
-	def test_Testcase(self):
+	def test_Testcase(self) -> None:
 		tc = Testcase("tc", "cls")
 
 		self.assertEqual("tc", tc.Name)
@@ -46,7 +48,7 @@ class Instantiation(py_TestCase):
 		self.assertIsNone(tc.Duration)
 		self.assertIsNone(tc.AssertionCount)
 
-	def test_Testsuite(self):
+	def test_Testsuite(self) -> None:
 		ts = Testsuite("ts")
 
 		self.assertEqual("ts", ts.Name)
@@ -57,7 +59,7 @@ class Instantiation(py_TestCase):
 		self.assertEqual(0, ts.TestcaseCount)
 		self.assertIsNone(ts.AssertionCount)
 
-	def test_TestsuiteSummary(self):
+	def test_TestsuiteSummary(self) -> None:
 		tss = TestsuiteSummary("tss")
 
 		self.assertEqual("tss", tss.Name)
@@ -69,7 +71,7 @@ class Instantiation(py_TestCase):
 
 
 class TestcasesInTestsuite(py_TestCase):
-	def test_TestcaseConstructor(self):
+	def test_TestcaseConstructor(self) -> None:
 		ts = Testsuite("ts")
 		self.assertEqual(0, ts.TestcaseCount)
 
@@ -86,7 +88,7 @@ class TestcasesInTestsuite(py_TestCase):
 		for testcase in testcases2:
 			self.assertEqual(ts, testcase.Parent)
 
-	def test_TestsuiteConstructor(self):
+	def test_TestsuiteConstructor(self) -> None:
 		tc1 = Testcase("tc1", "cls")
 		tc2 = Testcase("tc2", "cls")
 		testcases2 = (tc1, tc2)
@@ -98,7 +100,7 @@ class TestcasesInTestsuite(py_TestCase):
 		for testcase in testcases2:
 			self.assertEqual(ts, testcase.Parent)
 
-	def test_AddTestcase(self):
+	def test_AddTestcase(self) -> None:
 		tc1 = Testcase("tc1", "cls")
 		tc2 = Testcase("tc2", "cls")
 
@@ -119,7 +121,7 @@ class TestcasesInTestsuite(py_TestCase):
 		for testcase in testcases2:
 			self.assertEqual(ts, testcase.Parent)
 
-	def test_AddTestcases(self):
+	def test_AddTestcases(self) -> None:
 		tc1 = Testcase("tc1", "cls")
 		tc2 = Testcase("tc2", "cls")
 		tc3 = Testcase("tc3", "cls")
@@ -144,7 +146,7 @@ class TestcasesInTestsuite(py_TestCase):
 
 
 class TestsuiteInTestsuiteSummary(py_TestCase):
-	def test_TestsuiteConstructor(self):
+	def test_TestsuiteConstructor(self) -> None:
 		tss = TestsuiteSummary("tss")
 		self.assertEqual(0, tss.TestsuiteCount)
 
@@ -161,7 +163,7 @@ class TestsuiteInTestsuiteSummary(py_TestCase):
 		for testsuite in testsuites2:
 			self.assertEqual(tss, testsuite.Parent)
 
-	def test_TestsuitesConstructor(self):
+	def test_TestsuitesConstructor(self) -> None:
 		ts1 = Testsuite("ts1")
 		ts2 = Testsuite("ts2")
 		testsuites2 = (ts1, ts2)
@@ -173,7 +175,7 @@ class TestsuiteInTestsuiteSummary(py_TestCase):
 		for testsuite in testsuites2:
 			self.assertEqual(tss, testsuite.Parent)
 
-	def test_AddTestsuite(self):
+	def test_AddTestsuite(self) -> None:
 		ts1 = Testsuite("ts1")
 		ts2 = Testsuite("ts2")
 
@@ -194,7 +196,7 @@ class TestsuiteInTestsuiteSummary(py_TestCase):
 		for testsuite in testsuites2:
 			self.assertEqual(tss, testsuite.Parent)
 
-	def test_AddTestsuites(self):
+	def test_AddTestsuites(self) -> None:
 		ts1 = Testsuite("ts1")
 		ts2 = Testsuite("ts2")
 		ts3 = Testsuite("ts3")
@@ -219,7 +221,7 @@ class TestsuiteInTestsuiteSummary(py_TestCase):
 
 
 class Hierarchy(py_TestCase):
-	def test_Simple(self):
+	def test_Simple(self) -> None:
 		tss = TestsuiteSummary("tss")
 		ts = Testsuite("ts", parent=tss)
 		tc1_1 = Testcase("tc1", "cls1", parent=ts)
@@ -244,7 +246,7 @@ class Hierarchy(py_TestCase):
 		self.assertEqual(4, ts.Tests)
 		self.assertEqual(4, tss.Tests)
 
-	def test_Complex(self):
+	def test_Complex(self) -> None:
 		tss = TestsuiteSummary("tss")
 		ts1 = Testsuite("ts1", parent=tss)
 		tc1_1 = Testcase("tc1", "cls1", parent=ts1)
@@ -265,6 +267,47 @@ class Hierarchy(py_TestCase):
 
 		self.assertEqual(4, ts2.Tests)
 		self.assertEqual(8, tss.Tests)
+
+
+class Conversion(py_TestCase):
+	def test_ToTestcase(self) -> None:
+		juTC = Testcase("tc", "cls1", duration=timedelta(seconds=0.023))
+		tc = juTC.ToTestcase()
+
+		self.assertEqual("tc", tc.Name)
+		self.assertEqual(timedelta(seconds=0.023), tc.TestDuration)
+
+	def test_ToTestsuite(self) -> None:
+		juTS = Testsuite("ts", duration=timedelta(seconds=0.024))
+		ts = juTS.ToTestsuite()
+
+		self.assertEqual("ts", ts.Name)
+		self.assertEqual(timedelta(seconds=0.024), ts.TotalDuration)
+
+	def test_ToTestsuiteSummary(self) -> None:
+		juTSS = TestsuiteSummary("tss", duration=timedelta(seconds=0.025))
+		tss = juTSS.ToTestsuiteSummary()
+
+		self.assertEqual("tss", tss.Name)
+		self.assertEqual(timedelta(seconds=0.025), tss.TotalDuration)
+
+	def test_FromTestcase(self) -> None:
+		tc = ut_Testcase("tc")
+		juTC = Testcase.FromTestcase(tc)
+
+		self.assertEqual("tc", juTC.Name)
+
+	def test_FromTestsuite(self) -> None:
+		ts = ut_Testsuite("ts")
+		juTS = Testsuite.FromTestsuite(ts)
+
+		self.assertEqual("ts", juTS.Name)
+
+	def test_FromTestsuiteSummary(self) -> None:
+		tss = ut_TestsuiteSummary("tss")
+		juTSS = TestsuiteSummary.FromTestsuiteSummary(tss)
+
+		self.assertEqual("tss", juTSS.Name)
 
 
 class Document(py_TestCase):

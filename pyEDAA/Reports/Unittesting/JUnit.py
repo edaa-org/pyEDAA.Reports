@@ -36,7 +36,7 @@ from datetime        import datetime, timedelta
 from enum            import Flag
 from pathlib         import Path
 from time            import perf_counter_ns
-from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Generic, Union, TypeVar
+from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar
 
 from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element, _Comment
 from lxml.etree                 import ElementTree, Element, SubElement, tostring
@@ -47,7 +47,8 @@ from pyTooling.Tree             import Node
 from pyEDAA.Reports             import resources, getResourceFile
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, IterationScheme
-from pyEDAA.Reports.Unittesting import Document as ut_Document
+from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
+from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut_Testcase
 
 
 @export
@@ -202,7 +203,22 @@ class Testcase(Base):
 			# TODO: check for setup errors
 			# TODO: check for teardown errors
 
-		# return 0, 0, 0
+	@classmethod
+	def FromTestcase(cls, testcase: ut_Testcase) -> "Testcase":
+		return cls(
+			testcase._name,
+			"",  # classname
+			duration=testcase._totalDuration,
+			status= testcase._status
+		)
+
+	def ToTestcase(self) -> ut_Testcase:
+		return ut_Testcase(
+			self._name,
+			testDuration=self._duration,
+			status=self._status,
+			assertionCount=self._assertionCount
+		)
 
 	def __str__(self) -> str:
 		return (
@@ -476,6 +492,25 @@ class Testsuite(TestsuiteBase):
 			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
 				yield self
 
+	@classmethod
+	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
+		return cls(
+			testsuite._name,
+			startTime=testsuite._startTime,
+			duration=testsuite._totalDuration,
+			status= testsuite._status,
+			testcases=(ut_Testcase.FromTestcase(testcase) for testcase in testsuite._testcases.values())
+		)
+
+	def ToTestsuite(self) -> ut_Testsuite:
+		return ut_Testsuite(
+			self._name,
+			startTime=self._startTime,
+			totalDuration=self._duration,
+			status=self._status,
+			testcases=(testcase.ToTestcase() for testcase in self._testcases.values())
+		)
+
 	def __str__(self) -> str:
 		return (
 			f"<JUnit.Testsuite {self._name}: {self._status.name} - {self._tests}>"
@@ -570,6 +605,25 @@ class TestsuiteSummary(TestsuiteBase):
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PostOrder in scheme:
 			yield self
 
+	@classmethod
+	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> "TestsuiteSummary":
+		return cls(
+			testsuiteSummary._name,
+			startTime=testsuiteSummary._startTime,
+			duration=testsuiteSummary._totalDuration,
+			status=testsuiteSummary._status,
+			testsuites=(ut_Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+		)
+
+	def ToTestsuiteSummary(self) -> ut_TestsuiteSummary:
+		return ut_TestsuiteSummary(
+			self._name,
+			startTime=self._startTime,
+			totalDuration=self._duration,
+			status=self._status,
+			testsuites=(testsuite.ToTestsuite() for testsuite in self._testsuites.values())
+		)
+
 	def __str__(self) -> str:
 		return (
 			f"<JUnit.TestsuiteSummary {self._name}: {self._status.name} - {self._tests}>"
@@ -579,7 +633,7 @@ class TestsuiteSummary(TestsuiteBase):
 
 
 @export
-class JUnitDocument(TestsuiteSummary, ut_Document):
+class Document(TestsuiteSummary, ut_Document):
 	_readerMode:       JUnitReaderMode
 	_xmlDocument:      Nullable[_ElementTree]
 
@@ -595,11 +649,11 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 			self.Parse()
 
 	@classmethod
-	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: TestsuiteSummary):
+	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary):
 		doc = cls(xmlReportFile)
 		doc._name = testsuiteSummary._name
 		doc._startTime = testsuiteSummary._startTime
-		doc._totalDuration = testsuiteSummary._duration
+		doc._duration = testsuiteSummary._totalDuration
 		doc._status = testsuiteSummary._status
 		doc._tests = testsuiteSummary._tests
 		doc._skipped = testsuiteSummary._skipped
@@ -607,9 +661,7 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 		doc._failed = testsuiteSummary._failed
 		doc._passed = testsuiteSummary._passed
 
-		for name, testsuite in testsuiteSummary._testsuites.items():
-			doc._testsuites[name] = testsuite
-			testsuite._parent = doc
+		doc.AddTestsuites(ut_Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
 
 		return doc
 
