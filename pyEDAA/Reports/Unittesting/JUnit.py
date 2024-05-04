@@ -319,7 +319,7 @@ class Testsuite(TestsuiteBase):
 	def __init__(
 		self,
 		name: str,
-		hostname: str,
+		hostname: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
@@ -349,7 +349,7 @@ class Testsuite(TestsuiteBase):
 				self._testcases[testcase._name] = testcase
 
 	@readonly
-	def Hostname(self) -> str:
+	def Hostname(self) -> Nullable[str]:
 		return self._hostname
 
 	@readonly
@@ -710,9 +710,10 @@ class JUnitDocument(TestsuiteSummary, ut_Document):
 		# 	raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
 
 		for node in testsuitesNode.iterchildren():   # type: _Element
-			if node.tag == "testsuite":
-				self._ParseTestsuite(newTestsuite, node)
-			elif node.tag == "testcase":
+			# if node.tag == "testsuite":
+			# 	self._ParseTestsuite(newTestsuite, node)
+			# el
+			if node.tag == "testcase":
 				self._ParseTestcase(newTestsuite, node)
 
 	def _ParseTestcase(self, parent: Testsuite, testsuiteNode: _Element) -> None:

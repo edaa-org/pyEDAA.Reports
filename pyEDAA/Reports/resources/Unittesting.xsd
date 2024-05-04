@@ -86,11 +86,11 @@
 					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded">
-				<xsd:annotation>
-					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>
-				</xsd:annotation>
-			</xsd:element>
+<!--			<xsd:element name="testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded">-->
+<!--				<xsd:annotation>-->
+<!--					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>-->
+<!--				</xsd:annotation>-->
+<!--			</xsd:element>-->
 			<xsd:element name="testcase" type="testcase" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>

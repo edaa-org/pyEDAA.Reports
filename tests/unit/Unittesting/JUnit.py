@@ -30,13 +30,244 @@
 #
 from datetime import timedelta, datetime
 from pathlib  import Path
-from unittest import TestCase as ut_TestCase
+from unittest import TestCase as py_TestCase
 
-from pyEDAA.Reports.Unittesting       import Testsuite, Testcase
-from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument
+from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus
+from pyEDAA.Reports.Unittesting.JUnit import Testcase, Testsuite, TestsuiteSummary, JUnitDocument
 
 
-class Document(ut_TestCase):
+class Instantiation(py_TestCase):
+	def test_Testcase(self):
+		tc = Testcase("tc", "cls")
+
+		self.assertEqual("tc", tc.Name)
+		self.assertEqual("cls", tc.Classname)
+		self.assertEqual(TestcaseStatus.Unknown, tc.Status)
+		self.assertIsNone(tc.Duration)
+		self.assertIsNone(tc.AssertionCount)
+
+	def test_Testsuite(self):
+		ts = Testsuite("ts")
+
+		self.assertEqual("ts", ts.Name)
+		self.assertIsNone(ts.Hostname)
+		self.assertEqual(TestsuiteStatus.Unknown, ts.Status)
+		self.assertIsNone(ts.StartTime)
+		self.assertIsNone(ts.Duration)
+		self.assertEqual(0, ts.TestcaseCount)
+		self.assertIsNone(ts.AssertionCount)
+
+	def test_TestsuiteSummary(self):
+		tss = TestsuiteSummary("tss")
+
+		self.assertEqual("tss", tss.Name)
+		# self.assertIsNone(tss.Hostname)
+		self.assertIsNone(tss.StartTime)
+		self.assertIsNone(tss.Duration)
+		self.assertEqual(0, tss.TestsuiteCount)
+		self.assertIsNone(tss.AssertionCount)
+
+
+class TestcasesInTestsuite(py_TestCase):
+	def test_TestcaseConstructor(self):
+		ts = Testsuite("ts")
+		self.assertEqual(0, ts.TestcaseCount)
+
+		tc1 = Testcase("tc1", "cls", parent=ts)
+		testcases1 = (tc1,)
+		self.assertEqual(1, ts.TestcaseCount)
+		self.assertTupleEqual(testcases1, tuple(ts.Testcases.values()))
+
+		tc2 = Testcase("tc2", "cls", parent=ts)
+		testcases2 = (tc1, tc2)
+		self.assertEqual(2, ts.TestcaseCount)
+		self.assertTupleEqual(testcases2, tuple(ts.Testcases.values()))
+
+		for testcase in testcases2:
+			self.assertEqual(ts, testcase.Parent)
+
+	def test_TestsuiteConstructor(self):
+		tc1 = Testcase("tc1", "cls")
+		tc2 = Testcase("tc2", "cls")
+		testcases2 = (tc1, tc2)
+
+		ts = Testsuite("ts", testcases=testcases2)
+		self.assertEqual(2, ts.TestcaseCount)
+		self.assertTupleEqual(testcases2, tuple(ts.Testcases.values()))
+
+		for testcase in testcases2:
+			self.assertEqual(ts, testcase.Parent)
+
+	def test_AddTestcase(self):
+		tc1 = Testcase("tc1", "cls")
+		tc2 = Testcase("tc2", "cls")
+
+		testcases1 = (tc1,)
+		testcases2 = (tc1, tc2)
+
+		ts = Testsuite("ts")
+		self.assertEqual(0, ts.TestcaseCount)
+
+		ts.AddTestcase(tc1)
+		self.assertEqual(1, ts.TestcaseCount)
+		self.assertTupleEqual(testcases1, tuple(ts.Testcases.values()))
+
+		ts.AddTestcase(tc2)
+		self.assertEqual(2, ts.TestcaseCount)
+		self.assertTupleEqual(testcases2, tuple(ts.Testcases.values()))
+
+		for testcase in testcases2:
+			self.assertEqual(ts, testcase.Parent)
+
+	def test_AddTestcases(self):
+		tc1 = Testcase("tc1", "cls")
+		tc2 = Testcase("tc2", "cls")
+		tc3 = Testcase("tc3", "cls")
+
+		testcases1 = (tc1,)
+		testcases23 = (tc2, tc3)
+		testcases3 = (tc1, tc2, tc3)
+
+		ts = Testsuite("ts")
+		self.assertEqual(0, ts.TestcaseCount)
+
+		ts.AddTestcases(testcases1)
+		self.assertEqual(1, ts.TestcaseCount)
+		self.assertTupleEqual(testcases1, tuple(ts.Testcases.values()))
+
+		ts.AddTestcases(testcases23)
+		self.assertEqual(3, ts.TestcaseCount)
+		self.assertTupleEqual(testcases3, tuple(ts.Testcases.values()))
+
+		for testcase in testcases3:
+			self.assertEqual(ts, testcase.Parent)
+
+
+class TestsuiteInTestsuiteSummary(py_TestCase):
+	def test_TestsuiteConstructor(self):
+		tss = TestsuiteSummary("tss")
+		self.assertEqual(0, tss.TestsuiteCount)
+
+		ts1 = Testsuite("ts1", parent=tss)
+		testsuites1 = (ts1,)
+		self.assertEqual(1, tss.TestsuiteCount)
+		self.assertTupleEqual(testsuites1, tuple(tss.Testsuites.values()))
+
+		ts2 = Testsuite("ts2", parent=tss)
+		testsuites2 = (ts1, ts2)
+		self.assertEqual(2, tss.TestsuiteCount)
+		self.assertTupleEqual(testsuites2, tuple(tss.Testsuites.values()))
+
+		for testsuite in testsuites2:
+			self.assertEqual(tss, testsuite.Parent)
+
+	def test_TestsuitesConstructor(self):
+		ts1 = Testsuite("ts1")
+		ts2 = Testsuite("ts2")
+		testsuites2 = (ts1, ts2)
+
+		tss = TestsuiteSummary("tss", testsuites=testsuites2)
+		self.assertEqual(2, tss.TestsuiteCount)
+		self.assertTupleEqual(testsuites2, tuple(tss.Testsuites.values()))
+
+		for testsuite in testsuites2:
+			self.assertEqual(tss, testsuite.Parent)
+
+	def test_AddTestsuite(self):
+		ts1 = Testsuite("ts1")
+		ts2 = Testsuite("ts2")
+
+		testsuites1 = (ts1,)
+		testsuites2 = (ts1, ts2)
+
+		tss = TestsuiteSummary("tss")
+		self.assertEqual(0, tss.TestsuiteCount)
+
+		tss.AddTestsuite(ts1)
+		self.assertEqual(1, tss.TestsuiteCount)
+		self.assertTupleEqual(testsuites1, tuple(tss.Testsuites.values()))
+
+		tss.AddTestsuite(ts2)
+		self.assertEqual(2, tss.TestsuiteCount)
+		self.assertTupleEqual(testsuites2, tuple(tss.Testsuites.values()))
+
+		for testsuite in testsuites2:
+			self.assertEqual(tss, testsuite.Parent)
+
+	def test_AddTestsuites(self):
+		ts1 = Testsuite("ts1")
+		ts2 = Testsuite("ts2")
+		ts3 = Testsuite("ts3")
+
+		testsuites1 = (ts1,)
+		testsuites23 = (ts2, ts3)
+		testsuites3 = (ts1, ts2, ts3)
+
+		tss = TestsuiteSummary("tss")
+		self.assertEqual(0, tss.TestsuiteCount)
+
+		tss.AddTestsuites(testsuites1)
+		self.assertEqual(1, tss.TestsuiteCount)
+		self.assertTupleEqual(testsuites1, tuple(tss.Testsuites.values()))
+
+		tss.AddTestsuites(testsuites23)
+		self.assertEqual(3, tss.TestsuiteCount)
+		self.assertTupleEqual(testsuites3, tuple(tss.Testsuites.values()))
+
+		for testsuite in testsuites3:
+			self.assertEqual(tss, testsuite.Parent)
+
+
+class Hierarchy(py_TestCase):
+	def test_Simple(self):
+		tss = TestsuiteSummary("tss")
+		ts = Testsuite("ts", parent=tss)
+		tc1_1 = Testcase("tc1", "cls1", parent=ts)
+		tss.Aggregate()
+
+		self.assertIsNone(tc1_1.AssertionCount)
+		self.assertIsNone(ts.AssertionCount)
+		self.assertIsNone(tss.AssertionCount)
+		self.assertEqual(1, ts.Tests)
+		self.assertEqual(1, tss.Tests)
+
+		tc2_1 = Testcase("tc2", "cls1", parent=ts)
+		tss.Aggregate()
+
+		self.assertEqual(2, ts.Tests)
+		self.assertEqual(2, tss.Tests)
+
+		tc3_2 = Testcase("tc3", "cls2", parent=ts)
+		tc4_2 = Testcase("tc4", "cls2", parent=ts)
+		tss.Aggregate()
+
+		self.assertEqual(4, ts.Tests)
+		self.assertEqual(4, tss.Tests)
+
+	def test_Complex(self):
+		tss = TestsuiteSummary("tss")
+		ts1 = Testsuite("ts1", parent=tss)
+		tc1_1 = Testcase("tc1", "cls1", parent=ts1)
+		tc2_1 = Testcase("tc2", "cls1", parent=ts1)
+		tc3_2 = Testcase("tc3", "cls2", parent=ts1)
+		tc4_2 = Testcase("tc4", "cls2", parent=ts1)
+		tss.Aggregate()
+
+		self.assertEqual(4, ts1.Tests)
+		self.assertEqual(4, tss.Tests)
+
+		ts2 = Testsuite("ts2", parent=tss)
+		tc5_3 = Testcase("tc5", "cls3", parent=ts2)
+		tc6_3 = Testcase("tc6", "cls3", parent=ts2)
+		tc7_4 = Testcase("tc7", "cls4", parent=ts2)
+		tc8_4 = Testcase("tc8", "cls4", parent=ts2)
+		tss.Aggregate()
+
+		self.assertEqual(4, ts2.Tests)
+		self.assertEqual(8, tss.Tests)
+
+
+class Document(py_TestCase):
 	_outputDirectory = Path("tests/output/JUnit_Document")
 
 	@classmethod
@@ -53,26 +284,30 @@ class Document(ut_TestCase):
 			cls._outputDirectory.mkdir(parents=True)
 
 	def test_Create_WithoutParse(self) -> None:
+		zeroTime = timedelta()
+
 		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
 		doc = JUnitDocument(junitExampleFile)
 
 		self.assertEqual(junitExampleFile, doc.Path)
-		self.assertLess(doc.AnalysisDuration, timedelta(seconds=0))
-		self.assertLess(doc.ModelConversionDuration, timedelta(seconds=0))
+		self.assertLess(doc.AnalysisDuration, zeroTime)
+		self.assertLess(doc.ModelConversionDuration, zeroTime)
 
 		doc.Read()
-		doc.Parse()
+		self.assertGreater(doc.AnalysisDuration, zeroTime)
 
-		self.assertGreaterEqual(doc.AnalysisDuration, timedelta(seconds=0))
-		self.assertGreaterEqual(doc.ModelConversionDuration, timedelta(seconds=0))
+		doc.Parse()
+		self.assertGreater(doc.ModelConversionDuration, zeroTime)
 
 	def test_Create_WithParse(self) -> None:
+		zeroTime = timedelta()
+
 		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
 		doc = JUnitDocument(junitExampleFile, parse=True)
 
 		self.assertEqual(junitExampleFile, doc.Path)
-		self.assertGreaterEqual(doc.AnalysisDuration, timedelta(seconds=0))
-		self.assertGreaterEqual(doc.ModelConversionDuration, timedelta(seconds=0))
+		self.assertGreater(doc.AnalysisDuration, zeroTime)
+		self.assertGreater(doc.ModelConversionDuration, zeroTime)
 
 	def test_ReadWrite(self) -> None:
 		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
@@ -86,23 +321,24 @@ class Document(ut_TestCase):
 		doc._name = "root"
 		doc._startTime = datetime.fromisoformat("2024-02-24T12:12:12+01:00")
 		ts1 = Testsuite("ts1", startTime=datetime.fromisoformat("2024-02-24T12:12:12+01:00"))
-		ts11 = Testsuite("ts11", startTime=datetime.fromisoformat("2024-02-24T12:12:12+01:00"), parent=ts1)
-		tc111 = Testcase("tc111", assertionCount=10, passedAssertionCount=10, totalDuration=timedelta(seconds=0.005), parent=ts11)
-		tc112 = Testcase("tc112", assertionCount=24, passedAssertionCount=24, totalDuration=timedelta(seconds=0.859), parent=ts11)
+		tc11 = Testcase("tc11", "cls1", assertionCount=10, duration=timedelta(seconds=0.005), parent=ts1)
+		tc12 = Testcase("tc12", "cls2", assertionCount=24, duration=timedelta(seconds=0.859), parent=ts1)
+		tc13 = Testcase("tc13", "cls2", assertionCount=24, duration=timedelta(seconds=0.859), parent=ts1)
 		ts2 = Testsuite("ts2", startTime=datetime.fromisoformat("2024-02-24T12:12:13+01:00"))
-		tc21 = Testcase("tc21", assertionCount=13, failedAssertionCount=1, totalDuration=timedelta(seconds=3.637), parent=ts2)
-		tc22 = Testcase("tc22", assertionCount=48, failedAssertionCount=15, totalDuration=timedelta(seconds=2.473), parent=ts2)
+		tc21 = Testcase("tc21", "cls3", assertionCount=13, duration=timedelta(seconds=3.637), parent=ts2)
+		tc22 = Testcase("tc22", "cls3", assertionCount=48, duration=timedelta(seconds=2.473), parent=ts2)
+		tc23 = Testcase("tc23", "cls4", assertionCount=48, duration=timedelta(seconds=2.473), parent=ts2)
 		doc.AddTestsuite(ts1)
 		doc.AddTestsuite(ts2)
 		doc.Aggregate()
 
-		tree = doc.ToTree()
-		print(tree.Render())
+		# tree = doc.ToTree()
+		# print(tree.Render())
 
 		doc.Write(regenerate=True)
 
 
-class ExampleFiles(ut_TestCase):
+class ExampleFiles(py_TestCase):
 	def test_pytest_pyAttributes(self) -> None:
 		print()
 
