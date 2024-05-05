@@ -594,7 +594,7 @@ class Testsuite(TestsuiteBase):
 
 			classname = ts._name
 			ts = ts._parent
-			while ts is not None and ts.Kind > TestsuiteKind.Logical:
+			while ts is not None and ts._kind > TestsuiteKind.Logical:
 				classname = f"{ts._name}.{classname}"
 				ts = ts._parent
 
@@ -608,14 +608,30 @@ class Testsuite(TestsuiteBase):
 		return juTestsuite
 
 	def ToTestsuite(self) -> ut_Testsuite:
-		return ut_Testsuite(
+		testsuite = ut_Testsuite(
 			self._name,
 			TestsuiteKind.Logical,
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
-			testsuites=(cls.ToTestsuite() for cls in self._testclasses.values())
 		)
+
+		for testclass in self._testclasses.values():
+			suite = testsuite
+			classpath = testclass._name.split(".")
+			for element in classpath:
+				if element in suite._testsuites:
+					suite = suite._testsuites[element]
+				else:
+					suite = ut_Testsuite(element, kind=TestsuiteKind.Package, parent=suite)
+
+			suite._kind = TestsuiteKind.Class
+			if suite._parent is not testsuite:
+				suite._parent._kind = TestsuiteKind.Module
+
+			suite.AddTestcases(tc.ToTestcase() for tc in testclass._testcases.values())
+
+		return testsuite
 
 	def ToTree(self) -> Node:
 		node = Node(
@@ -989,9 +1005,9 @@ class Document(TestsuiteSummary, ut_Document):
 
 	def _GenerateTestcase(self, testcase: Testcase, parentElement: _Element):
 		testcaseElement = SubElement(parentElement, "testcase")
-		testcaseElement.attrib["name"] = testcase._name
 		if testcase.Classname is not None:
 			testcaseElement.attrib["classname"] = testcase.Classname
+		testcaseElement.attrib["name"] = testcase._name
 		if testcase._duration is not None:
 			testcaseElement.attrib["time"] = f"{testcase._duration.total_seconds():.6f}"
 		if testcase._assertionCount is not None:

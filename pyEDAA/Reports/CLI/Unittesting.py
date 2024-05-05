@@ -6,13 +6,14 @@ from pyTooling.Attributes.ArgParse import CommandHandler
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
 from pyTooling.MetaClasses import ExtendedType
 
-from pyEDAA.Reports.Unittesting       import Document, MergedTestsuiteSummary
+from pyEDAA.Reports.Unittesting       import Document, MergedTestsuiteSummary, TestsuiteKind
 from pyEDAA.Reports.Unittesting.JUnit import Document, JUnitReaderMode, UnittestException
 
 
 class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 	@CommandHandler("merge-unittest", help="Merge unit testing results.", description="Merge unit testing results.")
 	@LongValuedFlag("--junit", dest="junit", metaName='JUnitFile', help="Unit testing summary file (XML).")
+	@LongValuedFlag("--pytest", dest="pytest", metaName='Package', help="Remove pytest overhead.")
 	def HandleMergeUnittest(self, args: Namespace) -> None:
 		"""Handle program calls with command ``merge-unittest``."""
 		self._PrintHeadline()
@@ -46,6 +47,23 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 		self.WriteNormal(f"Flattening data structures to a single dimension ...")
 		result = merged.ToTestsuiteSummary()
+
+		if args.pytest is not None:
+			self.WriteNormal(f"Remove overhead from pytest ...")
+			suite = result
+
+			for element in args.pytest.split("."):
+				suite = suite._testsuites[element]
+
+			for ts in suite._testsuites.values():
+				ts._parent = None
+				ts._kind = TestsuiteKind.Logical
+				result.AddTestsuite(ts)
+
+			while suite is not result:
+				name = suite._name
+				suite = suite._parent
+				del suite._testsuites[name]
 
 		self.WriteNormal(f"Writing merged unit test summaries to file ...")
 		mergedFile = Path.cwd() / Path("Unittesting.xml")
