@@ -34,7 +34,7 @@ from typing   import List
 from unittest import TestCase as ut_TestCase
 
 from pyEDAA.Reports.Unittesting       import MergedTestsuiteSummary, IterationScheme, TestcaseStatus
-from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument, JUnitReaderMode
+from pyEDAA.Reports.Unittesting.JUnit import Document, JUnitReaderMode
 
 
 class PyTooling(ut_TestCase):
@@ -56,7 +56,7 @@ class PyTooling(ut_TestCase):
 	def test_PlatformTesting(self) -> None:
 		print()
 
-		junitDocuments: List[JUnitDocument] = []
+		junitDocuments: List[Document] = []
 
 		directory = Path("tests/data/JUnit/pytest.pyTooling")
 		print(f"Reading platform testing summary files from '{directory}' ...")
@@ -64,7 +64,9 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			# print(f"  Parsing {file}")
-			junitDocuments.append(JUnitDocument(file, parse=True))
+			junitDocument = Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName)
+			junitDocuments.append(junitDocument)
+
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 
@@ -73,7 +75,7 @@ class PyTooling(ut_TestCase):
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
 			# print(f"  merging {summary.Path}")
-			merged.Merge(summary)
+			merged.Merge(summary.ToTestsuiteSummary())
 
 		endMerging = perf_counter_ns()
 		mergingDuration = (endMerging - startMerging) / 1e9
@@ -100,11 +102,28 @@ class PyTooling(ut_TestCase):
 		endAggregate = perf_counter_ns()
 		aggregateDuration = (endAggregate - startAggregate) / 1e9
 
+		self.assertEqual(3, merged.TestsuiteCount)
+		self.assertEqual(10, merged.TestcaseCount)
+		self.assertEqual(0, merged.AssertionCount)
+		self.assertEqual(10, merged.Tests)
+		self.assertEqual(3, merged.Skipped)
+		self.assertEqual(0, merged.Errored)
+		self.assertEqual(0, merged.Failed)
+
+		# Compress to a TestsuiteSummary
 		result = merged.ToTestsuiteSummary()
+
+		self.assertEqual(3, result.TestsuiteCount)
+		self.assertEqual(10, result.TestcaseCount)
+		self.assertEqual(0, result.AssertionCount)
+		self.assertEqual(10, result.Tests)
+		self.assertEqual(3, result.Skipped)
+		self.assertEqual(0, result.Errored)
+		self.assertEqual(0, result.Failed)
 
 		print(f"Writing merged data as JUnit XML ...")
 		startWrite = perf_counter_ns()
-		junitDocument = JUnitDocument.FromTestsuiteSummary(self._outputDirectory / "Platform.xml", result)
+		junitDocument = Document.FromTestsuiteSummary(self._outputDirectory / "Platform.xml", result)
 		junitDocument.Write(regenerate=True)
 		endWrite = perf_counter_ns()
 		writeDuration = (endWrite - startWrite) / 1e9
@@ -118,7 +137,7 @@ class PyTooling(ut_TestCase):
 	def test_Unittesting(self) -> None:
 		print()
 
-		junitDocuments: List[JUnitDocument] = []
+		junitDocuments: List[Document] = []
 
 		directory = Path("tests/data/JUnit/pytest.pyTooling")
 		print(f"Reading platform testing summary files from '{directory}' ...")
@@ -126,7 +145,7 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			# print(f"  Parsing {file}")
-			junitDocuments.append(JUnitDocument(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 
@@ -135,7 +154,7 @@ class PyTooling(ut_TestCase):
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
 			# print(f"  merging {summary.Path}")
-			merged.Merge(summary)
+			merged.Merge(summary.ToTestsuiteSummary())
 		endMerging = perf_counter_ns()
 		mergingDuration = (endMerging - startMerging) / 1e9
 
@@ -160,7 +179,7 @@ class PyTooling(ut_TestCase):
 
 		print(f"Writing merged data as JUnit XML ...")
 		startWrite = perf_counter_ns()
-		junitDocument = JUnitDocument.FromTestsuiteSummary(self._outputDirectory / "Unittesting.xml", merged)
+		junitDocument = Document.FromTestsuiteSummary(self._outputDirectory / "Unittesting.xml", merged)
 		junitDocument.Write(regenerate=True)
 		endWrite = perf_counter_ns()
 		writeDuration = (endWrite - startWrite) / 1e9

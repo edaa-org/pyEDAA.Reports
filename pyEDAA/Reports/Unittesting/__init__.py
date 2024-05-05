@@ -30,12 +30,12 @@
 #
 """Abstraction of testsuites and testcases."""
 from datetime              import timedelta, datetime
-from enum                  import Flag
+from enum                  import Flag, IntEnum
 from pathlib               import Path
 from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar
 
 from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import abstractmethod, ExtendedType, mustoverride
+from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Tree        import Node
 
 from pyEDAA.Reports        import ReportException
@@ -101,6 +101,16 @@ class TestcaseStatus(Flag):
 
 		resolved |= (self & self.Flags) | (other & self.Flags)
 		return resolved
+
+
+@export
+class TestsuiteKind(IntEnum):
+	Root = 0
+	Logical = 1
+	Namespace = 2
+	Package = 3
+	Module = 4
+	Class = 5
 
 
 @export
@@ -334,6 +344,8 @@ class Testcase(Base):
 
 	@readonly
 	def AssertionCount(self) -> int:
+		if self._assertionCount is None:
+			return 0
 		return self._assertionCount
 
 	@readonly
@@ -396,6 +408,7 @@ class Testcase(Base):
 
 @export
 class TestsuiteBase(Base, Generic[TestsuiteType]):
+	_kind:       TestsuiteKind
 	_status:     TestsuiteStatus
 	_testsuites: Dict[str, TestsuiteType]
 
@@ -411,6 +424,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	def __init__(
 		self,
 		name: str,
+		kind: TestsuiteKind = TestsuiteKind.Logical,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
@@ -430,6 +444,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
 
+		self._kind = kind
 		self._status = status
 
 		self._testsuites = {}
@@ -472,8 +487,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 	@readonly
 	def AssertionCount(self) -> int:
-		raise NotImplementedError()
-		# return self._assertionCount
+		return sum(ts.AssertionCount for ts in self._testsuites.values())
 
 	@readonly
 	def FailedAssertionCount(self) -> int:
@@ -589,7 +603,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		for testcase in testcases:
 			self.AddTestcase(testcase)
 
-	@mustoverride
+	@abstractmethod
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		pass
 
@@ -622,11 +636,12 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 @export
 class Testsuite(TestsuiteBase[TestsuiteType]):
-	_testcases:  Dict[str, "Testcase"]
+	_testcases: Dict[str, "Testcase"]
 
 	def __init__(
 		self,
 		name: str,
+		kind: TestsuiteKind = TestsuiteKind.Logical,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
@@ -639,7 +654,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, kind, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 		# self._testDuration = testDuration
 
@@ -656,12 +671,20 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 				self._testcases[testcase._name] = testcase
 
 	@readonly
+	def Kind(self) -> TestsuiteKind:
+		return self._kind
+
+	@readonly
 	def Testcases(self) -> Dict[str, "Testcase"]:
 		return self._testcases
 
 	@readonly
 	def TestcaseCount(self) -> int:
 		return super().TestcaseCount + len(self._testcases)
+
+	@readonly
+	def AssertionCount(self) -> int:
+		return super().AssertionCount + sum(tc.AssertionCount for tc in self._testcases.values())
 
 	def Copy(self) -> "Testsuite":
 		return self.__class__(
@@ -782,7 +805,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, TestsuiteKind.Root, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
 		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
@@ -972,7 +995,7 @@ class MergedTestcase(Testcase, Merged):
 		self._fatalCount += tc._fatalCount
 
 	def ToTestcase(self) -> Testcase:
-		testcase = Testcase(
+		return Testcase(
 			self._name,
 			self._startTime,
 			self._setupDuration,
@@ -980,11 +1003,13 @@ class MergedTestcase(Testcase, Merged):
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
+			self._assertionCount,
+			self._failedAssertionCount,
+			self._passedAssertionCount,
 			self._warningCount,
 			self._errorCount,
 			self._fatalCount
 		)
-		return testcase
 
 
 @export
@@ -1001,6 +1026,7 @@ class MergedTestsuite(Testsuite, Merged):
 
 		super().__init__(
 			testsuite._name,
+			testsuite._kind,
 			testsuite._startTime,
 			testsuite._setupDuration, testsuite._teardownDuration, testsuite._totalDuration,
 			TestsuiteStatus.Unknown,
@@ -1039,6 +1065,7 @@ class MergedTestsuite(Testsuite, Merged):
 	def ToTestsuite(self) -> Testsuite:
 		testsuite = Testsuite(
 			self._name,
+			self._kind,
 			self._startTime,
 			self._setupDuration,
 			self._teardownDuration,
@@ -1046,12 +1073,19 @@ class MergedTestsuite(Testsuite, Merged):
 			self._status,
 			self._warningCount,
 			self._errorCount,
-			self._fatalCount
+			self._fatalCount,
+			testsuites=(ts.ToTestsuite() for ts in self._testsuites.values()),
+			testcases=(tc.ToTestcase() for tc in self._testcases.values())
 		)
-		for ts in self._testsuites.values():
-			testsuite.AddTestsuite(ts.ToTestsuite())
-		for tc in self._testcases.values():
-			testsuite.AddTestcase(tc.ToTestcase())
+
+		testsuite._tests = self._tests
+		testsuite._excluded = self._excluded
+		testsuite._inconsistent = self._inconsistent
+		testsuite._skipped = self._skipped
+		testsuite._errored = self._errored
+		testsuite._weak = self._weak
+		testsuite._failed = self._failed
+		testsuite._passed = self._passed
 
 		return testsuite
 
@@ -1091,9 +1125,17 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 			self._status,
 			self._warningCount,
 			self._errorCount,
-			self._fatalCount
+			self._fatalCount,
+			testsuites=(ts.ToTestsuite() for ts in self._testsuites.values())
 		)
-		for ts in self._testsuites.values():
-			testsuiteSummary.AddTestsuite(ts.ToTestsuite())
+
+		testsuiteSummary._tests = self._tests
+		testsuiteSummary._excluded = self._excluded
+		testsuiteSummary._inconsistent = self._inconsistent
+		testsuiteSummary._skipped = self._skipped
+		testsuiteSummary._errored = self._errored
+		testsuiteSummary._weak = self._weak
+		testsuiteSummary._failed = self._failed
+		testsuiteSummary._passed = self._passed
 
 		return testsuiteSummary

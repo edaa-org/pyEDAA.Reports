@@ -6,8 +6,8 @@ from pyTooling.Attributes.ArgParse import CommandHandler
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
 from pyTooling.MetaClasses import ExtendedType
 
-from pyEDAA.Reports.Unittesting import MergedTestsuiteSummary
-from pyEDAA.Reports.Unittesting.JUnit import JUnitDocument, JUnitReaderMode, UnittestException
+from pyEDAA.Reports.Unittesting       import Document, MergedTestsuiteSummary
+from pyEDAA.Reports.Unittesting.JUnit import Document, JUnitReaderMode, UnittestException
 
 
 class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
@@ -28,26 +28,29 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		foundFiles = [f for f in Path.cwd().glob(args.junit)]
 		self.WriteNormal(f"Reading {len(foundFiles)} unit test summary files ...")
 
-		junitDocuments: List[JUnitDocument] = []
+		junitDocuments: List[Document] = []
 		self.WriteVerbose(f"IN (JUnit)  -> Common Data Model:      {args.junit}")
 		for file in foundFiles:
 			self.WriteVerbose(f"  reading {file}")
-			junitDocuments.append(JUnitDocument(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 
 		self.WriteNormal(f"Merging unit test summary files to a single file ...")
 
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
 			self.WriteVerbose(f"  merging {summary.Path}")
-			merged.Merge(summary)
+			merged.Merge(summary.ToTestsuiteSummary())
 
 		self.WriteNormal(f"Aggregating unit test metrics ...")
 		merged.Aggregate()
 
+		self.WriteNormal(f"Flattening data structures to a single dimension ...")
+		result = merged.ToTestsuiteSummary()
+
 		self.WriteNormal(f"Writing merged unit test summaries to file ...")
 		mergedFile = Path.cwd() / Path("Unittesting.xml")
 		self.WriteVerbose(f"  Common Data Model -> OUT (JUnit):      {mergedFile}")
-		junitDocument = JUnitDocument.FromTestsuiteSummary(mergedFile, merged)
+		junitDocument = Document.FromTestsuiteSummary(mergedFile, result)
 		try:
 			junitDocument.Write(regenerate=True, overwrite=True)
 		except UnittestException as ex:
