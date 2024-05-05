@@ -41,7 +41,7 @@ from typing          import Optional as Nullable, Iterable, Dict, Any, Generator
 from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element, _Comment
 from lxml.etree                 import ElementTree, Element, SubElement, tostring
 from pyTooling.Decorators       import export, readonly
-from pyTooling.MetaClasses      import ExtendedType, mustoverride
+from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmethod
 from pyTooling.Tree             import Node
 
 from pyEDAA.Reports             import resources, getResourceFile
@@ -130,8 +130,9 @@ class BaseWithProperties(Base):
 		return self._duration
 
 	@readonly
+	@abstractmethod
 	def AssertionCount(self) -> int:
-		return self._assertionCount
+		pass
 
 	def __len__(self) -> int:
 		return len(self._properties)
@@ -184,6 +185,12 @@ class Testcase(BaseWithProperties):
 	@readonly
 	def Status(self) -> TestcaseStatus:
 		return self._status
+
+	@readonly
+	def AssertionCount(self) -> int:
+		if self._assertionCount is None:
+			return 0
+		return self._assertionCount
 
 	def Copy(self) -> "Testcase":
 		return self.__class__(
@@ -365,6 +372,10 @@ class Class(Base):
 	def TestcaseCount(self) -> int:
 		return len(self._testcases)
 
+	@readonly
+	def AssertionCount(self) -> int:
+		return sum(tc.AssertionCount for tc in self._testcases.values())
+
 	def AddTestcase(self, testcase: "Testcase") -> None:
 		if testcase._parent is not None:
 			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
@@ -459,6 +470,10 @@ class Testsuite(TestsuiteBase):
 	@readonly
 	def TestcaseCount(self) -> int:
 		return sum(cls.TestcaseCount for cls in self._classes.values())
+
+	@readonly
+	def AssertionCount(self) -> int:
+		return sum(cls.AssertionCount for cls in self._classes.values())
 
 	def AddClass(self, cls: "Class") -> None:
 		if cls._parent is not None:
@@ -643,11 +658,15 @@ class TestsuiteSummary(TestsuiteBase):
 
 	@readonly
 	def TestcaseCount(self) -> int:
-		return sum(testsuite.TestcaseCount for testsuite in self._testsuites.values())
+		return sum(ts.TestcaseCount for ts in self._testsuites.values())
 
 	@readonly
 	def TestsuiteCount(self) -> int:
 		return len(self._testsuites)
+
+	@readonly
+	def AssertionCount(self) -> int:
+		return sum(ts.AssertionCount for ts in self._testsuites.values())
 
 	def AddTestsuite(self, testsuite: Testsuite) -> None:
 		if testsuite._parent is not None:

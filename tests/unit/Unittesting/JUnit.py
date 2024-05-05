@@ -48,7 +48,7 @@ class Instantiation(py_TestCase):
 			_ = tc.Classname
 		self.assertEqual(TestcaseStatus.Unknown, tc.Status)
 		self.assertIsNone(tc.Duration)
-		self.assertIsNone(tc.AssertionCount)
+		self.assertEqual(0, tc.AssertionCount)
 
 	def test_Class(self) -> None:
 		cls = Class("cls")
@@ -57,7 +57,7 @@ class Instantiation(py_TestCase):
 		self.assertEqual("cls", cls.Classname)
 		# self.assertEqual(TestcaseStatus.Unknown, cls.Status)
 		# self.assertIsNone(cls.Duration)
-		# self.assertIsNone(cls.AssertionCount)
+		self.assertEqual(0, cls.AssertionCount)
 
 	def test_Testsuite(self) -> None:
 		ts = Testsuite("ts")
@@ -68,7 +68,7 @@ class Instantiation(py_TestCase):
 		self.assertIsNone(ts.StartTime)
 		self.assertIsNone(ts.Duration)
 		self.assertEqual(0, ts.TestcaseCount)
-		self.assertIsNone(ts.AssertionCount)
+		self.assertEqual(0, ts.AssertionCount)
 
 	def test_TestsuiteSummary(self) -> None:
 		tss = TestsuiteSummary("tss")
@@ -78,7 +78,7 @@ class Instantiation(py_TestCase):
 		self.assertIsNone(tss.StartTime)
 		self.assertIsNone(tss.Duration)
 		self.assertEqual(0, tss.TestsuiteCount)
-		self.assertIsNone(tss.AssertionCount)
+		self.assertEqual(0, tss.AssertionCount)
 
 
 class TestcasesInClass(py_TestCase):
@@ -314,9 +314,9 @@ class Hierarchy(py_TestCase):
 		tc1_1 = Testcase("tc1", parent=cls1)
 		tss.Aggregate()
 
-		self.assertIsNone(tc1_1.AssertionCount)
-		self.assertIsNone(ts.AssertionCount)
-		self.assertIsNone(tss.AssertionCount)
+		self.assertEqual(0, tc1_1.AssertionCount)
+		self.assertEqual(0, ts.AssertionCount)
+		self.assertEqual(0, tss.AssertionCount)
 		self.assertEqual(1, ts.Tests)
 		self.assertEqual(1, tss.Tests)
 
