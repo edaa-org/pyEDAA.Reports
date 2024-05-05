@@ -32,7 +32,7 @@ from datetime import timedelta, datetime
 from pathlib  import Path
 from unittest import TestCase as py_TestCase
 
-from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus
+from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
 from pyEDAA.Reports.Unittesting       import Testsuite as ut_Testsuite, Testcase as ut_Testcase
 from pyEDAA.Reports.Unittesting.JUnit import UnittestException
@@ -362,21 +362,29 @@ class Hierarchy(py_TestCase):
 
 
 class Conversion(py_TestCase):
-	def test_ToTestcase(self) -> None:
+	def test_TestcaseToTestcase(self) -> None:
 		juTC = Testcase("tc", duration=timedelta(seconds=0.023))
 		tc = juTC.ToTestcase()
 
 		self.assertEqual("tc", tc.Name)
 		self.assertEqual(timedelta(seconds=0.023), tc.TestDuration)
 
-	def test_ToTestsuite(self) -> None:
+	def test_ClassToTestsuite(self) -> None:
+		juC = Class("cls")
+		ts = juC.ToTestsuite()
+
+		self.assertEqual("cls", ts.Name)
+		self.assertEqual(TestsuiteKind.Class, ts.Kind)
+
+	def test_TestsuiteToTestsuite(self) -> None:
 		juTS = Testsuite("ts", duration=timedelta(seconds=0.024))
 		ts = juTS.ToTestsuite()
 
 		self.assertEqual("ts", ts.Name)
+		self.assertEqual(TestsuiteKind.Logical, ts.Kind)
 		self.assertEqual(timedelta(seconds=0.024), ts.TotalDuration)
 
-	def test_ToTestsuiteSummary(self) -> None:
+	def test_TestsuiteSummaryToTestsuiteSummary(self) -> None:
 		juTSS = TestsuiteSummary("tss", duration=timedelta(seconds=0.025))
 		tss = juTSS.ToTestsuiteSummary()
 

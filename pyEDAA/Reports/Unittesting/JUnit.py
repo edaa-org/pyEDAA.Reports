@@ -583,7 +583,7 @@ class Testsuite(TestsuiteBase):
 
 			juClass.AddTestcase(Testcase.FromTestcase(tc))
 
-		return testsuite
+		return juTestsuite
 
 	def ToTestsuite(self) -> ut_Testsuite:
 		return ut_Testsuite(
@@ -979,3 +979,8 @@ class Document(TestsuiteSummary, ut_Document):
 			skippedElement = SubElement(testcaseElement, "skipped")
 		else:
 			errorElement = SubElement(testcaseElement, "error")
+
+	def __str__(self) -> str:
+		return (
+			f"<JUnit.Document {self._name} ({self._path}): {self._status.name} - suites/tests:{self.TestsuiteCount}/{self.TestcaseCount}>"
+		)
