@@ -470,6 +470,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		self._passed =       0
 
 	@readonly
+	def Kind(self) -> TestsuiteKind:
+		return self._kind
+
+	@readonly
 	def Status(self) -> TestsuiteStatus:
 		return self._status
 
@@ -669,10 +673,6 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 				testcase._parent = self
 				self._testcases[testcase._name] = testcase
-
-	@readonly
-	def Kind(self) -> TestsuiteKind:
-		return self._kind
 
 	@readonly
 	def Testcases(self) -> Dict[str, "Testcase"]:
