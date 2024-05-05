@@ -45,7 +45,8 @@ from pyTooling.MetaClasses      import ExtendedType, mustoverride
 from pyTooling.Tree             import Node
 
 from pyEDAA.Reports             import resources, getResourceFile
-from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException
+from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, \
+	TestsuiteKind
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, IterationScheme
 from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
 from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut_Testcase
@@ -110,7 +111,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Base2(Base):
+class BaseWithProperties(Base):
 	_duration:       Nullable[timedelta]
 	_assertionCount: Nullable[int]
 	_properties:     Dict[str, Any]
@@ -152,7 +153,7 @@ class Base2(Base):
 
 
 @export
-class Testcase(Base2):
+class Testcase(BaseWithProperties):
 	_classname:      str
 	_status:         TestcaseStatus
 
@@ -238,7 +239,7 @@ class Testcase(Base2):
 
 
 @export
-class TestsuiteBase(Base2):
+class TestsuiteBase(BaseWithProperties):
 	_startTime: Nullable[datetime]
 	_status:    TestsuiteStatus
 
@@ -381,6 +382,7 @@ class Class(Base):
 	def ToTestsuite(self) -> ut_Testsuite:
 		return ut_Testsuite(
 			self._name,
+			TestsuiteKind.Class,
 			# startTime=self._startTime,
 			# totalDuration=self._duration,
 			# status=self._status,
@@ -478,16 +480,6 @@ class Testsuite(TestsuiteBase):
 	def IterateTestcases(self, scheme: IterationScheme = IterationScheme.TestcaseDefault) -> Generator[Testcase, None, None]:
 		return self.Iterate(scheme)
 
-	def ToTree(self) -> Node:
-		node = Node(
-			value=self._name,
-			children=(cls.ToTree() for cls in self._classes.values())
-		)
-		node["startTime"] = self._startTime
-		node["duration"] = self._duration
-
-		return node
-
 	def Copy(self) -> "Testsuite":
 		return self.__class__(
 			self._name,
@@ -566,22 +558,52 @@ class Testsuite(TestsuiteBase):
 
 	@classmethod
 	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
-		return cls(
+		juTestsuite = cls(
 			testsuite._name,
 			startTime=testsuite._startTime,
 			duration=testsuite._totalDuration,
 			status= testsuite._status,
-			classes=(ut_Testcase.FromTestcase(testcase) for testcase in testsuite._testcases.values())
 		)
+
+		for tc in testsuite.IterateTestcases():
+			ts = tc._parent
+			if ts is None:
+				raise UnittestException(f"Testcase '{tc._name}' is not part of a hierarchy.")
+
+			classname = ts._name
+			ts = ts._parent
+			while ts is not None and ts.Kind > TestsuiteKind.Logical:
+				classname = f"{ts._name}.{classname}"
+				ts = ts._parent
+
+			if classname in juTestsuite._classes:
+				juClass = juTestsuite._classes[classname]
+			else:
+				juClass = Class(classname, parent=juTestsuite)
+
+			juClass.AddTestcase(Testcase.FromTestcase(tc))
+
+		return testsuite
 
 	def ToTestsuite(self) -> ut_Testsuite:
 		return ut_Testsuite(
 			self._name,
+			TestsuiteKind.Logical,
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
-			testcases=(cls.ToTestsuite() for cls in self._classes.values())
+			testsuites=(cls.ToTestsuite() for cls in self._classes.values())
 		)
+
+	def ToTree(self) -> Node:
+		node = Node(
+			value=self._name,
+			children=(cls.ToTree() for cls in self._classes.values())
+		)
+		node["startTime"] = self._startTime
+		node["duration"] = self._duration
+
+		return node
 
 	def __str__(self) -> str:
 		return (
@@ -739,7 +761,7 @@ class Document(TestsuiteSummary, ut_Document):
 		doc._failed = testsuiteSummary._failed
 		doc._passed = testsuiteSummary._passed
 
-		doc.AddTestsuites(ut_Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+		doc.AddTestsuites(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
 
 		return doc
 
