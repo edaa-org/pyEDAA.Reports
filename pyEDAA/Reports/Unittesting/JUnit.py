@@ -164,10 +164,10 @@ class Testcase(BaseWithProperties):
 		duration:  Nullable[timedelta] = None,
 		status: TestcaseStatus = TestcaseStatus.Unknown,
 		assertionCount: Nullable[int] = None,
-		parent: Nullable["Class"] = None
+		parent: Nullable["TestClass"] = None
 	):
 		if parent is not None:
-			if not isinstance(parent, Class):
+			if not isinstance(parent, TestClass):
 				raise TypeError(f"Parameter 'parent' is not of type 'Class'.")
 
 			parent._testcases[name] = self
@@ -179,7 +179,7 @@ class Testcase(BaseWithProperties):
 	@readonly
 	def Classname(self) -> str:
 		if self._parent is None:
-			raise UnittestException("Standalone Testcase instance is not linked to a Class.")
+			raise UnittestException("Standalone Testcase instance is not linked to a Testclass.")
 		return self._parent._name
 
 	@readonly
@@ -332,7 +332,7 @@ class TestsuiteBase(BaseWithProperties):
 
 
 @export
-class Class(Base):
+class TestClass(Base):
 	_testcases: Dict[str, "Testcase"]
 
 	def __init__(
@@ -345,7 +345,7 @@ class Class(Base):
 			if not isinstance(parent, Testsuite):
 				raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
 
-			parent._classes[classname] = self
+			parent._testclasses[classname] = self
 
 		super().__init__(classname, parent)
 
@@ -417,8 +417,8 @@ class Class(Base):
 
 @export
 class Testsuite(TestsuiteBase):
-	_hostname:  str
-	_classes:   Dict[str, "Class"]
+	_hostname:    str
+	_testclasses: Dict[str, "TestClass"]
 
 	def __init__(
 		self,
@@ -427,7 +427,7 @@ class Testsuite(TestsuiteBase):
 		startTime: Nullable[datetime] = None,
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
-		classes: Nullable[Iterable["Class"]] = None,
+		testclasses: Nullable[Iterable["TestClass"]] = None,
 		parent: Nullable["TestsuiteSummary"] = None
 	):
 		if parent is not None:
@@ -440,29 +440,29 @@ class Testsuite(TestsuiteBase):
 
 		self._hostname = hostname
 
-		self._classes = {}
-		if classes is not None:
-			for cls in classes:
-				if cls._parent is not None:
-					raise ValueError(f"Class '{cls._name}' is already part of a testsuite hierarchy.")
+		self._testclasses = {}
+		if testclasses is not None:
+			for testclass in testclasses:
+				if testclass._parent is not None:
+					raise ValueError(f"Class '{testclass._name}' is already part of a testsuite hierarchy.")
 
-				if cls._name in self._classes:
-					raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{cls._name}'.")
+				if testclass._name in self._testclasses:
+					raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{testclass._name}'.")
 
-				cls._parent = self
-				self._classes[cls._name] = cls
+				testclass._parent = self
+				self._testclasses[testclass._name] = testclass
 
 	@readonly
 	def Hostname(self) -> Nullable[str]:
 		return self._hostname
 
 	@readonly
-	def Classes(self) -> Dict[str, "Class"]:
-		return self._classes
+	def Testclasses(self) -> Dict[str, "TestClass"]:
+		return self._testclasses
 
 	@readonly
-	def ClassCount(self) -> int:
-		return len(self._classes)
+	def TestclassCount(self) -> int:
+		return len(self._testclasses)
 
 	# @readonly
 	# def Testcases(self) -> Dict[str, "Testcase"]:
@@ -470,25 +470,25 @@ class Testsuite(TestsuiteBase):
 
 	@readonly
 	def TestcaseCount(self) -> int:
-		return sum(cls.TestcaseCount for cls in self._classes.values())
+		return sum(cls.TestcaseCount for cls in self._testclasses.values())
 
 	@readonly
 	def AssertionCount(self) -> int:
-		return sum(cls.AssertionCount for cls in self._classes.values())
+		return sum(cls.AssertionCount for cls in self._testclasses.values())
 
-	def AddClass(self, cls: "Class") -> None:
-		if cls._parent is not None:
-			raise ValueError(f"Class '{cls._name}' is already part of a testsuite hierarchy.")
+	def AddTestclass(self, testclass: "TestClass") -> None:
+		if testclass._parent is not None:
+			raise ValueError(f"Class '{testclass._name}' is already part of a testsuite hierarchy.")
 
-		if cls._name in self._classes:
-			raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{cls._name}'.")
+		if testclass._name in self._testclasses:
+			raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{testclass._name}'.")
 
-		cls._parent = self
-		self._classes[cls._name] = cls
+		testclass._parent = self
+		self._testclasses[testclass._name] = testclass
 
-	def AddClasses(self, classes: Iterable["Class"]) -> None:
-		for testcase in classes:
-			self.AddClass(testcase)
+	def AddTestclasses(self, testclasses: Iterable["TestClass"]) -> None:
+		for testcase in testclasses:
+			self.AddTestclass(testcase)
 
 	# def IterateTestsuites(self, scheme: IterationScheme = IterationScheme.TestsuiteDefault) -> Generator[TestsuiteType, None, None]:
 	# 	return self.Iterate(scheme)
@@ -508,7 +508,7 @@ class Testsuite(TestsuiteBase):
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
 		tests, skipped, errored, failed, passed = super().Aggregate()
 
-		for testcase in self._classes.values():
+		for testcase in self._testclasses.values():
 			_ = testcase.Aggregate(strict)
 
 			tests += 1
@@ -558,7 +558,7 @@ class Testsuite(TestsuiteBase):
 				yield self
 
 			if IterationScheme.IncludeTestcases in scheme:
-				for testcase in self._classes.values():
+				for testcase in self._testclasses.values():
 					yield testcase
 
 		for testsuite in self._testsuites.values():
@@ -566,7 +566,7 @@ class Testsuite(TestsuiteBase):
 
 		if IterationScheme.PostOrder in scheme:
 			if IterationScheme.IncludeTestcases in scheme:
-				for testcase in self._classes.values():
+				for testcase in self._testclasses.values():
 					yield testcase
 
 			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
@@ -598,10 +598,10 @@ class Testsuite(TestsuiteBase):
 				classname = f"{ts._name}.{classname}"
 				ts = ts._parent
 
-			if classname in juTestsuite._classes:
-				juClass = juTestsuite._classes[classname]
+			if classname in juTestsuite._testclasses:
+				juClass = juTestsuite._testclasses[classname]
 			else:
-				juClass = Class(classname, parent=juTestsuite)
+				juClass = TestClass(classname, parent=juTestsuite)
 
 			juClass.AddTestcase(Testcase.FromTestcase(tc))
 
@@ -614,13 +614,13 @@ class Testsuite(TestsuiteBase):
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
-			testsuites=(cls.ToTestsuite() for cls in self._classes.values())
+			testsuites=(cls.ToTestsuite() for cls in self._testclasses.values())
 		)
 
 	def ToTree(self) -> Node:
 		node = Node(
 			value=self._name,
-			children=(cls.ToTree() for cls in self._classes.values())
+			children=(cls.ToTree() for cls in self._testclasses.values())
 		)
 		node["startTime"] = self._startTime
 		node["duration"] = self._duration
@@ -914,12 +914,12 @@ class Document(TestsuiteSummary, ut_Document):
 		# 		currentTestsuite._testsuites[testsuiteName] = new = Testsuite(testsuiteName)
 		# 		currentTestsuite = new
 
-		if className in parent._classes:
-			cls = parent._classes[className]
+		if className in parent._testclasses:
+			testclass = parent._testclasses[className]
 		else:
-			cls = Class(className, parent=parent)
+			testclass = TestClass(className, parent=parent)
 
-		testcase = Testcase(name, duration=timedelta(seconds=time), parent=cls)
+		testcase = Testcase(name, duration=timedelta(seconds=time), parent=testclass)
 
 		for node in testsuiteNode.iterchildren():   # type: _Element
 			if isinstance(node, _Comment):
@@ -983,8 +983,8 @@ class Document(TestsuiteSummary, ut_Document):
 		if testsuite._hostname is not None:
 			testsuiteElement.attrib["hostname"] = testsuite._hostname
 
-		for cls in testsuite._classes.values():
-			for tc in cls._testcases.values():
+		for testclass in testsuite._testclasses.values():
+			for tc in testclass._testcases.values():
 				self._GenerateTestcase(tc, testsuiteElement)
 
 	def _GenerateTestcase(self, testcase: Testcase, parentElement: _Element):

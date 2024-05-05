@@ -33,10 +33,10 @@ from pathlib  import Path
 from unittest import TestCase as py_TestCase
 
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, TestsuiteKind
-from pyEDAA.Reports.Unittesting       import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
+from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary
 from pyEDAA.Reports.Unittesting       import Testsuite as ut_Testsuite, Testcase as ut_Testcase
 from pyEDAA.Reports.Unittesting.JUnit import UnittestException
-from pyEDAA.Reports.Unittesting.JUnit import Testcase, Class, Testsuite, TestsuiteSummary, Document as JUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit import Testcase, TestClass, Testsuite, TestsuiteSummary, Document as JUnitDocument
 
 
 class Instantiation(py_TestCase):
@@ -51,7 +51,7 @@ class Instantiation(py_TestCase):
 		self.assertEqual(0, tc.AssertionCount)
 
 	def test_Class(self) -> None:
-		cls = Class("cls")
+		cls = TestClass("cls")
 
 		self.assertEqual("cls", cls.Name)
 		self.assertEqual("cls", cls.Classname)
@@ -81,9 +81,9 @@ class Instantiation(py_TestCase):
 		self.assertEqual(0, tss.AssertionCount)
 
 
-class TestcasesInClass(py_TestCase):
+class TestcasesInTestclass(py_TestCase):
 	def test_TestcaseConstructor(self) -> None:
-		cls = Class("cls")
+		cls = TestClass("cls")
 		self.assertEqual(0, cls.TestcaseCount)
 
 		tc1 = Testcase("tc1", parent=cls)
@@ -104,7 +104,7 @@ class TestcasesInClass(py_TestCase):
 		tc2 = Testcase("tc2")
 		testcases2 = (tc1, tc2)
 
-		cls = Class("cls", testcases=testcases2)
+		cls = TestClass("cls", testcases=testcases2)
 		self.assertEqual(2, cls.TestcaseCount)
 		self.assertTupleEqual(testcases2, tuple(cls.Testcases.values()))
 
@@ -118,7 +118,7 @@ class TestcasesInClass(py_TestCase):
 		testcases1 = (tc1,)
 		testcases2 = (tc1, tc2)
 
-		cls = Class("cls")
+		cls = TestClass("cls")
 		self.assertEqual(0, cls.TestcaseCount)
 
 		cls.AddTestcase(tc1)
@@ -141,7 +141,7 @@ class TestcasesInClass(py_TestCase):
 		testcases23 = (tc2, tc3)
 		testcases3 = (tc1, tc2, tc3)
 
-		cls = Class("cls")
+		cls = TestClass("cls")
 		self.assertEqual(0, cls.TestcaseCount)
 
 		cls.AddTestcases(testcases1)
@@ -156,76 +156,76 @@ class TestcasesInClass(py_TestCase):
 			self.assertEqual(cls, testcase.Parent)
 
 
-class ClassesInTestsuite(py_TestCase):
+class TestclassesInTestsuite(py_TestCase):
 	def test_ClassConstructor(self) -> None:
 		ts = Testsuite("ts")
 		self.assertEqual(0, ts.TestcaseCount)
 
-		cls1 = Class("cls1", parent=ts)
+		cls1 = TestClass("cls1", parent=ts)
 		classes1 = (cls1,)
-		self.assertEqual(1, ts.ClassCount)
-		self.assertTupleEqual(classes1, tuple(ts.Classes.values()))
+		self.assertEqual(1, ts.TestclassCount)
+		self.assertTupleEqual(classes1, tuple(ts.Testclasses.values()))
 
-		cls2 = Class("cls2", parent=ts)
+		cls2 = TestClass("cls2", parent=ts)
 		classes2 = (cls1, cls2)
-		self.assertEqual(2, ts.ClassCount)
-		self.assertTupleEqual(classes2, tuple(ts.Classes.values()))
+		self.assertEqual(2, ts.TestclassCount)
+		self.assertTupleEqual(classes2, tuple(ts.Testclasses.values()))
 
 		for testcase in classes2:
 			self.assertEqual(ts, testcase.Parent)
 
 	def test_TestsuiteConstructor(self) -> None:
-		cls1 = Class("cls1")
-		cls2 = Class("cls2")
+		cls1 = TestClass("cls1")
+		cls2 = TestClass("cls2")
 		classes2 = (cls1, cls2)
 
-		ts = Testsuite("ts", classes=classes2)
-		self.assertEqual(2, ts.ClassCount)
-		self.assertTupleEqual(classes2, tuple(ts.Classes.values()))
+		ts = Testsuite("ts", testclasses=classes2)
+		self.assertEqual(2, ts.TestclassCount)
+		self.assertTupleEqual(classes2, tuple(ts.Testclasses.values()))
 
 		for testcase in classes2:
 			self.assertEqual(ts, testcase.Parent)
 
 	def test_AddTestcase(self) -> None:
-		cls1 = Class("cls1")
-		cls2 = Class("cls2")
+		cls1 = TestClass("cls1")
+		cls2 = TestClass("cls2")
 
 		classes1 = (cls1,)
 		classes2 = (cls1, cls2)
 
 		ts = Testsuite("ts")
-		self.assertEqual(0, ts.ClassCount)
+		self.assertEqual(0, ts.TestclassCount)
 
-		ts.AddClass(cls1)
-		self.assertEqual(1, ts.ClassCount)
-		self.assertTupleEqual(classes1, tuple(ts.Classes.values()))
+		ts.AddTestclass(cls1)
+		self.assertEqual(1, ts.TestclassCount)
+		self.assertTupleEqual(classes1, tuple(ts.Testclasses.values()))
 
-		ts.AddClass(cls2)
-		self.assertEqual(2, ts.ClassCount)
-		self.assertTupleEqual(classes2, tuple(ts.Classes.values()))
+		ts.AddTestclass(cls2)
+		self.assertEqual(2, ts.TestclassCount)
+		self.assertTupleEqual(classes2, tuple(ts.Testclasses.values()))
 
 		for testcase in classes2:
 			self.assertEqual(ts, testcase.Parent)
 
 	def test_AddTestcases(self) -> None:
-		cls1 = Class("cls1")
-		cls2 = Class("cls2")
-		cls3 = Class("cls3")
+		cls1 = TestClass("cls1")
+		cls2 = TestClass("cls2")
+		cls3 = TestClass("cls3")
 
 		classes1 = (cls1,)
 		classes23 = (cls2, cls3)
 		classes3 = (cls1, cls2, cls3)
 
 		ts = Testsuite("ts")
-		self.assertEqual(0, ts.ClassCount)
+		self.assertEqual(0, ts.TestclassCount)
 
-		ts.AddClasses(classes1)
-		self.assertEqual(1, ts.ClassCount)
-		self.assertTupleEqual(classes1, tuple(ts.Classes.values()))
+		ts.AddTestclasses(classes1)
+		self.assertEqual(1, ts.TestclassCount)
+		self.assertTupleEqual(classes1, tuple(ts.Testclasses.values()))
 
-		ts.AddClasses(classes23)
-		self.assertEqual(3, ts.ClassCount)
-		self.assertTupleEqual(classes3, tuple(ts.Classes.values()))
+		ts.AddTestclasses(classes23)
+		self.assertEqual(3, ts.TestclassCount)
+		self.assertTupleEqual(classes3, tuple(ts.Testclasses.values()))
 
 		for testcase in classes3:
 			self.assertEqual(ts, testcase.Parent)
@@ -310,7 +310,7 @@ class Hierarchy(py_TestCase):
 	def test_Simple(self) -> None:
 		tss = TestsuiteSummary("tss")
 		ts = Testsuite("ts", parent=tss)
-		cls1 = Class("cls1", parent=ts)
+		cls1 = TestClass("cls1", parent=ts)
 		tc1_1 = Testcase("tc1", parent=cls1)
 		tss.Aggregate()
 
@@ -326,7 +326,7 @@ class Hierarchy(py_TestCase):
 		self.assertEqual(2, ts.Tests)
 		self.assertEqual(2, tss.Tests)
 
-		cls2 = Class("cls2", parent=ts)
+		cls2 = TestClass("cls2", parent=ts)
 		tc3_2 = Testcase("tc3", parent=cls2)
 		tc4_2 = Testcase("tc4", parent=cls2)
 		tss.Aggregate()
@@ -337,10 +337,10 @@ class Hierarchy(py_TestCase):
 	def test_Complex(self) -> None:
 		tss = TestsuiteSummary("tss")
 		ts1 = Testsuite("ts1", parent=tss)
-		cls1 = Class("cls1", parent=ts1)
+		cls1 = TestClass("cls1", parent=ts1)
 		tc1_1 = Testcase("tc1", parent=cls1)
 		tc2_1 = Testcase("tc2", parent=cls1)
-		cls2 = Class("cls2", parent=ts1)
+		cls2 = TestClass("cls2", parent=ts1)
 		tc3_2 = Testcase("tc3", parent=cls2)
 		tc4_2 = Testcase("tc4", parent=cls2)
 		tss.Aggregate()
@@ -349,10 +349,10 @@ class Hierarchy(py_TestCase):
 		self.assertEqual(4, tss.Tests)
 
 		ts2 = Testsuite("ts2", parent=tss)
-		cls3 = Class("cls1", parent=ts2)
+		cls3 = TestClass("cls1", parent=ts2)
 		tc5_3 = Testcase("tc5", parent=cls3)
 		tc6_3 = Testcase("tc6", parent=cls3)
-		cls4 = Class("cls4", parent=ts2)
+		cls4 = TestClass("cls4", parent=ts2)
 		tc7_4 = Testcase("tc7", parent=cls4)
 		tc8_4 = Testcase("tc8", parent=cls4)
 		tss.Aggregate()
@@ -370,7 +370,7 @@ class Conversion(py_TestCase):
 		self.assertEqual(timedelta(seconds=0.023), tc.TestDuration)
 
 	def test_ClassToTestsuite(self) -> None:
-		juC = Class("cls")
+		juC = TestClass("cls")
 		ts = juC.ToTestsuite()
 
 		self.assertEqual("cls", ts.Name)
@@ -464,16 +464,16 @@ class Document(py_TestCase):
 		doc._name = "root"
 		doc._startTime = datetime.fromisoformat("2024-02-24T12:12:12+01:00")
 		ts1 = Testsuite("ts1", startTime=datetime.fromisoformat("2024-02-24T12:12:12+01:00"))
-		cls1 = Class("cls1", parent=ts1)
+		cls1 = TestClass("cls1", parent=ts1)
 		tc11 = Testcase("tc11", assertionCount=10, duration=timedelta(seconds=0.005), parent=cls1)
-		cls2 = Class("cls2", parent=ts1)
+		cls2 = TestClass("cls2", parent=ts1)
 		tc12 = Testcase("tc12", assertionCount=24, duration=timedelta(seconds=0.859), parent=cls2)
 		tc13 = Testcase("tc13", assertionCount=24, duration=timedelta(seconds=0.859), parent=cls2)
 		ts2 = Testsuite("ts2", startTime=datetime.fromisoformat("2024-02-24T12:12:13+01:00"))
-		cls3 = Class("cls3", parent=ts2)
+		cls3 = TestClass("cls3", parent=ts2)
 		tc21 = Testcase("tc21", assertionCount=13, duration=timedelta(seconds=3.637), parent=cls3)
 		tc22 = Testcase("tc22", assertionCount=48, duration=timedelta(seconds=2.473), parent=cls3)
-		cls4 = Class("cls4", parent=ts2)
+		cls4 = TestClass("cls4", parent=ts2)
 		tc23 = Testcase("tc23", assertionCount=48, duration=timedelta(seconds=2.473), parent=cls4)
 		doc.AddTestsuite(ts1)
 		doc.AddTestsuite(ts2)
