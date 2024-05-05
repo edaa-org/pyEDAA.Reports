@@ -49,21 +49,42 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		result = merged.ToTestsuiteSummary()
 
 		if args.pytest is not None:
-			self.WriteNormal(f"Remove overhead from pytest ...")
-			suite = result
+			self.WriteNormal(f"Simplifying unit testing reports created by pytest ...")
 
-			for element in args.pytest.split("."):
-				suite = suite._testsuites[element]
+			cleanups = []
+			for path in args.pytest.split(";"):
+				suite = result
+				message = f"  Walking: {suite._name}"
+				for element in path.split("."):
+					if element in suite._testsuites:
+						suite = suite._testsuites[element]
+						message += f" -> {suite._name}"
+					else:
+						self.WriteVerbose(f"  Skipping: {path}")
+						suite = None
+						break
 
-			for ts in suite._testsuites.values():
-				ts._parent = None
-				ts._kind = TestsuiteKind.Logical
-				result.AddTestsuite(ts)
+				if suite is None:
+					continue
 
-			while suite is not result:
-				name = suite._name
-				suite = suite._parent
-				del suite._testsuites[name]
+				self.WriteVerbose(message)
+				cleanups.append(suite)
+
+				self.WriteVerbose(f"  Moving testsuites ...")
+				for ts in suite._testsuites.values():
+					self.WriteDebug(f"    {ts._name} -> {result._name}")
+					ts._parent = None
+					ts._kind = TestsuiteKind.Logical
+					result.AddTestsuite(ts)
+
+			self.WriteVerbose(f"  Deleting empty testsuites ...")
+			for clean in cleanups:
+				suite = clean
+				while suite is not result:
+					name = suite._name
+					suite = suite._parent
+					self.WriteDebug(f"    {name}")
+					del suite._testsuites[name]
 
 		self.WriteNormal(f"Writing merged unit test summaries to file ...")
 		mergedFile = Path.cwd() / Path("Unittesting.xml")
