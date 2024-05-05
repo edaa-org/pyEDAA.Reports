@@ -93,7 +93,7 @@ class TestcasesInTestsuite(py_TestCase):
 		tc2 = Testcase("tc2", "cls")
 		testcases2 = (tc1, tc2)
 
-		ts = Testsuite("ts", testcases=testcases2)
+		ts = Testsuite("ts", classes=testcases2)
 		self.assertEqual(2, ts.TestcaseCount)
 		self.assertTupleEqual(testcases2, tuple(ts.Testcases.values()))
 
@@ -110,11 +110,11 @@ class TestcasesInTestsuite(py_TestCase):
 		ts = Testsuite("ts")
 		self.assertEqual(0, ts.TestcaseCount)
 
-		ts.AddTestcase(tc1)
+		ts.AddClass(tc1)
 		self.assertEqual(1, ts.TestcaseCount)
 		self.assertTupleEqual(testcases1, tuple(ts.Testcases.values()))
 
-		ts.AddTestcase(tc2)
+		ts.AddClass(tc2)
 		self.assertEqual(2, ts.TestcaseCount)
 		self.assertTupleEqual(testcases2, tuple(ts.Testcases.values()))
 
@@ -133,11 +133,11 @@ class TestcasesInTestsuite(py_TestCase):
 		ts = Testsuite("ts")
 		self.assertEqual(0, ts.TestcaseCount)
 
-		ts.AddTestcases(testcases1)
+		ts.AddClasses(testcases1)
 		self.assertEqual(1, ts.TestcaseCount)
 		self.assertTupleEqual(testcases1, tuple(ts.Testcases.values()))
 
-		ts.AddTestcases(testcases23)
+		ts.AddClasses(testcases23)
 		self.assertEqual(3, ts.TestcaseCount)
 		self.assertTupleEqual(testcases3, tuple(ts.Testcases.values()))
 
