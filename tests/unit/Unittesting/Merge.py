@@ -102,7 +102,7 @@ class PyTooling(ut_TestCase):
 		endAggregate = perf_counter_ns()
 		aggregateDuration = (endAggregate - startAggregate) / 1e9
 
-		self.assertEqual(3, merged.TestsuiteCount)
+		self.assertEqual(7, merged.TestsuiteCount)
 		self.assertEqual(10, merged.TestcaseCount)
 		self.assertEqual(0, merged.AssertionCount)
 		self.assertEqual(10, merged.Tests)
@@ -113,7 +113,7 @@ class PyTooling(ut_TestCase):
 		# Compress to a TestsuiteSummary
 		result = merged.ToTestsuiteSummary()
 
-		self.assertEqual(3, result.TestsuiteCount)
+		self.assertEqual(7, result.TestsuiteCount)
 		self.assertEqual(10, result.TestcaseCount)
 		self.assertEqual(0, result.AssertionCount)
 		self.assertEqual(10, result.Tests)
