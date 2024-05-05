@@ -176,6 +176,8 @@ class Testcase(Base2):
 
 	@readonly
 	def Classname(self) -> str:
+		if self._parent is None:
+			raise UnittestException("Standalone Testcase instance is not linked to a Class.")
 		return self._parent._name
 
 	@readonly
@@ -376,6 +378,15 @@ class Class(Base):
 		for testcase in testcases:
 			self.AddTestcase(testcase)
 
+	def ToTestsuite(self) -> ut_Testsuite:
+		return ut_Testsuite(
+			self._name,
+			# startTime=self._startTime,
+			# totalDuration=self._duration,
+			# status=self._status,
+			testcases=(tc.ToTestcase() for tc in self._testcases.values())
+		)
+
 	def __str__(self) -> str:
 		return (
 			f"<JUnit.Class {self._name}: {len(self._testcases)}>"
@@ -569,14 +580,12 @@ class Testsuite(TestsuiteBase):
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
-			testcases=(testcase.ToTestcase() for testcase in self._classes.values())
+			testcases=(cls.ToTestsuite() for cls in self._classes.values())
 		)
 
 	def __str__(self) -> str:
 		return (
-			f"<JUnit.Testsuite {self._name}: {self._status.name} - {self._tests}>"
-			# f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
-			# f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount}>"
+			f"<JUnit.Testsuite {self._name}: {self._status.name} - tests:{self._tests}>"
 		)
 
 
@@ -926,14 +935,15 @@ class Document(TestsuiteSummary, ut_Document):
 		if testsuite._hostname is not None:
 			testsuiteElement.attrib["hostname"] = testsuite._hostname
 
-		for tc in testsuite._classes.values():
-			self._GenerateTestcase(tc, testsuiteElement)
+		for cls in testsuite._classes.values():
+			for tc in cls._testcases.values():
+				self._GenerateTestcase(tc, testsuiteElement)
 
 	def _GenerateTestcase(self, testcase: Testcase, parentElement: _Element):
 		testcaseElement = SubElement(parentElement, "testcase")
 		testcaseElement.attrib["name"] = testcase._name
-		if testcase._classname is not None:
-			testcaseElement.attrib["classname"] = testcase._classname
+		if testcase.Classname is not None:
+			testcaseElement.attrib["classname"] = testcase.Classname
 		if testcase._duration is not None:
 			testcaseElement.attrib["time"] = f"{testcase._duration.total_seconds():.6f}"
 		if testcase._assertionCount is not None:
