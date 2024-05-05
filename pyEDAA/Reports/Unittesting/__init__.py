@@ -995,7 +995,7 @@ class MergedTestcase(Testcase, Merged):
 		self._fatalCount += tc._fatalCount
 
 	def ToTestcase(self) -> Testcase:
-		testcase = Testcase(
+		return Testcase(
 			self._name,
 			self._startTime,
 			self._setupDuration,
@@ -1003,11 +1003,13 @@ class MergedTestcase(Testcase, Merged):
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
+			self._assertionCount,
+			self._failedAssertionCount,
+			self._passedAssertionCount,
 			self._warningCount,
 			self._errorCount,
 			self._fatalCount
 		)
-		return testcase
 
 
 @export
@@ -1071,12 +1073,19 @@ class MergedTestsuite(Testsuite, Merged):
 			self._status,
 			self._warningCount,
 			self._errorCount,
-			self._fatalCount
+			self._fatalCount,
+			testsuites=(ts.ToTestsuite() for ts in self._testsuites.values()),
+			testcases=(tc.ToTestcase() for tc in self._testcases.values())
 		)
-		for ts in self._testsuites.values():
-			testsuite.AddTestsuite(ts.ToTestsuite())
-		for tc in self._testcases.values():
-			testsuite.AddTestcase(tc.ToTestcase())
+
+		testsuite._tests = self._tests
+		testsuite._excluded = self._excluded
+		testsuite._inconsistent = self._inconsistent
+		testsuite._skipped = self._skipped
+		testsuite._errored = self._errored
+		testsuite._weak = self._weak
+		testsuite._failed = self._failed
+		testsuite._passed = self._passed
 
 		return testsuite
 
@@ -1116,9 +1125,17 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 			self._status,
 			self._warningCount,
 			self._errorCount,
-			self._fatalCount
+			self._fatalCount,
+			testsuites=(ts.ToTestsuite() for ts in self._testsuites.values())
 		)
-		for ts in self._testsuites.values():
-			testsuiteSummary.AddTestsuite(ts.ToTestsuite())
+
+		testsuiteSummary._tests = self._tests
+		testsuiteSummary._excluded = self._excluded
+		testsuiteSummary._inconsistent = self._inconsistent
+		testsuiteSummary._skipped = self._skipped
+		testsuiteSummary._errored = self._errored
+		testsuiteSummary._weak = self._weak
+		testsuiteSummary._failed = self._failed
+		testsuiteSummary._passed = self._passed
 
 		return testsuiteSummary

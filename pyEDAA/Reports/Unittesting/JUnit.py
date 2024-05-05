@@ -220,7 +220,8 @@ class Testcase(BaseWithProperties):
 		return cls(
 			testcase._name,
 			duration=testcase._testDuration,
-			status= testcase._status
+			status= testcase._status,
+			assertionCount=testcase._assertionCount
 		)
 
 	def ToTestcase(self) -> ut_Testcase:
@@ -579,6 +580,12 @@ class Testsuite(TestsuiteBase):
 			duration=testsuite._totalDuration,
 			status= testsuite._status,
 		)
+
+		juTestsuite._tests = testsuite._tests
+		juTestsuite._skipped = testsuite._skipped
+		juTestsuite._errored = testsuite._errored
+		juTestsuite._failed = testsuite._failed
+		juTestsuite._passed = testsuite._passed
 
 		for tc in testsuite.IterateTestcases():
 			ts = tc._parent
