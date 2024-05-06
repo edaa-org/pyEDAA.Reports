@@ -83,8 +83,12 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				while suite is not result:
 					name = suite._name
 					suite = suite._parent
-					self.WriteDebug(f"    {name}")
-					del suite._testsuites[name]
+					if name in suite._testsuites:
+						self.WriteDebug(f"    delete '{name}'")
+						del suite._testsuites[name]
+					else:
+						self.WriteDebug(f"    skipping '{name}'")
+						break
 
 		self.WriteNormal(f"Writing merged unit test summaries to file ...")
 		mergedFile = Path.cwd() / Path("Unittesting.xml")
