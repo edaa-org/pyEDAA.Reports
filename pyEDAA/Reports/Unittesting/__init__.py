@@ -154,8 +154,8 @@ class IterationScheme(Flag):
 
 
 TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
-TestcaseAggregateReturnType = Tuple[int, int, int]
-TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int, int, int]
+TestcaseAggregateReturnType = Tuple[int, int, int, timedelta]
+TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int, int, int, timedelta]
 
 
 @export
@@ -165,6 +165,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 	_startTime:        datetime
 	_setupDuration:    Nullable[timedelta]
+	_testDuration:     Nullable[timedelta]
 	_teardownDuration: Nullable[timedelta]
 	_totalDuration:    Nullable[timedelta]
 
@@ -179,6 +180,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		name: str,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		warningCount: int = 0,
@@ -194,8 +196,45 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._parent = parent
 		self._name = name
 
+		if testDuration is not None:
+			if setupDuration is not None:
+				if teardownDuration is not None:
+					if totalDuration is not None:
+						if totalDuration < (setupDuration + testDuration + teardownDuration):
+							raise UnittestException(f"Parameter 'totalDuration' can not be less than the sum of setup, test and teardown durations.")
+					else:  # no total
+						totalDuration = setupDuration + testDuration + teardownDuration
+				# no teardown
+				elif totalDuration is not None:
+					if totalDuration < (setupDuration + testDuration):
+						raise UnittestException(f"Parameter 'totalDuration' can not be less than the sum of setup and test durations.")
+				# no teardown, no total
+				else:
+					totalDuration = setupDuration + testDuration
+			# no setup
+			elif teardownDuration is not None:
+				if totalDuration is not None:
+					if totalDuration < (testDuration + teardownDuration):
+						raise UnittestException(f"Parameter 'totalDuration' can not be less than the sum of test and teardown durations.")
+				else:  # no setup, no total
+					totalDuration = testDuration + teardownDuration
+			# no setup, no teardown
+			elif totalDuration is not None:
+				if totalDuration < testDuration:
+					raise UnittestException(f"Parameter 'totalDuration' can not be less than test durations.")
+			else:  # no setup, no teardown, no total
+				totalDuration = testDuration
+		# no test
+		elif totalDuration is not None:
+			testDuration = totalDuration
+			if setupDuration is not None:
+				testDuration -= setupDuration
+			if teardownDuration is not None:
+				testDuration -= teardownDuration
+
 		self._startTime = startTime
 		self._setupDuration = setupDuration
+		self._testDuration = testDuration
 		self._teardownDuration = teardownDuration
 		self._totalDuration = totalDuration
 
@@ -205,11 +244,10 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		self._dict = {}
 
+	# QUESTION: allow Parent as setter?
 	@readonly
 	def Parent(self) -> Nullable["Testsuite"]:
 		return self._parent
-
-	# QUESTION: allow Parent as setter?
 
 	@readonly
 	def Name(self) -> str:
@@ -222,6 +260,10 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def SetupDuration(self) -> timedelta:
 		return self._setupDuration
+
+	@readonly
+	def TestDuration(self) -> timedelta:
+		return self._testDuration
 
 	@readonly
 	def TeardownDuration(self) -> timedelta:
@@ -269,7 +311,6 @@ class Base(metaclass=ExtendedType, slots=True):
 @export
 class Testcase(Base):
 	_status:               TestcaseStatus
-	_testDuration:         Nullable[timedelta]
 	_assertionCount:       Nullable[int]
 	_failedAssertionCount: Nullable[int]
 	_passedAssertionCount: Nullable[int]
@@ -297,11 +338,9 @@ class Testcase(Base):
 
 			parent._testcases[name] = self
 
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		super().__init__(name, startTime, setupDuration, testDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
 
 		self._status = status
-		self._testDuration = testDuration
-		# if totalDuration is not None:
 
 		self._assertionCount = assertionCount
 		if assertionCount is not None:
@@ -337,10 +376,6 @@ class Testcase(Base):
 	@readonly
 	def Status(self) -> TestcaseStatus:
 		return self._status
-
-	@readonly
-	def TestDuration(self) -> timedelta:
-		return self._testDuration
 
 	@readonly
 	def AssertionCount(self) -> int:
@@ -396,13 +431,16 @@ class Testcase(Base):
 			# TODO: check for setup errors
 			# TODO: check for teardown errors
 
-		return self._warningCount, self._errorCount, self._fatalCount
+		totalDuration = timedelta() if self._totalDuration is None else self._totalDuration
+
+		return self._warningCount, self._errorCount, self._fatalCount, totalDuration
 
 	def __str__(self) -> str:
 		return (
 			f"<Testcase {self._name}: {self._status.name} -"
 			f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
-			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount}>"
+			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount} -"
+			f" setup/test/teardown:{self._setupDuration:.3f}/{self._testDuration:.3f}/{self._teardownDuration:.3f}>"
 		)
 
 
@@ -427,6 +465,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		kind: TestsuiteKind = TestsuiteKind.Logical,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
@@ -442,7 +481,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 			parent._testsuites[name] = self
 
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		super().__init__(name, startTime, setupDuration, testDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
 
 		self._kind = kind
 		self._status = status
@@ -559,12 +598,15 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		weak = 0
 		failed = 0
 		passed = 0
+
 		warningCount = 0
 		errorCount = 0
 		fatalCount = 0
 
+		totalDuration = timedelta()
+
 		for testsuite in self._testsuites.values():
-			t, i, ex, s, e, w, f, p, wc, ec, fc = testsuite.Aggregate()
+			t, i, ex, s, e, w, f, p, wc, ec, fc, td = testsuite.Aggregate()
 			tests += t
 			inconsistent += i
 			excluded += ex
@@ -573,11 +615,14 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			weak += w
 			failed += f
 			passed += p
+
 			warningCount += wc
 			errorCount += ec
 			fatalCount += fc
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
+			totalDuration += td
+
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
 
 	def AddTestsuite(self, testsuite: TestsuiteType) -> None:
 		if testsuite._parent is not None:
@@ -648,6 +693,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		kind: TestsuiteKind = TestsuiteKind.Logical,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
@@ -658,7 +704,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
-		super().__init__(name, kind, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, kind, startTime, setupDuration, testDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 		# self._testDuration = testDuration
 
@@ -700,15 +746,18 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration = super().Aggregate()
 
 		for testcase in self._testcases.values():
-			wc, ec, fc = testcase.Aggregate(strict)
+			wc, ec, fc, td = testcase.Aggregate(strict)
 
 			tests += 1
+
 			warningCount += wc
 			errorCount +=   ec
 			fatalCount +=   fc
+
+			totalDuration += td
 
 			status = testcase._status
 			if status is TestcaseStatus.Unknown:
@@ -740,9 +789,13 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		self._weak = weak
 		self._failed = failed
 		self._passed = passed
+
 		self._warningCount = warningCount
 		self._errorCount = errorCount
 		self._fatalCount = fatalCount
+
+		if self._totalDuration is None:
+			self._totalDuration = totalDuration
 
 		if errored > 0:
 			self._status = TestsuiteStatus.Errored
@@ -757,7 +810,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
@@ -796,6 +849,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		name: str,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
@@ -805,10 +859,10 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
-		super().__init__(name, TestsuiteKind.Root, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, TestsuiteKind.Root, startTime, setupDuration, testDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration = super().Aggregate()
 
 		self._tests = tests
 		self._inconsistent = inconsistent
@@ -818,9 +872,13 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		self._weak = weak
 		self._failed = failed
 		self._passed = passed
+
 		self._warningCount = warningCount
 		self._errorCount = errorCount
 		self._fatalCount = fatalCount
+
+		if self._totalDuration is None:
+			self._totalDuration = totalDuration
 
 		if errored > 0:
 			self._status = TestsuiteStatus.Errored
@@ -837,7 +895,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
@@ -970,10 +1028,11 @@ class MergedTestcase(Testcase, Merged):
 	def Aggregate(self, strict: bool = True) -> TestcaseAggregateReturnType:
 		firstMTC = self._mergedTestcases[0]
 
-		status =       firstMTC._status
-		warningCount = firstMTC._warningCount
-		errorCount =   firstMTC._errorCount
-		fatalCount =   firstMTC._fatalCount
+		status =        firstMTC._status
+		warningCount =  firstMTC._warningCount
+		errorCount =    firstMTC._errorCount
+		fatalCount =    firstMTC._fatalCount
+		totalDuration = firstMTC._totalDuration
 
 		for mtc in self._mergedTestcases[1:]:
 			status @=       mtc._status
@@ -983,7 +1042,7 @@ class MergedTestcase(Testcase, Merged):
 
 		self._status = status
 
-		return warningCount, errorCount, fatalCount
+		return warningCount, errorCount, fatalCount, totalDuration
 
 	def Merge(self, tc: Testcase) -> None:
 		self._mergedCount += 1
@@ -1028,7 +1087,7 @@ class MergedTestsuite(Testsuite, Merged):
 			testsuite._name,
 			testsuite._kind,
 			testsuite._startTime,
-			testsuite._setupDuration, testsuite._teardownDuration, testsuite._totalDuration,
+			testsuite._setupDuration, testsuite._testDuration, testsuite._teardownDuration, testsuite._totalDuration,
 			TestsuiteStatus.Unknown,
 			testsuite._warningCount, testsuite._errorCount, testsuite._fatalCount,
 			parent
@@ -1068,6 +1127,7 @@ class MergedTestsuite(Testsuite, Merged):
 			self._kind,
 			self._startTime,
 			self._setupDuration,
+			self._testDuration,
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
@@ -1120,6 +1180,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 			self._name,
 			self._startTime,
 			self._setupDuration,
+			self._testDuration,
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
