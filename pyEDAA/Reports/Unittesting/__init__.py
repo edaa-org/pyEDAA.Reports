@@ -154,8 +154,8 @@ class IterationScheme(Flag):
 
 
 TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
-TestcaseAggregateReturnType = Tuple[int, int, int]
-TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int, int, int]
+TestcaseAggregateReturnType = Tuple[int, int, int, timedelta]
+TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int, int, int, timedelta]
 
 
 @export
@@ -431,7 +431,9 @@ class Testcase(Base):
 			# TODO: check for setup errors
 			# TODO: check for teardown errors
 
-		return self._warningCount, self._errorCount, self._fatalCount
+		totalDuration = timedelta() if self._totalDuration is None else self._totalDuration
+
+		return self._warningCount, self._errorCount, self._fatalCount, totalDuration
 
 	def __str__(self) -> str:
 		return (
@@ -596,12 +598,15 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		weak = 0
 		failed = 0
 		passed = 0
+
 		warningCount = 0
 		errorCount = 0
 		fatalCount = 0
 
+		totalDuration = timedelta()
+
 		for testsuite in self._testsuites.values():
-			t, i, ex, s, e, w, f, p, wc, ec, fc = testsuite.Aggregate()
+			t, i, ex, s, e, w, f, p, wc, ec, fc, td = testsuite.Aggregate()
 			tests += t
 			inconsistent += i
 			excluded += ex
@@ -610,11 +615,14 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			weak += w
 			failed += f
 			passed += p
+
 			warningCount += wc
 			errorCount += ec
 			fatalCount += fc
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
+			totalDuration += td
+
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
 
 	def AddTestsuite(self, testsuite: TestsuiteType) -> None:
 		if testsuite._parent is not None:
@@ -738,15 +746,18 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration = super().Aggregate()
 
 		for testcase in self._testcases.values():
-			wc, ec, fc = testcase.Aggregate(strict)
+			wc, ec, fc, td = testcase.Aggregate(strict)
 
 			tests += 1
+
 			warningCount += wc
 			errorCount +=   ec
 			fatalCount +=   fc
+
+			totalDuration += td
 
 			status = testcase._status
 			if status is TestcaseStatus.Unknown:
@@ -778,9 +789,13 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		self._weak = weak
 		self._failed = failed
 		self._passed = passed
+
 		self._warningCount = warningCount
 		self._errorCount = errorCount
 		self._fatalCount = fatalCount
+
+		if self._totalDuration is None:
+			self._totalDuration = totalDuration
 
 		if errored > 0:
 			self._status = TestsuiteStatus.Errored
@@ -795,7 +810,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
@@ -847,7 +862,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		super().__init__(name, TestsuiteKind.Root, startTime, setupDuration, testDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration = super().Aggregate()
 
 		self._tests = tests
 		self._inconsistent = inconsistent
@@ -857,9 +872,13 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		self._weak = weak
 		self._failed = failed
 		self._passed = passed
+
 		self._warningCount = warningCount
 		self._errorCount = errorCount
 		self._fatalCount = fatalCount
+
+		if self._totalDuration is None:
+			self._totalDuration = totalDuration
 
 		if errored > 0:
 			self._status = TestsuiteStatus.Errored
@@ -876,7 +895,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
@@ -1009,10 +1028,11 @@ class MergedTestcase(Testcase, Merged):
 	def Aggregate(self, strict: bool = True) -> TestcaseAggregateReturnType:
 		firstMTC = self._mergedTestcases[0]
 
-		status =       firstMTC._status
-		warningCount = firstMTC._warningCount
-		errorCount =   firstMTC._errorCount
-		fatalCount =   firstMTC._fatalCount
+		status =        firstMTC._status
+		warningCount =  firstMTC._warningCount
+		errorCount =    firstMTC._errorCount
+		fatalCount =    firstMTC._fatalCount
+		totalDuration = firstMTC._totalDuration
 
 		for mtc in self._mergedTestcases[1:]:
 			status @=       mtc._status
@@ -1022,7 +1042,7 @@ class MergedTestcase(Testcase, Merged):
 
 		self._status = status
 
-		return warningCount, errorCount, fatalCount
+		return warningCount, errorCount, fatalCount, totalDuration
 
 	def Merge(self, tc: Testcase) -> None:
 		self._mergedCount += 1
