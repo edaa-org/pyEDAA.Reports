@@ -165,6 +165,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 	_startTime:        datetime
 	_setupDuration:    Nullable[timedelta]
+	_testDuration:     Nullable[timedelta]
 	_teardownDuration: Nullable[timedelta]
 	_totalDuration:    Nullable[timedelta]
 
@@ -179,6 +180,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		name: str,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		warningCount: int = 0,
@@ -194,8 +196,45 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._parent = parent
 		self._name = name
 
+		if testDuration is not None:
+			if setupDuration is not None:
+				if teardownDuration is not None:
+					if totalDuration is not None:
+						if totalDuration < (setupDuration + testDuration + teardownDuration):
+							raise UnittestException(f"Parameter 'totalDuration' can not be less than the sum of setup, test and teardown durations.")
+					else:  # no total
+						totalDuration = setupDuration + testDuration + teardownDuration
+				# no teardown
+				elif totalDuration is not None:
+					if totalDuration < (setupDuration + testDuration):
+						raise UnittestException(f"Parameter 'totalDuration' can not be less than the sum of setup and test durations.")
+				# no teardown, no total
+				else:
+					totalDuration = setupDuration + testDuration
+			# no setup
+			elif teardownDuration is not None:
+				if totalDuration is not None:
+					if totalDuration < (testDuration + teardownDuration):
+						raise UnittestException(f"Parameter 'totalDuration' can not be less than the sum of test and teardown durations.")
+				else:  # no setup, no total
+					totalDuration = testDuration + teardownDuration
+			# no setup, no teardown
+			elif totalDuration is not None:
+				if totalDuration < testDuration:
+					raise UnittestException(f"Parameter 'totalDuration' can not be less than test durations.")
+			else:  # no setup, no teardown, no total
+				totalDuration = testDuration
+		# no test
+		elif totalDuration is not None:
+			testDuration = totalDuration
+			if setupDuration is not None:
+				testDuration -= setupDuration
+			if teardownDuration is not None:
+				testDuration -= teardownDuration
+
 		self._startTime = startTime
 		self._setupDuration = setupDuration
+		self._testDuration = testDuration
 		self._teardownDuration = teardownDuration
 		self._totalDuration = totalDuration
 
@@ -205,11 +244,10 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		self._dict = {}
 
+	# QUESTION: allow Parent as setter?
 	@readonly
 	def Parent(self) -> Nullable["Testsuite"]:
 		return self._parent
-
-	# QUESTION: allow Parent as setter?
 
 	@readonly
 	def Name(self) -> str:
@@ -222,6 +260,10 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def SetupDuration(self) -> timedelta:
 		return self._setupDuration
+
+	@readonly
+	def TestDuration(self) -> timedelta:
+		return self._testDuration
 
 	@readonly
 	def TeardownDuration(self) -> timedelta:
@@ -269,7 +311,6 @@ class Base(metaclass=ExtendedType, slots=True):
 @export
 class Testcase(Base):
 	_status:               TestcaseStatus
-	_testDuration:         Nullable[timedelta]
 	_assertionCount:       Nullable[int]
 	_failedAssertionCount: Nullable[int]
 	_passedAssertionCount: Nullable[int]
@@ -297,11 +338,9 @@ class Testcase(Base):
 
 			parent._testcases[name] = self
 
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		super().__init__(name, startTime, setupDuration, testDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
 
 		self._status = status
-		self._testDuration = testDuration
-		# if totalDuration is not None:
 
 		self._assertionCount = assertionCount
 		if assertionCount is not None:
@@ -337,10 +376,6 @@ class Testcase(Base):
 	@readonly
 	def Status(self) -> TestcaseStatus:
 		return self._status
-
-	@readonly
-	def TestDuration(self) -> timedelta:
-		return self._testDuration
 
 	@readonly
 	def AssertionCount(self) -> int:
@@ -402,7 +437,8 @@ class Testcase(Base):
 		return (
 			f"<Testcase {self._name}: {self._status.name} -"
 			f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
-			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount}>"
+			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount} -"
+			f" setup/test/teardown:{self._setupDuration:.3f}/{self._testDuration:.3f}/{self._teardownDuration:.3f}>"
 		)
 
 
@@ -427,6 +463,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		kind: TestsuiteKind = TestsuiteKind.Logical,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
@@ -442,7 +479,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 			parent._testsuites[name] = self
 
-		super().__init__(name, startTime, setupDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		super().__init__(name, startTime, setupDuration, testDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
 
 		self._kind = kind
 		self._status = status
@@ -648,6 +685,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		kind: TestsuiteKind = TestsuiteKind.Logical,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
@@ -658,7 +696,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
-		super().__init__(name, kind, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, kind, startTime, setupDuration, testDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 		# self._testDuration = testDuration
 
@@ -796,6 +834,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		name: str,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
+		testDuration: Nullable[timedelta] = None,
 		teardownDuration: Nullable[timedelta] = None,
 		totalDuration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
@@ -805,7 +844,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
-		super().__init__(name, TestsuiteKind.Root, startTime, setupDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
+		super().__init__(name, TestsuiteKind.Root, startTime, setupDuration, testDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
 		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount = super().Aggregate()
@@ -1028,7 +1067,7 @@ class MergedTestsuite(Testsuite, Merged):
 			testsuite._name,
 			testsuite._kind,
 			testsuite._startTime,
-			testsuite._setupDuration, testsuite._teardownDuration, testsuite._totalDuration,
+			testsuite._setupDuration, testsuite._testDuration, testsuite._teardownDuration, testsuite._totalDuration,
 			TestsuiteStatus.Unknown,
 			testsuite._warningCount, testsuite._errorCount, testsuite._fatalCount,
 			parent
@@ -1068,6 +1107,7 @@ class MergedTestsuite(Testsuite, Merged):
 			self._kind,
 			self._startTime,
 			self._setupDuration,
+			self._testDuration,
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
@@ -1120,6 +1160,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 			self._name,
 			self._startTime,
 			self._setupDuration,
+			self._testDuration,
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
