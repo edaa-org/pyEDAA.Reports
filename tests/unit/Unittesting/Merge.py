@@ -60,10 +60,10 @@ class PyTooling(ut_TestCase):
 
 		directory = Path("tests/data/JUnit/pytest.pyTooling")
 		print(f"Reading platform testing summary files from '{directory}' ...")
-		files = directory.glob("PlatformTesting-*.xml")
+		files = directory.glob("Platform-UnitTestReportSummary-XML-*.xml")
 		startParsing = perf_counter_ns()
 		for file in files:
-			# print(f"  Parsing {file}")
+			print(f"  Parsing {file}")
 			junitDocument = Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName)
 			junitDocuments.append(junitDocument)
 
@@ -74,7 +74,7 @@ class PyTooling(ut_TestCase):
 		startMerging = perf_counter_ns()
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
-			# print(f"  merging {summary.Path}")
+			print(f"  merging {summary.Path}")
 			merged.Merge(summary.ToTestsuiteSummary())
 
 		endMerging = perf_counter_ns()
@@ -141,10 +141,10 @@ class PyTooling(ut_TestCase):
 
 		directory = Path("tests/data/JUnit/pytest.pyTooling")
 		print(f"Reading platform testing summary files from '{directory}' ...")
-		files = directory.glob("Unittesting-*.xml")
+		files = directory.glob("pyTooling-UnitTestReportSummary-XML-*.xml")
 		startParsing = perf_counter_ns()
 		for file in files:
-			# print(f"  Parsing {file}")
+			print(f"  Parsing {file}")
 			junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
@@ -153,7 +153,7 @@ class PyTooling(ut_TestCase):
 		startMerging = perf_counter_ns()
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
-			# print(f"  merging {summary.Path}")
+			print(f"  merging {summary.Path}")
 			merged.Merge(summary.ToTestsuiteSummary())
 		endMerging = perf_counter_ns()
 		mergingDuration = (endMerging - startMerging) / 1e9
