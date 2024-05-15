@@ -31,6 +31,35 @@ jobs:
           name: Java-Ant-JUnit4
           path: examples/Java/JUnit/build/*.xml
 
+  Cpp-GoogleTest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏬ Checkout repository
+        uses: actions/checkout@v4
+      - name: ⏬ Checkout 'google/googletest' repository
+        uses: actions/checkout@v4
+        with:
+          repository: google/googletest
+          path: examples/Cpp/GoogleTest/lib/googletest
+      - name: 🛠 Run CMake
+        run: |
+          cd examples/Cpp/GoogleTest
+          cmake -B build
+          cmake --build build
+      - name: ✅ Run unit tests
+        run: |
+          cd examples/Cpp/GoogleTest/build
+          ./runUnitTests
+      - name: List generated XML reports
+        run: |
+          ls -lAh examples/Cpp/GoogleTest/build/*.xml
+          update-alternatives --config gcc
+      - name: 📤 Upload JUnit XML files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cpp-GoogleTest
+          path: examples/Cpp/GoogleTest/build/*.xml
+
   Python-pytest:
     runs-on: ubuntu-latest
     steps:
@@ -58,7 +87,8 @@ jobs:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@r1
     with:
       name: pyEDAA.Reports
-      python_version_list: "3.9 3.10 3.11 3.12 pypy-3.9 pypy-3.10"
+      python_version_list: "3.12"
+#      python_version_list: "3.9 3.10 3.11 3.12 pypy-3.9 pypy-3.10"
 #      disable_list: "windows:pypy-3.8 windows:pypy-3.9 windows:pypy-3.10"
 
   UnitTesting:
@@ -106,6 +136,7 @@ jobs:
     needs:
       - Package
       - Java-Ant-JUnit4
+      - Cpp-GoogleTest
       - Python-pytest
     runs-on: ubuntu-latest
     steps:
