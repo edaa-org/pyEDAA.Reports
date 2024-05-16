@@ -44,12 +44,13 @@ jobs:
       - name: 🛠 Run CMake
         run: |
           cd examples/Cpp/GoogleTest
-          cmake -B build
+          cmake -B build -G Ninja
           cmake --build build
       - name: ✅ Run unit tests
         run: |
-          cd examples/Cpp/GoogleTest/build
-          ./runUnitTests
+          cd examples/Cpp/GoogleTest
+          ctest --test-dir build/ --output-junit ../ctest.xml
+          ./build/unit_tests --gtest_output=xml:gtest.xml
       - name: List generated XML reports
         run: |
           ls -lAh examples/Cpp/GoogleTest/build/*.xml

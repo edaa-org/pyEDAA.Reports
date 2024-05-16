@@ -10,23 +10,26 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_FLAGS "-g -Wall")
 set(CMAKE_CXX_STANDARD 20)
 
-include_directories(${PROJECT_SOURCE_DIR}/src)
-file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.[ch]pp)
+
+add_library(app STATIC ${SRC_FILES})
+target_include_directories(app PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
 # GoogleTest
 add_subdirectory(./lib/googletest)
-enable_testing()
-#
-# Include the gtest library. gtest_SOURCE_DIR is available due to
-# 'project(gtest)' above.
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 ########################################
 # Test files
 ########################################
-file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
+file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.[ch]pp)
 
 ########################################
 # Unit Tests
 ########################################
-add_executable(runUnitTests ${TEST_SRC_FILES})
+add_executable(unit_tests ${TEST_SRC_FILES})
+target_link_libraries(unit_tests app gtest_main)
+
+
+enable_testing()
+include(GoogleTest)
+gtest_discover_tests(unit_tests)

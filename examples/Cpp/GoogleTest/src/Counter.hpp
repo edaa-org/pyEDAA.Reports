@@ -6,7 +6,7 @@ class Counter {
 		int _value;
 
 	public:
-		Counter() : _value(0) {}
+		Counter(int value = 0) : _value { value } {}
 
 		int Value();
 		int Increment();
