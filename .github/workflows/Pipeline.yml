@@ -31,6 +31,40 @@ jobs:
           name: Java-Ant-JUnit4
           path: examples/Java/JUnit/build/*.xml
 
+  Cpp-GoogleTest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏬ Checkout repository
+        uses: actions/checkout@v4
+      - name: ⏬ Checkout 'google/googletest' repository
+        uses: actions/checkout@v4
+        with:
+          repository: google/googletest
+          path: examples/Cpp/GoogleTest/lib/googletest
+      - name: 🔧 Install dependencies
+        run: sudo apt-get install -y --no-install-recommends ninja-build
+      - name: 🛠 Run CMake
+        run: |
+          cd examples/Cpp/GoogleTest
+          cmake -B build -G Ninja
+          cmake --build build
+      - name: ✅ Run unit tests (directly)
+        run: |
+          cd examples/Cpp/GoogleTest
+          ./build/unit_tests --gtest_output=xml:gtest.xml
+      - name: ✅ Run unit tests (by ctest)
+        run: |
+          cd examples/Cpp/GoogleTest
+          ctest --test-dir build/ --output-junit ../ctest.xml
+      - name: List generated XML reports
+        run: |
+          ls -lAh examples/Cpp/GoogleTest/*.xml
+      - name: 📤 Upload JUnit XML files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cpp-GoogleTest
+          path: examples/Cpp/GoogleTest/*.xml
+
   Python-pytest:
     runs-on: ubuntu-latest
     steps:
@@ -106,6 +140,7 @@ jobs:
     needs:
       - Package
       - Java-Ant-JUnit4
+      - Cpp-GoogleTest
       - Python-pytest
     runs-on: ubuntu-latest
     steps:
