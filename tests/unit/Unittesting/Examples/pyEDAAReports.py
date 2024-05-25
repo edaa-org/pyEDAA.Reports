@@ -33,10 +33,10 @@ from pathlib      import Path
 from unittest     import TestCase
 
 # FIXME: change to generic JUnit
-from pyEDAA.Reports.Unittesting.AntJUnit        import Document as JUnit4Document
-from pyEDAA.Reports.Unittesting.CTestJUnit      import Document as CTestDocument
-from pyEDAA.Reports.Unittesting.GoogleTestJUnit import Document as GTestDocument
-from pyEDAA.Reports.Unittesting.PyTestJUnit     import Document as PyTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.AntJUnit        import Document as JUnit4Document
+from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestDocument
 
 
 if __name__ == "__main__": # pragma: no cover

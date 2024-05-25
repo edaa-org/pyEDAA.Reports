@@ -32,8 +32,8 @@
 from pathlib      import Path
 from unittest     import TestCase
 
-from pyEDAA.Reports.Unittesting.GenericJUnit import Document as JUnitDocument
-from pyEDAA.Reports.Unittesting.OSVVM        import OsvvmYamlDocument
+from pyEDAA.Reports.Unittesting.JUnit import Document as JUnitDocument
+from pyEDAA.Reports.Unittesting.OSVVM import OsvvmYamlDocument
 
 
 if __name__ == "__main__": # pragma: no cover

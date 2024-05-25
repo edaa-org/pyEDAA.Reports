@@ -84,7 +84,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteError(f"Syntax error: '{task}'")
 
 	def _mergeAntJUnit(self, testsuiteSummary: MergedTestsuiteSummary, globPattern: str) -> None:
-		from pyEDAA.Reports.Unittesting.AntJUnit import Document, JUnitReaderMode
+		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document, JUnitReaderMode
 
 		foundFiles = [f for f in Path.cwd().glob(globPattern)]
 		self.WriteNormal(f"Reading {len(foundFiles)} Ant-JUnit unit test summary files ...")
@@ -100,7 +100,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
 	def _mergeCTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, globPattern: str) -> None:
-		from pyEDAA.Reports.Unittesting.CTestJUnit import Document, JUnitReaderMode
+		from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document, JUnitReaderMode
 
 		foundFiles = [f for f in Path.cwd().glob(globPattern)]
 		self.WriteNormal(f"Reading {len(foundFiles)} CTest-JUnit unit test summary files ...")
@@ -116,7 +116,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
 	def _mergeGoogleTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, globPattern: str) -> None:
-		from pyEDAA.Reports.Unittesting.GoogleTestJUnit import Document, JUnitReaderMode
+		from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document, JUnitReaderMode
 
 		foundFiles = [f for f in Path.cwd().glob(globPattern)]
 		self.WriteNormal(f"Reading {len(foundFiles)} GoogleTest-JUnit unit test summary files ...")
@@ -132,7 +132,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
 	def _mergePyTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, globPattern: str) -> None:
-		from pyEDAA.Reports.Unittesting.PyTestJUnit import Document, JUnitReaderMode
+		from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document, JUnitReaderMode
 
 		foundFiles = [f for f in Path.cwd().glob(globPattern)]
 		if len(foundFiles) == 0:
@@ -238,7 +238,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteError(f"Syntax error: '{task}'")
 
 	def _outputAntJUnit(self, testsuiteSummary: TestsuiteSummary, file: Path):
-		from pyEDAA.Reports.Unittesting.AntJUnit import Document, UnittestException
+		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document, UnittestException
 
 		self.WriteNormal(f"Writing merged unit test summaries to file ...")
 		self.WriteVerbose(f"  Common Data Model -> OUT (JUnit):      {file}")

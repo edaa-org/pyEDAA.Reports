@@ -32,7 +32,7 @@
 from pathlib      import Path
 from unittest     import TestCase
 
-from pyEDAA.Reports.Unittesting.PyTestJUnit     import Document as PyTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document as PyTestDocument
 
 
 if __name__ == "__main__": # pragma: no cover

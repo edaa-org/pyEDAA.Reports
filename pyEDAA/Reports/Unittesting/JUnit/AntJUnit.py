@@ -53,26 +53,6 @@ from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut
 
 
 @export
-class JUnitException:
-	pass
-
-
-@export
-class UnittestException(UnittestException, JUnitException):
-	pass
-
-
-@export
-class DuplicateTestsuiteException(DuplicateTestsuiteException, JUnitException):
-	pass
-
-
-@export
-class DuplicateTestcaseException(DuplicateTestcaseException, JUnitException):
-	pass
-
-
-@export
 class JUnitReaderMode(Flag):
 	Default = 0
 	DecoupleTestsuiteHierarchyAndTestcaseClassName = 1
@@ -814,7 +794,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		startAnalysis = perf_counter_ns()
 		try:
-			xmlSchemaFile = getResourceFile(resources, "../resources/CTest-JUnit.xsd")
+			xmlSchemaFile = getResourceFile(resources, "../resources/Ant-JUnit.xsd")
 			schemaParser = XMLParser(ns_clean=True)
 			schemaRoot = parse(xmlSchemaFile, schemaParser)
 
