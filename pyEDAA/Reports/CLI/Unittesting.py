@@ -13,7 +13,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 	@CommandHandler("unittest", help="Merge unit testing results.", description="Merge unit testing results.")
 	@LongValuedFlag("--name", dest="name", metaName='Name', help="Top-level unit testing summary name.")
 	@LongValuedFlag("--merge", dest="merge", metaName='format:JUnit File', help="Unit testing summary file (XML).")
-	@LongValuedFlag("--pytest", dest="pytest", metaName='Package', help="Remove pytest overhead.")
+	@LongValuedFlag("--pytest", dest="pytest", metaName='cleanup;cleanup', help="Remove pytest overhead.")
 	@LongValuedFlag("--render", dest="render", metaName='format', help="Render unit testing results to <format>.")
 	@LongValuedFlag("--output", dest="output", metaName='format:JUnit File', help="Processed unit testing summary file (XML).")
 	def HandleUnittest(self, args: Namespace) -> None:
@@ -42,7 +42,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		result = merged.ToTestsuiteSummary()
 
 		if args.pytest is not None:
-			self._processingPyTest(result, args.pytest)
+			self._processPyTest(result, args.pytest)
 
 		if args.output is not None:
 			outputs = (args.output, )
@@ -51,7 +51,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 		if args.render is not None and self.Verbose:
 			self.WriteVerbose("*" * self.Width)
-			
+
 			if args.render == "tree":
 				tree = result.ToTree()
 				self.WriteVerbose(tree.Render(), appendLinebreak=False)
@@ -151,46 +151,67 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  merging {summary.Path}")
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
-	def _processingPyTest(self, testsuiteSummary: TestsuiteSummary, paths: str) -> None:
+	def _processPyTest(self, testsuiteSummary: TestsuiteSummary, cleanups: str) -> None:
 		self.WriteNormal(f"Simplifying unit testing reports created by pytest ...")
 
-		cleanups = []
-		for path in paths.split(";"):
-			suite = testsuiteSummary
-			message = f"  Walking: {suite._name}"
-			for element in path.split("."):
-				if element in suite._testsuites:
-					suite = suite._testsuites[element]
-					message += f" -> {suite._name}"
+		for cleanup in (x.lower() for x in cleanups.split(";")):
+			y = cleanup.split(":")
+			if (l := len(y)) == 1:
+				if cleanup == "rewrite-dunder-init":
+					self._processPyTest_RewiteDunderInit(testsuiteSummary)
 				else:
-					self.WriteVerbose(f"  Skipping: {path}")
-					suite = None
-					break
+					self.WriteError(f"Unsupported cleanup action for pytest: '{cleanup}'")
+			elif l >= 2:
+				if y[0] == "reduce-depth":
+					for path in y[1:]:
+						self._processPyTest_ReduceDepth(testsuiteSummary, path)
+				else:
+					self.WriteError(f"Unsupported cleanup action for pytest: '{y[0]}'")
+			else:
+				self.WriteError(f"Syntax error: '{cleanup}'")
 
-			if suite is None:
-				continue
+	def _processPyTest_RewiteDunderInit(self, testsuiteSummary: TestsuiteSummary):
+		self.WriteVerbose(f"  Rewriting '__init__' in classnames to actual Python package names")
+		self.WriteError("Rewrite __init__ not yet supported!")
 
-			self.WriteVerbose(message)
-			cleanups.append(suite)
+	def _processPyTest_ReduceDepth(self, testsuiteSummary: TestsuiteSummary, path: str):
+		self.WriteVerbose(f"  Reducing path depth of testsuite '{path}'")
+		cleanups = []
+		suite = testsuiteSummary
+		message = f"    Walking: {suite._name}"
+		for element in path.split("."):
+			if element in suite._testsuites:
+				suite = suite._testsuites[element]
+				message += f" -> {suite._name}"
+			else:
+				self.WriteDebug(f"    Skipping: {path}")
+				suite = None
+				break
 
-			self.WriteVerbose(f"  Moving testsuites ...")
-			for ts in suite._testsuites.values():
-				self.WriteDebug(f"    {ts._name} -> {testsuiteSummary._name}")
-				ts._parent = None
-				ts._kind = TestsuiteKind.Logical
-				testsuiteSummary.AddTestsuite(ts)
+		if suite is None:
+			return
 
-		self.WriteVerbose(f"  Deleting empty testsuites ...")
+		self.WriteDebug(message)
+		cleanups.append(suite)
+
+		self.WriteDebug(f"    Moving testsuites ...")
+		for ts in suite._testsuites.values():
+			self.WriteDebug(f"      {ts._name} -> {testsuiteSummary._name}")
+			ts._parent = None
+			ts._kind = TestsuiteKind.Logical
+			testsuiteSummary.AddTestsuite(ts)
+
+		self.WriteDebug(f"    Deleting empty testsuites ...")
 		for clean in cleanups:
 			suite = clean
 			while suite is not testsuiteSummary:
 				name = suite._name
 				suite = suite._parent
 				if name in suite._testsuites:
-					self.WriteDebug(f"    delete '{name}'")
+					self.WriteDebug(f"      delete '{name}'")
 					del suite._testsuites[name]
 				else:
-					self.WriteDebug(f"    skipping '{name}'")
+					self.WriteDebug(f"      skipping '{name}'")
 					break
 
 	def _output(self, testsuiteSummary: TestsuiteSummary, task: str):
