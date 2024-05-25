@@ -49,6 +49,15 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			for output in outputs:
 				self._output(result, output)
 
+		if args.render is not None and self.Verbose:
+			self.WriteVerbose("*" * self.Width)
+			
+			if args.render == "tree":
+				tree = result.ToTree()
+				self.WriteVerbose(tree.Render(), appendLinebreak=False)
+
+			self.WriteVerbose("*" * self.Width)
+
 		self.ExitOnPreviousErrors()
 
 	def _merge(self, testsuiteSummary: MergedTestsuiteSummary, task: str) -> None:
