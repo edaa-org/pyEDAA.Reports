@@ -33,8 +33,8 @@ from time     import perf_counter_ns
 from typing   import List
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting          import MergedTestsuiteSummary, IterationScheme, TestcaseStatus
-from pyEDAA.Reports.Unittesting.AntJUnit import Document, JUnitReaderMode
+from pyEDAA.Reports.Unittesting              import MergedTestsuiteSummary, IterationScheme, TestcaseStatus
+from pyEDAA.Reports.Unittesting.GenericJUnit import Document, JUnitReaderMode
 
 
 class PyTooling(ut_TestCase):
@@ -58,7 +58,7 @@ class PyTooling(ut_TestCase):
 
 		junitDocuments: List[Document] = []
 
-		directory = Path("tests/data/JUnit/pytest.pyTooling")
+		directory = Path("tests/data/JUnit/pyTooling")
 		print(f"Reading platform testing summary files from '{directory}' ...")
 		files = directory.glob("Platform-UnitTestReportSummary-XML-*.xml")
 		startParsing = perf_counter_ns()
@@ -139,7 +139,7 @@ class PyTooling(ut_TestCase):
 
 		junitDocuments: List[Document] = []
 
-		directory = Path("tests/data/JUnit/pytest.pyTooling")
+		directory = Path("tests/data/JUnit/pyTooling")
 		print(f"Reading platform testing summary files from '{directory}' ...")
 		files = directory.glob("pyTooling-UnitTestReportSummary-XML-*.xml")
 		startParsing = perf_counter_ns()

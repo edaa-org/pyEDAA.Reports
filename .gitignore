@@ -14,6 +14,10 @@ coverage.xml
 # pytest
 /report/unit
 
+# generated data from tests
+/tests/data/JUnit/.gitignore
+/tests/output/
+
 # setuptools
 /build/**/*.*
 /dist/**/*.*
