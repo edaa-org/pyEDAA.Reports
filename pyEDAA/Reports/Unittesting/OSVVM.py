@@ -54,7 +54,7 @@ class UnittestException(UnittestException, OsvvmException):
 
 
 @export
-class TestsuiteSummary(ut_TestsuiteSummary):
+class Testcase(ut_Testcase):
 	pass
 
 
@@ -64,7 +64,7 @@ class Testsuite(ut_Testsuite):
 
 
 @export
-class Testcase(ut_Testcase):
+class TestsuiteSummary(ut_TestsuiteSummary):
 	pass
 
 

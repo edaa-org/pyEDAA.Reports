@@ -72,7 +72,7 @@
 			</xsd:element>
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string" use="required" />
-		<xsd:attribute name="classname" type="xsd:string" use="optional" />
+		<xsd:attribute name="classname" type="xsd:string" use="required" />
 		<xsd:attribute name="time" type="xsd:float" use="optional" />
 		<xsd:attribute name="assertions" type="xsd:nonNegativeInteger" use="optional" />
 		<xsd:attribute name="file" type="xsd:string" use="optional" />
@@ -86,11 +86,6 @@
 					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-<!--			<xsd:element name="testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded">-->
-<!--				<xsd:annotation>-->
-<!--					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>-->
-<!--				</xsd:annotation>-->
-<!--			</xsd:element>-->
 			<xsd:element name="testcase" type="testcase" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>

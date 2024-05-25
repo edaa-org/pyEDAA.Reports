@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xsd:schema
+	version="0.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">Reversed engineered schema description for JUnit-like unit test summary files.</xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:simpleType name="preservingstring">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="preserve"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="literalblock">
+		<xsd:simpleContent>
+			<xsd:extension base="preservingstring">
+				<xsd:attribute name="type" type="xsd:string" />
+				<xsd:attribute name="message" type="xsd:string" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:simpleType name="testcaseStatus">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="run"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="testcaseResult">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="completed"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="testcase">
+		<xsd:sequence minOccurs="0">
+			<xsd:choice minOccurs="0">
+				<xsd:element name="skipped" type="literalblock" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en"></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="error" type="literalblock" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en"></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="failure" type="literalblock" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en"></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:choice>
+			<xsd:element name="system-out" type="literalblock" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="system-err" type="literalblock" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="classname" type="xsd:string" use="required" />
+		<xsd:attribute name="time" type="xsd:float" use="required" />
+		<xsd:attribute name="timestamp" type="xsd:dateTime" use="required" />
+		<xsd:attribute name="file" type="xsd:string" use="required" />
+		<xsd:attribute name="line" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="status" type="testcaseStatus" use="required" />
+		<xsd:attribute name="result" type="testcaseResult" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuite">
+		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="testcase" type="testcase" minOccurs="0" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="system-out" type="literalblock" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="system-err" type="literalblock" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en"></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="errors" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="failures" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="disabled" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="skipped" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="tests" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="time" type="xsd:float" use="required" />
+		<xsd:attribute name="timestamp" type="xsd:dateTime" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuites">
+		<xsd:sequence>
+			<xsd:element name="testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Describes the aggregated results of multiple testcase.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="errors" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="failures" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="disabled" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="tests" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="time" type="xsd:float" use="required" />
+		<xsd:attribute name="timestamp" type="xsd:dateTime" use="required" />
+	</xsd:complexType>
+
+	<xsd:element name="testsuites" type="testsuites">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Describes the overall result of all testcases in all testsuites.</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+</xsd:schema>

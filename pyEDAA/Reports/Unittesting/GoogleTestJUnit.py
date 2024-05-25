@@ -814,8 +814,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		startAnalysis = perf_counter_ns()
 		try:
-			# xmlSchemaFile = getResourceFile(resources, "JUnit.xsd")
-			xmlSchemaFile = getResourceFile(resources, "Unittesting.xsd")
+			xmlSchemaFile = getResourceFile(resources, "../resources/GoogleTest-JUnit.xsd")
 			schemaParser = XMLParser(ns_clean=True)
 			schemaRoot = parse(xmlSchemaFile, schemaParser)
 
