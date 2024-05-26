@@ -33,8 +33,9 @@ from time     import perf_counter_ns
 from typing   import List
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting       import MergedTestsuiteSummary, IterationScheme, TestcaseStatus
-from pyEDAA.Reports.Unittesting.JUnit import Document, JUnitReaderMode
+from pyEDAA.Reports.Unittesting                   import MergedTestsuiteSummary, IterationScheme, TestcaseStatus
+from pyEDAA.Reports.Unittesting.JUnit             import JUnitReaderMode
+from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
 
 class PyTooling(ut_TestCase):

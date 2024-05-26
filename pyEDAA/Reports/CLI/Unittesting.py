@@ -6,7 +6,8 @@ from pyTooling.Attributes.ArgParse import CommandHandler
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
 from pyTooling.MetaClasses import ExtendedType
 
-from pyEDAA.Reports.Unittesting          import TestsuiteKind, TestsuiteSummary, MergedTestsuiteSummary
+from pyEDAA.Reports.Unittesting       import TestsuiteKind, TestsuiteSummary, MergedTestsuiteSummary, UnittestException
+from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode
 
 
 class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
@@ -132,7 +133,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
 	def _mergePyTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, globPattern: str) -> None:
-		from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document, JUnitReaderMode
+		from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
 		foundFiles = [f for f in Path.cwd().glob(globPattern)]
 		if len(foundFiles) == 0:
@@ -144,7 +145,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		junitDocuments: List[Document] = []
 		for file in foundFiles:
 			self.WriteVerbose(f"  reading {file}")
-			junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			try:
+				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			except UnittestException as ex:
+				self.PrintException(ex)
 
 		self.WriteNormal(f"Merging unit test summary files into a single data model ...")
 		for summary in junitDocuments:

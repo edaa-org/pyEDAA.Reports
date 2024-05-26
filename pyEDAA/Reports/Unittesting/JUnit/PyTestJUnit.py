@@ -36,26 +36,19 @@ from datetime        import datetime, timedelta
 from enum            import Flag
 from pathlib         import Path
 from time            import perf_counter_ns
-from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar
+from typing import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
-from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element, _Comment
-from lxml.etree                 import ElementTree, Element, SubElement, tostring
+from lxml.etree                 import ElementTree, Element, SubElement, tostring, _Element
 from pyTooling.Decorators       import export, readonly
 from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmethod
 from pyTooling.Tree             import Node
 
-from pyEDAA.Reports             import resources, getResourceFile
-from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, \
-	TestsuiteKind
+from pyEDAA.Reports import fullyQualifiedName
+from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, TestsuiteKind
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, IterationScheme
-from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
-from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut_Testcase
-
-
-@export
-class JUnitReaderMode(Flag):
-	Default = 0
-	DecoupleTestsuiteHierarchyAndTestcaseClassName = 1
+from pyEDAA.Reports.Unittesting import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, Testcase as ut_Testcase
+from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, Testsuite as ju_Testsuite
+from pyEDAA.Reports.Unittesting.JUnit import TestsuiteSummary as ju_TestsuiteSummary, Document as ju_Document
 
 
 TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
@@ -64,80 +57,7 @@ TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
 
 
 @export
-class Base(metaclass=ExtendedType, slots=True):
-	_parent:         Nullable["Testsuite"]
-	_name:           str
-
-	def __init__(self, name: str, parent: Nullable["Testsuite"] = None):
-		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
-		elif not isinstance(name, str):
-			raise TypeError(f"Parameter 'name' is not of type 'str'.")
-
-		# TODO: check parameter parent
-
-		self._parent = parent
-		self._name = name
-
-	@readonly
-	def Parent(self) -> Nullable["Testsuite"]:
-		return self._parent
-
-	# QUESTION: allow Parent as setter?
-
-	@readonly
-	def Name(self) -> str:
-		return self._name
-
-
-@export
-class BaseWithProperties(Base):
-	_duration:       Nullable[timedelta]
-	_assertionCount: Nullable[int]
-	_properties:     Dict[str, Any]
-
-	def __init__(self, name: str, duration: Nullable[timedelta] = None, assertionCount: Nullable[int] = None, parent: Nullable["Testsuite"] = None):
-		super().__init__(name, parent)
-
-		# TODO: check parameter duration
-		self._duration = duration
-		self._assertionCount = assertionCount
-
-		self._properties = {}
-
-	@readonly
-	def Duration(self) -> timedelta:
-		return self._duration
-
-	@readonly
-	@abstractmethod
-	def AssertionCount(self) -> int:
-		pass
-
-	def __len__(self) -> int:
-		return len(self._properties)
-
-	def __getitem__(self, key: str) -> Any:
-		return self._properties[key]
-
-	def __setitem__(self, key: str, value: Any) -> None:
-		self._properties[key] = value
-
-	def __delitem__(self, key: str) -> None:
-		del self._properties[key]
-
-	def __contains__(self, key: str) -> bool:
-		return key in self._properties
-
-	def __iter__(self) -> Generator[Tuple[str, Any], None, None]:
-		yield from self._properties.items()
-
-
-@export
-class Testcase(BaseWithProperties):
-	_classname:      str
-	_status:         TestcaseStatus
-
+class Testcase(ju_Testcase):
 	def __init__(
 		self,
 		name: str,
@@ -147,30 +67,13 @@ class Testcase(BaseWithProperties):
 		parent: Nullable["Testclass"] = None
 	):
 		if parent is not None:
-			if not isinstance(parent, Testclass):
-				raise TypeError(f"Parameter 'parent' is not of type 'Class'.")
+			pass
+			# if not isinstance(parent, Testclass):
+			# 	raise TypeError(f"Parameter 'parent' is not of type 'Testclass'.")
+				#ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+				#raise ex
 
-			parent._testcases[name] = self
-
-		super().__init__(name, duration, assertionCount, parent)
-
-		self._status = status
-
-	@readonly
-	def Classname(self) -> str:
-		if self._parent is None:
-			raise UnittestException("Standalone Testcase instance is not linked to a Testclass.")
-		return self._parent._name
-
-	@readonly
-	def Status(self) -> TestcaseStatus:
-		return self._status
-
-	@readonly
-	def AssertionCount(self) -> int:
-		if self._assertionCount is None:
-			return 0
-		return self._assertionCount
+		super().__init__(name, duration, status, assertionCount, parent)
 
 	def Copy(self) -> "Testcase":
 		return self.__class__(
@@ -221,100 +124,11 @@ class Testcase(BaseWithProperties):
 		return node
 
 	def __str__(self) -> str:
-		return (
-			f"<JUnit.Testcase {self._name}: {self._status.name} - asserts:{self._assertionCount}>"
-		)
+		return (f"<PyTestJUnit.Testcase {self._name}: {self._status.name} - asserts:{self._assertionCount}>")
 
 
 @export
-class TestsuiteBase(BaseWithProperties):
-	_startTime: Nullable[datetime]
-	_status:    TestsuiteStatus
-
-	_tests:     int
-	_skipped:   int
-	_errored:   int
-	_failed:    int
-	_passed:    int
-
-	def __init__(
-		self,
-		name: str,
-		startTime: Nullable[datetime] = None,
-		duration:  Nullable[timedelta] = None,
-		status: TestsuiteStatus = TestsuiteStatus.Unknown,
-		parent: Nullable["Testsuite"] = None
-	):
-		super().__init__(name, duration, None, parent)
-
-		self._startTime = startTime
-		self._status = status
-		self._tests =        0
-		self._skipped =      0
-		self._errored =      0
-		self._failed =       0
-		self._passed =       0
-
-	@readonly
-	def StartTime(self) -> Nullable[datetime]:
-		return self._startTime
-
-	@readonly
-	def Status(self) -> TestsuiteStatus:
-		return self._status
-
-	@readonly
-	@mustoverride
-	def TestcaseCount(self) -> int:
-		pass
-
-	@readonly
-	def Tests(self) -> int:
-		return self.TestcaseCount
-
-	@readonly
-	def Skipped(self) -> int:
-		return self._skipped
-
-	@readonly
-	def Errored(self) -> int:
-		return self._errored
-
-	@readonly
-	def Failed(self) -> int:
-		return self._failed
-
-	@readonly
-	def Passed(self) -> int:
-		return self._passed
-
-	def Aggregate(self) -> TestsuiteAggregateReturnType:
-		tests = 0
-		skipped = 0
-		errored = 0
-		failed = 0
-		passed = 0
-
-		# for testsuite in self._testsuites.values():
-		# 	t, s, e, w, f, p = testsuite.Aggregate()
-		# 	tests += t
-		# 	skipped += s
-		# 	errored += e
-		# 	weak += w
-		# 	failed += f
-		# 	passed += p
-
-		return tests, skipped, errored, failed, passed
-
-	@mustoverride
-	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
-		pass
-
-
-@export
-class Testclass(Base):
-	_testcases: Dict[str, "Testcase"]
-
+class Testclass(ju_Testclass):
 	def __init__(
 		self,
 		classname: str,
@@ -323,53 +137,11 @@ class Testclass(Base):
 	):
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
-				raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+				ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+				raise ex
 
-			parent._testclasses[classname] = self
-
-		super().__init__(classname, parent)
-
-		self._testcases = {}
-		if testcases is not None:
-			for testcase in testcases:
-				if testcase._parent is not None:
-					raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
-
-				if testcase._name in self._testcases:
-					raise DuplicateTestcaseException(f"Class already contains a testcase with same name '{testcase._name}'.")
-
-				testcase._parent = self
-				self._testcases[testcase._name] = testcase
-
-	@readonly
-	def Classname(self) -> str:
-		return self._name
-
-	@readonly
-	def Testcases(self) -> Dict[str, "Testcase"]:
-		return self._testcases
-
-	@readonly
-	def TestcaseCount(self) -> int:
-		return len(self._testcases)
-
-	@readonly
-	def AssertionCount(self) -> int:
-		return sum(tc.AssertionCount for tc in self._testcases.values())
-
-	def AddTestcase(self, testcase: "Testcase") -> None:
-		if testcase._parent is not None:
-			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
-
-		if testcase._name in self._testcases:
-			raise DuplicateTestcaseException(f"Class already contains a testcase with same name '{testcase._name}'.")
-
-		testcase._parent = self
-		self._testcases[testcase._name] = testcase
-
-	def AddTestcases(self, testcases: Iterable["Testcase"]) -> None:
-		for testcase in testcases:
-			self.AddTestcase(testcase)
+		super().__init__(classname, testcases, parent)
 
 	def ToTestsuite(self) -> ut_Testsuite:
 		return ut_Testsuite(
@@ -381,11 +153,6 @@ class Testclass(Base):
 			testcases=(tc.ToTestcase() for tc in self._testcases.values())
 		)
 
-	def __str__(self) -> str:
-		return (
-			f"<JUnit.Class {self._name}: {len(self._testcases)}>"
-		)
-
 	def ToTree(self) -> Node:
 		node = Node(
 			value=self._name,
@@ -394,12 +161,14 @@ class Testclass(Base):
 
 		return node
 
+	def __str__(self) -> str:
+		return (
+			f"<PyTestJUnit.Class {self._name}: {len(self._testcases)}>"
+		)
+
 
 @export
-class Testsuite(TestsuiteBase):
-	_hostname:    str
-	_testclasses: Dict[str, "Testclass"]
-
+class Testsuite(ju_Testsuite):
 	def __init__(
 		self,
 		name: str,
@@ -411,70 +180,13 @@ class Testsuite(TestsuiteBase):
 		parent: Nullable["TestsuiteSummary"] = None
 	):
 		if parent is not None:
-			if not isinstance(parent, TestsuiteSummary):
-				raise TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
+			pass
+			# if not isinstance(parent, TestsuiteSummary):
+			# 	raise TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
+		#		ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+		#		raise ex
 
-			parent._testsuites[name] = self
-
-		super().__init__(name, startTime, duration, status, parent)
-
-		self._hostname = hostname
-
-		self._testclasses = {}
-		if testclasses is not None:
-			for testclass in testclasses:
-				if testclass._parent is not None:
-					raise ValueError(f"Class '{testclass._name}' is already part of a testsuite hierarchy.")
-
-				if testclass._name in self._testclasses:
-					raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{testclass._name}'.")
-
-				testclass._parent = self
-				self._testclasses[testclass._name] = testclass
-
-	@readonly
-	def Hostname(self) -> Nullable[str]:
-		return self._hostname
-
-	@readonly
-	def Testclasses(self) -> Dict[str, "Testclass"]:
-		return self._testclasses
-
-	@readonly
-	def TestclassCount(self) -> int:
-		return len(self._testclasses)
-
-	# @readonly
-	# def Testcases(self) -> Dict[str, "Testcase"]:
-	# 	return self._classes
-
-	@readonly
-	def TestcaseCount(self) -> int:
-		return sum(cls.TestcaseCount for cls in self._testclasses.values())
-
-	@readonly
-	def AssertionCount(self) -> int:
-		return sum(cls.AssertionCount for cls in self._testclasses.values())
-
-	def AddTestclass(self, testclass: "Testclass") -> None:
-		if testclass._parent is not None:
-			raise ValueError(f"Class '{testclass._name}' is already part of a testsuite hierarchy.")
-
-		if testclass._name in self._testclasses:
-			raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{testclass._name}'.")
-
-		testclass._parent = self
-		self._testclasses[testclass._name] = testclass
-
-	def AddTestclasses(self, testclasses: Iterable["Testclass"]) -> None:
-		for testcase in testclasses:
-			self.AddTestclass(testcase)
-
-	# def IterateTestsuites(self, scheme: IterationScheme = IterationScheme.TestsuiteDefault) -> Generator[TestsuiteType, None, None]:
-	# 	return self.Iterate(scheme)
-
-	def IterateTestcases(self, scheme: IterationScheme = IterationScheme.TestcaseDefault) -> Generator[Testcase, None, None]:
-		return self.Iterate(scheme)
+		super().__init__(name, hostname, startTime, duration, status, testclasses, parent)
 
 	def Copy(self) -> "Testsuite":
 		return self.__class__(
@@ -625,14 +337,12 @@ class Testsuite(TestsuiteBase):
 
 	def __str__(self) -> str:
 		return (
-			f"<JUnit.Testsuite {self._name}: {self._status.name} - tests:{self._tests}>"
+			f"<PyTestJUnit.Testsuite {self._name}: {self._status.name} - tests:{self._tests}>"
 		)
 
 
 @export
-class TestsuiteSummary(TestsuiteBase):
-	_testsuites: Dict[str, Testsuite]
-
+class TestsuiteSummary(ju_TestsuiteSummary):
 	def __init__(
 		self,
 		name: str,
@@ -641,49 +351,7 @@ class TestsuiteSummary(TestsuiteBase):
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		testsuites: Nullable[Iterable[Testsuite]] = None
 	):
-		super().__init__(name, startTime, duration, status, None)
-
-		self._testsuites = {}
-		if testsuites is not None:
-			for testsuite in testsuites:
-				if testsuite._parent is not None:
-					raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
-
-				if testsuite._name in self._testsuites:
-					raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
-
-				testsuite._parent = self
-				self._testsuites[testsuite._name] = testsuite
-
-	@readonly
-	def Testsuites(self) -> Dict[str, Testsuite]:
-		return self._testsuites
-
-	@readonly
-	def TestcaseCount(self) -> int:
-		return sum(ts.TestcaseCount for ts in self._testsuites.values())
-
-	@readonly
-	def TestsuiteCount(self) -> int:
-		return len(self._testsuites)
-
-	@readonly
-	def AssertionCount(self) -> int:
-		return sum(ts.AssertionCount for ts in self._testsuites.values())
-
-	def AddTestsuite(self, testsuite: Testsuite) -> None:
-		if testsuite._parent is not None:
-			raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
-
-		if testsuite._name in self._testsuites:
-			raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
-
-		testsuite._parent = self
-		self._testsuites[testsuite._name] = testsuite
-
-	def AddTestsuites(self, testsuites: Iterable[Testsuite]) -> None:
-		for testsuite in testsuites:
-			self.AddTestsuite(testsuite)
+		super().__init__(name, startTime, duration, status, testsuites)
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
 		tests, skipped, errored, failed, passed = super().Aggregate()
@@ -750,25 +418,15 @@ class TestsuiteSummary(TestsuiteBase):
 
 	def __str__(self) -> str:
 		return (
-			f"<JUnit.TestsuiteSummary {self._name}: {self._status.name} - tests:{self._tests}>"
+			f"<PyTestJUnit.TestsuiteSummary {self._name}: {self._status.name} - tests:{self._tests}>"
 		)
 
 
 @export
-class Document(TestsuiteSummary, ut_Document):
-	_readerMode:       JUnitReaderMode
-	_xmlDocument:      Nullable[_ElementTree]
-
-	def __init__(self, xmlReportFile: Path, parse: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
-		super().__init__("Unprocessed JUnit XML file")
-		ut_Document.__init__(self, xmlReportFile)
-
-		self._readerMode = readerMode
-		self._xmlDocument = None
-
-		if parse:
-			self.Read()
-			self.Parse()
+class Document(ju_Document):
+	_TESTCASE:          ClassVar[Type[Testcase]] =         Testcase
+	_TESTCLASS:         ClassVar[Type[Testclass]] =        Testclass
+	_TESTSUITE:         ClassVar[Type[Testsuite]] =        Testsuite
 
 	@classmethod
 	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary):
@@ -788,31 +446,8 @@ class Document(TestsuiteSummary, ut_Document):
 		return doc
 
 	def Read(self) -> None:
-		if not self._path.exists():
-			raise UnittestException(f"JUnit XML file '{self._path}' does not exist.") \
-				from FileNotFoundError(f"File '{self._path}' not found.")
-
-		startAnalysis = perf_counter_ns()
-		try:
-			# xmlSchemaFile = getResourceFile(resources, "Windyroads-JUnit.xsd")
-			xmlSchemaFile = getResourceFile(resources, "../resources/PyTest-JUnit.xsd")
-			schemaParser = XMLParser(ns_clean=True)
-			schemaRoot = parse(xmlSchemaFile, schemaParser)
-
-			junitSchema = XMLSchema(schemaRoot)
-			junitParser = XMLParser(schema=junitSchema, ns_clean=True)
-			junitDocument = parse(self._path, parser=junitParser)
-
-			self._xmlDocument = junitDocument
-		except XMLSyntaxError as ex:
-			print(ex)
-
-			print(junitParser.error_log)
-		except Exception as ex:
-			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
-
-		endAnalysis = perf_counter_ns()
-		self._analysisDuration = (endAnalysis - startAnalysis) / 1e9
+		xmlSchemaFile = "PyTest-JUnit.xsd"
+		self._Read(xmlSchemaFile)
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
 		if path is None:
@@ -842,9 +477,9 @@ class Document(TestsuiteSummary, ut_Document):
 		startConversion = perf_counter_ns()
 		rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name =      rootElement.attrib["name"]                              if "name"      in rootElement.attrib else "root"
-		self._startTime = datetime.fromisoformat(rootElement.attrib["timestamp"]) if "timestamp" in rootElement.attrib else None
-		self._duration =  timedelta(seconds=float(rootElement.attrib["time"]))    if "time"      in rootElement.attrib else None
+		self._name = self._ParseName(rootElement, required=False)
+		self._startTime =self._ParseTimestamp(rootElement, required=False)
+		self._duration = self._ParseTime(rootElement, required=False)
 
 		# tests = rootElement.getAttribute("tests")
 		# skipped = rootElement.getAttribute("skipped")
@@ -860,19 +495,11 @@ class Document(TestsuiteSummary, ut_Document):
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
 	def _ParseTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
-		name = testsuitesNode.attrib["name"]
-
-		kwargs = {}
-		if "timestamp" in testsuitesNode.attrib:
-			kwargs["startTime"] = datetime.fromisoformat(testsuitesNode.attrib["timestamp"])
-		if "time" in testsuitesNode.attrib:
-			kwargs["duration"] = timedelta(seconds=float(testsuitesNode.attrib["time"]))
-		if "hostname" in testsuitesNode.attrib:
-			kwargs["hostname"] = testsuitesNode.attrib["hostname"]
-
 		newTestsuite = Testsuite(
-			name,
-			**kwargs,
+			self._ParseName(testsuitesNode),
+			self._ParseHostname(testsuitesNode),
+			self._ParseTimestamp(testsuitesNode),
+			self._ParseTime(testsuitesNode),
 			parent=parent
 		)
 
@@ -883,17 +510,12 @@ class Document(TestsuiteSummary, ut_Document):
 		# else:
 		# 	raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
 
-		for node in testsuitesNode.iterchildren():   # type: _Element
-			# if node.tag == "testsuite":
-			# 	self._ParseTestsuite(newTestsuite, node)
-			# el
-			if node.tag == "testcase":
-				self._ParseTestcase(newTestsuite, node)
+		self._ParseTestsuiteChildren(testsuitesNode, newTestsuite)
 
-	def _ParseTestcase(self, parent: Testsuite, testsuiteNode: _Element) -> None:
-		name = testsuiteNode.attrib["name"]
-		className = testsuiteNode.attrib["classname"]
-		time = float(testsuiteNode.attrib["time"])
+	def _ParseTestcase(self, parent: Testsuite, testcaseNode: _Element) -> None:
+		name = self._ParseName(testcaseNode)
+		className = self._ParseClassname(testcaseNode)
+		time = self._ParseTime(testcaseNode)
 
 		# if self._readerMode is JUnitReaderMode.Default:
 		# 	currentTestsuite = self
@@ -902,44 +524,10 @@ class Document(TestsuiteSummary, ut_Document):
 		# else:
 		# 	raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
 
-		# testsuitePath = className.split(".")
-		# for testsuiteName in testsuitePath:
-		# 	try:
-		# 		currentTestsuite = currentTestsuite._testsuites[testsuiteName]
-		# 	except KeyError:
-		# 		currentTestsuite._testsuites[testsuiteName] = new = Testsuite(testsuiteName)
-		# 		currentTestsuite = new
+		testclass = self._FindOrCreateTestclass(parent, className)
+		newTestcase = Testcase(name, duration=time, parent=testclass)
 
-		if className in parent._testclasses:
-			testclass = parent._testclasses[className]
-		else:
-			testclass = Testclass(className, parent=parent)
-
-		testcase = Testcase(name, duration=timedelta(seconds=time), parent=testclass)
-
-		for node in testsuiteNode.iterchildren():   # type: _Element
-			if isinstance(node, _Comment):
-				pass
-			elif isinstance(node, _Element):
-				if node.tag == "skipped":
-					testcase._status = TestcaseStatus.Skipped
-				elif node.tag == "failure":
-					testcase._status = TestcaseStatus.Failed
-				elif node.tag == "error":
-					testcase._status = TestcaseStatus.Errored
-				elif node.tag == "system-out":
-					pass
-				elif node.tag == "system-err":
-					pass
-				elif node.tag == "properties":
-					pass
-				else:
-					raise UnittestException(f"Unknown element '{node.tag}' in junit file.")
-			else:
-				pass
-
-		if testcase._status is TestcaseStatus.Unknown:
-			testcase._status = TestcaseStatus.Passed
+		self._ParseTestcaseChildren(testcaseNode, newTestcase)
 
 	def Generate(self, overwrite: bool = False) -> None:
 		if self._xmlDocument is not None:
@@ -1004,5 +592,5 @@ class Document(TestsuiteSummary, ut_Document):
 
 	def __str__(self) -> str:
 		return (
-			f"<JUnit.Document {self._name} ({self._path}): {self._status.name} - suites/tests:{self.TestsuiteCount}/{self.TestcaseCount}>"
+			f"<PyTestJUnit.Document {self._name} ({self._path}): {self._status.name} - suites/tests:{self.TestsuiteCount}/{self.TestcaseCount}>"
 		)

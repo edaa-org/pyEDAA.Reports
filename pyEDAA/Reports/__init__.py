@@ -43,14 +43,39 @@ from importlib.resources  import files
 from pathlib              import Path
 from sys                  import version_info
 from types                import ModuleType
-from typing               import List, Union
+from typing               import List, Union, Any
 
 from pyTooling.Decorators import export
 
 
+# FIXME: move to pyTooling
+def fullyQualifiedName(obj: Any):
+	try:
+		module = obj.__module__             # for class or function
+	except AttributeError:
+		module = obj.__class__.__module__
+
+	try:
+		name = obj.__qualname__             # for class or function
+	except AttributeError:
+		name = obj.__class__.__qualname__
+
+	# If obj is a method of builtin class, then module will be None
+	if module == "builtins" or module is None:
+		return name
+
+	return f"{module}.{name}"
+
+
+# FIXME: move to pyTooling
 @export
 def getResourceFile(module: Union[str, ModuleType], filename: str) -> Path:
-	return files(module) / filename
+	resourcePath = files(module) / filename
+	# TODO: files() has wrong TypeHint Traversible vs. Path
+	if not resourcePath.exists():
+		from pyTooling.Exceptions import ToolingException
+		raise ToolingException(f"Resource file '{filename}' not found in resource '{module}'.") from FileNotFoundError(str(resourcePath))
+	return resourcePath
 
 
 @export

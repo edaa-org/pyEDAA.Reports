@@ -76,7 +76,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 	def __init__(self, name: str, parent: Nullable["Base"] = None):
 		if name is None:
-			raise TypeError(f"Parameter 'name' must not be None.")
+			raise ValueError(f"Parameter 'name' must not be None.")
 
 		self._parent = parent
 		self._name = name

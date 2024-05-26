@@ -36,15 +36,16 @@ from datetime        import datetime, timedelta
 from enum            import Flag
 from pathlib         import Path
 from time            import perf_counter_ns
-from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar
+from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
-from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element, _Comment
+from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
 from lxml.etree                 import ElementTree, Element, SubElement, tostring
 from pyTooling.Decorators       import export, readonly
+from pyTooling.Exceptions       import ToolingException
 from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmethod
 from pyTooling.Tree             import Node
 
-from pyEDAA.Reports             import resources, getResourceFile
+from pyEDAA.Reports             import resources, getResourceFile, fullyQualifiedName
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, \
 	TestsuiteKind
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, IterationScheme
@@ -92,7 +93,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			raise TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex.add_note(f"Got type '{fullyQualifiedName(name)}'.")
+			raise ex
 
 		# TODO: check parameter parent
 
@@ -168,7 +171,9 @@ class Testcase(BaseWithProperties):
 	):
 		if parent is not None:
 			if not isinstance(parent, Testclass):
-				raise TypeError(f"Parameter 'parent' is not of type 'Class'.")
+				ex = TypeError(f"Parameter 'parent' is not of type 'Testclass'.")
+				ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+				raise ex
 
 			parent._testcases[name] = self
 
@@ -342,8 +347,10 @@ class Testclass(Base):
 		parent: Nullable["Testsuite"] = None
 	):
 		if parent is not None:
-			if not isinstance(parent, Testsuite):
-				raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+			# if not isinstance(parent, Testsuite):
+			# 	raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+			#	ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+			#	raise ex
 
 			parent._testclasses[classname] = self
 
@@ -432,7 +439,9 @@ class Testsuite(TestsuiteBase):
 	):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
-				raise TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
+				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
+				ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+				raise ex
 
 			parent._testsuites[name] = self
 
@@ -776,8 +785,12 @@ class TestsuiteSummary(TestsuiteBase):
 
 @export
 class Document(TestsuiteSummary, ut_Document):
-	_readerMode:       JUnitReaderMode
-	_xmlDocument:      Nullable[_ElementTree]
+	_TESTCASE:          ClassVar[Type[Testcase]] =         Testcase
+	_TESTCLASS:         ClassVar[Type[Testclass]] =        Testclass
+	_TESTSUITE:         ClassVar[Type[Testsuite]] =        Testsuite
+
+	_readerMode:        JUnitReaderMode
+	_xmlDocument:       Nullable[_ElementTree]
 
 	def __init__(self, xmlReportFile: Path, parse: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
 		super().__init__("Unprocessed JUnit XML file")
@@ -808,25 +821,40 @@ class Document(TestsuiteSummary, ut_Document):
 		return doc
 
 	def Read(self) -> None:
+		xmlSchemaFile = "Generic-JUnit.xsd"
+		self._Read(xmlSchemaFile)
+
+	def _Read(self, xmlSchemaFile: str) -> None:
 		if not self._path.exists():
 			raise UnittestException(f"JUnit XML file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
 
 		startAnalysis = perf_counter_ns()
 		try:
-			xmlSchemaFile = getResourceFile(resources, "../resources/Generic-JUnit.xsd")
-			schemaParser = XMLParser(ns_clean=True)
-			schemaRoot = parse(xmlSchemaFile, schemaParser)
+			xmlSchemaResourceFile = getResourceFile(resources, xmlSchemaFile)
+		except ToolingException as ex:
+			raise UnittestException(f"Couldn't locate XML Schema '{xmlSchemaFile}' in package resources.") from ex
 
+		try:
+			schemaParser = XMLParser(ns_clean=True)
+			schemaRoot = parse(xmlSchemaResourceFile, schemaParser)
+		except XMLSyntaxError as ex:
+			raise UnittestException(f"XML Syntax Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
+
+		try:
 			junitSchema = XMLSchema(schemaRoot)
+		except XMLSchemaParseError as ex:
+			raise UnittestException(f"Error while parsing XML Schema '{xmlSchemaFile}'.")
+
+		try:
 			junitParser = XMLParser(schema=junitSchema, ns_clean=True)
 			junitDocument = parse(self._path, parser=junitParser)
 
 			self._xmlDocument = junitDocument
 		except XMLSyntaxError as ex:
-			print(ex)
-
-			print(junitParser.error_log)
+			for logEntry in junitParser.error_log:
+				ex.add_note(str(logEntry))
+			raise UnittestException(f"XML syntax or validation error for '{self._path}'.") from ex
 		except Exception as ex:
 			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
 
@@ -861,9 +889,9 @@ class Document(TestsuiteSummary, ut_Document):
 		startConversion = perf_counter_ns()
 		rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name =      rootElement.attrib["name"]                              if "name"      in rootElement.attrib else "root"
-		self._startTime = datetime.fromisoformat(rootElement.attrib["timestamp"]) if "timestamp" in rootElement.attrib else None
-		self._duration =  timedelta(seconds=float(rootElement.attrib["time"]))    if "time"      in rootElement.attrib else None
+		self._name = self._ParseName(rootElement, required=False)
+		self._startTime = self._ParseTimestamp(rootElement, required=False)
+		self._duration = self._ParseTime(rootElement, required=False)
 
 		# tests = rootElement.getAttribute("tests")
 		# skipped = rootElement.getAttribute("skipped")
@@ -878,20 +906,52 @@ class Document(TestsuiteSummary, ut_Document):
 		endConversation = perf_counter_ns()
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
+	def _ParseName(self, element: _Element, default: str = "root", required: bool = True) -> str:
+		if "name" in element.attrib:
+			return element.attrib["name"]
+		elif required:
+			raise UnittestException(f"Required parameter 'name' not found in tag '{element.tag}'.")
+		else:
+			return default
+
+	def _ParseTimestamp(self, element: _Element, required: bool = True) -> Nullable[datetime]:
+		if "timestamp" in element.attrib:
+			timestamp = element.attrib["timestamp"]
+			return datetime.fromisoformat(timestamp)
+		elif required:
+			raise UnittestException(f"Required parameter 'timestamp' not found in tag '{element.tag}'.")
+		else:
+			return None
+
+	def _ParseTime(self, element: _Element, required: bool = True) -> Nullable[timedelta]:
+		if "time" in element.attrib:
+			time = element.attrib["time"]
+			return timedelta(seconds=float(time))
+		elif required:
+			raise UnittestException(f"Required parameter 'time' not found in tag '{element.tag}'.")
+		else:
+			return None
+
+	def _ParseHostname(self, element: _Element, default: str = "localhost", required: bool = True) -> str:
+		if "hostname" in element.attrib:
+			return element.attrib["hostname"]
+		elif required:
+			raise UnittestException(f"Required parameter 'hostname' not found in tag '{element.tag}'.")
+		else:
+			return default
+
+	def _ParseClassname(self, element: _Element, required: bool = True) -> str:
+		if "classname" in element.attrib:
+			return element.attrib["classname"]
+		elif required:
+			raise UnittestException(f"Required parameter 'classname' not found in tag '{element.tag}'.")
+
 	def _ParseTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
-		name = testsuitesNode.attrib["name"]
-
-		kwargs = {}
-		if "timestamp" in testsuitesNode.attrib:
-			kwargs["startTime"] = datetime.fromisoformat(testsuitesNode.attrib["timestamp"])
-		if "time" in testsuitesNode.attrib:
-			kwargs["duration"] = timedelta(seconds=float(testsuitesNode.attrib["time"]))
-		if "hostname" in testsuitesNode.attrib:
-			kwargs["hostname"] = testsuitesNode.attrib["hostname"]
-
-		newTestsuite = Testsuite(
-			name,
-			**kwargs,
+		newTestsuite = self._TESTSUITE(
+			self._ParseName(testsuitesNode),
+			self._ParseHostname(testsuitesNode, required=False),
+			self._ParseTimestamp(testsuitesNode, required=False),
+			self._ParseTime(testsuitesNode, required=False),
 			parent=parent
 		)
 
@@ -902,6 +962,9 @@ class Document(TestsuiteSummary, ut_Document):
 		# else:
 		# 	raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
 
+		self._ParseTestsuiteChildren(testsuitesNode, newTestsuite)
+
+	def _ParseTestsuiteChildren(self, testsuitesNode: _Element, newTestsuite: Testsuite) -> None:
 		for node in testsuitesNode.iterchildren():   # type: _Element
 			# if node.tag == "testsuite":
 			# 	self._ParseTestsuite(newTestsuite, node)
@@ -909,10 +972,10 @@ class Document(TestsuiteSummary, ut_Document):
 			if node.tag == "testcase":
 				self._ParseTestcase(newTestsuite, node)
 
-	def _ParseTestcase(self, parent: Testsuite, testsuiteNode: _Element) -> None:
-		name = testsuiteNode.attrib["name"]
-		className = testsuiteNode.attrib["classname"]
-		time = float(testsuiteNode.attrib["time"])
+	def _ParseTestcase(self, parent: Testsuite, testcaseNode: _Element) -> None:
+		name = self._ParseName(testcaseNode, required=True)
+		className = self._ParseClassname(testcaseNode, required=True)
+		time = self._ParseTime(testcaseNode)
 
 		# if self._readerMode is JUnitReaderMode.Default:
 		# 	currentTestsuite = self
@@ -921,31 +984,28 @@ class Document(TestsuiteSummary, ut_Document):
 		# else:
 		# 	raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
 
-		# testsuitePath = className.split(".")
-		# for testsuiteName in testsuitePath:
-		# 	try:
-		# 		currentTestsuite = currentTestsuite._testsuites[testsuiteName]
-		# 	except KeyError:
-		# 		currentTestsuite._testsuites[testsuiteName] = new = Testsuite(testsuiteName)
-		# 		currentTestsuite = new
+		testclass = self._FindOrCreateTestclass(parent, className)
+		newTestcase = self._TESTCASE(name, duration=time, parent=testclass)
 
+		self._ParseTestcaseChildren(testcaseNode, newTestcase)
+
+	def _FindOrCreateTestclass(self, parent: Testsuite, className: str) -> Testclass:
 		if className in parent._testclasses:
-			testclass = parent._testclasses[className]
+			return parent._testclasses[className]
 		else:
-			testclass = Testclass(className, parent=parent)
+			return self._TESTCLASS(className, parent=parent)
 
-		testcase = Testcase(name, duration=timedelta(seconds=time), parent=testclass)
-
-		for node in testsuiteNode.iterchildren():   # type: _Element
+	def _ParseTestcaseChildren(self, testcaseNode: _Element, newTestcase: Testcase) -> None:
+		for node in testcaseNode.iterchildren():   # type: _Element
 			if isinstance(node, _Comment):
 				pass
 			elif isinstance(node, _Element):
 				if node.tag == "skipped":
-					testcase._status = TestcaseStatus.Skipped
+					newTestcase._status = TestcaseStatus.Skipped
 				elif node.tag == "failure":
-					testcase._status = TestcaseStatus.Failed
+					newTestcase._status = TestcaseStatus.Failed
 				elif node.tag == "error":
-					testcase._status = TestcaseStatus.Errored
+					newTestcase._status = TestcaseStatus.Errored
 				elif node.tag == "system-out":
 					pass
 				elif node.tag == "system-err":
@@ -957,8 +1017,8 @@ class Document(TestsuiteSummary, ut_Document):
 			else:
 				pass
 
-		if testcase._status is TestcaseStatus.Unknown:
-			testcase._status = TestcaseStatus.Passed
+		if newTestcase._status is TestcaseStatus.Unknown:
+			newTestcase._status = TestcaseStatus.Passed
 
 	def Generate(self, overwrite: bool = False) -> None:
 		if self._xmlDocument is not None:

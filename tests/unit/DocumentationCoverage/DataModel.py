@@ -36,7 +36,7 @@ from pyEDAA.Reports.DocumentationCoverage.Python import CoverageState, ClassCove
 
 class ClassCoverageInstantiation(TestCase):
 	def test_ClassCoverage_NoName(self) -> None:
-		with self.assertRaises(TypeError):
+		with self.assertRaises(ValueError):
 			_ = ClassCoverage(None)
 
 	def test_ClassCoverage_Name(self) -> None:
@@ -52,7 +52,7 @@ class ClassCoverageInstantiation(TestCase):
 
 class ModuleCoverageInstantiation(TestCase):
 	def test_ModuleCoverage_NoName(self) -> None:
-		with self.assertRaises(TypeError):
+		with self.assertRaises(ValueError):
 			_ = ModuleCoverage(None, Path("module.py"))
 
 	def test_ModuleCoverage_Name(self) -> None:
@@ -65,7 +65,7 @@ class ModuleCoverageInstantiation(TestCase):
 
 class PackageCoverageInstantiation(TestCase):
 	def test_PackageCoverage_NoName(self) -> None:
-		with self.assertRaises(TypeError):
+		with self.assertRaises(ValueError):
 			_ = PackageCoverage(None, Path("package"))
 
 	def test_PackageCoverage_Name(self) -> None:
