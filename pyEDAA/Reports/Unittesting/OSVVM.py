@@ -114,7 +114,7 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 			ex.add_note(f"Call 'OsvvmYamlDocument.Generate()' or 'OsvvmYamlDocument.Write(..., regenerate=True)'.")
 			raise ex
 
-		# with path.open("w") as file:
+		# with path.open("w", encoding="utf-8") as file:
 		# 	self._yamlDocument.writexml(file, addindent="\t", encoding="utf-8", newl="\n")
 
 	def Parse(self) -> None:

@@ -67,7 +67,7 @@ class RequirementsFile:
 			self.Parse()
 
 	def Parse(self) -> None:
-		with self._path.open("r") as file:
+		with self._path.open("r", encoding="utf-8") as file:
 			lines = file.readline()
 
 		for line in lines:

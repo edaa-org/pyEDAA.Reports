@@ -1,10 +1,10 @@
 from argparse import Namespace
-from pathlib import Path
-from typing import List, Tuple
+from pathlib  import Path
+from typing   import List, Tuple
 
-from pyTooling.Attributes.ArgParse import CommandHandler
+from pyTooling.MetaClasses                    import ExtendedType
+from pyTooling.Attributes.ArgParse            import CommandHandler
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
-from pyTooling.MetaClasses import ExtendedType
 
 from pyEDAA.Reports.Unittesting       import TestsuiteKind, TestsuiteSummary, MergedTestsuiteSummary, UnittestException
 from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode

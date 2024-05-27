@@ -34,11 +34,12 @@ from enum                  import Flag, IntEnum
 from pathlib               import Path
 from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar
 
+from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Tree        import Node
 
-from pyEDAA.Reports        import ReportException, fullyQualifiedName
+from pyEDAA.Reports        import ReportException
 
 
 @export
@@ -192,7 +193,7 @@ class Base(metaclass=ExtendedType, slots=True):
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
 			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
-			ex.add_note(f"Got type '{fullyQualifiedName(name)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 
 		self._parent = parent
@@ -337,7 +338,7 @@ class Testcase(Base):
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
-				ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testcases[name] = self
@@ -482,7 +483,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
-				ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testsuites[name] = self

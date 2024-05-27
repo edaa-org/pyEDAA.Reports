@@ -40,12 +40,13 @@ from typing          import Optional as Nullable, Iterable, Dict, Any, Generator
 
 from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
 from lxml.etree                 import ElementTree, Element, SubElement, tostring
+from pyTooling.Common           import getFullyQualifiedName, getResourceFile
 from pyTooling.Decorators       import export, readonly
 from pyTooling.Exceptions       import ToolingException
 from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmethod
 from pyTooling.Tree             import Node
 
-from pyEDAA.Reports             import resources, getResourceFile, fullyQualifiedName
+from pyEDAA.Reports             import resources
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, \
 	TestsuiteKind
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, IterationScheme
@@ -94,7 +95,7 @@ class Base(metaclass=ExtendedType, slots=True):
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
 			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
-			ex.add_note(f"Got type '{fullyQualifiedName(name)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 
 		# TODO: check parameter parent
@@ -172,7 +173,7 @@ class Testcase(BaseWithProperties):
 		if parent is not None:
 			if not isinstance(parent, Testclass):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testclass'.")
-				ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testcases[name] = self
@@ -205,7 +206,7 @@ class Testcase(BaseWithProperties):
 			self._assertionCount
 		)
 
-	def Aggregate(self, strict: bool = True) -> None:  # TestcaseAggregateReturnType:
+	def Aggregate(self) -> None:
 		if self._status is TestcaseStatus.Unknown:
 			if self._assertionCount is None:
 				self._status = TestcaseStatus.Passed
@@ -213,9 +214,6 @@ class Testcase(BaseWithProperties):
 				self._status = TestcaseStatus.Weak
 			else:
 				self._status = TestcaseStatus.Failed
-
-				if strict:
-					self._status = self._status & ~TestcaseStatus.Passed | TestcaseStatus.Failed
 
 			# TODO: check for setup errors
 			# TODO: check for teardown errors
@@ -246,8 +244,10 @@ class Testcase(BaseWithProperties):
 		return node
 
 	def __str__(self) -> str:
+		moduleName = self.__module__.split(".")[-1]
+		className = self.__class__.__name__
 		return (
-			f"<JUnit.Testcase {self._name}: {self._status.name} - asserts:{self._assertionCount}>"
+			f"<{moduleName}{className} {self._name}: {self._status.name} - asserts:{self._assertionCount}>"
 		)
 
 
@@ -349,7 +349,7 @@ class Testclass(Base):
 		if parent is not None:
 			# if not isinstance(parent, Testsuite):
 			# 	raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
-			#	ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+			#	ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			#	raise ex
 
 			parent._testclasses[classname] = self
@@ -408,11 +408,6 @@ class Testclass(Base):
 			testcases=(tc.ToTestcase() for tc in self._testcases.values())
 		)
 
-	def __str__(self) -> str:
-		return (
-			f"<JUnit.Class {self._name}: {len(self._testcases)}>"
-		)
-
 	def ToTree(self) -> Node:
 		node = Node(
 			value=self._name,
@@ -420,6 +415,13 @@ class Testclass(Base):
 		)
 
 		return node
+
+	def __str__(self) -> str:
+		moduleName = self.__module__.split(".")[-1]
+		className = self.__class__.__name__
+		return (
+			f"<{moduleName}{className} {self._name}: {len(self._testcases)}>"
+		)
 
 
 @export
@@ -440,7 +442,7 @@ class Testsuite(TestsuiteBase):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
-				ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testsuites[name] = self
@@ -517,14 +519,14 @@ class Testsuite(TestsuiteBase):
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
 		tests, skipped, errored, failed, passed = super().Aggregate()
 
-		for testcase in self._testclasses.values():
-			_ = testcase.Aggregate(strict)
+		for testclass in self._testclasses.values():
+			_ = testclass.Aggregate(strict)
 
 			tests += 1
 
-			status = testcase._status
+			status = testclass._status
 			if status is TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+				raise UnittestException(f"Found testclass '{testclass._name}' with state 'Unknown'.")
 			elif status is TestcaseStatus.Skipped:
 				skipped += 1
 			elif status is TestcaseStatus.Errored:
@@ -534,9 +536,9 @@ class Testsuite(TestsuiteBase):
 			elif status is TestcaseStatus.Failed:
 				failed += 1
 			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+				raise UnittestException(f"Found testclass '{testclass._name}' with unsupported state '{status}'.")
 			else:
-				raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
+				raise UnittestException(f"Internal error for testclass '{testclass._name}', field '_status' is '{status}'.")
 
 		self._tests = tests
 		self._skipped = skipped
@@ -653,8 +655,10 @@ class Testsuite(TestsuiteBase):
 		return node
 
 	def __str__(self) -> str:
+		moduleName = self.__module__.split(".")[-1]
+		className = self.__class__.__name__
 		return (
-			f"<JUnit.Testsuite {self._name}: {self._status.name} - tests:{self._tests}>"
+			f"<{moduleName}{className} {self._name}: {self._status.name} - tests:{self._tests}>"
 		)
 
 
@@ -778,8 +782,10 @@ class TestsuiteSummary(TestsuiteBase):
 		return node
 
 	def __str__(self) -> str:
+		moduleName = self.__module__.split(".")[-1]
+		className = self.__class__.__name__
 		return (
-			f"<JUnit.TestsuiteSummary {self._name}: {self._status.name} - tests:{self._tests}>"
+			f"<{moduleName}{className} {self._name}: {self._status.name} - tests:{self._tests}>"
 		)
 
 
@@ -889,78 +895,121 @@ class Document(TestsuiteSummary, ut_Document):
 		startConversion = perf_counter_ns()
 		rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name = self._ParseName(rootElement, required=False)
-		self._startTime = self._ParseTimestamp(rootElement, required=False)
-		self._duration = self._ParseTime(rootElement, required=False)
+		self._name = self._ParseName(rootElement, optional=True)
+		self._startTime = self._ParseTimestamp(rootElement, optional=True)
+		self._duration = self._ParseTime(rootElement, optional=True)
 
-		# tests = rootElement.getAttribute("tests")
-		# skipped = rootElement.getAttribute("skipped")
-		# errors = rootElement.getAttribute("errors")
-		# failures = rootElement.getAttribute("failures")
-		# assertions = rootElement.getAttribute("assertions")
+		if False:  # self._readerMode is JUnitReaderMode.
+			self._tests = self._ParseTests(testsuitesNode)
+			self._skipped = self._ParseSkipped(testsuitesNode)
+			self._errored = self._ParseErrors(testsuitesNode)
+			self._failed = self._ParseFailures(testsuitesNode)
+			self._assertionCount = self._ParseAssertions(testsuitesNode)
 
 		for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
 			self._ParseTestsuite(self, rootNode)
 
-		self.Aggregate()
+		if True:  # self._readerMode is JUnitReaderMode.
+			self.Aggregate()
+
 		endConversation = perf_counter_ns()
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
-	def _ParseName(self, element: _Element, default: str = "root", required: bool = True) -> str:
+	def _ParseName(self, element: _Element, default: str = "root", optional: bool = True) -> str:
 		if "name" in element.attrib:
 			return element.attrib["name"]
-		elif required:
+		elif not optional:
 			raise UnittestException(f"Required parameter 'name' not found in tag '{element.tag}'.")
 		else:
 			return default
 
-	def _ParseTimestamp(self, element: _Element, required: bool = True) -> Nullable[datetime]:
+	def _ParseTimestamp(self, element: _Element, optional: bool = True) -> Nullable[datetime]:
 		if "timestamp" in element.attrib:
 			timestamp = element.attrib["timestamp"]
 			return datetime.fromisoformat(timestamp)
-		elif required:
+		elif not optional:
 			raise UnittestException(f"Required parameter 'timestamp' not found in tag '{element.tag}'.")
 		else:
 			return None
 
-	def _ParseTime(self, element: _Element, required: bool = True) -> Nullable[timedelta]:
+	def _ParseTime(self, element: _Element, optional: bool = True) -> Nullable[timedelta]:
 		if "time" in element.attrib:
 			time = element.attrib["time"]
 			return timedelta(seconds=float(time))
-		elif required:
+		elif not optional:
 			raise UnittestException(f"Required parameter 'time' not found in tag '{element.tag}'.")
 		else:
 			return None
 
-	def _ParseHostname(self, element: _Element, default: str = "localhost", required: bool = True) -> str:
+	def _ParseHostname(self, element: _Element, default: str = "localhost", optional: bool = True) -> str:
 		if "hostname" in element.attrib:
 			return element.attrib["hostname"]
-		elif required:
+		elif not optional:
 			raise UnittestException(f"Required parameter 'hostname' not found in tag '{element.tag}'.")
 		else:
 			return default
 
-	def _ParseClassname(self, element: _Element, required: bool = True) -> str:
+	def _ParseClassname(self, element: _Element, optional: bool = True) -> str:
 		if "classname" in element.attrib:
 			return element.attrib["classname"]
-		elif required:
+		elif not optional:
 			raise UnittestException(f"Required parameter 'classname' not found in tag '{element.tag}'.")
+
+	def _ParseTests(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		if "tests" in element.attrib:
+			return int(element.attrib["tests"])
+		elif not optional:
+			raise UnittestException(f"Required parameter 'tests' not found in tag '{element.tag}'.")
+		else:
+			return default
+
+	def _ParseSkipped(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		if "skipped" in element.attrib:
+			return int(element.attrib["skipped"])
+		elif not optional:
+			raise UnittestException(f"Required parameter 'skipped' not found in tag '{element.tag}'.")
+		else:
+			return default
+
+	def _ParseErrors(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		if "errors" in element.attrib:
+			return int(element.attrib["errors"])
+		elif not optional:
+			raise UnittestException(f"Required parameter 'errors' not found in tag '{element.tag}'.")
+		else:
+			return default
+
+	def _ParseFailures(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		if "failures" in element.attrib:
+			return int(element.attrib["failures"])
+		elif not optional:
+			raise UnittestException(f"Required parameter 'failures' not found in tag '{element.tag}'.")
+		else:
+			return default
+
+	def _ParseAssertions(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		if "assertions" in element.attrib:
+			return int(element.attrib["assertions"])
+		elif not optional:
+			raise UnittestException(f"Required parameter 'assertions' not found in tag '{element.tag}'.")
+		else:
+			return default
 
 	def _ParseTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
 		newTestsuite = self._TESTSUITE(
-			self._ParseName(testsuitesNode),
-			self._ParseHostname(testsuitesNode, required=False),
-			self._ParseTimestamp(testsuitesNode, required=False),
-			self._ParseTime(testsuitesNode, required=False),
+			self._ParseName(testsuitesNode, optional=False),
+			self._ParseHostname(testsuitesNode, optional=True),
+			self._ParseTimestamp(testsuitesNode, optional=True),
+			self._ParseTime(testsuitesNode, optional=True),
 			parent=parent
 		)
 
-		# if self._readerMode is JUnitReaderMode.Default:
-		# 	currentTestsuite = parent
-		# elif self._readerMode is JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName:
-		# 	currentTestsuite = newTestsuite
-		# else:
-		# 	raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
+		if False:  # self._readerMode is JUnitReaderMode.
+			self._tests = self._ParseTests(testsuitesNode)
+			self._skipped = self._ParseSkipped(testsuitesNode)
+			self._errored = self._ParseErrors(testsuitesNode)
+			self._failed = self._ParseFailures(testsuitesNode)
+			self._assertionCount = self._ParseAssertions(testsuitesNode)
 
 		self._ParseTestsuiteChildren(testsuitesNode, newTestsuite)
 
@@ -973,19 +1022,15 @@ class Document(TestsuiteSummary, ut_Document):
 				self._ParseTestcase(newTestsuite, node)
 
 	def _ParseTestcase(self, parent: Testsuite, testcaseNode: _Element) -> None:
-		name = self._ParseName(testcaseNode, required=True)
-		className = self._ParseClassname(testcaseNode, required=True)
-		time = self._ParseTime(testcaseNode)
-
-		# if self._readerMode is JUnitReaderMode.Default:
-		# 	currentTestsuite = self
-		# elif self._readerMode is JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName:
-		# 	currentTestsuite = parentTestsuite
-		# else:
-		# 	raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
-
+		className = self._ParseClassname(testcaseNode, optional=False)
 		testclass = self._FindOrCreateTestclass(parent, className)
-		newTestcase = self._TESTCASE(name, duration=time, parent=testclass)
+
+		newTestcase = self._TESTCASE(
+			self._ParseName(testcaseNode, optional=False),
+			self._ParseTime(testcaseNode, optional=False),
+			assertionCount=self._ParseAssertions(testcaseNode),
+			parent=testclass
+		)
 
 		self._ParseTestcaseChildren(testcaseNode, newTestcase)
 
@@ -1082,6 +1127,8 @@ class Document(TestsuiteSummary, ut_Document):
 			errorElement = SubElement(testcaseElement, "error")
 
 	def __str__(self) -> str:
+		moduleName = self.__module__.split(".")[-1]
+		className = self.__class__.__name__
 		return (
-			f"<JUnit.Document {self._name} ({self._path}): {self._status.name} - suites/tests:{self.TestsuiteCount}/{self.TestcaseCount}>"
+			f"<{moduleName}{className} {self._name} ({self._path}): {self._status.name} - suites/tests:{self.TestsuiteCount}/{self.TestcaseCount}>"
 		)

@@ -40,11 +40,12 @@ from typing          import Optional as Nullable, Iterable, Dict, Any, Generator
 
 from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element, _Comment
 from lxml.etree                 import ElementTree, Element, SubElement, tostring
+from pyTooling.Common           import getFullyQualifiedName, getResourceFile
 from pyTooling.Decorators       import export, readonly
 from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmethod
 from pyTooling.Tree             import Node
 
-from pyEDAA.Reports             import resources, getResourceFile
+from pyEDAA.Reports             import resources
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, \
 	TestsuiteKind
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, IterationScheme
@@ -72,7 +73,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			raise TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			raise ex
 
 		# TODO: check parameter parent
 
@@ -148,7 +151,9 @@ class Testcase(BaseWithProperties):
 	):
 		if parent is not None:
 			if not isinstance(parent, Testclass):
-				raise TypeError(f"Parameter 'parent' is not of type 'Class'.")
+				ex = TypeError(f"Parameter 'parent' is not of type 'Testclass'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
 
 			parent._testcases[name] = self
 
@@ -323,7 +328,9 @@ class Testclass(Base):
 	):
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
-				raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
 
 			parent._testclasses[classname] = self
 
@@ -412,7 +419,9 @@ class Testsuite(TestsuiteBase):
 	):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
-				raise TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
+				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
 
 			parent._testsuites[name] = self
 

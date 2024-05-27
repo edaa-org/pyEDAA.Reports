@@ -32,21 +32,16 @@
 """
 Reader for JUnit unit testing summary files in XML format.
 """
-from datetime        import datetime, timedelta
-from enum            import Flag
-from pathlib         import Path
-from time            import perf_counter_ns
-from typing import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
+from pathlib              import Path
+from time                 import perf_counter_ns
+from typing               import Optional as Nullable, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
-from lxml.etree                 import ElementTree, Element, SubElement, tostring, _Element
-from pyTooling.Decorators       import export, readonly
-from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmethod
-from pyTooling.Tree             import Node
+from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
+from pyTooling.Decorators import export
 
-from pyEDAA.Reports import fullyQualifiedName
-from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, TestsuiteKind
-from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, IterationScheme
-from pyEDAA.Reports.Unittesting import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, Testcase as ut_Testcase
+from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind
+from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
+from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, Testcase as ut_Testcase
 from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, Testsuite as ju_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit import TestsuiteSummary as ju_TestsuiteSummary, Document as ju_Document
 
@@ -58,156 +53,27 @@ TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
 
 @export
 class Testcase(ju_Testcase):
-	def __init__(
-		self,
-		name: str,
-		duration:  Nullable[timedelta] = None,
-		status: TestcaseStatus = TestcaseStatus.Unknown,
-		assertionCount: Nullable[int] = None,
-		parent: Nullable["Testclass"] = None
-	):
-		if parent is not None:
-			pass
-			# if not isinstance(parent, Testclass):
-			# 	raise TypeError(f"Parameter 'parent' is not of type 'Testclass'.")
-				#ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
-				#raise ex
-
-		super().__init__(name, duration, status, assertionCount, parent)
-
-	def Copy(self) -> "Testcase":
-		return self.__class__(
-			self._name,
-			self._duration,
-			self._status,
-			self._assertionCount
-		)
-
-	def Aggregate(self, strict: bool = True) -> None:  # TestcaseAggregateReturnType:
-		if self._status is TestcaseStatus.Unknown:
-			if self._assertionCount is None:
-				self._status = TestcaseStatus.Passed
-			elif self._assertionCount == 0:
-				self._status = TestcaseStatus.Weak
-			else:
-				self._status = TestcaseStatus.Failed
-
-				if strict:
-					self._status = self._status & ~TestcaseStatus.Passed | TestcaseStatus.Failed
-
-			# TODO: check for setup errors
-			# TODO: check for teardown errors
-
-	@classmethod
-	def FromTestcase(cls, testcase: ut_Testcase) -> "Testcase":
-		return cls(
-			testcase._name,
-			duration=testcase._testDuration,
-			status= testcase._status,
-			assertionCount=testcase._assertionCount
-		)
-
-	def ToTestcase(self) -> ut_Testcase:
-		return ut_Testcase(
-			self._name,
-			testDuration=self._duration,
-			status=self._status,
-			assertionCount=self._assertionCount
-		)
-
-	def ToTree(self) -> Node:
-		node = Node(value=self._name)
-		node["status"] = self._status
-		node["assertionCount"] = self._assertionCount
-		node["duration"] = self._duration
-
-		return node
-
-	def __str__(self) -> str:
-		return (f"<PyTestJUnit.Testcase {self._name}: {self._status.name} - asserts:{self._assertionCount}>")
+	pass
 
 
 @export
 class Testclass(ju_Testclass):
-	def __init__(
-		self,
-		classname: str,
-		testcases: Nullable[Iterable["Testcase"]] = None,
-		parent: Nullable["Testsuite"] = None
-	):
-		if parent is not None:
-			if not isinstance(parent, Testsuite):
-				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
-				ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
-				raise ex
-
-		super().__init__(classname, testcases, parent)
-
-	def ToTestsuite(self) -> ut_Testsuite:
-		return ut_Testsuite(
-			self._name,
-			TestsuiteKind.Class,
-			# startTime=self._startTime,
-			# totalDuration=self._duration,
-			# status=self._status,
-			testcases=(tc.ToTestcase() for tc in self._testcases.values())
-		)
-
-	def ToTree(self) -> Node:
-		node = Node(
-			value=self._name,
-			children=(tc.ToTree() for tc in self._testcases.values())
-		)
-
-		return node
-
-	def __str__(self) -> str:
-		return (
-			f"<PyTestJUnit.Class {self._name}: {len(self._testcases)}>"
-		)
+	pass
 
 
 @export
 class Testsuite(ju_Testsuite):
-	def __init__(
-		self,
-		name: str,
-		hostname: Nullable[str] = None,
-		startTime: Nullable[datetime] = None,
-		duration:  Nullable[timedelta] = None,
-		status: TestsuiteStatus = TestsuiteStatus.Unknown,
-		testclasses: Nullable[Iterable["Testclass"]] = None,
-		parent: Nullable["TestsuiteSummary"] = None
-	):
-		if parent is not None:
-			pass
-			# if not isinstance(parent, TestsuiteSummary):
-			# 	raise TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
-		#		ex.add_note(f"Got type '{fullyQualifiedName(parent)}'.")
-		#		raise ex
-
-		super().__init__(name, hostname, startTime, duration, status, testclasses, parent)
-
-	def Copy(self) -> "Testsuite":
-		return self.__class__(
-			self._name,
-			self._hostname,
-			self._startTime,
-			self._duration,
-			self._status
-		)
-
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
 		tests, skipped, errored, failed, passed = super().Aggregate()
 
-		for testcase in self._testclasses.values():
-			_ = testcase.Aggregate(strict)
+		for testclass in self._testclasses.values():
+			_ = testclass.Aggregate(strict)
 
 			tests += 1
 
-			status = testcase._status
+			status = testclass._status
 			if status is TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+				raise UnittestException(f"Found testclass '{testclass._name}' with state 'Unknown'.")
 			elif status is TestcaseStatus.Skipped:
 				skipped += 1
 			elif status is TestcaseStatus.Errored:
@@ -217,9 +83,9 @@ class Testsuite(ju_Testsuite):
 			elif status is TestcaseStatus.Failed:
 				failed += 1
 			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+				raise UnittestException(f"Found testclass '{testclass._name}' with unsupported state '{status}'.")
 			else:
-				raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
+				raise UnittestException(f"Internal error for testclass '{testclass._name}', field '_status' is '{status}'.")
 
 		self._tests = tests
 		self._skipped = skipped
@@ -325,34 +191,9 @@ class Testsuite(ju_Testsuite):
 
 		return testsuite
 
-	def ToTree(self) -> Node:
-		node = Node(
-			value=self._name,
-			children=(cls.ToTree() for cls in self._testclasses.values())
-		)
-		node["startTime"] = self._startTime
-		node["duration"] = self._duration
-
-		return node
-
-	def __str__(self) -> str:
-		return (
-			f"<PyTestJUnit.Testsuite {self._name}: {self._status.name} - tests:{self._tests}>"
-		)
-
 
 @export
 class TestsuiteSummary(ju_TestsuiteSummary):
-	def __init__(
-		self,
-		name: str,
-		startTime: Nullable[datetime] = None,
-		duration:  Nullable[timedelta] = None,
-		status: TestsuiteStatus = TestsuiteStatus.Unknown,
-		testsuites: Nullable[Iterable[Testsuite]] = None
-	):
-		super().__init__(name, startTime, duration, status, testsuites)
-
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
 		tests, skipped, errored, failed, passed = super().Aggregate()
 
@@ -404,21 +245,6 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 			totalDuration=self._duration,
 			status=self._status,
 			testsuites=(testsuite.ToTestsuite() for testsuite in self._testsuites.values())
-		)
-
-	def ToTree(self) -> Node:
-		node = Node(
-			value=self._name,
-			children=(ts.ToTree() for ts in self._testsuites.values())
-		)
-		node["startTime"] = self._startTime
-		node["duration"] = self._duration
-
-		return node
-
-	def __str__(self) -> str:
-		return (
-			f"<PyTestJUnit.TestsuiteSummary {self._name}: {self._status.name} - tests:{self._tests}>"
 		)
 
 
@@ -477,9 +303,9 @@ class Document(ju_Document):
 		startConversion = perf_counter_ns()
 		rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name = self._ParseName(rootElement, required=False)
-		self._startTime =self._ParseTimestamp(rootElement, required=False)
-		self._duration = self._ParseTime(rootElement, required=False)
+		self._name = self._ParseName(rootElement, optional=True)
+		self._startTime =self._ParseTimestamp(rootElement, optional=True)
+		self._duration = self._ParseTime(rootElement, optional=True)
 
 		# tests = rootElement.getAttribute("tests")
 		# skipped = rootElement.getAttribute("skipped")
@@ -496,38 +322,14 @@ class Document(ju_Document):
 
 	def _ParseTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
 		newTestsuite = Testsuite(
-			self._ParseName(testsuitesNode),
-			self._ParseHostname(testsuitesNode),
-			self._ParseTimestamp(testsuitesNode),
-			self._ParseTime(testsuitesNode),
+			self._ParseName(testsuitesNode, optional=False),
+			self._ParseHostname(testsuitesNode, optional=False),
+			self._ParseTimestamp(testsuitesNode, optional=False),
+			self._ParseTime(testsuitesNode, optional=False),
 			parent=parent
 		)
 
-		# if self._readerMode is JUnitReaderMode.Default:
-		# 	currentTestsuite = parent
-		# elif self._readerMode is JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName:
-		# 	currentTestsuite = newTestsuite
-		# else:
-		# 	raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
-
 		self._ParseTestsuiteChildren(testsuitesNode, newTestsuite)
-
-	def _ParseTestcase(self, parent: Testsuite, testcaseNode: _Element) -> None:
-		name = self._ParseName(testcaseNode)
-		className = self._ParseClassname(testcaseNode)
-		time = self._ParseTime(testcaseNode)
-
-		# if self._readerMode is JUnitReaderMode.Default:
-		# 	currentTestsuite = self
-		# elif self._readerMode is JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName:
-		# 	currentTestsuite = parentTestsuite
-		# else:
-		# 	raise UnittestException(f"Unknown reader mode '{self._readerMode}'.")
-
-		testclass = self._FindOrCreateTestclass(parent, className)
-		newTestcase = Testcase(name, duration=time, parent=testclass)
-
-		self._ParseTestcaseChildren(testcaseNode, newTestcase)
 
 	def Generate(self, overwrite: bool = False) -> None:
 		if self._xmlDocument is not None:
@@ -589,8 +391,3 @@ class Document(ju_Document):
 			skippedElement = SubElement(testcaseElement, "skipped")
 		else:
 			errorElement = SubElement(testcaseElement, "error")
-
-	def __str__(self) -> str:
-		return (
-			f"<PyTestJUnit.Document {self._name} ({self._path}): {self._status.name} - suites/tests:{self.TestsuiteCount}/{self.TestcaseCount}>"
-		)
