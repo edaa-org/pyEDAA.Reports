@@ -41,7 +41,7 @@ from pyTooling.Decorators import export
 
 from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
-from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, Testcase as ut_Testcase
+from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, Testsuite as ju_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit import TestsuiteSummary as ju_TestsuiteSummary, Document as ju_Document
 
