@@ -33,9 +33,9 @@ from datetime import timedelta
 from enum     import Enum, auto
 from pathlib  import Path
 from time     import perf_counter_ns
-from typing   import Optional as Nullable, Dict, Iterator
+from typing import Optional as Nullable, Dict, Iterator, Iterable
 
-from ruamel.yaml           import YAML
+from ruamel.yaml import YAML, CommentedMap
 from pyTooling.Decorators  import readonly, export
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Tree        import Node
@@ -66,25 +66,65 @@ class AlertLogStatus(Enum):
 
 
 @export
-class Base(metaclass=ExtendedType, slots=True):
-	pass
-
-
-@export
-class LoggingGroup(Base):
-	_parent: "LoggingGroup"
+class AlertLogGroup(metaclass=ExtendedType, slots=True):
+	_parent: "AlertLogGroup"
 	_name: str
-	_children: Dict[str, "LoggingGroup"]
-	_afirmations: int
+	_children: Dict[str, "AlertLogGroup"]
 
-	def __init__(self, name: str, afirmations: int = 0, parent: Nullable["LoggingGroup"] = None) -> None:
+	_status: AlertLogStatus
+	_totalErrors: int
+	_alertCountWarnings: int
+	_alertCountErrors: int
+	_alertCountFailures: int
+	_passedCount: int
+	_affirmCount: int
+	_requirementsPassed: int
+	_requirementsGoal: int
+	_disabledAlertCountWarnings: int
+	_disabledAlertCountErrors: int
+	_disabledAlertCountFailures: int
+
+	def __init__(
+		self,
+		name: str,
+		status: AlertLogStatus = AlertLogStatus.Unknown,
+		totalErrors: int = 0,
+		alertCountWarnings: int = 0,
+		alertCountErrors: int = 0,
+		alertCountFailures: int = 0,
+		passedCount: int = 0,
+		affirmCount: int = 0,
+		requirementsPassed: int = 0,
+		requirementsGoal: int = 0,
+		disabledAlertCountWarnings: int = 0,
+		disabledAlertCountErrors: int = 0,
+		disabledAlertCountFailures: int = 0,
+		children: Iterable["AlertLogGroup"] = None,
+		parent: Nullable["AlertLogGroup"] = None
+	) -> None:
 		self._parent = parent
 		self._name = name
 		self._children = {}
-		self._afirmations = afirmations
+		if children is not None:
+			for child in children:
+				self._children[child._name] = child
+				child._parent = self
+
+		self._status = status
+		self._totalErrors = totalErrors
+		self._alertCountWarnings = alertCountWarnings
+		self._alertCountErrors = alertCountErrors
+		self._alertCountFailures = alertCountFailures
+		self._passedCount = passedCount
+		self._affirmCount = affirmCount
+		self._requirementsPassed = requirementsPassed
+		self._requirementsGoal = requirementsGoal
+		self._disabledAlertCountWarnings = disabledAlertCountWarnings
+		self._disabledAlertCountErrors = disabledAlertCountErrors
+		self._disabledAlertCountFailures = disabledAlertCountFailures
 
 	@readonly
-	def Parent(self) -> Nullable["LoggingGroup"]:
+	def Parent(self) -> Nullable["AlertLogGroup"]:
 		return self._parent
 
 	@readonly
@@ -92,13 +132,61 @@ class LoggingGroup(Base):
 		return self._name
 
 	@readonly
-	def Affirmations(self) -> int:
-		return self._afirmations
+	def Status(self) -> AlertLogStatus:
+		return self._status
 
-	def __iter__(self) -> Iterator["LoggingGroup"]:
+	# @readonly
+	# def Affirmations(self) -> int:
+	# 	return self._afirmations
+
+	@readonly
+	def TotalErrors(self) -> int:
+		return self._totalErrors
+
+	@readonly
+	def AlertCountWarnings(self) -> int:
+		return self._alertCountWarnings
+
+	@readonly
+	def AlertCountErrors(self) -> int:
+		return self._alertCountErrors
+
+	@readonly
+	def AlertCountFailures(self) -> int:
+		return self._alertCountFailures
+
+	@readonly
+	def PassedCount(self) -> int:
+		return self._passedCount
+
+	@readonly
+	def AffirmCount(self) -> int:
+		return self._affirmCount
+
+	@readonly
+	def RequirementsPassed(self) -> int:
+		return self._requirementsPassed
+
+	@readonly
+	def RequirementsGoal(self) -> int:
+		return self._requirementsGoal
+
+	@readonly
+	def DisabledAlertCountWarnings(self) -> int:
+		return self._disabledAlertCountWarnings
+
+	@readonly
+	def DisabledAlertCountErrors(self) -> int:
+		return self._disabledAlertCountErrors
+
+	@readonly
+	def DisabledAlertCountFailures(self) -> int:
+		return self._disabledAlertCountFailures
+
+	def __iter__(self) -> Iterator["AlertLogGroup"]:
 		return self._chilren.values()
 
-	def __getitem__(self, name: str) -> "LoggingGroup":
+	def __getitem__(self, name: str) -> "AlertLogGroup":
 		return self._chilren[name]
 
 	def ToTree(self) -> Node:
@@ -108,24 +196,17 @@ class LoggingGroup(Base):
 
 
 @export
-class Document(Base):
+class Document(AlertLogGroup):
 	_path: Path
 	_yamlDocument: Nullable[YAML]
-
-	_name: str
-	_status: AlertLogStatus
-	_children: Dict[str, LoggingGroup]
 
 	_analysisDuration: float  #: TODO: replace by Timer; should be timedelta?
 	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
 
 	def __init__(self, filename: Path, parse: bool = False) -> None:
+		super().__init__("", parent=None)
 		self._path = filename
 		self._yamlDocument = None
-
-		self._name = None
-		self._status = AlertLogStatus.Unknown
-		self._children = {}
 
 		self._analysisDuration = -1.0
 		self._modelConversion = -1.0
@@ -172,29 +253,30 @@ class Document(Base):
 		self._name = self._yamlDocument["Name"]
 		self._status = AlertLogStatus.Parse(self._yamlDocument["Status"])
 		for child in self._yamlDocument["Children"]:
-			group  = self._ParseGroup(child, self)
-			self._children[group._name] = group
+			alertLogGroup = self._ParseAlertLogGroup(child)
+			self._children[alertLogGroup._name] = alertLogGroup
+			alertLogGroup._parent = self
 
-		# self.Aggregate()
 		endConversation = perf_counter_ns()
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
-	def _ParseGroup(self, child, parent: Base) -> LoggingGroup:
-		group = LoggingGroup(
+	def _ParseAlertLogGroup(self, child: CommentedMap) -> AlertLogGroup:
+		results = child["Results"]
+		alertLogGroup = AlertLogGroup(
 			child["Name"],
-			0,
-			parent
+			AlertLogStatus.Parse(child["Status"]),
+			int(results["TotalErrors"]),
+			int(results["AlertCount"]["Warning"]),
+			int(results["AlertCount"]["Error"]),
+			int(results["AlertCount"]["Failure"]),
+			int(results["PassedCount"]),
+			int(results["AffirmCount"]),
+			int(results["RequirementsPassed"]),
+			int(results["RequirementsGoal"]),
+			int(results["DisabledAlertCount"]["Warning"]),
+			int(results["DisabledAlertCount"]["Error"]),
+			int(results["DisabledAlertCount"]["Failure"]),
+			children=(self._ParseAlertLogGroup(ch) for ch in child["Children"])
 		)
-		for ch in child["Children"]:
-			grp  = self._ParseGroup(ch, self)
-			group._children[grp._name] = grp
 
-		return group
-
-	def ToTree(self) -> Node:
-		root = Node(
-			value=self._name,
-			children=(child.ToTree() for child in self._children.values())
-		)
-
-		return root
+		return alertLogGroup

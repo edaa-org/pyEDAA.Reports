@@ -58,6 +58,11 @@ class Document(TestCase):
 		self.assertEqual(invalidTimedelta, doc.AnalysisDuration)
 		self.assertEqual(invalidTimedelta, doc.ModelConversionDuration)
 
+		print()
+		print(f"Statistics:")
+		print(f"  Times: YAML parsing: {doc.AnalysisDuration}s   convert: {doc.ModelConversionDuration}s")
+
+
 	def test_Create_WithParse(self) -> None:
 		print()
 		zeroTime = timedelta()
@@ -71,3 +76,7 @@ class Document(TestCase):
 
 		tree = doc.ToTree()
 		print(tree.Render())
+
+		print()
+		print(f"Statistics:")
+		print(f"  Times: YAML parsing: {doc.AnalysisDuration}s   convert: {doc.ModelConversionDuration}s")
