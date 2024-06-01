@@ -58,7 +58,7 @@ class JUnitGeneratedByOSVVM(TestCase):
 
 		print()
 		print(f"Statistics:")
-		print(f"  Times: MiniDOM: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
+		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
 	def test_RunAllTests(self):
 		print()
@@ -75,7 +75,7 @@ class JUnitGeneratedByOSVVM(TestCase):
 
 		print()
 		print(f"Statistics:")
-		print(f"  Times: MiniDOM: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
+		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
 
 class YAMLGeneratedByOSVVM(TestCase):

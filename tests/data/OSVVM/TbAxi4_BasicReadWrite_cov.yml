@@ -1,0 +1,895 @@
+Version: 1.0
+Coverage: 100.00
+Settings: 
+  WritePassFail: 0
+Models: 
+  - Name: "WriteAddressDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1296437502, 1511131805]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteAddressDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [628491352, 1843851328]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteAddressDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [963124330, 867366020]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteDataDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1992752071, 1456192725]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteDataDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1940533339, 2055473551]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteDataDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1136972191, 1113371690]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteResponseDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1935614252, 1231610140]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteResponseDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [628491352, 1519532790]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 1}
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteResponseDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1682240380, 1538165535]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadAddressDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1296437502, 1383831417]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadAddressDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1712199934, 1717908421]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadAddressDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [963124330, 2144458818]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadDataDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1362522746, 1446320732]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadDataDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1940533339, 551584956]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 1}
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadDataDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [2118121841, 781495195]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteAddressDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [201959419, 353797856]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteAddressDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [779970012, 1610791482]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 1}
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteAddressDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1367125401, 794307227]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteDataDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [332594846, 475700727]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteDataDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1603832055, 1829461270]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 1}
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteDataDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1603111803, 325466259]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteResponseDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [216688206, 1846275625]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteResponseDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [779970012, 367264995]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "WriteResponseDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [2123892427, 1305105689]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadAddressDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [201959419, 1150771571]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadAddressDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1391413899, 1644849628]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 1}
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadAddressDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1367125401, 1163966820]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 2
+      FieldNames: 
+        - "Bin1"
+        - "Bin2"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadDataDelayCov BurstLength"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1832458720, 1220308451]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 10}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadDataDelayCov BurstDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1603832055, 1911162924]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 2, Max: 5}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
+  - Name: "ReadDataDelayCov BeatDelay"
+    TestCases: 
+      - "TbAxi4_BasicReadWrite"
+    Coverage: 0.00
+    Settings: 
+      CovWeight: 0
+      Goal: 100.0
+      WeightMode: "REMAIN"
+      Seeds: [1024899620, 41944993]
+      CountMode: "COUNT_FIRST"
+      IllegalMode: "ILLEGAL_ON"
+      Threshold: 45.0
+      ThresholdEnable: "FALSE"
+      TotalCovCount: 0
+      TotalCovGoal: 1
+    BinInfo: 
+      Dimensions: 1
+      FieldNames: 
+        - "Bin1"
+      NumBins: 1
+    Bins: 
+      - Name: ""
+        Type: "COUNT"
+        Range: 
+          - {Min: 0, Max: 0}
+        Count: 0
+        AtLeast: 1
+        PercentCov: 0.0000
+
