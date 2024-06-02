@@ -73,7 +73,7 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 	_yamlDocument: Nullable[YAML]
 
 	def __init__(self, yamlReportFile: Path, parse: bool = False) -> None:
-		super().__init__("Unprocessed JUnit XML file")
+		super().__init__("Unprocessed OSVVM YAML file")
 		Document.__init__(self, yamlReportFile)
 
 		self._yamlDocument = None
@@ -120,7 +120,7 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 	def Parse(self) -> None:
 		if self._yamlDocument is None:
 			ex = UnittestException(f"OSVVM YAML file '{self._path}' needs to be read and analyzed by a YAML parser.")
-			ex.add_note(f"Call 'OsvvmYamlDocument.Read()' or create document using 'OsvvmYamlDocument(path, parse=True)'.")
+			ex.add_note(f"Call 'Document.Read()' or create document using 'Document(path, parse=True)'.")
 			raise ex
 
 		startConversion = perf_counter_ns()
