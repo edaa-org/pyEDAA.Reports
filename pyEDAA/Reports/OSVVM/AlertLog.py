@@ -66,7 +66,9 @@ class AlertLogStatus(Enum):
 
 
 def _format(node: Node) -> str:
-	return f"{node._value}: {node["TotalErrors"]}={node["AlertCountFailures"]}/{node["AlertCountErrors"]}/{node["AlertCountWarnings"]} {node["PassedCount"]}/{node["AffirmCount"]}"
+	return f"{node._value}: {node['TotalErrors']}={node['AlertCountFailures']}/{node['AlertCountErrors']}/{node['AlertCountWarnings']} {node['PassedCount']}/{node['AffirmCount']}"
+	# TODO: Python 3.12+
+	# return f"{node._value}: {node["TotalErrors"]}={node["AlertCountFailures"]}/{node["AlertCountErrors"]}/{node["AlertCountWarnings"]} {node["PassedCount"]}/{node["AffirmCount"]}"
 
 
 @export
