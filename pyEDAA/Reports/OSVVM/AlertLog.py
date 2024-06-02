@@ -65,6 +65,10 @@ class AlertLogStatus(Enum):
 		return self is self.Passed
 
 
+def _format(node: Node) -> str:
+	return f"{node._value}: {node["TotalErrors"]}={node["AlertCountFailures"]}/{node["AlertCountErrors"]}/{node["AlertCountWarnings"]} {node["PassedCount"]}/{node["AffirmCount"]}"
+
+
 @export
 class AlertLogGroup(metaclass=ExtendedType, slots=True):
 	_parent: "AlertLogGroup"
@@ -190,7 +194,19 @@ class AlertLogGroup(metaclass=ExtendedType, slots=True):
 		return self._chilren[name]
 
 	def ToTree(self) -> Node:
-		node = Node(value=self._name, children=(child.ToTree() for child in self._children.values()))
+		node = Node(
+			value=self._name,
+			keyValuePairs={
+				"TotalErrors": self._totalErrors,
+				"AlertCountFailures":  self._alertCountFailures,
+				"AlertCountErrors": self._alertCountErrors,
+				"AlertCountWarnings": self._alertCountWarnings,
+				"PassedCount": self._passedCount,
+				"AffirmCount": self._affirmCount
+			},
+			children=(child.ToTree() for child in self._children.values()),
+			format=_format
+		)
 
 		return node
 
