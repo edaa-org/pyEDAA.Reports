@@ -32,6 +32,7 @@
 from datetime              import timedelta, datetime
 from enum                  import Flag, IntEnum
 from pathlib               import Path
+from sys                   import version_info
 from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar
 
 from pyTooling.Common      import getFullyQualifiedName
@@ -193,7 +194,8 @@ class Base(metaclass=ExtendedType, slots=True):
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
 			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 
 		self._parent = parent
@@ -338,7 +340,8 @@ class Testcase(Base):
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testcases[name] = self
@@ -483,7 +486,8 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testsuites[name] = self

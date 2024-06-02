@@ -35,6 +35,7 @@ Reader for JUnit unit testing summary files in XML format.
 from datetime        import datetime, timedelta
 from enum            import Flag
 from pathlib         import Path
+from sys             import version_info
 from time            import perf_counter_ns
 from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
@@ -95,7 +96,8 @@ class Base(metaclass=ExtendedType, slots=True):
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
 			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 
 		# TODO: check parameter parent
@@ -173,7 +175,8 @@ class Testcase(BaseWithProperties):
 		if parent is not None:
 			if not isinstance(parent, Testclass):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testclass'.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testcases[name] = self
@@ -442,7 +445,8 @@ class Testsuite(TestsuiteBase):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testsuites[name] = self
@@ -858,8 +862,9 @@ class Document(TestsuiteSummary, ut_Document):
 
 			self._xmlDocument = junitDocument
 		except XMLSyntaxError as ex:
-			for logEntry in junitParser.error_log:
-				ex.add_note(str(logEntry))
+			if version_info >= (3, 11):  # pragma: no cover
+				for logEntry in junitParser.error_log:
+					ex.add_note(str(logEntry))
 			raise UnittestException(f"XML syntax or validation error for '{self._path}'.") from ex
 		except Exception as ex:
 			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
