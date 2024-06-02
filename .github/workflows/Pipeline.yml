@@ -31,6 +31,28 @@ jobs:
           name: Java-Ant-JUnit4
           path: examples/Java/JUnit/build/*.xml
 
+  Java-Maven-JUnit5:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏬ Checkout repository
+        uses: actions/checkout@v4
+      - name: ☕ Set up JDK 21 for x64
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: x64
+      - name: ✅ Run the Maven 'junit' target
+        run: |
+          cd examples/Java/JUnit
+      - name: List generated XML reports
+        run: ls -lAh examples/Java/JUnit/build/*.xml
+      - name: 📤 Upload JUnit XML files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Java-Maven-JUnit5
+          path: examples/Java/JUnit/build/*.xml
+
   Cpp-GoogleTest:
     runs-on: ubuntu-latest
     steps:
@@ -140,6 +162,7 @@ jobs:
     needs:
       - Package
       - Java-Ant-JUnit4
+      - Java-Maven-JUnit5
       - Cpp-GoogleTest
       - Python-pytest
     runs-on: ubuntu-latest
