@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites name="OSVVMLibraries_RunAllTests" timestamp="2024-06-01T07:56:17+02:00" id="2024.05" time="381.852"	tests="285" failures="0" errors="0" skipped="0">
+	<testsuite name="StreamTransactionPkg" time="18.050" tests="15" failures="0" errors="0" skipped="0">
+		<testcase name="TbStream_SendGet1" classname="StreamTransactionPkg" time="1.116"></testcase>
+		<testcase name="TbStream_SendGetAsync1" classname="StreamTransactionPkg" time="0.960"></testcase>
+		<testcase name="TbStream_SendGetAll1" classname="StreamTransactionPkg" time="0.868"></testcase>
+		<testcase name="TbStream_SendGetAllAsync1" classname="StreamTransactionPkg" time="0.830"></testcase>
+		<testcase name="TbAxi_SendGetAllParam1" classname="StreamTransactionPkg" time="0.843"></testcase>
+		<testcase name="TbAxi_SendGetAllParamAsync1" classname="StreamTransactionPkg" time="1.060"></testcase>
+		<testcase name="TbStream_GotBurst1" classname="StreamTransactionPkg" time="0.850"></testcase>
+		<testcase name="TbStream_SendCheckBurstVector1" classname="StreamTransactionPkg" time="0.789"></testcase>
+		<testcase name="TbStream_SendCheckBurstVectorAsync1" classname="StreamTransactionPkg" time="0.804"></testcase>
+		<testcase name="TbStream_ReleaseAcquireTransmitter1" classname="StreamTransactionPkg" time="0.965"></testcase>
+		<testcase name="TbStream_ReleaseAcquireReceiver1" classname="StreamTransactionPkg" time="0.793"></testcase>
+		<testcase name="TbStream_MultipleDriversTransmitter1" classname="StreamTransactionPkg" time="0.826"></testcase>
+		<testcase name="TbStream_MultipleDriversReceiver1" classname="StreamTransactionPkg" time="0.800"></testcase>
+		<testcase name="TbAxi_SetBurstMode1" classname="StreamTransactionPkg" time="0.773"></testcase>
+		<testcase name="TbAxi_SetModelOptions1" classname="StreamTransactionPkg" time="0.773"></testcase>
+	</testsuite>
+	<testsuite name="StreamTransactionArrayPkg" time="14.399" tests="13" failures="0" errors="0" skipped="0">
+		<testcase name="TbStream_SendGet1" classname="StreamTransactionArrayPkg" time="0.831"></testcase>
+		<testcase name="TbStream_SendGetAsync1" classname="StreamTransactionArrayPkg" time="0.813"></testcase>
+		<testcase name="TbStream_SendGetAll1" classname="StreamTransactionArrayPkg" time="0.831"></testcase>
+		<testcase name="TbStream_SendGetAllAsync1" classname="StreamTransactionArrayPkg" time="0.806"></testcase>
+		<testcase name="TbAxi_SendGetAllParam1" classname="StreamTransactionArrayPkg" time="0.800"></testcase>
+		<testcase name="TbAxi_SendGetAllParamAsync1" classname="StreamTransactionArrayPkg" time="0.812"></testcase>
+		<testcase name="TbStream_GotBurst1" classname="StreamTransactionArrayPkg" time="0.804"></testcase>
+		<testcase name="TbStream_ReleaseAcquireTransmitter1" classname="StreamTransactionArrayPkg" time="0.730"></testcase>
+		<testcase name="TbStream_ReleaseAcquireReceiver1" classname="StreamTransactionArrayPkg" time="0.733"></testcase>
+		<testcase name="TbStream_MultipleDriversTransmitter1" classname="StreamTransactionArrayPkg" time="0.751"></testcase>
+		<testcase name="TbStream_MultipleDriversReceiver1" classname="StreamTransactionArrayPkg" time="0.756"></testcase>
+		<testcase name="TbAxi_SetBurstMode1" classname="StreamTransactionArrayPkg" time="0.734"></testcase>
+		<testcase name="TbAxi_SetModelOptions1" classname="StreamTransactionArrayPkg" time="0.750"></testcase>
+	</testsuite>
+	<testsuite name="AddressBusTransactionPkg" time="57.346" tests="41" failures="0" errors="0" skipped="0">
+		<testcase name="TbAxi4_TransactionApiManager" classname="AddressBusTransactionPkg" time="1.003"></testcase>
+		<testcase name="TbAxi4_AlertLogIDManager" classname="AddressBusTransactionPkg" time="1.004"></testcase>
+		<testcase name="TbAxi4_ReleaseAcquireManager1" classname="AddressBusTransactionPkg" time="1.128"></testcase>
+		<testcase name="TbAxi4_MultipleDriversManager" classname="AddressBusTransactionPkg" time="0.973"></testcase>
+		<testcase name="TbAxi4_BasicReadWrite" classname="AddressBusTransactionPkg" time="1.067"></testcase>
+		<testcase name="TbAxi4_MemoryReadWrite1" classname="AddressBusTransactionPkg" time="1.091"></testcase>
+		<testcase name="TbAxi4_MemoryReadWrite2" classname="AddressBusTransactionPkg" time="1.021"></testcase>
+		<testcase name="TbAxi4_ReadPoll1" classname="AddressBusTransactionPkg" time="0.957"></testcase>
+		<testcase name="TbAxi4_RandomReadWrite" classname="AddressBusTransactionPkg" time="1.588"></testcase>
+		<testcase name="TbAxi4_RandomReadWriteByte1" classname="AddressBusTransactionPkg" time="1.545"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync1" classname="AddressBusTransactionPkg" time="0.975"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync2" classname="AddressBusTransactionPkg" time="0.969"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync3" classname="AddressBusTransactionPkg" time="1.016"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync4" classname="AddressBusTransactionPkg" time="0.971"></testcase>
+		<testcase name="TbAxi4_TransactionApiSubordinate" classname="AddressBusTransactionPkg" time="0.999"></testcase>
+		<testcase name="TbAxi4_AlertLogIDSubordinate" classname="AddressBusTransactionPkg" time="0.960"></testcase>
+		<testcase name="TbAxi4_ReleaseAcquireSubordinate1" classname="AddressBusTransactionPkg" time="0.966"></testcase>
+		<testcase name="TbAxi4_MultipleDriversSubordinate" classname="AddressBusTransactionPkg" time="1.013"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWrite1" classname="AddressBusTransactionPkg" time="0.985"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWrite2" classname="AddressBusTransactionPkg" time="0.974"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWrite3" classname="AddressBusTransactionPkg" time="0.977"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWriteAsync1" classname="AddressBusTransactionPkg" time="1.013"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWriteAsync2" classname="AddressBusTransactionPkg" time="0.973"></testcase>
+		<testcase name="TbAxi4_TransactionApiMemory" classname="AddressBusTransactionPkg" time="1.025"></testcase>
+		<testcase name="TbAxi4_AlertLogIDMemory" classname="AddressBusTransactionPkg" time="1.017"></testcase>
+		<testcase name="TbAxi4_ReleaseAcquireMemory1" classname="AddressBusTransactionPkg" time="1.000"></testcase>
+		<testcase name="TbAxi4_MultipleDriversMemory" classname="AddressBusTransactionPkg" time="0.989"></testcase>
+		<testcase name="TbAxi4_MemoryAsync" classname="AddressBusTransactionPkg" time="1.003"></testcase>
+		<testcase name="TbAxi4_TransactionApiManagerBurst" classname="AddressBusTransactionPkg" time="1.011"></testcase>
+		<testcase name="TbAxi4_TransactionApiMemoryBurst" classname="AddressBusTransactionPkg" time="1.003"></testcase>
+		<testcase name="TbAxi4_MemoryBurst1" classname="AddressBusTransactionPkg" time="1.004"></testcase>
+		<testcase name="TbAxi4_MemoryBurstPattern1" classname="AddressBusTransactionPkg" time="1.031"></testcase>
+		<testcase name="TbAxi4_MemoryBurstPattern2" classname="AddressBusTransactionPkg" time="1.148"></testcase>
+		<testcase name="TbAxi4_MemoryBurstByte1" classname="AddressBusTransactionPkg" time="1.016"></testcase>
+		<testcase name="TbAxi4_MemoryBurstBytePattern1" classname="AddressBusTransactionPkg" time="1.026"></testcase>
+		<testcase name="TbAxi4_MemoryBurstAsync1" classname="AddressBusTransactionPkg" time="1.038"></testcase>
+		<testcase name="TbAxi4_MemoryBurstAsyncPattern1" classname="AddressBusTransactionPkg" time="1.029"></testcase>
+		<testcase name="TbAxi4_MemoryBurstAsyncPattern2" classname="AddressBusTransactionPkg" time="1.133"></testcase>
+		<testcase name="TbAxi4_MemoryBurstSparse1" classname="AddressBusTransactionPkg" time="1.029"></testcase>
+		<testcase name="TbAxi4_MemoryReadWriteDemo1" classname="AddressBusTransactionPkg" time="1.227"></testcase>
+		<testcase name="TbAxi4_SetModelOptions1" classname="AddressBusTransactionPkg" time="1.054"></testcase>
+	</testsuite>
+	<testsuite name="AddressBusTransactionArrayPkg" time="60.550" tests="41" failures="0" errors="0" skipped="0">
+		<testcase name="TbAxi4_TransactionApiManager" classname="AddressBusTransactionArrayPkg" time="1.137"></testcase>
+		<testcase name="TbAxi4_AlertLogIDManager" classname="AddressBusTransactionArrayPkg" time="0.962"></testcase>
+		<testcase name="TbAxi4_ReleaseAcquireManager1" classname="AddressBusTransactionArrayPkg" time="1.017"></testcase>
+		<testcase name="TbAxi4_MultipleDriversManager" classname="AddressBusTransactionArrayPkg" time="0.953"></testcase>
+		<testcase name="TbAxi4_BasicReadWrite" classname="AddressBusTransactionArrayPkg" time="1.199"></testcase>
+		<testcase name="TbAxi4_MemoryReadWrite1" classname="AddressBusTransactionArrayPkg" time="0.997"></testcase>
+		<testcase name="TbAxi4_MemoryReadWrite2" classname="AddressBusTransactionArrayPkg" time="1.098"></testcase>
+		<testcase name="TbAxi4_ReadPoll1" classname="AddressBusTransactionArrayPkg" time="0.980"></testcase>
+		<testcase name="TbAxi4_RandomReadWrite" classname="AddressBusTransactionArrayPkg" time="1.665"></testcase>
+		<testcase name="TbAxi4_RandomReadWriteByte1" classname="AddressBusTransactionArrayPkg" time="1.573"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync1" classname="AddressBusTransactionArrayPkg" time="1.145"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync2" classname="AddressBusTransactionArrayPkg" time="0.984"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync3" classname="AddressBusTransactionArrayPkg" time="1.050"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync4" classname="AddressBusTransactionArrayPkg" time="1.151"></testcase>
+		<testcase name="TbAxi4_TransactionApiSubordinate" classname="AddressBusTransactionArrayPkg" time="1.044"></testcase>
+		<testcase name="TbAxi4_AlertLogIDSubordinate" classname="AddressBusTransactionArrayPkg" time="0.999"></testcase>
+		<testcase name="TbAxi4_ReleaseAcquireSubordinate1" classname="AddressBusTransactionArrayPkg"
+							time="1.052"></testcase>
+		<testcase name="TbAxi4_MultipleDriversSubordinate" classname="AddressBusTransactionArrayPkg"
+							time="1.036"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWrite1" classname="AddressBusTransactionArrayPkg" time="1.180"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWrite2" classname="AddressBusTransactionArrayPkg" time="1.103"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWrite3" classname="AddressBusTransactionArrayPkg" time="1.016"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWriteAsync1" classname="AddressBusTransactionArrayPkg"
+							time="1.130"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWriteAsync2" classname="AddressBusTransactionArrayPkg"
+							time="1.105"></testcase>
+		<testcase name="TbAxi4_TransactionApiMemory" classname="AddressBusTransactionArrayPkg" time="1.075"></testcase>
+		<testcase name="TbAxi4_AlertLogIDMemory" classname="AddressBusTransactionArrayPkg" time="1.132"></testcase>
+		<testcase name="TbAxi4_ReleaseAcquireMemory1" classname="AddressBusTransactionArrayPkg" time="1.021"></testcase>
+		<testcase name="TbAxi4_MultipleDriversMemory" classname="AddressBusTransactionArrayPkg" time="1.123"></testcase>
+		<testcase name="TbAxi4_MemoryAsync" classname="AddressBusTransactionArrayPkg" time="1.093"></testcase>
+		<testcase name="TbAxi4_TransactionApiManagerBurst" classname="AddressBusTransactionArrayPkg"
+							time="1.034"></testcase>
+		<testcase name="TbAxi4_TransactionApiMemoryBurst" classname="AddressBusTransactionArrayPkg" time="1.087"></testcase>
+		<testcase name="TbAxi4_MemoryBurst1" classname="AddressBusTransactionArrayPkg" time="1.164"></testcase>
+		<testcase name="TbAxi4_MemoryBurstPattern1" classname="AddressBusTransactionArrayPkg" time="1.080"></testcase>
+		<testcase name="TbAxi4_MemoryBurstPattern2" classname="AddressBusTransactionArrayPkg" time="1.087"></testcase>
+		<testcase name="TbAxi4_MemoryBurstByte1" classname="AddressBusTransactionArrayPkg" time="0.993"></testcase>
+		<testcase name="TbAxi4_MemoryBurstBytePattern1" classname="AddressBusTransactionArrayPkg" time="1.027"></testcase>
+		<testcase name="TbAxi4_MemoryBurstAsync1" classname="AddressBusTransactionArrayPkg" time="1.056"></testcase>
+		<testcase name="TbAxi4_MemoryBurstAsyncPattern1" classname="AddressBusTransactionArrayPkg" time="1.052"></testcase>
+		<testcase name="TbAxi4_MemoryBurstAsyncPattern2" classname="AddressBusTransactionArrayPkg" time="1.088"></testcase>
+		<testcase name="TbAxi4_MemoryBurstSparse1" classname="AddressBusTransactionArrayPkg" time="1.053"></testcase>
+		<testcase name="TbAxi4_MemoryReadWriteDemo1" classname="AddressBusTransactionArrayPkg" time="1.201"></testcase>
+		<testcase name="TbAxi4_SetModelOptions1" classname="AddressBusTransactionArrayPkg" time="1.047"></testcase>
+	</testsuite>
+	<testsuite name="InterruptHandler_Gen" time="9.822" tests="6" failures="0" errors="0" skipped="0">
+		<testcase name="TbAb_Interrupt1" classname="InterruptHandler_Gen" time="1.228"></testcase>
+		<testcase name="TbAb_Interrupt2" classname="InterruptHandler_Gen" time="1.251"></testcase>
+		<testcase name="TbAb_Interrupt3_NUM_INTERRUPTS_2" classname="InterruptHandler_Gen" time="1.244"></testcase>
+		<testcase name="TbAb_InterruptBurst1" classname="InterruptHandler_Gen" time="1.111"></testcase>
+		<testcase name="TbAb_InterruptBurst2" classname="InterruptHandler_Gen" time="1.205"></testcase>
+		<testcase name="TbAb_InterruptNoHandler1" classname="InterruptHandler_Gen" time="1.272"></testcase>
+	</testsuite>
+	<testsuite name="ModelParams" time="1.445" tests="2" failures="0" errors="0" skipped="0">
+		<testcase name="TbModelParameters1" classname="ModelParams" time="0.499"></testcase>
+		<testcase name="TbModelParameters2" classname="ModelParams" time="0.506"></testcase>
+	</testsuite>
+	<testsuite name="ModelParams_PT" time="0.706" tests="1" failures="0" errors="0" skipped="0">
+		<testcase name="TbModelParameters" classname="ModelParams_PT" time="0.488"></testcase>
+	</testsuite>
+	<testsuite name="Axi4Lite" time="24.355" tests="17" failures="0" errors="0" skipped="0">
+		<testcase name="TbAxi4_BasicReadWrite" classname="Axi4Lite" time="0.898"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync1" classname="Axi4Lite" time="0.878"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync2" classname="Axi4Lite" time="0.873"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync3" classname="Axi4Lite" time="1.072"></testcase>
+		<testcase name="TbAxi4_RandomReadWrite" classname="Axi4Lite" time="1.416"></testcase>
+		<testcase name="TbAxi4_RandomReadWriteByte" classname="Axi4Lite" time="1.453"></testcase>
+		<testcase name="TbAxi4_TimeOut" classname="Axi4Lite" time="0.895"></testcase>
+		<testcase name="TbAxi4_WriteOptions" classname="Axi4Lite" time="0.903"></testcase>
+		<testcase name="TbAxi4_MemoryReadWrite1" classname="Axi4Lite" time="0.901"></testcase>
+		<testcase name="TbAxi4_AxiXResp" classname="Axi4Lite" time="0.904"></testcase>
+		<testcase name="TbAxi4_AxiXResp2_Enum" classname="Axi4Lite" time="0.893"></testcase>
+		<testcase name="TbAxi4_NoRandomTiming1" classname="Axi4Lite" time="0.973"></testcase>
+		<testcase name="TbAxi4_ManagerRandomTiming1" classname="Axi4Lite" time="1.009"></testcase>
+		<testcase name="TbAxi4_MemoryRandomTiming1" classname="Axi4Lite" time="1.036"></testcase>
+		<testcase name="TbAxi4_SubordinateRandomTiming1" classname="Axi4Lite" time="1.213"></testcase>
+		<testcase name="TbAxi4_ManagerMemoryRandomTiming1" classname="Axi4Lite" time="1.228"></testcase>
+		<testcase name="TbAxi4_ManagerSubordinateRandomTiming1" classname="Axi4Lite" time="0.905"></testcase>
+	</testsuite>
+	<testsuite name="Axi4Full" time="98.209" tests="68" failures="0" errors="0" skipped="0">
+		<testcase name="TbAxi4_DemoMemoryReadWrite1" classname="Axi4Full" time="1.183"></testcase>
+		<testcase name="TbAxi4_BasicReadWrite" classname="Axi4Full" time="0.961"></testcase>
+		<testcase name="TbAxi4_RandomReadWrite" classname="Axi4Full" time="1.482"></testcase>
+		<testcase name="TbAxi4_RandomReadWriteByte1" classname="Axi4Full" time="1.596"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWrite1" classname="Axi4Full" time="1.048"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWrite2" classname="Axi4Full" time="0.992"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWrite3" classname="Axi4Full" time="0.990"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync1" classname="Axi4Full" time="1.110"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync2" classname="Axi4Full" time="1.106"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync3" classname="Axi4Full" time="1.105"></testcase>
+		<testcase name="TbAxi4_ReadWriteAsync4" classname="Axi4Full" time="1.046"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWriteAsync1" classname="Axi4Full" time="0.995"></testcase>
+		<testcase name="TbAxi4_SubordinateReadWriteAsync2" classname="Axi4Full" time="0.999"></testcase>
+		<testcase name="TbAxi4_MultipleDriversManager" classname="Axi4Full" time="1.273"></testcase>
+		<testcase name="TbAxi4_MultipleDriversSubordinate" classname="Axi4Full" time="1.198"></testcase>
+		<testcase name="TbAxi4_ReleaseAcquireSubordinate1" classname="Axi4Full" time="1.030"></testcase>
+		<testcase name="TbAxi4_AlertLogIDManager" classname="Axi4Full" time="1.224"></testcase>
+		<testcase name="TbAxi4_AlertLogIDSubordinate" classname="Axi4Full" time="1.037"></testcase>
+		<testcase name="TbAxi4_TransactionApiSubordinate" classname="Axi4Full" time="1.038"></testcase>
+		<testcase name="TbAxi4_ValidTimingManager" classname="Axi4Full" time="1.243"></testcase>
+		<testcase name="TbAxi4_ValidTimingSubordinate" classname="Axi4Full" time="0.981"></testcase>
+		<testcase name="TbAxi4_ReadyTimingSubordinate" classname="Axi4Full" time="1.091"></testcase>
+		<testcase name="TbAxi4_AxiIfOptionsManagerSubordinate" classname="Axi4Full" time="1.079"></testcase>
+		<testcase name="TbAxi4_AxiXResp" classname="Axi4Full" time="3.489"></testcase>
+		<testcase name="TbAxi4_AxiXResp2_Enum" classname="Axi4Full" time="0.928"></testcase>
+		<testcase name="TbAxi4_AxiXResp3_slv" classname="Axi4Full" time="0.952"></testcase>
+		<testcase name="TbAxi4_TimeOutManager" classname="Axi4Full" time="0.899"></testcase>
+		<testcase name="TbAxi4_TimeOutSubordinate" classname="Axi4Full" time="0.920"></testcase>
+		<testcase name="TbAxi4_MemoryReadWrite1" classname="Axi4Full" time="1.005"></testcase>
+		<testcase name="TbAxi4_MemoryReadWrite2" classname="Axi4Full" time="0.999"></testcase>
+		<testcase name="TbAxi4_MultipleDriversMemory" classname="Axi4Full" time="0.977"></testcase>
+		<testcase name="TbAxi4_ReleaseAcquireMemory1" classname="Axi4Full" time="0.978"></testcase>
+		<testcase name="TbAxi4_AlertLogIDMemory" classname="Axi4Full" time="0.942"></testcase>
+		<testcase name="TbAxi4_TimeOutMemory" classname="Axi4Full" time="0.980"></testcase>
+		<testcase name="TbAxi4_TransactionApiManager" classname="Axi4Full" time="0.934"></testcase>
+		<testcase name="TbAxi4_TransactionApiMemory" classname="Axi4Full" time="0.932"></testcase>
+		<testcase name="TbAxi4_ValidTimingMemory" classname="Axi4Full" time="0.947"></testcase>
+		<testcase name="TbAxi4_ReadyTimingManager" classname="Axi4Full" time="1.017"></testcase>
+		<testcase name="TbAxi4_ReadyTimingMemory" classname="Axi4Full" time="1.013"></testcase>
+		<testcase name="TbAxi4_MemoryAsync" classname="Axi4Full" time="0.979"></testcase>
+		<testcase name="TbAxi4_MemoryBurst1" classname="Axi4Full" time="0.950"></testcase>
+		<testcase name="TbAxi4_MemoryBurstAsync1" classname="Axi4Full" time="0.974"></testcase>
+		<testcase name="TbAxi4_MemoryBurstByte1" classname="Axi4Full" time="0.931"></testcase>
+		<testcase name="TbAxi4_MemoryBurstPattern1" classname="Axi4Full" time="0.961"></testcase>
+		<testcase name="TbAxi4_MemoryBurstPattern2" classname="Axi4Full" time="1.054"></testcase>
+		<testcase name="TbAxi4_MemoryBurstBytePattern1" classname="Axi4Full" time="0.980"></testcase>
+		<testcase name="TbAxi4_MemoryBurstAsyncPattern1" classname="Axi4Full" time="0.967"></testcase>
+		<testcase name="TbAxi4_MemoryBurstAsyncPattern2" classname="Axi4Full" time="1.015"></testcase>
+		<testcase name="TbAxi4_MemoryBurstSparse1" classname="Axi4Full" time="0.933"></testcase>
+		<testcase name="TbAxi4_ReleaseAcquireManager1" classname="Axi4Full" time="0.952"></testcase>
+		<testcase name="TbAxi4_AxSizeManagerMemory1" classname="Axi4Full" time="0.944"></testcase>
+		<testcase name="TbAxi4_AxSizeManagerMemory2" classname="Axi4Full" time="0.964"></testcase>
+		<testcase name="TbAxi4_AxiIfOptionsManagerMemory" classname="Axi4Full" time="0.992"></testcase>
+		<testcase name="TbAxi4_TransactionApiManagerBurst" classname="Axi4Full" time="0.979"></testcase>
+		<testcase name="TbAxi4_TransactionApiMemoryBurst" classname="Axi4Full" time="0.945"></testcase>
+		<testcase name="TbAxi4_ValidTimingBurstManager" classname="Axi4Full" time="1.068"></testcase>
+		<testcase name="TbAxi4_ValidTimingBurstMemory" classname="Axi4Full" time="1.033"></testcase>
+		<testcase name="TbAxi4_ManagerRandomTiming1" classname="Axi4Full" time="1.081"></testcase>
+		<testcase name="TbAxi4_ManagerRandomTimingAsync1" classname="Axi4Full" time="1.011"></testcase>
+		<testcase name="TbAxi4_MemoryRandomTiming1" classname="Axi4Full" time="1.036"></testcase>
+		<testcase name="TbAxi4_MemoryRandomTimingAsync1" classname="Axi4Full" time="1.294"></testcase>
+		<testcase name="TbAxi4_ManagerMemoryRandomTiming1" classname="Axi4Full" time="1.058"></testcase>
+		<testcase name="TbAxi4_SubordinateRandomTiming1" classname="Axi4Full" time="0.935"></testcase>
+		<testcase name="TbAxi4_ManagerSubordinateRandomTiming1" classname="Axi4Full" time="0.953"></testcase>
+		<testcase name="TbAxi4_ManagerSubordinateRandomTimingAsync1" classname="Axi4Full" time="1.067"></testcase>
+		<testcase name="TbAxi4_NoRandomTiming1" classname="Axi4Full" time="1.058"></testcase>
+		<testcase name="TbAxi4_Shared1" classname="Axi4Full" time="1.055"></testcase>
+		<testcase name="TbAxi4_Separate1" classname="Axi4Full" time="1.142"></testcase>
+	</testsuite>
+	<testsuite name="AxiStream" time="76.143" tests="65" failures="0" errors="0" skipped="0">
+		<testcase name="TbStream_SendGetDemo1" classname="AxiStream" time="0.956"></testcase>
+		<testcase name="TbStream_SendGetPacketBurst1" classname="AxiStream" time="1.207"></testcase>
+		<testcase name="TbStream_SendGetRandom1" classname="AxiStream" time="1.181"></testcase>
+		<testcase name="TbStream_SendGetRandom2" classname="AxiStream" time="1.162"></testcase>
+		<testcase name="TbStream_MultipleDriversTransmitter1" classname="AxiStream" time="0.921"></testcase>
+		<testcase name="TbStream_MultipleDriversReceiver1" classname="AxiStream" time="0.866"></testcase>
+		<testcase name="TbStream_SendGet1" classname="AxiStream" time="0.828"></testcase>
+		<testcase name="TbStream_ByteHandling1" classname="AxiStream" time="0.767"></testcase>
+		<testcase name="TbStream_SendGetAsync1" classname="AxiStream" time="0.811"></testcase>
+		<testcase name="TbStream_ByteHandlingAsync1" classname="AxiStream" time="0.787"></testcase>
+		<testcase name="TbStream_SendGetBurst1" classname="AxiStream" time="0.842"></testcase>
+		<testcase name="TbStream_SendGetBurstByte1" classname="AxiStream" time="0.776"></testcase>
+		<testcase name="TbStream_ByteHandlingBurst1" classname="AxiStream" time="0.773"></testcase>
+		<testcase name="TbStream_ByteHandlingBurstByte1" classname="AxiStream" time="0.765"></testcase>
+		<testcase name="TbStream_SendCheckBurst1" classname="AxiStream" time="0.838"></testcase>
+		<testcase name="TbStream_SendCheckBurstByte1" classname="AxiStream" time="0.782"></testcase>
+		<testcase name="TbStream_SendCheckBurstPattern1" classname="AxiStream" time="0.793"></testcase>
+		<testcase name="TbStream_SendCheckBurstPattern2" classname="AxiStream" time="0.809"></testcase>
+		<testcase name="TbStream_SendCheckBurstBytePattern1" classname="AxiStream" time="0.743"></testcase>
+		<testcase name="TbStream_SendCheckBurstAsyncPattern1" classname="AxiStream" time="0.746"></testcase>
+		<testcase name="TbStream_SendCheckBurstAsyncPattern2" classname="AxiStream" time="0.815"></testcase>
+		<testcase name="TbStream_SendCheckBurstByteAsyncPattern1" classname="AxiStream" time="0.791"></testcase>
+		<testcase name="TbStream_SendGetBurstAsync1" classname="AxiStream" time="0.789"></testcase>
+		<testcase name="TbStream_SendGetBurstByteAsync1" classname="AxiStream" time="0.757"></testcase>
+		<testcase name="TbStream_ByteHandlingBurstAsync1" classname="AxiStream" time="0.782"></testcase>
+		<testcase name="TbStream_ByteHandlingBurstByteAsync1" classname="AxiStream" time="0.789"></testcase>
+		<testcase name="TbStream_SendCheckBurstAsync1" classname="AxiStream" time="0.806"></testcase>
+		<testcase name="TbStream_SendCheckBurstByteAsync1" classname="AxiStream" time="0.792"></testcase>
+		<testcase name="TbStream_ReleaseAcquireTransmitter1" classname="AxiStream" time="0.734"></testcase>
+		<testcase name="TbStream_ReleaseAcquireReceiver1" classname="AxiStream" time="0.761"></testcase>
+		<testcase name="TbStream_AxiSendGet2" classname="AxiStream" time="0.839"></testcase>
+		<testcase name="TbStream_AxiSetOptions1" classname="AxiStream" time="0.802"></testcase>
+		<testcase name="TbStream_AxiTxValidDelay1" classname="AxiStream" time="0.772"></testcase>
+		<testcase name="TbStream_AxiTiming1" classname="AxiStream" time="0.755"></testcase>
+		<testcase name="TbStream_AxiTiming2" classname="AxiStream" time="0.764"></testcase>
+		<testcase name="TbStream_AxiSetOptions2" classname="AxiStream" time="0.774"></testcase>
+		<testcase name="TbStream_AxiSendGetAsync2" classname="AxiStream" time="0.825"></testcase>
+		<testcase name="TbStream_AxiSetOptionsAsync1" classname="AxiStream" time="0.830"></testcase>
+		<testcase name="TbStream_AxiSetOptionsAsync2" classname="AxiStream" time="0.738"></testcase>
+		<testcase name="TbStream_WaitForGet1" classname="AxiStream" time="0.763"></testcase>
+		<testcase name="TbStream_WaitForGetAsync1" classname="AxiStream" time="0.752"></testcase>
+		<testcase name="TbStream_AxiSendGetBurst2" classname="AxiStream" time="0.772"></testcase>
+		<testcase name="TbStream_AxiLastParam1" classname="AxiStream" time="0.888"></testcase>
+		<testcase name="TbStream_AxiLastOption1" classname="AxiStream" time="0.924"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurst1" classname="AxiStream" time="0.809"></testcase>
+		<testcase name="TbStream_AxiTxValidDelayBurst1" classname="AxiStream" time="0.774"></testcase>
+		<testcase name="TbStream_AxiTimingBurst2" classname="AxiStream" time="0.787"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurst2" classname="AxiStream" time="0.848"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurstByte2" classname="AxiStream" time="0.786"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurst3" classname="AxiStream" time="0.797"></testcase>
+		<testcase name="TbStream_AxiBurstNoLast1" classname="AxiStream" time="0.833"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurstCheck3" classname="AxiStream" time="0.811"></testcase>
+		<testcase name="TbStream_AxiSendCheckBurstPattern1" classname="AxiStream" time="0.879"></testcase>
+		<testcase name="TbStream_AxiSendCheckBurstPattern2" classname="AxiStream" time="0.897"></testcase>
+		<testcase name="TbStream_AxiSendCheckBurstAsyncPattern1" classname="AxiStream" time="0.771"></testcase>
+		<testcase name="TbStream_AxiSendCheckBurstAsyncPattern2" classname="AxiStream" time="0.808"></testcase>
+		<testcase name="TbStream_AxiSendGetBurstAsync2" classname="AxiStream" time="0.778"></testcase>
+		<testcase name="TbStream_AxiLastParamAsync1" classname="AxiStream" time="0.897"></testcase>
+		<testcase name="TbStream_AxiLastOptionAsync1" classname="AxiStream" time="1.254"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurstAsync1" classname="AxiStream" time="0.874"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurstAsync2" classname="AxiStream" time="0.773"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurstByteAsync2" classname="AxiStream" time="0.753"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurstAsync3" classname="AxiStream" time="0.774"></testcase>
+		<testcase name="TbStream_AxiBurstAsyncNoLast1" classname="AxiStream" time="0.781"></testcase>
+		<testcase name="TbStream_AxiSetOptionsBurstCheckAsync3" classname="AxiStream" time="0.764"></testcase>
+	</testsuite>
+	<testsuite name="Uart" time="10.160" tests="8" failures="0" errors="0" skipped="0">
+		<testcase name="TbUart_SendGet1" classname="Uart" time="0.775"></testcase>
+		<testcase name="TbUart_SendGet2" classname="Uart" time="0.746"></testcase>
+		<testcase name="TbUart_Options1" classname="Uart" time="0.800"></testcase>
+		<testcase name="TbUart_Options2" classname="Uart" time="0.684"></testcase>
+		<testcase name="TbUart_Checkers1" classname="Uart" time="0.736"></testcase>
+		<testcase name="TbUart_Checkers2" classname="Uart" time="0.737"></testcase>
+		<testcase name="TbUart_Scoreboard1" classname="Uart" time="2.010"></testcase>
+		<testcase name="TbUart_Overload1" classname="Uart" time="0.752"></testcase>
+	</testsuite>
+	<testsuite name="DpRam" time="1.365" tests="1" failures="0" errors="0" skipped="0">
+		<testcase name="TbDpRam_BasicReadWrite" classname="DpRam" time="0.672"></testcase>
+	</testsuite>
+	<testsuite name="Ethernet" time="7.433" tests="6" failures="0" errors="0" skipped="0">
+		<testcase name="Tb_xMii1" classname="Ethernet" time="1.077"></testcase>
+		<testcase name="Tb_xMii1_MII_INTERFACE_RGMII_MII_BPS_BPS_1G" classname="Ethernet" time="1.083"></testcase>
+		<testcase name="Tb_xMii1_MII_INTERFACE_MII_MII_BPS_BPS_100M" classname="Ethernet" time="1.105"></testcase>
+		<testcase name="Tb_xMii1_MII_INTERFACE_MII_MII_BPS_BPS_10M" classname="Ethernet" time="1.070"></testcase>
+		<testcase name="Tb_xMii1_MII_INTERFACE_RMII_MII_BPS_BPS_100M" classname="Ethernet" time="1.186"></testcase>
+		<testcase name="Tb_xMii1_MII_INTERFACE_RMII_MII_BPS_BPS_10M" classname="Ethernet" time="1.149"></testcase>
+	</testsuite>
+	<testsuite name="VideoBus" time="1.852" tests="1" failures="0" errors="0" skipped="0">
+		<testcase name="TbVideoBus_SendGet" classname="VideoBus" time="1.118"></testcase>
+	</testsuite>
+</testsuites>

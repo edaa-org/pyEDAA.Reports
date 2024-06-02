@@ -429,7 +429,7 @@ class Document(py_TestCase):
 	def test_Create_WithoutParse(self) -> None:
 		zeroTime = timedelta()
 
-		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
 		doc = JUnitDocument(junitExampleFile)
 
 		self.assertEqual(junitExampleFile, doc.Path)
@@ -445,7 +445,7 @@ class Document(py_TestCase):
 	def test_Create_WithParse(self) -> None:
 		zeroTime = timedelta()
 
-		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
 		doc = JUnitDocument(junitExampleFile, parse=True)
 
 		self.assertEqual(junitExampleFile, doc.Path)
@@ -453,7 +453,7 @@ class Document(py_TestCase):
 		self.assertGreater(doc.ModelConversionDuration, zeroTime)
 
 	def test_ReadWrite(self) -> None:
-		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
 		doc = JUnitDocument(junitExampleFile, parse=True)
 
 		doc.Write(self._outputDirectory / "ReadWrite.xml")
@@ -489,7 +489,7 @@ class ExampleFiles(py_TestCase):
 	def test_pytest_pyAttributes(self) -> None:
 		print()
 
-		junitExampleFile = Path("tests/data/JUnit/pytest.pyAttributes.xml")
+		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
 		doc = JUnitDocument(junitExampleFile, parse=True)
 
 		self.assertGreater(doc.TestsuiteCount, 0)
@@ -501,12 +501,12 @@ class ExampleFiles(py_TestCase):
 
 		print()
 		print(f"Statistics:")
-		print(f"  Times: MiniDOM: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
+		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
 	def test_OSVVM_Libraries(self) -> None:
 		print()
 
-		junitExampleFile = Path("tests/data/JUnit/osvvm.Libraries.xml")
+		junitExampleFile = Path("tests/data/JUnit/OsvvmLibraries/OSVVMLibraries_RunAllTests.xml")
 		doc = JUnitDocument(junitExampleFile, parse=True)
 
 		self.assertGreater(doc.TestsuiteCount, 0)
@@ -518,4 +518,4 @@ class ExampleFiles(py_TestCase):
 
 		print()
 		print(f"Statistics:")
-		print(f"  Times: MiniDOM: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
+		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")

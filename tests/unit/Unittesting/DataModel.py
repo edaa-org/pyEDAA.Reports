@@ -240,6 +240,12 @@ class Hierarchy(ut_TestCase):
 		self.assertEqual(ts, tc2.Parent)
 
 
+class TestsuiteSummaryInstantiation(ut_TestCase):
+	def test_TestsuiteSummary_NoName(self) -> None:
+		with self.assertRaises(ValueError):
+			_ = TestsuiteSummary(None)
+
+
 class Duplicates(ut_TestCase):
 	def test_DuplicateTestsuite(self) -> None:
 		ts = Testsuite("root")

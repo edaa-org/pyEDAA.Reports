@@ -32,8 +32,10 @@
 from datetime              import timedelta, datetime
 from enum                  import Flag, IntEnum
 from pathlib               import Path
+from sys                   import version_info
 from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar
 
+from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Tree        import Node
@@ -191,7 +193,10 @@ class Base(metaclass=ExtendedType, slots=True):
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			raise TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			raise ex
 
 		self._parent = parent
 		self._name = name
@@ -334,7 +339,10 @@ class Testcase(Base):
 	):
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
-				raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
 
 			parent._testcases[name] = self
 
@@ -477,7 +485,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
-				raise TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
+				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
 
 			parent._testsuites[name] = self
 
@@ -987,7 +998,7 @@ class MergedTestcase(Testcase, Merged):
 		parent: Nullable["Testsuite"] = None
 	):
 		if testcase is None:
-			raise TypeError(f"Parameter 'testcase' is None.")
+			raise ValueError(f"Parameter 'testcase' is None.")
 
 		super().__init__(
 			testcase._name,
@@ -1081,7 +1092,7 @@ class MergedTestsuite(Testsuite, Merged):
 		parent: Nullable["Testsuite"] = None
 	):
 		if testsuite is None:
-			raise TypeError(f"Parameter 'testsuite' is None.")
+			raise ValueError(f"Parameter 'testsuite' is None.")
 
 		super().__init__(
 			testsuite._name,

@@ -29,10 +29,9 @@
 # ==================================================================================================================== #
 #
 """Testcase for OSVVM specific file formats."""
-from pathlib      import Path
 from unittest     import TestCase
 
-from pyEDAA.Reports.Unittesting.OSVVM import OsvvmYamlDocument
+from pyEDAA.Reports.Unittesting.OSVVM    import Testsuite, Testcase
 
 
 if __name__ == "__main__": # pragma: no cover
@@ -41,40 +40,9 @@ if __name__ == "__main__": # pragma: no cover
 	exit(1)
 
 
-class TestResults(TestCase):
-	def test_ReadOSVVMTestSummaryYAML(self) -> None:
-		yamlPath = Path("tests/data/OSVVM/osvvm.Summary.yml")
+class Instantiation(TestCase):
+	def test_Testsuite(self) -> None:
+		ts = Testsuite("ts")
 
-		osvvmTestSummary = OsvvmYamlDocument(yamlPath, parse=True)
-		print(osvvmTestSummary.ToTree().Render())
-
-		self.assertEqual(14, len(osvvmTestSummary.Testsuites))
-		self.assertIn("Axi4Lite", osvvmTestSummary)
-		self.assertIn("Axi4Full", osvvmTestSummary)
-		self.assertIn("AxiStream", osvvmTestSummary)
-		self.assertIn("Uart", osvvmTestSummary)
-
-		axi4lite = osvvmTestSummary["Axi4Lite"]
-		self.assertEqual(17, len(axi4lite.Testcases))
-
-		axi4 = osvvmTestSummary["Axi4Full"]
-		self.assertEqual(68, len(axi4.Testcases))
-
-		axi4stream = osvvmTestSummary["AxiStream"]
-		self.assertEqual(65, len(axi4stream.Testcases))
-
-		uart = osvvmTestSummary["Uart"]
-		self.assertEqual(8, len(uart.Testcases))
-
-	# 	for suite in osvvmTestSummary:
-	# 		self.printTestsuite(suite)
-	#
-	# def printTestsuite(self, testsuite: Testsuite, indent: int = 0):
-	# 	print(f"{'  '*indent}{testsuite.Name}")
-	# 	for suite in testsuite._testsuites.values():
-	# 		self.printTestsuite(suite, indent + 2)
-	# 	for case in testsuite:
-	# 		self.printTestcase(case, indent + 2)
-	#
-	# def printTestcase(self, testcase: Testcase, indent: int = 0):
-	# 	print(f"{'  ' * indent}{testcase.Name}")
+	def test_Testcase(self) -> None:
+		tc = Testcase("tc")

@@ -35,22 +35,14 @@ __author__ =    "Patrick Lehmann"
 __email__ =     "Paebbels@gmail.com"
 __copyright__ = "2021-2024, Electronic Design Automation Abstraction (EDA²)"
 __license__ =   "Apache License, Version 2.0"
-__version__ =   "0.8.0"
+__version__ =   "0.9.0"
 __keywords__ =  ["Reports", "Abstract Model", "Data Model", "Unit Testing", "Testcase", "Testsuite", "OSVVM", "YAML", "XML"]
 
 from enum                 import Enum
-from importlib.resources  import files
-from pathlib              import Path
 from sys                  import version_info
-from types                import ModuleType
-from typing               import List, Union
+from typing               import List
 
 from pyTooling.Decorators import export
-
-
-@export
-def getResourceFile(module: Union[str, ModuleType], filename: str) -> Path:
-	return files(module) / filename
 
 
 @export

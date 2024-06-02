@@ -29,13 +29,14 @@
 # ==================================================================================================================== #
 #
 """Reader for OSVVM test report summary files in YAML format."""
-from datetime             import timedelta, datetime
-from pathlib              import Path
-from time                 import perf_counter_ns
-from typing               import Optional as Nullable
+from datetime              import timedelta, datetime
+from pathlib               import Path
+from time                  import perf_counter_ns
+from typing                import Optional as Nullable
 
-from ruamel.yaml          import YAML
-from pyTooling.Decorators import export, notimplemented
+from ruamel.yaml           import YAML
+from pyTooling.Decorators  import export, notimplemented
+from ruamel.yaml.timestamp import TimeStamp
 
 from pyEDAA.Reports.Unittesting import UnittestException, Document, TestcaseStatus
 from pyEDAA.Reports.Unittesting import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
@@ -53,7 +54,7 @@ class UnittestException(UnittestException, OsvvmException):
 
 
 @export
-class TestsuiteSummary(ut_TestsuiteSummary):
+class Testcase(ut_Testcase):
 	pass
 
 
@@ -63,7 +64,7 @@ class Testsuite(ut_Testsuite):
 
 
 @export
-class Testcase(ut_Testcase):
+class TestsuiteSummary(ut_TestsuiteSummary):
 	pass
 
 
@@ -113,7 +114,7 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 			ex.add_note(f"Call 'OsvvmYamlDocument.Generate()' or 'OsvvmYamlDocument.Write(..., regenerate=True)'.")
 			raise ex
 
-		# with path.open("w") as file:
+		# with path.open("w", encoding="utf-8") as file:
 		# 	self._yamlDocument.writexml(file, addindent="\t", encoding="utf-8", newl="\n")
 
 	def Parse(self) -> None:
@@ -123,8 +124,11 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 			raise ex
 
 		startConversion = perf_counter_ns()
-		self._startTime = datetime.fromisoformat(self._yamlDocument["Date"])
-		# yamlBuild = self._yamlDocument["BuildInfo"]
+		startTime = self._yamlDocument["Date"]
+		if isinstance(startTime, TimeStamp):
+			self._startTime = startTime
+		else:
+			self._startTime = datetime.fromisoformat(startTime)
 
 		for yamlTestsuite in self._yamlDocument['TestSuites']:
 			self._ParseTestsuite(self, yamlTestsuite)
@@ -143,11 +147,12 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 			parent=parentTestsuite
 		)
 
-		for yamlTestcase in yamlTestsuite['TestCases']:
-			self._ParseTestcase(testsuite, yamlTestcase)
+		if yamlTestsuite['TestCases'] is not None:
+			for yamlTestcase in yamlTestsuite['TestCases']:
+				self._ParseTestcase(testsuite, yamlTestcase)
 
 	def _ParseTestcase(self, parentTestsuite: Testsuite, yamlTestcase) -> None:
-		testcaseName = yamlTestcase["Name"]
+		testcaseName = yamlTestcase["TestCaseName"]
 		totalDuration = timedelta(seconds=float(yamlTestcase["ElapsedTime"]))
 		yamlStatus = yamlTestcase["Status"].lower()
 		yamlResults = yamlTestcase["Results"]

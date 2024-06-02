@@ -1,0 +1,23 @@
+Version: 2024.05
+Date: 2024-06-01T07:53:19+02:00
+BuildInfo:
+  StartTime:            2024-06-01T07:53:19+02:00
+  FinishTime:           2024-06-01T07:53:57+02:00
+  Elapsed:              37.936
+  Simulator:            "GHDL "
+  SimulatorVersion:     "4.1.0"
+  OsvvmVersion:         "2024.05"
+  BuildErrorCode:       0
+  AnalyzeErrorCount:    0
+  SimulateErrorCount:   0
+OsvvmSettingsInfo:
+  BaseDirectory:        ""
+  ReportsSubdirectory:  "reports"
+  CssSubdirectory:      "reports"
+  SimulationLogFile: "logs/GHDL-4.1.0/OSVVMLibraries_OsvvmLibraries.log"
+  SimulationHtmlLogFile: "logs/GHDL-4.1.0/OSVVMLibraries_OsvvmLibraries_log.html"
+  CssPngSourceDirectory:   "C:/Git/GitHub/OSVVM/OSVVMLibraries/Scripts"
+  RequirementsSubdirectory: ""
+  CoverageSubdirectory: ""
+  Report2CssFiles: "reports/CssOsvvmStyle.css"
+  Report2PngFile:  "reports/OsvvmLogo.png"
