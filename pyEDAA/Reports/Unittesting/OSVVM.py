@@ -124,11 +124,10 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 			raise ex
 
 		startConversion = perf_counter_ns()
-		startTime = self._yamlDocument["Date"]
-		if isinstance(startTime, TimeStamp):
-			self._startTime = startTime
-		else:
-			self._startTime = datetime.fromisoformat(startTime)
+		# self._name = self._yamlDocument["name"]
+		buildInfo = self._yamlDocument["BuildInfo"]
+		self._startTime = buildInfo["StartTime"]
+		self._totalDuration = timedelta(seconds=buildInfo["Elapsed"])
 
 		for yamlTestsuite in self._yamlDocument['TestSuites']:
 			self._ParseTestsuite(self, yamlTestsuite)
@@ -139,7 +138,7 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 
 	def _ParseTestsuite(self, parentTestsuite: Testsuite, yamlTestsuite) -> None:
 		testsuiteName = yamlTestsuite["Name"]
-		totalDuration = timedelta(seconds=float(yamlTestsuite["ElapsedTime"]))
+		totalDuration = timedelta(seconds=yamlTestsuite["ElapsedTime"])
 
 		testsuite = Testsuite(
 			testsuiteName,
@@ -153,16 +152,17 @@ class OsvvmYamlDocument(TestsuiteSummary, Document):
 
 	def _ParseTestcase(self, parentTestsuite: Testsuite, yamlTestcase) -> None:
 		testcaseName = yamlTestcase["TestCaseName"]
-		totalDuration = timedelta(seconds=float(yamlTestcase["ElapsedTime"]))
+		totalDuration = timedelta(seconds=yamlTestcase["ElapsedTime"])
 		yamlStatus = yamlTestcase["Status"].lower()
 		yamlResults = yamlTestcase["Results"]
-		assertionCount = int(yamlResults["AffirmCount"])
-		passedAssertionCount = int(yamlResults["PassedCount"])
-		totalErrors = int(yamlResults["TotalErrors"])
-		warningCount = int(yamlResults["AlertCount"]["Warning"])
-		errorCount = int(yamlResults["AlertCount"]["Error"])
-		fatalCount = int(yamlResults["AlertCount"]["Failure"])
+		assertionCount = yamlResults["AffirmCount"]
+		passedAssertionCount = yamlResults["PassedCount"]
+		totalErrors = yamlResults["TotalErrors"]
+		warningCount = yamlResults["AlertCount"]["Warning"]
+		errorCount = yamlResults["AlertCount"]["Error"]
+		fatalCount = yamlResults["AlertCount"]["Failure"]
 
+		# FIXME: write a Parse classmethod in enum
 		if yamlStatus == "passed":
 			status = TestcaseStatus.Passed
 		elif yamlStatus == "skipped":

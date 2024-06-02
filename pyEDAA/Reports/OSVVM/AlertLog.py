@@ -283,17 +283,17 @@ class Document(AlertLogGroup):
 		alertLogGroup = AlertLogGroup(
 			child["Name"],
 			AlertLogStatus.Parse(child["Status"]),
-			int(results["TotalErrors"]),
-			int(results["AlertCount"]["Warning"]),
-			int(results["AlertCount"]["Error"]),
-			int(results["AlertCount"]["Failure"]),
-			int(results["PassedCount"]),
-			int(results["AffirmCount"]),
-			int(results["RequirementsPassed"]),
-			int(results["RequirementsGoal"]),
-			int(results["DisabledAlertCount"]["Warning"]),
-			int(results["DisabledAlertCount"]["Error"]),
-			int(results["DisabledAlertCount"]["Failure"]),
+			results["TotalErrors"],
+			results["AlertCount"]["Warning"],
+			results["AlertCount"]["Error"],
+			results["AlertCount"]["Failure"],
+			results["PassedCount"],
+			results["AffirmCount"],
+			results["RequirementsPassed"],
+			results["RequirementsGoal"],
+			results["DisabledAlertCount"]["Warning"],
+			results["DisabledAlertCount"]["Error"],
+			results["DisabledAlertCount"]["Failure"],
 			children=(self._ParseAlertLogGroup(ch) for ch in child["Children"])
 		)
 
