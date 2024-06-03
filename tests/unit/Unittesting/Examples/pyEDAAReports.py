@@ -83,7 +83,6 @@ class CppGoogleTestCTest(TestCase):
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
 
-
 class JavaAntJUnit4(TestCase):
 	def test_JUnit4(self):
 		print()

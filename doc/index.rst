@@ -41,6 +41,20 @@ Proposal to define an abstract model for outputs from EDA tools and logging libr
 
     <br>
 
+
+.. rubric:: Supported Ant JUnit XMl file outputs
+
+* pytest
+* VUnit
+* OSVVM (OSVVM's YAML format should be preferred due to more content and meta information)
+
+.. rubric:: Supported proprietary file formats
+
+* OSVVM (YAML files)
+
+
+
+
 .. _contributors:
 
 Contributors

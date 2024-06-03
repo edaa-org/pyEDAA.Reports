@@ -1,6 +1,6 @@
 Version: 2024.05
 Date: 2024-06-01T07:56:17+02:00
-TestSuites: 
+TestSuites:
   - Name: StreamTransactionPkg
     TestCases:
       - TestCaseName: "TbStream_SendGet1"

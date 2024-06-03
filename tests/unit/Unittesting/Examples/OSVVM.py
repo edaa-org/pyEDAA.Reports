@@ -33,7 +33,7 @@ from pathlib      import Path
 from unittest     import TestCase
 
 from pyEDAA.Reports.Unittesting.JUnit import Document as JUnitDocument
-from pyEDAA.Reports.Unittesting.OSVVM import OsvvmYamlDocument
+from pyEDAA.Reports.Unittesting.OSVVM import BuildSummaryDocument
 
 
 if __name__ == "__main__": # pragma: no cover
@@ -67,8 +67,14 @@ class JUnitGeneratedByOSVVM(TestCase):
 		doc = JUnitDocument(junitExampleFile, parse=True)
 
 		self.assertGreaterEqual(doc.TestsuiteCount, 14)
-		self.assertGreater(doc.TestcaseCount, 0)
+		self.assertGreaterEqual(doc.TestcaseCount, 285)
 
+		print("=" * 40)
+		tree = doc.ToTree()
+		print(tree.Render(), end="")
+		print("=" * 40)
+
+		print()
 		print(f"JUnit file:")
 		print(f"  Testsuites: {doc.TestsuiteCount}")
 		print(f"  Testcases:  {doc.TestcaseCount}")
@@ -79,31 +85,70 @@ class JUnitGeneratedByOSVVM(TestCase):
 
 
 class YAMLGeneratedByOSVVM(TestCase):
-	def test_ReadOSVVMTestSummaryYAML(self) -> None:
-		yamlPath = Path("tests/data/OSVVM/osvvm.Summary.yml")
+	def test_OsvvmLibraries(self) -> None:
+		print()
 
-		osvvmTestSummary = OsvvmYamlDocument(yamlPath, parse=True)
-		print(osvvmTestSummary.ToTree().Render())
+		yamlPath = Path("tests/data/OSVVM/OSVVMLibraries_OsvvmLibraries.yml")
+		doc = BuildSummaryDocument(yamlPath, parse=True)
 
-		self.assertEqual(14, len(osvvmTestSummary.Testsuites))
-		self.assertIn("Axi4Lite", osvvmTestSummary)
-		self.assertIn("Axi4Full", osvvmTestSummary)
-		self.assertIn("AxiStream", osvvmTestSummary)
-		self.assertIn("Uart", osvvmTestSummary)
+		print("=" * 40)
+		tree = doc.ToTree()
+		print(tree.Render(), end="")
+		print("=" * 40)
 
-		axi4lite = osvvmTestSummary["Axi4Lite"]
+		print()
+		print(f"YAML file:")
+		print(f"  Testsuites: {doc.TestsuiteCount}")
+		print(f"  Testcases:  {doc.TestcaseCount}")
+
+		print()
+		print(f"Statistics:")
+		print(f"  Times: parsing by ruamel.yaml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
+
+
+		self.assertEqual(1, doc.TestsuiteCount)
+		self.assertEqual(0, doc.TestcaseCount)
+
+	def test_RunAllTests(self) -> None:
+		print()
+
+		yamlPath = Path("tests/data/OSVVM/OSVVMLibraries_RunAllTests.yml")
+		doc = BuildSummaryDocument(yamlPath, parse=True)
+
+		print("=" * 40)
+		tree = doc.ToTree()
+		print(tree.Render(), end="")
+		print("=" * 40)
+
+		print()
+		print(f"YAML file:")
+		print(f"  Testsuites: {doc.TestsuiteCount}")
+		print(f"  Testcases:  {doc.TestcaseCount}")
+
+		print()
+		print(f"Statistics:")
+		print(f"  Times: parsing by ruamel.yaml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
+
+
+		self.assertEqual(14, len(doc.Testsuites))
+		self.assertIn("Axi4Lite", doc)
+		self.assertIn("Axi4Full", doc)
+		self.assertIn("AxiStream", doc)
+		self.assertIn("Uart", doc)
+
+		axi4lite = doc["Axi4Lite"]
 		self.assertEqual(17, len(axi4lite.Testcases))
 
-		axi4 = osvvmTestSummary["Axi4Full"]
+		axi4 = doc["Axi4Full"]
 		self.assertEqual(68, len(axi4.Testcases))
 
-		axi4stream = osvvmTestSummary["AxiStream"]
+		axi4stream = doc["AxiStream"]
 		self.assertEqual(65, len(axi4stream.Testcases))
 
-		uart = osvvmTestSummary["Uart"]
+		uart = doc["Uart"]
 		self.assertEqual(8, len(uart.Testcases))
 
-	# 	for suite in osvvmTestSummary:
+	# 	for suite in doc:
 	# 		self.printTestsuite(suite)
 	#
 	# def printTestsuite(self, testsuite: Testsuite, indent: int = 0):

@@ -6,7 +6,8 @@ from pyTooling.MetaClasses                    import ExtendedType
 from pyTooling.Attributes.ArgParse            import CommandHandler
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
 
-from pyEDAA.Reports.Unittesting       import TestsuiteKind, TestsuiteSummary, MergedTestsuiteSummary, UnittestException
+from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind, TestsuiteSummary, Testsuite, Testcase
+from pyEDAA.Reports.Unittesting       import MergedTestsuiteSummary
 from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode
 
 
@@ -45,11 +46,6 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		if args.pytest is not None:
 			self._processPyTest(result, args.pytest)
 
-		if args.output is not None:
-			outputs = (args.output, )
-			for output in outputs:
-				self._output(result, output)
-
 		if args.render is not None and self.Verbose:
 			self.WriteVerbose("*" * self.Width)
 
@@ -58,6 +54,11 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				self.WriteVerbose(tree.Render(), appendLinebreak=False)
 
 			self.WriteVerbose("*" * self.Width)
+
+		if args.output is not None:
+			outputs = (args.output, )
+			for output in outputs:
+				self._output(result, output)
 
 		self.ExitOnPreviousErrors()
 
@@ -68,15 +69,21 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		elif l == 2:
 			dialect, format = (x.lower() for x in parts[0].split("-"))
 			globPattern = parts[1]
+
+			foundFiles = tuple(f for f in Path.cwd().glob(globPattern))
+			if len(foundFiles) == 0:
+				self.WriteWarning(f"Found no matching files for pattern '{Path.cwd()}/{globPattern}'")
+				return
+
 			if format == "junit":
 				if dialect == "ant":
-					self._mergeAntJUnit(testsuiteSummary, globPattern)
+					self._mergeAntJUnit(testsuiteSummary, foundFiles)
 				elif dialect == "ctest":
-					self._mergeCTestJUnit(testsuiteSummary, globPattern)
+					self._mergeCTestJUnit(testsuiteSummary, foundFiles)
 				elif dialect == "gtest":
-					self._mergeGoogleTestJUnit(testsuiteSummary, globPattern)
+					self._mergeGoogleTestJUnit(testsuiteSummary, foundFiles)
 				elif dialect == "pytest":
-					self._mergePyTestJUnit(testsuiteSummary, globPattern)
+					self._mergePyTestJUnit(testsuiteSummary, foundFiles)
 				else:
 					self.WriteError(f"Unsupported JUnit XML dialect for merging: '{format}'")
 			else:
@@ -84,10 +91,9 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		else:
 			self.WriteError(f"Syntax error: '{task}'")
 
-	def _mergeAntJUnit(self, testsuiteSummary: MergedTestsuiteSummary, globPattern: str) -> None:
-		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document, JUnitReaderMode
+	def _mergeAntJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
+		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document
 
-		foundFiles = [f for f in Path.cwd().glob(globPattern)]
 		self.WriteNormal(f"Reading {len(foundFiles)} Ant-JUnit unit test summary files ...")
 
 		junitDocuments: List[Document] = []
@@ -100,10 +106,9 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  merging {summary.Path}")
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
-	def _mergeCTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, globPattern: str) -> None:
-		from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document, JUnitReaderMode
+	def _mergeCTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
+		from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
-		foundFiles = [f for f in Path.cwd().glob(globPattern)]
 		self.WriteNormal(f"Reading {len(foundFiles)} CTest-JUnit unit test summary files ...")
 
 		junitDocuments: List[Document] = []
@@ -116,10 +121,9 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  merging {summary.Path}")
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
-	def _mergeGoogleTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, globPattern: str) -> None:
-		from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document, JUnitReaderMode
+	def _mergeGoogleTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
+		from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
-		foundFiles = [f for f in Path.cwd().glob(globPattern)]
 		self.WriteNormal(f"Reading {len(foundFiles)} GoogleTest-JUnit unit test summary files ...")
 
 		junitDocuments: List[Document] = []
@@ -132,13 +136,8 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  merging {summary.Path}")
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
-	def _mergePyTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, globPattern: str) -> None:
+	def _mergePyTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
 		from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
-
-		foundFiles = [f for f in Path.cwd().glob(globPattern)]
-		if len(foundFiles) == 0:
-			self.WriteWarning(f"Found no matching files for pattern '{Path.cwd()}/{globPattern}'")
-			return
 
 		self.WriteNormal(f"Reading {len(foundFiles)} pytest-JUnit unit test summary files ...")
 
@@ -176,7 +175,25 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 	def _processPyTest_RewiteDunderInit(self, testsuiteSummary: TestsuiteSummary):
 		self.WriteVerbose(f"  Rewriting '__init__' in classnames to actual Python package names")
-		self.WriteError("Rewrite __init__ not yet supported!")
+
+		def processTestsuite(suite: Testsuite) -> None:
+			testsuites: Tuple[Testsuite, ...] = tuple(ts for ts in suite.Testsuites.values())
+			for testsuite in testsuites:                # type: Testsuite
+				if testsuite.Name != "__init__":
+					processTestsuite(testsuite)
+					continue
+
+				for ts in testsuite.Testsuites.values():  # type: Testsuite
+					ts._parent = None
+					suite.AddTestsuite(ts)
+
+				for tc in testsuite.Testcases.values():   # type: Testcase
+					tc._parent = None
+					suite.AddTestcase(tc)
+
+				del suite._testsuites["__init__"]
+
+		processTestsuite(testsuiteSummary)
 
 	def _processPyTest_ReduceDepth(self, testsuiteSummary: TestsuiteSummary, path: str):
 		self.WriteVerbose(f"  Reducing path depth of testsuite '{path}'")

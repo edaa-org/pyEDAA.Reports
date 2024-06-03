@@ -235,7 +235,9 @@ class Testcase(BaseWithProperties):
 			self._name,
 			testDuration=self._duration,
 			status=self._status,
-			assertionCount=self._assertionCount
+			assertionCount=self._assertionCount,
+			# TODO: as only assertions are recorded by JUnit files, all are marked as passed
+			passedAssertionCount=self._assertionCount
 		)
 
 	def ToTree(self) -> Node:
@@ -352,6 +354,7 @@ class Testclass(Base):
 		if parent is not None:
 			# if not isinstance(parent, Testsuite):
 			# 	raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+			# 	if version_info >= (3, 11):  # pragma: no cover
 			#	ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			#	raise ex
 
