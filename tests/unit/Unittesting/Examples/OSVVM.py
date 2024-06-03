@@ -33,7 +33,7 @@ from pathlib      import Path
 from unittest     import TestCase
 
 from pyEDAA.Reports.Unittesting.JUnit import Document as JUnitDocument
-from pyEDAA.Reports.Unittesting.OSVVM import OsvvmYamlDocument
+from pyEDAA.Reports.Unittesting.OSVVM import BuildSummaryDocument
 
 
 if __name__ == "__main__": # pragma: no cover
@@ -67,7 +67,7 @@ class JUnitGeneratedByOSVVM(TestCase):
 		doc = JUnitDocument(junitExampleFile, parse=True)
 
 		self.assertGreaterEqual(doc.TestsuiteCount, 14)
-		self.assertGreater(doc.TestcaseCount, 0)
+		self.assertGreaterEqual(doc.TestcaseCount, 285)
 
 		print("=" * 40)
 		tree = doc.ToTree()
@@ -85,11 +85,35 @@ class JUnitGeneratedByOSVVM(TestCase):
 
 
 class YAMLGeneratedByOSVVM(TestCase):
-	def test_ReadOSVVMTestSummaryYAML(self) -> None:
+	def test_OsvvmLibraries(self) -> None:
 		print()
 
-		yamlPath = Path("tests/data/OSVVM/osvvm.Summary.yml")
-		doc = OsvvmYamlDocument(yamlPath, parse=True)
+		yamlPath = Path("tests/data/OSVVM/OSVVMLibraries_OsvvmLibraries.yml")
+		doc = BuildSummaryDocument(yamlPath, parse=True)
+
+		print("=" * 40)
+		tree = doc.ToTree()
+		print(tree.Render(), end="")
+		print("=" * 40)
+
+		print()
+		print(f"YAML file:")
+		print(f"  Testsuites: {doc.TestsuiteCount}")
+		print(f"  Testcases:  {doc.TestcaseCount}")
+
+		print()
+		print(f"Statistics:")
+		print(f"  Times: parsing by ruamel.yaml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
+
+
+		self.assertEqual(1, doc.TestsuiteCount)
+		self.assertEqual(0, doc.TestcaseCount)
+
+	def test_RunAllTests(self) -> None:
+		print()
+
+		yamlPath = Path("tests/data/OSVVM/OSVVMLibraries_RunAllTests.yml")
+		doc = BuildSummaryDocument(yamlPath, parse=True)
 
 		print("=" * 40)
 		tree = doc.ToTree()

@@ -33,14 +33,20 @@ from datetime import timedelta
 from enum     import Enum, auto
 from pathlib  import Path
 from time     import perf_counter_ns
-from typing import Optional as Nullable, Dict, Iterator, Iterable
+from types    import NoneType
+from typing   import Optional as Nullable, Dict, Iterator, Iterable
 
-from ruamel.yaml import YAML, CommentedMap
+from ruamel.yaml           import YAML, CommentedSeq, CommentedMap
 from pyTooling.Decorators  import readonly, export
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Tree        import Node
 
 from pyEDAA.Reports.OSVVM  import OSVVMException
+
+
+@export
+class AlertLogException(OSVVMException):
+	pass
 
 
 @export
@@ -59,7 +65,7 @@ class AlertLogStatus(Enum):
 		try:
 			return self.__MAPPINGS__[name.lower()]
 		except KeyError as ex:
-			raise OSVVMException(f"Unknown AlertLog status '{name}'.") from ex
+			raise AlertLogException(f"Unknown AlertLog status '{name}'.") from ex
 
 	def __bool__(self) -> bool:
 		return self is self.Passed
@@ -140,10 +146,6 @@ class AlertLogGroup(metaclass=ExtendedType, slots=True):
 	@readonly
 	def Status(self) -> AlertLogStatus:
 		return self._status
-
-	# @readonly
-	# def Affirmations(self) -> int:
-	# 	return self._afirmations
 
 	@readonly
 	def TotalErrors(self) -> int:
@@ -260,6 +262,69 @@ class Document(AlertLogGroup):
 		endAnalysis = perf_counter_ns()
 		self._analysisDuration = (endAnalysis - startAnalysis) / 1e9
 
+	@staticmethod
+	def _ParseSequenceFromYAML(node: CommentedMap, fieldName: str) -> Nullable[CommentedSeq]:
+		try:
+			value = node[fieldName]
+		except KeyError as ex:
+			newEx = OSVVMException(f"Sequence field '{fieldName}' not found in node starting at line {node.lc.line + 1}.")
+			newEx.add_note(f"Available fields: {', '.join(key for key in node)}")
+			raise newEx from ex
+
+		if isinstance(value, NoneType):
+			return ()
+		elif not isinstance(value, CommentedSeq):
+			ex = AlertLogException(f"Field '{fieldName}' is not a sequence.")  # TODO: from TypeError??
+			ex.add_note(f"Found type {value.__class__.__name__} at line {node._yaml_line_col.data[fieldName][0] + 1}.")
+			raise ex
+
+		return value
+
+	@staticmethod
+	def _ParseMapFromYAML(node: CommentedMap, fieldName: str) -> Nullable[CommentedMap]:
+		try:
+			value = node[fieldName]
+		except KeyError as ex:
+			newEx = OSVVMException(f"Dictionary field '{fieldName}' not found in node starting at line {node.lc.line + 1}.")
+			newEx.add_note(f"Available fields: {', '.join(key for key in node)}")
+			raise newEx from ex
+
+		if isinstance(value, NoneType):
+			return {}
+		elif not isinstance(value, CommentedMap):
+			ex = AlertLogException(f"Field '{fieldName}' is not a list.")  # TODO: from TypeError??
+			ex.add_note(f"Type mismatch found for line {node._yaml_line_col.data[fieldName][0] + 1}.")
+			raise ex
+		return value
+
+	@staticmethod
+	def _ParseStrFieldFromYAML(node: CommentedMap, fieldName: str) -> Nullable[str]:
+		try:
+			value = node[fieldName]
+		except KeyError as ex:
+			newEx = OSVVMException(f"String field '{fieldName}' not found in node starting at line {node.lc.line + 1}.")
+			newEx.add_note(f"Available fields: {', '.join(key for key in node)}")
+			raise newEx from ex
+
+		if not isinstance(value, str):
+			raise AlertLogException(f"Field '{fieldName}' is not of type str.")  # TODO: from TypeError??
+
+		return value
+
+	@staticmethod
+	def _ParseIntFieldFromYAML(node: CommentedMap, fieldName: str) -> Nullable[int]:
+		try:
+			value = node[fieldName]
+		except KeyError as ex:
+			newEx = OSVVMException(f"Integer field '{fieldName}' not found in node starting at line {node.lc.line + 1}.")
+			newEx.add_note(f"Available fields: {', '.join(key for key in node)}")
+			raise newEx from ex
+
+		if not isinstance(value, int):
+			raise AlertLogException(f"Field '{fieldName}' is not of type int.")  # TODO: from TypeError??
+
+		return value
+
 	def Parse(self) -> None:
 		if self._yamlDocument is None:
 			ex = OSVVMException(f"OSVVM AlertLog YAML file '{self._path}' needs to be read and analyzed by a YAML parser.")
@@ -268,9 +333,9 @@ class Document(AlertLogGroup):
 
 		startConversion = perf_counter_ns()
 
-		self._name = self._yamlDocument["Name"]
-		self._status = AlertLogStatus.Parse(self._yamlDocument["Status"])
-		for child in self._yamlDocument["Children"]:
+		self._name = self._ParseStrFieldFromYAML(self._yamlDocument, "Name")
+		self._status = AlertLogStatus.Parse(self._ParseStrFieldFromYAML(self._yamlDocument, "Status"))
+		for child in self._ParseSequenceFromYAML(self._yamlDocument, "Children"):
 			alertLogGroup = self._ParseAlertLogGroup(child)
 			self._children[alertLogGroup._name] = alertLogGroup
 			alertLogGroup._parent = self
@@ -279,22 +344,24 @@ class Document(AlertLogGroup):
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
 	def _ParseAlertLogGroup(self, child: CommentedMap) -> AlertLogGroup:
-		results = child["Results"]
+		results = self._ParseMapFromYAML(child, "Results")
+		yamlAlertCount = self._ParseMapFromYAML(results, "AlertCount")
+		yamlDisabledAlertCount = self._ParseMapFromYAML(results, "DisabledAlertCount")
 		alertLogGroup = AlertLogGroup(
-			child["Name"],
-			AlertLogStatus.Parse(child["Status"]),
-			results["TotalErrors"],
-			results["AlertCount"]["Warning"],
-			results["AlertCount"]["Error"],
-			results["AlertCount"]["Failure"],
-			results["PassedCount"],
-			results["AffirmCount"],
-			results["RequirementsPassed"],
-			results["RequirementsGoal"],
-			results["DisabledAlertCount"]["Warning"],
-			results["DisabledAlertCount"]["Error"],
-			results["DisabledAlertCount"]["Failure"],
-			children=(self._ParseAlertLogGroup(ch) for ch in child["Children"])
+			self._ParseStrFieldFromYAML(child, "Name"),
+			AlertLogStatus.Parse(self._ParseStrFieldFromYAML(child, "Status")),
+			self._ParseIntFieldFromYAML(results, "TotalErrors"),
+			self._ParseIntFieldFromYAML(yamlAlertCount, "Warning"),
+			self._ParseIntFieldFromYAML(yamlAlertCount, "Error"),
+			self._ParseIntFieldFromYAML(yamlAlertCount, "Failure"),
+			self._ParseIntFieldFromYAML(results, "PassedCount"),
+			self._ParseIntFieldFromYAML(results, "AffirmCount"),
+			self._ParseIntFieldFromYAML(results, "RequirementsPassed"),
+			self._ParseIntFieldFromYAML(results, "RequirementsGoal"),
+			self._ParseIntFieldFromYAML(yamlDisabledAlertCount, "Warning"),
+			self._ParseIntFieldFromYAML(yamlDisabledAlertCount, "Error"),
+			self._ParseIntFieldFromYAML(yamlDisabledAlertCount, "Failure"),
+			children=(self._ParseAlertLogGroup(ch) for ch in self._ParseSequenceFromYAML(child, "Children"))
 		)
 
 		return alertLogGroup
