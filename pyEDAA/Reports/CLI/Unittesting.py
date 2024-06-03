@@ -6,7 +6,8 @@ from pyTooling.MetaClasses                    import ExtendedType
 from pyTooling.Attributes.ArgParse            import CommandHandler
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
 
-from pyEDAA.Reports.Unittesting       import TestsuiteKind, TestsuiteSummary, MergedTestsuiteSummary, UnittestException
+from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind, TestsuiteSummary, Testsuite, Testcase
+from pyEDAA.Reports.Unittesting       import MergedTestsuiteSummary
 from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode
 
 
@@ -45,11 +46,6 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		if args.pytest is not None:
 			self._processPyTest(result, args.pytest)
 
-		if args.output is not None:
-			outputs = (args.output, )
-			for output in outputs:
-				self._output(result, output)
-
 		if args.render is not None and self.Verbose:
 			self.WriteVerbose("*" * self.Width)
 
@@ -58,6 +54,11 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				self.WriteVerbose(tree.Render(), appendLinebreak=False)
 
 			self.WriteVerbose("*" * self.Width)
+
+		if args.output is not None:
+			outputs = (args.output, )
+			for output in outputs:
+				self._output(result, output)
 
 		self.ExitOnPreviousErrors()
 
@@ -174,7 +175,25 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 	def _processPyTest_RewiteDunderInit(self, testsuiteSummary: TestsuiteSummary):
 		self.WriteVerbose(f"  Rewriting '__init__' in classnames to actual Python package names")
-		self.WriteError("Rewrite __init__ not yet supported!")
+
+		def processTestsuite(suite: Testsuite) -> None:
+			testsuites: Tuple[Testsuite, ...] = tuple(ts for ts in suite.Testsuites.values())
+			for testsuite in testsuites:                # type: Testsuite
+				if testsuite.Name != "__init__":
+					processTestsuite(testsuite)
+					continue
+
+				for ts in testsuite.Testsuites.values():  # type: Testsuite
+					ts._parent = None
+					suite.AddTestsuite(ts)
+
+				for tc in testsuite.Testcases.values():   # type: Testcase
+					tc._parent = None
+					suite.AddTestcase(tc)
+
+				del suite._testsuites["__init__"]
+
+		processTestsuite(testsuiteSummary)
 
 	def _processPyTest_ReduceDepth(self, testsuiteSummary: TestsuiteSummary, path: str):
 		self.WriteVerbose(f"  Reducing path depth of testsuite '{path}'")
