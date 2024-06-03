@@ -32,7 +32,6 @@
 from datetime              import timedelta, datetime
 from pathlib               import Path
 from time                  import perf_counter_ns
-from types                 import NoneType
 from typing                import Optional as Nullable
 
 from ruamel.yaml           import YAML, CommentedMap, CommentedSeq
@@ -126,7 +125,7 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 			newEx.add_note(f"Available fields: {', '.join(key for key in node)}")
 			raise newEx from ex
 
-		if isinstance(value, NoneType):
+		if value is None:
 			return ()
 		elif not isinstance(value, CommentedSeq):
 			line = node._yaml_line_col.data[fieldName][0] + 1
@@ -145,7 +144,7 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 			newEx.add_note(f"Available fields: {', '.join(key for key in node)}")
 			raise newEx from ex
 
-		if isinstance(value, NoneType):
+		if value is None:
 			return {}
 		elif not isinstance(value, CommentedMap):
 			line = node._yaml_line_col.data[fieldName][0] + 1

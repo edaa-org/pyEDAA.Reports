@@ -33,7 +33,6 @@ from datetime import timedelta
 from enum     import Enum, auto
 from pathlib  import Path
 from time     import perf_counter_ns
-from types    import NoneType
 from typing   import Optional as Nullable, Dict, Iterator, Iterable
 
 from ruamel.yaml           import YAML, CommentedSeq, CommentedMap
@@ -271,7 +270,7 @@ class Document(AlertLogGroup):
 			newEx.add_note(f"Available fields: {', '.join(key for key in node)}")
 			raise newEx from ex
 
-		if isinstance(value, NoneType):
+		if value is None:
 			return ()
 		elif not isinstance(value, CommentedSeq):
 			ex = AlertLogException(f"Field '{fieldName}' is not a sequence.")  # TODO: from TypeError??
@@ -289,7 +288,7 @@ class Document(AlertLogGroup):
 			newEx.add_note(f"Available fields: {', '.join(key for key in node)}")
 			raise newEx from ex
 
-		if isinstance(value, NoneType):
+		if value is None:
 			return {}
 		elif not isinstance(value, CommentedMap):
 			ex = AlertLogException(f"Field '{fieldName}' is not a list.")  # TODO: from TypeError??
