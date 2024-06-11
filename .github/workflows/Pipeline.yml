@@ -36,11 +36,6 @@ jobs:
     steps:
       - name: ⏬ Checkout repository
         uses: actions/checkout@v4
-      - name: ⏬ Checkout 'google/googletest' repository
-        uses: actions/checkout@v4
-        with:
-          repository: google/googletest
-          path: examples/Cpp/GoogleTest/lib/googletest
       - name: 🔧 Install dependencies
         run: sudo apt-get install -y --no-install-recommends ninja-build
       - name: 🛠 Run CMake
