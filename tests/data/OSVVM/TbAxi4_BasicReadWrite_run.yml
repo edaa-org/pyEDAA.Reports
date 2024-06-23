@@ -1,0 +1,26 @@
+Version: "2024.06"
+TestCaseName: "TbAxi4_BasicReadWrite"
+TestSuiteName: "Axi4Lite"
+BuildName: "OSVVMLibraries_RunAllTests"
+Generics:
+TestSuiteDirectory: "reports/Axi4Lite"
+RequirementsYamlFile: ""
+AlertYamlFile: "reports/Axi4Lite/TbAxi4_BasicReadWrite_alerts.yml"
+CovYamlFile: "reports/Axi4Lite/TbAxi4_BasicReadWrite_cov.yml"
+ScoreboardDict:
+  slv: "reports/Axi4Lite/TbAxi4_BasicReadWrite_sb_slv.yml"
+TranscriptFiles:
+  - "results/Axi4Lite/TbAxi4_BasicReadWrite.txt"
+TestCaseFileName: "TbAxi4_BasicReadWrite"
+OsvvmSettingsInfo:
+  BaseDirectory:        ""
+  ReportsSubdirectory:  "reports"
+  CssSubdirectory:      "reports"
+  SimulationLogFile: "logs/GHDL-4.1.0/OSVVMLibraries_RunAllTests.log"
+  SimulationHtmlLogFile: "logs/GHDL-4.1.0/OSVVMLibraries_RunAllTests_log.html"
+  CssPngSourceDirectory:   "../Scripts"
+  RequirementsSubdirectory: ""
+  CoverageSubdirectory: ""
+  Report2CssFiles:
+    - "reports/CssOsvvmStyle.css"
+  Report2PngFile:  "reports/OsvvmLogo.png"

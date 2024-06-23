@@ -60,16 +60,18 @@
 					</xsd:annotation>
 				</xsd:element>
 			</xsd:choice>
-			<xsd:element name="system-out" type="literalblock" minOccurs="0">
-				<xsd:annotation>
-					<xsd:documentation xml:lang="en"></xsd:documentation>
-				</xsd:annotation>
-			</xsd:element>
-			<xsd:element name="system-err" type="literalblock" minOccurs="0">
-				<xsd:annotation>
-					<xsd:documentation xml:lang="en"></xsd:documentation>
-				</xsd:annotation>
-			</xsd:element>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="system-out" type="literalblock" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en"></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="system-err" type="literalblock" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en"></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:choice>
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string" use="required" />
 		<xsd:attribute name="classname" type="xsd:string" use="required" />
@@ -96,16 +98,18 @@
 					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>
 				</xsd:annotation>
 			</xsd:element>
-			<xsd:element name="system-out" type="literalblock" minOccurs="0">
-				<xsd:annotation>
-					<xsd:documentation xml:lang="en"></xsd:documentation>
-				</xsd:annotation>
-			</xsd:element>
-			<xsd:element name="system-err" type="literalblock" minOccurs="0">
-				<xsd:annotation>
-					<xsd:documentation xml:lang="en"></xsd:documentation>
-				</xsd:annotation>
-			</xsd:element>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="system-out" type="literalblock" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en"></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="system-err" type="literalblock" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en"></xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:choice>
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string" use="required" />
 		<xsd:attribute name="errors" type="xsd:nonNegativeInteger" use="optional" />

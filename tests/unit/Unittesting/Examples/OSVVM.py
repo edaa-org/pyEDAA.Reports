@@ -146,7 +146,7 @@ class YAMLGeneratedByOSVVM(TestCase):
 		self.assertEqual(65, len(axi4stream.Testcases))
 
 		uart = doc["Uart"]
-		self.assertEqual(8, len(uart.Testcases))
+		self.assertEqual(10, len(uart.Testcases))
 
 	# 	for suite in doc:
 	# 		self.printTestsuite(suite)
