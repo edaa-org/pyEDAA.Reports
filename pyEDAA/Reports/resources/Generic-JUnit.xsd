@@ -116,6 +116,11 @@
 
 	<xsd:complexType name="testsuites">
 		<xsd:sequence>
+			<xsd:element name="properties" type="properties" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Describes the result of an individual testcase.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
 			<xsd:element name="testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded">
 				<xsd:annotation>
 					<xsd:documentation xml:lang="en">Describes the aggregated results of multiple testcase.</xsd:documentation>
