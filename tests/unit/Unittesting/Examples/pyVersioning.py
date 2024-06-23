@@ -122,24 +122,24 @@ class pyVersioning(ut_TestCase):
 		endAggregate = perf_counter_ns()
 		aggregateDuration = (endAggregate - startAggregate) / 1e9
 
-		self.assertEqual(7, merged.TestsuiteCount)
-		self.assertEqual(10, merged.TestcaseCount)
+		self.assertEqual(15, merged.TestsuiteCount)
+		self.assertEqual(30, merged.TestcaseCount)
 		self.assertEqual(0, merged.AssertionCount)
-		self.assertEqual(10, merged.Tests)
-		self.assertEqual(3, merged.Skipped)
+		self.assertEqual(30, merged.Tests)
+		self.assertEqual(5, merged.Skipped)
 		self.assertEqual(0, merged.Errored)
-		self.assertEqual(0, merged.Failed)
+		self.assertEqual(2, merged.Failed)
 
 		# Compress to a TestsuiteSummary
 		result = merged.ToTestsuiteSummary()
 
-		self.assertEqual(7, result.TestsuiteCount)
-		self.assertEqual(10, result.TestcaseCount)
+		self.assertEqual(15, result.TestsuiteCount)
+		self.assertEqual(30, result.TestcaseCount)
 		self.assertEqual(0, result.AssertionCount)
-		self.assertEqual(10, result.Tests)
-		self.assertEqual(3, result.Skipped)
+		self.assertEqual(30, result.Tests)
+		self.assertEqual(5, result.Skipped)
 		self.assertEqual(0, result.Errored)
-		self.assertEqual(0, result.Failed)
+		self.assertEqual(2, result.Failed)
 
 		print(f"Writing merged data as JUnit XML ...")
 		startWrite = perf_counter_ns()
