@@ -19,6 +19,11 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           architecture: x64
+      - name: ❓ Investigate Java environment
+        run: |
+          ls -lAh /usr/share/gradle-*
+          ls -lAh /usr/share/gradle-*/lib/junit-*
+          ls -lAh /usr/share/gradle-*/lib/hamcrest-*
       - name: ✅ Run the Ant 'junit' target
         run: |
           cd examples/Java/JUnit
