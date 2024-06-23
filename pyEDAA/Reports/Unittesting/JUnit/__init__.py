@@ -868,7 +868,7 @@ class Document(TestsuiteSummary, ut_Document):
 			if version_info >= (3, 11):  # pragma: no cover
 				for logEntry in junitParser.error_log:
 					ex.add_note(str(logEntry))
-			raise UnittestException(f"XML syntax or validation error for '{self._path}'.") from ex
+			raise UnittestException(f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'.") from ex
 		except Exception as ex:
 			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
 
