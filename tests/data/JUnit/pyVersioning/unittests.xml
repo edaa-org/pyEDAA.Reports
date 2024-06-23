@@ -1,0 +1,1425 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testsuite name="pytest" errors="0" failures="2" skipped="5" tests="30" time="5.848"
+						 timestamp="2024-06-23T18:58:34.733814" hostname="Paebbels">
+		<testcase classname="tests.unit.Application.Application" name="test_Field_GitCommitHash" time="0.272">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				d313c748122bef2a9f5f878c39d28fe1821fa6f7
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_Field_Version" time="0.239">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				v0.0.0
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_Fillout" time="0.238">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				/***********************************************************************************************************************
+				/* __ __ _ _ *
+				/* _ __ _ \ \ / /__ _ __ ___(_) ___ _ __ (_)_ __ __ _ *
+				/* | '_ \| | | \ \ / / _ \ '__/ __| |/ _ \| '_ \| | '_ \ / _` | *
+				/* | |_) | |_| |\ V / __/ | \__ \ | (_) | | | | | | | | (_| | *
+				/* | .__/ \__, | \_/ \___|_| |___/_|\___/|_| |_|_|_| |_|\__, | *
+				/* |_| |___/ |___/ *
+				/***********************************************************************************************************************
+				/* @author Patrick Lehmann *
+				/* *
+				/* @brief C constant declaration of the version data structure *
+				/* *
+				/* @copyright Copyright 2020-2024 Patrick Lehmann - Boetzingen, Germany *
+				/* *
+				/* Licensed under the Apache License, Version 2.0 (the "License"); *
+				/* you may not use this file except in compliance with the License. *
+				/* You may obtain a copy of the License at *
+				/* *
+				/* http://www.apache.org/licenses/LICENSE-2.0 *
+				/* *
+				/* Unless required by applicable law or agreed to in writing, software *
+				/* distributed under the License is distributed on an "AS IS" BASIS, *
+				/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. *
+				/* See the License for the specific language governing permissions and *
+				/* limitations under the License. *
+				/* *
+				/* SPDX-License-Identifier: Apache-2.0 *
+				/**********************************************************************************************************************/
+				#include "versioning.h"
+
+				const VersioningInformation versioningInformation = {
+				.version = {
+				.flags = 0x0/*{version.Flags:02X}*/,
+				.major = 0x0 /*:02X}*/,
+				.minor = 0x0 /*:02X}*/,
+				.patch = 0x0 /*:02X}*/
+				},
+				.git = {
+				.commit = {
+				.hash = "d313c748122bef2a9f5f878c39d28fe1821fa6f7\0",
+				.datetime = {
+				.date = {
+				.day = 23,
+				.month = 6,
+				.year = 2024
+				},
+				.time = {
+				.hour = 9,
+				.minute = 49,
+				.second = 2
+				}
+				}
+				},
+				.reference = "dev\0",
+				.repository = "git@github.com:Paebbels/pyVersioning.git\0"
+				},
+				.project = {
+				.name = "\0",
+				.variant = "\0",
+				},
+				.build = {
+				.datetime = {
+				.date = {
+				.day = 23,
+				.month = 6,
+				.year = 2024
+				},
+				.time = {
+				.hour = 18,
+				.minute = 58,
+				.second = 35
+				}
+				},
+				.compiler = {
+				.name = "\0",
+				.version = {
+				.flags = 0x0/*{build.compiler.version.Flags:02X}*/,
+				.major = /*0x*/ 0 /*:02X}*/,
+				.minor = 0x0 /*:02X}*/,
+				.patch = 0x0 /*:02X}*/
+				},
+				.configuration = "\0",
+				.options = "\0"
+				}
+				}
+				};
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_Help" time="0.001">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37m#x1B[95m Version file generator. #x1B[39m
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37mAuthor: Patrick Lehmann (Paebbels@gmail.com)#x1B[39m
+				#x1B[37mCopyright: 2020-2024, Patrick Lehmann#x1B[39m
+				#x1B[37mLicense: Apache License, Version 2.0#x1B[39m
+				#x1B[37mVersion: 0.15.0#x1B[39m
+				#x1B[37m#x1B[39m
+				usage: pyVersioning.py [-v] [-d] [--config-file &lt;pyVersioning.yaml&gt;]
+				{help,version,variables,field,fillout,json,yaml} ...
+
+				Version file generator.
+
+				positional arguments:
+				{help,version,variables,field,fillout,json,yaml}
+				sub-command help
+				help Display help page(s) for the given command name.
+				version Display version information.
+				variables Print all available variables.
+				field Return a single pyVersioning field.
+				fillout Read a template and replace tokens with version information.
+				json Write all available variables as JSON.
+				yaml Write all available variables as YAML.
+
+				options:
+				-v, --verbose Print verbose messages.
+				-d, --debug Print debug messages.
+				--config-file &lt;pyVersioning.yaml&gt;
+				Path to pyVersioning.yaml .
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_JSON_WithError" time="0.241">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				{
+				"format": "1.1",
+				"version": {
+				"name": "v0.0.0",
+				"major": 0,
+				"minor": 0,
+				"patch": 0,
+				"flags": 1
+				}
+				}
+				-- STDERR ----------------------------------------------------------------------
+				#x1B[91m[ERROR] Configuration file 'CIServices\.pyVersioning.yml' does not exist.#x1B[39m
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_JSON_WithoutError" time="0.238">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				{
+				"format": "1.1",
+				"version": {
+				"name": "v1.1.6",
+				"major": 1,
+				"minor": 1,
+				"patch": 6,
+				"flags": 1
+				}
+				}
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_NoCommand" time="0.001">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37m#x1B[95m Version file generator. #x1B[39m
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37mAuthor: Patrick Lehmann (Paebbels@gmail.com)#x1B[39m
+				#x1B[37mCopyright: 2020-2024, Patrick Lehmann#x1B[39m
+				#x1B[37mLicense: Apache License, Version 2.0#x1B[39m
+				#x1B[37mVersion: 0.15.0#x1B[39m
+				#x1B[37m#x1B[39m
+				usage: pyVersioning.py [-v] [-d] [--config-file &lt;pyVersioning.yaml&gt;]
+				{help,version,variables,field,fillout,json,yaml} ...
+
+				Version file generator.
+
+				positional arguments:
+				{help,version,variables,field,fillout,json,yaml}
+				sub-command help
+				help Display help page(s) for the given command name.
+				version Display version information.
+				variables Print all available variables.
+				field Return a single pyVersioning field.
+				fillout Read a template and replace tokens with version information.
+				json Write all available variables as JSON.
+				yaml Write all available variables as YAML.
+
+				options:
+				-v, --verbose Print verbose messages.
+				-d, --debug Print debug messages.
+				--config-file &lt;pyVersioning.yaml&gt;
+				Path to pyVersioning.yaml .
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_Variables" time="0.238">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				#x1B[97mproject : - v0.0.0#x1B[39m
+				#x1B[97m name : #x1B[39m
+				#x1B[97m variant : #x1B[39m
+				#x1B[97m version : v0.0.0#x1B[39m
+				#x1B[97mbuild : &lt;pyVersioning.Build object at 0x000001F66E780480&gt;#x1B[39m
+				#x1B[97m date : 2024-06-23#x1B[39m
+				#x1B[97m time : 18:58:36.445658#x1B[39m
+				#x1B[97m compiler : &lt;pyVersioning.Compiler object at 0x000001F66E896B10&gt;#x1B[39m
+				#x1B[97m name : #x1B[39m
+				#x1B[97m version : v0.0.0#x1B[39m
+				#x1B[97m configuration : #x1B[39m
+				#x1B[97m options : #x1B[39m
+				#x1B[97mversion : v0.0.0#x1B[39m
+				#x1B[97mtool : pyVersioning v0.15.0#x1B[39m
+				#x1B[97m name : pyVersioning#x1B[39m
+				#x1B[97m version : v0.15.0#x1B[39m
+				#x1B[97mgit : &lt;pyVersioning.Git object at 0x000001F66E896C00&gt;#x1B[39m
+				#x1B[97m commit : &lt;pyVersioning.Commit object at 0x000001F66E4F6DA0&gt;#x1B[39m
+				#x1B[97m hash : d313c748122bef2a9f5f878c39d28fe1821fa6f7#x1B[39m
+				#x1B[97m date : 2024-06-23#x1B[39m
+				#x1B[97m time : 09:49:02#x1B[39m
+				#x1B[97m author : Patrick Lehmann &lt;Paebbels@gmail.com&gt;#x1B[39m
+				#x1B[97m name : Patrick Lehmann#x1B[39m
+				#x1B[97m email : Paebbels@gmail.com#x1B[39m
+				#x1B[97m committer : Patrick Lehmann &lt;Paebbels@gmail.com&gt;#x1B[39m
+				#x1B[97m name : Patrick Lehmann#x1B[39m
+				#x1B[97m email : Paebbels@gmail.com#x1B[39m
+				#x1B[97m comment : Allow CI pipeline to build for documentation publishing.
+				#x1B[39m
+				#x1B[97m oneline : Allow CI pipeline to build for documentation publishing.#x1B[39m
+				#x1B[97m reference : dev#x1B[39m
+				#x1B[97m tag : #x1B[39m
+				#x1B[97m branch : dev#x1B[39m
+				#x1B[97m repository : git@github.com:Paebbels/pyVersioning.git#x1B[39m
+				#x1B[97menv : Environment(ALDEC_LICENSE_FILE='c:\\Keys\\Riviera-PRO.2024.12.dat',
+				ALLUSERSPROFILE='C:\\ProgramData', APPDATA='C:\\Users\\Patrick_Lehmann\\AppData\\Roaming',
+				CHOCOLATEYINSTALL='C:\\ProgramData\\chocolatey', CHOCOLATEYLASTPATHUPDATE='133405584154168929',
+				CLASSPATH='C:\\Tools\\ANTLR4\\4.12.0\\antlr-4.12.0-complete.jar;C:\\Tools\\ANTLR3\\3.5.3\\antlrworks-1.5.1.jar;',
+				COLUMNS='120', COMMONPROGRAMFILES='C:\\Program Files\\Common Files', COMMONPROGRAMW6432='C:\\Program
+				Files\\Common Files', COMPUTERNAME='PAEBBELS', COMSPEC='C:\\WINDOWS\\system32\\cmd.exe',
+				DRIVERDATA='C:\\Windows\\System32\\Drivers\\DriverData',
+				GNUPLOT_LIB='C:\\Tools\\gnuplot\\5.4.3\\demo;C:\\Tools\\gnuplot\\5.4.3\\demo\\games;C:\\Tools\\gnuplot\\5.4.3\\share',
+				HOMEDRIVE='C:', HOMEPATH='\\Users\\Patrick_Lehmann',
+				IGCCSVC_DB='AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA/srfxRJB/EuIe46nxIOllQQAAAACAAAAAAAQZgAAAAEAACAAAABRJy4t+aMv5eGbwnDNWcrVEKuPPVQjoMB0UfTqk0fNQAAAAAAOgAAAAAIAACAAAAC6SDOTVk0ySEeyQnf/RoJo4Y86BXJOyBgVNlb4QcOahmAAAABUCYsN4ulwp3TnHMrqTFAU/6LDHNCecpBfM20PXj/oc8Ej1Nb964CwniyuBczRWdTPVfMMJDRSPIiLa3h2hpHYFyfFubouP3/Qg5F/ixZwnHeuFToRBFsXHr/2ID7vZiNAAAAAw8vRL2rPpvXm9n/27nsNJSfG8pnDvOad3A5i+WlYPe8Nx3Y4zvrSqAqF8dkO7nEVZ/4yBXJX5/22GrSRB6fDUA==',
+				LOCALAPPDATA='C:\\Users\\Patrick_Lehmann\\AppData\\Local', LOGONSERVER='\\\\PAEBBELS',
+				NUMBER_OF_PROCESSORS='16', ONEDRIVE='C:\\Users\\Patrick_Lehmann\\OneDrive', OS='Windows_NT', PATH='C:\\Program
+				Files\\PowerShell\\7;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\Program
+				Files\\NVIDIA Corporation\\NVIDIA NvDLISR;C:\\Program Files\\MiKTeX\\miktex\\bin\\x64\\;C:\\Program
+				Files\\Common Files\\Oracle\\Java\\javapath;C:\\Program
+				Files\\PuTTY\\;C:\\Tools\\Graphviz\\7.0.6\\bin;C:\\Tools\\gnuplot\\5.4.10\\bin;C:\\ProgramData\\chocolatey\\bin;C:\\Program
+				Files\\Pandoc\\;C:\\Program Files\\dotnet\\;C:\\Program Files\\Python3.12\\Scripts\\;C:\\Program
+				Files\\Python3.12\\;C:\\Program Files\\Microsoft VS Code\\bin;C:\\Program Files\\Git\\cmd;C:\\Program
+				Files\\PowerShell\\7\\;C:\\intelFPGA\\21.1\\questa_fse\\win64;;C:\\Users\\Patrick_Lehmann\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Tools\\NVC\\1.12.0\\bin\\',
+				PATHEXT='.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW;.CPL',
+				POWERSHELL_DISTRIBUTION_CHANNEL='MSI:Windows 10 Pro', POWERSHELL_TELEMETRY_OPTOUT='1',
+				PROCESSOR_ARCHITECTURE='AMD64', PROCESSOR_IDENTIFIER='Intel64 Family 6 Model 141 Stepping 1, GenuineIntel',
+				PROCESSOR_LEVEL='6', PROCESSOR_REVISION='8d01', PROGRAMDATA='C:\\ProgramData', PROGRAMFILES='C:\\Program Files',
+				PROGRAMW6432='C:\\Program Files',
+				PSMODULEPATH='C:\\Users\\Patrick_Lehmann\\Documents\\PowerShell\\Modules;C:\\Program
+				Files\\PowerShell\\Modules;c:\\program files\\powershell\\7\\Modules;C:\\Program
+				Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules',
+				PUBLIC='C:\\Users\\Public', QSYS_ROOTDIR='C:\\intelFPGA\\21.1\\quartus\\sopc_builder\\bin',
+				QUARTUS_ROOTDIR='C:\\intelFPGA\\21.1\\quartus', SESSIONNAME='Console',
+				SOPC_KIT_NIOS2='C:\\intelFPGA\\21.1\\nios2eds', SYSTEMDRIVE='C:', SYSTEMROOT='C:\\WINDOWS',
+				TEMP='C:\\Users\\PATRIC~1\\AppData\\Local\\Temp', TMP='C:\\Users\\PATRIC~1\\AppData\\Local\\Temp',
+				USERDOMAIN='PAEBBELS', USERDOMAIN_ROAMINGPROFILE='PAEBBELS', USERNAME='Patrick_Lehmann',
+				USERPROFILE='C:\\Users\\Patrick_Lehmann', WINDIR='C:\\WINDOWS', WSLENV='WT_SESSION:WT_PROFILE_ID:',
+				WT_PROFILE_ID='{574e775e-4f2a-5b96-ac1e-a2962a402336}', WT_SESSION='fd273244-e74b-47c7-ac5b-98fd7cce2e95',
+				ZES_ENABLE_SYSMAN='1', PYTEST_VERSION='8.2.2',
+				PYTEST_CURRENT_TEST='tests/unit/Application.py::Application::test_Variables (call)')#x1B[39m
+				#x1B[97mplatform : &lt;pyVersioning.Platform object at 0x000001F66CE9A020&gt;#x1B[39m
+				#x1B[97m ci_service : NO-CI#x1B[39m
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_Version" time="0.001">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37m#x1B[95m Version file generator. #x1B[39m
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37mAuthor: Patrick Lehmann (Paebbels@gmail.com)#x1B[39m
+				#x1B[37mCopyright: 2020-2024, Patrick Lehmann#x1B[39m
+				#x1B[37mLicense: Apache License, Version 2.0#x1B[39m
+				#x1B[37mVersion: 0.15.0#x1B[39m
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_YAML_WithError" time="0.242">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				format: "1.1"
+
+				version:
+				name: "v0.0.0"
+				major: 0
+				minor: 0
+				patch: 0
+				flags: 1
+
+				git:
+				commit:
+				hash: d313c748122bef2a9f5f878c39d28fe1821fa6f7
+				date: 2024-06-23
+				reference: dev
+				branch: dev
+				tag:
+				repository: git@github.com:Paebbels/pyVersioning.git
+
+				project:
+				name:
+				variant:
+
+				build:
+				date: 2024-06-23
+				compiler:
+				name:
+				version: v0.0.0
+				configuration:
+				options:
+
+				platform:
+				ci-service: NO-CI
+				appveyor:
+				# not found
+				github:
+				# not found
+				gitlab:
+				# not found
+				travis:
+				# not found
+				env:
+
+				-- STDERR ----------------------------------------------------------------------
+				#x1B[91m[ERROR] Configuration file 'CIServices\.pyVersioning.yml' does not exist.#x1B[39m
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Application.Application" name="test_YAML_WithoutError" time="0.251">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				format: "1.1"
+
+				version:
+				name: "v1.1.6"
+				major: 1
+				minor: 1
+				patch: 6
+				flags: 1
+
+				git:
+				commit:
+				hash: d313c748122bef2a9f5f878c39d28fe1821fa6f7
+				date: 2024-06-23
+				reference: dev
+				branch: dev
+				tag:
+				repository: git@github.com:Paebbels/pyVersioning.git
+
+				project:
+				name: UnitTest Project
+				variant: V1
+
+				build:
+				date: 2024-06-23
+				compiler:
+				name: gcc
+				version: v10.2.0
+				configuration: Release
+				options: -g -O3
+
+				platform:
+				ci-service: NO-CI
+				appveyor:
+				# not found
+				github:
+				# not found
+				gitlab:
+				# not found
+				travis:
+				# not found
+				env:
+
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.GitHub.GitHubEnvironment" name="test_Fillout" time="0.000">
+			<skipped type="pytest.skip" message="unconditional skip">
+				C:\Git\GitHub\Paebbels\pyVersioning\tests\unit\CIServices\GitHub.py:67: unconditional skip
+			</skipped>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.GitHub.GitHubEnvironment" name="test_Variables" time="0.000">
+			<skipped type="pytest.skip" message="unconditional skip">
+				C:\Git\GitHub\Paebbels\pyVersioning\tests\unit\CIServices\GitHub.py:61: unconditional skip
+			</skipped>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.GitLab.GitLabEnvironment" name="test_Fillout" time="0.192">
+			<failure
+				message="Exception: Error when executing the process: Command '['py', '-3.12', 'pyVersioning/CLI.py', '-d', '--config-file=tests/unit/CIServices/.pyVersioning.yml', 'fillout', 'tests/template.in', 'tests/template.out']' returned non-zero exit status 241.">
+				self = &lt;class 'tests.unit.CIServices.GitLab.GitLabEnvironment'&gt;, command = '-d'
+				args = ('--config-file=tests/unit/CIServices/.pyVersioning.yml', 'fillout', 'tests/template.in',
+				'tests/template.out')
+
+				@classmethod
+				def _run(self, command: Nullable[str] = None, *args: Any) -&gt; Tuple[str, str]:
+				try:
+				&gt; prog = subprocess_run(
+				args=self._getExecutable(command, *args),
+				stdout=subprocess_PIPE,
+				stderr=subprocess_STDOUT,
+				shell=True,
+				env=self._getServiceEnvironment(),
+				check=True,
+				encoding="utf-8"
+				)
+
+				tests\unit\CIServices\__init__.py:69:
+				_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+				_ _ _ _
+
+				input = None, capture_output = False, timeout = None, check = True, popenargs = ()
+				kwargs = {'args': ['py', '-3.12', 'pyVersioning/CLI.py', '-d',
+				'--config-file=tests/unit/CIServices/.pyVersioning.yml', 'fillou...sers\\Patrick_Lehmann\\AppData\\Roaming',
+				'CHOCOLATEYINSTALL': 'C:\\ProgramData\\chocolatey', ...}, 'shell': True, ...}
+				process = &lt;Popen: returncode: 241 args: ['py', '-3.12', 'pyVersioning/CLI.py', '-d', '...&gt;
+				stdout = '\x1b[91m[FATAL] An unknown or unhandled exception reached the topmost exception handler!\x1b[39m\n
+				\x1b[93mException...ading information from configuration file ...\x1b[39m\n\x1b[90m Collecting information from
+				environment ...\x1b[39m\n'
+				stderr = None, retcode = 241
+
+				def run(*popenargs,
+				input=None, capture_output=False, timeout=None, check=False, **kwargs):
+				"""Run command with arguments and return a CompletedProcess instance.
+
+				The returned instance will have attributes args, returncode, stdout and
+				stderr. By default, stdout and stderr are not captured, and those attributes
+				will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+				or pass capture_output=True to capture both.
+
+				If check is True and the exit code was non-zero, it raises a
+				CalledProcessError. The CalledProcessError object will have the return code
+				in the returncode attribute, and output &amp; stderr attributes if those streams
+				were captured.
+
+				If timeout is given, and the process takes too long, a TimeoutExpired
+				exception will be raised.
+
+				There is an optional argument "input", allowing you to
+				pass bytes or a string to the subprocess's stdin. If you use this argument
+				you may not also use the Popen constructor's "stdin" argument, as
+				it will be used internally.
+
+				By default, all communication is in bytes, and therefore any "input" should
+				be bytes, and the stdout and stderr will be bytes. If in text mode, any
+				"input" should be a string, and stdout and stderr will be strings decoded
+				according to locale encoding, or by "encoding" if set. Text mode is
+				triggered by setting any of text, encoding, errors or universal_newlines.
+
+				The other arguments are the same as for the Popen constructor.
+				"""
+				if input is not None:
+				if kwargs.get('stdin') is not None:
+				raise ValueError('stdin and input arguments may not both be used.')
+				kwargs['stdin'] = PIPE
+
+				if capture_output:
+				if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+				raise ValueError('stdout and stderr arguments may not be used '
+				'with capture_output.')
+				kwargs['stdout'] = PIPE
+				kwargs['stderr'] = PIPE
+
+				with Popen(*popenargs, **kwargs) as process:
+				try:
+				stdout, stderr = process.communicate(input, timeout=timeout)
+				except TimeoutExpired as exc:
+				process.kill()
+				if _mswindows:
+				# Windows accumulates the output in a single blocking
+				# read() call run on child threads, with the timeout
+				# being done in a join() on those threads. communicate()
+				# _after_ kill() is required to collect that and add it
+				# to the exception.
+				exc.stdout, exc.stderr = process.communicate()
+				else:
+				# POSIX _communicate already populated the output so
+				# far into the TimeoutExpired exception.
+				process.wait()
+				raise
+				except: # Including KeyboardInterrupt, communicate handled that.
+				process.kill()
+				# We don't call process.wait() as .__exit__ does that for us.
+				raise
+				retcode = process.poll()
+				if check and retcode:
+				&gt; raise CalledProcessError(retcode, process.args,
+				output=stdout, stderr=stderr)
+				E subprocess.CalledProcessError: Command '['py', '-3.12', 'pyVersioning/CLI.py', '-d',
+				'--config-file=tests/unit/CIServices/.pyVersioning.yml', 'fillout', 'tests/template.in', 'tests/template.out']'
+				returned non-zero exit status 241.
+
+				C:\Program Files\Python3.12\Lib\subprocess.py:571: CalledProcessError
+
+				The above exception was the direct cause of the following exception:
+
+				self = &lt;tests.unit.CIServices.GitLab.GitLabEnvironment testMethod=test_Fillout&gt;
+
+				def test_Fillout(self) -&gt; None:
+				print()
+
+				&gt; stdout, stderr = self._run("-d", "--config-file=tests/unit/CIServices/.pyVersioning.yml", "fillout",
+				"tests/template.in", "tests/template.out")
+
+				tests\unit\CIServices\GitLab.py:69:
+				_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+				_ _ _ _
+
+				self = &lt;class 'tests.unit.CIServices.GitLab.GitLabEnvironment'&gt;, command = '-d'
+				args = ('--config-file=tests/unit/CIServices/.pyVersioning.yml', 'fillout', 'tests/template.in',
+				'tests/template.out')
+
+				@classmethod
+				def _run(self, command: Nullable[str] = None, *args: Any) -&gt; Tuple[str, str]:
+				try:
+				prog = subprocess_run(
+				args=self._getExecutable(command, *args),
+				stdout=subprocess_PIPE,
+				stderr=subprocess_STDOUT,
+				shell=True,
+				env=self._getServiceEnvironment(),
+				check=True,
+				encoding="utf-8"
+				)
+				except CalledProcessError as ex:
+				print("-- CALLED PROCESS ERROR " + "-" * 56)
+				print(f"Return code: {ex.returncode}")
+				print(ex.output)
+				print("-" * 80)
+				&gt; raise Exception(f"Error when executing the process: {ex}") from ex
+				E Exception: Error when executing the process: Command '['py', '-3.12', 'pyVersioning/CLI.py', '-d',
+				'--config-file=tests/unit/CIServices/.pyVersioning.yml', 'fillout', 'tests/template.in', 'tests/template.out']'
+				returned non-zero exit status 241.
+
+				tests\unit\CIServices\__init__.py:83: Exception
+			</failure>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- CALLED PROCESS ERROR --------------------------------------------------------
+				Return code: 241
+				#x1B[91m[FATAL] An unknown or unhandled exception reached the topmost exception handler!#x1B[39m
+				#x1B[93mException type:#x1B[39m #x1B[91mValueError#x1B[39m
+				#x1B[93mException message:#x1B[39m time data '2024-06-23T18:58:37.182588+02:00' does not match format
+				'%Y-%m-%dT%H:%M:%S%z'
+				#x1B[93mCaused in:#x1B[39m _strptime(...) in file 'C:\Program Files\Python3.12\Lib\_strptime.py' at line 333
+				#x1B[91m--------------------------------------------------------------------------------#x1B[39m
+				File "C:\Git\GitHub\Paebbels\pyVersioning\pyVersioning\CLI.py", line 414, in main
+				application.Run()
+				File "C:\Git\GitHub\Paebbels\pyVersioning\pyVersioning\CLI.py", line 125, in Run
+				super().Run() # todo: enableAutoComplete ??
+				^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyTooling\Attributes\ArgParse\__init__.py", line 336, in Run
+				self._ParseArguments()
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyTooling\Attributes\ArgParse\__init__.py", line 348, in
+				_ParseArguments
+				self._RouteToHandler(parsed)
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyTooling\Attributes\ArgParse\__init__.py", line 352, in
+				_RouteToHandler
+				args.func(self, args)
+				File "C:\Git\GitHub\Paebbels\pyVersioning\pyVersioning\CLI.py", line 226, in HandleFillOut
+				self.Initialize(None if args.ConfigFile is None else Path(args.ConfigFile))
+				File "C:\Git\GitHub\Paebbels\pyVersioning\pyVersioning\CLI.py", line 122, in Initialize
+				self._versioning.CollectData()
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\__init__.py", line 424, in CollectData
+				self._variables["git"] = self.GetGitInformation()
+				^^^^^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\__init__.py", line 442, in GetGitInformation
+				commit=self.GetLastCommit(),
+				^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\__init__.py", line 449, in GetLastCommit
+				dt = self.GetCommitDate()
+				^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\__init__.py", line 468, in GetCommitDate
+				return self._service.GetCommitDate()
+				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\GitLab.py", line 62, in GetCommitDate
+				return datetime.strptime(iso8601, "%Y-%m-%dT%H:%M:%S%z")
+				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\_strptime.py", line 554, in _strptime_datetime
+				tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\_strptime.py", line 333, in _strptime
+				raise ValueError("time data %r does not match format %r" %
+				#x1B[91m--------------------------------------------------------------------------------#x1B[39m
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37m#x1B[95m Version file generator. #x1B[39m
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37mReading configuration file 'tests\unit\CIServices\.pyVersioning.yml'#x1B[39m
+				#x1B[37mCreating internal data model ...#x1B[39m
+				#x1B[90m Loading information from configuration file ...#x1B[39m
+				#x1B[90m Collecting information from environment ...#x1B[39m
+
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.GitLab.GitLabEnvironment" name="test_Variables" time="0.189">
+			<failure
+				message="Exception: Error when executing the process: Command '['py', '-3.12', 'pyVersioning/CLI.py', 'variables']' returned non-zero exit status 241.">
+				self = &lt;class 'tests.unit.CIServices.GitLab.GitLabEnvironment'&gt;, command = 'variables', args = ()
+
+				@classmethod
+				def _run(self, command: Nullable[str] = None, *args: Any) -&gt; Tuple[str, str]:
+				try:
+				&gt; prog = subprocess_run(
+				args=self._getExecutable(command, *args),
+				stdout=subprocess_PIPE,
+				stderr=subprocess_STDOUT,
+				shell=True,
+				env=self._getServiceEnvironment(),
+				check=True,
+				encoding="utf-8"
+				)
+
+				tests\unit\CIServices\__init__.py:69:
+				_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+				_ _ _ _
+
+				input = None, capture_output = False, timeout = None, check = True, popenargs = ()
+				kwargs = {'args': ['py', '-3.12', 'pyVersioning/CLI.py', 'variables'], 'encoding': 'utf-8', 'env':
+				{'ALDEC_LICENSE_FILE': 'c:\\...sers\\Patrick_Lehmann\\AppData\\Roaming', 'CHOCOLATEYINSTALL':
+				'C:\\ProgramData\\chocolatey', ...}, 'shell': True, ...}
+				process = &lt;Popen: returncode: 241 args: ['py', '-3.12', 'pyVersioning/CLI.py', 'variab...&gt;
+				stdout = '\x1b[91m[FATAL] An unknown or unhandled exception reached the topmost exception handler!\x1b[39m\n
+				\x1b[93mException...tch format %r" %\n
+				\x1b[91m--------------------------------------------------------------------------------\x1b[39m\n'
+				stderr = None, retcode = 241
+
+				def run(*popenargs,
+				input=None, capture_output=False, timeout=None, check=False, **kwargs):
+				"""Run command with arguments and return a CompletedProcess instance.
+
+				The returned instance will have attributes args, returncode, stdout and
+				stderr. By default, stdout and stderr are not captured, and those attributes
+				will be None. Pass stdout=PIPE and/or stderr=PIPE in order to capture them,
+				or pass capture_output=True to capture both.
+
+				If check is True and the exit code was non-zero, it raises a
+				CalledProcessError. The CalledProcessError object will have the return code
+				in the returncode attribute, and output &amp; stderr attributes if those streams
+				were captured.
+
+				If timeout is given, and the process takes too long, a TimeoutExpired
+				exception will be raised.
+
+				There is an optional argument "input", allowing you to
+				pass bytes or a string to the subprocess's stdin. If you use this argument
+				you may not also use the Popen constructor's "stdin" argument, as
+				it will be used internally.
+
+				By default, all communication is in bytes, and therefore any "input" should
+				be bytes, and the stdout and stderr will be bytes. If in text mode, any
+				"input" should be a string, and stdout and stderr will be strings decoded
+				according to locale encoding, or by "encoding" if set. Text mode is
+				triggered by setting any of text, encoding, errors or universal_newlines.
+
+				The other arguments are the same as for the Popen constructor.
+				"""
+				if input is not None:
+				if kwargs.get('stdin') is not None:
+				raise ValueError('stdin and input arguments may not both be used.')
+				kwargs['stdin'] = PIPE
+
+				if capture_output:
+				if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+				raise ValueError('stdout and stderr arguments may not be used '
+				'with capture_output.')
+				kwargs['stdout'] = PIPE
+				kwargs['stderr'] = PIPE
+
+				with Popen(*popenargs, **kwargs) as process:
+				try:
+				stdout, stderr = process.communicate(input, timeout=timeout)
+				except TimeoutExpired as exc:
+				process.kill()
+				if _mswindows:
+				# Windows accumulates the output in a single blocking
+				# read() call run on child threads, with the timeout
+				# being done in a join() on those threads. communicate()
+				# _after_ kill() is required to collect that and add it
+				# to the exception.
+				exc.stdout, exc.stderr = process.communicate()
+				else:
+				# POSIX _communicate already populated the output so
+				# far into the TimeoutExpired exception.
+				process.wait()
+				raise
+				except: # Including KeyboardInterrupt, communicate handled that.
+				process.kill()
+				# We don't call process.wait() as .__exit__ does that for us.
+				raise
+				retcode = process.poll()
+				if check and retcode:
+				&gt; raise CalledProcessError(retcode, process.args,
+				output=stdout, stderr=stderr)
+				E subprocess.CalledProcessError: Command '['py', '-3.12', 'pyVersioning/CLI.py', 'variables']' returned non-zero
+				exit status 241.
+
+				C:\Program Files\Python3.12\Lib\subprocess.py:571: CalledProcessError
+
+				The above exception was the direct cause of the following exception:
+
+				self = &lt;tests.unit.CIServices.GitLab.GitLabEnvironment testMethod=test_Variables&gt;
+
+				def test_Variables(self) -&gt; None:
+				print()
+
+				&gt; stdout, stderr = self._run("variables")
+
+				tests\unit\CIServices\GitLab.py:64:
+				_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+				_ _ _ _
+
+				self = &lt;class 'tests.unit.CIServices.GitLab.GitLabEnvironment'&gt;, command = 'variables', args = ()
+
+				@classmethod
+				def _run(self, command: Nullable[str] = None, *args: Any) -&gt; Tuple[str, str]:
+				try:
+				prog = subprocess_run(
+				args=self._getExecutable(command, *args),
+				stdout=subprocess_PIPE,
+				stderr=subprocess_STDOUT,
+				shell=True,
+				env=self._getServiceEnvironment(),
+				check=True,
+				encoding="utf-8"
+				)
+				except CalledProcessError as ex:
+				print("-- CALLED PROCESS ERROR " + "-" * 56)
+				print(f"Return code: {ex.returncode}")
+				print(ex.output)
+				print("-" * 80)
+				&gt; raise Exception(f"Error when executing the process: {ex}") from ex
+				E Exception: Error when executing the process: Command '['py', '-3.12', 'pyVersioning/CLI.py', 'variables']'
+				returned non-zero exit status 241.
+
+				tests\unit\CIServices\__init__.py:83: Exception
+			</failure>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- CALLED PROCESS ERROR --------------------------------------------------------
+				Return code: 241
+				#x1B[91m[FATAL] An unknown or unhandled exception reached the topmost exception handler!#x1B[39m
+				#x1B[93mException type:#x1B[39m #x1B[91mValueError#x1B[39m
+				#x1B[93mException message:#x1B[39m time data '2024-06-23T18:58:37.438964+02:00' does not match format
+				'%Y-%m-%dT%H:%M:%S%z'
+				#x1B[93mCaused in:#x1B[39m _strptime(...) in file 'C:\Program Files\Python3.12\Lib\_strptime.py' at line 333
+				#x1B[91m--------------------------------------------------------------------------------#x1B[39m
+				File "C:\Git\GitHub\Paebbels\pyVersioning\pyVersioning\CLI.py", line 414, in main
+				application.Run()
+				File "C:\Git\GitHub\Paebbels\pyVersioning\pyVersioning\CLI.py", line 125, in Run
+				super().Run() # todo: enableAutoComplete ??
+				^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyTooling\Attributes\ArgParse\__init__.py", line 336, in Run
+				self._ParseArguments()
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyTooling\Attributes\ArgParse\__init__.py", line 348, in
+				_ParseArguments
+				self._RouteToHandler(parsed)
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyTooling\Attributes\ArgParse\__init__.py", line 352, in
+				_RouteToHandler
+				args.func(self, args)
+				File "C:\Git\GitHub\Paebbels\pyVersioning\pyVersioning\CLI.py", line 184, in HandleVariables
+				self.Initialize(Path(args.ConfigFile) if args.ConfigFile is not None else None)
+				File "C:\Git\GitHub\Paebbels\pyVersioning\pyVersioning\CLI.py", line 122, in Initialize
+				self._versioning.CollectData()
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\__init__.py", line 424, in CollectData
+				self._variables["git"] = self.GetGitInformation()
+				^^^^^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\__init__.py", line 442, in GetGitInformation
+				commit=self.GetLastCommit(),
+				^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\__init__.py", line 449, in GetLastCommit
+				dt = self.GetCommitDate()
+				^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\__init__.py", line 468, in GetCommitDate
+				return self._service.GetCommitDate()
+				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\site-packages\pyVersioning\GitLab.py", line 62, in GetCommitDate
+				return datetime.strptime(iso8601, "%Y-%m-%dT%H:%M:%S%z")
+				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\_strptime.py", line 554, in _strptime_datetime
+				tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				File "C:\Program Files\Python3.12\Lib\_strptime.py", line 333, in _strptime
+				raise ValueError("time data %r does not match format %r" %
+				#x1B[91m--------------------------------------------------------------------------------#x1B[39m
+
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Field_GitCommitHash" time="0.428">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				d313c748122bef2a9f5f878c39d28fe1821fa6f7
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Field_Version" time="0.421">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				v0.0.0
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Fillout_WithOutputFile"
+							time="0.449">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				#x1B[93m[WARNING] Configuration file '.pyVersioning.yml' does not exist.#x1B[39m
+				#x1B[93m[WARNING] Skipping environment variable 'COMMONPROGRAMFILES(X86)', because it's not a valid Python
+				identifier.#x1B[39m
+				#x1B[93m[WARNING] Skipping environment variable 'PROGRAMFILES(X86)', because it's not a valid Python
+				identifier.#x1B[39m
+				#x1B[93m[WARNING] Output file 'tests\template.out' already exists. This file will be overwritten.#x1B[39m
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37m#x1B[95m Version file generator. #x1B[39m
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Fillout_WithoutOutputFile"
+							time="0.420">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				/***********************************************************************************************************************
+				/* __ __ _ _ *
+				/* _ __ _ \ \ / /__ _ __ ___(_) ___ _ __ (_)_ __ __ _ *
+				/* | '_ \| | | \ \ / / _ \ '__/ __| |/ _ \| '_ \| | '_ \ / _` | *
+				/* | |_) | |_| |\ V / __/ | \__ \ | (_) | | | | | | | | (_| | *
+				/* | .__/ \__, | \_/ \___|_| |___/_|\___/|_| |_|_|_| |_|\__, | *
+				/* |_| |___/ |___/ *
+				/***********************************************************************************************************************
+				/* @author Patrick Lehmann *
+				/* *
+				/* @brief C constant declaration of the version data structure *
+				/* *
+				/* @copyright Copyright 2020-2024 Patrick Lehmann - Boetzingen, Germany *
+				/* *
+				/* Licensed under the Apache License, Version 2.0 (the "License"); *
+				/* you may not use this file except in compliance with the License. *
+				/* You may obtain a copy of the License at *
+				/* *
+				/* http://www.apache.org/licenses/LICENSE-2.0 *
+				/* *
+				/* Unless required by applicable law or agreed to in writing, software *
+				/* distributed under the License is distributed on an "AS IS" BASIS, *
+				/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. *
+				/* See the License for the specific language governing permissions and *
+				/* limitations under the License. *
+				/* *
+				/* SPDX-License-Identifier: Apache-2.0 *
+				/**********************************************************************************************************************/
+				#include "versioning.h"
+
+				const VersioningInformation versioningInformation = {
+				.version = {
+				.flags = 0x0/*{version.Flags:02X}*/,
+				.major = 0x0 /*:02X}*/,
+				.minor = 0x0 /*:02X}*/,
+				.patch = 0x0 /*:02X}*/
+				},
+				.git = {
+				.commit = {
+				.hash = "d313c748122bef2a9f5f878c39d28fe1821fa6f7\0",
+				.datetime = {
+				.date = {
+				.day = 23,
+				.month = 6,
+				.year = 2024
+				},
+				.time = {
+				.hour = 9,
+				.minute = 49,
+				.second = 2
+				}
+				}
+				},
+				.reference = "dev\0",
+				.repository = "git@github.com:Paebbels/pyVersioning.git\0"
+				},
+				.project = {
+				.name = "\0",
+				.variant = "\0",
+				},
+				.build = {
+				.datetime = {
+				.date = {
+				.day = 23,
+				.month = 6,
+				.year = 2024
+				},
+				.time = {
+				.hour = 18,
+				.minute = 58,
+				.second = 39
+				}
+				},
+				.compiler = {
+				.name = "\0",
+				.version = {
+				.flags = 0x0/*{build.compiler.version.Flags:02X}*/,
+				.major = /*0x*/ 0 /*:02X}*/,
+				.minor = 0x0 /*:02X}*/,
+				.patch = 0x0 /*:02X}*/
+				},
+				.configuration = "\0",
+				.options = "\0"
+				}
+				}
+				};
+
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Help" time="0.177">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37m#x1B[95m Version file generator. #x1B[39m
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37mAuthor: Patrick Lehmann (Paebbels@gmail.com)#x1B[39m
+				#x1B[37mCopyright: 2020-2024, Patrick Lehmann#x1B[39m
+				#x1B[37mLicense: Apache License, Version 2.0#x1B[39m
+				#x1B[37mVersion: 0.14.1#x1B[39m
+				#x1B[37m#x1B[39m
+				usage: CLI.py [-v] [-d] [--config-file &lt;pyVersioning.yaml&gt;]
+				{help,version,variables,field,fillout,json,yaml} ...
+
+				Version file generator.
+
+				positional arguments:
+				{help,version,variables,field,fillout,json,yaml}
+				sub-command help
+				help Display help page(s) for the given command name.
+				version Display version information.
+				variables Print all available variables.
+				field Return a single pyVersioning field.
+				fillout Read a template and replace tokens with version information.
+				json Write all available variables as JSON.
+				yaml Write all available variables as YAML.
+
+				options:
+				-v, --verbose Print verbose messages.
+				-d, --debug Print debug messages.
+				--config-file &lt;pyVersioning.yaml&gt;
+				Path to pyVersioning.yaml .
+
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Json_WithOutputFile" time="0.000">
+			<skipped type="pytest.skip" message="unconditional skip">
+				C:\Git\GitHub\Paebbels\pyVersioning\tests\unit\CIServices\NoService.py:119: unconditional skip
+			</skipped>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Json_WithoutOutputFile"
+							time="0.000">
+			<skipped type="pytest.skip" message="unconditional skip">
+				C:\Git\GitHub\Paebbels\pyVersioning\tests\unit\CIServices\NoService.py:103: unconditional skip
+			</skipped>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_NoArguments" time="0.173">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37m#x1B[95m Version file generator. #x1B[39m
+				#x1B[37m#x1B[95m================================================================================#x1B[39m
+				#x1B[37mAuthor: Patrick Lehmann (Paebbels@gmail.com)#x1B[39m
+				#x1B[37mCopyright: 2020-2024, Patrick Lehmann#x1B[39m
+				#x1B[37mLicense: Apache License, Version 2.0#x1B[39m
+				#x1B[37mVersion: 0.14.1#x1B[39m
+				#x1B[37m#x1B[39m
+				usage: CLI.py [-v] [-d] [--config-file &lt;pyVersioning.yaml&gt;]
+				{help,version,variables,field,fillout,json,yaml} ...
+
+				Version file generator.
+
+				positional arguments:
+				{help,version,variables,field,fillout,json,yaml}
+				sub-command help
+				help Display help page(s) for the given command name.
+				version Display version information.
+				variables Print all available variables.
+				field Return a single pyVersioning field.
+				fillout Read a template and replace tokens with version information.
+				json Write all available variables as JSON.
+				yaml Write all available variables as YAML.
+
+				options:
+				-v, --verbose Print verbose messages.
+				-d, --debug Print debug messages.
+				--config-file &lt;pyVersioning.yaml&gt;
+				Path to pyVersioning.yaml .
+
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Variables" time="0.432">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				#x1B[97mproject : - v0.0.0#x1B[39m
+				#x1B[97m name : #x1B[39m
+				#x1B[97m variant : #x1B[39m
+				#x1B[97m version : v0.0.0#x1B[39m
+				#x1B[97mbuild : &lt;pyVersioning.Build object at 0x0000020FFF3F3040&gt;#x1B[39m
+				#x1B[97m date : 2024-06-23#x1B[39m
+				#x1B[97m time : 18:58:39.879083#x1B[39m
+				#x1B[97m compiler : &lt;pyVersioning.Compiler object at 0x0000020FFF459990&gt;#x1B[39m
+				#x1B[97m name : #x1B[39m
+				#x1B[97m version : v0.0.0#x1B[39m
+				#x1B[97m configuration : #x1B[39m
+				#x1B[97m options : #x1B[39m
+				#x1B[97mversion : v0.0.0#x1B[39m
+				#x1B[97mtool : pyVersioning v0.14.1#x1B[39m
+				#x1B[97m name : pyVersioning#x1B[39m
+				#x1B[97m version : v0.14.1#x1B[39m
+				#x1B[97mgit : &lt;pyVersioning.Git object at 0x0000020FFF45B510&gt;#x1B[39m
+				#x1B[97m commit : &lt;pyVersioning.Commit object at 0x0000020FFF403FA0&gt;#x1B[39m
+				#x1B[97m hash : d313c748122bef2a9f5f878c39d28fe1821fa6f7#x1B[39m
+				#x1B[97m date : 2024-06-23#x1B[39m
+				#x1B[97m time : 09:49:02#x1B[39m
+				#x1B[97m author : Patrick Lehmann &lt;Paebbels@gmail.com&gt;#x1B[39m
+				#x1B[97m name : Patrick Lehmann#x1B[39m
+				#x1B[97m email : Paebbels@gmail.com#x1B[39m
+				#x1B[97m committer : Patrick Lehmann &lt;Paebbels@gmail.com&gt;#x1B[39m
+				#x1B[97m name : Patrick Lehmann#x1B[39m
+				#x1B[97m email : Paebbels@gmail.com#x1B[39m
+				#x1B[97m comment : Allow CI pipeline to build for documentation publishing.
+				#x1B[39m
+				#x1B[97m oneline : Allow CI pipeline to build for documentation publishing.#x1B[39m
+				#x1B[97m reference : dev#x1B[39m
+				#x1B[97m tag : #x1B[39m
+				#x1B[97m branch : dev#x1B[39m
+				#x1B[97m repository : git@github.com:Paebbels/pyVersioning.git#x1B[39m
+				#x1B[97menv : Environment(ALDEC_LICENSE_FILE='c:\\Keys\\Riviera-PRO.2024.12.dat',
+				ALLUSERSPROFILE='C:\\ProgramData', APPDATA='C:\\Users\\Patrick_Lehmann\\AppData\\Roaming',
+				CHOCOLATEYINSTALL='C:\\ProgramData\\chocolatey', CHOCOLATEYLASTPATHUPDATE='133405584154168929',
+				CLASSPATH='C:\\Tools\\ANTLR4\\4.12.0\\antlr-4.12.0-complete.jar;C:\\Tools\\ANTLR3\\3.5.3\\antlrworks-1.5.1.jar;',
+				COLUMNS='120', COMMONPROGRAMFILES='C:\\Program Files\\Common Files', COMMONPROGRAMW6432='C:\\Program
+				Files\\Common Files', COMPUTERNAME='PAEBBELS', COMSPEC='C:\\WINDOWS\\system32\\cmd.exe',
+				DRIVERDATA='C:\\Windows\\System32\\Drivers\\DriverData',
+				GNUPLOT_LIB='C:\\Tools\\gnuplot\\5.4.3\\demo;C:\\Tools\\gnuplot\\5.4.3\\demo\\games;C:\\Tools\\gnuplot\\5.4.3\\share',
+				HOMEDRIVE='C:', HOMEPATH='\\Users\\Patrick_Lehmann',
+				IGCCSVC_DB='AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA/srfxRJB/EuIe46nxIOllQQAAAACAAAAAAAQZgAAAAEAACAAAABRJy4t+aMv5eGbwnDNWcrVEKuPPVQjoMB0UfTqk0fNQAAAAAAOgAAAAAIAACAAAAC6SDOTVk0ySEeyQnf/RoJo4Y86BXJOyBgVNlb4QcOahmAAAABUCYsN4ulwp3TnHMrqTFAU/6LDHNCecpBfM20PXj/oc8Ej1Nb964CwniyuBczRWdTPVfMMJDRSPIiLa3h2hpHYFyfFubouP3/Qg5F/ixZwnHeuFToRBFsXHr/2ID7vZiNAAAAAw8vRL2rPpvXm9n/27nsNJSfG8pnDvOad3A5i+WlYPe8Nx3Y4zvrSqAqF8dkO7nEVZ/4yBXJX5/22GrSRB6fDUA==',
+				LOCALAPPDATA='C:\\Users\\Patrick_Lehmann\\AppData\\Local', LOGONSERVER='\\\\PAEBBELS',
+				NUMBER_OF_PROCESSORS='16', ONEDRIVE='C:\\Users\\Patrick_Lehmann\\OneDrive', OS='Windows_NT', PATH='C:\\Program
+				Files\\PowerShell\\7;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\Program
+				Files\\NVIDIA Corporation\\NVIDIA NvDLISR;C:\\Program Files\\MiKTeX\\miktex\\bin\\x64\\;C:\\Program
+				Files\\Common Files\\Oracle\\Java\\javapath;C:\\Program
+				Files\\PuTTY\\;C:\\Tools\\Graphviz\\7.0.6\\bin;C:\\Tools\\gnuplot\\5.4.10\\bin;C:\\ProgramData\\chocolatey\\bin;C:\\Program
+				Files\\Pandoc\\;C:\\Program Files\\dotnet\\;C:\\Program Files\\Python3.12\\Scripts\\;C:\\Program
+				Files\\Python3.12\\;C:\\Program Files\\Microsoft VS Code\\bin;C:\\Program Files\\Git\\cmd;C:\\Program
+				Files\\PowerShell\\7\\;C:\\intelFPGA\\21.1\\questa_fse\\win64;;C:\\Users\\Patrick_Lehmann\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Tools\\NVC\\1.12.0\\bin\\',
+				PATHEXT='.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW;.CPL',
+				POWERSHELL_DISTRIBUTION_CHANNEL='MSI:Windows 10 Pro', POWERSHELL_TELEMETRY_OPTOUT='1',
+				PROCESSOR_ARCHITECTURE='AMD64', PROCESSOR_IDENTIFIER='Intel64 Family 6 Model 141 Stepping 1, GenuineIntel',
+				PROCESSOR_LEVEL='6', PROCESSOR_REVISION='8d01', PROGRAMDATA='C:\\ProgramData', PROGRAMFILES='C:\\Program Files',
+				PROGRAMW6432='C:\\Program Files', PROMPT='$P$G',
+				PSMODULEPATH='C:\\Users\\Patrick_Lehmann\\Documents\\PowerShell\\Modules;C:\\Program
+				Files\\PowerShell\\Modules;c:\\program files\\powershell\\7\\Modules;C:\\Program
+				Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules',
+				PUBLIC='C:\\Users\\Public',
+				PYTEST_CURRENT_TEST='tests/unit/CIServices/NoService.py::LocalEnvironment::test_Variables (call)',
+				PYTEST_VERSION='8.2.2', QSYS_ROOTDIR='C:\\intelFPGA\\21.1\\quartus\\sopc_builder\\bin',
+				QUARTUS_ROOTDIR='C:\\intelFPGA\\21.1\\quartus', SESSIONNAME='Console',
+				SOPC_KIT_NIOS2='C:\\intelFPGA\\21.1\\nios2eds', SYSTEMDRIVE='C:', SYSTEMROOT='C:\\WINDOWS',
+				TEMP='C:\\Users\\PATRIC~1\\AppData\\Local\\Temp', TMP='C:\\Users\\PATRIC~1\\AppData\\Local\\Temp',
+				USERDOMAIN='PAEBBELS', USERDOMAIN_ROAMINGPROFILE='PAEBBELS', USERNAME='Patrick_Lehmann',
+				USERPROFILE='C:\\Users\\Patrick_Lehmann', WINDIR='C:\\WINDOWS', WSLENV='WT_SESSION:WT_PROFILE_ID:',
+				WT_PROFILE_ID='{574e775e-4f2a-5b96-ac1e-a2962a402336}', WT_SESSION='fd273244-e74b-47c7-ac5b-98fd7cce2e95',
+				ZES_ENABLE_SYSMAN='1')#x1B[39m
+				#x1B[97mplatform : &lt;pyVersioning.Platform object at 0x0000020FFF41E3B0&gt;#x1B[39m
+				#x1B[97m ci_service : NO-CI#x1B[39m
+
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Yaml_WithOutputFile" time="0.000">
+			<skipped type="pytest.skip" message="unconditional skip">
+				C:\Git\GitHub\Paebbels\pyVersioning\tests\unit\CIServices\NoService.py:157: unconditional skip
+			</skipped>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.CIServices.NoService.LocalEnvironment" name="test_Yaml_WithoutOutputFile"
+							time="0.419">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+				-- STDOUT ----------------------------------------------------------------------
+				format: "1.1"
+
+				version:
+				name: "v0.0.0"
+				major: 0
+				minor: 0
+				patch: 0
+				flags: 1
+
+				git:
+				commit:
+				hash: d313c748122bef2a9f5f878c39d28fe1821fa6f7
+				date: 2024-06-23
+				reference: dev
+				branch: dev
+				tag:
+				repository: git@github.com:Paebbels/pyVersioning.git
+
+				project:
+				name:
+				variant:
+
+				build:
+				date: 2024-06-23
+				compiler:
+				name:
+				version: v0.0.0
+				configuration:
+				options:
+
+				platform:
+				ci-service: NO-CI
+				appveyor:
+				# not found
+				github:
+				# not found
+				gitlab:
+				# not found
+				travis:
+				# not found
+				env:
+
+
+				--------------------------------------------------------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Database.Project" name="test_ProjectName" time="0.000">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Database.Project" name="test_ProjectName_VariantName" time="0.000">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Database.Project" name="test_ProjectName_VersionAsString" time="0.000">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+		<testcase classname="tests.unit.Database.Project" name="test_ProjectName_VersionAsVersion" time="0.000">
+			<system-out>--------------------------------- Captured Log ---------------------------------
+
+				--------------------------------- Captured Out ---------------------------------
+
+			</system-out>
+			<system-err>--------------------------------- Captured Err ---------------------------------
+
+			</system-err>
+		</testcase>
+	</testsuite>
+</testsuites>
