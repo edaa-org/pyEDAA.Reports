@@ -115,6 +115,7 @@ Contributors
    :caption: References and Reports
    :hidden:
 
+   CommandLineInterface
    pyEDAA.Reports/pyEDAA.Reports
    reports/unittests
    reports/coverage/index
