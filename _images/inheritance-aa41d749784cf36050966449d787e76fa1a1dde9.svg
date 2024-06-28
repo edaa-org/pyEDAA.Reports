@@ -1,0 +1,65 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="427pt" height="45pt" viewBox="0.00 0.00 427.00 45.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 41)">
+<ns0:title>inheritance84c535a038</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Base</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.Base" ns1:title="Base" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="54,-19 0,-19 0,0 54,0 54,-19" />
+<ns0:text text-anchor="middle" x="27" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Base</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>BaseWithProperties</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties" ns1:title="BaseWithProperties" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="203,-19 90,-19 90,0 203,0 203,-19" />
+<ns0:text text-anchor="middle" x="146.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BaseWithProperties</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>Base-&gt;BaseWithProperties</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.08,-9.5C63.14,-9.5 73.73,-9.5 84.42,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="84.66,-11.25 89.66,-9.5 84.66,-7.75 84.66,-11.25" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>TestsuiteBase</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase" ns1:title="TestsuiteBase" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="323,-19 239,-19 239,0 323,0 323,-19" />
+<ns0:text text-anchor="middle" x="281" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TestsuiteBase</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>BaseWithProperties-&gt;TestsuiteBase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M203.31,-9.5C213.43,-9.5 223.88,-9.5 233.69,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="233.75,-11.25 238.75,-9.5 233.75,-7.75 233.75,-11.25" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>Testsuite</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.Testsuite" ns1:title="Testsuite" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="419,-19 359,-19 359,0 419,0 419,-19" />
+<ns0:text text-anchor="middle" x="389" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Testsuite</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>Testsuite-&gt;Testsuite</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M372.66,-19.08C364.71,-27.73 370.16,-37 389,-37 404.6,-37 411.02,-30.65 408.25,-23.55" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="409.53,-22.32 405.34,-19.08 406.6,-24.23 409.53,-22.32" />
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>TestsuiteBase-&gt;Testsuite</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M323.29,-9.5C333.29,-9.5 343.88,-9.5 353.54,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="353.79,-11.25 358.79,-9.5 353.79,-7.75 353.79,-11.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

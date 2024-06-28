@@ -1,0 +1,115 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+================================
+pyEDAA.Reports.Unittesting.OSVVM
+================================
+
+.. automodule:: pyEDAA.Reports.Unittesting.OSVVM
+
+
+.. currentmodule:: pyEDAA.Reports.Unittesting.OSVVM
+
+
+**Exceptions**
+
+- :py:exc:`UnittestException`:
+  Common base class for all non-exit exceptions.
+
+
+
+**Classes**
+
+- :py:class:`OsvvmException`:
+  Undocumented.
+
+- :py:class:`Testcase`:
+  Undocumented.
+
+- :py:class:`Testsuite`:
+  Abstract base class for generic types.
+
+- :py:class:`TestsuiteSummary`:
+  Abstract base class for generic types.
+
+- :py:class:`BuildSummaryDocument`:
+  Abstract base class for generic types.
+
+
+
+---------------------
+
+**Exceptions**
+
+
+
+
+.. autoexception:: UnittestException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: UnittestException
+      :parts: 1
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: OsvvmException
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: OsvvmException
+      :parts: 1
+
+.. autoclass:: Testcase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testcase
+      :parts: 1
+
+.. autoclass:: Testsuite
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testsuite
+      :parts: 1
+
+.. autoclass:: TestsuiteSummary
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteSummary
+      :parts: 1
+
+.. autoclass:: BuildSummaryDocument
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: BuildSummaryDocument
+      :parts: 1

@@ -1,0 +1,94 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+===========================================
+pyEDAA.Reports.Unittesting.JUnit.CTestJUnit
+===========================================
+
+.. automodule:: pyEDAA.Reports.Unittesting.JUnit.CTestJUnit
+
+
+.. currentmodule:: pyEDAA.Reports.Unittesting.JUnit.CTestJUnit
+
+
+**Classes**
+
+- :py:class:`Testcase`:
+  Undocumented.
+
+- :py:class:`Testclass`:
+  Undocumented.
+
+- :py:class:`Testsuite`:
+  Undocumented.
+
+- :py:class:`TestsuiteSummary`:
+  Undocumented.
+
+- :py:class:`Document`:
+  Undocumented.
+
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: Testcase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testcase
+      :parts: 1
+
+.. autoclass:: Testclass
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testclass
+      :parts: 1
+
+.. autoclass:: Testsuite
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testsuite
+      :parts: 1
+
+.. autoclass:: TestsuiteSummary
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteSummary
+      :parts: 1
+
+.. autoclass:: Document
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Document
+      :parts: 1

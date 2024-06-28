@@ -1,0 +1,86 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="576pt" height="63pt" viewBox="0.00 0.00 576.00 62.89">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 59)">
+<ns0:title>inheritance0376ade860</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Base</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.Base" ns1:title="Base" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="54,-19 0,-19 0,0 54,0 54,-19" />
+<ns0:text text-anchor="middle" x="27" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Base</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>BaseWithProperties</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties" ns1:title="BaseWithProperties" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="203,-19 90,-19 90,0 203,0 203,-19" />
+<ns0:text text-anchor="middle" x="146.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">BaseWithProperties</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>Base-&gt;BaseWithProperties</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.08,-9.5C63.14,-9.5 73.73,-9.5 84.42,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="84.66,-11.25 89.66,-9.5 84.66,-7.75 84.66,-11.25" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>TestsuiteBase</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase" ns1:title="TestsuiteBase" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="323,-19 239,-19 239,0 323,0 323,-19" />
+<ns0:text text-anchor="middle" x="281" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TestsuiteBase</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>BaseWithProperties-&gt;TestsuiteBase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M203.31,-9.5C213.43,-9.5 223.88,-9.5 233.69,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="233.75,-11.25 238.75,-9.5 233.75,-7.75 233.75,-11.25" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>Document</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit.Document" ns1:title="Document" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="569,-19 502,-19 502,0 569,0 569,-19" />
+<ns0:text text-anchor="middle" x="535.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Document</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>Document-&gt;Document</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M526.1,-19.08C521.52,-27.73 524.66,-37 535.5,-37 544.31,-37 548.03,-30.88 546.66,-23.95" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="548.25,-23.19 544.9,-19.08 544.96,-24.38 548.25,-23.19" />
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>Document-&gt;Document</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M521.56,-19.33C506.07,-34.98 510.72,-55 535.5,-55 558.15,-55 563.98,-38.27 552.99,-23.45" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="554.03,-21.98 549.44,-19.33 551.38,-24.26 554.03,-21.98" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>TestsuiteSummary</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary" ns1:title="TestsuiteSummary" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="466,-19 359,-19 359,0 466,0 466,-19" />
+<ns0:text text-anchor="middle" x="412.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TestsuiteSummary</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>TestsuiteSummary-&gt;Document</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M466.22,-9.5C476.43,-9.5 486.94,-9.5 496.56,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="496.81,-11.25 501.81,-9.5 496.81,-7.75 496.81,-11.25" />
+</ns0:g>
+
+<ns0:g id="edge6" class="edge">
+<ns0:title>TestsuiteBase-&gt;TestsuiteSummary</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M323.33,-9.5C333,-9.5 343.47,-9.5 353.71,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="353.72,-11.25 358.72,-9.5 353.72,-7.75 353.72,-11.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

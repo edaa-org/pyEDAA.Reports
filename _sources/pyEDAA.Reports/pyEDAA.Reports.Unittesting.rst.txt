@@ -1,0 +1,282 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+==========================
+pyEDAA.Reports.Unittesting
+==========================
+
+.. automodule:: pyEDAA.Reports.Unittesting
+
+
+
+**Submodules**
+
+.. toctree::
+   :maxdepth: 1
+
+   pyEDAA.Reports.Unittesting.JUnit
+   pyEDAA.Reports.Unittesting.OSVVM
+
+.. currentmodule:: pyEDAA.Reports.Unittesting
+
+
+**Exceptions**
+
+- :py:exc:`UnittestException`:
+  Common base class for all non-exit exceptions.
+
+- :py:exc:`DuplicateTestsuiteException`:
+  Common base class for all non-exit exceptions.
+
+- :py:exc:`DuplicateTestcaseException`:
+  Common base class for all non-exit exceptions.
+
+
+
+**Classes**
+
+- :py:class:`TestcaseStatus`:
+  Support for flags
+
+- :py:class:`TestsuiteKind`:
+  Enum where members are also (and must be) ints
+
+- :py:class:`TestsuiteStatus`:
+  Support for flags
+
+- :py:class:`IterationScheme`:
+  Support for flags
+
+- :py:class:`Base`:
+  Undocumented.
+
+- :py:class:`Testcase`:
+  Undocumented.
+
+- :py:class:`TestsuiteBase`:
+  Abstract base class for generic types.
+
+- :py:class:`Testsuite`:
+  Abstract base class for generic types.
+
+- :py:class:`TestsuiteSummary`:
+  Abstract base class for generic types.
+
+- :py:class:`Document`:
+  Undocumented.
+
+- :py:class:`Merged`:
+  Undocumented.
+
+- :py:class:`Combined`:
+  Undocumented.
+
+- :py:class:`MergedTestcase`:
+  Undocumented.
+
+- :py:class:`MergedTestsuite`:
+  Abstract base class for generic types.
+
+- :py:class:`MergedTestsuiteSummary`:
+  Abstract base class for generic types.
+
+
+
+---------------------
+
+**Exceptions**
+
+
+
+
+.. autoexception:: UnittestException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: UnittestException
+      :parts: 1
+
+.. autoexception:: DuplicateTestsuiteException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: DuplicateTestsuiteException
+      :parts: 1
+
+.. autoexception:: DuplicateTestcaseException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: DuplicateTestcaseException
+      :parts: 1
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: TestcaseStatus
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestcaseStatus
+      :parts: 1
+
+.. autoclass:: TestsuiteKind
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteKind
+      :parts: 1
+
+.. autoclass:: TestsuiteStatus
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteStatus
+      :parts: 1
+
+.. autoclass:: IterationScheme
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: IterationScheme
+      :parts: 1
+
+.. autoclass:: Base
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Base
+      :parts: 1
+
+.. autoclass:: Testcase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testcase
+      :parts: 1
+
+.. autoclass:: TestsuiteBase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteBase
+      :parts: 1
+
+.. autoclass:: Testsuite
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testsuite
+      :parts: 1
+
+.. autoclass:: TestsuiteSummary
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteSummary
+      :parts: 1
+
+.. autoclass:: Document
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Document
+      :parts: 1
+
+.. autoclass:: Merged
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Merged
+      :parts: 1
+
+.. autoclass:: Combined
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Combined
+      :parts: 1
+
+.. autoclass:: MergedTestcase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: MergedTestcase
+      :parts: 1
+
+.. autoclass:: MergedTestsuite
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: MergedTestsuite
+      :parts: 1
+
+.. autoclass:: MergedTestsuiteSummary
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: MergedTestsuiteSummary
+      :parts: 1

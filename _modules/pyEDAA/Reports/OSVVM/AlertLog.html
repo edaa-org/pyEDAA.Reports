@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyEDAA.Reports.OSVVM.AlertLog &mdash; pyEDAA.Reports 0.11.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=77553476" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-reports.e44b1595f1e09d5e109d001839ba3f42.css?v=0b41afa8" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/override.css?v=d48d1b8b" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.svg"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=f3b36f1a"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+              <img src="../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.11
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="https://edaa-org.github.io/">Used as a layer of EDA² ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Installation.html">Installation/Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Dependency.html">Dependency</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Report Formats</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CodeCoverage/index.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../DocCoverage/index.html">Documentation Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Unittesting/index.html">Unittesting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../FunctionalCoverage.html">Functional coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../LineCoverage.html">Line coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Resources.html">Synthesis and implementation results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../RichLogging.html">Semantic/rich logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Tracking.html">Tracking requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Frontends.html">Frontends</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References and Reports</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pyEDAA.Reports/pyEDAA.Reports.html">Python Class Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/unittests.html">Unittest Summary Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/coverage/index.html">Code Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/doccoverage.html">Doc. Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/typing/index.html">Static Type Check Report ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../License.html">Apache License 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Doc-License.html">Creative Commons Attribution 4.0 International</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../py-modindex.html">Python Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../TODO.html">TODOs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyEDAA.Reports</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../OSVVM.html">pyEDAA.Reports.OSVVM</a></li>
+      <li class="breadcrumb-item active">pyEDAA.Reports.OSVVM.AlertLog</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyEDAA.Reports.OSVVM.AlertLog</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#              _____ ____    _        _      ____                       _                                              #</span>
+<span class="c1">#  _ __  _   _| ____|  _ \  / \      / \    |  _ \ ___ _ __   ___  _ __| |_ ___                                        #</span>
+<span class="c1"># | &#39;_ \| | | |  _| | | | |/ _ \    / _ \   | |_) / _ \ &#39;_ \ / _ \| &#39;__| __/ __|                                       #</span>
+<span class="c1"># | |_) | |_| | |___| |_| / ___ \  / ___ \ _|  _ &lt;  __/ |_) | (_) | |  | |_\__ \                                       #</span>
+<span class="c1"># | .__/ \__, |_____|____/_/   \_\/_/   \_(_)_| \_\___| .__/ \___/|_|   \__|___/                                       #</span>
+<span class="c1"># |_|    |___/                                        |_|                                                              #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Authors:                                                                                                             #</span>
+<span class="c1">#   Patrick Lehmann                                                                                                    #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># License:                                                                                                             #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Copyright 2021-2024 Electronic Design Automation Abstraction (EDA²)                                                  #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                                      #</span>
+<span class="c1"># you may not use this file except in compliance with the License.                                                     #</span>
+<span class="c1"># You may obtain a copy of the License at                                                                              #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0                                                                         #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software                                                  #</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                                    #</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                             #</span>
+<span class="c1"># See the License for the specific language governing permissions and                                                  #</span>
+<span class="c1"># limitations under the License.                                                                                       #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># SPDX-License-Identifier: Apache-2.0                                                                                  #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;A data model for OSVVM&#39;s AlertLog YAML file format.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">enum</span>     <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span> <span class="nn">pathlib</span>  <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">time</span>     <span class="kn">import</span> <span class="n">perf_counter_ns</span>
+<span class="kn">from</span> <span class="nn">typing</span>   <span class="kn">import</span> <span class="n">Optional</span> <span class="k">as</span> <span class="n">Nullable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Iterable</span>
+
+<span class="kn">from</span> <span class="nn">ruamel.yaml</span>           <span class="kn">import</span> <span class="n">YAML</span><span class="p">,</span> <span class="n">CommentedSeq</span><span class="p">,</span> <span class="n">CommentedMap</span>
+<span class="kn">from</span> <span class="nn">pyTooling.Decorators</span>  <span class="kn">import</span> <span class="n">readonly</span><span class="p">,</span> <span class="n">export</span>
+<span class="kn">from</span> <span class="nn">pyTooling.MetaClasses</span> <span class="kn">import</span> <span class="n">ExtendedType</span>
+<span class="kn">from</span> <span class="nn">pyTooling.Tree</span>        <span class="kn">import</span> <span class="n">Node</span>
+
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.OSVVM</span>  <span class="kn">import</span> <span class="n">OSVVMException</span>
+
+
+<div class="viewcode-block" id="AlertLogException">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.OSVVM.AlertLog.html#pyEDAA.Reports.OSVVM.AlertLog.AlertLogException">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">AlertLogException</span><span class="p">(</span><span class="n">OSVVMException</span><span class="p">):</span>
+	<span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="AlertLogStatus">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.OSVVM.AlertLog.html#pyEDAA.Reports.OSVVM.AlertLog.AlertLogStatus">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">AlertLogStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+	<span class="n">Unknown</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+	<span class="n">Passed</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+	<span class="n">Failed</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+	<span class="n">__MAPPINGS__</span> <span class="o">=</span> <span class="p">{</span>
+		<span class="s2">&quot;passed&quot;</span><span class="p">:</span> <span class="n">Passed</span><span class="p">,</span>
+		<span class="s2">&quot;failed&quot;</span><span class="p">:</span> <span class="n">Failed</span>
+	<span class="p">}</span>
+
+	<span class="nd">@classmethod</span>
+	<span class="k">def</span> <span class="nf">Parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AlertLogStatus&quot;</span><span class="p">:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MAPPINGS__</span><span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">AlertLogException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown AlertLog status &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+<div class="viewcode-block" id="AlertLogStatus.__bool__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.OSVVM.AlertLog.html#pyEDAA.Reports.OSVVM.AlertLog.AlertLogStatus.__bool__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">Passed</span></div>
+</div>
+
+
+
+<span class="k">def</span> <span class="nf">_format</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+	<span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">_value</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;TotalErrors&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;AlertCountFailures&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;AlertCountErrors&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;AlertCountWarnings&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;PassedCount&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;AffirmCount&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+	<span class="c1"># TODO: Python 3.12+</span>
+	<span class="c1"># return f&quot;{node._value}: {node[&quot;TotalErrors&quot;]}={node[&quot;AlertCountFailures&quot;]}/{node[&quot;AlertCountErrors&quot;]}/{node[&quot;AlertCountWarnings&quot;]} {node[&quot;PassedCount&quot;]}/{node[&quot;AffirmCount&quot;]}&quot;</span>
+
+
+<div class="viewcode-block" id="AlertLogGroup">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.OSVVM.AlertLog.html#pyEDAA.Reports.OSVVM.AlertLog.AlertLogGroup">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">AlertLogGroup</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ExtendedType</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+	<span class="n">_parent</span><span class="p">:</span> <span class="s2">&quot;AlertLogGroup&quot;</span>
+	<span class="n">_name</span><span class="p">:</span> <span class="nb">str</span>
+	<span class="n">_children</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;AlertLogGroup&quot;</span><span class="p">]</span>
+
+	<span class="n">_status</span><span class="p">:</span> <span class="n">AlertLogStatus</span>
+	<span class="n">_totalErrors</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_alertCountWarnings</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_alertCountErrors</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_alertCountFailures</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_passedCount</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_affirmCount</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_requirementsPassed</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_requirementsGoal</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_disabledAlertCountWarnings</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_disabledAlertCountErrors</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_disabledAlertCountFailures</span><span class="p">:</span> <span class="nb">int</span>
+
+<div class="viewcode-block" id="AlertLogGroup.__init__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.OSVVM.AlertLog.html#pyEDAA.Reports.OSVVM.AlertLog.AlertLogGroup.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+		<span class="bp">self</span><span class="p">,</span>
+		<span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+		<span class="n">status</span><span class="p">:</span> <span class="n">AlertLogStatus</span> <span class="o">=</span> <span class="n">AlertLogStatus</span><span class="o">.</span><span class="n">Unknown</span><span class="p">,</span>
+		<span class="n">totalErrors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">alertCountWarnings</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">alertCountErrors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">alertCountFailures</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">passedCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">affirmCount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">requirementsPassed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">requirementsGoal</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">disabledAlertCountWarnings</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">disabledAlertCountErrors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">disabledAlertCountFailures</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+		<span class="n">children</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="s2">&quot;AlertLogGroup&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+		<span class="n">parent</span><span class="p">:</span> <span class="n">Nullable</span><span class="p">[</span><span class="s2">&quot;AlertLogGroup&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">child</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">child</span>
+				<span class="n">child</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="bp">self</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">status</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_totalErrors</span> <span class="o">=</span> <span class="n">totalErrors</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_alertCountWarnings</span> <span class="o">=</span> <span class="n">alertCountWarnings</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_alertCountErrors</span> <span class="o">=</span> <span class="n">alertCountErrors</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_alertCountFailures</span> <span class="o">=</span> <span class="n">alertCountFailures</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_passedCount</span> <span class="o">=</span> <span class="n">passedCount</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_affirmCount</span> <span class="o">=</span> <span class="n">affirmCount</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_requirementsPassed</span> <span class="o">=</span> <span class="n">requirementsPassed</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_requirementsGoal</span> <span class="o">=</span> <span class="n">requirementsGoal</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_disabledAlertCountWarnings</span> <span class="o">=</span> <span class="n">disabledAlertCountWarnings</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_disabledAlertCountErrors</span> <span class="o">=</span> <span class="n">disabledAlertCountErrors</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_disabledAlertCountFailures</span> <span class="o">=</span> <span class="n">disabledAlertCountFailures</span></div>
+
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="s2">&quot;AlertLogGroup&quot;</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AlertLogStatus</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">TotalErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_totalErrors</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AlertCountWarnings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alertCountWarnings</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AlertCountErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alertCountErrors</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AlertCountFailures</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alertCountFailures</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">PassedCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_passedCount</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AffirmCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_affirmCount</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">RequirementsPassed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_requirementsPassed</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">RequirementsGoal</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_requirementsGoal</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">DisabledAlertCountWarnings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disabledAlertCountWarnings</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">DisabledAlertCountErrors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disabledAlertCountErrors</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">DisabledAlertCountFailures</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disabledAlertCountFailures</span>
+
+	<span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="s2">&quot;AlertLogGroup&quot;</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chilren</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+	<span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AlertLogGroup&quot;</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chilren</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+	<span class="k">def</span> <span class="nf">ToTree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+		<span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span>
+			<span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+			<span class="n">keyValuePairs</span><span class="o">=</span><span class="p">{</span>
+				<span class="s2">&quot;TotalErrors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_totalErrors</span><span class="p">,</span>
+				<span class="s2">&quot;AlertCountFailures&quot;</span><span class="p">:</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_alertCountFailures</span><span class="p">,</span>
+				<span class="s2">&quot;AlertCountErrors&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alertCountErrors</span><span class="p">,</span>
+				<span class="s2">&quot;AlertCountWarnings&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_alertCountWarnings</span><span class="p">,</span>
+				<span class="s2">&quot;PassedCount&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_passedCount</span><span class="p">,</span>
+				<span class="s2">&quot;AffirmCount&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_affirmCount</span>
+			<span class="p">},</span>
+			<span class="n">children</span><span class="o">=</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">ToTree</span><span class="p">()</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+			<span class="nb">format</span><span class="o">=</span><span class="n">_format</span>
+		<span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">node</span></div>
+
+
+
+<div class="viewcode-block" id="Document">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.OSVVM.AlertLog.html#pyEDAA.Reports.OSVVM.AlertLog.Document">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">Document</span><span class="p">(</span><span class="n">AlertLogGroup</span><span class="p">):</span>
+	<span class="n">_path</span><span class="p">:</span> <span class="n">Path</span>
+	<span class="n">_yamlDocument</span><span class="p">:</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">YAML</span><span class="p">]</span>
+
+	<span class="n">_analysisDuration</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1">#: TODO: replace by Timer; should be timedelta?</span>
+	<span class="n">_modelConversion</span><span class="p">:</span>  <span class="nb">float</span>  <span class="c1">#: TODO: replace by Timer; should be timedelta?</span>
+
+<div class="viewcode-block" id="Document.__init__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.OSVVM.AlertLog.html#pyEDAA.Reports.OSVVM.AlertLog.Document.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">parse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">filename</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_analysisDuration</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_modelConversion</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+
+		<span class="k">if</span> <span class="n">parse</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">Read</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">Parse</span><span class="p">()</span></div>
+
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">Path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AnalysisDuration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">timedelta</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_analysisDuration</span><span class="p">)</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">ModelConversionDuration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">timedelta</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_modelConversion</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">Read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+			<span class="k">raise</span> <span class="n">OSVVMException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;OSVVM AlertLog YAML file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span> \
+				<span class="kn">from</span> <span class="nn">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+
+		<span class="n">startAnalysis</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">yamlReader</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span> <span class="o">=</span> <span class="n">yamlReader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">OSVVMException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Couldn&#39;t open &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="n">endAnalysis</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_analysisDuration</span> <span class="o">=</span> <span class="p">(</span><span class="n">endAnalysis</span> <span class="o">-</span> <span class="n">startAnalysis</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e9</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseSequenceFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">CommentedSeq</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">OSVVMException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sequence field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="p">()</span>
+		<span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CommentedSeq</span><span class="p">):</span>
+			<span class="n">ex</span> <span class="o">=</span> <span class="n">AlertLogException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not a sequence.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+			<span class="n">ex</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found type </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">_yaml_line_col</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">fieldName</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">ex</span>
+
+		<span class="k">return</span> <span class="n">value</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseMapFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">CommentedMap</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">OSVVMException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dictionary field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="p">{}</span>
+		<span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CommentedMap</span><span class="p">):</span>
+			<span class="n">ex</span> <span class="o">=</span> <span class="n">AlertLogException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not a list.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+			<span class="n">ex</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type mismatch found for line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">_yaml_line_col</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">fieldName</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">ex</span>
+		<span class="k">return</span> <span class="n">value</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseStrFieldFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">OSVVMException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;String field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="n">AlertLogException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not of type str.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+
+		<span class="k">return</span> <span class="n">value</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">OSVVMException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Integer field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="n">AlertLogException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not of type int.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+
+		<span class="k">return</span> <span class="n">value</span>
+
+	<span class="k">def</span> <span class="nf">Parse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">ex</span> <span class="o">=</span> <span class="n">OSVVMException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;OSVVM AlertLog YAML file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39; needs to be read and analyzed by a YAML parser.&quot;</span><span class="p">)</span>
+			<span class="n">ex</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Call &#39;Document.Read()&#39; or create document using &#39;Document(path, parse=True)&#39;.&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">ex</span>
+
+		<span class="n">startConversion</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseStrFieldFromYAML</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span><span class="p">,</span> <span class="s2">&quot;Name&quot;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">AlertLogStatus</span><span class="o">.</span><span class="n">Parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ParseStrFieldFromYAML</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span><span class="p">,</span> <span class="s2">&quot;Status&quot;</span><span class="p">))</span>
+		<span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseSequenceFromYAML</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span><span class="p">,</span> <span class="s2">&quot;Children&quot;</span><span class="p">):</span>
+			<span class="n">alertLogGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseAlertLogGroup</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">[</span><span class="n">alertLogGroup</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">alertLogGroup</span>
+			<span class="n">alertLogGroup</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="bp">self</span>
+
+		<span class="n">endConversation</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_modelConversion</span> <span class="o">=</span> <span class="p">(</span><span class="n">endConversation</span> <span class="o">-</span> <span class="n">startConversion</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e9</span>
+
+	<span class="k">def</span> <span class="nf">_ParseAlertLogGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AlertLogGroup</span><span class="p">:</span>
+		<span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseMapFromYAML</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">&quot;Results&quot;</span><span class="p">)</span>
+		<span class="n">yamlAlertCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseMapFromYAML</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;AlertCount&quot;</span><span class="p">)</span>
+		<span class="n">yamlDisabledAlertCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseMapFromYAML</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;DisabledAlertCount&quot;</span><span class="p">)</span>
+		<span class="n">alertLogGroup</span> <span class="o">=</span> <span class="n">AlertLogGroup</span><span class="p">(</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseStrFieldFromYAML</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">&quot;Name&quot;</span><span class="p">),</span>
+			<span class="n">AlertLogStatus</span><span class="o">.</span><span class="n">Parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ParseStrFieldFromYAML</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">&quot;Status&quot;</span><span class="p">)),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;TotalErrors&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlAlertCount</span><span class="p">,</span> <span class="s2">&quot;Warning&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlAlertCount</span><span class="p">,</span> <span class="s2">&quot;Error&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlAlertCount</span><span class="p">,</span> <span class="s2">&quot;Failure&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;PassedCount&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;AffirmCount&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;RequirementsPassed&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="s2">&quot;RequirementsGoal&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlDisabledAlertCount</span><span class="p">,</span> <span class="s2">&quot;Warning&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlDisabledAlertCount</span><span class="p">,</span> <span class="s2">&quot;Error&quot;</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlDisabledAlertCount</span><span class="p">,</span> <span class="s2">&quot;Failure&quot;</span><span class="p">),</span>
+			<span class="n">children</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ParseAlertLogGroup</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseSequenceFromYAML</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">&quot;Children&quot;</span><span class="p">))</span>
+		<span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">alertLogGroup</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2024, Electronic Design Automation Abstraction (EDA²).
+      <span class="lastupdated">Last updated on 28.06.2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

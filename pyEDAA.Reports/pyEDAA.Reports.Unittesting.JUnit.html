@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyEDAA.Reports.Unittesting.JUnit &mdash; pyEDAA.Reports 0.11.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=77553476" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-reports.e44b1595f1e09d5e109d001839ba3f42.css?v=0b41afa8" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/override.css?v=d48d1b8b" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.svg"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f3b36f1a"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+        <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyEDAA.Reports.Unittesting.JUnit.AntJUnit" href="pyEDAA.Reports.Unittesting.JUnit.AntJUnit.html" />
+    <link rel="prev" title="pyEDAA.Reports.Unittesting" href="pyEDAA.Reports.Unittesting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.11
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="https://edaa-org.github.io/">Used as a layer of EDA² ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation/Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Dependency.html">Dependency</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Report Formats</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../CodeCoverage/index.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DocCoverage/index.html">Documentation Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Unittesting/index.html">Unittesting</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FunctionalCoverage.html">Functional coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../LineCoverage.html">Line coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Resources.html">Synthesis and implementation results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../RichLogging.html">Semantic/rich logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tracking.html">Tracking requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frontends.html">Frontends</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References and Reports</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pyEDAA.Reports.html">Python Class Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.CLI.html">pyEDAA.Reports.CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.Dependency.html">pyEDAA.Reports.Dependency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.html">pyEDAA.Reports.DocumentationCoverage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.OSVVM.html">pyEDAA.Reports.OSVVM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.Requirement.html">pyEDAA.Reports.Requirement</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html">pyEDAA.Reports.Unittesting</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pyEDAA.Reports.Unittesting.JUnit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.AntJUnit.html">pyEDAA.Reports.Unittesting.JUnit.AntJUnit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.CTestJUnit.html">pyEDAA.Reports.Unittesting.JUnit.CTestJUnit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html">pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit.html">pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.UnittestException"><code class="docutils literal notranslate"><span class="pre">UnittestException</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.DuplicateTestsuiteException"><code class="docutils literal notranslate"><span class="pre">DuplicateTestsuiteException</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.DuplicateTestcaseException"><code class="docutils literal notranslate"><span class="pre">DuplicateTestcaseException</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitException"><code class="docutils literal notranslate"><span class="pre">JUnitException</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._generate_next_value_"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode._generate_next_value_()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._numeric_repr_"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode._numeric_repr_()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._iter_member_by_value_"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode._iter_member_by_value_()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._iter_member_"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode._iter_member_()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._iter_member_by_def_"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode._iter_member_by_def_()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._missing_"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode._missing_()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__contains__"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode.__contains__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__iter__"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode.__iter__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__len__"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode.__len__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__repr__"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode.__repr__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__str__"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode.__str__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__bool__"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode.__bool__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__or__"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode.__or__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__ror__"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode.__ror__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__new__"><code class="docutils literal notranslate"><span class="pre">JUnitReaderMode.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Base.__init__"><code class="docutils literal notranslate"><span class="pre">Base.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Base.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Base.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Base.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Base.HasMethodAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties"><code class="docutils literal notranslate"><span class="pre">BaseWithProperties</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties.__init__"><code class="docutils literal notranslate"><span class="pre">BaseWithProperties.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">BaseWithProperties.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">BaseWithProperties.HasMethodAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase"><code class="docutils literal notranslate"><span class="pre">Testcase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase.__init__"><code class="docutils literal notranslate"><span class="pre">Testcase.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase.__str__"><code class="docutils literal notranslate"><span class="pre">Testcase.__str__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Testcase.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Testcase.HasMethodAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.__init__"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.__new__"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass"><code class="docutils literal notranslate"><span class="pre">Testclass</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass.__init__"><code class="docutils literal notranslate"><span class="pre">Testclass.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass.__str__"><code class="docutils literal notranslate"><span class="pre">Testclass.__str__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Testclass.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Testclass.HasMethodAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite"><code class="docutils literal notranslate"><span class="pre">Testsuite</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.__init__"><code class="docutils literal notranslate"><span class="pre">Testsuite.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.__str__"><code class="docutils literal notranslate"><span class="pre">Testsuite.__str__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Testsuite.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Testsuite.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.__new__"><code class="docutils literal notranslate"><span class="pre">Testsuite.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.__init__"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.__str__"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.__str__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.__new__"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Document"><code class="docutils literal notranslate"><span class="pre">Document</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Document.__init__"><code class="docutils literal notranslate"><span class="pre">Document.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Document._analysisDuration"><code class="docutils literal notranslate"><span class="pre">Document._analysisDuration</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Document._modelConversion"><code class="docutils literal notranslate"><span class="pre">Document._modelConversion</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Document.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Document.HasClassAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Document.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Document.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Document.__new__"><code class="docutils literal notranslate"><span class="pre">Document.__new__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Document.__str__"><code class="docutils literal notranslate"><span class="pre">Document.__str__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.OSVVM.html">pyEDAA.Reports.Unittesting.OSVVM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.UnittestException"><code class="docutils literal notranslate"><span class="pre">UnittestException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.DuplicateTestsuiteException"><code class="docutils literal notranslate"><span class="pre">DuplicateTestsuiteException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.DuplicateTestcaseException"><code class="docutils literal notranslate"><span class="pre">DuplicateTestcaseException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestcaseStatus"><code class="docutils literal notranslate"><span class="pre">TestcaseStatus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteKind"><code class="docutils literal notranslate"><span class="pre">TestsuiteKind</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteStatus"><code class="docutils literal notranslate"><span class="pre">TestsuiteStatus</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.IterationScheme"><code class="docutils literal notranslate"><span class="pre">IterationScheme</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Testcase"><code class="docutils literal notranslate"><span class="pre">Testcase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteBase"><code class="docutils literal notranslate"><span class="pre">TestsuiteBase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Testsuite"><code class="docutils literal notranslate"><span class="pre">Testsuite</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteSummary"><code class="docutils literal notranslate"><span class="pre">TestsuiteSummary</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Document"><code class="docutils literal notranslate"><span class="pre">Document</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Merged"><code class="docutils literal notranslate"><span class="pre">Merged</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Combined"><code class="docutils literal notranslate"><span class="pre">Combined</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.MergedTestcase"><code class="docutils literal notranslate"><span class="pre">MergedTestcase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.MergedTestsuite"><code class="docutils literal notranslate"><span class="pre">MergedTestsuite</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.MergedTestsuiteSummary"><code class="docutils literal notranslate"><span class="pre">MergedTestsuiteSummary</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.resources.html">pyEDAA.Reports.resources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/unittests.html">Unittest Summary Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/coverage/index.html">Code Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/doccoverage.html">Doc. Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/typing/index.html">Static Type Check Report ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../License.html">Apache License 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Doc-License.html">Creative Commons Attribution 4.0 International</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Python Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TODO.html">TODOs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyEDAA.Reports</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pyEDAA.Reports.html">Python Class Reference</a></li>
+          <li class="breadcrumb-item"><a href="pyEDAA.Reports.Unittesting.html">pyEDAA.Reports.Unittesting</a></li>
+      <li class="breadcrumb-item active">pyEDAA.Reports.Unittesting.JUnit</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <style type="text/css">
+  span.bolditalic {font-weight: bold; font-style: italic; }
+  span.underline {text-decoration: underline; }
+  span.strike {text-decoration: line-through; }
+  span.xlarge {font-size: x-large; }
+  span.colorred {color: #CC0000; }
+  span.colorgreen {color: #009933; }
+  span.colorblue {color: #0066FF; }
+  span.colorpurple {color: #9900CC; }
+</style><section id="module-pyEDAA.Reports.Unittesting.JUnit">
+<span id="pyedaa-reports-unittesting-junit"></span><h1>pyEDAA.Reports.Unittesting.JUnit<a class="headerlink" href="#module-pyEDAA.Reports.Unittesting.JUnit" title="Link to this heading"></a></h1>
+<p>Reader for JUnit unit testing summary files in XML format.</p>
+<p><strong>Submodules</strong></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.AntJUnit.html">pyEDAA.Reports.Unittesting.JUnit.AntJUnit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.CTestJUnit.html">pyEDAA.Reports.Unittesting.JUnit.CTestJUnit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html">pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit.html">pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit</a></li>
+</ul>
+</div>
+<p><strong>Exceptions</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.UnittestException" title="pyEDAA.Reports.Unittesting.JUnit.UnittestException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnittestException</span></code></a>:
+Common base class for all non-exit exceptions.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.DuplicateTestsuiteException" title="pyEDAA.Reports.Unittesting.JUnit.DuplicateTestsuiteException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DuplicateTestsuiteException</span></code></a>:
+Common base class for all non-exit exceptions.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.DuplicateTestcaseException" title="pyEDAA.Reports.Unittesting.JUnit.DuplicateTestcaseException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DuplicateTestcaseException</span></code></a>:
+Common base class for all non-exit exceptions.</p></li>
+</ul>
+<p><strong>Classes</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitException" title="pyEDAA.Reports.Unittesting.JUnit.JUnitException"><code class="xref py py-class docutils literal notranslate"><span class="pre">JUnitException</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode" title="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">JUnitReaderMode</span></code></a>:
+Support for flags</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Base" title="pyEDAA.Reports.Unittesting.JUnit.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties" title="pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWithProperties</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase" title="pyEDAA.Reports.Unittesting.JUnit.Testcase"><code class="xref py py-class docutils literal notranslate"><span class="pre">Testcase</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase" title="pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestsuiteBase</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass" title="pyEDAA.Reports.Unittesting.JUnit.Testclass"><code class="xref py py-class docutils literal notranslate"><span class="pre">Testclass</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="pyEDAA.Reports.Unittesting.JUnit.Testsuite"><code class="xref py py-class docutils literal notranslate"><span class="pre">Testsuite</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary" title="pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestsuiteSummary</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Document" title="pyEDAA.Reports.Unittesting.JUnit.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a>:
+Undocumented.</p></li>
+</ul>
+<hr class="docutils" />
+<p><strong>Exceptions</strong></p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.UnittestException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">UnittestException</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#UnittestException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.UnittestException" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-aa8f43ac11076581afbb5ab0b47cb40a013dfdae.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of UnittestException</p></object></div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.DuplicateTestsuiteException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">DuplicateTestsuiteException</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#DuplicateTestsuiteException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.DuplicateTestsuiteException" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-adb2f1bf27646857f062d40b5999da77af72b264.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of DuplicateTestsuiteException</p></object></div>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.DuplicateTestcaseException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">DuplicateTestcaseException</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#DuplicateTestcaseException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.DuplicateTestcaseException" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-40b52600026f469e03f67286f7fc5435c40dfd24.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of DuplicateTestcaseException</p></object></div>
+</dd></dl>
+
+<hr class="docutils" />
+<p><strong>Classes</strong></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitException">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">JUnitException</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#JUnitException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitException" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-d44826806e0d5896d034b8894dc25edef3807afe.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of JUnitException</p></object></div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">JUnitReaderMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#JUnitReaderMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-a8dfe22e9f490a1bb3fa42bee9b0bcbd27bc42b2.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of JUnitReaderMode</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._generate_next_value_">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_generate_next_value_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._generate_next_value_" title="Link to this definition"></a></dt>
+<dd><p>Generate the next value when not given.</p>
+<p>name: the name of the member
+start: the initial start value or None
+count: the number of existing members
+last_values: the last value assigned or None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._numeric_repr_">
+<span class="sig-name descname"><span class="pre">_numeric_repr_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._numeric_repr_" title="Link to this definition"></a></dt>
+<dd><p>Return the canonical string representation of the object.</p>
+<p>For many object types, including most builtins, eval(repr(obj)) == obj.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._iter_member_by_value_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_iter_member_by_value_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._iter_member_by_value_" title="Link to this definition"></a></dt>
+<dd><p>Extract all members from the value in definition (i.e. increasing value) order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._iter_member_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_iter_member_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._iter_member_" title="Link to this definition"></a></dt>
+<dd><p>Extract all members from the value in definition (i.e. increasing value) order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._iter_member_by_def_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_iter_member_by_def_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._iter_member_by_def_" title="Link to this definition"></a></dt>
+<dd><p>Extract all members from the value in definition order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode._missing_" title="Link to this definition"></a></dt>
+<dd><p>Create a composite member containing all canonical members present in <cite>value</cite>.</p>
+<p>If non-member values are present, result depends on <cite>_boundary_</cite> setting.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__contains__" title="Link to this definition"></a></dt>
+<dd><p>Returns True if self has at least the same flags set as other.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Returns flags in definition order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__len__" title="Link to this definition"></a></dt>
+<dd><p>Return the number of members (no aliases)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__bool__">
+<span class="sig-name descname"><span class="pre">__bool__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__bool__" title="Link to this definition"></a></dt>
+<dd><p>classes/types should always be True.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__or__">
+<span class="sig-name descname"><span class="pre">__or__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__or__" title="Link to this definition"></a></dt>
+<dd><p>Return self|value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__ror__">
+<span class="sig-name descname"><span class="pre">__ror__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__ror__" title="Link to this definition"></a></dt>
+<dd><p>Return value|self.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Base">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Base" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-d099ed1dcdbf1f04a6dc84f5162adef666a6e2ee.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Base</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="pyEDAA.Reports.Unittesting.JUnit.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Base.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Base.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Base.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="pyEDAA.Reports.Unittesting.JUnit.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Base.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Base.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Base.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Base.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">BaseWithProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assertionCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#BaseWithProperties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-71ff26bc805a5439747b7b52146f06294242f6fd.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of BaseWithProperties</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>assertionCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="pyEDAA.Reports.Unittesting.JUnit.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assertionCount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#BaseWithProperties.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>assertionCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="pyEDAA.Reports.Unittesting.JUnit.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.BaseWithProperties.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testcase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">Testcase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status=&lt;TestcaseStatus.Unknown:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assertionCount=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Testcase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-4dc5374cfe5a7298ce4c0378d60596156dc510ce.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Testcase</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestcaseStatus" title="pyEDAA.Reports.Unittesting.TestcaseStatus"><em>TestcaseStatus</em></a>)</p></li>
+<li><p><strong>assertionCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass" title="pyEDAA.Reports.Unittesting.JUnit.Testclass"><em>Testclass</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testcase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status=&lt;TestcaseStatus.Unknown:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assertionCount=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Testcase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestcaseStatus" title="pyEDAA.Reports.Unittesting.TestcaseStatus"><em>TestcaseStatus</em></a>)</p></li>
+<li><p><strong>assertionCount</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass" title="pyEDAA.Reports.Unittesting.JUnit.Testclass"><em>Testclass</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testcase.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Testcase.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testcase.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testcase.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">TestsuiteBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status=&lt;TestsuiteStatus.Unknown:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#TestsuiteBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-0ca83c7868846062b38e0bda90cf32376d470a58.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of TestsuiteBase</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status=&lt;TestsuiteStatus.Unknown:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#TestsuiteBase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>startTime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.12)"><em>datetime</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteStatus" title="pyEDAA.Reports.Unittesting.TestsuiteStatus"><em>TestsuiteStatus</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="pyEDAA.Reports.Unittesting.JUnit.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteBase.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testclass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">Testclass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">classname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testcases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Testclass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-529aebbc91b2a423a0f54674690c5da3584cb3af.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Testclass</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>classname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>testcases</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.12)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase" title="pyEDAA.Reports.Unittesting.JUnit.Testcase"><em>Testcase</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="pyEDAA.Reports.Unittesting.JUnit.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testclass.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">classname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testcases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Testclass.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>classname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>testcases</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.12)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testcase" title="pyEDAA.Reports.Unittesting.JUnit.Testcase"><em>Testcase</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="pyEDAA.Reports.Unittesting.JUnit.Testsuite"><em>Testsuite</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testclass.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Testclass.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testclass.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testclass.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testsuite">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">Testsuite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hostname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status=&lt;TestsuiteStatus.Unknown:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testclasses=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Testsuite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-6663dfabfceb23f68d37922050e10ecb821d0202.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Testsuite</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testsuite.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hostname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status=&lt;TestsuiteStatus.Unknown:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testclasses=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Testsuite.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>hostname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>startTime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.12)"><em>datetime</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteStatus" title="pyEDAA.Reports.Unittesting.TestsuiteStatus"><em>TestsuiteStatus</em></a>)</p></li>
+<li><p><strong>testclasses</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.12)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testclass" title="pyEDAA.Reports.Unittesting.JUnit.Testclass"><em>Testclass</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary" title="pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary"><em>TestsuiteSummary</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testsuite.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Testsuite.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testsuite.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testsuite.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Testsuite.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">TestsuiteSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status=&lt;TestsuiteStatus.Unknown:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testsuites=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#TestsuiteSummary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-37cf54ae3aee3ba70ff657dbcc079100e279e711.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of TestsuiteSummary</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status=&lt;TestsuiteStatus.Unknown:</span> <span class="pre">0&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testsuites=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#TestsuiteSummary.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>)</p></li>
+<li><p><strong>startTime</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.12)"><em>datetime</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>duration</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.12)"><em>timedelta</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteStatus" title="pyEDAA.Reports.Unittesting.TestsuiteStatus"><em>TestsuiteStatus</em></a>)</p></li>
+<li><p><strong>testsuites</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.12)"><em>Iterable</em></a><em>[</em><a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.Testsuite" title="pyEDAA.Reports.Unittesting.JUnit.Testsuite"><em>Testsuite</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#TestsuiteSummary.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.TestsuiteSummary.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Document">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.Unittesting.JUnit.</span></span><span class="sig-name descname"><span class="pre">Document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xmlReportFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parse=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readerMode=&lt;JUnitReaderMode.Default:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Document" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-420101178367d31346392826be31e6b71bed2be6.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Document</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xmlReportFile</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>)</p></li>
+<li><p><strong>parse</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>)</p></li>
+<li><p><strong>readerMode</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode" title="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode"><em>JUnitReaderMode</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Document.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xmlReportFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parse=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readerMode=&lt;JUnitReaderMode.Default:</span> <span class="pre">0&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Document.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Document.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xmlReportFile</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.12)"><em>Path</em></a>)</p></li>
+<li><p><strong>parse</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>)</p></li>
+<li><p><strong>readerMode</strong> (<a class="reference internal" href="#pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode" title="pyEDAA.Reports.Unittesting.JUnit.JUnitReaderMode"><em>JUnitReaderMode</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Document._analysisDuration">
+<span class="sig-name descname"><span class="pre">_analysisDuration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Document._analysisDuration" title="Link to this definition"></a></dt>
+<dd><p>TODO: replace by Timer; should be timedelta?</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Document._modelConversion">
+<span class="sig-name descname"><span class="pre">_modelConversion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Document._modelConversion" title="Link to this definition"></a></dt>
+<dd><p>TODO: replace by Timer; should be timedelta?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Document.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Document.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Document.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Document.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Check if class has any method with Attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Document.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Document.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.Unittesting.JUnit.Document.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/Unittesting/JUnit.html#Document.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.Unittesting.JUnit.Document.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyEDAA.Reports.Unittesting.html" class="btn btn-neutral float-left" title="pyEDAA.Reports.Unittesting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyEDAA.Reports.Unittesting.JUnit.AntJUnit.html" class="btn btn-neutral float-right" title="pyEDAA.Reports.Unittesting.JUnit.AntJUnit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2024, Electronic Design Automation Abstraction (EDA²).
+      <span class="lastupdated">Last updated on 28.06.2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

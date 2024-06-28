@@ -1,0 +1,59 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="376pt" height="27pt" viewBox="0.00 0.00 376.00 27.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 23)">
+<ns0:title>inheritance16a412fec3</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Enum</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="https://docs.python.org/3/library/enum.html#enum.Enum" ns1:title="Create a collection of name/value pairs." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="54,-19 0,-19 0,0 54,0 54,-19" />
+<ns0:text text-anchor="middle" x="27" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Enum</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>ReprEnum</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="https://docs.python.org/3/library/enum.html#enum.ReprEnum" ns1:title="Only changes the repr(), leaving str() and format() to the mixed-in type." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="157,-19 90,-19 90,0 157,0 157,-19" />
+<ns0:text text-anchor="middle" x="123.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ReprEnum</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>Enum-&gt;ReprEnum</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.07,-9.5C63.47,-9.5 74.28,-9.5 84.49,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="84.76,-11.25 89.76,-9.5 84.76,-7.75 84.76,-11.25" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>IntEnum</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="https://docs.python.org/3/library/enum.html#enum.IntEnum" ns1:title="Enum where members are also (and must be) ints" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="250,-19 193,-19 193,0 250,0 250,-19" />
+<ns0:text text-anchor="middle" x="221.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">IntEnum</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>TestsuiteKind</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteKind" ns1:title="TestsuiteKind" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="368,-19 286,-19 286,0 368,0 368,-19" />
+<ns0:text text-anchor="middle" x="327" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TestsuiteKind</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>IntEnum-&gt;TestsuiteKind</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M250.24,-9.5C259.6,-9.5 270.32,-9.5 280.68,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="280.73,-11.25 285.73,-9.5 280.73,-7.75 280.73,-11.25" />
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>ReprEnum-&gt;IntEnum</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M157,-9.5C166.91,-9.5 177.81,-9.5 187.74,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="187.84,-11.25 192.84,-9.5 187.84,-7.75 187.84,-11.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>
