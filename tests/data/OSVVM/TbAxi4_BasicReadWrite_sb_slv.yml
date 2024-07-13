@@ -1,6 +1,6 @@
-Version: "1.1"
+Version: 1.1
 TestCase: "TbAxi4_BasicReadWrite"
-Scoreboards:
+Scoreboards: 
   - Name:         "WriteAddressFIFO"
     ParentName:   "subordinate_1"
     ItemCount:    10
@@ -111,5 +111,21 @@ Scoreboards:
     ErrorCount:   0
     ItemsChecked: 0
     ItemsPopped:  10
+    ItemsDropped: 0
+    FifoCount: 0
+  - Name:         "WriteBurstFifo"
+    ParentName:   "manager_1"
+    ItemCount:    0
+    ErrorCount:   0
+    ItemsChecked: 0
+    ItemsPopped:  0
+    ItemsDropped: 0
+    FifoCount: 0
+  - Name:         "ReadBurstFifo"
+    ParentName:   "manager_1"
+    ItemCount:    0
+    ErrorCount:   0
+    ItemsChecked: 0
+    ItemsPopped:  0
     ItemsDropped: 0
     FifoCount: 0

@@ -46,7 +46,7 @@ At next use this layer's service program to convert from UCDB to Cobertura forma
 
    pyedaa-ucis export --ucdb ucdb.xml --cobertura cobertura.xml
 """
-from typing   import NoReturn
+from typing   import NoReturn, Optional as Nullable
 
 from argparse import RawDescriptionHelpFormatter, Namespace
 from textwrap import dedent
@@ -74,7 +74,7 @@ class ProgramBase(TerminalApplication):
 
 
 @export
-class Program(ProgramBase, UnittestingHandlers, ArgParseHelperMixin):
+class Application(ProgramBase, UnittestingHandlers, ArgParseHelperMixin):
 	"""Program class to implement the command line interface (CLI) using commands and options."""
 
 	programTitle = "Report Service Program"
@@ -133,7 +133,7 @@ class Program(ProgramBase, UnittestingHandlers, ArgParseHelperMixin):
 			""")
 		)
 
-	def _PrintHelp(self, command: str = None) -> None:
+	def _PrintHelp(self, command: Nullable[str] = None) -> None:
 		"""Helper function to print the command line parsers help page(s)."""
 		if command is None:
 			self.MainParser.print_help()
@@ -160,7 +160,7 @@ def main() -> NoReturn:
 	"""
 	from sys import argv
 
-	program = Program()
+	program = Application()
 	program.Configure(
 		verbose=("-v" in argv or "--verbose" in argv),
 		debug=("-d" in argv or "--debug" in argv),

@@ -1,13 +1,13 @@
 -r ../requirements.txt
 
-pyTooling ~= 6.3
+pyTooling ~= 6.4
 colorama >= 0.4.6
 ruamel.yaml ~= 0.18.6
-setuptools ~= 70.1
+setuptools ~= 70.3
 
 # Enforce latest version on ReadTheDocs
-sphinx ~= 7.3
-docutils ~= 0.18.1
+sphinx ~= 7.4
+docutils ~= 0.20
 
 # ReadTheDocs Theme
 sphinx_rtd_theme ~= 2.0.0
