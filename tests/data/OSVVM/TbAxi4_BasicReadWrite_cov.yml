@@ -1,13 +1,13 @@
-Version: "1.0"
+Version: 1.0
 Coverage: 100.00
-Settings:
+Settings: 
   WritePassFail: 0
-Models:
+Models: 
   - Name: "WriteAddressDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -18,25 +18,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteAddressDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -47,25 +47,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 5}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteAddressDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -76,25 +76,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteDataDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -105,25 +105,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteDataDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -134,25 +134,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 5}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteDataDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -163,25 +163,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteResponseDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -192,25 +192,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteResponseDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -221,16 +221,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 1}
           - {Min: 2, Max: 5}
         Count: 0
@@ -238,10 +238,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "WriteResponseDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -252,16 +252,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
           - {Min: 0, Max: 0}
         Count: 0
@@ -269,10 +269,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "ReadAddressDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -283,25 +283,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "ReadAddressDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -312,25 +312,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 5}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "ReadAddressDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -341,25 +341,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "ReadDataDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -370,25 +370,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "ReadDataDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -399,16 +399,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 1}
           - {Min: 2, Max: 5}
         Count: 0
@@ -416,10 +416,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "ReadDataDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -430,16 +430,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
           - {Min: 0, Max: 0}
         Count: 0
@@ -447,10 +447,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "WriteAddressDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -461,25 +461,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteAddressDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -490,16 +490,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 1}
           - {Min: 2, Max: 5}
         Count: 0
@@ -507,10 +507,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "WriteAddressDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -521,16 +521,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
           - {Min: 0, Max: 0}
         Count: 0
@@ -538,10 +538,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "WriteDataDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -552,25 +552,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteDataDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -581,16 +581,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 1}
           - {Min: 2, Max: 5}
         Count: 0
@@ -598,10 +598,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "WriteDataDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -612,16 +612,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
           - {Min: 0, Max: 0}
         Count: 0
@@ -629,10 +629,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "WriteResponseDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -643,25 +643,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteResponseDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -672,25 +672,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 5}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "WriteResponseDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -701,25 +701,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "ReadAddressDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -730,25 +730,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "ReadAddressDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -759,16 +759,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 1}
           - {Min: 2, Max: 5}
         Count: 0
@@ -776,10 +776,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "ReadAddressDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -790,16 +790,16 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 2
-      FieldNames:
+      FieldNames: 
         - "Bin1"
         - "Bin2"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
           - {Min: 0, Max: 0}
         Count: 0
@@ -807,10 +807,10 @@ Models:
         PercentCov: 0.0000
 
   - Name: "ReadDataDelayCov BurstLength"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -821,25 +821,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 10}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "ReadDataDelayCov BurstDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -850,25 +850,25 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 2, Max: 5}
         Count: 0
         AtLeast: 1
         PercentCov: 0.0000
 
   - Name: "ReadDataDelayCov BeatDelay"
-    TestCases:
+    TestCases: 
       - "TbAxi4_BasicReadWrite"
     Coverage: 0.00
-    Settings:
+    Settings: 
       CovWeight: 0
       Goal: 100.0
       WeightMode: "REMAIN"
@@ -879,15 +879,15 @@ Models:
       ThresholdEnable: "FALSE"
       TotalCovCount: 0
       TotalCovGoal: 1
-    BinInfo:
+    BinInfo: 
       Dimensions: 1
-      FieldNames:
+      FieldNames: 
         - "Bin1"
       NumBins: 1
-    Bins:
+    Bins: 
       - Name: ""
         Type: "COUNT"
-        Range:
+        Range: 
           - {Min: 0, Max: 0}
         Count: 0
         AtLeast: 1
