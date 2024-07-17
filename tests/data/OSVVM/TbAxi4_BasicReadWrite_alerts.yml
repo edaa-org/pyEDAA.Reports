@@ -44,11 +44,11 @@ Children:
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
         Children: []
-      - Name: "WriteResponse Scoreboard"
+      - Name: "WriteResp SB"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 10, AffirmCount: 10, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
         Children: []
-      - Name: "ReadResponse Scoreboard"
+      - Name: "ReadResp SB"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 10, AffirmCount: 10, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
         Children: []

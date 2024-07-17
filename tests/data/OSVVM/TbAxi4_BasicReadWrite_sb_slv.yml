@@ -1,7 +1,7 @@
 Version: 1.1
 TestCase: "TbAxi4_BasicReadWrite"
 Scoreboards: 
-  - Name:         "WriteAddressFIFO"
+  - Name:         "WriteAddrFifo"
     ParentName:   "subordinate_1"
     ItemCount:    10
     ErrorCount:   0
@@ -17,14 +17,6 @@ Scoreboards:
     ItemsPopped:  10
     ItemsDropped: 0
     FifoCount: 0
-  - Name:         "WriteTransactionFifo"
-    ParentName:   "subordinate_1"
-    ItemCount:    0
-    ErrorCount:   0
-    ItemsChecked: 0
-    ItemsPopped:  0
-    ItemsDropped: 0
-    FifoCount: 0
   - Name:         "WriteResponseFifo"
     ParentName:   "subordinate_1"
     ItemCount:    10
@@ -33,7 +25,7 @@ Scoreboards:
     ItemsPopped:  10
     ItemsDropped: 0
     FifoCount: 0
-  - Name:         "ReadAddressFifo"
+  - Name:         "ReadAddrFifo"
     ParentName:   "subordinate_1"
     ItemCount:    10
     ErrorCount:   0
@@ -41,7 +33,7 @@ Scoreboards:
     ItemsPopped:  10
     ItemsDropped: 0
     FifoCount: 0
-  - Name:         "ReadAddressTransactionFifo"
+  - Name:         "ReadByteAddrFifo"
     ParentName:   "subordinate_1"
     ItemCount:    10
     ErrorCount:   0
@@ -57,7 +49,7 @@ Scoreboards:
     ItemsPopped:  10
     ItemsDropped: 0
     FifoCount: 0
-  - Name:         "WriteResponse Scoreboard"
+  - Name:         "WriteResp SB"
     ParentName:   "manager_1"
     ItemCount:    10
     ErrorCount:   0
@@ -65,7 +57,7 @@ Scoreboards:
     ItemsPopped:  10
     ItemsDropped: 0
     FifoCount: 0
-  - Name:         "ReadResponse Scoreboard"
+  - Name:         "ReadResp SB"
     ParentName:   "manager_1"
     ItemCount:    10
     ErrorCount:   0
@@ -73,7 +65,7 @@ Scoreboards:
     ItemsPopped:  10
     ItemsDropped: 0
     FifoCount: 0
-  - Name:         "WriteAddressFIFO"
+  - Name:         "WriteAddrFifo"
     ParentName:   "manager_1"
     ItemCount:    10
     ErrorCount:   0
@@ -89,7 +81,7 @@ Scoreboards:
     ItemsPopped:  10
     ItemsDropped: 0
     FifoCount: 0
-  - Name:         "ReadAddressFifo"
+  - Name:         "ReadAddrFifo"
     ParentName:   "manager_1"
     ItemCount:    10
     ErrorCount:   0
@@ -97,7 +89,7 @@ Scoreboards:
     ItemsPopped:  10
     ItemsDropped: 0
     FifoCount: 0
-  - Name:         "ReadAddressTransactionFifo"
+  - Name:         "ReadByteAddrFifo"
     ParentName:   "manager_1"
     ItemCount:    10
     ErrorCount:   0

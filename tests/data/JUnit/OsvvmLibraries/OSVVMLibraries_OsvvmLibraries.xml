@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites 
-   name="OSVVMLibraries_OsvvmLibraries"
-   timestamp="2024-07-13T21:21:17+02:00"
-   time="38.145"
-   tests="0"
-   failures="0"
-   errors="0"
-   skipped="0"
->
-<properties> 
-  <property name="OsvvmVersion" value="2024.06-Dev" /> 
-  <property name="Simulator" value="GHDL" /> 
-  <property name="SimulatorVersion" value="4.1.0" /> 
-</properties> 
+<testsuites name="OSVVMLibraries_OsvvmLibraries" timestamp="2024-07-18T00:13:35+02:00" time="11.904" tests="0" failures="0" errors="0" skipped="0">
+	<properties>
+		<property name="OsvvmVersion" value="2024.07-Dev" />
+		<property name="Simulator" value="GHDL" />
+		<property name="SimulatorVersion" value="5.0.0-dev" />
+	</properties>
 </testsuites>
