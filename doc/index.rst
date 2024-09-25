@@ -53,9 +53,7 @@ Proposal to define an abstract model for outputs from EDA tools and logging libr
 * OSVVM (YAML files)
 
 
-
-
-.. _contributors:
+.. _CONTRIBUTORS:
 
 Contributors
 ************
@@ -64,6 +62,10 @@ Contributors
 * `Unai Martinez-Corral <https://GitHub.com/umarcor/>`__
 * `and more... <https://GitHub.com/edaa-org/pyEDAA.Reports/graphs/contributors>`__
 
+
+.. _LICENSE:
+
+.. todo:: add license texts here
 
 .. toctree::
    :hidden:

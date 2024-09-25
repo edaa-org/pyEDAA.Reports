@@ -49,8 +49,9 @@ from pyTooling.Decorators import export
 class ReportException(Exception):
 	# WORKAROUND: for Python <3.11
 	# Implementing a dummy method for Python versions before
-	__notes__: List[str]
 	if version_info < (3, 11):  # pragma: no cover
+		__notes__: List[str]
+
 		def add_note(self, message: str) -> None:
 			try:
 				self.__notes__.append(message)
