@@ -290,7 +290,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			else:
 				self.WriteError(f"Syntax error: '{cleanup}'")
 
-	def _processPyTest_RewiteDunderInit(self, testsuiteSummary: TestsuiteSummary):
+	def _processPyTest_RewiteDunderInit(self, testsuiteSummary: TestsuiteSummary) -> None:
 		self.WriteVerbose(f"  Rewriting '__init__' in classnames to actual Python package names")
 
 		def processTestsuite(suite: Testsuite) -> None:
@@ -312,7 +312,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 		processTestsuite(testsuiteSummary)
 
-	def _processPyTest_ReduceDepth(self, testsuiteSummary: TestsuiteSummary, path: str):
+	def _processPyTest_ReduceDepth(self, testsuiteSummary: TestsuiteSummary, path: str) -> None:
 		self.WriteVerbose(f"  Reducing path depth of testsuite '{path}'")
 		cleanups = []
 		suite = testsuiteSummary
@@ -352,10 +352,30 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					self.WriteDebug(f"      skipping '{name}'")
 					break
 
-	def _processPyTest_SplitTestsuite(self, testsuiteSummary: TestsuiteSummary, path: str):
+	def _processPyTest_SplitTestsuite(self, testsuiteSummary: TestsuiteSummary, path: str) -> None:
 		self.WriteVerbose(f"  Splitting testsuite '{path}'")
-		for testsuite in testsuiteSummary.Testsuites[path].Testsuites.values():
-			self.WriteDebug(f"    Moving {testsuite.Name} to {testsuiteSummary.Name}")
+		if path not in testsuiteSummary.Testsuites:
+			self.WriteError(f"Path '{path}' not found")
+			return
+
+		cleanups = []
+		parentTestsuite = testsuiteSummary
+		workingTestsuite = parentTestsuite.Testsuites[path]
+		for testsuite in workingTestsuite.Testsuites.values():
+			self.WriteDebug(f"    Moving {testsuite.Name} to {parentTestsuite.Name}")
+
+			testsuiteName = testsuite._name
+			parentTestsuite.Testsuites[testsuiteName] = testsuite
+			testsuite._parent = parentTestsuite
+
+			cleanups.append(testsuiteName)
+
+		for cleanup in cleanups:
+			del workingTestsuite.Testsuites[cleanup]
+
+		if len(workingTestsuite.Testsuites) == 0 and len(workingTestsuite.Testcases) == 0:
+			self.WriteVerbose(f"  Removing empty testsuite '{path}'")
+			del parentTestsuite.Testsuites[path]
 
 	def _output(self, testsuiteSummary: TestsuiteSummary, task: str):
 		parts = task.split(":")
