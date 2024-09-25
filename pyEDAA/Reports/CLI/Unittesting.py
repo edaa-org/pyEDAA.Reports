@@ -8,23 +8,24 @@ from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
 
 from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind, TestsuiteSummary, Testsuite, Testcase
 from pyEDAA.Reports.Unittesting       import MergedTestsuiteSummary
-from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode
+from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode, TestsuiteSummary as ju_TestsuiteSummary
 
 
 class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 	@CommandHandler("unittest", help="Merge unit testing results.", description="Merge unit testing results.")
-	@LongValuedFlag("--name", dest="name", metaName='Name', help="Top-level unit testing summary name.")
-	@LongValuedFlag("--merge", dest="merge", metaName='format:JUnit File', help="Unit testing summary file (XML).")
-	@LongValuedFlag("--pytest", dest="pytest", metaName='cleanup;cleanup', help="Remove pytest overhead.")
-	@LongValuedFlag("--render", dest="render", metaName='format', help="Render unit testing results to <format>.")
+	@LongValuedFlag("--name", dest="name", metaName='Name', optional=True, help="Top-level unit testing summary name.")
+	@LongValuedFlag("--input", dest="input", metaName='format:JUnit File', optional=True, help="Unit testing summary file (XML).")
+	@LongValuedFlag("--merge", dest="merge", metaName='format:JUnit File', optional=True, help="Unit testing summary file (XML).")
+	@LongValuedFlag("--pytest", dest="pytest", metaName='cleanup;cleanup', optional=True, help="Remove pytest overhead.")
+	@LongValuedFlag("--render", dest="render", metaName='format', optional=True, help="Render unit testing results to <format>.")
 	@LongValuedFlag("--output", dest="output", metaName='format:JUnit File', help="Processed unit testing summary file (XML).")
 	def HandleUnittest(self, args: Namespace) -> None:
 		"""Handle program calls with command ``merge-unittest``."""
 		self._PrintHeadline()
 
 		returnCode = 0
-		if args.merge is None:
-			self.WriteError(f"Option '--merge=<Format>:<JUnitFilePattern>' is missing.")
+		if (args.input is None) and (args.merge is None):
+			self.WriteError(f"Either option '--input=<Format>:<JUnitFilePattern>' or '--merge=<Format>:<JUnitFilePattern>' is missing.")
 			returnCode = 3
 
 		if returnCode != 0:
@@ -33,9 +34,15 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		testsuiteSummaryName = args.name if args.name is not None else "TestsuiteSummary"
 		merged = MergedTestsuiteSummary(testsuiteSummaryName)
 
-		mergeTasks: Tuple[str, ...] = (args.merge, )
-		for mergeTask in mergeTasks:
-			self._merge(merged, mergeTask)
+		if args.input is not None:
+			openTask = args.input
+			document = self._open(openTask)
+			merged.Merge(document.ToTestsuiteSummary())
+
+		if args.merge is not None:
+			mergeTasks: Tuple[str, ...] = (args.merge, )
+			for mergeTask in mergeTasks:
+				self._merge(merged, mergeTask)
 
 		self.WriteNormal(f"Aggregating unit test metrics ...")
 		merged.Aggregate()
@@ -62,6 +69,64 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 		self.ExitOnPreviousErrors()
 
+	def _open(self, task: str) -> ju_TestsuiteSummary:
+		parts = task.split(":")
+		if (l := len(parts)) == 1:
+			self.WriteError(f"Syntax error: '{task}'")
+		elif l == 2:
+			dialect, format = (x.lower() for x in parts[0].split("-"))
+			globPattern = parts[1]
+			foundFiles = [f for f in Path.cwd().glob(globPattern)]
+			if (l := len(foundFiles)) != 1:
+				raise UnittestException(f"Found {l} files for pattern '{globPattern}'.") from FileNotFoundError(str(Path.cwd() / globPattern))
+
+			if format == "junit":
+				if dialect == "ant":
+					from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document
+					try:
+						return Document(foundFiles[0], parse=True)
+					except UnittestException as ex:
+						self.WriteFatal(ex, immediateExit=False)
+						for note in ex.__notes__:
+							self.WriteNormal(f"           {note}")
+
+				elif dialect == "any":
+					from pyEDAA.Reports.Unittesting.JUnit import Document
+					try:
+						return Document(foundFiles[0], parse=True)
+					except UnittestException as ex:
+						self.WriteFatal(ex, immediateExit=False)
+						for note in ex.__notes__:
+							self.WriteNormal(f"           {note}")
+
+				elif dialect == "ctest":
+					from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
+					try:
+						return Document(foundFiles[0], parse=True)
+					except UnittestException as ex:
+						self.WriteFatal(ex)
+
+				elif dialect == "gtest":
+					from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
+					try:
+						return Document(foundFiles[0], parse=True)
+					except UnittestException as ex:
+						self.WriteFatal(ex)
+
+				elif dialect == "pytest":
+					from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
+					try:
+						return Document(foundFiles[0], parse=True)
+					except UnittestException as ex:
+						self.WriteFatal(ex)
+
+				else:
+					self.WriteError(f"Unsupported JUnit XML dialect for input: '{format}'")
+			else:
+				self.WriteError(f"Unsupported unit testing report format for input: '{format}'")
+		else:
+			self.WriteError(f"Syntax error: '{task}'")
+
 	def _merge(self, testsuiteSummary: MergedTestsuiteSummary, task: str) -> None:
 		parts = task.split(":")
 		if (l := len(parts)) == 1:
@@ -78,6 +143,8 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			if format == "junit":
 				if dialect == "ant":
 					self._mergeAntJUnit(testsuiteSummary, foundFiles)
+				elif dialect == "any":
+					self._mergeAnyJUnit(testsuiteSummary, foundFiles)
 				elif dialect == "ctest":
 					self._mergeCTestJUnit(testsuiteSummary, foundFiles)
 				elif dialect == "gtest":
@@ -99,7 +166,36 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		junitDocuments: List[Document] = []
 		for file in foundFiles:
 			self.WriteVerbose(f"  reading {file}")
-			junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			try:
+				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			except UnittestException as ex:
+				self.WriteError(ex)
+
+		if len(junitDocuments) == 0:
+			self.WriteCritical("None of the Ant-JUnit files were successfully read.")
+			return
+
+		self.WriteNormal(f"Merging unit test summary files into a single data model ...")
+		for summary in junitDocuments:
+			self.WriteVerbose(f"  merging {summary.Path}")
+			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
+
+	def _mergeAnyJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
+		from pyEDAA.Reports.Unittesting.JUnit import Document
+
+		self.WriteNormal(f"Reading {len(foundFiles)} (generic) JUnit unit test summary files ...")
+
+		junitDocuments: List[Document] = []
+		for file in foundFiles:
+			self.WriteVerbose(f"  reading {file}")
+			try:
+				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			except UnittestException as ex:
+				self.WriteError(ex)
+
+		if len(junitDocuments) == 0:
+			self.WriteCritical("None of the (generic) JUnit files were successfully read.")
+			return
 
 		self.WriteNormal(f"Merging unit test summary files into a single data model ...")
 		for summary in junitDocuments:
@@ -114,7 +210,14 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		junitDocuments: List[Document] = []
 		for file in foundFiles:
 			self.WriteVerbose(f"  reading {file}")
-			junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			try:
+				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			except UnittestException as ex:
+				self.WriteError(ex)
+
+		if len(junitDocuments) == 0:
+			self.WriteCritical("None of the CTest-JUnit files were successfully read.")
+			return
 
 		self.WriteNormal(f"Merging unit test summary files into a single data model ...")
 		for summary in junitDocuments:
@@ -129,7 +232,14 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		junitDocuments: List[Document] = []
 		for file in foundFiles:
 			self.WriteVerbose(f"  reading {file}")
-			junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			try:
+				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			except UnittestException as ex:
+				self.WriteError(ex)
+
+		if len(junitDocuments) == 0:
+			self.WriteCritical("None of the GoogleTest-JUnit files were successfully read.")
+			return
 
 		self.WriteNormal(f"Merging unit test summary files into a single data model ...")
 		for summary in junitDocuments:
@@ -147,7 +257,11 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			try:
 				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
-				self.PrintException(ex)
+				self.WriteError(ex)
+
+		if len(junitDocuments) == 0:
+			self.WriteCritical("None of the pytest-JUnit files were successfully read.")
+			return
 
 		self.WriteNormal(f"Merging unit test summary files into a single data model ...")
 		for summary in junitDocuments:
@@ -168,6 +282,9 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				if y[0] == "reduce-depth":
 					for path in y[1:]:
 						self._processPyTest_ReduceDepth(testsuiteSummary, path)
+				elif y[0] == "split":
+					for path in y[1:]:
+						self._processPyTest_SplitTestsuite(testsuiteSummary, path)
 				else:
 					self.WriteError(f"Unsupported cleanup action for pytest: '{y[0]}'")
 			else:
@@ -234,6 +351,11 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				else:
 					self.WriteDebug(f"      skipping '{name}'")
 					break
+
+	def _processPyTest_SplitTestsuite(self, testsuiteSummary: TestsuiteSummary, path: str):
+		self.WriteVerbose(f"  Splitting testsuite '{path}'")
+		for testsuite in testsuiteSummary.Testsuites[path].Testsuites.values():
+			self.WriteDebug(f"    Moving {testsuite.Name} to {testsuiteSummary.Name}")
 
 	def _output(self, testsuiteSummary: TestsuiteSummary, task: str):
 		parts = task.split(":")
