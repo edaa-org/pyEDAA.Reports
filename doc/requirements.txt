@@ -6,7 +6,7 @@ ruamel.yaml ~= 0.18.6
 setuptools ~= 75.1
 
 # Enforce latest version on ReadTheDocs
-sphinx ~= 7.4
+sphinx ~= 8.0
 docutils ~= 0.20
 
 # ReadTheDocs Theme
