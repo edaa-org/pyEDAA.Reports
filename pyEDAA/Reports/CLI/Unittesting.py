@@ -35,8 +35,16 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		merged = MergedTestsuiteSummary(testsuiteSummaryName)
 
 		if args.input is not None:
+			self.WriteNormal(f"Reading unit test input file ...")
 			openTask = args.input
-			document = self._open(openTask)
+			try:
+				document = self._open(openTask)
+			except UnittestException as ex:
+				self.WriteFatal(ex, immediateExit=False)
+				for note in ex.__notes__:
+					self.WriteNormal(f"           {note}")
+				self.Exit()
+
 			merged.Merge(document.ToTestsuiteSummary())
 
 		if args.merge is not None:
@@ -71,68 +79,49 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 	def _open(self, task: str) -> ju_TestsuiteSummary:
 		parts = task.split(":")
-		if (l := len(parts)) == 1:
-			self.WriteError(f"Syntax error: '{task}'")
-		elif l == 2:
-			dialect, format = (x.lower() for x in parts[0].split("-"))
+		if (length := len(parts)) == 1:
+			raise UnittestException(f"Syntax error: '{task}'")
+		elif length == 2:
+			dialect, dataFormat = (x.lower() for x in parts[0].split("-"))
 			globPattern = parts[1]
 			foundFiles = [f for f in Path.cwd().glob(globPattern)]
-			if (l := len(foundFiles)) != 1:
-				raise UnittestException(f"Found {l} files for pattern '{globPattern}'.") from FileNotFoundError(str(Path.cwd() / globPattern))
+			if (length := len(foundFiles)) != 1:
+				raise UnittestException(f"Found {length} files for pattern '{globPattern}'.") from FileNotFoundError(str(Path.cwd() / globPattern))
 
-			if format == "junit":
+			file = foundFiles[0]
+
+			if dataFormat == "junit":
 				if dialect == "ant":
 					from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document
-					try:
-						return Document(foundFiles[0], parse=True)
-					except UnittestException as ex:
-						self.WriteFatal(ex, immediateExit=False)
-						for note in ex.__notes__:
-							self.WriteNormal(f"           {note}")
-
+					docClass = Document
 				elif dialect == "any":
 					from pyEDAA.Reports.Unittesting.JUnit import Document
-					try:
-						return Document(foundFiles[0], parse=True)
-					except UnittestException as ex:
-						self.WriteFatal(ex, immediateExit=False)
-						for note in ex.__notes__:
-							self.WriteNormal(f"           {note}")
-
+					docClass = Document
 				elif dialect == "ctest":
 					from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
-					try:
-						return Document(foundFiles[0], parse=True)
-					except UnittestException as ex:
-						self.WriteFatal(ex)
-
+					docClass = Document
 				elif dialect == "gtest":
 					from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
-					try:
-						return Document(foundFiles[0], parse=True)
-					except UnittestException as ex:
-						self.WriteFatal(ex)
-
+					docClass = Document
 				elif dialect == "pytest":
 					from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
-					try:
-						return Document(foundFiles[0], parse=True)
-					except UnittestException as ex:
-						self.WriteFatal(ex)
-
+					docClass = Document
 				else:
-					self.WriteError(f"Unsupported JUnit XML dialect for input: '{format}'")
+					raise UnittestException(f"Unsupported JUnit XML dialect for input: '{dataFormat}'")
+
+				self.WriteVerbose(f"  Reading {file}")
+				return docClass(file, parse=True)
 			else:
-				self.WriteError(f"Unsupported unit testing report format for input: '{format}'")
+				raise UnittestException(f"Unsupported unit testing report dataFormat for input: '{dataFormat}'")
 		else:
-			self.WriteError(f"Syntax error: '{task}'")
+			raise UnittestException(f"Syntax error: '{task}'")
 
 	def _merge(self, testsuiteSummary: MergedTestsuiteSummary, task: str) -> None:
 		parts = task.split(":")
-		if (l := len(parts)) == 1:
+		if (length := len(parts)) == 1:
 			self.WriteError(f"Syntax error: '{task}'")
-		elif l == 2:
-			dialect, format = (x.lower() for x in parts[0].split("-"))
+		elif length == 2:
+			dialect, dataFormat = (x.lower() for x in parts[0].split("-"))
 			globPattern = parts[1]
 
 			foundFiles = tuple(f for f in Path.cwd().glob(globPattern))
@@ -140,7 +129,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				self.WriteWarning(f"Found no matching files for pattern '{Path.cwd()}/{globPattern}'")
 				return
 
-			if format == "junit":
+			if dataFormat == "junit":
 				if dialect == "ant":
 					self._mergeAntJUnit(testsuiteSummary, foundFiles)
 				elif dialect == "any":
@@ -152,20 +141,20 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				elif dialect == "pytest":
 					self._mergePyTestJUnit(testsuiteSummary, foundFiles)
 				else:
-					self.WriteError(f"Unsupported JUnit XML dialect for merging: '{format}'")
+					self.WriteError(f"Unsupported JUnit XML dialect for merging: '{dataFormat}'")
 			else:
-				self.WriteError(f"Unsupported unit testing report format for merging: '{format}'")
+				self.WriteError(f"Unsupported unit testing report dataFormat for merging: '{dataFormat}'")
 		else:
 			self.WriteError(f"Syntax error: '{task}'")
 
-	def _mergeAntJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
+	def _mergeAntJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path, ...]) -> None:
 		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document
 
 		self.WriteNormal(f"Reading {len(foundFiles)} Ant-JUnit unit test summary files ...")
 
 		junitDocuments: List[Document] = []
 		for file in foundFiles:
-			self.WriteVerbose(f"  reading {file}")
+			self.WriteVerbose(f"  Reading {file}")
 			try:
 				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
@@ -180,14 +169,14 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  merging {summary.Path}")
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
-	def _mergeAnyJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
+	def _mergeAnyJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path, ...]) -> None:
 		from pyEDAA.Reports.Unittesting.JUnit import Document
 
 		self.WriteNormal(f"Reading {len(foundFiles)} (generic) JUnit unit test summary files ...")
 
 		junitDocuments: List[Document] = []
 		for file in foundFiles:
-			self.WriteVerbose(f"  reading {file}")
+			self.WriteVerbose(f"  Reading {file}")
 			try:
 				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
@@ -202,14 +191,14 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  merging {summary.Path}")
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
-	def _mergeCTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
+	def _mergeCTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path, ...]) -> None:
 		from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
 		self.WriteNormal(f"Reading {len(foundFiles)} CTest-JUnit unit test summary files ...")
 
 		junitDocuments: List[Document] = []
 		for file in foundFiles:
-			self.WriteVerbose(f"  reading {file}")
+			self.WriteVerbose(f"  Reading {file}")
 			try:
 				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
@@ -224,14 +213,14 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  merging {summary.Path}")
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
-	def _mergeGoogleTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
+	def _mergeGoogleTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path, ...]) -> None:
 		from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
 		self.WriteNormal(f"Reading {len(foundFiles)} GoogleTest-JUnit unit test summary files ...")
 
 		junitDocuments: List[Document] = []
 		for file in foundFiles:
-			self.WriteVerbose(f"  reading {file}")
+			self.WriteVerbose(f"  Reading {file}")
 			try:
 				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
@@ -246,14 +235,14 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  merging {summary.Path}")
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
-	def _mergePyTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path]) -> None:
+	def _mergePyTestJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path, ...]) -> None:
 		from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
 		self.WriteNormal(f"Reading {len(foundFiles)} pytest-JUnit unit test summary files ...")
 
 		junitDocuments: List[Document] = []
 		for file in foundFiles:
-			self.WriteVerbose(f"  reading {file}")
+			self.WriteVerbose(f"  Reading {file}")
 			try:
 				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
