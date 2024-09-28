@@ -57,7 +57,7 @@ from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut
 
 @export
 class JUnitException:
-	pass
+	"""An exception mixin for JUnit format specific exceptions."""
 
 
 @export
