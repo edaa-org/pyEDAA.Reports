@@ -93,7 +93,7 @@ jobs:
     with:
       name: pyEDAA.Reports
       python_version_list: "3.9 3.10 3.11 3.12 pypy-3.9 pypy-3.10"
-#      disable_list: "windows:pypy-3.8 windows:pypy-3.9 windows:pypy-3.10"
+      disable_list: "mingw64:* ucrt64:*"
 
   UnitTesting:
     uses: pyTooling/Actions/.github/workflows/UnitTesting.yml@dev
