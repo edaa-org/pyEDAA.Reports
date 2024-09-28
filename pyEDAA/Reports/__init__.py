@@ -35,7 +35,7 @@ __author__ =    "Patrick Lehmann"
 __email__ =     "Paebbels@gmail.com"
 __copyright__ = "2021-2024, Electronic Design Automation Abstraction (EDA²)"
 __license__ =   "Apache License, Version 2.0"
-__version__ =   "0.11.0"
+__version__ =   "0.12.0"
 __keywords__ =  ["Reports", "Abstract Model", "Data Model", "Unit Testing", "Testcase", "Testsuite", "OSVVM", "YAML", "XML"]
 
 from enum                 import Enum
@@ -49,8 +49,9 @@ from pyTooling.Decorators import export
 class ReportException(Exception):
 	# WORKAROUND: for Python <3.11
 	# Implementing a dummy method for Python versions before
-	__notes__: List[str]
 	if version_info < (3, 11):  # pragma: no cover
+		__notes__: List[str]
+
 		def add_note(self, message: str) -> None:
 			try:
 				self.__notes__.append(message)

@@ -38,7 +38,7 @@ from pyTooling.Decorators import export
 class Requirement:
 	_package: str
 
-	EXTRA_PATTERN = re_compile(r"""^\s*extra\s*==\s*(?P<quote>['"])(?P<key>\w+)(?P=quote))?$""")
+	EXTRA_PATTERN = re_compile(r"""^\s*extra\s*==\s*(?P<quote>['"])(?P<key>\w+)(?P=quote)?$""")
 
 	# python_version
 	# platform_python_implementation

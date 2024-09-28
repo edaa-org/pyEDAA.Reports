@@ -1,54 +1,62 @@
-Version: "1.0"
+Version: 1.0
 Name: "TbAxi4_BasicReadWrite"
 Status: PASSED
 Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 60, AffirmCount: 60, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
 Settings: {ExternalErrors: {Failure: 0, Error: 0, Warning: 0}, FailOnDisabledErrors: "true", FailOnRequirementErrors: "true", FailOnWarning: "true"}
-Children:
+Children: 
   - Name: "Default"
     Status: PASSED
     Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 40, AffirmCount: 40, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-    Children:
+    Children: []
   - Name: "OSVVM"
     Status: PASSED
     Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-    Children:
+    Children: []
   - Name: "subordinate_1"
     Status: PASSED
     Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-    Children:
+    Children: 
       - Name: "Protocol Error"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-        Children:
+        Children: []
       - Name: "Data Check"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-        Children:
+        Children: []
       - Name: "No response"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-        Children:
+        Children: []
   - Name: "manager_1"
     Status: PASSED
     Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-    Children:
+    Children: 
       - Name: "Protocol Error"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-        Children:
+        Children: []
       - Name: "Data Check"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-        Children:
+        Children: []
       - Name: "No response"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-        Children:
-      - Name: "WriteResponse Scoreboard"
+        Children: []
+      - Name: "WriteResp SB"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 10, AffirmCount: 10, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-        Children:
-      - Name: "ReadResponse Scoreboard"
+        Children: []
+      - Name: "ReadResp SB"
         Status: PASSED
         Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 10, AffirmCount: 10, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
-        Children:
+        Children: []
+      - Name: "WriteBurstFifo"
+        Status: PASSED
+        Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
+        Children: []
+      - Name: "ReadBurstFifo"
+        Status: PASSED
+        Results: {TotalErrors: 0, AlertCount: {Failure: 0, Error: 0, Warning: 0}, PassedCount: 0, AffirmCount: 0, RequirementsPassed: 0, RequirementsGoal: 0, DisabledAlertCount: {Failure: 0, Error: 0, Warning: 0}}
+        Children: []

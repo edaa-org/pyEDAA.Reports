@@ -45,21 +45,22 @@ from pyEDAA.Reports        import ReportException
 
 @export
 class UnittestException(ReportException):
-	pass
+	"""Base-exception for all unit test related exceptions."""
 
 
 @export
 class DuplicateTestsuiteException(UnittestException):
-	pass
+	"""A unit test exception raised on duplicate test suites."""
 
 
 @export
 class DuplicateTestcaseException(UnittestException):
-	pass
+	"""A unit test exception raised on duplicate test cases."""
 
 
 @export
 class TestcaseStatus(Flag):
+	"""A flag enumeration describing the status of a test case."""
 	Unknown =    0                         #: Testcase status is uninitialized and therefore unknown.
 	Excluded =   1                         #: Testcase was permanently excluded / disabled
 	Skipped =    2                         #: Testcase was temporarily skipped (e.g. based on a condition)
@@ -69,16 +70,16 @@ class TestcaseStatus(Flag):
 
 	Mask = Excluded | Skipped | Weak | Passed | Failed
 
-	Inverted = 128                         #: to mark inverted results
+	Inverted = 128                         #: To mark inverted results
 	UnexpectedPassed = Failed | Inverted
 	ExpectedFailed =   Passed | Inverted
 
-	Warned =  1024                         #: runtime warning
-	Errored = 2048                         #: runtime error (mostly caught exceptions)
-	Aborted = 4096                         #: uncaught runtime exception
+	Warned =  1024                         #: Runtime warning
+	Errored = 2048                         #: Runtime error (mostly caught exceptions)
+	Aborted = 4096                         #: Uncaught runtime exception
 
-	SetupError =     8192                  #: preparation / compilation error
-	TearDownError = 16384                  #: cleanup error / resource release error
+	SetupError =     8192                  #: Preparation / compilation error
+	TearDownError = 16384                  #: Cleanup error / resource release error
 	Inconsistent = 32768                   #: Dataset is inconsistent
 
 	Flags = Warned | Errored | Aborted | SetupError | TearDownError | Inconsistent
@@ -107,6 +108,7 @@ class TestcaseStatus(Flag):
 
 @export
 class TestsuiteKind(IntEnum):
+	"""Enumeration describing the kind of test suite."""
 	Root = 0
 	Logical = 1
 	Namespace = 2
@@ -117,31 +119,33 @@ class TestsuiteKind(IntEnum):
 
 @export
 class TestsuiteStatus(Flag):
+	"""A flag enumeration describing the status of a test suite."""
 	Unknown =    0
-	Excluded =   1                         #: testcase was permanently excluded / disabled
-	Skipped =    2                         #: testcase was temporarily skipped (e.g. based on a condition)
-	Empty =      4                         #: no tests in suite
-	Passed =     8                         #: passed testcase, because all assertions succeeded
-	Failed =    16                         #: failed testcase due to failing assertions
+	Excluded =   1                         #: Testcase was permanently excluded / disabled
+	Skipped =    2                         #: Testcase was temporarily skipped (e.g. based on a condition)
+	Empty =      4                         #: No tests in suite
+	Passed =     8                         #: Passed testcase, because all assertions succeeded
+	Failed =    16                         #: Failed testcase due to failing assertions
 
 	Mask = Excluded | Skipped | Empty | Passed | Failed
 
-	Inverted = 128                         #: to mark inverted results
+	Inverted = 128                         #: To mark inverted results
 	UnexpectedPassed = Failed | Inverted
 	ExpectedFailed =   Passed | Inverted
 
-	Warned =  1024                         #: runtime warning
-	Errored = 2048                         #: runtime error (mostly caught exceptions)
-	Aborted = 4096                         #: uncaught runtime exception
+	Warned =  1024                         #: Runtime warning
+	Errored = 2048                         #: Runtime error (mostly caught exceptions)
+	Aborted = 4096                         #: Uncaught runtime exception
 
-	SetupError =     8192                  #: preparation / compilation error
-	TearDownError = 16384                  #: cleanup error / resource release error
+	SetupError =     8192                  #: Preparation / compilation error
+	TearDownError = 16384                  #: Cleanup error / resource release error
 
 	Flags = Warned | Errored | Aborted | SetupError | TearDownError
 
 
 @export
 class IterationScheme(Flag):
+	"""A flag enumeration for selecting the test suite iteration scheme."""
 	Unknown =           0
 	IncludeSelf =       1
 	IncludeTestsuites = 2
@@ -162,6 +166,8 @@ TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int
 
 @export
 class Base(metaclass=ExtendedType, slots=True):
+	"""Base-class for all test entities (test cases, test suites, ...)."""
+
 	_parent: Nullable["Testsuite"]
 	_name:   str
 
@@ -190,6 +196,24 @@ class Base(metaclass=ExtendedType, slots=True):
 		fatalCount: int = 0,
 		parent: Nullable["Testsuite"] = None
 	):
+		"""
+		Initializes the fields of the base-class.
+
+		:param name:               Name of the test entity.
+		:param startTime:          Time when the test entity was started.
+		:param setupDuration:      Duration it took to set up the entity.
+		:param testDuration:       Duration of the entity's test run.
+		:param teardownDuration:   Duration it took to tear down the entity.
+		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
+		:param warningCount:       Count of encountered warnings.
+		:param errorCount:         Count of encountered errors.
+		:param fatalCount:         Count of encountered fatal errors.
+		:param parent:             Reference to the parent test entity.
+		:raises ValueError:        If parameter 'name' is None.
+		:raises TypeError:         If parameter 'name' is not a string.
+		:raises UnittestException: If parameter 'totalDuration' is not consistent.
+		"""
+
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
@@ -252,42 +276,97 @@ class Base(metaclass=ExtendedType, slots=True):
 	# QUESTION: allow Parent as setter?
 	@readonly
 	def Parent(self) -> Nullable["Testsuite"]:
+		"""
+		Read-only property returning the reference to the parent test entity.
+
+		:return: Reference to the parent entity.
+		"""
 		return self._parent
 
 	@readonly
 	def Name(self) -> str:
+		"""
+		Read-only property returning the test entity's name.
+
+		:return:
+		"""
 		return self._name
 
 	@readonly
 	def StartTime(self) -> datetime:
+		"""
+		Read-only property returning the time when the test entity was started.
+
+		:return: Time when the test entity was started.
+		"""
 		return self._startTime
 
 	@readonly
 	def SetupDuration(self) -> timedelta:
+		"""
+		Read-only property returning the duration of the test entity's setup.
+
+		:return: Duration it took to set up the entity.
+		"""
 		return self._setupDuration
 
 	@readonly
 	def TestDuration(self) -> timedelta:
+		"""
+		Read-only property returning the duration of a test entities run.
+
+		This duration is excluding setup and teardown durations. In case setup and/or teardown durations are unknown or not
+		distinguishable, assign setup and teardown durations with zero.
+
+		:return: Duration of the entity's test run.
+		"""
 		return self._testDuration
 
 	@readonly
 	def TeardownDuration(self) -> timedelta:
+		"""
+		Read-only property returning the duration of the test entity's teardown.
+
+		:return: Duration it took to tear down the entity.
+		"""
 		return self._teardownDuration
 
 	@readonly
 	def TotalDuration(self) -> timedelta:
+		"""
+		Read-only property returning the total duration of a test entity run.
+
+		this duration includes setup and teardown durations.
+
+		:return: Total duration of the entity's execution (setup + test + teardown)
+		"""
 		return self._totalDuration
 
 	@readonly
 	def WarningCount(self) -> int:
+		"""
+		Read-only property returning the number of encountered warnings.
+
+		:return: Count of encountered warnings.
+		"""
 		return self._warningCount
 
 	@readonly
 	def ErrorCount(self) -> int:
+		"""
+		Read-only property returning the number of encountered errors.
+
+		:return: Count of encountered errors.
+		"""
 		return self._errorCount
 
 	@readonly
 	def FatalCount(self) -> int:
+		"""
+		Read-only property returning the number of encountered fatal errors.
+
+		:return: Count of encountered fatal errors.
+		"""
 		return self._fatalCount
 
 	def __len__(self) -> int:
@@ -315,6 +394,12 @@ class Base(metaclass=ExtendedType, slots=True):
 
 @export
 class Testcase(Base):
+	"""
+	A testcase is leaf-entity in the test entity hierarchy representing a single test.
+
+	Test cases are grouped by test suites. The root of hierarchy is a test summary.
+	"""
+
 	_status:               TestcaseStatus
 	_assertionCount:       Nullable[int]
 	_failedAssertionCount: Nullable[int]
@@ -337,6 +422,25 @@ class Testcase(Base):
 		fatalCount: int = 0,
 		parent: Nullable["Testsuite"] = None
 	):
+		"""
+		Initializes the fields of a test case.
+
+		:param name:               Name of the test entity.
+		:param startTime:          Time when the test entity was started.
+		:param setupDuration:      Duration it took to set up the entity.
+		:param testDuration:       Duration of the entity's test run.
+		:param teardownDuration:   Duration it took to tear down the entity.
+		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
+		:param status:
+		:param assertionCount:
+		:param failedAssertionCount:
+		:param passedAssertionCount:
+		:param warningCount:       Count of encountered warnings.
+		:param errorCount:         Count of encountered errors.
+		:param fatalCount:         Count of encountered fatal errors.
+		:param parent:             Reference to the parent test entity.
+		"""
+
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
@@ -454,6 +558,10 @@ class Testcase(Base):
 
 @export
 class TestsuiteBase(Base, Generic[TestsuiteType]):
+	"""
+	Base-class for all test suites and for test summaries.
+	"""
+
 	_kind:       TestsuiteKind
 	_status:     TestsuiteStatus
 	_testsuites: Dict[str, TestsuiteType]
@@ -696,6 +804,13 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 @export
 class Testsuite(TestsuiteBase[TestsuiteType]):
+	"""
+	A testsuite is an intermediate element in the test entity hierarchy representing a group of tests.
+
+	Test suites contain test cases and optionally other test suites. Test suites can be grouped by test suites. The root
+	of hierarchy is a test summary.
+	"""
+
 	_testcases: Dict[str, "Testcase"]
 
 	def __init__(
@@ -855,6 +970,12 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 @export
 class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
+	"""
+	A testsuite summary is the root element in the test entity hierarchy representing a summary of all test suites and cases.
+
+	The testsuite summary contains test suites, which in turn can contain test suites and test cases.
+	"""
+
 	def __init__(
 		self,
 		name: str,
@@ -928,6 +1049,8 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 
 @export
 class Document(metaclass=ExtendedType, mixin=True):
+	"""A mixin-class representing a unit test summary document (file)."""
+
 	_path:             Path
 
 	_analysisDuration: float  #: TODO: replace by Timer; should be timedelta?
@@ -966,6 +1089,8 @@ class Document(metaclass=ExtendedType, mixin=True):
 
 @export
 class Merged(metaclass=ExtendedType, mixin=True):
+	"""A mixin-class representing a merged test entity."""
+
 	_mergedCount: int
 
 	def __init__(self, mergedCount: int = 1):
