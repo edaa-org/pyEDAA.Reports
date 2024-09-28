@@ -30,27 +30,122 @@
 The pyEDAA.Reports Documentation
 ################################
 
-Proposal to define an abstract model for outputs from EDA tools and logging libraries.
+This project provides abstract data models and specific implementations for report formats. Examples are unit test
+summaries (like Ant JUnit XML), code coverage (like Cobertura) and documentation coverage reports.
 
-.. image:: _static/work-in-progress.png
-   :height: 275 px
-   :align: center
-   :target: https://GitHub.com/edaa-org/pyEDAA.Reports
+While the data models and file format implementations can be used as a library, a CLI program will be provided too. It
+allows reading, converting, concatenating, merging, transforming and writing report files.
 
-.. raw:: html
-
-    <br>
+It's also planned to support console outputs from simulators and synthesis/implementation tools to create structured
+logs and reports for filtering and data extraction.
 
 
-.. rubric:: Supported Ant JUnit XMl file outputs
+Report Formats
+**************
 
-* pytest
-* VUnit
-* OSVVM (OSVVM's YAML format should be preferred due to more content and meta information)
+.. grid:: 3
 
-.. rubric:: Supported proprietary file formats
+   .. grid-item-card::
+      :columns: 4
 
-* OSVVM (YAML files)
+      :ref:`Code Coverage <CODECOV>`
+      ^^^
+
+      Code coverage measures used and unused code lines, statements, branches, etc. Depending on the programming
+      language this is measured by instrumenting the code/binary and running the program, it's test cases or simulating
+      the code. In generate code coverage is a measure of test coverage. Unused code is not (yet) covered by tests.
+
+      The code coverage metric in percent is a ratio of used code versus all possibly usable code. A coverage of <100%
+      indicates unused code. This can be dead code (unreachable) or untested code (⇒ needs more test cases).
+
+      **Supported tools**
+
+      * Coverage.py / pytest-cov
+      * Aldec Riviera-PRO
+      * others tbd. (GHDL with enabled coverage)
+
+      .. #  (via ACDB conversion of UCDB to UCIS format and then converted to Cobertura)
+
+      **Supported file formats**
+
+      * Cobertura
+      * others tbd. (gcov)
+
+
+   .. grid-item-card::
+      :columns: 4
+
+      :ref:`Documentation Coverage <DOCCOV>`
+      ^^^
+
+      Documentation coverage measures the presence of code documentation. It primarily counts for public language
+      entities like publicly visible constants and variables, parameters, types, functions, methods, classes, modules,
+      packages, etc. The documentation goal depends on the used coverage collection tool's settings. E.g. usually,
+      private language entities are not required to be documented.
+
+      The documentation coverage metric in percent is a ratio of documented language entity versus all documentation
+      worthy langauge entities. A coverage of <100% indicates undocumented code.
+
+      .. rubric:: Supported tools
+
+      * docstr_coverage
+      * others tbd. (GHDL)
+
+      .. rubric:: Supported file formats
+
+      * tbd.
+
+
+   .. grid-item-card::
+      :columns: 4
+
+      :ref:`Unit Test Summaries <UNITTEST>`
+      ^^^
+
+      Results of (unit) tests (also regression tests) are collected in machine readable summary files. Test cases are
+      usually grouped by one or more test suites. Besides the test's result (passed, failed, skipped, ...) also the
+      test's outputs and durations are collected. Results can be visualized as a expandable tree structure.
+
+      The total number of testcases indicates the spend effort in testing and applying many test vectors. In combination
+      with code coverage, it can be judged if the code has untested sections.
+
+      .. rubric:: Supported features
+
+      * Read Ant JUnit XML files (and various dialects)
+      * Merge Ant JUnit reports
+      * Concatenate Ant JUnit reports
+      * Transform the hierarchy of reports
+      * Write Ant JUnit reports (also to other dialects)
+
+      .. rubric:: Supported tools
+
+      * Ant + JUnit4
+      * CTest
+      * GoogleTest
+      * OSVVM
+      * pyTest
+
+      .. rubric:: Supported file formats
+
+      * Ant JUnit4 XML format and various dialects
+      * OSVVM YAML format
+
+
+   .. #grid-item-card::
+      :columns: 4
+
+      :ref:`Tool Outputs <TOOLOUT>`
+      ^^^
+
+      .. rubric:: Supported tools
+
+      * planned: Vivado synthesis
+      * planned: Vivado implementation
+      * others tbd. (GHDL)
+
+      .. rubric:: Supported file formats
+
+      * tbd.
 
 
 .. _CONTRIBUTORS:
