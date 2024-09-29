@@ -259,6 +259,7 @@ jobs:
       - PublishCoverageResults
       - PublishToGitHubPages
 #      - PublishOnPyPI
+      - IntermediateCleanUp
     with:
       package: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
       remaining: |

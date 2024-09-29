@@ -171,7 +171,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	_parent: Nullable["Testsuite"]
 	_name:   str
 
-	_startTime:        datetime
+	_startTime:        Nullable[datetime]
 	_setupDuration:    Nullable[timedelta]
 	_testDuration:     Nullable[timedelta]
 	_teardownDuration: Nullable[timedelta]
@@ -209,10 +209,18 @@ class Base(metaclass=ExtendedType, slots=True):
 		:param errorCount:         Count of encountered errors.
 		:param fatalCount:         Count of encountered fatal errors.
 		:param parent:             Reference to the parent test entity.
+		:raises TypeError:         If parameter 'parent' is not a TestsuiteBase.
 		:raises ValueError:        If parameter 'name' is None.
 		:raises TypeError:         If parameter 'name' is not a string.
+		:raises ValueError:        If parameter 'name' is empty.
 		:raises UnittestException: If parameter 'totalDuration' is not consistent.
 		"""
+
+		if parent is not None and not isinstance(parent, TestsuiteBase):
+			ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
 
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
@@ -221,6 +229,8 @@ class Base(metaclass=ExtendedType, slots=True):
 			if version_info >= (3, 11):  # pragma: no cover
 				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
+		elif name.strip() == "":
+			raise ValueError(f"Parameter 'name' is empty.")
 
 		self._parent = parent
 		self._name = name
@@ -293,7 +303,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		return self._name
 
 	@readonly
-	def StartTime(self) -> datetime:
+	def StartTime(self) -> Nullable[datetime]:
 		"""
 		Read-only property returning the time when the test entity was started.
 
@@ -302,7 +312,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		return self._startTime
 
 	@readonly
-	def SetupDuration(self) -> timedelta:
+	def SetupDuration(self) -> Nullable[timedelta]:
 		"""
 		Read-only property returning the duration of the test entity's setup.
 
@@ -311,7 +321,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		return self._setupDuration
 
 	@readonly
-	def TestDuration(self) -> timedelta:
+	def TestDuration(self) -> Nullable[timedelta]:
 		"""
 		Read-only property returning the duration of a test entities run.
 
@@ -323,7 +333,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		return self._testDuration
 
 	@readonly
-	def TeardownDuration(self) -> timedelta:
+	def TeardownDuration(self) -> Nullable[timedelta]:
 		"""
 		Read-only property returning the duration of the test entity's teardown.
 
@@ -332,7 +342,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		return self._teardownDuration
 
 	@readonly
-	def TotalDuration(self) -> timedelta:
+	def TotalDuration(self) -> Nullable[timedelta]:
 		"""
 		Read-only property returning the total duration of a test entity run.
 
@@ -370,26 +380,73 @@ class Base(metaclass=ExtendedType, slots=True):
 		return self._fatalCount
 
 	def __len__(self) -> int:
+		"""
+		Returns the number of annotated key-value pairs.
+
+		:return: Number of annotated key-value pairs.
+		"""
 		return len(self._dict)
 
 	def __getitem__(self, key: str) -> Any:
+		"""
+		Access a key-value pair by key.
+
+		:param key: Name if the key-value pair.
+		:return:    Value of the accessed key.
+		"""
 		return self._dict[key]
 
 	def __setitem__(self, key: str, value: Any) -> None:
+		"""
+		Set the value of a key-value pair by key.
+
+		If the pair doesn't exist yet, it's created.
+
+		:param key:   Key of the key-value pair.
+		:param value: Value of the key-value pair.
+		"""
 		self._dict[key] = value
 
 	def __delitem__(self, key: str) -> None:
+		"""
+		Delete a key-value pair by key.
+
+		:param key: Name if the key-value pair.
+		"""
 		del self._dict[key]
 
 	def __contains__(self, key: str) -> bool:
+		"""
+		Returns True, if a key-value pairs was annotated by this key.
+
+		:param key: Name if the key-value pair.
+		:return:    True, if the pair was annotated.
+		"""
 		return key in self._dict
 
 	def __iter__(self) -> Generator[Tuple[str, Any], None, None]:
+		"""
+		Iterate all annotated key-value pairs.
+
+		:return: A generator of key-value pair tuples.
+		"""
 		yield from self._dict.items()
 
 	@abstractmethod
-	def Aggregate(self):
-		pass
+	def Aggregate(self, strict: bool = True):
+		"""
+		Aggregate all test entities in the hierarchy.
+
+		:return:
+		"""
+
+	@abstractmethod
+	def __str__(self) -> str:
+		"""
+		Formats the test entity as human-readable incl. some statistics.
+
+		:return:
+		"""
 
 
 @export

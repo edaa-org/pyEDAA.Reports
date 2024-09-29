@@ -30,14 +30,28 @@
 The pyEDAA.Reports Documentation
 ################################
 
-This project provides abstract data models and specific implementations for report formats. Examples are unit test
-summaries (like Ant JUnit XML), code coverage (like Cobertura) and documentation coverage reports.
+A collection of various (EDA tool-specific) report data formats.
 
-While the data models and file format implementations can be used as a library, a CLI program will be provided too. It
-allows reading, converting, concatenating, merging, transforming and writing report files.
+.. _GOALS:
 
-It's also planned to support console outputs from simulators and synthesis/implementation tools to create structured
-logs and reports for filtering and data extraction.
+Main Goals
+**********
+
+This package provides abstract data models and specific implementations for report formats. The supported report formats
+are commonly used for any programming language or have a specifc context with Electronic Design Automation (EDA) tools.
+Examples are unit test summaries (like Ant JUnit XML), code coverage (like Cobertura) and documentation coverage reports.
+
+While the data models and file format implementations can be used as a library, a CLI program ``pyedaa-report`` will be
+provided too. It allows reading, converting, concatenating, merging, transforming and writing report files.
+
+.. admonition:: Roadmap
+
+   It's also planned to support console outputs from simulators and synthesis/implementation tools to create structured
+   logs and reports for filtering and data extraction.
+
+
+
+
 
 
 Report Formats
@@ -48,7 +62,7 @@ Report Formats
    .. grid-item-card::
       :columns: 4
 
-      :ref:`Code Coverage <CODECOV>`
+      :ref:`🚧 Code Coverage <CODECOV>`
       ^^^
 
       Code coverage measures used and unused code lines, statements, branches, etc. Depending on the programming
@@ -75,7 +89,7 @@ Report Formats
    .. grid-item-card::
       :columns: 4
 
-      :ref:`Documentation Coverage <DOCCOV>`
+      :ref:`🚧 Documentation Coverage <DOCCOV>`
       ^^^
 
       Documentation coverage measures the presence of code documentation. It primarily counts for public language
@@ -111,24 +125,26 @@ Report Formats
 
       .. rubric:: Supported features
 
-      * Read Ant JUnit XML files (and various dialects)
-      * Merge Ant JUnit reports
-      * Concatenate Ant JUnit reports
-      * Transform the hierarchy of reports
-      * Write Ant JUnit reports (also to other dialects)
+      * :ref:`Read Ant JUnit XML files (and various dialects) <UNITTEST/Feature/Read>`
+      * :ref:`Merge Ant JUnit reports <UNITTEST/Feature/Merge>`
+      * :ref:`Concatenate Ant JUnit reports <UNITTEST/Feature/Concat>`
+      * :ref:`Transform the hierarchy of reports <UNITTEST/Feature/Transform>`
+      * :ref:`Write Ant JUnit reports (also to other dialects) <UNITTEST/Feature/Write>`
 
       .. rubric:: Supported tools
 
-      * Ant + JUnit4
-      * CTest
-      * GoogleTest
-      * OSVVM
-      * pyTest
+      * :ref:`CTest <UNITTEST/Tool/CTest>`
+      * :ref:`GoogleTest <UNITTEST/Tool/GoogleTest>`
+      * :ref:`Ant + JUnit4 <UNITTEST/Tool/JUnit4>`
+      * :ref:`JUnit5 <UNITTEST/Tool/JUnit5>`
+      * :ref:`OSVVM <UNITTEST/Tool/OSVVM>`
+      * :ref:`pyTest <UNITTEST/Tool/pytest>`
 
       .. rubric:: Supported file formats
 
-      * Ant JUnit4 XML format and various dialects
-      * OSVVM YAML format
+      * :ref:`Ant JUnit4 XML format and various dialects <UNITTEST/FileFormats/AntJUnit4>`
+      * :ref:`JUnit5 XML format (Open Test Reporting) <UNITTEST/FileFormats/JUnit5>`
+      * :ref:`OSVVM YAML format <UNITTEST/FileFormats/OSVVM>`
 
 
    .. #grid-item-card::
@@ -146,6 +162,17 @@ Report Formats
       .. rubric:: Supported file formats
 
       * tbd.
+
+
+.. _CONSUMERS:
+
+Consumers
+*********
+
+This layer is used by:
+
+* `pyTooling/Actions → PublishTestResults <https://github.com/pyTooling/Actions/>`__
+* 🚧 `pyTooling/Sphinx-Reports <https://github.com/pyTooling/sphinx-reports>`__
 
 
 .. _CONTRIBUTORS:
@@ -182,6 +209,7 @@ Contributors
    CodeCoverage/index
    DocCoverage/index
    Unittesting/index
+   Logging/index
 
 
 .. #toctree::
@@ -190,18 +218,6 @@ Contributors
 
    Converting
    Merging
-
-.. toctree::
-   :caption: About
-   :hidden:
-
-   Introduction
-   FunctionalCoverage
-   LineCoverage
-   Resources
-   RichLogging
-   Tracking
-   Frontends
 
 
 .. raw:: latex
@@ -234,3 +250,15 @@ Contributors
    genindex
    Python Module Index <modindex>
    TODO
+
+.. toctree::
+   :caption: Old Content
+   :hidden:
+
+   old/Introduction
+   old/FunctionalCoverage
+   old/LineCoverage
+   old/Resources
+   old/RichLogging
+   old/Tracking
+   old/Frontends
