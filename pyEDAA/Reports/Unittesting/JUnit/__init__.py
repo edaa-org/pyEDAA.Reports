@@ -47,7 +47,7 @@ from pyTooling.Exceptions       import ToolingException
 from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmethod
 from pyTooling.Tree             import Node
 
-from pyEDAA.Reports             import resources
+from pyEDAA.Reports             import Resources
 from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, \
 	TestsuiteKind
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, IterationScheme
@@ -844,7 +844,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		startAnalysis = perf_counter_ns()
 		try:
-			xmlSchemaResourceFile = getResourceFile(resources, xmlSchemaFile)
+			xmlSchemaResourceFile = getResourceFile(Resources, xmlSchemaFile)
 		except ToolingException as ex:
 			raise UnittestException(f"Couldn't locate XML Schema '{xmlSchemaFile}' in package resources.") from ex
 
