@@ -444,8 +444,6 @@ class Base(metaclass=ExtendedType, slots=True):
 	def __str__(self) -> str:
 		"""
 		Formats the test entity as human-readable incl. some statistics.
-
-		:return:
 		"""
 
 
@@ -544,20 +542,40 @@ class Testcase(Base):
 
 	@readonly
 	def Status(self) -> TestcaseStatus:
+		"""
+		Read-only property returning the status of the test case.
+
+		:return: The test case's status.
+		"""
 		return self._status
 
 	@readonly
 	def AssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of assertions (checks) in a test case.
+
+		:return: Number of assertions.
+		"""
 		if self._assertionCount is None:
 			return 0
 		return self._assertionCount
 
 	@readonly
 	def FailedAssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of failed assertions (failed checks) in a test case.
+
+		:return: Number of assertions.
+		"""
 		return self._failedAssertionCount
 
 	@readonly
 	def PassedAssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of passed assertions (successful checks) in a test case.
+
+		:return: Number of passed assertions.
+		"""
 		return self._passedAssertionCount
 
 	def Copy(self) -> "Testcase":
@@ -605,6 +623,13 @@ class Testcase(Base):
 		return self._warningCount, self._errorCount, self._fatalCount, totalDuration
 
 	def __str__(self) -> str:
+		"""
+		Formats the test case as human-readable incl. statistics.
+
+		:pycode:`f"<Testcase {}: {} - assert/pass/fail:{}/{}/{} - warn/error/fatal:{}/{}/{} - setup/test/teardown:{}/{}/{}>"`
+
+		:return: Human-readable summary of a test case object.
+		"""
 		return (
 			f"<Testcase {self._name}: {self._status.name} -"
 			f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
