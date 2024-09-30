@@ -166,7 +166,24 @@ TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int
 
 @export
 class Base(metaclass=ExtendedType, slots=True):
-	"""Base-class for all test entities (test cases, test suites, ...)."""
+	"""
+	Base-class for all test entities (test cases, test suites, ...).
+
+	It provides a reference to the parent test entity, so bidirectional referencing can be used in the test entity
+	hierarchy.
+
+	Every test entity has a name to identity it. It's also used in the parent's child element dictionaries to identify the
+	child. E.g. it's used as a test case name in the dictionary of test cases in a test suite.
+
+	Every test entity has fields for time tracking. If known, a start time and a test duration can be set. For more
+	details, a setup duration and teardown duration can be added. All durations are summed in a total duration field.
+
+	As tests can have warnings and errors or even fail, these messages are counted and aggregated in the test entity
+	hierarchy.
+
+	Every test entity offers an internal dictionary for annotations. This feature is for example used by Ant + JUnit4's
+	XML property fields.
+	"""
 
 	_parent: Nullable["Testsuite"]
 	_name:   str
@@ -444,17 +461,20 @@ class Base(metaclass=ExtendedType, slots=True):
 	def __str__(self) -> str:
 		"""
 		Formats the test entity as human-readable incl. some statistics.
-
-		:return:
 		"""
 
 
 @export
 class Testcase(Base):
 	"""
-	A testcase is leaf-entity in the test entity hierarchy representing a single test.
+	A testcase is leaf-entity in the test entity hierarchy representing an individual test run.
 
-	Test cases are grouped by test suites. The root of hierarchy is a test summary.
+	Test cases are grouped by test suites in the test entity hierarchy. The root of the hierarchy is a test summary.
+
+	Every test case has an overall status like unknown, skipped, failed or passed.
+
+	In addition to all features from its base-class, test cases provide additional statistics for passed and failed
+	assertions (checks) as well as a sum thereof.
 	"""
 
 	_status:               TestcaseStatus
@@ -482,20 +502,20 @@ class Testcase(Base):
 		"""
 		Initializes the fields of a test case.
 
-		:param name:               Name of the test entity.
-		:param startTime:          Time when the test entity was started.
-		:param setupDuration:      Duration it took to set up the entity.
-		:param testDuration:       Duration of the entity's test run.
-		:param teardownDuration:   Duration it took to tear down the entity.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
-		:param status:
-		:param assertionCount:
-		:param failedAssertionCount:
-		:param passedAssertionCount:
-		:param warningCount:       Count of encountered warnings.
-		:param errorCount:         Count of encountered errors.
-		:param fatalCount:         Count of encountered fatal errors.
-		:param parent:             Reference to the parent test entity.
+		:param name:                 Name of the test entity.
+		:param startTime:            Time when the test entity was started.
+		:param setupDuration:        Duration it took to set up the entity.
+		:param testDuration:         Duration of the entity's test run.
+		:param teardownDuration:     Duration it took to tear down the entity.
+		:param totalDuration:        Total duration of the entity's execution (setup + test + teardown)
+		:param status:               Status of the test case.
+		:param assertionCount:       Number of assertions within the test.
+		:param failedAssertionCount: Number of failed assertions within the test.
+		:param passedAssertionCount: Number of passed assertions within the test.
+		:param warningCount:         Count of encountered warnings.
+		:param errorCount:           Count of encountered errors.
+		:param fatalCount:           Count of encountered fatal errors.
+		:param parent:               Reference to the parent test suite.
 		"""
 
 		if parent is not None:
@@ -507,7 +527,18 @@ class Testcase(Base):
 
 			parent._testcases[name] = self
 
-		super().__init__(name, startTime, setupDuration, testDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		super().__init__(
+			name,
+			startTime,
+			setupDuration,
+			testDuration,
+			teardownDuration,
+			totalDuration,
+			warningCount,
+			errorCount,
+			fatalCount,
+			parent
+		)
 
 		self._status = status
 
@@ -544,20 +575,40 @@ class Testcase(Base):
 
 	@readonly
 	def Status(self) -> TestcaseStatus:
+		"""
+		Read-only property returning the status of the test case.
+
+		:return: The test case's status.
+		"""
 		return self._status
 
 	@readonly
 	def AssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of assertions (checks) in a test case.
+
+		:return: Number of assertions.
+		"""
 		if self._assertionCount is None:
 			return 0
 		return self._assertionCount
 
 	@readonly
 	def FailedAssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of failed assertions (failed checks) in a test case.
+
+		:return: Number of assertions.
+		"""
 		return self._failedAssertionCount
 
 	@readonly
 	def PassedAssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of passed assertions (successful checks) in a test case.
+
+		:return: Number of passed assertions.
+		"""
 		return self._passedAssertionCount
 
 	def Copy(self) -> "Testcase":
@@ -605,6 +656,13 @@ class Testcase(Base):
 		return self._warningCount, self._errorCount, self._fatalCount, totalDuration
 
 	def __str__(self) -> str:
+		"""
+		Formats the test case as human-readable incl. statistics.
+
+		:pycode:`f"<Testcase {}: {} - assert/pass/fail:{}/{}/{} - warn/error/fatal:{}/{}/{} - setup/test/teardown:{}/{}/{}>"`
+
+		:return: Human-readable summary of a test case object.
+		"""
 		return (
 			f"<Testcase {self._name}: {self._status.name} -"
 			f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
@@ -617,6 +675,10 @@ class Testcase(Base):
 class TestsuiteBase(Base, Generic[TestsuiteType]):
 	"""
 	Base-class for all test suites and for test summaries.
+
+	A test suite is a mid-level grouping element in the test entity hierarchy, whereas the test summary is the root
+	element in that hierarchy. While a test suite groups other test suites and test cases, a test summary can only group
+	test suites. Thus, a test summary contains no test cases.
 	"""
 
 	_kind:       TestsuiteKind
@@ -648,6 +710,23 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
+		"""
+		Initializes the based-class fields of a test suite or test summary.
+
+		:param name:               Name of the test entity.
+		:param kind:               Kind of the test entity.
+		:param startTime:          Time when the test entity was started.
+		:param setupDuration:      Duration it took to set up the entity.
+		:param testDuration:       Duration of all tests listed in the test entity.
+		:param teardownDuration:   Duration it took to tear down the entity.
+		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
+		:param status:             Overall status of the test entity.
+		:param warningCount:       Count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:         List of test suites to initialize the test entity with.
+		:param parent:             Reference to the parent test entity.
+		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
@@ -657,7 +736,18 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 			parent._testsuites[name] = self
 
-		super().__init__(name, startTime, setupDuration, testDuration, teardownDuration, totalDuration, warningCount, errorCount, fatalCount, parent)
+		super().__init__(
+			name,
+			startTime,
+			setupDuration,
+			testDuration,
+			teardownDuration,
+			totalDuration,
+			warningCount,
+			errorCount,
+			fatalCount,
+			parent
+		)
 
 		self._kind = kind
 		self._status = status
@@ -887,7 +977,39 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
-		super().__init__(name, kind, startTime, setupDuration, testDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
+		"""
+		Initializes the fields of a test suite.
+
+		:param name:               Name of the test suite.
+		:param kind:               Kind of the test suite.
+		:param startTime:          Time when the test suite was started.
+		:param setupDuration:      Duration it took to set up the test suite.
+		:param testDuration:       Duration of all tests listed in the test suite.
+		:param teardownDuration:   Duration it took to tear down the test suite.
+		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
+		:param status:             Overall status of the test suite.
+		:param warningCount:       Count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:         List of test suites to initialize the test suite with.
+		:param testcases:          List of test cases to initialize the test suite with.
+		:param parent:             Reference to the parent test entity.
+		"""
+		super().__init__(
+			name,
+			kind,
+			startTime,
+			setupDuration,
+			testDuration,
+			teardownDuration,
+			totalDuration,
+			status,
+			warningCount,
+			errorCount,
+			fatalCount,
+			testsuites,
+			parent
+		)
 
 		# self._testDuration = testDuration
 
@@ -1048,10 +1170,40 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
-		super().__init__(name, TestsuiteKind.Root, startTime, setupDuration, testDuration, teardownDuration, totalDuration, status, warningCount, errorCount, fatalCount, testsuites, parent)
+		"""
+		Initializes the fields of a test summary.
 
-	def Aggregate(self) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration = super().Aggregate()
+		:param name:               Name of the test summary.
+		:param startTime:          Time when the test summary was started.
+		:param setupDuration:      Duration it took to set up the test summary.
+		:param testDuration:       Duration of all tests listed in the test summary.
+		:param teardownDuration:   Duration it took to tear down the test summary.
+		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
+		:param status:             Overall status of the test summary.
+		:param warningCount:       Count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:         List of test suites to initialize the test summary with.
+		:param parent:             Reference to the parent test summary.
+		"""
+		super().__init__(
+			name,
+			TestsuiteKind.Root,
+			startTime,
+			setupDuration,
+			testDuration,
+			teardownDuration,
+			totalDuration,
+			status,
+			warningCount,
+			errorCount,
+			fatalCount,
+			testsuites,
+			parent
+		)
+
+	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration = super().Aggregate(strict)
 
 		self._tests = tests
 		self._inconsistent = inconsistent

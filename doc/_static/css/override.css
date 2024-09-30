@@ -113,3 +113,13 @@ section > p,
 	padding-left: 0;
 	padding-right: 0;
 }
+
+.sd-card-header {
+	background-color: #EEEEEE;
+	font-size: larger;
+	font-weight: 700;
+}
+
+.sd-card-body > p {
+	text-align: justify
+}
