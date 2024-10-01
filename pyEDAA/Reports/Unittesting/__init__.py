@@ -33,7 +33,7 @@ from datetime              import timedelta, datetime
 from enum                  import Flag, IntEnum
 from pathlib               import Path
 from sys                   import version_info
-from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar
+from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar, Mapping
 
 from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
@@ -211,6 +211,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
 		"""
@@ -225,6 +226,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		:param warningCount:       Count of encountered warnings.
 		:param errorCount:         Count of encountered errors.
 		:param fatalCount:         Count of encountered fatal errors.
+		:param keyValuePairs:      Mapping of key-value pairs to initialize the test entity with.
 		:param parent:             Reference to the parent test entity.
 		:raises TypeError:         If parameter 'parent' is not a TestsuiteBase.
 		:raises ValueError:        If parameter 'name' is None.
@@ -251,6 +253,30 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		self._parent = parent
 		self._name = name
+
+		if testDuration is not None and not isinstance(testDuration, timedelta):
+			ex = TypeError(f"Parameter 'testDuration' is not of type 'timedelta'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(testDuration)}'.")
+			raise ex
+
+		if setupDuration is not None and not isinstance(setupDuration, timedelta):
+			ex = TypeError(f"Parameter 'setupDuration' is not of type 'timedelta'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(setupDuration)}'.")
+			raise ex
+
+		if teardownDuration is not None and not isinstance(teardownDuration, timedelta):
+			ex = TypeError(f"Parameter 'teardownDuration' is not of type 'timedelta'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(teardownDuration)}'.")
+			raise ex
+
+		if totalDuration is not None and not isinstance(totalDuration, timedelta):
+			ex = TypeError(f"Parameter 'totalDuration' is not of type 'timedelta'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(totalDuration)}'.")
+			raise ex
 
 		if testDuration is not None:
 			if setupDuration is not None:
@@ -294,11 +320,35 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._teardownDuration = teardownDuration
 		self._totalDuration = totalDuration
 
+		if not isinstance(warningCount, int):
+			ex = TypeError(f"Parameter 'warningCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(warningCount)}'.")
+			raise ex
+
+		if not isinstance(errorCount, int):
+			ex = TypeError(f"Parameter 'errorCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(errorCount)}'.")
+			raise ex
+
+		if not isinstance(fatalCount, int):
+			ex = TypeError(f"Parameter 'fatalCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(fatalCount)}'.")
+			raise ex
+
 		self._warningCount = warningCount
 		self._errorCount = errorCount
 		self._fatalCount = fatalCount
 
-		self._dict = {}
+		if keyValuePairs is not None and not isinstance(keyValuePairs, Mapping):
+			ex = TypeError(f"Parameter 'keyValuePairs' is not a mapping.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
+			raise ex
+
+		self._dict = {} if keyValuePairs is None else {k: v for k, v in keyValuePairs}
 
 	# QUESTION: allow Parent as setter?
 	@readonly
@@ -497,6 +547,7 @@ class Testcase(Base):
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
 		"""
@@ -515,6 +566,7 @@ class Testcase(Base):
 		:param warningCount:         Count of encountered warnings.
 		:param errorCount:           Count of encountered errors.
 		:param fatalCount:           Count of encountered fatal errors.
+		:param keyValuePairs:        Mapping of key-value pairs to initialize the test case.
 		:param parent:               Reference to the parent test suite.
 		"""
 
@@ -537,6 +589,7 @@ class Testcase(Base):
 			warningCount,
 			errorCount,
 			fatalCount,
+			keyValuePairs,
 			parent
 		)
 
@@ -708,6 +761,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		errorCount: int = 0,
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
 		"""
@@ -725,6 +779,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
 		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
 		:param testsuites:         List of test suites to initialize the test entity with.
+		:param keyValuePairs:      Mapping of key-value pairs to initialize the test entity with.
 		:param parent:             Reference to the parent test entity.
 		"""
 		if parent is not None:
@@ -746,6 +801,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			warningCount,
 			errorCount,
 			fatalCount,
+			keyValuePairs,
 			parent
 		)
 
@@ -975,6 +1031,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		testcases: Nullable[Iterable["Testcase"]] = None,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
 		"""
@@ -993,6 +1050,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
 		:param testsuites:         List of test suites to initialize the test suite with.
 		:param testcases:          List of test cases to initialize the test suite with.
+		:param keyValuePairs:      Mapping of key-value pairs to initialize the test suite with.
 		:param parent:             Reference to the parent test entity.
 		"""
 		super().__init__(
@@ -1008,6 +1066,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			errorCount,
 			fatalCount,
 			testsuites,
+			keyValuePairs,
 			parent
 		)
 
@@ -1168,6 +1227,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		errorCount: int = 0,
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[TestsuiteType] = None
 	):
 		"""
@@ -1184,6 +1244,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
 		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
 		:param testsuites:         List of test suites to initialize the test summary with.
+		:param keyValuePairs:      Mapping of key-value pairs to initialize the test summary with.
 		:param parent:             Reference to the parent test summary.
 		"""
 		super().__init__(
@@ -1199,6 +1260,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 			errorCount,
 			fatalCount,
 			testsuites,
+			keyValuePairs,
 			parent
 		)
 
