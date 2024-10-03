@@ -231,7 +231,7 @@ class Document(AlertLogGroup):
 		self._modelConversion = -1.0
 
 		if parse:
-			self.Read()
+			self.Analyze()
 			self.Parse()
 
 	@property
@@ -246,7 +246,7 @@ class Document(AlertLogGroup):
 	def ModelConversionDuration(self) -> timedelta:
 		return timedelta(seconds=self._modelConversion)
 
-	def Read(self) -> None:
+	def Analyze(self) -> None:
 		if not self._path.exists():
 			raise OSVVMException(f"OSVVM AlertLog YAML file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
@@ -327,7 +327,7 @@ class Document(AlertLogGroup):
 	def Parse(self) -> None:
 		if self._yamlDocument is None:
 			ex = OSVVMException(f"OSVVM AlertLog YAML file '{self._path}' needs to be read and analyzed by a YAML parser.")
-			ex.add_note(f"Call 'Document.Read()' or create document using 'Document(path, parse=True)'.")
+			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, parse=True)'.")
 			raise ex
 
 		startConversion = perf_counter_ns()

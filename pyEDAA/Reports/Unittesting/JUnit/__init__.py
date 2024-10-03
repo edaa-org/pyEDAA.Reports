@@ -30,7 +30,65 @@
 # ==================================================================================================================== #
 #
 """
-Reader for JUnit unit testing summary files in XML format.
+The pyEDAA.Reports.Unittesting.JUnit package implements a hierarchy of test entities for the JUnit unit testing summary
+file format (XML format). This test entity hierarchy is not derived from :class:`pyEDAA.Reports.Unittesting`, because it
+doesn't match the unified data model. Nonetheless, both data models can be converted to each other. In addition, derived
+data models are provided for the many dialects of that XML file format. See the list modules in this package for the
+implemented dialects.
+
+The test entity hierarchy consists of test cases, test classes, test suites and a test summary. Test cases are the leaf
+elements in the hierarchy and represent an individual test run. Next, test classes group test cases, because the
+original Ant + JUnit format groups test cases (Java methods) in a Java class. Next, test suites are used to group
+multiple test classes. Finally, the root element is a test summary. When such a summary is stored in a file format like
+Ant + JUnit4 XML, a file format specific document is derived from a summary class.
+
+**Data Model**
+
+.. mermaid::
+
+	 graph TD;
+		 doc[Document]
+		 sum[Summary]
+		 ts1[Testsuite]
+		 ts11[Testsuite]
+		 ts2[Testsuite]
+
+		 tc111[Testclass]
+		 tc112[Testclass]
+		 tc23[Testclass]
+
+		 tc1111[Testcase]
+		 tc1112[Testcase]
+		 tc1113[Testcase]
+		 tc1121[Testcase]
+		 tc1122[Testcase]
+		 tc231[Testcase]
+		 tc232[Testcase]
+		 tc233[Testcase]
+
+		 doc:::root -.-> sum:::summary
+		 sum --> ts1:::suite
+		 sum ---> ts2:::suite
+		 ts1 --> ts11:::suite
+
+		 ts11 --> tc111:::cls
+		 ts11 --> tc112:::cls
+		 ts2  --> tc23:::cls
+
+		 tc111 --> tc1111:::case
+		 tc111 --> tc1112:::case
+		 tc111 --> tc1113:::case
+		 tc112 --> tc1121:::case
+		 tc112 --> tc1122:::case
+		 tc23 --> tc231:::case
+		 tc23 --> tc232:::case
+		 tc23 --> tc233:::case
+
+		 classDef root fill:#4dc3ff
+		 classDef summary fill:#80d4ff
+		 classDef suite fill:#b3e6ff
+		 classDef cls fill:#ff9966
+		 classDef case fill:#eeccff
 """
 from datetime        import datetime, timedelta
 from enum            import Flag
@@ -39,8 +97,8 @@ from sys             import version_info
 from time            import perf_counter_ns
 from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
-from lxml.etree                 import XMLParser, parse, XMLSchema, XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
-from lxml.etree                 import ElementTree, Element, SubElement, tostring
+from lxml.etree                 import XMLParser, parse, XMLSchema, ElementTree, Element, SubElement, tostring
+from lxml.etree                 import XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
 from pyTooling.Common           import getFullyQualifiedName, getResourceFile
 from pyTooling.Decorators       import export, readonly
 from pyTooling.Exceptions       import ToolingException
@@ -48,16 +106,15 @@ from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmetho
 from pyTooling.Tree             import Node
 
 from pyEDAA.Reports             import Resources
-from pyEDAA.Reports.Unittesting import UnittestException, DuplicateTestsuiteException, DuplicateTestcaseException, \
-	TestsuiteKind
-from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, IterationScheme
+from pyEDAA.Reports.Unittesting import UnittestException, AlreadyInHierarchyException, DuplicateTestsuiteException, DuplicateTestcaseException
+from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, TestsuiteKind, IterationScheme
 from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
 from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut_Testcase
 
 
 @export
 class JUnitException:
-	"""An exception mixin for JUnit format specific exceptions."""
+	"""An exception-mixin for JUnit format specific exceptions."""
 
 
 @export
@@ -66,19 +123,49 @@ class UnittestException(UnittestException, JUnitException):
 
 
 @export
+class AlreadyInHierarchyException(AlreadyInHierarchyException, JUnitException):
+	"""
+	A unit test exception raised if the element is already part of a hierarchy.
+
+	This exception is caused by an inconsistent data model. Elements added to the hierarchy should be part of the same
+	hierarchy should occur only once in the hierarchy.
+
+	.. hint::
+
+	   This is usually caused by a non-None parent reference.
+	"""
+
+
+@export
 class DuplicateTestsuiteException(DuplicateTestsuiteException, JUnitException):
-	pass
+	"""
+	A unit test exception raised on duplicate test suites (by name).
+
+	This exception is raised, if a child test suite with same name already exist in the test suite.
+
+	.. hint::
+
+	   Test suite names need to be unique per parent element (test suite or test summary).
+	"""
 
 
 @export
 class DuplicateTestcaseException(DuplicateTestcaseException, JUnitException):
-	pass
+	"""
+	A unit test exception raised on duplicate test cases (by name).
+
+	This exception is raised, if a child test case with same name already exist in the test suite.
+
+	.. hint::
+
+	   Test case names need to be unique per parent element (test suite).
+	"""
 
 
 @export
 class JUnitReaderMode(Flag):
-	Default = 0
-	DecoupleTestsuiteHierarchyAndTestcaseClassName = 1
+	Default = 0                                         #: Default behavior
+	DecoupleTestsuiteHierarchyAndTestcaseClassName = 1  #: Undocumented
 
 
 TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
@@ -88,10 +175,30 @@ TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
 
 @export
 class Base(metaclass=ExtendedType, slots=True):
+	"""
+	Base-class for all test entities (test cases, test classes, test suites, ...).
+
+	It provides a reference to the parent test entity, so bidirectional referencing can be used in the test entity
+	hierarchy.
+
+	Every test entity has a name to identity it. It's also used in the parent's child element dictionaries to identify the
+	child. |br|
+	E.g. it's used as a test case name in the dictionary of test cases in a test class.
+	"""
+
 	_parent:         Nullable["Testsuite"]
 	_name:           str
 
 	def __init__(self, name: str, parent: Nullable["Testsuite"] = None):
+		"""
+		Initializes the fields of the base-class.
+
+		:param name:        Name of the test entity.
+		:param parent:      Reference to the parent test entity.
+		:raises ValueError: If parameter 'name' is None.
+		:raises TypeError:  If parameter 'name' is not a string.
+		:raises ValueError: If parameter 'name' is empty.
+		"""
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
@@ -99,33 +206,78 @@ class Base(metaclass=ExtendedType, slots=True):
 			if version_info >= (3, 11):  # pragma: no cover
 				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
-
-		# TODO: check parameter parent
+		elif name.strip() == "":
+			raise ValueError(f"Parameter 'name' is empty.")
 
 		self._parent = parent
 		self._name = name
 
 	@readonly
 	def Parent(self) -> Nullable["Testsuite"]:
+		"""
+		Read-only property returning the reference to the parent test entity.
+
+		:return: Reference to the parent entity.
+		"""
 		return self._parent
 
 	# QUESTION: allow Parent as setter?
 
 	@readonly
 	def Name(self) -> str:
+		"""
+		Read-only property returning the test entity's name.
+
+		:return:
+		"""
 		return self._name
 
 
 @export
 class BaseWithProperties(Base):
+	"""
+	Base-class for all test entities supporting properties (test cases, test suites, ...).
+
+	Every test entity has fields for the test duration and number of executed assertions.
+
+	Every test entity offers an internal dictionary for properties.
+	"""
+
 	_duration:       Nullable[timedelta]
 	_assertionCount: Nullable[int]
 	_properties:     Dict[str, Any]
 
-	def __init__(self, name: str, duration: Nullable[timedelta] = None, assertionCount: Nullable[int] = None, parent: Nullable["Testsuite"] = None):
+	def __init__(
+		self,
+		name: str,
+		duration: Nullable[timedelta] = None,
+		assertionCount: Nullable[int] = None,
+		parent: Nullable["Testsuite"] = None
+	):
+		"""
+		Initializes the fields of the base-class.
+
+		:param name:           Name of the test entity.
+		:param duration:       Duration of the entity's execution.
+		:param assertionCount: Number of assertions within the test.
+		:param parent:         Reference to the parent test entity.
+		:raises TypeError:     If parameter 'duration' is not a timedelta.
+		:raises TypeError:     If parameter 'assertionCount' is not an integer.
+		"""
 		super().__init__(name, parent)
 
-		# TODO: check parameter duration
+		if duration is not None and not isinstance(duration, timedelta):
+			ex = TypeError(f"Parameter 'duration' is not of type 'timedelta'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(duration)}'.")
+			raise ex
+
+		if assertionCount is not None and not isinstance(assertionCount, int):
+			ex = TypeError(f"Parameter 'assertionCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
+			raise ex
+
 		self._duration = duration
 		self._assertionCount = assertionCount
 
@@ -133,35 +285,107 @@ class BaseWithProperties(Base):
 
 	@readonly
 	def Duration(self) -> timedelta:
+		"""
+		Read-only property returning the duration of a test entity run.
+
+		.. note::
+
+		   The JUnit format doesn't distinguish setup, run and teardown durations.
+
+		:return: Duration of the entity's execution.
+		"""
 		return self._duration
 
 	@readonly
 	@abstractmethod
 	def AssertionCount(self) -> int:
-		pass
+		"""
+		Read-only property returning the number of assertions (checks) in a test case.
+
+		.. note::
+
+		   The JUnit format doesn't distinguish passed and failed assertions.
+
+		:return: Number of assertions.
+		"""
 
 	def __len__(self) -> int:
+		"""
+		Returns the number of annotated properties.
+
+		Syntax: :pycode:`length = len(obj)`
+
+		:return: Number of annotated properties.
+		"""
 		return len(self._properties)
 
-	def __getitem__(self, key: str) -> Any:
-		return self._properties[key]
+	def __getitem__(self, name: str) -> Any:
+		"""
+		Access a property by name.
 
-	def __setitem__(self, key: str, value: Any) -> None:
-		self._properties[key] = value
+		Syntax: :pycode:`value = obj[name]`
 
-	def __delitem__(self, key: str) -> None:
-		del self._properties[key]
+		:param name: Name if the property.
+		:return:     Value of the accessed property.
+		"""
+		return self._properties[name]
 
-	def __contains__(self, key: str) -> bool:
-		return key in self._properties
+	def __setitem__(self, name: str, value: Any) -> None:
+		"""
+		Set the value of a property by name.
+
+		If the property doesn't exist yet, it's created.
+
+		Syntax: :pycode:`obj[name] = value`
+
+		:param name:  Name of the property.
+		:param value: Value of the property.
+		"""
+		self._properties[name] = value
+
+	def __delitem__(self, name: str) -> None:
+		"""
+		Delete a property by name.
+
+		Syntax: :pycode:`del obj[name]`
+
+		:param name: Name if the property.
+		"""
+		del self._properties[name]
+
+	def __contains__(self, name: str) -> bool:
+		"""
+		Returns True, if a property was annotated by this name.
+
+		Syntax: :pycode:`name in obj`
+
+		:param name: Name of the property.
+		:return:     True, if the property was annotated.
+		"""
+		return name in self._properties
 
 	def __iter__(self) -> Generator[Tuple[str, Any], None, None]:
+		"""
+		Iterate all annotated properties.
+
+		Syntax: :pycode:`for name, value in obj:`
+
+		:return: A generator of property tuples (name, value).
+		"""
 		yield from self._properties.items()
 
 
 @export
 class Testcase(BaseWithProperties):
-	_classname:      str
+	"""
+	A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
+
+	Test cases are grouped by test classes in the test entity hierarchy. These are again grouped by test suites. The root
+	of the hierarchy is a test summary.
+
+	Every test case has an overall status like unknown, skipped, failed or passed.
+	"""
+
 	_status:         TestcaseStatus
 
 	def __init__(
@@ -172,6 +396,17 @@ class Testcase(BaseWithProperties):
 		assertionCount: Nullable[int] = None,
 		parent: Nullable["Testclass"] = None
 	):
+		"""
+		Initializes the fields of a test case.
+
+		:param name:           Name of the test entity.
+		:param duration:       Duration of the entity's execution.
+		:param status:         Status of the test case.
+		:param assertionCount: Number of assertions within the test.
+		:param parent:         Reference to the parent test class.
+		:raises TypeError:     If parameter 'parent' is not a Testsuite.
+		:raises ValueError:    If parameter 'assertionCount' is not consistent.
+		"""
 		if parent is not None:
 			if not isinstance(parent, Testclass):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testclass'.")
@@ -183,20 +418,51 @@ class Testcase(BaseWithProperties):
 
 		super().__init__(name, duration, assertionCount, parent)
 
+		if not isinstance(status, TestcaseStatus):
+			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
+			raise ex
+
 		self._status = status
 
 	@readonly
 	def Classname(self) -> str:
+		"""
+		Read-only property returning the class name of the test case.
+
+		:return: The test case's class name.
+
+		.. note::
+
+		   In the JUnit format, a test case is uniquely identified by a tuple of class name and test case name. This
+		   structure has been decomposed by this data model into 2 leaf-levels in the test entity hierarchy. Thus, the class
+		   name is represented by its own level and instances of test classes.
+		"""
 		if self._parent is None:
 			raise UnittestException("Standalone Testcase instance is not linked to a Testclass.")
 		return self._parent._name
 
 	@readonly
 	def Status(self) -> TestcaseStatus:
+		"""
+		Read-only property returning the status of the test case.
+
+		:return: The test case's status.
+		"""
 		return self._status
 
 	@readonly
 	def AssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of assertions (checks) in a test case.
+
+		.. note::
+
+		   The JUnit format doesn't distinguish passed and failed assertions.
+
+		:return: Number of assertions.
+		"""
 		if self._assertionCount is None:
 			return 0
 		return self._assertionCount
@@ -258,6 +524,14 @@ class Testcase(BaseWithProperties):
 
 @export
 class TestsuiteBase(BaseWithProperties):
+	"""
+	Base-class for all test suites and for test summaries.
+
+	A test suite is a mid-level grouping element in the test entity hierarchy, whereas the test summary is the root
+	element in that hierarchy. While a test suite groups test classes, a test summary can only group test suites. Thus, a
+	test summary contains no test classes and test cases.
+	"""
+
 	_startTime: Nullable[datetime]
 	_status:    TestsuiteStatus
 
@@ -275,6 +549,25 @@ class TestsuiteBase(BaseWithProperties):
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		parent: Nullable["Testsuite"] = None
 	):
+		"""
+		Initializes the based-class fields of a test suite or test summary.
+
+		:param name:       Name of the test entity.
+		:param startTime:  Time when the test entity was started.
+		:param duration:   Duration of the entity's execution.
+		:param status:     Overall status of the test entity.
+		:param parent:     Reference to the parent test entity.
+		:raises TypeError: If parameter 'parent' is not a TestsuiteBase.
+		"""
+		if parent is not None:
+			if not isinstance(parent, TestsuiteBase):
+				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
+
+			parent._testsuites[name] = self
+
 		super().__init__(name, duration, None, parent)
 
 		self._startTime = startTime
@@ -343,6 +636,12 @@ class TestsuiteBase(BaseWithProperties):
 
 @export
 class Testclass(Base):
+	"""
+	A test class is a low-level element in the test entity hierarchy representing a group of tests.
+
+	Test classes contain test cases and are grouped by a test suites.
+	"""
+
 	_testcases: Dict[str, "Testcase"]
 
 	def __init__(
@@ -351,12 +650,21 @@ class Testclass(Base):
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
+		"""
+		Initializes the fields of the test class.
+
+		:param classname:   Classname of the test entity.
+		:param parent:      Reference to the parent test suite.
+		:raises ValueError: If parameter 'classname' is None.
+		:raises TypeError:  If parameter 'classname' is not a string.
+		:raises ValueError: If parameter 'classname' is empty.
+		"""
 		if parent is not None:
-			# if not isinstance(parent, Testsuite):
-			# 	raise TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
-			# 	if version_info >= (3, 11):  # pragma: no cover
-			#	ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
-			#	raise ex
+			if not isinstance(parent, Testsuite):
+				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
 
 			parent._testclasses[classname] = self
 
@@ -366,7 +674,7 @@ class Testclass(Base):
 		if testcases is not None:
 			for testcase in testcases:
 				if testcase._parent is not None:
-					raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyException(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 				if testcase._name in self._testcases:
 					raise DuplicateTestcaseException(f"Class already contains a testcase with same name '{testcase._name}'.")
@@ -376,14 +684,29 @@ class Testclass(Base):
 
 	@readonly
 	def Classname(self) -> str:
+		"""
+		Read-only property returning the name of the test class.
+
+		:return: The test class' name.
+		"""
 		return self._name
 
 	@readonly
 	def Testcases(self) -> Dict[str, "Testcase"]:
+		"""
+		Read-only property returning a reference to the internal dictionary of test cases.
+
+		:return: Reference to the dictionary of test cases.
+		"""
 		return self._testcases
 
 	@readonly
 	def TestcaseCount(self) -> int:
+		"""
+		Read-only property returning the number of all test cases in the test entity hierarchy.
+
+		:return: Number of test cases.
+		"""
 		return len(self._testcases)
 
 	@readonly
@@ -432,6 +755,12 @@ class Testclass(Base):
 
 @export
 class Testsuite(TestsuiteBase):
+	"""
+	A testsuite is a mid-level element in the test entity hierarchy representing a logical group of tests.
+
+	Test suites contain test classes and are grouped by a test summary, which is the root of the hierarchy.
+	"""
+
 	_hostname:    str
 	_testclasses: Dict[str, "Testclass"]
 
@@ -445,6 +774,19 @@ class Testsuite(TestsuiteBase):
 		testclasses: Nullable[Iterable["Testclass"]] = None,
 		parent: Nullable["TestsuiteSummary"] = None
 	):
+		"""
+		Initializes the fields of a test suite.
+
+		:param name:               Name of the test suite.
+		:param startTime:          Time when the test suite was started.
+		:param duration:           duration of the entity's execution.
+		:param status:             Overall status of the test suite.
+		:param parent:             Reference to the parent test summary.
+		:raises TypeError:         If parameter 'testcases' is not iterable.
+		:raises TypeError:         If element in parameter 'testcases' is not a Testcase.
+		:raises AlreadyInHierarchyException: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseException:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
+		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
@@ -569,6 +911,14 @@ class Testsuite(TestsuiteBase):
 		return tests, skipped, errored, failed, passed
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
+		"""
+		Iterate the test suite and its child elements according to the iteration scheme.
+
+		If no scheme is given, use the default scheme.
+
+		:param scheme: Scheme how to iterate the test suite and its child elements.
+		:returns:      A generator for iterating the results filtered and in the order defined by the iteration scheme.
+		"""
 		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
 
 		if IterationScheme.PreOrder in scheme:
@@ -579,8 +929,8 @@ class Testsuite(TestsuiteBase):
 				for testcase in self._testclasses.values():
 					yield testcase
 
-		for testsuite in self._testsuites.values():
-			yield from testsuite.Iterate(scheme | IterationScheme.IncludeSelf)
+		for testclass in self._testclasses.values():
+			yield from testclass.Iterate(scheme | IterationScheme.IncludeSelf)
 
 		if IterationScheme.PostOrder in scheme:
 			if IterationScheme.IncludeTestcases in scheme:
@@ -813,8 +1163,8 @@ class Document(TestsuiteSummary, ut_Document):
 		self._xmlDocument = None
 
 		if parse:
-			self.Read()
-			self.Parse()
+			self.Analyze()
+			self.Convert()
 
 	@classmethod
 	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary):
@@ -833,11 +1183,21 @@ class Document(TestsuiteSummary, ut_Document):
 
 		return doc
 
-	def Read(self) -> None:
-		xmlSchemaFile = "Generic-JUnit.xsd"
-		self._Read(xmlSchemaFile)
+	def Analyze(self) -> None:
+		"""
+		Analyze the XML file, parse the content into an XML data structure and validate the data structure using an XML
+		schema.
 
-	def _Read(self, xmlSchemaFile: str) -> None:
+		.. hint::
+
+		   The time spend for analysis will be made available via property :data:`AnalysisDuration`.
+
+		The used XML schema definition is generic to support "any" dialect.
+		"""
+		xmlSchemaFile = "Generic-JUnit.xsd"
+		self._Analyze(xmlSchemaFile)
+
+	def _Analyze(self, xmlSchemaFile: str) -> None:
 		if not self._path.exists():
 			raise UnittestException(f"JUnit XML file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
@@ -894,10 +1254,19 @@ class Document(TestsuiteSummary, ut_Document):
 		with path.open("wb") as file:
 			file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
 
-	def Parse(self) -> None:
+	def Convert(self) -> None:
+		"""
+		Convert the parsed and validated XML data structure into a JUnit test entity hierarchy.
+
+		.. hint::
+
+		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
+
+		:raises UnittestException: If XML was not read and parsed before.
+		"""
 		if self._xmlDocument is None:
 			ex = UnittestException(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'JUnitDocument.Read()' or create document using 'JUnitDocument(path, parse=True)'.")
+			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
 		startConversion = perf_counter_ns()

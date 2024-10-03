@@ -46,8 +46,8 @@ the unified data model.
 
             :ref:`UNITTEST/DataModel/Testcase`
             ^^^
-            A :dfn:`test case` is the leaf-element in the test entity hierarchy and describes a single test run. Test
-            cases are grouped by test suites.
+            A :dfn:`test case` is the leaf-element in the test entity hierarchy and describes an individual test run.
+            Test cases are grouped by test suites.
 
          .. grid-item-card::
             :columns: 6
@@ -136,16 +136,16 @@ Common
          test suite's :data:`~pyEDAA.Reports.Unittesting.TestsuiteBase.Kind` field.
 
       :data:`~pyEDAA.Reports.Unittesting.Base.StartTime`
-         Every test entity has a time when it was started. In case of a test case, it's the time when a single test was
-         run. In case of a test suite, it's the time when the first test within this test suite was started. In case of a
-         test suite summary, it's the time when the whole regression test was started.
+         Every test entity has a time when it was started. In case of a test case, it's the time when an individual test
+         was run. In case of a test suite, it's the time when the first test within this test suite was started. In case
+         of a test suite summary, it's the time when the whole regression test was started.
 
          If the start time is unknown, set this value to ``None``.
 
       :data:`~pyEDAA.Reports.Unittesting.Base.SetupDuration`
-         Every test entity has a field to capture the setup duration of a test run. In case of a test case, it's the time
-         spend on setting up a single test run. In case of a test suite, it's the duration spend on preparing the group
-         of tests for the first test run.
+         Every test entity has a field to capture the setup duration of a test run. In case of a test case, it's the
+         time spend on setting up an individual test run. In case of a test suite, it's the duration spend on preparing
+         the group of tests for the first test run.
 
          If the setup duration can't be distinguished from the test's runtime, set this value to ``None``.
 
@@ -156,8 +156,8 @@ Common
 
       :data:`~pyEDAA.Reports.Unittesting.Base.TeardownDuration`
          Every test entity has a field to capture the teardown duration of a test run. In case of a test case, it's the
-         time spend on tearing down a single test run. In case of a test suite, it's the duration spend on finalizing the
-         group of tests after the last test run.
+         time spend on tearing down an individual test run. In case of a test suite, it's the duration spend on
+         finalizing the group of tests after the last test run.
 
          If the teardown duration can't be distinguished from the test's runtime, set this value to ``None``.
 
@@ -338,8 +338,8 @@ Testcase
    .. grid-item::
       :columns: 6
 
-      A :class:`~pyEDAA.Reports.Unittesting.Testcase` is the leaf-element in the test entity hierarchy and describes a
-      single test run. Test cases are grouped by test suites.
+      A :class:`~pyEDAA.Reports.Unittesting.Testcase` is the leaf-element in the test entity hierarchy and describes an
+      individual test run. Test cases are grouped by test suites.
 
       :data:`~pyEDAA.Reports.Unittesting.Testcase.Status`
          The overall status of a test case.
@@ -577,10 +577,10 @@ Document
       :data:`~pyEDAA.Reports.Unittesting.Document.ModelConversionDuration`
         tbd
 
-      :meth:`~pyEDAA.Reports.Unittesting.Document.Read`
+      :meth:`~pyEDAA.Reports.Unittesting.Document.Analyze`
         tbd
 
-      :meth:`~pyEDAA.Reports.Unittesting.Document.Parse`
+      :meth:`~pyEDAA.Reports.Unittesting.Document.Convert`
         tbd
 
    .. grid-item::
@@ -606,11 +606,11 @@ Document
               ...
 
             @abstractmethod
-            def Read(self) -> None:
+            def Analyze(self) -> None:
               ...
 
             @abstractmethod
-            def Parse(self):
+            def Convert(self):
               ...
 
 

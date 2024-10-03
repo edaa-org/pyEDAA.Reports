@@ -131,6 +131,12 @@ Report Formats
       * :ref:`Transform the hierarchy of reports <UNITTEST/Feature/Transform>`
       * :ref:`Write Ant JUnit reports (also to other dialects) <UNITTEST/Feature/Write>`
 
+      .. rubric:: Supported file formats
+
+      * :ref:`Ant JUnit4 XML format and various dialects <UNITTEST/FileFormats/AntJUnit4>`
+      * :ref:`JUnit5 XML format (Open Test Reporting) <UNITTEST/FileFormats/JUnit5>`
+      * :ref:`OSVVM YAML format <UNITTEST/FileFormats/OSVVM>`
+
       .. rubric:: Supported tools
 
       * :ref:`CTest <UNITTEST/Tool/CTest>`
@@ -139,12 +145,6 @@ Report Formats
       * :ref:`JUnit5 <UNITTEST/Tool/JUnit5>`
       * :ref:`OSVVM <UNITTEST/Tool/OSVVM>`
       * :ref:`pyTest <UNITTEST/Tool/pytest>`
-
-      .. rubric:: Supported file formats
-
-      * :ref:`Ant JUnit4 XML format and various dialects <UNITTEST/FileFormats/AntJUnit4>`
-      * :ref:`JUnit5 XML format (Open Test Reporting) <UNITTEST/FileFormats/JUnit5>`
-      * :ref:`OSVVM YAML format <UNITTEST/FileFormats/OSVVM>`
 
 
    .. #grid-item-card::

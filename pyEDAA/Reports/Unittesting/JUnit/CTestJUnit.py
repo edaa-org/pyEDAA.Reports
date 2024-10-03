@@ -108,28 +108,6 @@ class Testsuite(ju_Testsuite):
 
 		return tests, skipped, errored, failed, passed
 
-	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
-		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
-
-		if IterationScheme.PreOrder in scheme:
-			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
-				yield self
-
-			if IterationScheme.IncludeTestcases in scheme:
-				for testcase in self._testclasses.values():
-					yield testcase
-
-		for testsuite in self._testsuites.values():
-			yield from testsuite.Iterate(scheme | IterationScheme.IncludeSelf)
-
-		if IterationScheme.PostOrder in scheme:
-			if IterationScheme.IncludeTestcases in scheme:
-				for testcase in self._testclasses.values():
-					yield testcase
-
-			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
-				yield self
-
 	@classmethod
 	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
 		juTestsuite = cls(
@@ -250,9 +228,19 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 
 @export
 class Document(ju_Document):
-	_TESTCASE:          ClassVar[Type[Testcase]] =         Testcase
-	_TESTCLASS:         ClassVar[Type[Testclass]] =        Testclass
-	_TESTSUITE:         ClassVar[Type[Testsuite]] =        Testsuite
+	"""
+	A document reader and writer for the CTest JUnit XML file format.
+
+	This class reads, validates and transforms an XML file in the CTest JUnit format into a JUnit data model. It can then
+	be converted into a unified test entity data model.
+
+	In reverse, a JUnit data model instance with the specific CTest JUnit file format can be created from a unified test
+	entity data model. This data model can be written as XML into a file.
+	"""
+
+	_TESTCASE:  ClassVar[Type[Testcase]] =  Testcase
+	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass
+	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite
 
 	@classmethod
 	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary):
@@ -271,9 +259,19 @@ class Document(ju_Document):
 
 		return doc
 
-	def Read(self) -> None:
+	def Analyze(self) -> None:
+		"""
+		Analyze the XML file, parse the content into an XML data structure and validate the data structure using an XML
+		schema.
+
+		.. hint::
+
+		   The time spend for analysis will be made available via property :data:`AnalysisDuration`.
+
+		The used XML schema definition is specific to the CTest JUnit dialect.
+		"""
 		xmlSchemaFile = "CTest-JUnit.xsd"
-		self._Read(xmlSchemaFile)
+		self._Analyze(xmlSchemaFile)
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
 		if path is None:
@@ -294,10 +292,19 @@ class Document(ju_Document):
 		with path.open("wb") as file:
 			file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
 
-	def Parse(self) -> None:
+	def Convert(self) -> None:
+		"""
+		Convert the parsed and validated XML data structure into a JUnit test entity hierarchy.
+
+		.. hint::
+
+		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
+
+		:raises UnittestException: If XML was not read and parsed before.
+		"""
 		if self._xmlDocument is None:
 			ex = UnittestException(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'JUnitDocument.Read()' or create document using 'JUnitDocument(path, parse=True)'.")
+			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
 		startConversion = perf_counter_ns()

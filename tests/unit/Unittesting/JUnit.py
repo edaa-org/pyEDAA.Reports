@@ -436,10 +436,10 @@ class Document(py_TestCase):
 		self.assertLess(doc.AnalysisDuration, zeroTime)
 		self.assertLess(doc.ModelConversionDuration, zeroTime)
 
-		doc.Read()
+		doc.Analyze()
 		self.assertGreater(doc.AnalysisDuration, zeroTime)
 
-		doc.Parse()
+		doc.Convert()
 		self.assertGreater(doc.ModelConversionDuration, zeroTime)
 
 	def test_Create_WithParse(self) -> None:

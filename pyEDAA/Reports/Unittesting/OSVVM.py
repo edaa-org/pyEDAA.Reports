@@ -78,10 +78,10 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 		self._yamlDocument = None
 
 		if parse:
-			self.Read()
-			self.Parse()
+			self.Analyze()
+			self.Convert()
 
-	def Read(self) -> None:
+	def Analyze(self) -> None:
 		if not self._path.exists():
 			raise UnittestException(f"OSVVM YAML file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
@@ -209,10 +209,10 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 
 		return timedelta(seconds=value)
 
-	def Parse(self) -> None:
+	def Convert(self) -> None:
 		if self._yamlDocument is None:
 			ex = UnittestException(f"OSVVM YAML file '{self._path}' needs to be read and analyzed by a YAML parser.")
-			ex.add_note(f"Call 'Document.Read()' or create document using 'Document(path, parse=True)'.")
+			ex.add_note(f"Call 'Document.Analyze()' or create document using 'Document(path, parse=True)'.")
 			raise ex
 
 		startConversion = perf_counter_ns()

@@ -28,7 +28,50 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Abstraction of testsuites and testcases."""
+"""
+The pyEDAA.Reports.Unittesting package implements a hierarchy of test entities. These are test cases, test suites and a
+test summary provided as a class hierarchy. Test cases are the leaf elements in the hierarchy and abstract an
+individual test run. Test suites are used to group multiple test cases or other test suites. The root element is a test
+summary. When such a summary is stored in a file format like Ant + JUnit4 XML, a file format specific document is
+derived from a summary class.
+
+**Data Model**
+
+.. mermaid::
+
+	 graph TD;
+		 doc[Document]
+		 sum[Summary]
+		 ts1[Testsuite]
+		 ts2[Testsuite]
+		 ts21[Testsuite]
+		 tc11[Testcase]
+		 tc12[Testcase]
+		 tc13[Testcase]
+		 tc21[Testcase]
+		 tc22[Testcase]
+		 tc211[Testcase]
+		 tc212[Testcase]
+		 tc213[Testcase]
+
+		 doc:::root -.-> sum:::summary
+		 sum --> ts1:::suite
+		 sum --> ts2:::suite
+		 ts2 --> ts21:::suite
+		 ts1 --> tc11:::case
+		 ts1 --> tc12:::case
+		 ts1 --> tc13:::case
+		 ts2 --> tc21:::case
+		 ts2 --> tc22:::case
+		 ts21 --> tc211:::case
+		 ts21 --> tc212:::case
+		 ts21 --> tc213:::case
+
+		 classDef root fill:#4dc3ff
+		 classDef summary fill:#80d4ff
+		 classDef suite fill:#b3e6ff
+		 classDef case fill:#eeccff
+"""
 from datetime              import timedelta, datetime
 from enum                  import Flag, IntEnum
 from pathlib               import Path
@@ -49,13 +92,43 @@ class UnittestException(ReportException):
 
 
 @export
+class AlreadyInHierarchyException(UnittestException):
+	"""
+	A unit test exception raised if the element is already part of a hierarchy.
+
+	This exception is caused by an inconsistent data model. Elements added to the hierarchy should be part of the same
+	hierarchy should occur only once in the hierarchy.
+
+	.. hint::
+
+	   This is usually caused by a non-None parent reference.
+	"""
+
+
+@export
 class DuplicateTestsuiteException(UnittestException):
-	"""A unit test exception raised on duplicate test suites."""
+	"""
+	A unit test exception raised on duplicate test suites (by name).
+
+	This exception is raised, if a child test suite with same name already exist in the test suite.
+
+	.. hint::
+
+	   Test suite names need to be unique per parent element (test suite or test summary).
+	"""
 
 
 @export
 class DuplicateTestcaseException(UnittestException):
-	"""A unit test exception raised on duplicate test cases."""
+	"""
+	A unit test exception raised on duplicate test cases (by name).
+
+	This exception is raised, if a child test case with same name already exist in the test suite.
+
+	.. hint::
+
+	   Test case names need to be unique per parent element (test suite).
+	"""
 
 
 @export
@@ -107,17 +180,6 @@ class TestcaseStatus(Flag):
 
 
 @export
-class TestsuiteKind(IntEnum):
-	"""Enumeration describing the kind of test suite."""
-	Root = 0
-	Logical = 1
-	Namespace = 2
-	Package = 3
-	Module = 4
-	Class = 5
-
-
-@export
 class TestsuiteStatus(Flag):
 	"""A flag enumeration describing the status of a test suite."""
 	Unknown =    0
@@ -144,19 +206,37 @@ class TestsuiteStatus(Flag):
 
 
 @export
+class TestsuiteKind(IntEnum):
+	"""Enumeration describing the kind of test suite."""
+	Root = 0       #: Root element of the hierarchy.
+	Logical = 1    #: Represents a logical unit.
+	Namespace = 2  #: Represents a namespace.
+	Package = 3    #: Represents a package.
+	Module = 4     #: Represents a module.
+	Class = 5      #: Represents a class.
+
+
+@export
 class IterationScheme(Flag):
-	"""A flag enumeration for selecting the test suite iteration scheme."""
-	Unknown =           0
-	IncludeSelf =       1
-	IncludeTestsuites = 2
-	IncludeTestcases =  4
+	"""
+	A flag enumeration for selecting the test suite iteration scheme.
 
-	PreOrder =         16
-	PostOrder =        32
+	When a test entity hierarchy is (recursively) iterated, this iteration scheme describes how to iterate the hierarchy
+	and what elements to return as a result.
+	"""
+	Unknown =           0    #: Neutral element.
+	IncludeSelf =       1    #: Also include the element itself.
+	IncludeTestsuites = 2    #: Include test suites into the result.
+	IncludeTestcases =  4    #: Include test cases into the result.
 
-	Default =          IncludeTestsuites | IncludeTestcases | PreOrder
-	TestsuiteDefault = IncludeTestsuites | PreOrder
-	TestcaseDefault =  IncludeTestcases  | PreOrder
+	Recursive =         8    #: Iterate recursively.
+
+	PreOrder =         16    #: Iterate in pre-order (top-down: current node, then child element left-to-right).
+	PostOrder =        32    #: Iterate in pre-order (bottom-up: child element left-to-right, then current node).
+
+	Default =          IncludeTestsuites | Recursive | IncludeTestcases | PreOrder  #: Recursively iterate all test entities in pre-order.
+	TestsuiteDefault = IncludeTestsuites | Recursive | PreOrder                     #: Recursively iterate only test suites in pre-order.
+	TestcaseDefault =  IncludeTestcases  | Recursive | PreOrder                     #: Recursively iterate only test cases in pre-order.
 
 
 TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
@@ -173,19 +253,20 @@ class Base(metaclass=ExtendedType, slots=True):
 	hierarchy.
 
 	Every test entity has a name to identity it. It's also used in the parent's child element dictionaries to identify the
-	child. E.g. it's used as a test case name in the dictionary of test cases in a test suite.
+	child. |br|
+	E.g. it's used as a test case name in the dictionary of test cases in a test suite.
 
 	Every test entity has fields for time tracking. If known, a start time and a test duration can be set. For more
-	details, a setup duration and teardown duration can be added. All durations are summed in a total duration field.
+	details, a setup duration and teardown duration can be added. All durations are summed up in a total duration field.
 
 	As tests can have warnings and errors or even fail, these messages are counted and aggregated in the test entity
 	hierarchy.
 
-	Every test entity offers an internal dictionary for annotations. This feature is for example used by Ant + JUnit4's
-	XML property fields.
+	Every test entity offers an internal dictionary for annotations. |br|
+	This feature is for example used by Ant + JUnit4's XML property fields.
 	"""
 
-	_parent: Nullable["Testsuite"]
+	_parent: Nullable["TestsuiteBase"]
 	_name:   str
 
 	_startTime:        Nullable[datetime]
@@ -212,7 +293,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		errorCount: int = 0,
 		fatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable["Testsuite"] = None
+		parent: Nullable["TestsuiteBase"] = None
 	):
 		"""
 		Initializes the fields of the base-class.
@@ -222,7 +303,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		:param setupDuration:      Duration it took to set up the entity.
 		:param testDuration:       Duration of the entity's test run.
 		:param teardownDuration:   Duration it took to tear down the entity.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
+		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown).
 		:param warningCount:       Count of encountered warnings.
 		:param errorCount:         Count of encountered errors.
 		:param fatalCount:         Count of encountered fatal errors.
@@ -232,7 +313,15 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises ValueError:        If parameter 'name' is None.
 		:raises TypeError:         If parameter 'name' is not a string.
 		:raises ValueError:        If parameter 'name' is empty.
-		:raises UnittestException: If parameter 'totalDuration' is not consistent.
+		:raises TypeError:         If parameter 'testDuration' is not a timedelta.
+		:raises TypeError:         If parameter 'setupDuration' is not a timedelta.
+		:raises TypeError:         If parameter 'teardownDuration' is not a timedelta.
+		:raises TypeError:         If parameter 'totalDuration' is not a timedelta.
+		:raises TypeError:         If parameter 'warningCount' is not an integer.
+		:raises TypeError:         If parameter 'errorCount' is not an integer.
+		:raises TypeError:         If parameter 'fatalCount' is not an integer.
+		:raises TypeError:         If parameter 'keyValuePairs' is not a Mapping.
+		:raises ValueError:        If parameter 'totalDuration' is not consistent.
 		"""
 
 		if parent is not None and not isinstance(parent, TestsuiteBase):
@@ -283,13 +372,13 @@ class Base(metaclass=ExtendedType, slots=True):
 				if teardownDuration is not None:
 					if totalDuration is not None:
 						if totalDuration < (setupDuration + testDuration + teardownDuration):
-							raise UnittestException(f"Parameter 'totalDuration' can not be less than the sum of setup, test and teardown durations.")
+							raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of setup, test and teardown durations.")
 					else:  # no total
 						totalDuration = setupDuration + testDuration + teardownDuration
 				# no teardown
 				elif totalDuration is not None:
 					if totalDuration < (setupDuration + testDuration):
-						raise UnittestException(f"Parameter 'totalDuration' can not be less than the sum of setup and test durations.")
+						raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of setup and test durations.")
 				# no teardown, no total
 				else:
 					totalDuration = setupDuration + testDuration
@@ -297,13 +386,13 @@ class Base(metaclass=ExtendedType, slots=True):
 			elif teardownDuration is not None:
 				if totalDuration is not None:
 					if totalDuration < (testDuration + teardownDuration):
-						raise UnittestException(f"Parameter 'totalDuration' can not be less than the sum of test and teardown durations.")
+						raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of test and teardown durations.")
 				else:  # no setup, no total
 					totalDuration = testDuration + teardownDuration
 			# no setup, no teardown
 			elif totalDuration is not None:
 				if totalDuration < testDuration:
-					raise UnittestException(f"Parameter 'totalDuration' can not be less than test durations.")
+					raise ValueError(f"Parameter 'totalDuration' can not be less than test durations.")
 			else:  # no setup, no teardown, no total
 				totalDuration = testDuration
 		# no test
@@ -352,7 +441,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 	# QUESTION: allow Parent as setter?
 	@readonly
-	def Parent(self) -> Nullable["Testsuite"]:
+	def Parent(self) -> Nullable["TestsuiteBase"]:
 		"""
 		Read-only property returning the reference to the parent test entity.
 
@@ -486,7 +575,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Returns True, if a key-value pairs was annotated by this key.
 
-		:param key: Name if the key-value pair.
+		:param key: Name of the key-value pair.
 		:return:    True, if the pair was annotated.
 		"""
 		return key in self._dict
@@ -495,7 +584,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Iterate all annotated key-value pairs.
 
-		:return: A generator of key-value pair tuples.
+		:return: A generator of key-value pair tuples (key, value).
 		"""
 		yield from self._dict.items()
 
@@ -517,7 +606,7 @@ class Base(metaclass=ExtendedType, slots=True):
 @export
 class Testcase(Base):
 	"""
-	A testcase is leaf-entity in the test entity hierarchy representing an individual test run.
+	A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
 
 	Test cases are grouped by test suites in the test entity hierarchy. The root of the hierarchy is a test summary.
 
@@ -568,6 +657,8 @@ class Testcase(Base):
 		:param fatalCount:           Count of encountered fatal errors.
 		:param keyValuePairs:        Mapping of key-value pairs to initialize the test case.
 		:param parent:               Reference to the parent test suite.
+		:raises TypeError:           If parameter 'parent' is not a Testsuite.
+		:raises ValueError:          If parameter 'assertionCount' is not consistent.
 		"""
 
 		if parent is not None:
@@ -593,7 +684,31 @@ class Testcase(Base):
 			parent
 		)
 
+		if not isinstance(status, TestcaseStatus):
+			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
+			raise ex
+
 		self._status = status
+
+		if assertionCount is not None and not isinstance(assertionCount, int):
+			ex = TypeError(f"Parameter 'assertionCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
+			raise ex
+
+		if failedAssertionCount is not None and not isinstance(failedAssertionCount, int):
+			ex = TypeError(f"Parameter 'failedAssertionCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(failedAssertionCount)}'.")
+			raise ex
+
+		if passedAssertionCount is not None and not isinstance(passedAssertionCount, int):
+			ex = TypeError(f"Parameter 'passedAssertionCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(passedAssertionCount)}'.")
+			raise ex
 
 		self._assertionCount = assertionCount
 		if assertionCount is not None:
@@ -781,6 +896,11 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		:param testsuites:         List of test suites to initialize the test entity with.
 		:param keyValuePairs:      Mapping of key-value pairs to initialize the test entity with.
 		:param parent:             Reference to the parent test entity.
+		:raises TypeError:         If parameter 'parent' is not a TestsuiteBase.
+		:raises TypeError:         If parameter 'testsuites' is not iterable.
+		:raises TypeError:         If element in parameter 'testsuites' is not a Testsuite.
+		:raises AlreadyInHierarchyException: If a test suite in parameter 'testsuites' is already part of a test entity hierarchy.
+		:raises DuplicateTestsuiteException: If a test suite in parameter 'testsuites' is already listed (by name) in the list of test suites.
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
@@ -810,9 +930,21 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 		self._testsuites = {}
 		if testsuites is not None:
+			if not isinstance(testsuites, Iterable):
+				ex = TypeError(f"Parameter 'testsuites' is not iterable.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
+				raise ex
+
 			for testsuite in testsuites:
+				if not isinstance(testsuite, Testsuite):
+					ex = TypeError(f"Element of parameter 'testsuites' is not of type 'Testsuite'.")
+					if version_info >= (3, 11):  # pragma: no cover
+						ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
+					raise ex
+
 				if testsuite._parent is not None:
-					raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyException(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 				if testsuite._name in self._testsuites:
 					raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
@@ -832,35 +964,81 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 	@readonly
 	def Kind(self) -> TestsuiteKind:
+		"""
+		Read-only property returning the kind of the test suite.
+
+		Test suites are used to group test cases. This grouping can be due to language/framework specifics like tests
+		grouped by a module file or namespace. Others might be just logically grouped without any relation to a programming
+		language construct.
+
+		Test summaries always return kind ``Root``.
+
+		:return: Kind of the test suite.
+		"""
 		return self._kind
 
 	@readonly
 	def Status(self) -> TestsuiteStatus:
+		"""
+		Read-only property returning the aggregated overall status of the test suite.
+
+		:return: Overall status of the test suite.
+		"""
 		return self._status
 
 	@readonly
 	def Testsuites(self) -> Dict[str, TestsuiteType]:
+		"""
+		Read-only property returning a reference to the internal dictionary of test suites.
+
+		:return: Reference to the dictionary of test suite.
+		"""
 		return self._testsuites
 
 	@readonly
 	def TestsuiteCount(self) -> int:
+		"""
+		Read-only property returning the number of all test suites in the test suite hierarchy.
+
+		:return: Number of test suites.
+		"""
 		return 1 + sum(testsuite.TestsuiteCount for testsuite in self._testsuites.values())
 
 	@readonly
 	def TestcaseCount(self) -> int:
+		"""
+		Read-only property returning the number of all test cases in the test entity hierarchy.
+
+		:return: Number of test cases.
+		"""
 		return sum(testsuite.TestcaseCount for testsuite in self._testsuites.values())
 
 	@readonly
 	def AssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of all assertions in all test cases in the test entity hierarchy.
+
+		:return: Number of assertions in all test cases.
+		"""
 		return sum(ts.AssertionCount for ts in self._testsuites.values())
 
 	@readonly
 	def FailedAssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of all failed assertions in all test cases in the test entity hierarchy.
+
+		:return: Number of failed assertions in all test cases.
+		"""
 		raise NotImplementedError()
 		# return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
 
 	@readonly
 	def PassedAssertionCount(self) -> int:
+		"""
+		Read-only property returning the number of all passed assertions in all test cases in the test entity hierarchy.
+
+		:return: Number of passed assertions in all test cases.
+		"""
 		raise NotImplementedError()
 		# return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
 
@@ -870,30 +1048,65 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 	@readonly
 	def Inconsistent(self) -> int:
+		"""
+		Read-only property returning the number of inconsistent tests in the test suite hierarchy.
+
+		:return: Number of inconsistent tests.
+		"""
 		return self._inconsistent
 
 	@readonly
 	def Excluded(self) -> int:
+		"""
+		Read-only property returning the number of excluded tests in the test suite hierarchy.
+
+		:return: Number of excluded tests.
+		"""
 		return self._excluded
 
 	@readonly
 	def Skipped(self) -> int:
+		"""
+		Read-only property returning the number of skipped tests in the test suite hierarchy.
+
+		:return: Number of skipped tests.
+		"""
 		return self._skipped
 
 	@readonly
 	def Errored(self) -> int:
+		"""
+		Read-only property returning the number of tests with errors in the test suite hierarchy.
+
+		:return: Number of errored tests.
+		"""
 		return self._errored
 
 	@readonly
 	def Weak(self) -> int:
+		"""
+		Read-only property returning the number of weak tests in the test suite hierarchy.
+
+		:return: Number of weak tests.
+		"""
 		return self._weak
 
 	@readonly
 	def Failed(self) -> int:
+		"""
+		Read-only property returning the number of failed tests in the test suite hierarchy.
+
+		:return: Number of failed tests.
+		"""
 		return self._failed
 
 	@readonly
 	def Passed(self) -> int:
+		"""
+		Read-only property returning the number of passed tests in the test suite hierarchy.
+
+		:return: Number of passed tests.
+		"""
 		return self._passed
 
 	@readonly
@@ -911,7 +1124,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		raise NotImplementedError()
 		# return self._fatalCount
 
-	def Aggregate(self) -> TestsuiteAggregateReturnType:
+	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
 		tests = 0
 		inconsistent = 0
 		excluded = 0
@@ -928,7 +1141,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		totalDuration = timedelta()
 
 		for testsuite in self._testsuites.values():
-			t, i, ex, s, e, w, f, p, wc, ec, fc, td = testsuite.Aggregate()
+			t, i, ex, s, e, w, f, p, wc, ec, fc, td = testsuite.Aggregate(strict)
 			tests += t
 			inconsistent += i
 			excluded += ex
@@ -947,8 +1160,25 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
 
 	def AddTestsuite(self, testsuite: TestsuiteType) -> None:
+		"""
+		Add a test suite to the list of test suites.
+
+		:param testsuite:   The test suite to add.
+		:raises ValueError: If parameter 'testsuite' is None.
+		:raises TypeError:  If parameter 'testsuite' is not a Testsuite.
+		:raises AlreadyInHierarchyException: If parameter 'testsuite' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseException:  If parameter 'testsuite' is already listed (by name) in the list of test suites.
+		"""
+		if testsuite is None:
+			raise ValueError("Parameter 'testsuite' is None.")
+		elif not isinstance(testsuite, Testsuite):
+			ex = TypeError(f"Parameter 'testsuite' is not of type 'Testsuite'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
+			raise ex
+
 		if testsuite._parent is not None:
-			raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
+			raise AlreadyInHierarchyException(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 		if testsuite._name in self._testsuites:
 			raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
@@ -957,22 +1187,23 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		self._testsuites[testsuite._name] = testsuite
 
 	def AddTestsuites(self, testsuites: Iterable[TestsuiteType]) -> None:
+		"""
+		Add a list of test suites to the list of test suites.
+
+		:param testsuites:  List of test suites to add.
+		:raises ValueError: If parameter 'testsuites' is None.
+		:raises TypeError:  If parameter 'testsuites' is not iterable.
+		"""
+		if testsuites is None:
+			raise ValueError("Parameter 'testsuites' is None.")
+		elif not isinstance(testsuites, Iterable):
+			ex = TypeError(f"Parameter 'testsuites' is not iterable.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
+			raise ex
+
 		for testsuite in testsuites:
 			self.AddTestsuite(testsuite)
-
-	def AddTestcase(self, testcase: "Testcase") -> None:
-		if testcase._parent is not None:
-			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
-
-		if testcase._name in self._testcases:
-			raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
-
-		testcase._parent = self
-		self._testcases[testcase._name] = testcase
-
-	def AddTestcases(self, testcases: Iterable["Testcase"]) -> None:
-		for testcase in testcases:
-			self.AddTestcase(testcase)
 
 	@abstractmethod
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
@@ -1008,10 +1239,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 @export
 class Testsuite(TestsuiteBase[TestsuiteType]):
 	"""
-	A testsuite is an intermediate element in the test entity hierarchy representing a group of tests.
+	A testsuite is a mid-level element in the test entity hierarchy representing a group of tests.
 
-	Test suites contain test cases and optionally other test suites. Test suites can be grouped by test suites. The root
-	of hierarchy is a test summary.
+	Test suites contain test cases and optionally other test suites. Test suites can be grouped by test suites to form a
+	hierarchy of test entities. The root of the hierarchy is a test summary.
 	"""
 
 	_testcases: Dict[str, "Testcase"]
@@ -1052,6 +1283,10 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		:param testcases:          List of test cases to initialize the test suite with.
 		:param keyValuePairs:      Mapping of key-value pairs to initialize the test suite with.
 		:param parent:             Reference to the parent test entity.
+		:raises TypeError:         If parameter 'testcases' is not iterable.
+		:raises TypeError:         If element in parameter 'testcases' is not a Testcase.
+		:raises AlreadyInHierarchyException: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseException:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
 		"""
 		super().__init__(
 			name,
@@ -1074,9 +1309,21 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 		self._testcases = {}
 		if testcases is not None:
+			if not isinstance(testcases, Iterable):
+				ex = TypeError(f"Parameter 'testcases' is not iterable.")
+				if version_info >= (3, 11):  # pragma: no cover
+					ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
+				raise ex
+
 			for testcase in testcases:
+				if not isinstance(testcase, Testcase):
+					ex = TypeError(f"Element of parameter 'testcases' is not of type 'Testcase'.")
+					if version_info >= (3, 11):  # pragma: no cover
+						ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
+					raise ex
+
 				if testcase._parent is not None:
-					raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyException(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 				if testcase._name in self._testcases:
 					raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
@@ -1086,10 +1333,20 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 	@readonly
 	def Testcases(self) -> Dict[str, "Testcase"]:
+		"""
+		Read-only property returning a reference to the internal dictionary of test cases.
+
+		:return: Reference to the dictionary of test cases.
+		"""
 		return self._testcases
 
 	@readonly
 	def TestcaseCount(self) -> int:
+		"""
+		Read-only property returning the number of all test cases in the test entity hierarchy.
+
+		:return: Number of test cases.
+		"""
 		return super().TestcaseCount + len(self._testcases)
 
 	@readonly
@@ -1175,6 +1432,52 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			self._status = TestsuiteStatus.Unknown
 
 		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
+
+	def AddTestcase(self, testcase: "Testcase") -> None:
+		"""
+		Add a test case to the list of test cases.
+
+		:param testcase:    The test case to add.
+		:raises ValueError: If parameter 'testcase' is None.
+		:raises TypeError:  If parameter 'testcase' is not a Testcase.
+		:raises AlreadyInHierarchyException: If parameter 'testcase' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseException:  If parameter 'testcase' is already listed (by name) in the list of test cases.
+		"""
+		if testcase is None:
+			raise ValueError("Parameter 'testcase' is None.")
+		elif not isinstance(testcase, Testcase):
+			ex = TypeError(f"Parameter 'testcase' is not of type 'Testcase'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
+			raise ex
+
+		if testcase._parent is not None:
+			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+
+		if testcase._name in self._testcases:
+			raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
+
+		testcase._parent = self
+		self._testcases[testcase._name] = testcase
+
+	def AddTestcases(self, testcases: Iterable["Testcase"]) -> None:
+		"""
+		Add a list of test cases to the list of test cases.
+
+		:param testcases:   List of test cases to add.
+		:raises ValueError: If parameter 'testcases' is None.
+		:raises TypeError:  If parameter 'testcases' is not iterable.
+		"""
+		if testcases is None:
+			raise ValueError("Parameter 'testcases' is None.")
+		elif not isinstance(testcases, Iterable):
+			ex = TypeError(f"Parameter 'testcases' is not iterable.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
+			raise ex
+
+		for testcase in testcases:
+			self.AddTestcase(testcase)
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
@@ -1335,27 +1638,52 @@ class Document(metaclass=ExtendedType, mixin=True):
 
 	@readonly
 	def Path(self) -> Path:
+		"""
+		Read-only property returning the path to the file of this document.
+
+		:return: The document's path to the file.
+		"""
 		return self._path
 
 	@readonly
 	def AnalysisDuration(self) -> timedelta:
+		"""
+		Read-only property returning analysis duration.
+
+		.. note::
+
+		   This includes usually the duration to validate and parse the file format, but it excludes the time to convert the
+		   content to the test entity hierarchy.
+
+		:return: Duration to analyze the document.
+		"""
 		return timedelta(seconds=self._analysisDuration)
 
 	@readonly
 	def ModelConversionDuration(self) -> timedelta:
+		"""
+		Read-only property returning conversion duration.
+
+		.. note::
+
+		   This includes usually the duration to convert the document's content to the test entity hierarchy. It might also
+		   include the duration to (re-)aggregate all states and statistics in the hierarchy.
+
+		:return: Duration to convert the document.
+		"""
 		return timedelta(seconds=self._modelConversion)
 
 	@abstractmethod
-	def Read(self) -> None:
-		pass
+	def Analyze(self) -> None:
+		"""Analyze and validate the document's content."""
 
 	# @abstractmethod
 	# def Write(self, path: Nullable[Path] = None, overwrite: bool = False):
 	# 	pass
 
 	@abstractmethod
-	def Parse(self):
-		pass
+	def Convert(self):
+		"""Convert the document's content to an instance of the test entity hierarchy."""
 
 
 @export
