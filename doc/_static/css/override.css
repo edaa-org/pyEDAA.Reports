@@ -35,7 +35,10 @@ footer p {
 
 section > p,
 .section p,
-.simple li {
+.simple li,
+.admonition > p,
+.sd-col > p,
+dl > dd > p {
 	text-align: justify
 }
 
@@ -100,6 +103,10 @@ section > p,
 /* Sphinx Design */
 .sd-tab-set {
 	margin: 0
+}
+
+.sd-row>* {
+	margin-top: 1.5em;
 }
 
 .sd-tab-set > label {

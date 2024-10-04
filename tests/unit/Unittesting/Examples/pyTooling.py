@@ -65,7 +65,7 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			print(f"  Parsing {file}")
-			junitDocument = Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName)
+			junitDocument = Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName)
 			junitDocuments.append(junitDocument)
 
 			# print(f"{junitDocument.Path}")
@@ -150,7 +150,7 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			print(f"  Parsing {file}")
-			junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 

@@ -156,7 +156,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 
@@ -178,7 +178,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 
@@ -200,7 +200,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 
@@ -222,7 +222,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 
@@ -244,7 +244,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 

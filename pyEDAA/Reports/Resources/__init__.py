@@ -5,7 +5,7 @@ This package is a resource package containing various data files.
 
 * :file:`Ant-JUnit.xsd`
 * :file:`CTest-JUnit.xsd`
-* :file:`Generic-JUnit.xsd`
+* :file:`Any-JUnit.xsd`
 * :file:`GoogleTest-JUnit.xsd`
 * :file:`PyTest-JUnit.xsd`
 """

@@ -42,29 +42,52 @@ from pyEDAA.Reports.Unittesting import TestsuiteSummary as ut_TestsuiteSummary, 
 from pyEDAA.Reports.Unittesting import Testcase as ut_Testcase
 
 
+from typing import Callable
+
+@export
+def InheritDocumentation(baseClass: type, merge: bool = False) -> Callable[[type], type]:
+	"""xxx"""
+	def decorator(c: type) -> type:
+		"""yyy"""
+		if merge:
+			if c.__doc__ is None:
+				c.__doc__ = baseClass.__doc__
+			elif baseClass.__doc__ is not None:
+				c.__doc__ = baseClass.__doc__ + "\n\n" + c.__doc__
+		else:
+			c.__doc__ = baseClass.__doc__
+		return c
+
+	return decorator
+
+
 @export
 class OsvvmException:
 	pass
 
 
 @export
+@InheritDocumentation(UnittestException)
 class UnittestException(UnittestException, OsvvmException):
-	pass
+	"""@InheritDocumentation(UnittestException)"""
 
 
 @export
+@InheritDocumentation(ut_Testcase)
 class Testcase(ut_Testcase):
-	pass
+	"""@InheritDocumentation(ut_Testcase)"""
 
 
 @export
+@InheritDocumentation(ut_Testsuite)
 class Testsuite(ut_Testsuite):
-	pass
+	"""@InheritDocumentation(ut_Testsuite)"""
 
 
 @export
+@InheritDocumentation(ut_TestsuiteSummary)
 class TestsuiteSummary(ut_TestsuiteSummary):
-	pass
+	"""@InheritDocumentation(ut_TestsuiteSummary)"""
 
 
 @export
@@ -82,6 +105,13 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 			self.Convert()
 
 	def Analyze(self) -> None:
+		"""
+		Analyze the YAML file, parse the content into an YAML data structure.
+
+		.. hint::
+
+		   The time spend for analysis will be made available via property :data:`AnalysisDuration`..
+		"""
 		if not self._path.exists():
 			raise UnittestException(f"OSVVM YAML file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
@@ -210,6 +240,15 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 		return timedelta(seconds=value)
 
 	def Convert(self) -> None:
+		"""
+		Convert the parsed YAML data structure into a test entity hierarchy.
+
+		.. hint::
+
+		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
+
+		:raises UnittestException: If XML was not read and parsed before.
+		"""
 		if self._yamlDocument is None:
 			ex = UnittestException(f"OSVVM YAML file '{self._path}' needs to be read and analyzed by a YAML parser.")
 			ex.add_note(f"Call 'Document.Analyze()' or create document using 'Document(path, parse=True)'.")

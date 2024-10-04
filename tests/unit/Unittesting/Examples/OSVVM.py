@@ -47,7 +47,7 @@ class JUnitGeneratedByOSVVM(TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/OsvvmLibraries/OSVVMLibraries_OsvvmLibraries.xml")
-		doc = JUnitDocument(junitExampleFile, parse=True)
+		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
 
 		self.assertEqual(0, doc.TestsuiteCount)
 		self.assertEqual(0, doc.TestcaseCount)
@@ -64,7 +64,7 @@ class JUnitGeneratedByOSVVM(TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/OsvvmLibraries/OSVVMLibraries_RunAllTests.xml")
-		doc = JUnitDocument(junitExampleFile, parse=True)
+		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
 
 		self.assertGreaterEqual(doc.TestsuiteCount, 14)
 		self.assertGreaterEqual(doc.TestcaseCount, 285)

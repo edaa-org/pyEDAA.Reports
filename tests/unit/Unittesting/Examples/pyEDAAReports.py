@@ -50,7 +50,7 @@ class CppGoogleTest(TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Cpp-GoogleTest/gtest.xml")
-		doc = GTestDocument(junitExampleFile, parse=True)
+		doc = GTestDocument(junitExampleFile, analyzeAndConvert=True)
 
 		self.assertEqual(1, doc.TestsuiteCount)
 		self.assertEqual(3, doc.TestcaseCount)
@@ -69,7 +69,7 @@ class CppGoogleTestCTest(TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Cpp-GoogleTest/ctest.xml")
-		doc = CTestDocument(junitExampleFile, parse=True)
+		doc = CTestDocument(junitExampleFile, analyzeAndConvert=True)
 
 		# self.assertEqual(1, doc.TestsuiteCount)
 		# self.assertEqual(3, doc.TestcaseCount)
@@ -88,7 +88,7 @@ class JavaAntJUnit4(TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Ant-JUnit4/TEST-my.AllTests.xml")
-		doc = JUnit4Document(junitExampleFile, parse=True)
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
 
 		# self.assertEqual(1, doc.TestsuiteCount)
 		# self.assertEqual(3, doc.TestcaseCount)
@@ -107,7 +107,7 @@ class PythonPyTest(TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Python-pytest/TestReportSummary.xml")
-		doc = PyTestDocument(junitExampleFile, parse=True)
+		doc = PyTestDocument(junitExampleFile, analyzeAndConvert=True)
 
 		self.assertEqual(1, doc.TestsuiteCount)
 		self.assertEqual(8, doc.TestcaseCount)

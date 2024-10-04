@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite errors="0" failures="1" hostname="fv-az1200-912" name="my.pack.MyClassTest" skipped="0" tests="1" time="0.002" timestamp="2024-05-12T19:00:51">
+<testsuite errors="0" failures="1" hostname="fv-az1153-136" name="my.pack.MyClassTest" skipped="0" tests="1" time="0.003" timestamp="2024-10-06T11:28:52">
   <properties>
     <property name="awt.toolkit" value="sun.awt.X11.XToolkit" />
     <property name="ant.library.dir" value="/usr/share/ant/lib" />
@@ -8,14 +8,14 @@
     <property name="ant.project.name" value="MyProject" />
     <property name="sun.cpu.isalist" value="" />
     <property name="sun.jnu.encoding" value="UTF-8" />
-    <property name="java.class.path" value="/usr/share/ant/lib/ant-launcher.jar:/usr/share/ant/lib/ant-apache-oro.jar:/usr/share/ant/lib/ant-javamail.jar:/usr/share/ant/lib/ant-apache-bcel.jar:/usr/share/ant/lib/ant-antlr.jar:/usr/share/ant/lib/ant-jsch.jar:/usr/share/ant/lib/ant-swing.jar:/usr/share/ant/lib/ant-xz.jar:/usr/share/ant/lib/ant-jdepend.jar:/usr/share/ant/lib/ant.jar:/usr/share/ant/lib/ant-jmf.jar:/usr/share/ant/lib/ant-apache-bsf.jar:/usr/share/ant/lib/ant-testutil.jar:/usr/share/ant/lib/ant-apache-regexp.jar:/usr/share/ant/lib/ant-apache-resolver.jar:/usr/share/ant/lib/ant-apache-log4j.jar:/usr/share/ant/lib/ant-junit.jar:/usr/share/ant/lib/ant-launcher.jar:/usr/share/ant/lib/ant-apache-xalan2.jar:/usr/share/ant/lib/ant-junit4.jar:/usr/share/ant/lib/ant-commons-net.jar:/usr/share/ant/lib/ant-commons-logging.jar" />
+    <property name="java.class.path" value="/usr/share/ant/lib/ant-launcher.jar:/usr/share/ant/lib/ant-junit.jar:/usr/share/ant/lib/ant-apache-bsf.jar:/usr/share/ant/lib/ant-swing.jar:/usr/share/ant/lib/ant-antlr.jar:/usr/share/ant/lib/ant-commons-logging.jar:/usr/share/ant/lib/ant-jdepend.jar:/usr/share/ant/lib/ant-junit4.jar:/usr/share/ant/lib/ant-apache-oro.jar:/usr/share/ant/lib/ant-jsch.jar:/usr/share/ant/lib/ant-commons-net.jar:/usr/share/ant/lib/ant-apache-xalan2.jar:/usr/share/ant/lib/ant-javamail.jar:/usr/share/ant/lib/ant-apache-bcel.jar:/usr/share/ant/lib/ant-jmf.jar:/usr/share/ant/lib/ant.jar:/usr/share/ant/lib/ant-launcher.jar:/usr/share/ant/lib/ant-apache-log4j.jar:/usr/share/ant/lib/ant-xz.jar:/usr/share/ant/lib/ant-apache-resolver.jar:/usr/share/ant/lib/ant-testutil.jar:/usr/share/ant/lib/ant-apache-regexp.jar" />
     <property name="java.vm.vendor" value="Eclipse Adoptium" />
     <property name="sun.arch.data.model" value="64" />
     <property name="java.vendor.url" value="https://adoptium.net/" />
     <property name="user.timezone" value="" />
     <property name="os.name" value="Linux" />
     <property name="java.vm.specification.version" value="11" />
-    <property name="DSTAMP" value="20240512" />
+    <property name="DSTAMP" value="20241006" />
     <property name="sun.java.launcher" value="SUN_STANDARD" />
     <property name="sun.boot.library.path" value="/usr/lib/jvm/temurin-11-jdk-amd64/lib" />
     <property name="sun.java.command" value="org.apache.tools.ant.launch.Launcher -cp  -noinput -buildfile build-github.xml junit" />
@@ -25,7 +25,7 @@
     <property name="user.home" value="/home/runner" />
     <property name="user.language" value="en" />
     <property name="java.specification.vendor" value="Oracle Corporation" />
-    <property name="java.version.date" value="2024-01-16" />
+    <property name="java.version.date" value="2024-07-16" />
     <property name="java.home" value="/usr/lib/jvm/temurin-11-jdk-amd64" />
     <property name="basedir" value="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Java/JUnit" />
     <property name="file.separator" value="/" />
@@ -36,25 +36,25 @@
     <property name="java.specification.name" value="Java Platform API Specification" />
     <property name="java.vm.specification.vendor" value="Oracle Corporation" />
     <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment" />
-    <property name="TSTAMP" value="1900" />
+    <property name="TSTAMP" value="1128" />
     <property name="ant.file.type.MyProject" value="file" />
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers" />
-    <property name="java.runtime.version" value="11.0.22+7" />
+    <property name="java.runtime.version" value="11.0.24+8" />
     <property name="user.name" value="runner" />
     <property name="ant.file" value="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Java/JUnit/build-github.xml" />
     <property name="path.separator" value=":" />
-    <property name="os.version" value="6.5.0-1018-azure" />
+    <property name="os.version" value="6.8.0-1014-azure" />
     <property name="java.runtime.name" value="OpenJDK Runtime Environment" />
     <property name="file.encoding" value="UTF-8" />
     <property name="ant.project.invoked-targets" value="junit" />
     <property name="java.vm.name" value="OpenJDK 64-Bit Server VM" />
-    <property name="java.vendor.version" value="Temurin-11.0.22+7" />
+    <property name="java.vendor.version" value="Temurin-11.0.24+8" />
     <property name="ant.core.lib" value="/usr/share/ant/lib/ant.jar" />
     <property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues" />
     <property name="java.io.tmpdir" value="/tmp" />
-    <property name="java.version" value="11.0.22" />
+    <property name="java.version" value="11.0.24" />
     <property name="src" value="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Java/JUnit/src" />
-    <property name="TODAY" value="May 12 2024" />
+    <property name="TODAY" value="October 6 2024" />
     <property name="user.dir" value="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Java/JUnit" />
     <property name="os.arch" value="amd64" />
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
@@ -66,13 +66,13 @@
     <property name="java.vendor" value="Eclipse Adoptium" />
     <property name="java.vm.info" value="mixed mode" />
     <property name="build" value="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Java/JUnit/build" />
-    <property name="java.vm.version" value="11.0.22+7" />
+    <property name="java.vm.version" value="11.0.24+8" />
     <property name="java.specification.maintenance.version" value="2" />
     <property name="sun.io.unicode.encoding" value="UnicodeLittle" />
     <property name="java.class.version" value="55.0" />
     <property name="ant.project.default-target" value="junit" />
   </properties>
-  <testcase classname="my.pack.MyClassTest" name="testReturnTrue" time="0.0">
+  <testcase classname="my.pack.MyClassTest" name="testReturnTrue" time="0.001">
     <failure type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError
 	at my.pack.MyClassTest.testReturnTrue(Unknown Source)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)

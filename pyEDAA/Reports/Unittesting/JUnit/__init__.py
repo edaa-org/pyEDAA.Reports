@@ -489,6 +489,12 @@ class Testcase(BaseWithProperties):
 
 	@classmethod
 	def FromTestcase(cls, testcase: ut_Testcase) -> "Testcase":
+		"""
+		Convert a test case of the unified test entity data model to the JUnit specific data model's test case object.
+
+		:param testcase: Test case from unified data model.
+		:return:         Test case from JUnit specific data model.
+		"""
 		return cls(
 			testcase._name,
 			duration=testcase._testDuration,
@@ -942,6 +948,12 @@ class Testsuite(TestsuiteBase):
 
 	@classmethod
 	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
+		"""
+		Convert a test suite of the unified test entity data model to the JUnit specific data model's test suite object.
+
+		:param testsuite: Test suite from unified data model.
+		:return:          Test suite from JUnit specific data model.
+		"""
 		juTestsuite = cls(
 			testsuite._name,
 			startTime=testsuite._startTime,
@@ -1100,6 +1112,14 @@ class TestsuiteSummary(TestsuiteBase):
 		return tests, skipped, errored, failed, passed
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[Testsuite, Testcase], None, None]:
+		"""
+		Iterate the test suite summary and its child elements according to the iteration scheme.
+
+		If no scheme is given, use the default scheme.
+
+		:param scheme: Scheme how to iterate the test suite summary and its child elements.
+		:returns:      A generator for iterating the results filtered and in the order defined by the iteration scheme.
+		"""
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
 			yield self
 
@@ -1111,6 +1131,12 @@ class TestsuiteSummary(TestsuiteBase):
 
 	@classmethod
 	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> "TestsuiteSummary":
+		"""
+		Convert a test suite summary of the unified test entity data model to the JUnit specific data model's test suite.
+
+		:param testsuiteSummary: Test suite summary from unified data model.
+		:return:                 Test suite summary from JUnit specific data model.
+		"""
 		return cls(
 			testsuiteSummary._name,
 			startTime=testsuiteSummary._startTime,
@@ -1120,6 +1146,13 @@ class TestsuiteSummary(TestsuiteBase):
 		)
 
 	def ToTestsuiteSummary(self) -> ut_TestsuiteSummary:
+		"""
+		Convert this test suite summary a new test suite summary of the unified data model.
+
+		All fields are copied to the new instance. Child elements like test suites are copied recursively.
+
+		:return: A test suite summary of the unified test entity data model.
+		"""
 		return ut_TestsuiteSummary(
 			self._name,
 			startTime=self._startTime,
@@ -1155,14 +1188,14 @@ class Document(TestsuiteSummary, ut_Document):
 	_readerMode:        JUnitReaderMode
 	_xmlDocument:       Nullable[_ElementTree]
 
-	def __init__(self, xmlReportFile: Path, parse: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
+	def __init__(self, xmlReportFile: Path, analyzeAndConvert: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
 		super().__init__("Unprocessed JUnit XML file")
 		ut_Document.__init__(self, xmlReportFile)
 
 		self._readerMode = readerMode
 		self._xmlDocument = None
 
-		if parse:
+		if analyzeAndConvert:
 			self.Analyze()
 			self.Convert()
 
@@ -1194,7 +1227,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		The used XML schema definition is generic to support "any" dialect.
 		"""
-		xmlSchemaFile = "Generic-JUnit.xsd"
+		xmlSchemaFile = "Any-JUnit.xsd"
 		self._Analyze(xmlSchemaFile)
 
 	def _Analyze(self, xmlSchemaFile: str) -> None:
@@ -1236,11 +1269,21 @@ class Document(TestsuiteSummary, ut_Document):
 		self._analysisDuration = (endAnalysis - startAnalysis) / 1e9
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
+		"""
+		Write the data model as XML into a file adhering to the Any JUnit dialect.
+
+		:param path:               Optional path to the XMl file, if internal path shouldn't be used.
+		:param overwrite:          If true, overwrite an existing file.
+		:param regenerate:         If true, regenerate the XML structure from data model.
+		:raises UnittestException: If the file cannot be overwritten.
+		:raises UnittestException: If the internal XML data structure wasn't generated.
+		:raises UnittestException: If the file cannot be opened or written.
+		"""
 		if path is None:
 			path = self._path
 
 		if not overwrite and path.exists():
-			raise UnittestException(f"JUnit XML file '{path}' can not be written.") \
+			raise UnittestException(f"JUnit XML file '{path}' can not be overwritten.") \
 				from FileExistsError(f"File '{path}' already exists.")
 
 		if regenerate:
@@ -1251,12 +1294,17 @@ class Document(TestsuiteSummary, ut_Document):
 			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
 			raise ex
 
-		with path.open("wb") as file:
-			file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
+		try:
+			with path.open("wb") as file:
+				file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
+		except Exception as ex:
+			raise UnittestException(f"JUnit XML file '{path}' can not be written.") from ex
 
 	def Convert(self) -> None:
 		"""
 		Convert the parsed and validated XML data structure into a JUnit test entity hierarchy.
+
+		This method converts the root element.
 
 		.. hint::
 
@@ -1272,19 +1320,19 @@ class Document(TestsuiteSummary, ut_Document):
 		startConversion = perf_counter_ns()
 		rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name = self._ParseName(rootElement, optional=True)
-		self._startTime = self._ParseTimestamp(rootElement, optional=True)
-		self._duration = self._ParseTime(rootElement, optional=True)
+		self._name = self._ConvertName(rootElement, optional=True)
+		self._startTime = self._ConvertTimestamp(rootElement, optional=True)
+		self._duration = self._ConvertTime(rootElement, optional=True)
 
 		if False:  # self._readerMode is JUnitReaderMode.
-			self._tests = self._ParseTests(testsuitesNode)
-			self._skipped = self._ParseSkipped(testsuitesNode)
-			self._errored = self._ParseErrors(testsuitesNode)
-			self._failed = self._ParseFailures(testsuitesNode)
-			self._assertionCount = self._ParseAssertions(testsuitesNode)
+			self._tests = self._ConvertTests(testsuitesNode)
+			self._skipped = self._ConvertSkipped(testsuitesNode)
+			self._errored = self._ConvertErrors(testsuitesNode)
+			self._failed = self._ConvertFailures(testsuitesNode)
+			self._assertionCount = self._ConvertAssertions(testsuitesNode)
 
 		for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
-			self._ParseTestsuite(self, rootNode)
+			self._ConvertTestsuite(self, rootNode)
 
 		if True:  # self._readerMode is JUnitReaderMode.
 			self.Aggregate()
@@ -1292,7 +1340,16 @@ class Document(TestsuiteSummary, ut_Document):
 		endConversation = perf_counter_ns()
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
-	def _ParseName(self, element: _Element, default: str = "root", optional: bool = True) -> str:
+	def _ConvertName(self, element: _Element, default: str = "root", optional: bool = True) -> str:
+		"""
+		Convert the ``name`` attribute from an XML element node to a string.
+
+		:param element:            The XML element node with a ``name`` attribute.
+		:param default:            The default value, if no ``name`` attribute was found.
+		:param optional:           If false, an exception is raised for the missing attribute.
+		:return:                   The ``name`` attribute's content if found, otherwise the given default value.
+		:raises UnittestException: If optional is false and no ``name`` attribute exists on the given element node.
+		"""
 		if "name" in element.attrib:
 			return element.attrib["name"]
 		elif not optional:
@@ -1300,7 +1357,15 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return default
 
-	def _ParseTimestamp(self, element: _Element, optional: bool = True) -> Nullable[datetime]:
+	def _ConvertTimestamp(self, element: _Element, optional: bool = True) -> Nullable[datetime]:
+		"""
+		Convert the ``timestamp`` attribute from an XML element node to a datetime.
+
+		:param element:            The XML element node with a ``timestamp`` attribute.
+		:param optional:           If false, an exception is raised for the missing attribute.
+		:return:                   The ``timestamp`` attribute's content if found, otherwise ``None``.
+		:raises UnittestException: If optional is false and no ``timestamp`` attribute exists on the given element node.
+		"""
 		if "timestamp" in element.attrib:
 			timestamp = element.attrib["timestamp"]
 			return datetime.fromisoformat(timestamp)
@@ -1309,7 +1374,15 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return None
 
-	def _ParseTime(self, element: _Element, optional: bool = True) -> Nullable[timedelta]:
+	def _ConvertTime(self, element: _Element, optional: bool = True) -> Nullable[timedelta]:
+		"""
+		Convert the ``time`` attribute from an XML element node to a timedelta.
+
+		:param element:            The XML element node with a ``time`` attribute.
+		:param optional:           If false, an exception is raised for the missing attribute.
+		:return:                   The ``time`` attribute's content if found, otherwise ``None``.
+		:raises UnittestException: If optional is false and no ``time`` attribute exists on the given element node.
+		"""
 		if "time" in element.attrib:
 			time = element.attrib["time"]
 			return timedelta(seconds=float(time))
@@ -1318,7 +1391,16 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return None
 
-	def _ParseHostname(self, element: _Element, default: str = "localhost", optional: bool = True) -> str:
+	def _ConvertHostname(self, element: _Element, default: str = "localhost", optional: bool = True) -> str:
+		"""
+		Convert the ``hostname`` attribute from an XML element node to a string.
+
+		:param element:            The XML element node with a ``hostname`` attribute.
+		:param default:            The default value, if no ``hostname`` attribute was found.
+		:param optional:           If false, an exception is raised for the missing attribute.
+		:return:                   The ``hostname`` attribute's content if found, otherwise the given default value.
+		:raises UnittestException: If optional is false and no ``hostname`` attribute exists on the given element node.
+		"""
 		if "hostname" in element.attrib:
 			return element.attrib["hostname"]
 		elif not optional:
@@ -1326,13 +1408,29 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return default
 
-	def _ParseClassname(self, element: _Element, optional: bool = True) -> str:
+	def _ConvertClassname(self, element: _Element) -> str:
+		"""
+		Convert the ``classname`` attribute from an XML element node to a string.
+
+		:param element:            The XML element node with a ``classname`` attribute.
+		:return:                   The ``classname`` attribute's content.
+		:raises UnittestException: If no ``classname`` attribute exists on the given element node.
+		"""
 		if "classname" in element.attrib:
 			return element.attrib["classname"]
-		elif not optional:
+		else:
 			raise UnittestException(f"Required parameter 'classname' not found in tag '{element.tag}'.")
 
-	def _ParseTests(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+	def _ConvertTests(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		"""
+		Convert the ``tests`` attribute from an XML element node to an integer.
+
+		:param element:            The XML element node with a ``tests`` attribute.
+		:param default:            The default value, if no ``tests`` attribute was found.
+		:param optional:           If false, an exception is raised for the missing attribute.
+		:return:                   The ``tests`` attribute's content if found, otherwise the given default value.
+		:raises UnittestException: If optional is false and no ``tests`` attribute exists on the given element node.
+		"""
 		if "tests" in element.attrib:
 			return int(element.attrib["tests"])
 		elif not optional:
@@ -1340,7 +1438,16 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return default
 
-	def _ParseSkipped(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+	def _ConvertSkipped(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		"""
+		Convert the ``skipped`` attribute from an XML element node to an integer.
+
+		:param element:            The XML element node with a ``skipped`` attribute.
+		:param default:            The default value, if no ``skipped`` attribute was found.
+		:param optional:           If false, an exception is raised for the missing attribute.
+		:return:                   The ``skipped`` attribute's content if found, otherwise the given default value.
+		:raises UnittestException: If optional is false and no ``skipped`` attribute exists on the given element node.
+		"""
 		if "skipped" in element.attrib:
 			return int(element.attrib["skipped"])
 		elif not optional:
@@ -1348,7 +1455,16 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return default
 
-	def _ParseErrors(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+	def _ConvertErrors(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		"""
+		Convert the ``errors`` attribute from an XML element node to an integer.
+
+		:param element:            The XML element node with a ``errors`` attribute.
+		:param default:            The default value, if no ``errors`` attribute was found.
+		:param optional:           If false, an exception is raised for the missing attribute.
+		:return:                   The ``errors`` attribute's content if found, otherwise the given default value.
+		:raises UnittestException: If optional is false and no ``errors`` attribute exists on the given element node.
+		"""
 		if "errors" in element.attrib:
 			return int(element.attrib["errors"])
 		elif not optional:
@@ -1356,7 +1472,16 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return default
 
-	def _ParseFailures(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+	def _ConvertFailures(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		"""
+		Convert the ``failures`` attribute from an XML element node to an integer.
+
+		:param element:            The XML element node with a ``failures`` attribute.
+		:param default:            The default value, if no ``failures`` attribute was found.
+		:param optional:           If false, an exception is raised for the missing attribute.
+		:return:                   The ``failures`` attribute's content if found, otherwise the given default value.
+		:raises UnittestException: If optional is false and no ``failures`` attribute exists on the given element node.
+		"""
 		if "failures" in element.attrib:
 			return int(element.attrib["failures"])
 		elif not optional:
@@ -1364,7 +1489,16 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return default
 
-	def _ParseAssertions(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+	def _ConvertAssertions(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
+		"""
+		Convert the ``assertions`` attribute from an XML element node to an integer.
+
+		:param element:            The XML element node with a ``assertions`` attribute.
+		:param default:            The default value, if no ``assertions`` attribute was found.
+		:param optional:           If false, an exception is raised for the missing attribute.
+		:return:                   The ``assertions`` attribute's content if found, otherwise the given default value.
+		:raises UnittestException: If optional is false and no ``assertions`` attribute exists on the given element node.
+		"""
 		if "assertions" in element.attrib:
 			return int(element.attrib["assertions"])
 		elif not optional:
@@ -1372,44 +1506,60 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return default
 
-	def _ParseTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
+	def _ConvertTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
+		"""
+		Convert the XML data structure of a ``<testsuite>`` to a test suite.
+
+		This method uses private helper methods provided by the base-class.
+
+		:param parent:         The test suite summary as a parent element in the test entity hierarchy.
+		:param testsuitesNode: The current XML element node representing a test suite.
+		"""
 		newTestsuite = self._TESTSUITE(
-			self._ParseName(testsuitesNode, optional=False),
-			self._ParseHostname(testsuitesNode, optional=True),
-			self._ParseTimestamp(testsuitesNode, optional=True),
-			self._ParseTime(testsuitesNode, optional=True),
+			self._ConvertName(testsuitesNode, optional=False),
+			self._ConvertHostname(testsuitesNode, optional=True),
+			self._ConvertTimestamp(testsuitesNode, optional=True),
+			self._ConvertTime(testsuitesNode, optional=True),
 			parent=parent
 		)
 
 		if False:  # self._readerMode is JUnitReaderMode.
-			self._tests = self._ParseTests(testsuitesNode)
-			self._skipped = self._ParseSkipped(testsuitesNode)
-			self._errored = self._ParseErrors(testsuitesNode)
-			self._failed = self._ParseFailures(testsuitesNode)
-			self._assertionCount = self._ParseAssertions(testsuitesNode)
+			self._tests = self._ConvertTests(testsuitesNode)
+			self._skipped = self._ConvertSkipped(testsuitesNode)
+			self._errored = self._ConvertErrors(testsuitesNode)
+			self._failed = self._ConvertFailures(testsuitesNode)
+			self._assertionCount = self._ConvertAssertions(testsuitesNode)
 
-		self._ParseTestsuiteChildren(testsuitesNode, newTestsuite)
+		self._ConvertTestsuiteChildren(testsuitesNode, newTestsuite)
 
-	def _ParseTestsuiteChildren(self, testsuitesNode: _Element, newTestsuite: Testsuite) -> None:
+	def _ConvertTestsuiteChildren(self, testsuitesNode: _Element, newTestsuite: Testsuite) -> None:
 		for node in testsuitesNode.iterchildren():   # type: _Element
 			# if node.tag == "testsuite":
-			# 	self._ParseTestsuite(newTestsuite, node)
+			# 	self._ConvertTestsuite(newTestsuite, node)
 			# el
 			if node.tag == "testcase":
-				self._ParseTestcase(newTestsuite, node)
+				self._ConvertTestcase(newTestsuite, node)
 
-	def _ParseTestcase(self, parent: Testsuite, testcaseNode: _Element) -> None:
-		className = self._ParseClassname(testcaseNode, optional=False)
+	def _ConvertTestcase(self, parent: Testsuite, testcaseNode: _Element) -> None:
+		"""
+		Convert the XML data structure of a ``<testcase>`` to a test case.
+
+		This method uses private helper methods provided by the base-class.
+
+		:param parent:       The test suite as a parent element in the test entity hierarchy.
+		:param testcaseNode: The current XML element node representing a test case.
+		"""
+		className = self._ConvertClassname(testcaseNode)
 		testclass = self._FindOrCreateTestclass(parent, className)
 
 		newTestcase = self._TESTCASE(
-			self._ParseName(testcaseNode, optional=False),
-			self._ParseTime(testcaseNode, optional=False),
-			assertionCount=self._ParseAssertions(testcaseNode),
+			self._ConvertName(testcaseNode, optional=False),
+			self._ConvertTime(testcaseNode, optional=False),
+			assertionCount=self._ConvertAssertions(testcaseNode),
 			parent=testclass
 		)
 
-		self._ParseTestcaseChildren(testcaseNode, newTestcase)
+		self._ConvertTestcaseChildren(testcaseNode, newTestcase)
 
 	def _FindOrCreateTestclass(self, parent: Testsuite, className: str) -> Testclass:
 		if className in parent._testclasses:
@@ -1417,7 +1567,7 @@ class Document(TestsuiteSummary, ut_Document):
 		else:
 			return self._TESTCLASS(className, parent=parent)
 
-	def _ParseTestcaseChildren(self, testcaseNode: _Element, newTestcase: Testcase) -> None:
+	def _ConvertTestcaseChildren(self, testcaseNode: _Element, newTestcase: Testcase) -> None:
 		for node in testcaseNode.iterchildren():   # type: _Element
 			if isinstance(node, _Comment):
 				pass
@@ -1443,7 +1593,15 @@ class Document(TestsuiteSummary, ut_Document):
 			newTestcase._status = TestcaseStatus.Passed
 
 	def Generate(self, overwrite: bool = False) -> None:
-		if self._xmlDocument is not None:
+		"""
+		Generate the internal XML data structure from test suites and test cases.
+
+		This method generates the XML root element (``<testsuites>``) and recursively calls other generated methods.
+
+		:param overwrite:          Overwrite the internal XML data structure.
+		:raises UnittestException: If overwrite is false and the internal XML data structure is not empty.
+		"""
+		if not overwrite and self._xmlDocument is not None:
 			raise UnittestException(f"Internal XML document is populated with data.")
 
 		rootElement = Element("testsuites")
@@ -1464,7 +1622,16 @@ class Document(TestsuiteSummary, ut_Document):
 		for testsuite in self._testsuites.values():
 			self._GenerateTestsuite(testsuite, rootElement)
 
-	def _GenerateTestsuite(self, testsuite: Testsuite, parentElement: _Element):
+	def _GenerateTestsuite(self, testsuite: Testsuite, parentElement: _Element) -> None:
+		"""
+		Generate the internal XML data structure for a test suite.
+
+		This method generates the XML element (``<testsuite>``) and recursively calls other generated methods.
+
+		:param testsuite:     The test suite to convert to an XML data structures.
+		:param parentElement: The parent XML data structure element, this data structure part will be added to.
+		:return:
+		"""
 		testsuiteElement = SubElement(parentElement, "testsuite")
 		testsuiteElement.attrib["name"] = testsuite._name
 		if testsuite._startTime is not None:
@@ -1484,7 +1651,16 @@ class Document(TestsuiteSummary, ut_Document):
 			for tc in testclass._testcases.values():
 				self._GenerateTestcase(tc, testsuiteElement)
 
-	def _GenerateTestcase(self, testcase: Testcase, parentElement: _Element):
+	def _GenerateTestcase(self, testcase: Testcase, parentElement: _Element) -> None:
+		"""
+		Generate the internal XML data structure for a test case.
+
+		This method generates the XML element (``<testcase>``) and recursively calls other generated methods.
+
+		:param testcase:      The test case to convert to an XML data structures.
+		:param parentElement: The parent XML data structure element, this data structure part will be added to.
+		:return:
+		"""
 		testcaseElement = SubElement(parentElement, "testcase")
 		if testcase.Classname is not None:
 			testcaseElement.attrib["classname"] = testcase.Classname

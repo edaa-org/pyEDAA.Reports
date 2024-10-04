@@ -116,7 +116,7 @@
 
 	<xsd:element name="testsuite" type="testsuite">
 		<xsd:annotation>
-			<xsd:documentation xml:lang="en">Describes the overall result of all testcases in all testsuites.</xsd:documentation>
+			<xsd:documentation xml:lang="en">Describes the overall result of all testcases in a single testsuite.</xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
 </xsd:schema>

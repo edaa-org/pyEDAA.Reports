@@ -46,7 +46,7 @@ class PythonPyTest(TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
-		doc = PyTestDocument(junitExampleFile, parse=True)
+		doc = PyTestDocument(junitExampleFile, analyzeAndConvert=True)
 
 		self.assertEqual(1, doc.TestsuiteCount)
 		self.assertEqual(611, doc.TestcaseCount)
