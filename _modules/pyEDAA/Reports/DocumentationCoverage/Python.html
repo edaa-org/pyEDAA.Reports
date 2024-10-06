@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyEDAA.Reports.DocumentationCoverage.Python &mdash; pyEDAA.Reports 0.13.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=77553476" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-reports.e44b1595f1e09d5e109d001839ba3f42.css?v=0b41afa8" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/override.css?v=6943e0d8" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.svg"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=1019fba8"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+              <img src="../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.13
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="https://edaa-org.github.io/">Used as a layer of EDA² ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Installation.html">Installation/Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Dependency.html">Dependency</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Report Formats</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CodeCoverage/index.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../DocCoverage/index.html">Documentation Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Unittesting/index.html">Unittesting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Logging/index.html">EDA Tool Logs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References and Reports</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CommandLineInterface.html">Command Line Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pyEDAA.Reports/pyEDAA.Reports.html">Python Class Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/unittests.html">Unittest Summary Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/coverage/index.html">Code Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/doccoverage.html">Doc. Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/typing/index.html">Static Type Check Report ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../License.html">Apache License 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Doc-License.html">Creative Commons Attribution 4.0 International</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../py-modindex.html">Python Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../TODO.html">TODOs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Old Content</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/FunctionalCoverage.html">Functional coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/LineCoverage.html">Line coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/Resources.html">Synthesis and implementation results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/RichLogging.html">Semantic/rich logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/Tracking.html">Tracking requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/Frontends.html">Frontends</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyEDAA.Reports</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../DocumentationCoverage.html">pyEDAA.Reports.DocumentationCoverage</a></li>
+      <li class="breadcrumb-item active">pyEDAA.Reports.DocumentationCoverage.Python</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyEDAA.Reports.DocumentationCoverage.Python</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#              _____ ____    _        _      ____                       _                                              #</span>
+<span class="c1">#  _ __  _   _| ____|  _ \  / \      / \    |  _ \ ___ _ __   ___  _ __| |_ ___                                        #</span>
+<span class="c1"># | &#39;_ \| | | |  _| | | | |/ _ \    / _ \   | |_) / _ \ &#39;_ \ / _ \| &#39;__| __/ __|                                       #</span>
+<span class="c1"># | |_) | |_| | |___| |_| / ___ \  / ___ \ _|  _ &lt;  __/ |_) | (_) | |  | |_\__ \                                       #</span>
+<span class="c1"># | .__/ \__, |_____|____/_/   \_\/_/   \_(_)_| \_\___| .__/ \___/|_|   \__|___/                                       #</span>
+<span class="c1"># |_|    |___/                                        |_|                                                              #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Authors:                                                                                                             #</span>
+<span class="c1">#   Patrick Lehmann                                                                                                    #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># License:                                                                                                             #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Copyright 2024-2024 Electronic Design Automation Abstraction (EDA²)                                                  #</span>
+<span class="c1"># Copyright 2023-2023 Patrick Lehmann - Bötzingen, Germany                                                             #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                                      #</span>
+<span class="c1"># you may not use this file except in compliance with the License.                                                     #</span>
+<span class="c1"># You may obtain a copy of the License at                                                                              #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0                                                                         #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software                                                  #</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                                    #</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                             #</span>
+<span class="c1"># See the License for the specific language governing permissions and                                                  #</span>
+<span class="c1"># limitations under the License.                                                                                       #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># SPDX-License-Identifier: Apache-2.0                                                                                  #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">**Abstract code documentation coverage data model for Python code.**</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pathlib</span>                              <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span>                               <span class="kn">import</span> <span class="n">Optional</span> <span class="k">as</span> <span class="n">Nullable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">pyTooling.Decorators</span>                 <span class="kn">import</span> <span class="n">export</span><span class="p">,</span> <span class="n">readonly</span>
+<span class="kn">from</span> <span class="nn">pyTooling.MetaClasses</span>                <span class="kn">import</span> <span class="n">ExtendedType</span>
+
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.DocumentationCoverage</span> <span class="kn">import</span> <span class="n">Class</span><span class="p">,</span> <span class="n">Module</span><span class="p">,</span> <span class="n">Package</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">,</span> <span class="n">DocCoverageException</span>
+
+
+<div class="viewcode-block" id="Coverage">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.Coverage">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">Coverage</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ExtendedType</span><span class="p">,</span> <span class="n">mixin</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This base-class for :class:`ClassCoverage` and :class:`AggregatedCoverage` represents a basic set of documentation coverage metrics.</span>
+
+<span class="sd">	Besides the *total* number of coverable items, it distinguishes items as *excluded*, *ignored*, and *expected*. |br|</span>
+<span class="sd">	Expected items are further distinguished into *covered* and *uncovered* items. |br|</span>
+<span class="sd">	If no item is expected, then *coverage* is always 100 |%|.</span>
+
+<span class="sd">	All coverable items</span>
+<span class="sd">	  total = excluded + ignored + expected</span>
+
+<span class="sd">	All expected items</span>
+<span class="sd">	  expected = covered + uncovered</span>
+
+<span class="sd">	Coverage [0.00..1.00]</span>
+<span class="sd">	  coverage = covered / expected</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">_total</span><span class="p">:</span>     <span class="nb">int</span>
+	<span class="n">_excluded</span><span class="p">:</span>  <span class="nb">int</span>
+	<span class="n">_ignored</span><span class="p">:</span>   <span class="nb">int</span>
+	<span class="n">_expected</span><span class="p">:</span>  <span class="nb">int</span>
+	<span class="n">_covered</span><span class="p">:</span>   <span class="nb">int</span>
+	<span class="n">_uncovered</span><span class="p">:</span> <span class="nb">int</span>
+
+	<span class="n">_coverage</span><span class="p">:</span>  <span class="nb">float</span>
+
+<div class="viewcode-block" id="Coverage.__init__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.Coverage.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_total</span> <span class="o">=</span>     <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span> <span class="o">=</span>  <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span> <span class="o">=</span>   <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_expected</span> <span class="o">=</span>  <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_covered</span> <span class="o">=</span>   <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_uncovered</span> <span class="o">=</span> <span class="mi">0</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span></div>
+
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Total</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Excluded</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Ignored</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Expected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expected</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Covered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_covered</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Uncovered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uncovered</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span>
+
+	<span class="k">def</span> <span class="nf">CalculateCoverage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_uncovered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expected</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_covered</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expected</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_covered</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expected</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+	<span class="k">def</span> <span class="nf">_CountCoverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">CoverageState</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+		<span class="n">total</span> <span class="o">=</span>    <span class="mi">0</span>
+		<span class="n">excluded</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">ignored</span> <span class="o">=</span>  <span class="mi">0</span>
+		<span class="n">expected</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">covered</span> <span class="o">=</span>  <span class="mi">0</span>
+		<span class="k">for</span> <span class="n">coverageState</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">coverageState</span> <span class="ow">is</span> <span class="n">CoverageState</span><span class="o">.</span><span class="n">Unknown</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+			<span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+
+			<span class="k">if</span> <span class="n">CoverageState</span><span class="o">.</span><span class="n">Excluded</span> <span class="ow">in</span> <span class="n">coverageState</span><span class="p">:</span>
+				<span class="n">excluded</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">elif</span> <span class="n">CoverageState</span><span class="o">.</span><span class="n">Ignored</span> <span class="ow">in</span> <span class="n">coverageState</span><span class="p">:</span>
+				<span class="n">ignored</span> <span class="o">+=</span> <span class="mi">1</span>
+
+			<span class="n">expected</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">if</span> <span class="n">CoverageState</span><span class="o">.</span><span class="n">Covered</span> <span class="ow">in</span> <span class="n">coverageState</span><span class="p">:</span>
+				<span class="n">covered</span> <span class="o">+=</span> <span class="mi">1</span>
+
+		<span class="k">return</span> <span class="n">total</span><span class="p">,</span> <span class="n">excluded</span><span class="p">,</span> <span class="n">ignored</span><span class="p">,</span> <span class="n">expected</span><span class="p">,</span> <span class="n">covered</span></div>
+
+
+
+<div class="viewcode-block" id="AggregatedCoverage">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">AggregatedCoverage</span><span class="p">(</span><span class="n">Coverage</span><span class="p">,</span> <span class="n">mixin</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This base-class for :class:`ModuleCoverage` and :class:`PackageCoverage` represents an extended set of documentation coverage metrics, especially with aggregated metrics.</span>
+
+<span class="sd">	As inherited from :class:`~Coverage`, it provides the *total* number of coverable items, which are distinguished into</span>
+<span class="sd">	*excluded*, *ignored*, and *expected* items. |br|</span>
+<span class="sd">	Expected items are further distinguished into *covered* and *uncovered* items. |br|</span>
+<span class="sd">	If no item is expected, then *coverage* and *aggregated coverage* are always 100 |%|.</span>
+
+<span class="sd">	In addition, all previously mentioned metrics are collected as *aggregated...*, too. |br|</span>
+
+<span class="sd">	All coverable items</span>
+<span class="sd">	  total = excluded + ignored + expected</span>
+
+<span class="sd">	All expected items</span>
+<span class="sd">	  expected = covered + uncovered</span>
+
+<span class="sd">	Coverage [0.00..1.00]</span>
+<span class="sd">	  coverage = covered / expected</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">_file</span><span class="p">:</span>                <span class="n">Path</span>
+
+	<span class="n">_aggregatedTotal</span><span class="p">:</span>     <span class="nb">int</span>
+	<span class="n">_aggregatedExcluded</span><span class="p">:</span>  <span class="nb">int</span>
+	<span class="n">_aggregatedIgnored</span><span class="p">:</span>   <span class="nb">int</span>
+	<span class="n">_aggregatedExpected</span><span class="p">:</span>  <span class="nb">int</span>
+	<span class="n">_aggregatedCovered</span><span class="p">:</span>   <span class="nb">int</span>
+	<span class="n">_aggregatedUncovered</span><span class="p">:</span> <span class="nb">int</span>
+
+	<span class="n">_aggregatedCoverage</span><span class="p">:</span>  <span class="nb">float</span>
+
+<div class="viewcode-block" id="AggregatedCoverage.__init__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">file</span></div>
+
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">File</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AggregatedTotal</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedTotal</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AggregatedExcluded</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExcluded</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AggregatedIgnored</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedIgnored</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AggregatedExpected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AggregatedCovered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AggregatedUncovered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedUncovered</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">AggregatedCoverage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCoverage</span>
+
+	<span class="k">def</span> <span class="nf">Aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedUncovered</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCoverage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCoverage</span> <span class="o">=</span> <span class="mf">1.0</span></div>
+
+
+
+<div class="viewcode-block" id="ClassCoverage">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">ClassCoverage</span><span class="p">(</span><span class="n">Class</span><span class="p">,</span> <span class="n">Coverage</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This class represents the class documentation coverage for Python classes.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">_fields</span><span class="p">:</span>  <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]</span>
+	<span class="n">_methods</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]</span>
+	<span class="n">_classes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;ClassCoverage&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ClassCoverage.__init__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;PackageCoverage&quot;</span><span class="p">,</span> <span class="s2">&quot;ClassCoverage&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+		<span class="n">Coverage</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">parent</span><span class="o">.</span><span class="n">_classes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_fields</span> <span class="o">=</span>  <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_methods</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_classes</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Methods</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_methods</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;ClassCoverage&quot;</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span>
+
+	<span class="k">def</span> <span class="nf">CalculateCoverage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="bp">cls</span><span class="o">.</span><span class="n">CalculateCoverage</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expected</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_covered</span> <span class="o">=</span> \
+			<span class="bp">self</span><span class="o">.</span><span class="n">_CountCoverage</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_methods</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+			<span class="p">))</span>
+
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">CalculateCoverage</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ClassCoverage.__str__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage.__str__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+		<span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;ClassCoverage - tot:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="si">}</span><span class="s2">, ex:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span><span class="si">}</span><span class="s2">, ig:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span><span class="si">}</span><span class="s2">, exp:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_expected</span><span class="si">}</span><span class="s2">, cov:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_covered</span><span class="si">}</span><span class="s2">, un:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_uncovered</span><span class="si">}</span><span class="s2"> =&gt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&gt;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ModuleCoverage">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">ModuleCoverage</span><span class="p">(</span><span class="n">Module</span><span class="p">,</span> <span class="n">AggregatedCoverage</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This class represents the module documentation coverage for Python modules.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">_variables</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]</span>
+	<span class="n">_functions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]</span>
+	<span class="n">_classes</span><span class="p">:</span>   <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ClassCoverage</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ModuleCoverage.__init__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Nullable</span><span class="p">[</span><span class="s2">&quot;PackageCoverage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+		<span class="n">AggregatedCoverage</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">parent</span><span class="o">.</span><span class="n">_modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span>      <span class="n">file</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_variables</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_functions</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_classes</span> <span class="o">=</span>   <span class="p">{}</span></div>
+
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_functions</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ClassCoverage</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span>
+
+	<span class="k">def</span> <span class="nf">CalculateCoverage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="bp">cls</span><span class="o">.</span><span class="n">CalculateCoverage</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expected</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_covered</span> <span class="o">=</span> \
+			<span class="bp">self</span><span class="o">.</span><span class="n">_CountCoverage</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_functions</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+			<span class="p">))</span>
+
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">CalculateCoverage</span><span class="p">()</span>
+
+	<span class="k">def</span> <span class="nf">Aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedTotal</span> <span class="o">=</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_total</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExcluded</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedIgnored</span> <span class="o">=</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_expected</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span> <span class="o">=</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_covered</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedUncovered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uncovered</span>
+
+		<span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedTotal</span> <span class="o">+=</span>     <span class="bp">cls</span><span class="o">.</span><span class="n">_total</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExcluded</span> <span class="o">+=</span>  <span class="bp">cls</span><span class="o">.</span><span class="n">_excluded</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedIgnored</span> <span class="o">+=</span>   <span class="bp">cls</span><span class="o">.</span><span class="n">_ignored</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span> <span class="o">+=</span>  <span class="bp">cls</span><span class="o">.</span><span class="n">_expected</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span> <span class="o">+=</span>   <span class="bp">cls</span><span class="o">.</span><span class="n">_covered</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedUncovered</span> <span class="o">+=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_uncovered</span>
+
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">Aggregate</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ModuleCoverage.__str__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.ModuleCoverage.__str__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+		<span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;ModuleCoverage - tot:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedTotal</span><span class="si">}</span><span class="s2">, ex:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExcluded</span><span class="si">}</span><span class="s2">, ig:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedIgnored</span><span class="si">}</span><span class="s2">, exp:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_expected</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span><span class="si">}</span><span class="s2">, cov:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_covered</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span><span class="si">}</span><span class="s2">, un:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_uncovered</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedUncovered</span><span class="si">}</span><span class="s2"> =&gt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCoverage</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&gt;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PackageCoverage">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">PackageCoverage</span><span class="p">(</span><span class="n">Package</span><span class="p">,</span> <span class="n">AggregatedCoverage</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This class represents the package documentation coverage for Python packages.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">_fileCount</span><span class="p">:</span> <span class="nb">int</span>
+	<span class="n">_variables</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]</span>
+	<span class="n">_functions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]</span>
+	<span class="n">_classes</span><span class="p">:</span>   <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ClassCoverage</span><span class="p">]</span>
+	<span class="n">_modules</span><span class="p">:</span>   <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ModuleCoverage</span><span class="p">]</span>
+	<span class="n">_packages</span><span class="p">:</span>  <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;PackageCoverage&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="PackageCoverage.__init__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Nullable</span><span class="p">[</span><span class="s2">&quot;PackageCoverage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+		<span class="n">AggregatedCoverage</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">parent</span><span class="o">.</span><span class="n">_packages</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span>      <span class="n">file</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_fileCount</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_variables</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_functions</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_classes</span> <span class="o">=</span>   <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_modules</span> <span class="o">=</span>   <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_packages</span> <span class="o">=</span>  <span class="p">{}</span></div>
+
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">FileCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fileCount</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Variables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Functions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CoverageState</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_functions</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ClassCoverage</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Modules</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ModuleCoverage</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modules</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">Packages</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;PackageCoverage&quot;</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_packages</span>
+
+	<span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;PackageCoverage&quot;</span><span class="p">,</span> <span class="n">ModuleCoverage</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modules</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_packages</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+	<span class="k">def</span> <span class="nf">CalculateCoverage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="bp">cls</span><span class="o">.</span><span class="n">CalculateCoverage</span><span class="p">()</span>
+
+		<span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="n">mod</span><span class="o">.</span><span class="n">CalculateCoverage</span><span class="p">()</span>
+
+		<span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_packages</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="n">pkg</span><span class="o">.</span><span class="n">CalculateCoverage</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expected</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_covered</span> <span class="o">=</span> \
+			<span class="bp">self</span><span class="o">.</span><span class="n">_CountCoverage</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_functions</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+			<span class="p">))</span>
+
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">CalculateCoverage</span><span class="p">()</span>
+
+	<span class="k">def</span> <span class="nf">Aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_fileCount</span> <span class="o">=</span>           <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_modules</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedTotal</span> <span class="o">=</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_total</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExcluded</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedIgnored</span> <span class="o">=</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_expected</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span> <span class="o">=</span>   <span class="bp">self</span><span class="o">.</span><span class="n">_covered</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedUncovered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uncovered</span>
+
+		<span class="k">for</span> <span class="n">pkg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_packages</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="n">pkg</span><span class="o">.</span><span class="n">Aggregate</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_fileCount</span> <span class="o">+=</span>           <span class="n">pkg</span><span class="o">.</span><span class="n">_fileCount</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedTotal</span> <span class="o">+=</span>     <span class="n">pkg</span><span class="o">.</span><span class="n">_total</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExcluded</span> <span class="o">+=</span>  <span class="n">pkg</span><span class="o">.</span><span class="n">_excluded</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedIgnored</span> <span class="o">+=</span>   <span class="n">pkg</span><span class="o">.</span><span class="n">_ignored</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span> <span class="o">+=</span>  <span class="n">pkg</span><span class="o">.</span><span class="n">_expected</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span> <span class="o">+=</span>   <span class="n">pkg</span><span class="o">.</span><span class="n">_covered</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedUncovered</span> <span class="o">+=</span> <span class="n">pkg</span><span class="o">.</span><span class="n">_uncovered</span>
+
+		<span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="n">mod</span><span class="o">.</span><span class="n">Aggregate</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedTotal</span> <span class="o">+=</span>     <span class="n">mod</span><span class="o">.</span><span class="n">_total</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExcluded</span> <span class="o">+=</span>  <span class="n">mod</span><span class="o">.</span><span class="n">_excluded</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedIgnored</span> <span class="o">+=</span>   <span class="n">mod</span><span class="o">.</span><span class="n">_ignored</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span> <span class="o">+=</span>  <span class="n">mod</span><span class="o">.</span><span class="n">_expected</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span> <span class="o">+=</span>   <span class="n">mod</span><span class="o">.</span><span class="n">_covered</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedUncovered</span> <span class="o">+=</span> <span class="n">mod</span><span class="o">.</span><span class="n">_uncovered</span>
+
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">Aggregate</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PackageCoverage.__str__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage.__str__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+		<span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;PackageCoverage - tot:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedTotal</span><span class="si">}</span><span class="s2">, ex:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_excluded</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExcluded</span><span class="si">}</span><span class="s2">, ig:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_ignored</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedIgnored</span><span class="si">}</span><span class="s2">, exp:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_expected</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedExpected</span><span class="si">}</span><span class="s2">, cov:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_covered</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCovered</span><span class="si">}</span><span class="s2">, un:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_uncovered</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedUncovered</span><span class="si">}</span><span class="s2"> =&gt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_aggregatedCoverage</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&gt;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DocStrCoverageError">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverageError">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">DocStrCoverageError</span><span class="p">(</span><span class="n">DocCoverageException</span><span class="p">):</span>
+	<span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="DocStrCoverage">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">DocStrCoverage</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ExtendedType</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A wrapper class for the docstr_coverage package and it&#39;s analyzer producing a documentation coverage model.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="kn">from</span> <span class="nn">docstr_coverage</span> <span class="kn">import</span> <span class="n">ResultCollection</span>
+
+	<span class="n">_packageName</span><span class="p">:</span>     <span class="nb">str</span>
+	<span class="n">_searchDirectory</span><span class="p">:</span> <span class="n">Path</span>
+	<span class="n">_moduleFiles</span><span class="p">:</span>     <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span>
+	<span class="n">_coverageReport</span><span class="p">:</span>  <span class="n">ResultCollection</span>
+
+<div class="viewcode-block" id="DocStrCoverage.__init__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.DocStrCoverage.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packageName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">directory</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+			<span class="k">raise</span> <span class="n">DocStrCoverageError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Package source directory &#39;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Directory &#39;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_searchDirectory</span> <span class="o">=</span> <span class="n">directory</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_packageName</span> <span class="o">=</span> <span class="n">packageName</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_moduleFiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">directory</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;**/*.py&quot;</span><span class="p">)]</span></div>
+
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">SearchDirectories</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_searchDirectory</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">PackageName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_packageName</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">ModuleFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moduleFiles</span>
+
+	<span class="nd">@readonly</span>
+	<span class="k">def</span> <span class="nf">CoverageReport</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResultCollection</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coverageReport</span>
+
+	<span class="k">def</span> <span class="nf">Analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResultCollection</span><span class="p">:</span>
+		<span class="kn">from</span> <span class="nn">docstr_coverage</span> <span class="kn">import</span> <span class="n">analyze</span><span class="p">,</span> <span class="n">ResultCollection</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_coverageReport</span><span class="p">:</span> <span class="n">ResultCollection</span> <span class="o">=</span> <span class="n">analyze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moduleFiles</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coverageReport</span>
+
+	<span class="k">def</span> <span class="nf">Convert</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PackageCoverage</span><span class="p">:</span>
+		<span class="kn">from</span> <span class="nn">docstr_coverage.result_collection</span> <span class="kn">import</span> <span class="n">FileCount</span>
+
+		<span class="n">rootPackageCoverage</span> <span class="o">=</span> <span class="n">PackageCoverage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_packageName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_searchDirectory</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">)</span>
+
+		<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coverageReport</span><span class="o">.</span><span class="n">files</span><span class="p">():</span>
+			<span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_searchDirectory</span><span class="p">)</span>
+			<span class="n">perFileResult</span><span class="p">:</span> <span class="n">FileCount</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">count_aggregate</span><span class="p">()</span>
+
+			<span class="n">moduleName</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span>
+			<span class="n">modulePath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parts</span>
+
+			<span class="n">currentCoverageObject</span><span class="p">:</span> <span class="n">AggregatedCoverage</span> <span class="o">=</span> <span class="n">rootPackageCoverage</span>
+			<span class="k">for</span> <span class="n">packageName</span> <span class="ow">in</span> <span class="n">modulePath</span><span class="p">:</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="n">currentCoverageObject</span> <span class="o">=</span> <span class="n">currentCoverageObject</span><span class="p">[</span><span class="n">packageName</span><span class="p">]</span>
+				<span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+					<span class="n">currentCoverageObject</span> <span class="o">=</span> <span class="n">PackageCoverage</span><span class="p">(</span><span class="n">packageName</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">currentCoverageObject</span><span class="p">)</span>
+
+			<span class="k">if</span> <span class="n">moduleName</span> <span class="o">!=</span> <span class="s2">&quot;__init__&quot;</span><span class="p">:</span>
+				<span class="n">currentCoverageObject</span> <span class="o">=</span> <span class="n">ModuleCoverage</span><span class="p">(</span><span class="n">moduleName</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">currentCoverageObject</span><span class="p">)</span>
+
+			<span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_expected</span> <span class="o">=</span> <span class="n">perFileResult</span><span class="o">.</span><span class="n">needed</span>
+			<span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_covered</span> <span class="o">=</span> <span class="n">perFileResult</span><span class="o">.</span><span class="n">found</span>
+			<span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_uncovered</span> <span class="o">=</span> <span class="n">perFileResult</span><span class="o">.</span><span class="n">missing</span>
+
+			<span class="k">if</span> <span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_expected</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_coverage</span> <span class="o">=</span> <span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_covered</span> <span class="o">/</span> <span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_expected</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_coverage</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+			<span class="k">if</span> <span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_uncovered</span> <span class="o">!=</span> <span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_expected</span> <span class="o">-</span> <span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_covered</span><span class="p">:</span>
+				<span class="n">currentCoverageObject</span><span class="o">.</span><span class="n">_coverage</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span>
+
+		<span class="k">return</span> <span class="n">rootPackageCoverage</span>
+
+	<span class="k">del</span> <span class="n">ResultCollection</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2024, Electronic Design Automation Abstraction (EDA²).
+      <span class="lastupdated">Last updated on 06.10.2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,223 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+================================
+pyEDAA.Reports.Unittesting.JUnit
+================================
+
+.. automodule:: pyEDAA.Reports.Unittesting.JUnit
+
+
+
+**Submodules**
+
+.. toctree::
+   :maxdepth: 1
+
+   pyEDAA.Reports.Unittesting.JUnit.AntJUnit
+   pyEDAA.Reports.Unittesting.JUnit.CTestJUnit
+   pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit
+   pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit
+
+.. currentmodule:: pyEDAA.Reports.Unittesting.JUnit
+
+
+**Exceptions**
+
+- :py:exc:`UnittestException`:
+  Base-exception for all unit test related exceptions.
+
+- :py:exc:`AlreadyInHierarchyException`:
+  A unit test exception raised if the element is already part of a hierarchy.
+
+- :py:exc:`DuplicateTestsuiteException`:
+  A unit test exception raised on duplicate test suites (by name).
+
+- :py:exc:`DuplicateTestcaseException`:
+  A unit test exception raised on duplicate test cases (by name).
+
+
+
+**Classes**
+
+- :py:class:`JUnitException`:
+  An exception-mixin for JUnit format specific exceptions.
+
+- :py:class:`JUnitReaderMode`:
+  Support for flags
+
+- :py:class:`Base`:
+  Base-class for all test entities (test cases, test classes, test suites, ...).
+
+- :py:class:`BaseWithProperties`:
+  Base-class for all test entities supporting properties (test cases, test suites, ...).
+
+- :py:class:`Testcase`:
+  A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
+
+- :py:class:`TestsuiteBase`:
+  Base-class for all test suites and for test summaries.
+
+- :py:class:`Testclass`:
+  A test class is a low-level element in the test entity hierarchy representing a group of tests.
+
+- :py:class:`Testsuite`:
+  A testsuite is a mid-level element in the test entity hierarchy representing a logical group of tests.
+
+- :py:class:`TestsuiteSummary`:
+  Base-class for all test suites and for test summaries.
+
+- :py:class:`Document`:
+  Base-class for all test suites and for test summaries.
+
+
+
+---------------------
+
+**Exceptions**
+
+
+
+
+.. autoexception:: UnittestException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: UnittestException
+      :parts: 1
+
+.. autoexception:: AlreadyInHierarchyException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: AlreadyInHierarchyException
+      :parts: 1
+
+.. autoexception:: DuplicateTestsuiteException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: DuplicateTestsuiteException
+      :parts: 1
+
+.. autoexception:: DuplicateTestcaseException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: DuplicateTestcaseException
+      :parts: 1
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: JUnitException
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: JUnitException
+      :parts: 1
+
+.. autoclass:: JUnitReaderMode
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: JUnitReaderMode
+      :parts: 1
+
+.. autoclass:: Base
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Base
+      :parts: 1
+
+.. autoclass:: BaseWithProperties
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: BaseWithProperties
+      :parts: 1
+
+.. autoclass:: Testcase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testcase
+      :parts: 1
+
+.. autoclass:: TestsuiteBase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteBase
+      :parts: 1
+
+.. autoclass:: Testclass
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testclass
+      :parts: 1
+
+.. autoclass:: Testsuite
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testsuite
+      :parts: 1
+
+.. autoclass:: TestsuiteSummary
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteSummary
+      :parts: 1
+
+.. autoclass:: Document
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Document
+      :parts: 1

@@ -1,0 +1,94 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+=========================================
+pyEDAA.Reports.Unittesting.JUnit.AntJUnit
+=========================================
+
+.. automodule:: pyEDAA.Reports.Unittesting.JUnit.AntJUnit
+
+
+.. currentmodule:: pyEDAA.Reports.Unittesting.JUnit.AntJUnit
+
+
+**Classes**
+
+- :py:class:`Testcase`:
+  A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
+
+- :py:class:`Testclass`:
+  A test class is a low-level element in the test entity hierarchy representing a group of tests.
+
+- :py:class:`Testsuite`:
+  A testsuite is a mid-level element in the test entity hierarchy representing a logical group of tests.
+
+- :py:class:`TestsuiteSummary`:
+  This is a derived implementation for the Ant + JUnit4 dialect.
+
+- :py:class:`Document`:
+  A document reader and writer for the Ant + JUnit4 XML file format.
+
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: Testcase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testcase
+      :parts: 1
+
+.. autoclass:: Testclass
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testclass
+      :parts: 1
+
+.. autoclass:: Testsuite
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testsuite
+      :parts: 1
+
+.. autoclass:: TestsuiteSummary
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteSummary
+      :parts: 1
+
+.. autoclass:: Document
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Document
+      :parts: 1

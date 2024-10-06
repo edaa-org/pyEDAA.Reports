@@ -1,0 +1,75 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+==================
+pyEDAA.Reports.CLI
+==================
+
+.. automodule:: pyEDAA.Reports.CLI
+
+
+
+**Submodules**
+
+.. toctree::
+   :maxdepth: 1
+
+   pyEDAA.Reports.CLI.Unittesting
+
+.. currentmodule:: pyEDAA.Reports.CLI
+
+
+**Functions**
+
+- :py:func:`main`:
+  Entrypoint to start program execution.
+
+
+
+**Classes**
+
+- :py:class:`ProgramBase`:
+  Base-class for all program classes.
+
+- :py:class:`Application`:
+  Program class to implement the command line interface (CLI) using commands and options.
+
+
+
+---------------------
+
+**Functions**
+
+
+.. autofunction:: main
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: ProgramBase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: ProgramBase
+      :parts: 1
+
+.. autoclass:: Application
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Application
+      :parts: 1

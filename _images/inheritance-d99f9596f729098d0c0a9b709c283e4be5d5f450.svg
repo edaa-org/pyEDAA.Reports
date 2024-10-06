@@ -1,0 +1,59 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="288pt" height="64pt" viewBox="0.00 0.00 288.00 64.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 60)">
+<ns0:title>inheritance8bc0148cc6</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Base</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Base" ns1:title="Base-class for all test entities (test cases, test suites, ...)." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="54,-56 0,-56 0,-37 54,-37 54,-56" />
+<ns0:text text-anchor="middle" x="27" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Base</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>Testcase</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Testcase" ns1:title="A testcase is the leaf-entity in the test entity hierarchy representing an individual test run." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="149,-56 90,-56 90,-37 149,-37 149,-56" />
+<ns0:text text-anchor="middle" x="119.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Testcase</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>Base-&gt;Testcase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.18,-46.5C63.69,-46.5 74.58,-46.5 84.66,-46.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="84.85,-48.25 89.85,-46.5 84.85,-44.75 84.85,-48.25" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>Merged</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Merged" ns1:title="A mixin-class representing a merged test entity." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="146.5,-19 92.5,-19 92.5,0 146.5,0 146.5,-19" />
+<ns0:text text-anchor="middle" x="119.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Merged</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>MergedTestcase</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.MergedTestcase" ns1:title="MergedTestcase" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="280,-37 185,-37 185,-18 280,-18 280,-37" />
+<ns0:text text-anchor="middle" x="232.5" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">MergedTestcase</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>Merged-&gt;MergedTestcase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M146.52,-13.72C156.42,-15.32 168.07,-17.21 179.52,-19.07" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="179.54,-20.85 184.76,-19.92 180.1,-17.39 179.54,-20.85" />
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>Testcase-&gt;MergedTestcase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M149.09,-41.61C158.47,-40 169.21,-38.16 179.77,-36.36" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="180.29,-38.04 184.93,-35.47 179.7,-34.59 180.29,-38.04" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

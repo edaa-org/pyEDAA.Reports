@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit &mdash; pyEDAA.Reports 0.13.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=77553476" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-reports.e44b1595f1e09d5e109d001839ba3f42.css?v=0b41afa8" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/override.css?v=6943e0d8" />
+
+  
+    <link rel="shortcut icon" href="../../../../../_static/favicon.svg"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=1019fba8"></script>
+        <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../../_static/copybutton.js?v=f281be69"></script>
+        <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html">
+            
+              <img src="../../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.13
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="https://edaa-org.github.io/">Used as a layer of EDA² ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../Installation.html">Installation/Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../Dependency.html">Dependency</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Report Formats</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../CodeCoverage/index.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../DocCoverage/index.html">Documentation Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../Unittesting/index.html">Unittesting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../Logging/index.html">EDA Tool Logs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References and Reports</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../CommandLineInterface.html">Command Line Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.html">Python Class Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reports/unittests.html">Unittest Summary Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reports/coverage/index.html">Code Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reports/doccoverage.html">Doc. Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reports/typing/index.html">Static Type Check Report ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../License.html">Apache License 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../Doc-License.html">Creative Commons Attribution 4.0 International</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../Glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../py-modindex.html">Python Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../TODO.html">TODOs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Old Content</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../old/Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../old/FunctionalCoverage.html">Functional coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../old/LineCoverage.html">Line coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../old/Resources.html">Synthesis and implementation results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../old/RichLogging.html">Semantic/rich logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../old/Tracking.html">Tracking requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../old/Frontends.html">Frontends</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">pyEDAA.Reports</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../Unittesting.html">pyEDAA.Reports.Unittesting</a></li>
+          <li class="breadcrumb-item"><a href="../JUnit.html">pyEDAA.Reports.Unittesting.JUnit</a></li>
+      <li class="breadcrumb-item active">pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#              _____ ____    _        _      ____                       _                                              #</span>
+<span class="c1">#  _ __  _   _| ____|  _ \  / \      / \    |  _ \ ___ _ __   ___  _ __| |_ ___                                        #</span>
+<span class="c1"># | &#39;_ \| | | |  _| | | | |/ _ \    / _ \   | |_) / _ \ &#39;_ \ / _ \| &#39;__| __/ __|                                       #</span>
+<span class="c1"># | |_) | |_| | |___| |_| / ___ \  / ___ \ _|  _ &lt;  __/ |_) | (_) | |  | |_\__ \                                       #</span>
+<span class="c1"># | .__/ \__, |_____|____/_/   \_\/_/   \_(_)_| \_\___| .__/ \___/|_|   \__|___/                                       #</span>
+<span class="c1"># |_|    |___/                                        |_|                                                              #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Authors:                                                                                                             #</span>
+<span class="c1">#   Patrick Lehmann                                                                                                    #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># License:                                                                                                             #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Copyright 2024-2024 Electronic Design Automation Abstraction (EDA²)                                                  #</span>
+<span class="c1"># Copyright 2023-2023 Patrick Lehmann - Bötzingen, Germany                                                             #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                                      #</span>
+<span class="c1"># you may not use this file except in compliance with the License.                                                     #</span>
+<span class="c1"># You may obtain a copy of the License at                                                                              #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0                                                                         #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software                                                  #</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                                    #</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                             #</span>
+<span class="c1"># See the License for the specific language governing permissions and                                                  #</span>
+<span class="c1"># limitations under the License.                                                                                       #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># SPDX-License-Identifier: Apache-2.0                                                                                  #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Reader for JUnit unit testing summary files in XML format.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pathlib</span>              <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">time</span>                 <span class="kn">import</span> <span class="n">perf_counter_ns</span>
+<span class="kn">from</span> <span class="nn">typing</span>               <span class="kn">import</span> <span class="n">Optional</span> <span class="k">as</span> <span class="n">Nullable</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">ClassVar</span>
+
+<span class="kn">from</span> <span class="nn">lxml.etree</span>           <span class="kn">import</span> <span class="n">ElementTree</span><span class="p">,</span> <span class="n">Element</span><span class="p">,</span> <span class="n">SubElement</span><span class="p">,</span> <span class="n">tostring</span><span class="p">,</span> <span class="n">_Element</span>
+<span class="kn">from</span> <span class="nn">pyTooling.Decorators</span> <span class="kn">import</span> <span class="n">export</span>
+
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.Unittesting</span>       <span class="kn">import</span> <span class="n">UnittestException</span><span class="p">,</span> <span class="n">TestsuiteKind</span>
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.Unittesting</span>       <span class="kn">import</span> <span class="n">TestcaseStatus</span><span class="p">,</span> <span class="n">TestsuiteStatus</span><span class="p">,</span> <span class="n">IterationScheme</span>
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.Unittesting</span>       <span class="kn">import</span> <span class="n">TestsuiteSummary</span> <span class="k">as</span> <span class="n">ut_TestsuiteSummary</span><span class="p">,</span> <span class="n">Testsuite</span> <span class="k">as</span> <span class="n">ut_Testsuite</span>
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.Unittesting.JUnit</span> <span class="kn">import</span> <span class="n">Testcase</span> <span class="k">as</span> <span class="n">ju_Testcase</span><span class="p">,</span> <span class="n">Testclass</span> <span class="k">as</span> <span class="n">ju_Testclass</span><span class="p">,</span> <span class="n">Testsuite</span> <span class="k">as</span> <span class="n">ju_Testsuite</span>
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.Unittesting.JUnit</span> <span class="kn">import</span> <span class="n">TestsuiteSummary</span> <span class="k">as</span> <span class="n">ju_TestsuiteSummary</span><span class="p">,</span> <span class="n">Document</span> <span class="k">as</span> <span class="n">ju_Document</span>
+
+
+<span class="n">TestsuiteType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TestsuiteType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s2">&quot;Testsuite&quot;</span><span class="p">)</span>
+<span class="n">TestcaseAggregateReturnType</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="n">TestsuiteAggregateReturnType</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.helper</span> <span class="kn">import</span> <span class="n">InheritDocumentation</span>
+
+
+<div class="viewcode-block" id="Testcase">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Testcase">[docs]</a>
+<span class="nd">@export</span>
+<span class="nd">@InheritDocumentation</span><span class="p">(</span><span class="n">ju_Testcase</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Testcase</span><span class="p">(</span><span class="n">ju_Testcase</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This is a derived implementation for the GoogleTest JUnit dialect.</span>
+<span class="sd">	&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Testclass">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Testclass">[docs]</a>
+<span class="nd">@export</span>
+<span class="nd">@InheritDocumentation</span><span class="p">(</span><span class="n">ju_Testclass</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Testclass</span><span class="p">(</span><span class="n">ju_Testclass</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This is a derived implementation for the GoogleTest JUnit dialect.</span>
+<span class="sd">	&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Testsuite">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Testsuite">[docs]</a>
+<span class="nd">@export</span>
+<span class="nd">@InheritDocumentation</span><span class="p">(</span><span class="n">ju_Testsuite</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Testsuite</span><span class="p">(</span><span class="n">ju_Testsuite</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This is a derived implementation for the GoogleTest JUnit dialect.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">Aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TestsuiteAggregateReturnType</span><span class="p">:</span>
+		<span class="n">tests</span><span class="p">,</span> <span class="n">skipped</span><span class="p">,</span> <span class="n">errored</span><span class="p">,</span> <span class="n">failed</span><span class="p">,</span> <span class="n">passed</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">Aggregate</span><span class="p">()</span>
+
+		<span class="k">for</span> <span class="n">testclass</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testclasses</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="n">_</span> <span class="o">=</span> <span class="n">testclass</span><span class="o">.</span><span class="n">Aggregate</span><span class="p">(</span><span class="n">strict</span><span class="p">)</span>
+
+			<span class="n">tests</span> <span class="o">+=</span> <span class="mi">1</span>
+
+			<span class="n">status</span> <span class="o">=</span> <span class="n">testclass</span><span class="o">.</span><span class="n">_status</span>
+			<span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Unknown</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found testclass &#39;</span><span class="si">{</span><span class="n">testclass</span><span class="o">.</span><span class="n">_name</span><span class="si">}</span><span class="s2">&#39; with state &#39;Unknown&#39;.&quot;</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Skipped</span><span class="p">:</span>
+				<span class="n">skipped</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">elif</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Errored</span><span class="p">:</span>
+				<span class="n">errored</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">elif</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Passed</span><span class="p">:</span>
+				<span class="n">passed</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">elif</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Failed</span><span class="p">:</span>
+				<span class="n">failed</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">elif</span> <span class="n">status</span> <span class="o">&amp;</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Unknown</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found testclass &#39;</span><span class="si">{</span><span class="n">testclass</span><span class="o">.</span><span class="n">_name</span><span class="si">}</span><span class="s2">&#39; with unsupported state &#39;</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Internal error for testclass &#39;</span><span class="si">{</span><span class="n">testclass</span><span class="o">.</span><span class="n">_name</span><span class="si">}</span><span class="s2">&#39;, field &#39;_status&#39; is &#39;</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_tests</span> <span class="o">=</span> <span class="n">tests</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_skipped</span> <span class="o">=</span> <span class="n">skipped</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_errored</span> <span class="o">=</span> <span class="n">errored</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_failed</span> <span class="o">=</span> <span class="n">failed</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_passed</span> <span class="o">=</span> <span class="n">passed</span>
+
+		<span class="k">if</span> <span class="n">errored</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">TestsuiteStatus</span><span class="o">.</span><span class="n">Errored</span>
+		<span class="k">elif</span> <span class="n">failed</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">TestsuiteStatus</span><span class="o">.</span><span class="n">Failed</span>
+		<span class="k">elif</span> <span class="n">tests</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">TestsuiteStatus</span><span class="o">.</span><span class="n">Empty</span>
+		<span class="k">elif</span> <span class="n">tests</span> <span class="o">-</span> <span class="n">skipped</span> <span class="o">==</span> <span class="n">passed</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">TestsuiteStatus</span><span class="o">.</span><span class="n">Passed</span>
+		<span class="k">elif</span> <span class="n">tests</span> <span class="o">==</span> <span class="n">skipped</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">TestsuiteStatus</span><span class="o">.</span><span class="n">Skipped</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">TestsuiteStatus</span><span class="o">.</span><span class="n">Unknown</span>
+
+		<span class="k">return</span> <span class="n">tests</span><span class="p">,</span> <span class="n">skipped</span><span class="p">,</span> <span class="n">errored</span><span class="p">,</span> <span class="n">failed</span><span class="p">,</span> <span class="n">passed</span>
+
+<div class="viewcode-block" id="Testsuite.FromTestsuite">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Testsuite.FromTestsuite">[docs]</a>
+	<span class="nd">@classmethod</span>
+	<span class="k">def</span> <span class="nf">FromTestsuite</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">testsuite</span><span class="p">:</span> <span class="n">ut_Testsuite</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Testsuite&quot;</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Convert a test suite of the unified test entity data model to the JUnit specific data model&#39;s test suite object</span>
+<span class="sd">		adhering to the GoogleTest JUnit dialect.</span>
+
+<span class="sd">		:param testsuite: Test suite from unified data model.</span>
+<span class="sd">		:return:          Test suite from JUnit specific data model (GoogleTest JUnit dialect).</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">juTestsuite</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+			<span class="n">testsuite</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+			<span class="n">startTime</span><span class="o">=</span><span class="n">testsuite</span><span class="o">.</span><span class="n">_startTime</span><span class="p">,</span>
+			<span class="n">duration</span><span class="o">=</span><span class="n">testsuite</span><span class="o">.</span><span class="n">_totalDuration</span><span class="p">,</span>
+			<span class="n">status</span><span class="o">=</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_status</span><span class="p">,</span>
+		<span class="p">)</span>
+
+		<span class="n">juTestsuite</span><span class="o">.</span><span class="n">_tests</span> <span class="o">=</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_tests</span>
+		<span class="n">juTestsuite</span><span class="o">.</span><span class="n">_skipped</span> <span class="o">=</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_skipped</span>
+		<span class="n">juTestsuite</span><span class="o">.</span><span class="n">_errored</span> <span class="o">=</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_errored</span>
+		<span class="n">juTestsuite</span><span class="o">.</span><span class="n">_failed</span> <span class="o">=</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_failed</span>
+		<span class="n">juTestsuite</span><span class="o">.</span><span class="n">_passed</span> <span class="o">=</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_passed</span>
+
+		<span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">IterateTestcases</span><span class="p">():</span>
+			<span class="n">ts</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">_parent</span>
+			<span class="k">if</span> <span class="n">ts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Testcase &#39;</span><span class="si">{</span><span class="n">tc</span><span class="o">.</span><span class="n">_name</span><span class="si">}</span><span class="s2">&#39; is not part of a hierarchy.&quot;</span><span class="p">)</span>
+
+			<span class="n">classname</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">_name</span>
+			<span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">_parent</span>
+			<span class="k">while</span> <span class="n">ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ts</span><span class="o">.</span><span class="n">_kind</span> <span class="o">&gt;</span> <span class="n">TestsuiteKind</span><span class="o">.</span><span class="n">Logical</span><span class="p">:</span>
+				<span class="n">classname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">classname</span><span class="si">}</span><span class="s2">&quot;</span>
+				<span class="n">ts</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">_parent</span>
+
+			<span class="k">if</span> <span class="n">classname</span> <span class="ow">in</span> <span class="n">juTestsuite</span><span class="o">.</span><span class="n">_testclasses</span><span class="p">:</span>
+				<span class="n">juClass</span> <span class="o">=</span> <span class="n">juTestsuite</span><span class="o">.</span><span class="n">_testclasses</span><span class="p">[</span><span class="n">classname</span><span class="p">]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">juClass</span> <span class="o">=</span> <span class="n">Testclass</span><span class="p">(</span><span class="n">classname</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">juTestsuite</span><span class="p">)</span>
+
+			<span class="n">juClass</span><span class="o">.</span><span class="n">AddTestcase</span><span class="p">(</span><span class="n">Testcase</span><span class="o">.</span><span class="n">FromTestcase</span><span class="p">(</span><span class="n">tc</span><span class="p">))</span>
+
+		<span class="k">return</span> <span class="n">juTestsuite</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TestsuiteSummary">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.TestsuiteSummary">[docs]</a>
+<span class="nd">@export</span>
+<span class="nd">@InheritDocumentation</span><span class="p">(</span><span class="n">ju_TestsuiteSummary</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">TestsuiteSummary</span><span class="p">(</span><span class="n">ju_TestsuiteSummary</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This is a derived implementation for the GoogleTest JUnit dialect.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestsuiteSummary.FromTestsuiteSummary">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.TestsuiteSummary.FromTestsuiteSummary">[docs]</a>
+	<span class="nd">@classmethod</span>
+	<span class="k">def</span> <span class="nf">FromTestsuiteSummary</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">testsuiteSummary</span><span class="p">:</span> <span class="n">ut_TestsuiteSummary</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TestsuiteSummary&quot;</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Convert a test suite summary of the unified test entity data model to the JUnit specific data model&#39;s test suite</span>
+<span class="sd">		summary object adhering to the GoogleTest JUnit dialect.</span>
+
+<span class="sd">		:param testsuiteSummary: Test suite summary from unified data model.</span>
+<span class="sd">		:return:                 Test suite summary from JUnit specific data model (GoogleTest JUnit dialect).</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+			<span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+			<span class="n">startTime</span><span class="o">=</span><span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_startTime</span><span class="p">,</span>
+			<span class="n">duration</span><span class="o">=</span><span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_totalDuration</span><span class="p">,</span>
+			<span class="n">status</span><span class="o">=</span><span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_status</span><span class="p">,</span>
+			<span class="n">testsuites</span><span class="o">=</span><span class="p">(</span><span class="n">ut_Testsuite</span><span class="o">.</span><span class="n">FromTestsuite</span><span class="p">(</span><span class="n">testsuite</span><span class="p">)</span> <span class="k">for</span> <span class="n">testsuite</span> <span class="ow">in</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_testsuites</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+		<span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Document">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">Document</span><span class="p">(</span><span class="n">ju_Document</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A document reader and writer for the GoogelTest JUnit XML file format.</span>
+
+<span class="sd">	This class reads, validates and transforms an XML file in the GoogelTest JUnit format into a JUnit data model. It can</span>
+<span class="sd">	then be converted into a unified test entity data model.</span>
+
+<span class="sd">	In reverse, a JUnit data model instance with the specific GoogelTest JUnit file format can be created from a unified</span>
+<span class="sd">	test entity data model. This data model can be written as XML into a file.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">_TESTCASE</span><span class="p">:</span>  <span class="n">ClassVar</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Testcase</span><span class="p">]]</span> <span class="o">=</span>  <span class="n">Testcase</span>
+	<span class="n">_TESTCLASS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Testclass</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Testclass</span>
+	<span class="n">_TESTSUITE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Testsuite</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Testsuite</span>
+
+<div class="viewcode-block" id="Document.FromTestsuiteSummary">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document.FromTestsuiteSummary">[docs]</a>
+	<span class="nd">@classmethod</span>
+	<span class="k">def</span> <span class="nf">FromTestsuiteSummary</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">xmlReportFile</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">testsuiteSummary</span><span class="p">:</span> <span class="n">ut_TestsuiteSummary</span><span class="p">):</span>
+		<span class="n">doc</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">xmlReportFile</span><span class="p">)</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_name</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">_startTime</span> <span class="o">=</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_startTime</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">_duration</span> <span class="o">=</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_totalDuration</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_status</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">_tests</span> <span class="o">=</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_tests</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">_skipped</span> <span class="o">=</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_skipped</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">_errored</span> <span class="o">=</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_errored</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">_failed</span> <span class="o">=</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_failed</span>
+		<span class="n">doc</span><span class="o">.</span><span class="n">_passed</span> <span class="o">=</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_passed</span>
+
+		<span class="n">doc</span><span class="o">.</span><span class="n">AddTestsuites</span><span class="p">(</span><span class="n">Testsuite</span><span class="o">.</span><span class="n">FromTestsuite</span><span class="p">(</span><span class="n">testsuite</span><span class="p">)</span> <span class="k">for</span> <span class="n">testsuite</span> <span class="ow">in</span> <span class="n">testsuiteSummary</span><span class="o">.</span><span class="n">_testsuites</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+		<span class="k">return</span> <span class="n">doc</span></div>
+
+
+<div class="viewcode-block" id="Document.Analyze">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document.Analyze">[docs]</a>
+	<span class="k">def</span> <span class="nf">Analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Analyze the XML file, parse the content into an XML data structure and validate the data structure using an XML</span>
+<span class="sd">		schema.</span>
+
+<span class="sd">		.. hint::</span>
+
+<span class="sd">		   The time spend for analysis will be made available via property :data:`AnalysisDuration`.</span>
+
+<span class="sd">		The used XML schema definition is specific to the GoogleTest JUnit dialect.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">xmlSchemaFile</span> <span class="o">=</span> <span class="s2">&quot;GoogleTest-JUnit.xsd&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_Analyze</span><span class="p">(</span><span class="n">xmlSchemaFile</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Document.Write">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document.Write">[docs]</a>
+	<span class="k">def</span> <span class="nf">Write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">regenerate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Write the data model as XML into a file adhering to the GoogleTest dialect.</span>
+
+<span class="sd">		:param path:               Optional path to the XMl file, if internal path shouldn&#39;t be used.</span>
+<span class="sd">		:param overwrite:          If true, overwrite an existing file.</span>
+<span class="sd">		:param regenerate:         If true, regenerate the XML structure from data model.</span>
+<span class="sd">		:raises UnittestException: If the file cannot be overwritten.</span>
+<span class="sd">		:raises UnittestException: If the internal XML data structure wasn&#39;t generated.</span>
+<span class="sd">		:raises UnittestException: If the file cannot be opened or written.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JUnit XML file &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; can not be overwritten.&quot;</span><span class="p">)</span> \
+				<span class="kn">from</span> <span class="nn">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; already exists.&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">regenerate</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">Generate</span><span class="p">(</span><span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlDocument</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">ex</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Internal XML document tree is empty and needs to be generated before write is possible.&quot;</span><span class="p">)</span>
+			<span class="n">ex</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Call &#39;JUnitDocument.Generate()&#39; or &#39;JUnitDocument.Write(..., regenerate=True)&#39;.&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">ex</span>
+
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+				<span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tostring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_xmlDocument</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">xml_declaration</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pretty_print</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JUnit XML file &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; can not be written.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span></div>
+
+
+<div class="viewcode-block" id="Document.Convert">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document.Convert">[docs]</a>
+	<span class="k">def</span> <span class="nf">Convert</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Convert the parsed and validated XML data structure into a JUnit test entity hierarchy.</span>
+
+<span class="sd">		This method converts the root element.</span>
+
+<span class="sd">		.. hint::</span>
+
+<span class="sd">		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.</span>
+
+<span class="sd">		:raises UnittestException: If XML was not read and parsed before.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlDocument</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">ex</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JUnit XML file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39; needs to be read and analyzed by an XML parser.&quot;</span><span class="p">)</span>
+			<span class="n">ex</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Call &#39;JUnitDocument.Analyze()&#39; or create the document using &#39;JUnitDocument(path, parse=True)&#39;.&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">ex</span>
+
+		<span class="n">startConversion</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+		<span class="n">rootElement</span><span class="p">:</span> <span class="n">_Element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlDocument</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ConvertName</span><span class="p">(</span><span class="n">rootElement</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_startTime</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ConvertTimestamp</span><span class="p">(</span><span class="n">rootElement</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ConvertTime</span><span class="p">(</span><span class="n">rootElement</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+		<span class="c1"># tests = rootElement.getAttribute(&quot;tests&quot;)</span>
+		<span class="c1"># skipped = rootElement.getAttribute(&quot;skipped&quot;)</span>
+		<span class="c1"># errors = rootElement.getAttribute(&quot;errors&quot;)</span>
+		<span class="c1"># failures = rootElement.getAttribute(&quot;failures&quot;)</span>
+		<span class="c1"># assertions = rootElement.getAttribute(&quot;assertions&quot;)</span>
+
+		<span class="k">for</span> <span class="n">rootNode</span> <span class="ow">in</span> <span class="n">rootElement</span><span class="o">.</span><span class="n">iterchildren</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;testsuite&quot;</span><span class="p">):</span>  <span class="c1"># type: _Element</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ConvertTestsuite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootNode</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">Aggregate</span><span class="p">()</span>
+		<span class="n">endConversation</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_modelConversion</span> <span class="o">=</span> <span class="p">(</span><span class="n">endConversation</span> <span class="o">-</span> <span class="n">startConversion</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e9</span></div>
+
+
+<div class="viewcode-block" id="Document._ConvertTestsuite">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document._ConvertTestsuite">[docs]</a>
+	<span class="k">def</span> <span class="nf">_ConvertTestsuite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">TestsuiteSummary</span><span class="p">,</span> <span class="n">testsuitesNode</span><span class="p">:</span> <span class="n">_Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Convert the XML data structure of a ``&lt;testsuite&gt;`` to a test suite.</span>
+
+<span class="sd">		This method uses private helper methods provided by the base-class.</span>
+
+<span class="sd">		:param parent:         The test suite summary as a parent element in the test entity hierarchy.</span>
+<span class="sd">		:param testsuitesNode: The current XML element node representing a test suite.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">newTestsuite</span> <span class="o">=</span> <span class="n">Testsuite</span><span class="p">(</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ConvertName</span><span class="p">(</span><span class="n">testsuitesNode</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ConvertHostname</span><span class="p">(</span><span class="n">testsuitesNode</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ConvertTimestamp</span><span class="p">(</span><span class="n">testsuitesNode</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ConvertTime</span><span class="p">(</span><span class="n">testsuitesNode</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+			<span class="n">parent</span><span class="o">=</span><span class="n">parent</span>
+		<span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_ConvertTestsuiteChildren</span><span class="p">(</span><span class="n">testsuitesNode</span><span class="p">,</span> <span class="n">newTestsuite</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Document.Generate">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document.Generate">[docs]</a>
+	<span class="k">def</span> <span class="nf">Generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Generate the internal XML data structure from test suites and test cases.</span>
+
+<span class="sd">		This method generates the XML root element (``&lt;testsuites&gt;``) and recursively calls other generated methods.</span>
+
+<span class="sd">		:param overwrite:          Overwrite the internal XML data structure.</span>
+<span class="sd">		:raises UnittestException: If overwrite is false and the internal XML data structure is not empty.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlDocument</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Internal XML document is populated with data.&quot;</span><span class="p">)</span>
+
+		<span class="n">rootElement</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="s2">&quot;testsuites&quot;</span><span class="p">)</span>
+		<span class="n">rootElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_startTime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">rootElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_startTime</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">rootElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_duration</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span>
+		<span class="n">rootElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;tests&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tests</span><span class="p">)</span>
+		<span class="n">rootElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;failures&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_failed</span><span class="p">)</span>
+		<span class="n">rootElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errored</span><span class="p">)</span>
+		<span class="n">rootElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;skipped&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_skipped</span><span class="p">)</span>
+		<span class="c1"># if self._assertionCount is not None:</span>
+		<span class="c1"># 	rootElement.attrib[&quot;assertions&quot;] = f&quot;{self._assertionCount}&quot;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_xmlDocument</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="p">(</span><span class="n">rootElement</span><span class="p">)</span>
+
+		<span class="k">for</span> <span class="n">testsuite</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testsuites</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_GenerateTestsuite</span><span class="p">(</span><span class="n">testsuite</span><span class="p">,</span> <span class="n">rootElement</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Document._GenerateTestsuite">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document._GenerateTestsuite">[docs]</a>
+	<span class="k">def</span> <span class="nf">_GenerateTestsuite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testsuite</span><span class="p">:</span> <span class="n">Testsuite</span><span class="p">,</span> <span class="n">parentElement</span><span class="p">:</span> <span class="n">_Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Generate the internal XML data structure for a test suite.</span>
+
+<span class="sd">		This method generates the XML element (``&lt;testsuite&gt;``) and recursively calls other generated methods.</span>
+
+<span class="sd">		:param testsuite:     The test suite to convert to an XML data structures.</span>
+<span class="sd">		:param parentElement: The parent XML data structure element, this data structure part will be added to.</span>
+<span class="sd">		:return:</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">testsuiteElement</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">parentElement</span><span class="p">,</span> <span class="s2">&quot;testsuite&quot;</span><span class="p">)</span>
+		<span class="n">testsuiteElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_name</span>
+		<span class="k">if</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_startTime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">testsuiteElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">testsuite</span><span class="o">.</span><span class="n">_startTime</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+		<span class="k">if</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">testsuiteElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">testsuite</span><span class="o">.</span><span class="n">_duration</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span>
+		<span class="n">testsuiteElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;tests&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">testsuite</span><span class="o">.</span><span class="n">_tests</span><span class="p">)</span>
+		<span class="n">testsuiteElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;failures&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">testsuite</span><span class="o">.</span><span class="n">_failed</span><span class="p">)</span>
+		<span class="n">testsuiteElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">testsuite</span><span class="o">.</span><span class="n">_errored</span><span class="p">)</span>
+		<span class="n">testsuiteElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;skipped&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">testsuite</span><span class="o">.</span><span class="n">_skipped</span><span class="p">)</span>
+		<span class="c1"># if testsuite._assertionCount is not None:</span>
+		<span class="c1"># 	testsuiteElement.attrib[&quot;assertions&quot;] = f&quot;{testsuite._assertionCount}&quot;</span>
+		<span class="k">if</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_hostname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">testsuiteElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;hostname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_hostname</span>
+
+		<span class="k">for</span> <span class="n">testclass</span> <span class="ow">in</span> <span class="n">testsuite</span><span class="o">.</span><span class="n">_testclasses</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+			<span class="k">for</span> <span class="n">tc</span> <span class="ow">in</span> <span class="n">testclass</span><span class="o">.</span><span class="n">_testcases</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_GenerateTestcase</span><span class="p">(</span><span class="n">tc</span><span class="p">,</span> <span class="n">testsuiteElement</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Document._GenerateTestcase">
+<a class="viewcode-back" href="../../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.html#pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document._GenerateTestcase">[docs]</a>
+	<span class="k">def</span> <span class="nf">_GenerateTestcase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">testcase</span><span class="p">:</span> <span class="n">Testcase</span><span class="p">,</span> <span class="n">parentElement</span><span class="p">:</span> <span class="n">_Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Generate the internal XML data structure for a test case.</span>
+
+<span class="sd">		This method generates the XML element (``&lt;testcase&gt;``) and recursively calls other generated methods.</span>
+
+<span class="sd">		:param testcase:      The test case to convert to an XML data structures.</span>
+<span class="sd">		:param parentElement: The parent XML data structure element, this data structure part will be added to.</span>
+<span class="sd">		:return:</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">testcaseElement</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">parentElement</span><span class="p">,</span> <span class="s2">&quot;testcase&quot;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">testcase</span><span class="o">.</span><span class="n">Classname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">testcaseElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;classname&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testcase</span><span class="o">.</span><span class="n">Classname</span>
+		<span class="n">testcaseElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">testcase</span><span class="o">.</span><span class="n">_name</span>
+		<span class="k">if</span> <span class="n">testcase</span><span class="o">.</span><span class="n">_duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">testcaseElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">testcase</span><span class="o">.</span><span class="n">_duration</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span>
+		<span class="k">if</span> <span class="n">testcase</span><span class="o">.</span><span class="n">_assertionCount</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">testcaseElement</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;assertions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">testcase</span><span class="o">.</span><span class="n">_assertionCount</span><span class="si">}</span><span class="s2">&quot;</span>
+
+		<span class="k">if</span> <span class="n">testcase</span><span class="o">.</span><span class="n">_status</span> <span class="ow">is</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Passed</span><span class="p">:</span>
+			<span class="k">pass</span>
+		<span class="k">elif</span> <span class="n">testcase</span><span class="o">.</span><span class="n">_status</span> <span class="ow">is</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Failed</span><span class="p">:</span>
+			<span class="n">failureElement</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">testcaseElement</span><span class="p">,</span> <span class="s2">&quot;failure&quot;</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">testcase</span><span class="o">.</span><span class="n">_status</span> <span class="ow">is</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Skipped</span><span class="p">:</span>
+			<span class="n">skippedElement</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">testcaseElement</span><span class="p">,</span> <span class="s2">&quot;skipped&quot;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">errorElement</span> <span class="o">=</span> <span class="n">SubElement</span><span class="p">(</span><span class="n">testcaseElement</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2024, Electronic Design Automation Abstraction (EDA²).
+      <span class="lastupdated">Last updated on 06.10.2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
