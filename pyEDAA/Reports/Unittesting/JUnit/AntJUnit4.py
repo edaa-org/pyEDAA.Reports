@@ -39,7 +39,6 @@ from typing               import Optional as Nullable, Generator, Tuple, Union, 
 from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
 from pyTooling.Common import firstValue
 from pyTooling.Decorators import export
-from sphinx.ext import duration
 
 from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
