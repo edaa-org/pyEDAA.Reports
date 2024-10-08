@@ -37,7 +37,9 @@ from time                 import perf_counter_ns
 from typing               import Optional as Nullable, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
 from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
+from pyTooling.Common import firstValue
 from pyTooling.Decorators import export
+from sphinx.ext import duration
 
 from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
@@ -79,7 +81,7 @@ class Testsuite(ju_Testsuite):
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
 		tests, skipped, errored, failed, passed = super().Aggregate()
 
-		for testclass in self._testclasses.values():
+		for testclass in self._testclasses.values():  # type: Testclass
 			_ = testclass.Aggregate(strict)
 
 			tests += 1
@@ -298,8 +300,8 @@ class Document(ju_Document):
 		# failures = rootElement.getAttribute("failures")
 		# assertions = rootElement.getAttribute("assertions")
 
-		for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
-			self._ConvertTestsuite(self, rootNode)
+		ts = Testsuite(self._name, startTime=self._startTime, duration=self._duration, parent=self)
+		self._ConvertTestsuiteChildren(rootElement, ts)
 
 		self.Aggregate()
 		endConversation = perf_counter_ns()
@@ -336,7 +338,14 @@ class Document(ju_Document):
 		if not overwrite and self._xmlDocument is not None:
 			raise UnittestException(f"Internal XML document is populated with data.")
 
-		rootElement = Element("testsuites")
+		if self.TestsuiteCount != 1:
+			ex = UnittestException(f"The Ant + JUnit4 format requires exactly one test suite.")
+			ex.add_note(f"Found {self.TestsuiteCount} test suites.")
+			raise ex
+
+		testsuite = firstValue(self._testsuites)
+
+		rootElement = Element("testsuite")
 		rootElement.attrib["name"] = self._name
 		if self._startTime is not None:
 			rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
@@ -348,40 +357,14 @@ class Document(ju_Document):
 		rootElement.attrib["skipped"] = str(self._skipped)
 		# if self._assertionCount is not None:
 		# 	rootElement.attrib["assertions"] = f"{self._assertionCount}"
+		if testsuite._hostname is not None:
+			rootElement.attrib["hostname"] = testsuite._hostname
 
 		self._xmlDocument = ElementTree(rootElement)
 
-		for testsuite in self._testsuites.values():
-			self._GenerateTestsuite(testsuite, rootElement)
-
-	def _GenerateTestsuite(self, testsuite: Testsuite, parentElement: _Element) -> None:
-		"""
-		Generate the internal XML data structure for a test suite.
-
-		This method generates the XML element (``<testsuite>``) and recursively calls other generated methods.
-
-		:param testsuite:     The test suite to convert to an XML data structures.
-		:param parentElement: The parent XML data structure element, this data structure part will be added to.
-		:return:
-		"""
-		testsuiteElement = SubElement(parentElement, "testsuite")
-		testsuiteElement.attrib["name"] = testsuite._name
-		if testsuite._startTime is not None:
-			testsuiteElement.attrib["timestamp"] = f"{testsuite._startTime.isoformat()}"
-		if testsuite._duration is not None:
-			testsuiteElement.attrib["time"] = f"{testsuite._duration.total_seconds():.6f}"
-		testsuiteElement.attrib["tests"] = str(testsuite._tests)
-		testsuiteElement.attrib["failures"] = str(testsuite._failed)
-		testsuiteElement.attrib["errors"] = str(testsuite._errored)
-		testsuiteElement.attrib["skipped"] = str(testsuite._skipped)
-		# if testsuite._assertionCount is not None:
-		# 	testsuiteElement.attrib["assertions"] = f"{testsuite._assertionCount}"
-		if testsuite._hostname is not None:
-			testsuiteElement.attrib["hostname"] = testsuite._hostname
-
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():
-				self._GenerateTestcase(tc, testsuiteElement)
+				self._GenerateTestcase(tc, rootElement)
 
 	def _GenerateTestcase(self, testcase: Testcase, parentElement: _Element) -> None:
 		"""
