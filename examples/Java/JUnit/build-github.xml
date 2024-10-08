@@ -19,6 +19,10 @@
 		</fileset>
 	</path>
 
+	<pathconvert property="path.junit.str" refid="path.junit"/>
+
+	<echo>JUnit Classpath is ${path.junit.str}</echo>
+
 	<target name="compile" depends="init" description="compile the source">
 		<javac destdir="${build}" includeantruntime="false">
 			<src path="${src}" />
