@@ -67,7 +67,7 @@ class pyVersioning(ut_TestCase):
 		for file in files:
 			print(f"  Parsing {file} ", end="")
 			try:
-				junitDocument = Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName)
+				junitDocument = Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName)
 			except UnittestException as ex:
 				exceptionCount += 1
 				print("FAILED")
