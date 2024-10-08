@@ -346,7 +346,8 @@ class Document(ju_Document):
 		rootElement.attrib["tests"] = str(self._tests)
 		rootElement.attrib["failures"] = str(self._failed)
 		rootElement.attrib["errors"] = str(self._errored)
-		rootElement.attrib["skipped"] = str(self._skipped)
+		# rootElement.attrib["skipped"] = str(self._skipped)
+		rootElement.attrib["disabled"] = "0"                   # TODO: find a value
 		# if self._assertionCount is not None:
 		# 	rootElement.attrib["assertions"] = f"{self._assertionCount}"
 
@@ -375,10 +376,11 @@ class Document(ju_Document):
 		testsuiteElement.attrib["failures"] = str(testsuite._failed)
 		testsuiteElement.attrib["errors"] = str(testsuite._errored)
 		testsuiteElement.attrib["skipped"] = str(testsuite._skipped)
+		testsuiteElement.attrib["disabled"] = "0"                    # TODO: find a value
 		# if testsuite._assertionCount is not None:
 		# 	testsuiteElement.attrib["assertions"] = f"{testsuite._assertionCount}"
-		if testsuite._hostname is not None:
-			testsuiteElement.attrib["hostname"] = testsuite._hostname
+		# if testsuite._hostname is not None:
+		# 	testsuiteElement.attrib["hostname"] = testsuite._hostname
 
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():
@@ -402,6 +404,12 @@ class Document(ju_Document):
 			testcaseElement.attrib["time"] = f"{testcase._duration.total_seconds():.6f}"
 		if testcase._assertionCount is not None:
 			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
+
+		testcaseElement.attrib["timestamp"] = f"{testcase._parent._parent._startTime.isoformat()}"     # TODO: find a value
+		testcaseElement.attrib["file"] = ""              # TODO: find a value
+		testcaseElement.attrib["line"] = "0"             # TODO: find a value
+		testcaseElement.attrib["status"] = "run"         # TODO: find a value
+		testcaseElement.attrib["result"] = "completed"   # TODO: find a value
 
 		if testcase._status is TestcaseStatus.Passed:
 			pass
