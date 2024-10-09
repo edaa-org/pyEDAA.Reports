@@ -10,7 +10,7 @@ sphinx ~= 8.0
 docutils ~= 0.21
 
 # ReadTheDocs Theme
-sphinx_rtd_theme ~= 3.0.0
+sphinx_rtd_theme ~= 3.0.1
 
 # Sphinx Extenstions
 #sphinxcontrib-actdiag>=0.8.5
