@@ -234,7 +234,7 @@ class Document(ju_Document):
 
 		The used XML schema definition is specific to the Ant JUnit4 dialect.
 		"""
-		xmlSchemaFile = "Ant-JUnit.xsd"
+		xmlSchemaFile = "Ant-JUnit4.xsd"
 		self._Analyze(xmlSchemaFile)
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
