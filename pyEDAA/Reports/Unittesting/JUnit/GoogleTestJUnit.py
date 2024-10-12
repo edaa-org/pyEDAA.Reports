@@ -51,18 +51,32 @@ TestcaseAggregateReturnType = Tuple[int, int, int]
 TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
 
 
+from pyEDAA.Reports.helper import InheritDocumentation
+
+
 @export
+@InheritDocumentation(ju_Testcase, merge=True)
 class Testcase(ju_Testcase):
-	pass
+	"""
+	This is a derived implementation for the GoogleTest JUnit dialect.
+	"""
 
 
 @export
+@InheritDocumentation(ju_Testclass, merge=True)
 class Testclass(ju_Testclass):
-	pass
+	"""
+	This is a derived implementation for the GoogleTest JUnit dialect.
+	"""
 
 
 @export
+@InheritDocumentation(ju_Testsuite, merge=True)
 class Testsuite(ju_Testsuite):
+	"""
+	This is a derived implementation for the GoogleTest JUnit dialect.
+	"""
+
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
 		tests, skipped, errored, failed, passed = super().Aggregate()
 
@@ -108,30 +122,15 @@ class Testsuite(ju_Testsuite):
 
 		return tests, skipped, errored, failed, passed
 
-	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
-		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
-
-		if IterationScheme.PreOrder in scheme:
-			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
-				yield self
-
-			if IterationScheme.IncludeTestcases in scheme:
-				for testcase in self._testclasses.values():
-					yield testcase
-
-		for testsuite in self._testsuites.values():
-			yield from testsuite.Iterate(scheme | IterationScheme.IncludeSelf)
-
-		if IterationScheme.PostOrder in scheme:
-			if IterationScheme.IncludeTestcases in scheme:
-				for testcase in self._testclasses.values():
-					yield testcase
-
-			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
-				yield self
-
 	@classmethod
 	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
+		"""
+		Convert a test suite of the unified test entity data model to the JUnit specific data model's test suite object
+		adhering to the GoogleTest JUnit dialect.
+
+		:param testsuite: Test suite from unified data model.
+		:return:          Test suite from JUnit specific data model (GoogleTest JUnit dialect).
+		"""
 		juTestsuite = cls(
 			testsuite._name,
 			startTime=testsuite._startTime,
@@ -165,71 +164,23 @@ class Testsuite(ju_Testsuite):
 
 		return juTestsuite
 
-	def ToTestsuite(self) -> ut_Testsuite:
-		testsuite = ut_Testsuite(
-			self._name,
-			TestsuiteKind.Logical,
-			startTime=self._startTime,
-			totalDuration=self._duration,
-			status=self._status,
-		)
-
-		for testclass in self._testclasses.values():
-			suite = testsuite
-			classpath = testclass._name.split(".")
-			for element in classpath:
-				if element in suite._testsuites:
-					suite = suite._testsuites[element]
-				else:
-					suite = ut_Testsuite(element, kind=TestsuiteKind.Package, parent=suite)
-
-			suite._kind = TestsuiteKind.Class
-			if suite._parent is not testsuite:
-				suite._parent._kind = TestsuiteKind.Module
-
-			suite.AddTestcases(tc.ToTestcase() for tc in testclass._testcases.values())
-
-		return testsuite
-
 
 @export
+@InheritDocumentation(ju_TestsuiteSummary, merge=True)
 class TestsuiteSummary(ju_TestsuiteSummary):
-	def Aggregate(self) -> TestsuiteAggregateReturnType:
-		tests, skipped, errored, failed, passed = super().Aggregate()
-
-		self._tests = tests
-		self._skipped = skipped
-		self._errored = errored
-		self._failed = failed
-		self._passed = passed
-
-		if errored > 0:
-			self._status = TestsuiteStatus.Errored
-		elif failed > 0:
-			self._status = TestsuiteStatus.Failed
-		elif tests == 0:
-			self._status = TestsuiteStatus.Empty
-		elif tests - skipped == passed:
-			self._status = TestsuiteStatus.Passed
-		elif tests == skipped:
-			self._status = TestsuiteStatus.Skipped
-		else:
-			self._status = TestsuiteStatus.Unknown
-
-		return tests, skipped, errored, failed, passed
-
-	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[Testsuite, Testcase], None, None]:
-		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
-			yield self
-
-		for testsuite in self._testsuites.values():
-			yield from testsuite.IterateTestsuites(scheme | IterationScheme.IncludeSelf)
-
-		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PostOrder in scheme:
-			yield self
+	"""
+	This is a derived implementation for the GoogleTest JUnit dialect.
+	"""
 
 	@classmethod
 	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> "TestsuiteSummary":
+		"""
+		Convert a test suite summary of the unified test entity data model to the JUnit specific data model's test suite
+		summary object adhering to the GoogleTest JUnit dialect.
+
+		:param testsuiteSummary: Test suite summary from unified data model.
+		:return:                 Test suite summary from JUnit specific data model (GoogleTest JUnit dialect).
+		"""
 		return cls(
 			testsuiteSummary._name,
 			startTime=testsuiteSummary._startTime,
@@ -238,21 +189,22 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 			testsuites=(ut_Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
 		)
 
-	def ToTestsuiteSummary(self) -> ut_TestsuiteSummary:
-		return ut_TestsuiteSummary(
-			self._name,
-			startTime=self._startTime,
-			totalDuration=self._duration,
-			status=self._status,
-			testsuites=(testsuite.ToTestsuite() for testsuite in self._testsuites.values())
-		)
-
 
 @export
 class Document(ju_Document):
-	_TESTCASE:          ClassVar[Type[Testcase]] =         Testcase
-	_TESTCLASS:         ClassVar[Type[Testclass]] =        Testclass
-	_TESTSUITE:         ClassVar[Type[Testsuite]] =        Testsuite
+	"""
+	A document reader and writer for the GoogelTest JUnit XML file format.
+
+	This class reads, validates and transforms an XML file in the GoogelTest JUnit format into a JUnit data model. It can
+	then be converted into a unified test entity data model.
+
+	In reverse, a JUnit data model instance with the specific GoogelTest JUnit file format can be created from a unified
+	test entity data model. This data model can be written as XML into a file.
+	"""
+
+	_TESTCASE:  ClassVar[Type[Testcase]] =  Testcase
+	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass
+	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite
 
 	@classmethod
 	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary):
@@ -271,16 +223,36 @@ class Document(ju_Document):
 
 		return doc
 
-	def Read(self) -> None:
+	def Analyze(self) -> None:
+		"""
+		Analyze the XML file, parse the content into an XML data structure and validate the data structure using an XML
+		schema.
+
+		.. hint::
+
+		   The time spend for analysis will be made available via property :data:`AnalysisDuration`.
+
+		The used XML schema definition is specific to the GoogleTest JUnit dialect.
+		"""
 		xmlSchemaFile = "GoogleTest-JUnit.xsd"
-		self._Read(xmlSchemaFile)
+		self._Analyze(xmlSchemaFile)
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
+		"""
+		Write the data model as XML into a file adhering to the GoogleTest dialect.
+
+		:param path:               Optional path to the XMl file, if internal path shouldn't be used.
+		:param overwrite:          If true, overwrite an existing file.
+		:param regenerate:         If true, regenerate the XML structure from data model.
+		:raises UnittestException: If the file cannot be overwritten.
+		:raises UnittestException: If the internal XML data structure wasn't generated.
+		:raises UnittestException: If the file cannot be opened or written.
+		"""
 		if path is None:
 			path = self._path
 
 		if not overwrite and path.exists():
-			raise UnittestException(f"JUnit XML file '{path}' can not be written.") \
+			raise UnittestException(f"JUnit XML file '{path}' can not be overwritten.") \
 				from FileExistsError(f"File '{path}' already exists.")
 
 		if regenerate:
@@ -291,21 +263,35 @@ class Document(ju_Document):
 			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
 			raise ex
 
-		with path.open("wb") as file:
-			file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
+		try:
+			with path.open("wb") as file:
+				file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
+		except Exception as ex:
+			raise UnittestException(f"JUnit XML file '{path}' can not be written.") from ex
 
-	def Parse(self) -> None:
+	def Convert(self) -> None:
+		"""
+		Convert the parsed and validated XML data structure into a JUnit test entity hierarchy.
+
+		This method converts the root element.
+
+		.. hint::
+
+		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
+
+		:raises UnittestException: If XML was not read and parsed before.
+		"""
 		if self._xmlDocument is None:
 			ex = UnittestException(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'JUnitDocument.Read()' or create document using 'JUnitDocument(path, parse=True)'.")
+			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
 		startConversion = perf_counter_ns()
 		rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name = self._ParseName(rootElement, optional=True)
-		self._startTime =self._ParseTimestamp(rootElement, optional=True)
-		self._duration = self._ParseTime(rootElement, optional=True)
+		self._name = self._ConvertName(rootElement, optional=True)
+		self._startTime =self._ConvertTimestamp(rootElement, optional=True)
+		self._duration = self._ConvertTime(rootElement, optional=True)
 
 		# tests = rootElement.getAttribute("tests")
 		# skipped = rootElement.getAttribute("skipped")
@@ -314,25 +300,41 @@ class Document(ju_Document):
 		# assertions = rootElement.getAttribute("assertions")
 
 		for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
-			self._ParseTestsuite(self, rootNode)
+			self._ConvertTestsuite(self, rootNode)
 
 		self.Aggregate()
 		endConversation = perf_counter_ns()
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
-	def _ParseTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
+	def _ConvertTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
+		"""
+		Convert the XML data structure of a ``<testsuite>`` to a test suite.
+
+		This method uses private helper methods provided by the base-class.
+
+		:param parent:         The test suite summary as a parent element in the test entity hierarchy.
+		:param testsuitesNode: The current XML element node representing a test suite.
+		"""
 		newTestsuite = Testsuite(
-			self._ParseName(testsuitesNode, optional=False),
-			self._ParseHostname(testsuitesNode, optional=True),
-			self._ParseTimestamp(testsuitesNode, optional=False),
-			self._ParseTime(testsuitesNode, optional=False),
+			self._ConvertName(testsuitesNode, optional=False),
+			self._ConvertHostname(testsuitesNode, optional=True),
+			self._ConvertTimestamp(testsuitesNode, optional=False),
+			self._ConvertTime(testsuitesNode, optional=False),
 			parent=parent
 		)
 
-		self._ParseTestsuiteChildren(testsuitesNode, newTestsuite)
+		self._ConvertTestsuiteChildren(testsuitesNode, newTestsuite)
 
 	def Generate(self, overwrite: bool = False) -> None:
-		if self._xmlDocument is not None:
+		"""
+		Generate the internal XML data structure from test suites and test cases.
+
+		This method generates the XML root element (``<testsuites>``) and recursively calls other generated methods.
+
+		:param overwrite:          Overwrite the internal XML data structure.
+		:raises UnittestException: If overwrite is false and the internal XML data structure is not empty.
+		"""
+		if not overwrite and self._xmlDocument is not None:
 			raise UnittestException(f"Internal XML document is populated with data.")
 
 		rootElement = Element("testsuites")
@@ -344,7 +346,8 @@ class Document(ju_Document):
 		rootElement.attrib["tests"] = str(self._tests)
 		rootElement.attrib["failures"] = str(self._failed)
 		rootElement.attrib["errors"] = str(self._errored)
-		rootElement.attrib["skipped"] = str(self._skipped)
+		# rootElement.attrib["skipped"] = str(self._skipped)
+		rootElement.attrib["disabled"] = "0"                   # TODO: find a value
 		# if self._assertionCount is not None:
 		# 	rootElement.attrib["assertions"] = f"{self._assertionCount}"
 
@@ -353,7 +356,16 @@ class Document(ju_Document):
 		for testsuite in self._testsuites.values():
 			self._GenerateTestsuite(testsuite, rootElement)
 
-	def _GenerateTestsuite(self, testsuite: Testsuite, parentElement: _Element):
+	def _GenerateTestsuite(self, testsuite: Testsuite, parentElement: _Element) -> None:
+		"""
+		Generate the internal XML data structure for a test suite.
+
+		This method generates the XML element (``<testsuite>``) and recursively calls other generated methods.
+
+		:param testsuite:     The test suite to convert to an XML data structures.
+		:param parentElement: The parent XML data structure element, this data structure part will be added to.
+		:return:
+		"""
 		testsuiteElement = SubElement(parentElement, "testsuite")
 		testsuiteElement.attrib["name"] = testsuite._name
 		if testsuite._startTime is not None:
@@ -364,16 +376,26 @@ class Document(ju_Document):
 		testsuiteElement.attrib["failures"] = str(testsuite._failed)
 		testsuiteElement.attrib["errors"] = str(testsuite._errored)
 		testsuiteElement.attrib["skipped"] = str(testsuite._skipped)
+		testsuiteElement.attrib["disabled"] = "0"                    # TODO: find a value
 		# if testsuite._assertionCount is not None:
 		# 	testsuiteElement.attrib["assertions"] = f"{testsuite._assertionCount}"
-		if testsuite._hostname is not None:
-			testsuiteElement.attrib["hostname"] = testsuite._hostname
+		# if testsuite._hostname is not None:
+		# 	testsuiteElement.attrib["hostname"] = testsuite._hostname
 
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():
 				self._GenerateTestcase(tc, testsuiteElement)
 
-	def _GenerateTestcase(self, testcase: Testcase, parentElement: _Element):
+	def _GenerateTestcase(self, testcase: Testcase, parentElement: _Element) -> None:
+		"""
+		Generate the internal XML data structure for a test case.
+
+		This method generates the XML element (``<testcase>``) and recursively calls other generated methods.
+
+		:param testcase:      The test case to convert to an XML data structures.
+		:param parentElement: The parent XML data structure element, this data structure part will be added to.
+		:return:
+		"""
 		testcaseElement = SubElement(parentElement, "testcase")
 		if testcase.Classname is not None:
 			testcaseElement.attrib["classname"] = testcase.Classname
@@ -382,6 +404,12 @@ class Document(ju_Document):
 			testcaseElement.attrib["time"] = f"{testcase._duration.total_seconds():.6f}"
 		if testcase._assertionCount is not None:
 			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
+
+		testcaseElement.attrib["timestamp"] = f"{testcase._parent._parent._startTime.isoformat()}"     # TODO: find a value
+		testcaseElement.attrib["file"] = ""              # TODO: find a value
+		testcaseElement.attrib["line"] = "0"             # TODO: find a value
+		testcaseElement.attrib["status"] = "run"         # TODO: find a value
+		testcaseElement.attrib["result"] = "completed"   # TODO: find a value
 
 		if testcase._status is TestcaseStatus.Passed:
 			pass

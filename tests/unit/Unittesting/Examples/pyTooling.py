@@ -65,7 +65,7 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			print(f"  Parsing {file}")
-			junitDocument = Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName)
+			junitDocument = Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName)
 			junitDocuments.append(junitDocument)
 
 			# print(f"{junitDocument.Path}")
@@ -108,9 +108,9 @@ class PyTooling(ut_TestCase):
 		aggregateDuration = (endAggregate - startAggregate) / 1e9
 
 		self.assertEqual(7, merged.TestsuiteCount)
-		self.assertEqual(10, merged.TestcaseCount)
+		self.assertEqual(11, merged.TestcaseCount)
 		self.assertEqual(0, merged.AssertionCount)
-		self.assertEqual(10, merged.Tests)
+		self.assertEqual(11, merged.Tests)
 		self.assertEqual(3, merged.Skipped)
 		self.assertEqual(0, merged.Errored)
 		self.assertEqual(0, merged.Failed)
@@ -119,9 +119,9 @@ class PyTooling(ut_TestCase):
 		result = merged.ToTestsuiteSummary()
 
 		self.assertEqual(7, result.TestsuiteCount)
-		self.assertEqual(10, result.TestcaseCount)
+		self.assertEqual(11, result.TestcaseCount)
 		self.assertEqual(0, result.AssertionCount)
-		self.assertEqual(10, result.Tests)
+		self.assertEqual(11, result.Tests)
 		self.assertEqual(3, result.Skipped)
 		self.assertEqual(0, result.Errored)
 		self.assertEqual(0, result.Failed)
@@ -150,7 +150,7 @@ class PyTooling(ut_TestCase):
 		startParsing = perf_counter_ns()
 		for file in files:
 			print(f"  Parsing {file}")
-			junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+			junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 

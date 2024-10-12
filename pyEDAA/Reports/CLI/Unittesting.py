@@ -92,7 +92,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 			if dataFormat == "junit":
 				if dialect == "ant":
-					from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document
+					from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 					docClass = Document
 				elif dialect == "any":
 					from pyEDAA.Reports.Unittesting.JUnit import Document
@@ -148,7 +148,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteError(f"Syntax error: '{task}'")
 
 	def _mergeAntJUnit(self, testsuiteSummary: MergedTestsuiteSummary, foundFiles: Tuple[Path, ...]) -> None:
-		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document
+		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 
 		self.WriteNormal(f"Reading {len(foundFiles)} Ant-JUnit unit test summary files ...")
 
@@ -156,7 +156,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 
@@ -178,7 +178,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 
@@ -200,7 +200,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 
@@ -222,7 +222,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 
@@ -244,7 +244,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		for file in foundFiles:
 			self.WriteVerbose(f"  Reading {file}")
 			try:
-				junitDocuments.append(Document(file, parse=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
+				junitDocuments.append(Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestException as ex:
 				self.WriteError(ex)
 
@@ -390,7 +390,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteError(f"Syntax error: '{task}'")
 
 	def _outputAntJUnit(self, testsuiteSummary: TestsuiteSummary, file: Path):
-		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document, UnittestException
+		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document, UnittestException
 
 		self.WriteNormal(f"Writing merged unit test summaries to file ...")
 		self.WriteVerbose(f"  Common Data Model -> OUT (JUnit):      {file}")

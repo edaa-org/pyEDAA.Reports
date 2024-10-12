@@ -35,8 +35,25 @@ footer p {
 
 section > p,
 .section p,
-.simple li {
+.simple li,
+.admonition > p,
+.sd-col > p,
+dl > dd > p {
 	text-align: justify
+}
+
+.rst-content .topic-title {
+	font-size: larger;
+	font-weight: 700;
+	margin-top: 18px;
+	margin-bottom: 6px;
+}
+
+.rst-content p.rubric {
+	text-decoration: underline;
+	font-weight: 700;
+	margin-top: 18px;
+	margin-bottom: 16px;
 }
 
 /* wyrm overrides */
@@ -88,6 +105,10 @@ section > p,
 	margin: 0
 }
 
+.sd-row>* {
+	margin-top: 1.5em;
+}
+
 .sd-tab-set > label {
 	padding-top: .5em;
 	padding-right: 1em;
@@ -98,4 +119,14 @@ section > p,
 .sd-container-fluid {
 	padding-left: 0;
 	padding-right: 0;
+}
+
+.sd-card-header {
+	background-color: #EEEEEE;
+	font-size: larger;
+	font-weight: 700;
+}
+
+.sd-card-body > p {
+	text-align: justify
 }

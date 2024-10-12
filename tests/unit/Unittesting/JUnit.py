@@ -436,17 +436,17 @@ class Document(py_TestCase):
 		self.assertLess(doc.AnalysisDuration, zeroTime)
 		self.assertLess(doc.ModelConversionDuration, zeroTime)
 
-		doc.Read()
+		doc.Analyze()
 		self.assertGreater(doc.AnalysisDuration, zeroTime)
 
-		doc.Parse()
+		doc.Convert()
 		self.assertGreater(doc.ModelConversionDuration, zeroTime)
 
 	def test_Create_WithParse(self) -> None:
 		zeroTime = timedelta()
 
 		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
-		doc = JUnitDocument(junitExampleFile, parse=True)
+		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
 
 		self.assertEqual(junitExampleFile, doc.Path)
 		self.assertGreater(doc.AnalysisDuration, zeroTime)
@@ -454,7 +454,7 @@ class Document(py_TestCase):
 
 	def test_ReadWrite(self) -> None:
 		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
-		doc = JUnitDocument(junitExampleFile, parse=True)
+		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
 
 		doc.Write(self._outputDirectory / "ReadWrite.xml")
 
@@ -490,7 +490,7 @@ class ExampleFiles(py_TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
-		doc = JUnitDocument(junitExampleFile, parse=True)
+		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
 
 		self.assertGreater(doc.TestsuiteCount, 0)
 		self.assertGreater(doc.TestcaseCount, 0)
@@ -507,7 +507,7 @@ class ExampleFiles(py_TestCase):
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/OsvvmLibraries/OSVVMLibraries_RunAllTests.xml")
-		doc = JUnitDocument(junitExampleFile, parse=True)
+		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
 
 		self.assertGreater(doc.TestsuiteCount, 0)
 		self.assertGreater(doc.TestcaseCount, 0)

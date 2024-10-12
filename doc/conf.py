@@ -255,15 +255,6 @@ todo_link_only = True
 # ==============================================================================
 # sphinx-reports
 # ==============================================================================
-_coverageLevels = {
-	30:      {"class": "report-cov-below30",  "desc": "almost undocumented"},
-	50:      {"class": "report-cov-below50",  "desc": "poorly documented"},
-	80:      {"class": "report-cov-below80",  "desc": "roughly documented"},
-	90:      {"class": "report-cov-below90",  "desc": "well documented"},
-	100:     {"class": "report-cov-below100", "desc": "excellent documented"},
-	"error": {"class": "report-cov-error",    "desc": "internal error"},
-}
-
 report_unittest_testsuites = {
 	"src": {
 		"name":        f"{project}",
@@ -275,7 +266,7 @@ report_codecov_packages = {
 		"name":        f"{project}",
 		"json_report": "../report/coverage/coverage.json",
 		"fail_below":  80,
-		"levels":      _coverageLevels
+		"levels":      "default"
 	}
 }
 report_doccov_packages = {
@@ -283,7 +274,7 @@ report_doccov_packages = {
 		"name":       f"{project}",
 		"directory":  f"../{project.replace('.', '/')}",
 		"fail_below": 80,
-		"levels":     _coverageLevels
+		"levels":     "default"
 	}
 }
 
@@ -291,7 +282,7 @@ report_doccov_packages = {
 # ==============================================================================
 # Sphinx_Design
 # ==============================================================================
-sd_fontawesome_latex = True
+# sd_fontawesome_latex = True
 
 
 # ==============================================================================
