@@ -52,7 +52,7 @@ setup(**DescribePythonPackageHostedOnGitHub(
 	dataFiles={
 		packageName: [
 			f"py.typed",
-			f"resources/*.xsd"
+			f"Resources/*.xsd"
 		]
 	},
 	consoleScripts={

@@ -90,6 +90,11 @@ jobs:
       python_version_list: "3.9 3.10 3.11 3.12 pypy-3.9 pypy-3.10"
       disable_list: "mingw64:* ucrt64:*"
 
+  AppTestingParams:
+    uses: pyTooling/Actions/.github/workflows/Parameters.yml@dev
+    with:
+      name: pyEDAA.Reports
+
   UnitTesting:
     uses: pyTooling/Actions/.github/workflows/UnitTesting.yml@dev
     needs:
@@ -131,19 +136,18 @@ jobs:
       python_version: ${{ needs.UnitTestingParams.outputs.python_version }}
       artifact: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
 
-  ApplicationTest:
+  AppTesting:
+    uses: pyTooling/Actions/.github/workflows/ApplicationTesting.yml@r1
     needs:
+      - AppTestingParams
       - Package
       - Java-Ant-JUnit4
       - Cpp-GoogleTest
       - Python-pytest
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download JUnit XML files
-        uses: actions/download-artifact@v4
-      - name: ✅ Run pytest
-        run: |
-          ls -lAh
+    with:
+      jobs: ${{ needs.AppTestingParams.outputs.python_jobs }}
+      wheel: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
+      apptest_xml_artifact: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).apptesting_xml }}
 
   PublishCoverageResults:
     uses: pyTooling/Actions/.github/workflows/PublishCoverageResults.yml@r1
@@ -227,6 +231,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags')
     needs:
       - Package
+      - AppTesting
       - PublishToGitHubPages
 
   PublishOnPyPI:
