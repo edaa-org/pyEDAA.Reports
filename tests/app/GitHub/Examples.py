@@ -28,34 +28,17 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Package installer for 'Various report abstract data models and report format converters'."""
-from pathlib             import Path
+"""Testcase for application testing report files generated on GitHub."""
+from pathlib      import Path
+from unittest     import TestCase
 
-from setuptools          import setup
-from pyTooling.Packaging import DescribePythonPackageHostedOnGitHub
 
-gitHubNamespace =        "pyEDAA"
-packageName =            "pyEDAA.Reports"
-packageDirectory =       packageName.replace(".", "/")
-packageInformationFile = Path(f"{packageDirectory}/__init__.py")
+if __name__ == "__main__": # pragma: no cover
+	print("ERROR: you called a testcase declaration file as an executable module.")
+	print("Use: 'python -m unitest <testcase module>'")
+	exit(1)
 
-setup(**DescribePythonPackageHostedOnGitHub(
-	packageName=packageName,
-	description="Various report abstract data models and report format converters.",
-	gitHubNamespace=gitHubNamespace,
-	unittestRequirementsFile=Path("tests/requirements.txt"),
-	developmentStatus="pre-alpha",
-	classifiers=[
-		"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
-	],
-	sourceFileWithVersion=packageInformationFile,
-	dataFiles={
-		packageName: [
-			f"py.typed",
-			f"Resources/*.xsd"
-		]
-	},
-	consoleScripts={
-		"pyedaa-reports": "pyEDAA.Reports.CLI:main"
-	}
-))
+
+class Dummy(TestCase):
+	def test_dummy(self):
+		print()
