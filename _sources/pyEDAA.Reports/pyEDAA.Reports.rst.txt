@@ -1,0 +1,20 @@
+.. # Template created by Patrick Lehmann
+
+Python Class Reference
+######################
+
+Reference of all packages and modules:
+
+.. automodule:: pyEDAA.Reports
+
+.. toctree::
+   :maxdepth: 1
+
+   pyEDAA.Reports.CLI
+   pyEDAA.Reports.Dependency
+   pyEDAA.Reports.DocumentationCoverage
+   pyEDAA.Reports.OSVVM
+   pyEDAA.Reports.Requirement
+   pyEDAA.Reports.Resources
+   pyEDAA.Reports.Unittesting
+   pyEDAA.Reports.helper

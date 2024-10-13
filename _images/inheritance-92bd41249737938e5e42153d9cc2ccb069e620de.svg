@@ -1,0 +1,65 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="278pt" height="64pt" viewBox="0.00 0.00 278.00 64.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 60)">
+<ns0:title>inheritance84c535a038</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Base</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Base" ns1:title="Base-class for all test entities (test cases, test suites, ...)." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="54,-56 0,-56 0,-37 54,-37 54,-56" />
+<ns0:text text-anchor="middle" x="27" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Base</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>TestsuiteBase</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.TestsuiteBase" ns1:title="Base-class for all test suites and for test summaries." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="174,-37 90,-37 90,-18 174,-18 174,-37" />
+<ns0:text text-anchor="middle" x="132" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TestsuiteBase</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>Base-&gt;TestsuiteBase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.26,-41.66C63.58,-39.94 74.37,-37.95 84.86,-36.01" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="85.37,-37.7 89.97,-35.07 84.74,-34.25 85.37,-37.7" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>Generic</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="https://docs.python.org/3/library/typing.html#typing.Generic" ns1:title="Abstract base class for generic types." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="54,-19 0,-19 0,0 54,0 54,-19" />
+<ns0:text text-anchor="middle" x="27" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Generic</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>Generic-&gt;TestsuiteBase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M54.26,-14.09C63.58,-15.72 74.37,-17.6 84.86,-19.44" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="84.75,-21.19 89.97,-20.33 85.35,-17.75 84.75,-21.19" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>Testsuite</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.Testsuite" ns1:title="A testsuite is a mid-level element in the test entity hierarchy representing a group of tests." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="270,-37 210,-37 210,-18 270,-18 270,-37" />
+<ns0:text text-anchor="middle" x="240" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Testsuite</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>Testsuite-&gt;Testsuite</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M223.66,-37.08C215.71,-45.73 221.16,-55 240,-55 255.6,-55 262.02,-48.65 259.25,-41.55" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="260.53,-40.32 256.34,-37.08 257.6,-42.23 260.53,-40.32" />
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>TestsuiteBase-&gt;Testsuite</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M174.29,-27.5C184.29,-27.5 194.88,-27.5 204.54,-27.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="204.79,-29.25 209.79,-27.5 204.79,-25.75 204.79,-29.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

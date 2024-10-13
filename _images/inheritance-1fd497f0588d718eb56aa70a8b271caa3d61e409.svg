@@ -1,0 +1,47 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="247pt" height="64pt" viewBox="0.00 0.00 247.00 64.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 60)">
+<ns0:title>inheritance87e4808aab</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>OsvvmException</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.OsvvmException" ns1:title="OsvvmException" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="99,-56 0,-56 0,-37 99,-37 99,-56" />
+<ns0:text text-anchor="middle" x="49.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">OsvvmException</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>UnittestException</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.UnittestException" ns1:title="Base-exception for all unit test related exceptions." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="239,-37 135,-37 135,-18 239,-18 239,-37" />
+<ns0:text text-anchor="middle" x="187" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">UnittestException</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>OsvvmException-&gt;UnittestException</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M99.04,-39.69C108.96,-38.3 119.47,-36.83 129.64,-35.4" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="129.89,-37.14 134.6,-34.71 129.4,-33.67 129.89,-37.14" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>ReportException</ns0:title>
+<ns0:polygon fill="white" stroke="#1e90ff" points="98,-19 1,-19 1,0 98,0 98,-19" />
+<ns0:text text-anchor="middle" x="49.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ReportException</ns0:text>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>ReportException-&gt;UnittestException</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M98.27,-15.85C108.49,-17.2 119.37,-18.65 129.86,-20.04" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="129.79,-21.8 134.98,-20.72 130.26,-18.33 129.79,-21.8" />
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>UnittestException-&gt;UnittestException</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M166.04,-37.08C155.84,-45.73 162.83,-55 187,-55 207.4,-55 215.56,-48.4 211.48,-41.15" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="212.56,-39.71 207.96,-37.08 209.91,-42.01 212.56,-39.71" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

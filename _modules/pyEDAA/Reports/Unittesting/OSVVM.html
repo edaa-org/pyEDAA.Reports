@@ -1,0 +1,531 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyEDAA.Reports.Unittesting.OSVVM &mdash; pyEDAA.Reports 0.14.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=77553476" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-reports.e44b1595f1e09d5e109d001839ba3f42.css?v=0b41afa8" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/override.css?v=6943e0d8" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.svg"/>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=3a3a8e7f"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html">
+            
+              <img src="../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="https://edaa-org.github.io/">Used as a layer of EDA² ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Installation.html">Installation/Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Dependency.html">Dependency</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Report Formats</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CodeCoverage/index.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../DocCoverage/index.html">Documentation Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Unittesting/index.html">Unittesting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Logging/index.html">EDA Tool Logs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References and Reports</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CommandLineInterface.html">Command Line Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pyEDAA.Reports/pyEDAA.Reports.html">Python Class Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/unittests.html">Unittest Summary Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/coverage/index.html">Code Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/doccoverage.html">Doc. Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reports/typing/index.html">Static Type Check Report ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../License.html">Apache License 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Doc-License.html">Creative Commons Attribution 4.0 International</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../py-modindex.html">Python Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../TODO.html">TODOs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Old Content</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/FunctionalCoverage.html">Functional coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/LineCoverage.html">Line coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/Resources.html">Synthesis and implementation results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/RichLogging.html">Semantic/rich logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/Tracking.html">Tracking requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../old/Frontends.html">Frontends</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">pyEDAA.Reports</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../Unittesting.html">pyEDAA.Reports.Unittesting</a></li>
+      <li class="breadcrumb-item active">pyEDAA.Reports.Unittesting.OSVVM</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyEDAA.Reports.Unittesting.OSVVM</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#              _____ ____    _        _      ____                       _                                              #</span>
+<span class="c1">#  _ __  _   _| ____|  _ \  / \      / \    |  _ \ ___ _ __   ___  _ __| |_ ___                                        #</span>
+<span class="c1"># | &#39;_ \| | | |  _| | | | |/ _ \    / _ \   | |_) / _ \ &#39;_ \ / _ \| &#39;__| __/ __|                                       #</span>
+<span class="c1"># | |_) | |_| | |___| |_| / ___ \  / ___ \ _|  _ &lt;  __/ |_) | (_) | |  | |_\__ \                                       #</span>
+<span class="c1"># | .__/ \__, |_____|____/_/   \_\/_/   \_(_)_| \_\___| .__/ \___/|_|   \__|___/                                       #</span>
+<span class="c1"># |_|    |___/                                        |_|                                                              #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Authors:                                                                                                             #</span>
+<span class="c1">#   Patrick Lehmann                                                                                                    #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># License:                                                                                                             #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Copyright 2021-2024 Electronic Design Automation Abstraction (EDA²)                                                  #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                                      #</span>
+<span class="c1"># you may not use this file except in compliance with the License.                                                     #</span>
+<span class="c1"># You may obtain a copy of the License at                                                                              #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0                                                                         #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software                                                  #</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                                    #</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                             #</span>
+<span class="c1"># See the License for the specific language governing permissions and                                                  #</span>
+<span class="c1"># limitations under the License.                                                                                       #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># SPDX-License-Identifier: Apache-2.0                                                                                  #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;Reader for OSVVM test report summary files in YAML format.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">datetime</span>              <span class="kn">import</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">pathlib</span>               <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">time</span>                  <span class="kn">import</span> <span class="n">perf_counter_ns</span>
+<span class="kn">from</span> <span class="nn">typing</span>                <span class="kn">import</span> <span class="n">Optional</span> <span class="k">as</span> <span class="n">Nullable</span>
+
+<span class="kn">from</span> <span class="nn">ruamel.yaml</span>           <span class="kn">import</span> <span class="n">YAML</span><span class="p">,</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">CommentedSeq</span>
+<span class="kn">from</span> <span class="nn">pyTooling.Decorators</span>  <span class="kn">import</span> <span class="n">export</span><span class="p">,</span> <span class="n">notimplemented</span>
+
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.Unittesting</span> <span class="kn">import</span> <span class="n">UnittestException</span><span class="p">,</span> <span class="n">Document</span><span class="p">,</span> <span class="n">TestcaseStatus</span>
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.Unittesting</span> <span class="kn">import</span> <span class="n">TestsuiteSummary</span> <span class="k">as</span> <span class="n">ut_TestsuiteSummary</span><span class="p">,</span> <span class="n">Testsuite</span> <span class="k">as</span> <span class="n">ut_Testsuite</span>
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.Unittesting</span> <span class="kn">import</span> <span class="n">Testcase</span> <span class="k">as</span> <span class="n">ut_Testcase</span>
+
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports.helper</span>      <span class="kn">import</span> <span class="n">InheritDocumentation</span>
+
+
+<div class="viewcode-block" id="OsvvmException">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.OsvvmException">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">OsvvmException</span><span class="p">:</span>
+	<span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="UnittestException">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.UnittestException">[docs]</a>
+<span class="nd">@export</span>
+<span class="nd">@InheritDocumentation</span><span class="p">(</span><span class="n">UnittestException</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">UnittestException</span><span class="p">(</span><span class="n">UnittestException</span><span class="p">,</span> <span class="n">OsvvmException</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;@InheritDocumentation(UnittestException)&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Testcase">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.Testcase">[docs]</a>
+<span class="nd">@export</span>
+<span class="nd">@InheritDocumentation</span><span class="p">(</span><span class="n">ut_Testcase</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Testcase</span><span class="p">(</span><span class="n">ut_Testcase</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;@InheritDocumentation(ut_Testcase)&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="Testsuite">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.Testsuite">[docs]</a>
+<span class="nd">@export</span>
+<span class="nd">@InheritDocumentation</span><span class="p">(</span><span class="n">ut_Testsuite</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Testsuite</span><span class="p">(</span><span class="n">ut_Testsuite</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;@InheritDocumentation(ut_Testsuite)&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="TestsuiteSummary">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.TestsuiteSummary">[docs]</a>
+<span class="nd">@export</span>
+<span class="nd">@InheritDocumentation</span><span class="p">(</span><span class="n">ut_TestsuiteSummary</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">TestsuiteSummary</span><span class="p">(</span><span class="n">ut_TestsuiteSummary</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;@InheritDocumentation(ut_TestsuiteSummary)&quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="BuildSummaryDocument">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.BuildSummaryDocument">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">BuildSummaryDocument</span><span class="p">(</span><span class="n">TestsuiteSummary</span><span class="p">,</span> <span class="n">Document</span><span class="p">):</span>
+	<span class="n">_yamlDocument</span><span class="p">:</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">YAML</span><span class="p">]</span>
+
+<div class="viewcode-block" id="BuildSummaryDocument.__init__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.BuildSummaryDocument.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yamlReportFile</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">analyzeAndConvert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Unprocessed OSVVM YAML file&quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="n">Document</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yamlReportFile</span><span class="p">,</span> <span class="n">analyzeAndConvert</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BuildSummaryDocument.Analyze">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.BuildSummaryDocument.Analyze">[docs]</a>
+	<span class="k">def</span> <span class="nf">Analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Analyze the YAML file, parse the content into an YAML data structure.</span>
+
+<span class="sd">		.. hint::</span>
+
+<span class="sd">		   The time spend for analysis will be made available via property :data:`AnalysisDuration`..</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;OSVVM YAML file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span> \
+				<span class="kn">from</span> <span class="nn">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+
+		<span class="n">startAnalysis</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">yamlReader</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span> <span class="o">=</span> <span class="n">yamlReader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Couldn&#39;t open &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="n">endAnalysis</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_analysisDuration</span> <span class="o">=</span> <span class="p">(</span><span class="n">endAnalysis</span> <span class="o">-</span> <span class="n">startAnalysis</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e9</span></div>
+
+
+	<span class="nd">@notimplemented</span>
+	<span class="k">def</span> <span class="nf">Write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Write the data model as XML into a file adhering to the Any JUnit dialect.</span>
+
+<span class="sd">		:param path:               Optional path to the YAML file, if internal path shouldn&#39;t be used.</span>
+<span class="sd">		:param overwrite:          If true, overwrite an existing file.</span>
+<span class="sd">		:raises UnittestException: If the file cannot be overwritten.</span>
+<span class="sd">		:raises UnittestException: If the internal YAML data structure wasn&#39;t generated.</span>
+<span class="sd">		:raises UnittestException: If the file cannot be opened or written.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;OSVVM YAML file &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; can not be overwritten.&quot;</span><span class="p">)</span> \
+				<span class="kn">from</span> <span class="nn">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; already exists.&quot;</span><span class="p">)</span>
+
+		<span class="c1"># if regenerate:</span>
+		<span class="c1"># 	self.Generate(overwrite=True)</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">ex</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Internal YAML document tree is empty and needs to be generated before write is possible.&quot;</span><span class="p">)</span>
+			<span class="c1"># ex.add_note(f&quot;Call &#39;BuildSummaryDocument.Generate()&#39; or &#39;BuildSummaryDocument.Write(..., regenerate=True)&#39;.&quot;)</span>
+			<span class="k">raise</span> <span class="n">ex</span>
+
+		<span class="c1"># with path.open(&quot;w&quot;, encoding=&quot;utf-8&quot;) as file:</span>
+		<span class="c1"># 	self._yamlDocument.writexml(file, addindent=&quot;\t&quot;, encoding=&quot;utf-8&quot;, newl=&quot;\n&quot;)</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseSequenceFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">CommentedSeq</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sequence field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="p">()</span>
+		<span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CommentedSeq</span><span class="p">):</span>
+			<span class="n">line</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">_yaml_line_col</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">fieldName</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+			<span class="n">ex</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not a sequence.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+			<span class="n">ex</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found type </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> at line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">ex</span>
+
+		<span class="k">return</span> <span class="n">value</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseMapFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">CommentedMap</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dictionary field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="p">{}</span>
+		<span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CommentedMap</span><span class="p">):</span>
+			<span class="n">line</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">_yaml_line_col</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">fieldName</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+			<span class="n">ex</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not a list.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+			<span class="n">ex</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type mismatch found for line </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">ex</span>
+		<span class="k">return</span> <span class="n">value</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseStrFieldFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;String field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not of type str.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+
+		<span class="k">return</span> <span class="n">value</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Integer field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not of type int.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+
+		<span class="k">return</span> <span class="n">value</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseDateFieldFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Date field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not of type datetime.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+
+		<span class="k">return</span> <span class="n">value</span>
+
+	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">_ParseDurationFieldFromYAML</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">,</span> <span class="n">fieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="n">timedelta</span><span class="p">]:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">fieldName</span><span class="p">]</span>
+		<span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+			<span class="n">newEx</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Duration field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; not found in node starting at line </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">lc</span><span class="o">.</span><span class="n">line</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+			<span class="n">newEx</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available fields: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">newEx</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Field &#39;</span><span class="si">{</span><span class="n">fieldName</span><span class="si">}</span><span class="s2">&#39; is not of type float.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: from TypeError??</span>
+
+		<span class="k">return</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BuildSummaryDocument.Convert">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.BuildSummaryDocument.Convert">[docs]</a>
+	<span class="k">def</span> <span class="nf">Convert</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Convert the parsed YAML data structure into a test entity hierarchy.</span>
+
+<span class="sd">		This method converts the root element.</span>
+
+<span class="sd">		.. hint::</span>
+
+<span class="sd">		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.</span>
+
+<span class="sd">		:raises UnittestException: If XML was not read and parsed before.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">ex</span> <span class="o">=</span> <span class="n">UnittestException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;OSVVM YAML file &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39; needs to be read and analyzed by a YAML parser.&quot;</span><span class="p">)</span>
+			<span class="n">ex</span><span class="o">.</span><span class="n">add_note</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Call &#39;Document.Analyze()&#39; or create document using &#39;Document(path, parse=True)&#39;.&quot;</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="n">ex</span>
+
+		<span class="n">startConversion</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+		<span class="c1"># self._name = self._yamlDocument[&quot;name&quot;]</span>
+		<span class="n">buildInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseMapFromYAML</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span><span class="p">,</span> <span class="s2">&quot;BuildInfo&quot;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_startTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseDateFieldFromYAML</span><span class="p">(</span><span class="n">buildInfo</span><span class="p">,</span> <span class="s2">&quot;StartTime&quot;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_totalDuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseDurationFieldFromYAML</span><span class="p">(</span><span class="n">buildInfo</span><span class="p">,</span> <span class="s2">&quot;Elapsed&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s2">&quot;TestSuites&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">yamlTestsuite</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseSequenceFromYAML</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_yamlDocument</span><span class="p">,</span> <span class="s2">&quot;TestSuites&quot;</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_ConvertTestsuite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yamlTestsuite</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">Aggregate</span><span class="p">()</span>
+		<span class="n">endConversation</span> <span class="o">=</span> <span class="n">perf_counter_ns</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_modelConversion</span> <span class="o">=</span> <span class="p">(</span><span class="n">endConversation</span> <span class="o">-</span> <span class="n">startConversion</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e9</span></div>
+
+
+	<span class="k">def</span> <span class="nf">_ConvertTestsuite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentTestsuite</span><span class="p">:</span> <span class="n">Testsuite</span><span class="p">,</span> <span class="n">yamlTestsuite</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="n">testsuiteName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseStrFieldFromYAML</span><span class="p">(</span><span class="n">yamlTestsuite</span><span class="p">,</span> <span class="s2">&quot;Name&quot;</span><span class="p">)</span>
+		<span class="n">totalDuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseDurationFieldFromYAML</span><span class="p">(</span><span class="n">yamlTestsuite</span><span class="p">,</span> <span class="s2">&quot;ElapsedTime&quot;</span><span class="p">)</span>
+
+		<span class="n">testsuite</span> <span class="o">=</span> <span class="n">Testsuite</span><span class="p">(</span>
+			<span class="n">testsuiteName</span><span class="p">,</span>
+			<span class="n">totalDuration</span><span class="o">=</span><span class="n">totalDuration</span><span class="p">,</span>
+			<span class="n">parent</span><span class="o">=</span><span class="n">parentTestsuite</span>
+		<span class="p">)</span>
+
+		<span class="c1"># if yamlTestsuite[&#39;TestCases&#39;] is not None:</span>
+		<span class="k">for</span> <span class="n">yamlTestcase</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseSequenceFromYAML</span><span class="p">(</span><span class="n">yamlTestsuite</span><span class="p">,</span> <span class="s1">&#39;TestCases&#39;</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_ConvertTestcase</span><span class="p">(</span><span class="n">testsuite</span><span class="p">,</span> <span class="n">yamlTestcase</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">_ConvertTestcase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentTestsuite</span><span class="p">:</span> <span class="n">Testsuite</span><span class="p">,</span> <span class="n">yamlTestcase</span><span class="p">:</span> <span class="n">CommentedMap</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="n">testcaseName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseStrFieldFromYAML</span><span class="p">(</span><span class="n">yamlTestcase</span><span class="p">,</span> <span class="s2">&quot;TestCaseName&quot;</span><span class="p">)</span>
+		<span class="n">totalDuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseDurationFieldFromYAML</span><span class="p">(</span><span class="n">yamlTestcase</span><span class="p">,</span> <span class="s2">&quot;ElapsedTime&quot;</span><span class="p">)</span>
+		<span class="n">yamlStatus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseStrFieldFromYAML</span><span class="p">(</span><span class="n">yamlTestcase</span><span class="p">,</span> <span class="s2">&quot;Status&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+		<span class="n">yamlResults</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseMapFromYAML</span><span class="p">(</span><span class="n">yamlTestcase</span><span class="p">,</span> <span class="s2">&quot;Results&quot;</span><span class="p">)</span>
+		<span class="n">assertionCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlResults</span><span class="p">,</span> <span class="s2">&quot;AffirmCount&quot;</span><span class="p">)</span>
+		<span class="n">passedAssertionCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlResults</span><span class="p">,</span> <span class="s2">&quot;PassedCount&quot;</span><span class="p">)</span>
+		<span class="n">totalErrors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlResults</span><span class="p">,</span> <span class="s2">&quot;TotalErrors&quot;</span><span class="p">)</span>
+		<span class="n">yamlAlertCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseMapFromYAML</span><span class="p">(</span><span class="n">yamlResults</span><span class="p">,</span> <span class="s2">&quot;AlertCount&quot;</span><span class="p">)</span>
+		<span class="n">warningCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlAlertCount</span><span class="p">,</span> <span class="s2">&quot;Warning&quot;</span><span class="p">)</span>
+		<span class="n">errorCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlAlertCount</span><span class="p">,</span> <span class="s2">&quot;Error&quot;</span><span class="p">)</span>
+		<span class="n">fatalCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ParseIntFieldFromYAML</span><span class="p">(</span><span class="n">yamlAlertCount</span><span class="p">,</span> <span class="s2">&quot;Failure&quot;</span><span class="p">)</span>
+
+		<span class="c1"># FIXME: write a Parse classmethod in enum</span>
+		<span class="k">if</span> <span class="n">yamlStatus</span> <span class="o">==</span> <span class="s2">&quot;passed&quot;</span><span class="p">:</span>
+			<span class="n">status</span> <span class="o">=</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Passed</span>
+		<span class="k">elif</span> <span class="n">yamlStatus</span> <span class="o">==</span> <span class="s2">&quot;skipped&quot;</span><span class="p">:</span>
+			<span class="n">status</span> <span class="o">=</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Skipped</span>
+		<span class="k">elif</span> <span class="n">yamlStatus</span> <span class="o">==</span> <span class="s2">&quot;failed&quot;</span><span class="p">:</span>
+			<span class="n">status</span> <span class="o">=</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Failed</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">status</span> <span class="o">=</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Unknown</span>
+
+		<span class="k">if</span> <span class="n">totalErrors</span> <span class="o">==</span> <span class="n">warningCount</span> <span class="o">+</span> <span class="n">errorCount</span> <span class="o">+</span> <span class="n">fatalCount</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">warningCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="n">status</span> <span class="o">|=</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Warned</span>
+			<span class="k">if</span> <span class="n">errorCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="n">status</span> <span class="o">|=</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Errored</span>
+			<span class="k">if</span> <span class="n">fatalCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="n">status</span> <span class="o">|=</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Aborted</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">status</span> <span class="o">|=</span> <span class="n">TestcaseStatus</span><span class="o">.</span><span class="n">Inconsistent</span>
+
+		<span class="n">_</span> <span class="o">=</span> <span class="n">Testcase</span><span class="p">(</span>
+			<span class="n">testcaseName</span><span class="p">,</span>
+			<span class="n">totalDuration</span><span class="o">=</span><span class="n">totalDuration</span><span class="p">,</span>
+			<span class="n">assertionCount</span><span class="o">=</span><span class="n">assertionCount</span><span class="p">,</span>
+			<span class="n">passedAssertionCount</span><span class="o">=</span><span class="n">passedAssertionCount</span><span class="p">,</span>
+			<span class="n">warningCount</span><span class="o">=</span><span class="n">warningCount</span><span class="p">,</span>
+			<span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
+			<span class="n">errorCount</span><span class="o">=</span><span class="n">errorCount</span><span class="p">,</span>
+			<span class="n">fatalCount</span><span class="o">=</span><span class="n">fatalCount</span><span class="p">,</span>
+			<span class="n">parent</span><span class="o">=</span><span class="n">parentTestsuite</span>
+		<span class="p">)</span>
+
+<div class="viewcode-block" id="BuildSummaryDocument.__contains__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.BuildSummaryDocument.__contains__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testsuites</span></div>
+
+
+<div class="viewcode-block" id="BuildSummaryDocument.__iter__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.BuildSummaryDocument.__iter__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_testsuites</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="BuildSummaryDocument.__getitem__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.BuildSummaryDocument.__getitem__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Testsuite</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testsuites</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="BuildSummaryDocument.__len__">
+<a class="viewcode-back" href="../../../../pyEDAA.Reports/pyEDAA.Reports.Unittesting.OSVVM.html#pyEDAA.Reports.Unittesting.OSVVM.BuildSummaryDocument.__len__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testsuites</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2024, Electronic Design Automation Abstraction (EDA²).
+      <span class="lastupdated">Last updated on 13.10.2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

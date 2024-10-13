@@ -1,0 +1,684 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyEDAA.Reports.DocumentationCoverage &mdash; pyEDAA.Reports 0.14.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=77553476" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-reports.e44b1595f1e09d5e109d001839ba3f42.css?v=0b41afa8" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/override.css?v=6943e0d8" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=3a3a8e7f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyEDAA.Reports.DocumentationCoverage.Python" href="pyEDAA.Reports.DocumentationCoverage.Python.html" />
+    <link rel="prev" title="pyEDAA.Reports.Dependency" href="pyEDAA.Reports.Dependency.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="https://edaa-org.github.io/">Used as a layer of EDA² ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation/Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Dependency.html">Dependency</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Report Formats</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../CodeCoverage/index.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DocCoverage/index.html">Documentation Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Unittesting/index.html">Unittesting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Logging/index.html">EDA Tool Logs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References and Reports</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../CommandLineInterface.html">Command Line Interfaces</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pyEDAA.Reports.html">Python Class Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.CLI.html">pyEDAA.Reports.CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.Dependency.html">pyEDAA.Reports.Dependency</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pyEDAA.Reports.DocumentationCoverage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.Python.html">pyEDAA.Reports.DocumentationCoverage.Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.DocCoverageException"><code class="docutils literal notranslate"><span class="pre">DocCoverageException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState"><code class="docutils literal notranslate"><span class="pre">CoverageState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._generate_next_value_"><code class="docutils literal notranslate"><span class="pre">CoverageState._generate_next_value_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._numeric_repr_"><code class="docutils literal notranslate"><span class="pre">CoverageState._numeric_repr_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._iter_member_by_value_"><code class="docutils literal notranslate"><span class="pre">CoverageState._iter_member_by_value_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._iter_member_"><code class="docutils literal notranslate"><span class="pre">CoverageState._iter_member_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._iter_member_by_def_"><code class="docutils literal notranslate"><span class="pre">CoverageState._iter_member_by_def_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._missing_"><code class="docutils literal notranslate"><span class="pre">CoverageState._missing_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__contains__"><code class="docutils literal notranslate"><span class="pre">CoverageState.__contains__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__iter__"><code class="docutils literal notranslate"><span class="pre">CoverageState.__iter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__len__"><code class="docutils literal notranslate"><span class="pre">CoverageState.__len__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__repr__"><code class="docutils literal notranslate"><span class="pre">CoverageState.__repr__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__str__"><code class="docutils literal notranslate"><span class="pre">CoverageState.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__bool__"><code class="docutils literal notranslate"><span class="pre">CoverageState.__bool__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__or__"><code class="docutils literal notranslate"><span class="pre">CoverageState.__or__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__ror__"><code class="docutils literal notranslate"><span class="pre">CoverageState.__ror__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__new__"><code class="docutils literal notranslate"><span class="pre">CoverageState.__new__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base.__init__"><code class="docutils literal notranslate"><span class="pre">Base.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Base.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Base.HasMethodAttributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Type"><code class="docutils literal notranslate"><span class="pre">_Type</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Type.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">_Type.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Type.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">_Type.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Type.__init__"><code class="docutils literal notranslate"><span class="pre">_Type.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Class"><code class="docutils literal notranslate"><span class="pre">Class</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Class.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Class.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Class.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Class.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Class.__init__"><code class="docutils literal notranslate"><span class="pre">Class.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Unit"><code class="docutils literal notranslate"><span class="pre">_Unit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Unit.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">_Unit.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Unit.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">_Unit.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Unit.__init__"><code class="docutils literal notranslate"><span class="pre">_Unit.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Module"><code class="docutils literal notranslate"><span class="pre">Module</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Module.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Module.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Module.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Module.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Module.__init__"><code class="docutils literal notranslate"><span class="pre">Module.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Package"><code class="docutils literal notranslate"><span class="pre">Package</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Package.HasClassAttributes"><code class="docutils literal notranslate"><span class="pre">Package.HasClassAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Package.HasMethodAttributes"><code class="docutils literal notranslate"><span class="pre">Package.HasMethodAttributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Package.__init__"><code class="docutils literal notranslate"><span class="pre">Package.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.OSVVM.html">pyEDAA.Reports.OSVVM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.Requirement.html">pyEDAA.Reports.Requirement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.Resources.html">pyEDAA.Reports.Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.Unittesting.html">pyEDAA.Reports.Unittesting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyEDAA.Reports.helper.html">Python Class Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/unittests.html">Unittest Summary Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/coverage/index.html">Code Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/doccoverage.html">Doc. Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/typing/index.html">Static Type Check Report ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../License.html">Apache License 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Doc-License.html">Creative Commons Attribution 4.0 International</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../py-modindex.html">Python Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TODO.html">TODOs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Old Content</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../old/Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../old/FunctionalCoverage.html">Functional coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../old/LineCoverage.html">Line coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../old/Resources.html">Synthesis and implementation results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../old/RichLogging.html">Semantic/rich logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../old/Tracking.html">Tracking requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../old/Frontends.html">Frontends</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyEDAA.Reports</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pyEDAA.Reports.html">Python Class Reference</a></li>
+      <li class="breadcrumb-item active">pyEDAA.Reports.DocumentationCoverage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <style type="text/css">
+  span.bolditalic {font-weight: bold; font-style: italic; }
+  span.underline {text-decoration: underline; }
+  span.strike {text-decoration: line-through; }
+  span.xlarge {font-size: x-large; }
+  span.colorred {color: #CC0000; }
+  span.colorgreen {color: #009933; }
+  span.colorblue {color: #0066FF; }
+  span.colorpurple {color: #9900CC; }
+</style><section id="module-pyEDAA.Reports.DocumentationCoverage">
+<span id="pyedaa-reports-documentationcoverage"></span><h1>pyEDAA.Reports.DocumentationCoverage<a class="headerlink" href="#module-pyEDAA.Reports.DocumentationCoverage" title="Link to this heading"></a></h1>
+<p>Abstraction of code documentation coverage data model.</p>
+<p><strong>Submodules</strong></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pyEDAA.Reports.DocumentationCoverage.Python.html">pyEDAA.Reports.DocumentationCoverage.Python</a></li>
+</ul>
+</div>
+<p><strong>Exceptions</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.DocCoverageException" title="pyEDAA.Reports.DocumentationCoverage.DocCoverageException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DocCoverageException</span></code></a>:
+Common base class for all non-exit exceptions.</p></li>
+</ul>
+<p><strong>Classes</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState" title="pyEDAA.Reports.DocumentationCoverage.CoverageState"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoverageState</span></code></a>:
+Support for flags</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Type" title="pyEDAA.Reports.DocumentationCoverage._Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Type</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Class" title="pyEDAA.Reports.DocumentationCoverage.Class"><code class="xref py py-class docutils literal notranslate"><span class="pre">Class</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage._Unit" title="pyEDAA.Reports.DocumentationCoverage._Unit"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Unit</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Module" title="pyEDAA.Reports.DocumentationCoverage.Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></a>:
+Undocumented.</p></li>
+<li><p><a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Package" title="pyEDAA.Reports.DocumentationCoverage.Package"><code class="xref py py-class docutils literal notranslate"><span class="pre">Package</span></code></a>:
+Undocumented.</p></li>
+</ul>
+<hr class="docutils" />
+<p><strong>Exceptions</strong></p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.DocCoverageException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.</span></span><span class="sig-name descname"><span class="pre">DocCoverageException</span></span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage.html#DocCoverageException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.DocCoverageException" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-4dd1a326c8f610304a5052cc914136be30d48926.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of DocCoverageException</p></object></div>
+</dd></dl>
+
+<hr class="docutils" />
+<p><strong>Classes</strong></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.</span></span><span class="sig-name descname"><span class="pre">CoverageState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage.html#CoverageState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-f74f2494d980ef8e08cbe921dd275e51dd6c0749.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of CoverageState</p></object></div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState._generate_next_value_">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_generate_next_value_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._generate_next_value_" title="Link to this definition"></a></dt>
+<dd><p>Generate the next value when not given.</p>
+<p>name: the name of the member
+start: the initial start value or None
+count: the number of existing members
+last_values: the last value assigned or None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState._numeric_repr_">
+<span class="sig-name descname"><span class="pre">_numeric_repr_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._numeric_repr_" title="Link to this definition"></a></dt>
+<dd><p>Return the canonical string representation of the object.</p>
+<p>For many object types, including most builtins, eval(repr(obj)) == obj.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState._iter_member_by_value_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_iter_member_by_value_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._iter_member_by_value_" title="Link to this definition"></a></dt>
+<dd><p>Extract all members from the value in definition (i.e. increasing value) order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState._iter_member_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_iter_member_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._iter_member_" title="Link to this definition"></a></dt>
+<dd><p>Extract all members from the value in definition (i.e. increasing value) order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState._iter_member_by_def_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_iter_member_by_def_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._iter_member_by_def_" title="Link to this definition"></a></dt>
+<dd><p>Extract all members from the value in definition order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState._missing_" title="Link to this definition"></a></dt>
+<dd><p>Create a composite member containing all canonical members present in <cite>value</cite>.</p>
+<p>If non-member values are present, result depends on <cite>_boundary_</cite> setting.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__contains__" title="Link to this definition"></a></dt>
+<dd><p>Returns True if self has at least the same flags set as other.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Returns flags in definition order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__len__" title="Link to this definition"></a></dt>
+<dd><p>Return the number of members (no aliases)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__str__" title="Link to this definition"></a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState.__bool__">
+<span class="sig-name descname"><span class="pre">__bool__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__bool__" title="Link to this definition"></a></dt>
+<dd><p>classes/types should always be True.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState.__or__">
+<span class="sig-name descname"><span class="pre">__or__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__or__" title="Link to this definition"></a></dt>
+<dd><p>Return self|value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState.__ror__">
+<span class="sig-name descname"><span class="pre">__ror__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__ror__" title="Link to this definition"></a></dt>
+<dd><p>Return value|self.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.CoverageState.__new__">
+<span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.CoverageState.__new__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Base">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage.html#Base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-e7a28fd6fac0e17ce923d2d28e762b4e157223ea.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Base</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Base.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage.html#Base.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Base.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Base.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Base.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__pyattr__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Base.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Base.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has methods with Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__methodsWithAttributes__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage._Type">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.</span></span><span class="sig-name descname"><span class="pre">_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage.html#_Type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage._Type" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage._Type.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage._Type.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__pyattr__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage._Type.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage._Type.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has methods with Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__methodsWithAttributes__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage._Type.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage._Type.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Class">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.</span></span><span class="sig-name descname"><span class="pre">Class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage.html#Class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Class" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-2ec31077562a0402bf748eddda2c8ddd1aecbce5.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Class</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Class.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Class.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__pyattr__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Class.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Class.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has methods with Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__methodsWithAttributes__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Class.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Class.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage._Unit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.</span></span><span class="sig-name descname"><span class="pre">_Unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage.html#_Unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage._Unit" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage._Unit.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage._Unit.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__pyattr__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage._Unit.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage._Unit.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has methods with Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__methodsWithAttributes__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage._Unit.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage._Unit.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Module">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.</span></span><span class="sig-name descname"><span class="pre">Module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage.html#Module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Module" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-af4248956fb207ac20eefa14b1836ec49d2d64ba.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Module</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Module.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Module.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__pyattr__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Module.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Module.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has methods with Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__methodsWithAttributes__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Module.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Module.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Package">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyEDAA.Reports.DocumentationCoverage.</span></span><span class="sig-name descname"><span class="pre">Package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyEDAA/Reports/DocumentationCoverage.html#Package"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Package" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Inheritance</p>
+<div class="graphviz"><object data="../_images/inheritance-19a59ec0ec8da3452b56dfe4a4f3ce2c7a0f53d9.svg" type="image/svg+xml" class="inheritance graphviz">
+<p class="warning">Inheritance diagram of Package</p></object></div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Package.HasClassAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasClassAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Package.HasClassAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__pyattr__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Package.HasMethodAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasMethodAttributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Package.HasMethodAttributes" title="Link to this definition"></a></dt>
+<dd><p>Read-only property to check if the class has methods with Attributes (<code class="xref py py-attr docutils literal notranslate"><span class="pre">__methodsWithAttributes__</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code>, if the class has any method with Attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyEDAA.Reports.DocumentationCoverage.Package.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyEDAA.Reports.DocumentationCoverage.Package.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pyEDAA.Reports.DocumentationCoverage.Base" title="pyEDAA.Reports.DocumentationCoverage.Base"><em>Base</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyEDAA.Reports.Dependency.html" class="btn btn-neutral float-left" title="pyEDAA.Reports.Dependency" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyEDAA.Reports.DocumentationCoverage.Python.html" class="btn btn-neutral float-right" title="pyEDAA.Reports.DocumentationCoverage.Python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2024, Electronic Design Automation Abstraction (EDA²).
+      <span class="lastupdated">Last updated on 13.10.2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

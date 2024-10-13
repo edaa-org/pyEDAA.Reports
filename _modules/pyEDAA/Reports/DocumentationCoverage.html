@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyEDAA.Reports.DocumentationCoverage &mdash; pyEDAA.Reports 0.14.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=77553476" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-reports.e44b1595f1e09d5e109d001839ba3f42.css?v=0b41afa8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/override.css?v=6943e0d8" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.svg"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=3a3a8e7f"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="https://edaa-org.github.io/">Used as a layer of EDA² ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../Installation.html">Installation/Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Dependency.html">Dependency</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Report Formats</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CodeCoverage/index.html">Code Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../DocCoverage/index.html">Documentation Coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Unittesting/index.html">Unittesting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Logging/index.html">EDA Tool Logs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References and Reports</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CommandLineInterface.html">Command Line Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pyEDAA.Reports/pyEDAA.Reports.html">Python Class Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reports/unittests.html">Unittest Summary Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reports/coverage/index.html">Code Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reports/doccoverage.html">Doc. Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reports/typing/index.html">Static Type Check Report ➚</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Appendix</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../License.html">Apache License 2.0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Doc-License.html">Creative Commons Attribution 4.0 International</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../py-modindex.html">Python Module Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../TODO.html">TODOs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Old Content</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../old/Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../old/FunctionalCoverage.html">Functional coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../old/LineCoverage.html">Line coverage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../old/Resources.html">Synthesis and implementation results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../old/RichLogging.html">Semantic/rich logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../old/Tracking.html">Tracking requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../old/Frontends.html">Frontends</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyEDAA.Reports</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyEDAA.Reports.DocumentationCoverage</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyEDAA.Reports.DocumentationCoverage</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#              _____ ____    _        _      ____                       _                                              #</span>
+<span class="c1">#  _ __  _   _| ____|  _ \  / \      / \    |  _ \ ___ _ __   ___  _ __| |_ ___                                        #</span>
+<span class="c1"># | &#39;_ \| | | |  _| | | | |/ _ \    / _ \   | |_) / _ \ &#39;_ \ / _ \| &#39;__| __/ __|                                       #</span>
+<span class="c1"># | |_) | |_| | |___| |_| / ___ \  / ___ \ _|  _ &lt;  __/ |_) | (_) | |  | |_\__ \                                       #</span>
+<span class="c1"># | .__/ \__, |_____|____/_/   \_\/_/   \_(_)_| \_\___| .__/ \___/|_|   \__|___/                                       #</span>
+<span class="c1"># |_|    |___/                                        |_|                                                              #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Authors:                                                                                                             #</span>
+<span class="c1">#   Patrick Lehmann                                                                                                    #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># License:                                                                                                             #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1"># Copyright 2021-2024 Electronic Design Automation Abstraction (EDA²)                                                  #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                                      #</span>
+<span class="c1"># you may not use this file except in compliance with the License.                                                     #</span>
+<span class="c1"># You may obtain a copy of the License at                                                                              #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0                                                                         #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software                                                  #</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                                    #</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                             #</span>
+<span class="c1"># See the License for the specific language governing permissions and                                                  #</span>
+<span class="c1"># limitations under the License.                                                                                       #</span>
+<span class="c1">#                                                                                                                      #</span>
+<span class="c1"># SPDX-License-Identifier: Apache-2.0                                                                                  #</span>
+<span class="c1"># ==================================================================================================================== #</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;Abstraction of code documentation coverage data model.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">enum</span>                  <span class="kn">import</span> <span class="n">Flag</span>
+<span class="kn">from</span> <span class="nn">typing</span>                <span class="kn">import</span> <span class="n">Optional</span> <span class="k">as</span> <span class="n">Nullable</span>
+
+<span class="kn">from</span> <span class="nn">pyTooling.Decorators</span>  <span class="kn">import</span> <span class="n">export</span>
+<span class="kn">from</span> <span class="nn">pyTooling.MetaClasses</span> <span class="kn">import</span> <span class="n">ExtendedType</span>
+
+<span class="kn">from</span> <span class="nn">pyEDAA.Reports</span>        <span class="kn">import</span> <span class="n">ReportException</span>
+
+
+<div class="viewcode-block" id="DocCoverageException">
+<a class="viewcode-back" href="../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.DocCoverageException">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">DocCoverageException</span><span class="p">(</span><span class="n">ReportException</span><span class="p">):</span>
+	<span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="CoverageState">
+<a class="viewcode-back" href="../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.CoverageState">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">CoverageState</span><span class="p">(</span><span class="n">Flag</span><span class="p">):</span>
+	<span class="n">Unknown</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">Excluded</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="n">Ignored</span> <span class="o">=</span> <span class="mi">2</span>
+	<span class="n">Empty</span> <span class="o">=</span> <span class="mi">4</span>
+	<span class="n">Covered</span> <span class="o">=</span> <span class="mi">8</span>
+
+	<span class="n">Weak</span> <span class="o">=</span> <span class="mi">16</span>
+	<span class="n">Incomplete</span> <span class="o">=</span> <span class="mi">32</span>
+	<span class="n">Inherited</span> <span class="o">=</span> <span class="mi">64</span>
+	<span class="n">Detailed</span> <span class="o">=</span> <span class="mi">128</span>
+
+	<span class="n">Undocumented</span> <span class="o">=</span> <span class="mi">256</span>
+	<span class="n">Documented</span> <span class="o">=</span> <span class="mi">512</span>
+
+	<span class="n">Parameters</span> <span class="o">=</span> <span class="mi">1024</span>
+	<span class="n">ReturnValue</span> <span class="o">=</span> <span class="mi">2048</span>
+	<span class="n">Exceptions</span> <span class="o">=</span> <span class="mi">8192</span>
+	<span class="n">Types</span> <span class="o">=</span> <span class="mi">16384</span></div>
+
+
+<span class="c1"># unrequiredButDocumented</span>
+<span class="c1"># wrongly documented</span>
+
+
+<div class="viewcode-block" id="Base">
+<a class="viewcode-back" href="../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Base">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">Base</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ExtendedType</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+	<span class="n">_parent</span><span class="p">:</span> <span class="n">Nullable</span><span class="p">[</span><span class="s2">&quot;Base&quot;</span><span class="p">]</span>
+	<span class="n">_name</span><span class="p">:</span>   <span class="nb">str</span>
+	<span class="n">_status</span><span class="p">:</span> <span class="n">CoverageState</span>
+
+<div class="viewcode-block" id="Base.__init__">
+<a class="viewcode-back" href="../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Base.__init__">[docs]</a>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Nullable</span><span class="p">[</span><span class="s2">&quot;Base&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter &#39;name&#39; must not be None.&quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_status</span> <span class="o">=</span> <span class="n">CoverageState</span><span class="o">.</span><span class="n">Unknown</span></div>
+
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">Parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nullable</span><span class="p">[</span><span class="s2">&quot;Base&quot;</span><span class="p">]:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">Name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">Status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoverageState</span><span class="p">:</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_status</span></div>
+
+
+
+<div class="viewcode-block" id="_Type">
+<a class="viewcode-back" href="../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage._Type">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">_Type</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+	<span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="Class">
+<a class="viewcode-back" href="../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Class">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">Class</span><span class="p">(</span><span class="n">_Type</span><span class="p">):</span>
+	<span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="_Unit">
+<a class="viewcode-back" href="../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage._Unit">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">_Unit</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+	<span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="Module">
+<a class="viewcode-back" href="../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Module">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">Module</span><span class="p">(</span><span class="n">_Unit</span><span class="p">):</span>
+	<span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="Package">
+<a class="viewcode-back" href="../../../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Package">[docs]</a>
+<span class="nd">@export</span>
+<span class="k">class</span> <span class="nc">Package</span><span class="p">(</span><span class="n">_Unit</span><span class="p">):</span>
+	<span class="k">pass</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2024, Electronic Design Automation Abstraction (EDA²).
+      <span class="lastupdated">Last updated on 13.10.2024.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
