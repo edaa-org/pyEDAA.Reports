@@ -41,24 +41,7 @@ from pyEDAA.Reports.Unittesting import UnittestException, Document, TestcaseStat
 from pyEDAA.Reports.Unittesting import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
 from pyEDAA.Reports.Unittesting import Testcase as ut_Testcase
 
-
-from typing import Callable
-
-@export
-def InheritDocumentation(baseClass: type, merge: bool = False) -> Callable[[type], type]:
-	"""xxx"""
-	def decorator(c: type) -> type:
-		"""yyy"""
-		if merge:
-			if c.__doc__ is None:
-				c.__doc__ = baseClass.__doc__
-			elif baseClass.__doc__ is not None:
-				c.__doc__ = baseClass.__doc__ + "\n\n" + c.__doc__
-		else:
-			c.__doc__ = baseClass.__doc__
-		return c
-
-	return decorator
+from pyEDAA.Reports.helper      import InheritDocumentation
 
 
 @export
@@ -125,11 +108,20 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 
 	@notimplemented
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False) -> None:
+		"""
+		Write the data model as XML into a file adhering to the Any JUnit dialect.
+
+		:param path:               Optional path to the YAML file, if internal path shouldn't be used.
+		:param overwrite:          If true, overwrite an existing file.
+		:raises UnittestException: If the file cannot be overwritten.
+		:raises UnittestException: If the internal YAML data structure wasn't generated.
+		:raises UnittestException: If the file cannot be opened or written.
+		"""
 		if path is None:
 			path = self._path
 
 		if not overwrite and path.exists():
-			raise UnittestException(f"OSVVM YAML file '{path}' can not be written.") \
+			raise UnittestException(f"OSVVM YAML file '{path}' can not be overwritten.") \
 				from FileExistsError(f"File '{path}' already exists.")
 
 		# if regenerate:
@@ -137,7 +129,7 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 
 		if self._yamlDocument is None:
 			ex = UnittestException(f"Internal YAML document tree is empty and needs to be generated before write is possible.")
-			ex.add_note(f"Call 'BuildSummaryDocument.Generate()' or 'BuildSummaryDocument.Write(..., regenerate=True)'.")
+			# ex.add_note(f"Call 'BuildSummaryDocument.Generate()' or 'BuildSummaryDocument.Write(..., regenerate=True)'.")
 			raise ex
 
 		# with path.open("w", encoding="utf-8") as file:
@@ -240,6 +232,8 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 		"""
 		Convert the parsed YAML data structure into a test entity hierarchy.
 
+		This method converts the root element.
+
 		.. hint::
 
 		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
@@ -259,13 +253,13 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 
 		if "TestSuites" in self._yamlDocument:
 			for yamlTestsuite in self._ParseSequenceFromYAML(self._yamlDocument, "TestSuites"):
-				self._ParseTestsuite(self, yamlTestsuite)
+				self._ConvertTestsuite(self, yamlTestsuite)
 
 		self.Aggregate()
 		endConversation = perf_counter_ns()
 		self._modelConversion = (endConversation - startConversion) / 1e9
 
-	def _ParseTestsuite(self, parentTestsuite: Testsuite, yamlTestsuite: CommentedMap) -> None:
+	def _ConvertTestsuite(self, parentTestsuite: Testsuite, yamlTestsuite: CommentedMap) -> None:
 		testsuiteName = self._ParseStrFieldFromYAML(yamlTestsuite, "Name")
 		totalDuration = self._ParseDurationFieldFromYAML(yamlTestsuite, "ElapsedTime")
 
@@ -277,9 +271,9 @@ class BuildSummaryDocument(TestsuiteSummary, Document):
 
 		# if yamlTestsuite['TestCases'] is not None:
 		for yamlTestcase in self._ParseSequenceFromYAML(yamlTestsuite, 'TestCases'):
-			self._ParseTestcase(testsuite, yamlTestcase)
+			self._ConvertTestcase(testsuite, yamlTestcase)
 
-	def _ParseTestcase(self, parentTestsuite: Testsuite, yamlTestcase: CommentedMap) -> None:
+	def _ConvertTestcase(self, parentTestsuite: Testsuite, yamlTestcase: CommentedMap) -> None:
 		testcaseName = self._ParseStrFieldFromYAML(yamlTestcase, "TestCaseName")
 		totalDuration = self._ParseDurationFieldFromYAML(yamlTestcase, "ElapsedTime")
 		yamlStatus = self._ParseStrFieldFromYAML(yamlTestcase, "Status").lower()
