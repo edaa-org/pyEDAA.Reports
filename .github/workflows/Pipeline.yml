@@ -165,13 +165,13 @@ jobs:
     secrets:
       codacy_token: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
-#  PublishTestResults:
-#    uses: pyTooling/Actions/.github/workflows/PublishTestResults.yml@dev
-#    needs:
-#      - UnitTestingParams
-#      - UnitTesting
-#    with:
-#      merged_junit_artifact: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).unittesting_xml }}
+  PublishTestResults:
+    uses: pyTooling/Actions/.github/workflows/PublishTestResults.yml@dev
+    needs:
+      - UnitTestingParams
+      - UnitTesting
+    with:
+      merged_junit_artifact: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).unittesting_xml }}
 
 #  VerifyDocs:
 #    uses: pyTooling/Actions/.github/workflows/VerifyDocs.yml@r1
@@ -184,7 +184,7 @@ jobs:
     uses: pyTooling/Actions/.github/workflows/SphinxDocumentation.yml@r1
     needs:
       - UnitTestingParams
-#      - PublishTestResults
+      - PublishTestResults
       - PublishCoverageResults
 #      - VerifyDocs
     with:
@@ -199,7 +199,7 @@ jobs:
     needs:
       - UnitTestingParams
       - PublishCoverageResults
-#      - PublishTestResults
+      - PublishTestResults
       - HTMLDocumentation
     with:
       sqlite_coverage_artifacts_prefix: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).codecoverage_sqlite }}-
@@ -257,7 +257,7 @@ jobs:
       - StaticTypeCheck
       - HTMLDocumentation
 #      - PDFDocumentation
-#      - PublishTestResults
+      - PublishTestResults
       - PublishCoverageResults
       - PublishToGitHubPages
 #      - PublishOnPyPI
