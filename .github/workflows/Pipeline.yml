@@ -94,6 +94,8 @@ jobs:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@dev
     with:
       name: pyEDAA.Reports
+      python_version_list: ""                 # use latest Python version
+      system_list: "ubuntu macos macos-arm"
 
   UnitTesting:
     uses: pyTooling/Actions/.github/workflows/UnitTesting.yml@dev
@@ -263,9 +265,7 @@ jobs:
     with:
       package: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
       remaining: |
-        ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).unittesting_xml }}-*
         ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).unittesting_html }}-*
-        ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).codecoverage_sqlite }}-*
         ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).codecoverage_xml }}-*
         ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).codecoverage_json }}-*
         ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).codecoverage_html }}-*
@@ -278,4 +278,5 @@ jobs:
         ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).statictyping_html }}
         ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).documentation_html }}
         ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).documentation_latex }}
+        ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).apptesting_xml }}-*
 #        ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).documentation_pdf }}
