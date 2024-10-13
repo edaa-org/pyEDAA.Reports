@@ -94,15 +94,12 @@ class TestsuiteSummary(ut_TestsuiteSummary):
 class BuildSummaryDocument(TestsuiteSummary, Document):
 	_yamlDocument: Nullable[YAML]
 
-	def __init__(self, yamlReportFile: Path, parse: bool = False) -> None:
+	def __init__(self, yamlReportFile: Path, analyzeAndConvert: bool = False) -> None:
 		super().__init__("Unprocessed OSVVM YAML file")
-		Document.__init__(self, yamlReportFile)
 
 		self._yamlDocument = None
 
-		if parse:
-			self.Analyze()
-			self.Convert()
+		Document.__init__(self, yamlReportFile, analyzeAndConvert)
 
 	def Analyze(self) -> None:
 		"""

@@ -89,7 +89,7 @@ class YAMLGeneratedByOSVVM(TestCase):
 		print()
 
 		yamlPath = Path("tests/data/OSVVM/OSVVMLibraries_OsvvmLibraries.yml")
-		doc = BuildSummaryDocument(yamlPath, parse=True)
+		doc = BuildSummaryDocument(yamlPath, analyzeAndConvert=True)
 
 		print("=" * 40)
 		tree = doc.ToTree()
@@ -113,7 +113,7 @@ class YAMLGeneratedByOSVVM(TestCase):
 		print()
 
 		yamlPath = Path("tests/data/OSVVM/OSVVMLibraries_RunAllTests.yml")
-		doc = BuildSummaryDocument(yamlPath, parse=True)
+		doc = BuildSummaryDocument(yamlPath, analyzeAndConvert=True)
 
 		print("=" * 40)
 		tree = doc.ToTree()

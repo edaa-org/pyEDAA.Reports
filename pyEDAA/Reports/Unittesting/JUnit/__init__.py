@@ -1190,14 +1190,11 @@ class Document(TestsuiteSummary, ut_Document):
 
 	def __init__(self, xmlReportFile: Path, analyzeAndConvert: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
 		super().__init__("Unprocessed JUnit XML file")
-		ut_Document.__init__(self, xmlReportFile)
 
 		self._readerMode = readerMode
 		self._xmlDocument = None
 
-		if analyzeAndConvert:
-			self.Analyze()
-			self.Convert()
+		ut_Document.__init__(self, xmlReportFile, analyzeAndConvert)
 
 	@classmethod
 	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary):
