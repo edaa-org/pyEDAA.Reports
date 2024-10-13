@@ -1630,11 +1630,15 @@ class Document(metaclass=ExtendedType, mixin=True):
 	_analysisDuration: float  #: TODO: replace by Timer; should be timedelta?
 	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
 
-	def __init__(self, path: Path):
-		self._path = path
+	def __init__(self, reportFile: Path, analyzeAndConvert: bool = False):
+		self._path = reportFile
 
 		self._analysisDuration = -1.0
 		self._modelConversion = -1.0
+
+		if analyzeAndConvert:
+			self.Analyze()
+			self.Convert()
 
 	@readonly
 	def Path(self) -> Path:
