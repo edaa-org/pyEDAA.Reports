@@ -1,0 +1,59 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="365pt" height="64pt" viewBox="0.00 0.00 365.00 64.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 60)">
+<ns0:title>inheritance42f105934e</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>AggregatedCoverage</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.AggregatedCoverage" ns1:title="This base-class for :class:`ModuleCoverage` and :class:`PackageCoverage` represents an extended set of documentation coverage metrics, especially with aggregated metrics." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="218,-19 99,-19 99,0 218,0 218,-19" />
+<ns0:text text-anchor="middle" x="158.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">AggregatedCoverage</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>PackageCoverage</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.PackageCoverage" ns1:title="This class represents the package documentation coverage for Python packages." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="357,-37 254,-37 254,-18 357,-18 357,-37" />
+<ns0:text text-anchor="middle" x="305.5" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">PackageCoverage</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>AggregatedCoverage-&gt;PackageCoverage</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M218.06,-16.77C228.1,-18.02 238.51,-19.31 248.48,-20.55" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="248.47,-22.31 253.65,-21.19 248.9,-18.83 248.47,-22.31" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>Coverage</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.Coverage" ns1:title="This base-class for :class:`ClassCoverage` and :class:`AggregatedCoverage` represents a basic set of documentation coverage metrics." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="63,-19 0,-19 0,0 63,0 63,-19" />
+<ns0:text text-anchor="middle" x="31.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Coverage</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>Coverage-&gt;AggregatedCoverage</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M63.08,-9.5C72.4,-9.5 83.01,-9.5 93.67,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="93.9,-11.25 98.9,-9.5 93.9,-7.75 93.9,-11.25" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>Package</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Package" ns1:title="Package" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="186.5,-56 130.5,-56 130.5,-37 186.5,-37 186.5,-56" />
+<ns0:text text-anchor="middle" x="158.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Package</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>Package-&gt;PackageCoverage</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M186.77,-42.93C204.24,-40.64 227.54,-37.58 248.8,-34.8" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="249.14,-36.52 253.87,-34.13 248.69,-33.05 249.14,-36.52" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

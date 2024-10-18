@@ -1,0 +1,86 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="556pt" height="101pt" viewBox="0.00 0.00 556.00 101.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 97)">
+<ns0:title>inheritancef5e767ba7b</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Application</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.CLI.html#pyEDAA.Reports.CLI.Application" ns1:title="Program class to implement the command line interface (CLI) using commands and options." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="548,-56 477,-56 477,-37 548,-37 548,-56" />
+<ns0:text text-anchor="middle" x="512.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Application</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>ProgramBase</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.CLI.html#pyEDAA.Reports.CLI.ProgramBase" ns1:title="Base-class for all program classes." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="422.5,-93 340.5,-93 340.5,-74 422.5,-74 422.5,-93" />
+<ns0:text text-anchor="middle" x="381.5" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ProgramBase</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>ProgramBase-&gt;Application</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M415.72,-73.97C433.19,-68.96 454.7,-62.79 472.9,-57.57" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="473.62,-59.19 477.94,-56.12 472.65,-55.82 473.62,-59.19" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>UnittestingHandlers</ns0:title>
+<ns0:polygon fill="white" stroke="#1e90ff" points="438.5,-56 324.5,-56 324.5,-37 438.5,-37 438.5,-56" />
+<ns0:text text-anchor="middle" x="381.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">UnittestingHandlers</ns0:text>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>UnittestingHandlers-&gt;Application</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M438.71,-46.5C449.79,-46.5 461.21,-46.5 471.62,-46.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="471.65,-48.25 476.65,-46.5 471.65,-44.75 471.65,-48.25" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>ArgParseHelperMixin</ns0:title>
+<ns0:g id="a_node4"><ns0:a ns1:href="https://pytooling.github.io/pyTooling/pyTooling/pyTooling.Attributes.ArgParse.html#pyTooling.Attributes.ArgParse.ArgParseHelperMixin" ns1:title="Mixin-class to implement an :mod:`argparse`-base command line argument processor." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="441,-19 322,-19 322,0 441,0 441,-19" />
+<ns0:text text-anchor="middle" x="381.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ArgParseHelperMixin</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>ArgParseHelperMixin-&gt;Application</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M415.72,-19.03C433.19,-24.04 454.7,-30.21 472.9,-35.43" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="472.65,-37.18 477.94,-36.88 473.62,-33.81 472.65,-37.18" />
+</ns0:g>
+
+<ns0:g id="node5" class="node">
+<ns0:title>TerminalApplication</ns0:title>
+<ns0:g id="a_node5"><ns0:a ns1:href="https://pytooling.github.io/pyTooling/pyTooling/pyTooling.TerminalUI.html#pyTooling.TerminalUI.TerminalApplication" ns1:title="TerminalApplication" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="286,-93 173,-93 173,-74 286,-74 286,-93" />
+<ns0:text text-anchor="middle" x="229.5" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TerminalApplication</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>TerminalApplication-&gt;ProgramBase</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M286.35,-83.5C302.37,-83.5 319.63,-83.5 334.95,-83.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="335.06,-85.25 340.06,-83.5 335.06,-81.75 335.06,-85.25" />
+</ns0:g>
+
+<ns0:g id="node6" class="node">
+<ns0:title>TerminalBaseApplication</ns0:title>
+<ns0:g id="a_node6"><ns0:a ns1:href="https://pytooling.github.io/pyTooling/pyTooling/pyTooling.TerminalUI.html#pyTooling.TerminalUI.TerminalBaseApplication" ns1:title="The class offers a basic terminal application base-class." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="137,-93 0,-93 0,-74 137,-74 137,-93" />
+<ns0:text text-anchor="middle" x="68.5" y="-81" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">TerminalBaseApplication</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge5" class="edge">
+<ns0:title>TerminalBaseApplication-&gt;TerminalApplication</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M137.39,-83.5C147.45,-83.5 157.77,-83.5 167.68,-83.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="167.82,-85.25 172.82,-83.5 167.82,-81.75 167.82,-85.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

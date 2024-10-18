@@ -1,0 +1,87 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+=============================
+pyEDAA.Reports.OSVVM.AlertLog
+=============================
+
+.. automodule:: pyEDAA.Reports.OSVVM.AlertLog
+
+
+.. currentmodule:: pyEDAA.Reports.OSVVM.AlertLog
+
+
+**Exceptions**
+
+- :py:exc:`AlertLogException`:
+  Common base class for all non-exit exceptions.
+
+
+
+**Classes**
+
+- :py:class:`AlertLogStatus`:
+  Create a collection of name/value pairs.
+
+- :py:class:`AlertLogGroup`:
+  Undocumented.
+
+- :py:class:`Document`:
+  Undocumented.
+
+
+
+---------------------
+
+**Exceptions**
+
+
+
+
+.. autoexception:: AlertLogException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: AlertLogException
+      :parts: 1
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: AlertLogStatus
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: AlertLogStatus
+      :parts: 1
+
+.. autoclass:: AlertLogGroup
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: AlertLogGroup
+      :parts: 1
+
+.. autoclass:: Document
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Document
+      :parts: 1

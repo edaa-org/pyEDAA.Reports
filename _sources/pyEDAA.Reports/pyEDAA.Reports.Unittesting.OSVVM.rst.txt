@@ -1,0 +1,130 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+================================
+pyEDAA.Reports.Unittesting.OSVVM
+================================
+
+.. automodule:: pyEDAA.Reports.Unittesting.OSVVM
+
+
+.. currentmodule:: pyEDAA.Reports.Unittesting.OSVVM
+
+
+**Functions**
+
+- :py:func:`InheritDocumentation`:
+  xxx
+
+
+
+**Exceptions**
+
+- :py:exc:`UnittestException`:
+  Base-exception for all unit test related exceptions.
+
+
+
+**Classes**
+
+- :py:class:`OsvvmException`:
+  Undocumented.
+
+- :py:class:`Testcase`:
+  A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
+
+- :py:class:`Testsuite`:
+  A testsuite is a mid-level element in the test entity hierarchy representing a group of tests.
+
+- :py:class:`TestsuiteSummary`:
+  A testsuite summary is the root element in the test entity hierarchy representing a summary of all test suites and cases.
+
+- :py:class:`BuildSummaryDocument`:
+  A testsuite summary is the root element in the test entity hierarchy representing a summary of all test suites and cases.
+
+
+
+---------------------
+
+**Functions**
+
+
+.. autofunction:: InheritDocumentation
+
+
+---------------------
+
+**Exceptions**
+
+
+
+
+.. autoexception:: UnittestException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: UnittestException
+      :parts: 1
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: OsvvmException
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: OsvvmException
+      :parts: 1
+
+.. autoclass:: Testcase
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testcase
+      :parts: 1
+
+.. autoclass:: Testsuite
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Testsuite
+      :parts: 1
+
+.. autoclass:: TestsuiteSummary
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TestsuiteSummary
+      :parts: 1
+
+.. autoclass:: BuildSummaryDocument
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: BuildSummaryDocument
+      :parts: 1

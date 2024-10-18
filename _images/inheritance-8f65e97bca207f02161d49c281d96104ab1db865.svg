@@ -1,0 +1,41 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="439pt" height="27pt" viewBox="0.00 0.00 439.00 27.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 23)">
+<ns0:title>inheritanceb90494d938</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>AlreadyInHierarchyException</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.AlreadyInHierarchyException" ns1:title="A unit test exception raised if the element is already part of a hierarchy." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="431,-19 273,-19 273,0 431,0 431,-19" />
+<ns0:text text-anchor="middle" x="352" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">AlreadyInHierarchyException</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>UnittestException</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.UnittestException" ns1:title="Base-exception for all unit test related exceptions." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="237,-19 133,-19 133,0 237,0 237,-19" />
+<ns0:text text-anchor="middle" x="185" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">UnittestException</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>UnittestException-&gt;AlreadyInHierarchyException</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M237.3,-9.5C246.98,-9.5 257.32,-9.5 267.69,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="267.77,-11.25 272.77,-9.5 267.77,-7.75 267.77,-11.25" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>ReportException</ns0:title>
+<ns0:polygon fill="white" stroke="#1e90ff" points="97,-19 0,-19 0,0 97,0 97,-19" />
+<ns0:text text-anchor="middle" x="48.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ReportException</ns0:text>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>ReportException-&gt;UnittestException</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M97.3,-9.5C107.07,-9.5 117.44,-9.5 127.49,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="127.71,-11.25 132.71,-9.5 127.71,-7.75 127.71,-11.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

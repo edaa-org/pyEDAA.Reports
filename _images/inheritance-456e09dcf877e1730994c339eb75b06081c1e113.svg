@@ -1,0 +1,29 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="197pt" height="27pt" viewBox="0.00 0.00 197.00 27.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 23)">
+<ns0:title>inheritance0376ade860</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>AlertLogGroup</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.OSVVM.AlertLog.html#pyEDAA.Reports.OSVVM.AlertLog.AlertLogGroup" ns1:title="AlertLogGroup" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="86,-19 0,-19 0,0 86,0 86,-19" />
+<ns0:text text-anchor="middle" x="43" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">AlertLogGroup</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>Document</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.OSVVM.AlertLog.html#pyEDAA.Reports.OSVVM.AlertLog.Document" ns1:title="Document" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="189,-19 122,-19 122,0 189,0 189,-19" />
+<ns0:text text-anchor="middle" x="155.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Document</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>AlertLogGroup-&gt;Document</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M86.09,-9.5C96.17,-9.5 106.86,-9.5 116.73,-9.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="116.81,-11.25 121.81,-9.5 116.81,-7.75 116.81,-11.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>
