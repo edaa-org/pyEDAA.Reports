@@ -9,7 +9,7 @@
       <excludeFolder url="file://$MODULE_DIR$/doc/_build/html" />
       <excludeFolder url="file://$MODULE_DIR$/report" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.12" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.13" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
