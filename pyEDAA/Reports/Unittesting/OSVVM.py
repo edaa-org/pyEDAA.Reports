@@ -35,13 +35,11 @@ from time                  import perf_counter_ns
 from typing                import Optional as Nullable
 
 from ruamel.yaml           import YAML, CommentedMap, CommentedSeq
-from pyTooling.Decorators  import export, notimplemented
+from pyTooling.Decorators  import export, InheritDocString, notimplemented
 
 from pyEDAA.Reports.Unittesting import UnittestException, Document, TestcaseStatus
 from pyEDAA.Reports.Unittesting import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
 from pyEDAA.Reports.Unittesting import Testcase as ut_Testcase
-
-from pyEDAA.Reports.helper      import InheritDocumentation
 
 
 @export
@@ -50,27 +48,27 @@ class OsvvmException:
 
 
 @export
-@InheritDocumentation(UnittestException)
+@InheritDocString(UnittestException)
 class UnittestException(UnittestException, OsvvmException):
-	"""@InheritDocumentation(UnittestException)"""
+	"""@InheritDocString(UnittestException)"""
 
 
 @export
-@InheritDocumentation(ut_Testcase)
+@InheritDocString(ut_Testcase)
 class Testcase(ut_Testcase):
-	"""@InheritDocumentation(ut_Testcase)"""
+	"""@InheritDocString(ut_Testcase)"""
 
 
 @export
-@InheritDocumentation(ut_Testsuite)
+@InheritDocString(ut_Testsuite)
 class Testsuite(ut_Testsuite):
-	"""@InheritDocumentation(ut_Testsuite)"""
+	"""@InheritDocString(ut_Testsuite)"""
 
 
 @export
-@InheritDocumentation(ut_TestsuiteSummary)
+@InheritDocString(ut_TestsuiteSummary)
 class TestsuiteSummary(ut_TestsuiteSummary):
-	"""@InheritDocumentation(ut_TestsuiteSummary)"""
+	"""@InheritDocString(ut_TestsuiteSummary)"""
 
 
 @export
