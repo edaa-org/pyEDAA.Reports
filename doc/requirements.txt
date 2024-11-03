@@ -1,10 +1,5 @@
 -r ../requirements.txt
 
-#pyTooling ~= 7.0
-colorama >= 0.4.6
-ruamel.yaml ~= 0.18.6
-setuptools ~= 75.3
-
 # Enforce latest version on ReadTheDocs
 sphinx ~= 8.1
 docutils ~= 0.21
