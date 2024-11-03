@@ -1,8 +1,8 @@
 [build-system]
 requires = [
-  "setuptools ~= 75.1",
+  "setuptools ~= 75.3",
   "wheel ~= 0.44",
-  "pyTooling ~= 6.7"
+  "pyTooling ~= 7.0"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -11,7 +11,7 @@ line-length = 120
 
 [tool.mypy]
 files = ["pyEDAA.Reports"]
-python_version = "3.12"
+python_version = "3.13"
 #ignore_missing_imports = true
 strict = true
 pretty = true

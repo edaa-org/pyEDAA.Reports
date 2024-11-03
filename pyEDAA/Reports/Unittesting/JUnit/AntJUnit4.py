@@ -37,8 +37,8 @@ from time                 import perf_counter_ns
 from typing               import Optional as Nullable, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
 from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
-from pyTooling.Common import firstValue
-from pyTooling.Decorators import export
+from pyTooling.Common     import firstValue
+from pyTooling.Decorators import export, InheritDocString
 
 from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
@@ -51,11 +51,8 @@ TestcaseAggregateReturnType = Tuple[int, int, int]
 TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
 
 
-from pyEDAA.Reports.helper import InheritDocumentation
-
-
 @export
-@InheritDocumentation(ju_Testcase, merge=True)
+@InheritDocString(ju_Testcase, merge=True)
 class Testcase(ju_Testcase):
 	"""
 	This is a derived implementation for the Ant + JUnit4 dialect.
@@ -63,7 +60,7 @@ class Testcase(ju_Testcase):
 
 
 @export
-@InheritDocumentation(ju_Testclass, merge=True)
+@InheritDocString(ju_Testclass, merge=True)
 class Testclass(ju_Testclass):
 	"""
 	This is a derived implementation for the Ant + JUnit4 dialect.
@@ -71,7 +68,7 @@ class Testclass(ju_Testclass):
 
 
 @export
-@InheritDocumentation(ju_Testsuite, merge=True)
+@InheritDocString(ju_Testsuite, merge=True)
 class Testsuite(ju_Testsuite):
 	"""
 	This is a derived implementation for the Ant + JUnit4 dialect.
@@ -166,7 +163,7 @@ class Testsuite(ju_Testsuite):
 
 
 @export
-@InheritDocumentation(ju_TestsuiteSummary, merge=True)
+@InheritDocString(ju_TestsuiteSummary, merge=True)
 class TestsuiteSummary(ju_TestsuiteSummary):
 	"""
 	This is a derived implementation for the Ant + JUnit4 dialect.
