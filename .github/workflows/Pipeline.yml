@@ -123,10 +123,11 @@ jobs:
   DocCoverage:
     uses: pyTooling/Actions/.github/workflows/CheckDocumentation.yml@dev
     needs:
+      - ConfigParams
       - UnitTestingParams
     with:
       python_version: ${{ needs.UnitTestingParams.outputs.python_version }}
-      directory: pyEDAA/Reports
+      directory: ${{ needs.ConfigParams.outputs.package_directors }}
 #      fail_below: 70
 
   ConfigParams:

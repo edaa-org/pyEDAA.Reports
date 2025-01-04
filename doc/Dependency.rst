@@ -1,7 +1,7 @@
-.. _dependency:
+.. _DEP:
 
-Dependency
-##########
+Dependencies
+############
 
 .. |img-Reports-lib-status| image:: https://img.shields.io/librariesio/release/pypi/pyEDAA.Reports
    :alt: Libraries.io status for latest release

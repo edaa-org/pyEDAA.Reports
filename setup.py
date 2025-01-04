@@ -32,7 +32,7 @@
 from pathlib             import Path
 
 from setuptools          import setup
-from pyTooling.Packaging import DescribePythonPackageHostedOnGitHub
+from pyTooling.Packaging import DescribePythonPackageHostedOnGitHub, DEFAULT_CLASSIFIERS
 
 gitHubNamespace =        "pyEDAA"
 packageName =            "pyEDAA.Reports"
@@ -45,7 +45,7 @@ setup(**DescribePythonPackageHostedOnGitHub(
 	gitHubNamespace=gitHubNamespace,
 	unittestRequirementsFile=Path("tests/requirements.txt"),
 	developmentStatus="pre-alpha",
-	classifiers=[
+	classifiers=list(DEFAULT_CLASSIFIERS) + [
 		"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
 	],
 	sourceFileWithVersion=packageInformationFile,

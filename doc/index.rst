@@ -180,8 +180,8 @@ This layer is used by:
 Contributors
 ************
 
-* `Patrick Lehmann <https://GitHub.com/Paebbels>`__ (Maintainer)
-* `Unai Martinez-Corral <https://GitHub.com/umarcor/>`__
+* :gh:`Patrick Lehmann <Paebbels>` (Maintainer)
+* :gh:`Unai Martinez-Corral <umarcor>`
 * `and more... <https://GitHub.com/edaa-org/pyEDAA.Reports/graphs/contributors>`__
 
 
@@ -250,6 +250,7 @@ Contributors
    genindex
    Python Module Index <modindex>
    TODO
+
 
 .. toctree::
    :caption: Old Content
