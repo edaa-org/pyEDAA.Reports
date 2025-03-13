@@ -20,7 +20,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 	@LongValuedFlag("--render", dest="render", metaName='format', optional=True, help="Render unit testing results to <format>.")
 	@LongValuedFlag("--output", dest="output", metaName='format:JUnit File', help="Processed unit testing summary file (XML).")
 	def HandleUnittest(self, args: Namespace) -> None:
-		"""Handle program calls with command ``merge-unittest``."""
+		"""Handle program calls with command ``unittest``."""
 		self._PrintHeadline()
 
 		returnCode = 0

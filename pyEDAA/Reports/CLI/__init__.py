@@ -57,6 +57,7 @@ from pyTooling.Attributes.ArgParse.Argument   import StringArgument
 from pyTooling.TerminalUI                     import TerminalApplication
 
 from pyEDAA.Reports                           import __version__, __copyright__, __license__
+from pyEDAA.Reports.Unittesting               import UnittestException
 from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
 
 
@@ -78,6 +79,7 @@ class Application(ProgramBase, UnittestingHandlers, ArgParseHelperMixin):
 	"""Program class to implement the command line interface (CLI) using commands and options."""
 
 	programTitle = "Report Service Program"
+	ISSUE_TRACKER_URL = "https://github.com/edaa-org/pyEDAA.Reports/issues"
 
 	def __init__(self) -> None:
 		super().__init__()
@@ -168,10 +170,15 @@ def main() -> NoReturn:
 	)
 	try:
 		program.Run()
-	except FileNotFoundError as ex:
-		print()
-		print(f"[ERROR] {ex}")
-		exit(1)
+	except UnittestException as ex:
+		program.WriteLineToStdErr(f"{{RED}}[ERROR] {ex}{{NOCOLOR}}".format(**Application.Foreground))
+		if ex.__cause__ is not None:
+			program.WriteLineToStdErr(f"{{DARK_YELLOW}}Because of: {ex.__cause__}{{NOCOLOR}}".format(**Application.Foreground))
+
+	except NotImplementedError as ex:
+		Application.PrintNotImplementedError(ex)
+	except Exception as ex:
+		Application.PrintException(ex)
 	# except CoberturaException as ex:
 	# 	print()
 	# 	print(f"[INTERNAL ERROR] {ex}")

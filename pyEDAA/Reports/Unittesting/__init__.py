@@ -158,6 +158,7 @@ class TestcaseStatus(Flag):
 	Flags = Warned | Errored | Aborted | SetupError | TearDownError | Inconsistent
 
 	# TODO: timed out ?
+	# TODO: some passed (if merged, mixed results of passed and failed)
 
 	def __matmul__(self, other: "TestcaseStatus") -> "TestcaseStatus":
 		s = self & self.Mask
@@ -169,9 +170,12 @@ class TestcaseStatus(Flag):
 		elif s is self.Weak:
 			resolved = self.Weak if o is self.Weak else self.Unknown
 		elif s is self.Passed:
-			resolved = self.Passed if (o is self.Skipped) or (o is self.Passed) else self.Unknown
+			if o is self.Failed:
+				resolved = self.Failed
+			else:
+				resolved = self.Passed if (o is self.Skipped) or (o is self.Passed) else self.Unknown
 		elif s is self.Failed:
-			resolved = self.Failed if (o is self.Skipped) or (o is self.Failed) else self.Unknown
+			resolved = self.Failed if (o is self.Skipped) or (o is self.Passed) or (o is self.Failed) else self.Unknown
 		else:
 			resolved = self.Unknown
 
