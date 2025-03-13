@@ -8,6 +8,11 @@ on:
     - cron: '0 22 * * 5'
 
 jobs:
+  ConfigParams:
+    uses: pyTooling/Actions/.github/workflows/ExtractConfiguration.yml@r4
+    with:
+      package_name: pyEDAA.Reports
+
   Java-Ant-JUnit4:
     runs-on: ubuntu-latest
     steps:
@@ -133,11 +138,6 @@ jobs:
       python_version: ${{ needs.UnitTestingParams.outputs.python_version }}
       directory: ${{ needs.ConfigParams.outputs.package_directors }}
 #      fail_below: 70
-
-  ConfigParams:
-    uses: pyTooling/Actions/.github/workflows/ExtractConfiguration.yml@dev
-    needs:
-      - DocCoverage
 
   Package:
     uses: pyTooling/Actions/.github/workflows/Package.yml@dev
