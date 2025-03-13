@@ -7,12 +7,21 @@ from pathlib import Path
 
 from pyTooling.Packaging import extractVersionInformation
 
+# ==============================================================================
+# Project configuration
+# ==============================================================================
+githubNamespace = "edaa-org"
+project = "pyEDAA.Reports"
+directoryName = project.replace('.', '/')
+
+# ==============================================================================
+# Project paths
+# ==============================================================================
 ROOT = Path(__file__).resolve().parent
 
 sys_path.insert(0, abspath("."))
 sys_path.insert(0, abspath(".."))
-# sys_path.insert(0, abspath("../pyEDAA/Reports"))
-# sys_path.insert(0, abspath("_extensions"))
+sys_path.insert(0, abspath(f"../{directoryName}"))
 
 
 # ==============================================================================
@@ -21,10 +30,7 @@ sys_path.insert(0, abspath(".."))
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-githubNamespace = "edaa-org"
-project = "pyEDAA.Reports"
-
-packageInformationFile = Path(f"../{project.replace('.', '/')}/__init__.py")
+packageInformationFile = Path(f"../{directoryName}/__init__.py")
 versionInformation = extractVersionInformation(packageInformationFile)
 
 author =    versionInformation.Author
@@ -59,10 +65,10 @@ pygments_style = "manni"
 # ==============================================================================
 # Restructured Text settings
 # ==============================================================================
-prologPath = "prolog.inc"
+prologPath = Path("prolog.inc")
 try:
-	with open(prologPath, "r") as prologFile:
-		rst_prolog = prologFile.read()
+	with prologPath.open("r", encoding="utf-8") as fileHandle:
+		rst_prolog = fileHandle.read()
 except Exception as ex:
 	print(f"[ERROR:] While reading '{prologPath}'.")
 	print(ex)
@@ -91,7 +97,7 @@ html_logo = str(Path(html_static_path[0]) / "logo.svg")
 html_favicon = str(Path(html_static_path[0]) / "favicon.svg")
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = f"{project.replace('.', '')}Doc"
+htmlhelp_basename = f"{project}Doc"
 
 # If not None, a 'Last updated on:' timestamp is inserted at every page
 # bottom, using the given strftime format.
@@ -182,10 +188,10 @@ extensions = [
 # Sphinx.Ext.InterSphinx
 # ==============================================================================
 intersphinx_mapping = {
-	"python":    ("https://docs.python.org/3", None),
-	"pytooling": ("https://pytooling.github.io/pyTooling", None),
-	"ucis":      ("https://edaa-org.github.io/pyEDAA.UCIS", None),
-	"ghdl":      ("https://ghdl.github.io/ghdl", None),
+	"python": ("https://docs.python.org/3", None),
+	"pyTool": ("https://pyTooling.github.io/pyTooling/", None),
+	"ucis":   ("https://edaa-org.github.io/pyEDAA.UCIS", None),
+	"ghdl":   ("https://ghdl.github.io/ghdl", None),
 }
 
 
@@ -209,11 +215,12 @@ autodoc_typehints = "both"
 # Sphinx.Ext.ExtLinks
 # ==============================================================================
 extlinks = {
-	"gh":      (f"https://GitHub.com/%s", "gh:%s"),
-	"ghissue": (f"https://GitHub.com/{githubNamespace}/{project}/issues/%s", "issue #%s"),
-	"ghpull":  (f"https://GitHub.com/{githubNamespace}/{project}/pull/%s", "pull request #%s"),
-	"ghsrc":   (f"https://GitHub.com/{githubNamespace}/{project}/blob/main/%s", None),
-	"wiki":    (f"https://en.wikipedia.org/wiki/%s", None),
+	"gh":          (f"https://GitHub.com/%s", "%s"),
+	"ghissue":     (f"https://GitHub.com/{githubNamespace}/{project}/issues/%s", "issue #%s"),
+	"ghpull":      (f"https://GitHub.com/{githubNamespace}/{project}/pull/%s", "pull request #%s"),
+	"ghsrc":       (f"https://GitHub.com/{githubNamespace}/{project}/blob/main/%s", None),
+	"pypi":       ('https://PyPI.org/project/%s', '%s'),
+	"wiki":        (f"https://en.wikipedia.org/wiki/%s", None),
 }
 
 
@@ -272,7 +279,7 @@ report_codecov_packages = {
 report_doccov_packages = {
 	"src": {
 		"name":       f"{project}",
-		"directory":  f"../{project.replace('.', '/')}",
+		"directory":  f"../{directoryName}",
 		"fail_below": 80,
 		"levels":     "default"
 	}

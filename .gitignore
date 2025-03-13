@@ -26,15 +26,13 @@ coverage.xml
 # Dependencies
 !requirements.txt
 
-# Sphinx
-doc/_build/
-doc/pyEDAA.Reports/**/*.*
-!doc/pyEDAA.Reports/index.rst
+# Sphinx documentation
+/doc/_build/
+/doc/_theme/
+/doc/pyEDAA.Reports/**/*.*
+!/doc/pyEDAA.Reports/index.rst
 
-# BuildTheDocs
-doc/_theme/**/*.*
-
-# IntelliJ project files
+# PyCharm project files
 /.idea/workspace.xml
 
 # Git files
