@@ -12,7 +12,7 @@ from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode, TestsuiteSummary a
 
 
 class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
-	@CommandHandler("unittest", help="Merge unit testing results.", description="Merge unit testing results.")
+	@CommandHandler("unittest", help="Transform unit testing results.", description="Merge and/or transform unit testing results.")
 	@LongValuedFlag("--name", dest="name", metaName='Name', optional=True, help="Top-level unit testing summary name.")
 	@LongValuedFlag("--input", dest="input", metaName='format:JUnit File', optional=True, help="Unit testing summary file (XML).")
 	@LongValuedFlag("--merge", dest="merge", metaName='format:JUnit File', optional=True, help="Unit testing summary file (XML).")
@@ -185,22 +185,23 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 	def _processPyTest(self, testsuiteSummary: TestsuiteSummary, cleanups: str) -> None:
 		self.WriteNormal(f"Simplifying unit testing reports created by pytest ...")
 
-		for cleanup in (x.lower() for x in cleanups.split(";")):
-			y = cleanup.split(":")
-			if (l := len(y)) == 1:
-				if cleanup == "rewrite-dunder-init":
+		for cleanup in cleanups.split(";"):
+			parts = cleanup.split(":")
+			if (l := len(parts)) == 1:
+				if cleanup.lower() == "rewrite-dunder-init":
 					self._processPyTest_RewiteDunderInit(testsuiteSummary)
 				else:
 					self.WriteError(f"Unsupported cleanup action for pytest: '{cleanup}'")
 			elif l >= 2:
-				if y[0] == "reduce-depth":
-					for path in y[1:]:
+				command = parts[0].lower()
+				if command == "reduce-depth":
+					for path in parts[1:]:
 						self._processPyTest_ReduceDepth(testsuiteSummary, path)
-				elif y[0] == "split":
-					for path in y[1:]:
+				elif command == "split":
+					for path in parts[1:]:
 						self._processPyTest_SplitTestsuite(testsuiteSummary, path)
 				else:
-					self.WriteError(f"Unsupported cleanup action for pytest: '{y[0]}'")
+					self.WriteError(f"Unsupported cleanup action for pytest: '{parts[0]}'")
 			else:
 				self.WriteError(f"Syntax error: '{cleanup}'")
 

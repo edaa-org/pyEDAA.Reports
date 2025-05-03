@@ -95,8 +95,8 @@ jobs:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@dev
     with:
       name: pyEDAA.Reports
-      python_version_list: "3.9 3.10 3.11 3.12 pypy-3.9 pypy-3.10"
-      disable_list: "mingw64:* ucrt64:*"
+      python_version_list: "3.9 3.10 3.11 3.12 3.13 pypy-3.9 pypy-3.10 pypy-3.11"
+#      disable_list: "mingw64:* ucrt64:*"
 
   AppTestingParams:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@dev
