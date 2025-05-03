@@ -1,3 +1,5 @@
+.. |PackageName| replace:: pyEDAA.Reports
+
 .. _INSTALL:
 
 Installation/Updates
@@ -46,7 +48,7 @@ just all (``all``) dependencies.
       .. tab-set::
 
          .. tab-item:: With Documentation Dependencies
-           :sync: Doc
+            :sync: Doc
 
             .. code-block:: bash
 
@@ -54,7 +56,7 @@ just all (``all``) dependencies.
                pip3 install pyEDAA.Reports[doc]
 
          .. tab-item:: With Unit Testing Dependencies
-           :sync: Unit
+            :sync: Unit
 
             .. code-block:: bash
 
@@ -62,7 +64,7 @@ just all (``all``) dependencies.
                pip3 install pyEDAA.Reports[test]
 
          .. tab-item:: All Developer Dependencies
-           :sync: All
+            :sync: All
 
             .. code-block:: bash
 
@@ -75,7 +77,7 @@ just all (``all``) dependencies.
       .. tab-set::
 
          .. tab-item:: With Documentation Dependencies
-           :sync: Doc
+            :sync: Doc
 
             .. code-block:: powershell
 
@@ -83,7 +85,7 @@ just all (``all``) dependencies.
                pip install pyEDAA.Reports[doc]
 
          .. tab-item:: With Unit Testing Dependencies
-           :sync: Unit
+            :sync: Unit
 
             .. code-block:: powershell
 
@@ -91,7 +93,7 @@ just all (``all``) dependencies.
                pip install pyEDAA.Reports[test]
 
          .. tab-item:: All Developer Dependencies
-           :sync: All
+            :sync: All
 
             .. code-block:: powershell
 
@@ -181,13 +183,13 @@ Ensure :ref:`packaging requirements <DEP/packaging>` are installed.
          cd <pyEDAA.Reports>
 
          # Package the code in a wheel (*.whl)
-         python -m build --wheel
+         python3 -m build --wheel
 
          # Uninstall the old package
-         python -m pip uninstall -y pyEDAA.Reports
+         python3 -m pip uninstall -y pyEDAA.Reports
 
          # Install from wheel
-         python -m pip install ./dist/pyEDAA.Reports-0.1.0-py3-none-any.whl
+         python3 -m pip install ./dist/pyEDAA.Reports-0.3.0-py3-none-any.whl
 
    .. tab-item:: Windows
       :sync: Windows

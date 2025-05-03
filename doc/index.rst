@@ -229,12 +229,12 @@ Contributors
    :hidden:
 
    CommandLineInterface
-   pyEDAA.Reports/pyEDAA.Reports
-   reports/unittests
-   reports/coverage/index
-   Doc. Coverage Report <reports/doccoverage>
-   Static Type Check Report ➚ <reports/typing/index>
-
+   Python Class Reference <pyEDAA.Reports/pyEDAA.Reports>
+   unittests/index
+   coverage/index
+   CodeCoverage
+   Doc. Coverage Report <DocCoverage>
+   Static Type Check Report ➚ <typing/index>
 
 .. raw:: latex
 
