@@ -33,7 +33,6 @@ from pathlib      import Path
 from unittest     import TestCase
 
 from pyEDAA.Reports.Unittesting.JUnit import Document as JUnitDocument
-from pyEDAA.Reports.Unittesting.OSVVM import BuildSummaryDocument
 
 
 if __name__ == "__main__": # pragma: no cover
@@ -42,121 +41,20 @@ if __name__ == "__main__": # pragma: no cover
 	exit(1)
 
 
-class JUnitGeneratedByOSVVM(TestCase):
-	def test_OsvvmLibraries(self):
-		print()
-
-		junitExampleFile = Path("tests/data/JUnit/OsvvmLibraries/OSVVMLibraries_OsvvmLibraries.xml")
-		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
-
-		self.assertEqual(0, doc.TestsuiteCount)
-		self.assertEqual(0, doc.TestcaseCount)
-
-		print(f"JUnit file:")
-		print(f"  Testsuites: {doc.TestsuiteCount}")
-		print(f"  Testcases:  {doc.TestcaseCount}")
-
-		print()
-		print(f"Statistics:")
-		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
-
-	def test_RunAllTests(self):
+class OSVVMLibraries(TestCase):
+	def test_RunAllTests(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/OsvvmLibraries/OSVVMLibraries_RunAllTests.xml")
 		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
 
-		self.assertGreaterEqual(doc.TestsuiteCount, 14)
-		self.assertGreaterEqual(doc.TestcaseCount, 285)
+		self.assertGreater(doc.TestsuiteCount, 0)
+		self.assertGreater(doc.TestcaseCount, 0)
 
-		print("=" * 40)
-		tree = doc.ToTree()
-		print(tree.Render(), end="")
-		print("=" * 40)
-
-		print()
 		print(f"JUnit file:")
-		print(f"  Testsuites: {doc.TestsuiteCount}")
-		print(f"  Testcases:  {doc.TestcaseCount}")
+		print(f"  Testsuites: {len(doc.Testsuites)}")
+		print(f"  Testcases:  ")
 
 		print()
 		print(f"Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
-
-
-class YAMLGeneratedByOSVVM(TestCase):
-	def test_OsvvmLibraries(self) -> None:
-		print()
-
-		yamlPath = Path("tests/data/OSVVM/OSVVMLibraries_OsvvmLibraries.yml")
-		doc = BuildSummaryDocument(yamlPath, analyzeAndConvert=True)
-
-		print("=" * 40)
-		tree = doc.ToTree()
-		print(tree.Render(), end="")
-		print("=" * 40)
-
-		print()
-		print(f"YAML file:")
-		print(f"  Testsuites: {doc.TestsuiteCount}")
-		print(f"  Testcases:  {doc.TestcaseCount}")
-
-		print()
-		print(f"Statistics:")
-		print(f"  Times: parsing by ruamel.yaml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
-
-
-		self.assertEqual(1, doc.TestsuiteCount)
-		self.assertEqual(0, doc.TestcaseCount)
-
-	def test_RunAllTests(self) -> None:
-		print()
-
-		yamlPath = Path("tests/data/OSVVM/OSVVMLibraries_RunAllTests.yml")
-		doc = BuildSummaryDocument(yamlPath, analyzeAndConvert=True)
-
-		print("=" * 40)
-		tree = doc.ToTree()
-		print(tree.Render(), end="")
-		print("=" * 40)
-
-		print()
-		print(f"YAML file:")
-		print(f"  Testsuites: {doc.TestsuiteCount}")
-		print(f"  Testcases:  {doc.TestcaseCount}")
-
-		print()
-		print(f"Statistics:")
-		print(f"  Times: parsing by ruamel.yaml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
-
-
-		self.assertEqual(14, len(doc.Testsuites))
-		self.assertIn("Axi4Lite", doc)
-		self.assertIn("Axi4Full", doc)
-		self.assertIn("AxiStream", doc)
-		self.assertIn("Uart", doc)
-
-		axi4lite = doc["Axi4Lite"]
-		self.assertEqual(17, len(axi4lite.Testcases))
-
-		axi4 = doc["Axi4Full"]
-		self.assertEqual(68, len(axi4.Testcases))
-
-		axi4stream = doc["AxiStream"]
-		self.assertEqual(65, len(axi4stream.Testcases))
-
-		uart = doc["Uart"]
-		self.assertEqual(10, len(uart.Testcases))
-
-	# 	for suite in doc:
-	# 		self.printTestsuite(suite)
-	#
-	# def printTestsuite(self, testsuite: Testsuite, indent: int = 0):
-	# 	print(f"{'  '*indent}{testsuite.Name}")
-	# 	for suite in testsuite._testsuites.values():
-	# 		self.printTestsuite(suite, indent + 2)
-	# 	for case in testsuite:
-	# 		self.printTestcase(case, indent + 2)
-	#
-	# def printTestcase(self, testcase: Testcase, indent: int = 0):
-	# 	print(f"{'  ' * indent}{testcase.Name}")

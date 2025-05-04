@@ -176,9 +176,9 @@ def main() -> NoReturn:
 			program.WriteLineToStdErr(f"{{DARK_YELLOW}}Because of: {ex.__cause__}{{NOCOLOR}}".format(**Application.Foreground))
 
 	except NotImplementedError as ex:
-		Application.PrintNotImplementedError(ex)
+		program.PrintNotImplementedError(ex)
 	except Exception as ex:
-		Application.PrintException(ex)
+		program.PrintException(ex)
 	# except CoberturaException as ex:
 	# 	print()
 	# 	print(f"[INTERNAL ERROR] {ex}")

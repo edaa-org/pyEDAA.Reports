@@ -102,7 +102,7 @@ Report Formats
 
       .. rubric:: Supported tools
 
-      * docstr_coverage
+      * `docstr_coverage <https://github.com/HunterMcGushion/docstr_coverage>`__
       * others tbd. (GHDL)
 
       .. rubric:: Supported file formats
@@ -135,7 +135,6 @@ Report Formats
 
       * :ref:`Ant JUnit4 XML format and various dialects <UNITTEST/FileFormats/AntJUnit4>`
       * :ref:`JUnit5 XML format (Open Test Reporting) <UNITTEST/FileFormats/JUnit5>`
-      * :ref:`OSVVM YAML format <UNITTEST/FileFormats/OSVVM>`
 
       .. rubric:: Supported tools
 
@@ -146,6 +145,11 @@ Report Formats
       * :ref:`OSVVM <UNITTEST/Tool/OSVVM>`
       * :ref:`pyTest <UNITTEST/Tool/pytest>`
 
+      .. note::
+
+         OSVVM YAML format
+           The YAML format for test results of OSVVM has been moved to `pyEDAA.OSVVM <https://edaa-org.github.io/pyEDAA.OSVVM/>`__
+           to group with other OSVVM specific formats.
 
    .. #grid-item-card::
       :columns: 4
@@ -229,12 +233,12 @@ Contributors
    :hidden:
 
    CommandLineInterface
-   pyEDAA.Reports/pyEDAA.Reports
-   reports/unittests
-   reports/coverage/index
-   Doc. Coverage Report <reports/doccoverage>
-   Static Type Check Report ➚ <reports/typing/index>
-
+   Python Class Reference <pyEDAA.Reports/pyEDAA.Reports>
+   unittests/index
+   coverage/index
+   CodeCoverage
+   Doc. Coverage Report <DocCoverage>
+   Static Type Check Report ➚ <typing/index>
 
 .. raw:: latex
 
