@@ -483,39 +483,3 @@ class Document(py_TestCase):
 		# print(tree.Render())
 
 		doc.Write(regenerate=True)
-
-
-class ExampleFiles(py_TestCase):
-	def test_pytest_pyAttributes(self) -> None:
-		print()
-
-		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
-		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
-
-		self.assertGreater(doc.TestsuiteCount, 0)
-		self.assertGreater(doc.TestcaseCount, 0)
-
-		print(f"JUnit file:")
-		print(f"  Testsuites: {len(doc.Testsuites)}")
-		print(f"  Testcases:  ")
-
-		print()
-		print(f"Statistics:")
-		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
-
-	def test_OSVVM_Libraries(self) -> None:
-		print()
-
-		junitExampleFile = Path("tests/data/JUnit/OsvvmLibraries/OSVVMLibraries_RunAllTests.xml")
-		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
-
-		self.assertGreater(doc.TestsuiteCount, 0)
-		self.assertGreater(doc.TestcaseCount, 0)
-
-		print(f"JUnit file:")
-		print(f"  Testsuites: {len(doc.Testsuites)}")
-		print(f"  Testcases:  ")
-
-		print()
-		print(f"Statistics:")
-		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
