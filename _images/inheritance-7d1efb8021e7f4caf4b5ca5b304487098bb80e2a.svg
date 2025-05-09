@@ -1,0 +1,62 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="436pt" height="64pt" viewBox="0.00 0.00 436.00 64.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 60)">
+<ns0:title>inheritanceb4dede040f</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>DuplicateTestsuiteException</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.DuplicateTestsuiteException" ns1:title="A unit test exception raised on duplicate test suites (by name)." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="428,-37 273,-37 273,-18 428,-18 428,-37" />
+<ns0:text text-anchor="middle" x="350.5" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">DuplicateTestsuiteException</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>DuplicateTestsuiteException-&gt;DuplicateTestsuiteException</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M325.22,-37.08C312.93,-45.73 321.35,-55 350.5,-55 375.55,-55 385.29,-48.16 379.74,-40.74" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="380.64,-39.19 375.78,-37.08 378.26,-41.76 380.64,-39.19" />
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>UnittestException</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.html#pyEDAA.Reports.Unittesting.UnittestException" ns1:title="Base-exception for all unit test related exceptions." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="237,-56 133,-56 133,-37 237,-37 237,-56" />
+<ns0:text text-anchor="middle" x="185" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">UnittestException</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>UnittestException-&gt;DuplicateTestsuiteException</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M237.28,-40.54C247.02,-39.41 257.43,-38.2 267.84,-36.99" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="268.18,-38.71 272.95,-36.4 267.78,-35.23 268.18,-38.71" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>JUnitException</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.Unittesting.JUnit.html#pyEDAA.Reports.Unittesting.JUnit.JUnitException" ns1:title="An exception-mixin for JUnit format specific exceptions." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="229,-19 141,-19 141,0 229,0 229,-19" />
+<ns0:text text-anchor="middle" x="185" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">JUnitException</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge3" class="edge">
+<ns0:title>JUnitException-&gt;DuplicateTestsuiteException</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M229.39,-14.28C241.16,-15.57 254.31,-17.02 267.47,-18.47" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="267.55,-20.24 272.71,-19.05 267.93,-16.76 267.55,-20.24" />
+</ns0:g>
+
+<ns0:g id="node4" class="node">
+<ns0:title>ReportException</ns0:title>
+<ns0:polygon fill="white" stroke="#1e90ff" points="97,-56 0,-56 0,-37 97,-37 97,-56" />
+<ns0:text text-anchor="middle" x="48.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ReportException</ns0:text>
+</ns0:g>
+
+<ns0:g id="edge4" class="edge">
+<ns0:title>ReportException-&gt;UnittestException</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M97.3,-46.5C107.07,-46.5 117.44,-46.5 127.49,-46.5" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="127.71,-48.25 132.71,-46.5 127.71,-44.75 127.71,-48.25" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>

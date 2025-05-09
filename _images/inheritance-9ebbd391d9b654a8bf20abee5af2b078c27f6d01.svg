@@ -1,0 +1,44 @@
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" width="196pt" height="64pt" viewBox="0.00 0.00 196.00 64.00">
+<ns0:g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 60)">
+<ns0:title>inheritance315bb6953e</ns0:title>
+
+<ns0:g id="node1" class="node">
+<ns0:title>Class</ns0:title>
+<ns0:g id="a_node1"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.html#pyEDAA.Reports.DocumentationCoverage.Class" ns1:title="Class" target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="58.5,-56 4.5,-56 4.5,-37 58.5,-37 58.5,-56" />
+<ns0:text text-anchor="middle" x="31.5" y="-44" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Class</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="node2" class="node">
+<ns0:title>ClassCoverage</ns0:title>
+<ns0:g id="a_node2"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.ClassCoverage" ns1:title="This class represents the class documentation coverage for Python classes." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="188,-37 99,-37 99,-18 188,-18 188,-37" />
+<ns0:text text-anchor="middle" x="143.5" y="-25" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">ClassCoverage</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge1" class="edge">
+<ns0:title>Class-&gt;ClassCoverage</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M58.57,-42C69.13,-40.17 81.68,-38 93.82,-35.91" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="94.36,-37.59 98.99,-35.02 93.76,-34.14 94.36,-37.59" />
+</ns0:g>
+
+<ns0:g id="node3" class="node">
+<ns0:title>Coverage</ns0:title>
+<ns0:g id="a_node3"><ns0:a ns1:href="../pyEDAA.Reports/pyEDAA.Reports.DocumentationCoverage.Python.html#pyEDAA.Reports.DocumentationCoverage.Python.Coverage" ns1:title="This base-class for :class:`ClassCoverage` and :class:`AggregatedCoverage` represents a basic set of documentation coverage metrics." target="_top">
+<ns0:polygon fill="white" stroke="#1e90ff" points="63,-19 0,-19 0,0 63,0 63,-19" />
+<ns0:text text-anchor="middle" x="31.5" y="-7" font-family="Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans" font-size="10.00">Coverage</ns0:text>
+</ns0:a>
+</ns0:g>
+</ns0:g>
+
+<ns0:g id="edge2" class="edge">
+<ns0:title>Coverage-&gt;ClassCoverage</ns0:title>
+<ns0:path fill="none" stroke="black" stroke-width="0.5" d="M63.14,-14.51C72.65,-16.07 83.37,-17.82 93.79,-19.53" />
+<ns0:polygon fill="black" stroke="black" stroke-width="0.5" points="93.65,-21.28 98.87,-20.36 94.22,-17.83 93.65,-21.28" />
+</ns0:g>
+</ns0:g>
+</ns0:svg>
