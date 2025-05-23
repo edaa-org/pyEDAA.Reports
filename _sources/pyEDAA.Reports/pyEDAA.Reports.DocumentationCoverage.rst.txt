@@ -1,0 +1,151 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+====================================
+pyEDAA.Reports.DocumentationCoverage
+====================================
+
+.. automodule:: pyEDAA.Reports.DocumentationCoverage
+
+
+
+**Submodules**
+
+.. toctree::
+   :maxdepth: 1
+
+   pyEDAA.Reports.DocumentationCoverage.Python
+
+.. currentmodule:: pyEDAA.Reports.DocumentationCoverage
+
+
+**Exceptions**
+
+- :py:exc:`DocCoverageException`:
+  Common base class for all non-exit exceptions.
+
+
+
+**Classes**
+
+- :py:class:`CoverageState`:
+  Support for flags
+
+- :py:class:`Base`:
+  Undocumented.
+
+- :py:class:`_Type`:
+  Undocumented.
+
+- :py:class:`Class`:
+  Undocumented.
+
+- :py:class:`_Unit`:
+  Undocumented.
+
+- :py:class:`Module`:
+  Undocumented.
+
+- :py:class:`Package`:
+  Undocumented.
+
+
+
+---------------------
+
+**Exceptions**
+
+
+
+
+.. autoexception:: DocCoverageException
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: DocCoverageException
+      :parts: 1
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: CoverageState
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: CoverageState
+      :parts: 1
+
+.. autoclass:: Base
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Base
+      :parts: 1
+
+.. autoclass:: _Type
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: _Type
+      :parts: 1
+
+.. autoclass:: Class
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Class
+      :parts: 1
+
+.. autoclass:: _Unit
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: _Unit
+      :parts: 1
+
+.. autoclass:: Module
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Module
+      :parts: 1
+
+.. autoclass:: Package
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Package
+      :parts: 1

@@ -1,0 +1,129 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+===========================================
+pyEDAA.Reports.DocumentationCoverage.Python
+===========================================
+
+.. automodule:: pyEDAA.Reports.DocumentationCoverage.Python
+
+
+.. currentmodule:: pyEDAA.Reports.DocumentationCoverage.Python
+
+
+**Exceptions**
+
+- :py:exc:`DocStrCoverageError`:
+  Common base class for all non-exit exceptions.
+
+
+
+**Classes**
+
+- :py:class:`Coverage`:
+  This base-class for :class:`ClassCoverage` and :class:`AggregatedCoverage` represents a basic set of documentation coverage metrics.
+
+- :py:class:`AggregatedCoverage`:
+  This base-class for :class:`ModuleCoverage` and :class:`PackageCoverage` represents an extended set of documentation coverage metrics, especially with aggregated metrics.
+
+- :py:class:`ClassCoverage`:
+  This class represents the class documentation coverage for Python classes.
+
+- :py:class:`ModuleCoverage`:
+  This class represents the module documentation coverage for Python modules.
+
+- :py:class:`PackageCoverage`:
+  This class represents the package documentation coverage for Python packages.
+
+- :py:class:`DocStrCoverage`:
+  A wrapper class for the docstr_coverage package and it's analyzer producing a documentation coverage model.
+
+
+
+---------------------
+
+**Exceptions**
+
+
+
+
+.. autoexception:: DocStrCoverageError
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: DocStrCoverageError
+      :parts: 1
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: Coverage
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Coverage
+      :parts: 1
+
+.. autoclass:: AggregatedCoverage
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: AggregatedCoverage
+      :parts: 1
+
+.. autoclass:: ClassCoverage
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: ClassCoverage
+      :parts: 1
+
+.. autoclass:: ModuleCoverage
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: ModuleCoverage
+      :parts: 1
+
+.. autoclass:: PackageCoverage
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: PackageCoverage
+      :parts: 1
+
+.. autoclass:: DocStrCoverage
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: DocStrCoverage
+      :parts: 1
