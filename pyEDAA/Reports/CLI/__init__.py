@@ -68,7 +68,7 @@ class ProgramBase(TerminalApplication):
 	programTitle: str
 
 	def _PrintHeadline(self) -> None:
-		"""Print the programs headline."""
+		"""Print the program's headline."""
 		print("{line}".format(line="=" * 120))
 		print("{headline: ^120s}".format(headline=self.programTitle))
 		print("{line}".format(line="=" * 120))
