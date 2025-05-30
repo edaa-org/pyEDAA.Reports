@@ -1,0 +1,52 @@
+.. # Template modified by Patrick Lehmann
+     * removed automodule on top, because private members are activated for autodoc (no doubled documentation).
+     * Made sections like 'submodules' bold text, but no headlines to reduce number of ToC levels.
+
+=================================
+pyEDAA.Reports.Requirement.Python
+=================================
+
+.. automodule:: pyEDAA.Reports.Requirement.Python
+
+
+.. currentmodule:: pyEDAA.Reports.Requirement.Python
+
+
+**Classes**
+
+- :py:class:`Requirement`:
+  Undocumented.
+
+- :py:class:`RequirementsFile`:
+  Undocumented.
+
+
+
+---------------------
+
+**Classes**
+
+
+
+
+.. autoclass:: Requirement
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Requirement
+      :parts: 1
+
+.. autoclass:: RequirementsFile
+   :members:
+   :private-members:
+   :special-members:
+   :inherited-members:
+   :exclude-members: __weakref__
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: RequirementsFile
+      :parts: 1
