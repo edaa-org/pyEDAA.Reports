@@ -1536,7 +1536,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[TestsuiteType] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test summary.
 
@@ -1647,9 +1647,9 @@ class Document(metaclass=ExtendedType, mixin=True):
 	@readonly
 	def Path(self) -> Path:
 		"""
-		Read-only property returning the path to the file of this document.
+		Read-only property to access the path to the file of this document.
 
-		:return: The document's path to the file.
+		:returns: The document's path to the file.
 		"""
 		return self._path
 

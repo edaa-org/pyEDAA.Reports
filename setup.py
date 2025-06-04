@@ -39,23 +39,26 @@ packageName =            "pyEDAA.Reports"
 packageDirectory =       packageName.replace(".", "/")
 packageInformationFile = Path(f"{packageDirectory}/__init__.py")
 
-setup(**DescribePythonPackageHostedOnGitHub(
-	packageName=packageName,
-	description="Various report abstract data models and report format converters.",
-	gitHubNamespace=gitHubNamespace,
-	unittestRequirementsFile=Path("tests/requirements.txt"),
-	developmentStatus="pre-alpha",
-	classifiers=list(DEFAULT_CLASSIFIERS) + [
-		"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
-	],
-	sourceFileWithVersion=packageInformationFile,
-	dataFiles={
-		packageName: [
-			f"py.typed",
-			f"Resources/*.xsd"
-		]
-	},
-	consoleScripts={
-		"pyedaa-reports": "pyEDAA.Reports.CLI:main"
-	}
-))
+setup(
+	**DescribePythonPackageHostedOnGitHub(
+		packageName=packageName,
+		description="Various report abstract data models and report format converters.",
+		gitHubNamespace=gitHubNamespace,
+		unittestRequirementsFile=Path("tests/requirements.txt"),
+		developmentStatus="beta",
+		classifiers=list(DEFAULT_CLASSIFIERS) + [
+			"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+		],
+		sourceFileWithVersion=packageInformationFile,
+		dataFiles={
+			packageName: [
+				"py.typed",
+				"Resources/*.xsd"
+			]
+		},
+		consoleScripts={
+			"pyedaa-reports": "pyEDAA.Reports.CLI:main"
+		},
+		debug=True
+	)
+)

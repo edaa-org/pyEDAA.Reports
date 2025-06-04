@@ -5,7 +5,7 @@ Both GitHub and GitLab do provide features for displaying CI results through the
 enough for displaying all the details, OSVR generators can provide stripped down file formats matching some of the
 supported readers; similarly to the JSON and xUnit outputs provided by VUnit.
 
-.. _API:Logging:OSVRE:
+.. _API/Logging/OSVRE:
 
 Open Source Verification Report Explorer
 ----------------------------------------
