@@ -270,20 +270,24 @@ class Base(metaclass=ExtendedType, slots=True):
 	This feature is for example used by Ant + JUnit4's XML property fields.
 	"""
 
-	_parent: Nullable["TestsuiteBase"]
-	_name:   str
+	_parent:               Nullable["TestsuiteBase"]
+	_name:                 str
 
-	_startTime:        Nullable[datetime]
-	_setupDuration:    Nullable[timedelta]
-	_testDuration:     Nullable[timedelta]
-	_teardownDuration: Nullable[timedelta]
-	_totalDuration:    Nullable[timedelta]
+	_startTime:            Nullable[datetime]
+	_setupDuration:        Nullable[timedelta]
+	_testDuration:         Nullable[timedelta]
+	_teardownDuration:     Nullable[timedelta]
+	_totalDuration:        Nullable[timedelta]
 
-	_warningCount: int
-	_errorCount:   int
-	_fatalCount:   int
+	_warningCount:         int
+	_errorCount:           int
+	_fatalCount:           int
 
-	_dict:         Dict[str, Any]
+	_expectedWarningCount: int
+	_expectedErrorCount:   int
+	_expectedFatalCount:   int
+
+	_dict:                 Dict[str, Any]
 
 	def __init__(
 		self,
@@ -296,6 +300,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
+		expectedWarningCount: int = 0,
+		expectedErrorCount: int = 0,
+		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["TestsuiteBase"] = None
 	):
@@ -324,6 +331,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises TypeError:         If parameter 'warningCount' is not an integer.
 		:raises TypeError:         If parameter 'errorCount' is not an integer.
 		:raises TypeError:         If parameter 'fatalCount' is not an integer.
+		:raises TypeError:         If parameter 'expectedWarningCount' is not an integer.
+		:raises TypeError:         If parameter 'expectedErrorCount' is not an integer.
+		:raises TypeError:         If parameter 'expectedFatalCount' is not an integer.
 		:raises TypeError:         If parameter 'keyValuePairs' is not a Mapping.
 		:raises ValueError:        If parameter 'totalDuration' is not consistent.
 		"""
@@ -431,9 +441,30 @@ class Base(metaclass=ExtendedType, slots=True):
 				ex.add_note(f"Got type '{getFullyQualifiedName(fatalCount)}'.")
 			raise ex
 
-		self._warningCount = warningCount
-		self._errorCount = errorCount
-		self._fatalCount = fatalCount
+		if not isinstance(expectedWarningCount, int):
+			ex = TypeError(f"Parameter 'expectedWarningCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(expectedWarningCount)}'.")
+			raise ex
+
+		if not isinstance(expectedErrorCount, int):
+			ex = TypeError(f"Parameter 'expectedErrorCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(expectedErrorCount)}'.")
+			raise ex
+
+		if not isinstance(expectedFatalCount, int):
+			ex = TypeError(f"Parameter 'expectedFatalCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(expectedFatalCount)}'.")
+			raise ex
+
+		self._warningCount =         warningCount
+		self._errorCount =           errorCount
+		self._fatalCount =           fatalCount
+		self._expectedWarningCount = expectedWarningCount
+		self._expectedErrorCount =   expectedErrorCount
+		self._expectedFatalCount =   expectedFatalCount
 
 		if keyValuePairs is not None and not isinstance(keyValuePairs, Mapping):
 			ex = TypeError(f"Parameter 'keyValuePairs' is not a mapping.")
@@ -539,6 +570,33 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		return self._fatalCount
 
+	@readonly
+	def ExpectedWarningCount(self) -> int:
+		"""
+		Read-only property returning the number of expected warnings.
+
+		:return: Count of expected warnings.
+		"""
+		return self._expectedWarningCount
+
+	@readonly
+	def ExpectedErrorCount(self) -> int:
+		"""
+		Read-only property returning the number of expected errors.
+
+		:return: Count of expected errors.
+		"""
+		return self._expectedErrorCount
+
+	@readonly
+	def ExpectedFatalCount(self) -> int:
+		"""
+		Read-only property returning the number of expected fatal errors.
+
+		:return: Count of expected fatal errors.
+		"""
+		return self._expectedFatalCount
+
 	def __len__(self) -> int:
 		"""
 		Returns the number of annotated key-value pairs.
@@ -640,6 +698,9 @@ class Testcase(Base):
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
+		expectedWarningCount: int = 0,
+		expectedErrorCount: int = 0,
+		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
@@ -677,13 +738,9 @@ class Testcase(Base):
 		super().__init__(
 			name,
 			startTime,
-			setupDuration,
-			testDuration,
-			teardownDuration,
-			totalDuration,
-			warningCount,
-			errorCount,
-			fatalCount,
+			setupDuration, testDuration, teardownDuration, totalDuration,
+			warningCount, errorCount, fatalCount,
+			expectedWarningCount, expectedErrorCount, expectedFatalCount,
 			keyValuePairs,
 			parent
 		)
@@ -925,6 +982,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			warningCount,
 			errorCount,
 			fatalCount,
+			0, 0, 0,
 			keyValuePairs,
 			parent
 		)
@@ -1557,15 +1615,9 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		super().__init__(
 			name,
 			TestsuiteKind.Root,
-			startTime,
-			setupDuration,
-			testDuration,
-			teardownDuration,
-			totalDuration,
+			startTime, setupDuration, testDuration, teardownDuration, totalDuration,
 			status,
-			warningCount,
-			errorCount,
-			fatalCount,
+			warningCount, errorCount, fatalCount,
 			testsuites,
 			keyValuePairs,
 			parent
