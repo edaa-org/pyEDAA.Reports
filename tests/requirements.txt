@@ -4,7 +4,7 @@
 Coverage ~= 7.8
 
 # Test Runner
-pytest ~= 8.3
+pytest ~= 8.4
 pytest-cov ~= 6.1
 
 # Static Type Checking
