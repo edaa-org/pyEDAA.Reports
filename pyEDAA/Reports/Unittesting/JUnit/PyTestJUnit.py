@@ -74,51 +74,6 @@ class Testsuite(ju_Testsuite):
 	This is a derived implementation for the pyTest JUnit dialect.
 	"""
 
-	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, skipped, errored, failed, passed = super().Aggregate()
-
-		for testclass in self._testclasses.values():
-			_ = testclass.Aggregate(strict)
-
-			tests += 1
-
-			status = testclass._status
-			if status is TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testclass '{testclass._name}' with state 'Unknown'.")
-			elif status is TestcaseStatus.Skipped:
-				skipped += 1
-			elif status is TestcaseStatus.Errored:
-				errored += 1
-			elif status is TestcaseStatus.Passed:
-				passed += 1
-			elif status is TestcaseStatus.Failed:
-				failed += 1
-			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testclass '{testclass._name}' with unsupported state '{status}'.")
-			else:
-				raise UnittestException(f"Internal error for testclass '{testclass._name}', field '_status' is '{status}'.")
-
-		self._tests = tests
-		self._skipped = skipped
-		self._errored = errored
-		self._failed = failed
-		self._passed = passed
-
-		if errored > 0:
-			self._status = TestsuiteStatus.Errored
-		elif failed > 0:
-			self._status = TestsuiteStatus.Failed
-		elif tests == 0:
-			self._status = TestsuiteStatus.Empty
-		elif tests - skipped == passed:
-			self._status = TestsuiteStatus.Passed
-		elif tests == skipped:
-			self._status = TestsuiteStatus.Skipped
-		else:
-			self._status = TestsuiteStatus.Unknown
-
-		return tests, skipped, errored, failed, passed
-
 	@classmethod
 	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
 		"""
