@@ -244,8 +244,8 @@ class IterationScheme(Flag):
 
 
 TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
-TestcaseAggregateReturnType = Tuple[int, int, int, timedelta]
-TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int, int, int, timedelta]
+TestcaseAggregateReturnType = Tuple[int, int, int, int, int, int, timedelta]
+TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int, int, int, int, int, int, int, int, int, timedelta]
 
 
 @export
@@ -270,20 +270,24 @@ class Base(metaclass=ExtendedType, slots=True):
 	This feature is for example used by Ant + JUnit4's XML property fields.
 	"""
 
-	_parent: Nullable["TestsuiteBase"]
-	_name:   str
+	_parent:               Nullable["TestsuiteBase"]
+	_name:                 str
 
-	_startTime:        Nullable[datetime]
-	_setupDuration:    Nullable[timedelta]
-	_testDuration:     Nullable[timedelta]
-	_teardownDuration: Nullable[timedelta]
-	_totalDuration:    Nullable[timedelta]
+	_startTime:            Nullable[datetime]
+	_setupDuration:        Nullable[timedelta]
+	_testDuration:         Nullable[timedelta]
+	_teardownDuration:     Nullable[timedelta]
+	_totalDuration:        Nullable[timedelta]
 
-	_warningCount: int
-	_errorCount:   int
-	_fatalCount:   int
+	_warningCount:         int
+	_errorCount:           int
+	_fatalCount:           int
 
-	_dict:         Dict[str, Any]
+	_expectedWarningCount: int
+	_expectedErrorCount:   int
+	_expectedFatalCount:   int
+
+	_dict:                 Dict[str, Any]
 
 	def __init__(
 		self,
@@ -296,6 +300,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
+		expectedWarningCount: int = 0,
+		expectedErrorCount: int = 0,
+		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["TestsuiteBase"] = None
 	):
@@ -324,6 +331,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises TypeError:         If parameter 'warningCount' is not an integer.
 		:raises TypeError:         If parameter 'errorCount' is not an integer.
 		:raises TypeError:         If parameter 'fatalCount' is not an integer.
+		:raises TypeError:         If parameter 'expectedWarningCount' is not an integer.
+		:raises TypeError:         If parameter 'expectedErrorCount' is not an integer.
+		:raises TypeError:         If parameter 'expectedFatalCount' is not an integer.
 		:raises TypeError:         If parameter 'keyValuePairs' is not a Mapping.
 		:raises ValueError:        If parameter 'totalDuration' is not consistent.
 		"""
@@ -431,9 +441,30 @@ class Base(metaclass=ExtendedType, slots=True):
 				ex.add_note(f"Got type '{getFullyQualifiedName(fatalCount)}'.")
 			raise ex
 
-		self._warningCount = warningCount
-		self._errorCount = errorCount
-		self._fatalCount = fatalCount
+		if not isinstance(expectedWarningCount, int):
+			ex = TypeError(f"Parameter 'expectedWarningCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(expectedWarningCount)}'.")
+			raise ex
+
+		if not isinstance(expectedErrorCount, int):
+			ex = TypeError(f"Parameter 'expectedErrorCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(expectedErrorCount)}'.")
+			raise ex
+
+		if not isinstance(expectedFatalCount, int):
+			ex = TypeError(f"Parameter 'expectedFatalCount' is not of type 'int'.")
+			if version_info >= (3, 11):  # pragma: no cover
+				ex.add_note(f"Got type '{getFullyQualifiedName(expectedFatalCount)}'.")
+			raise ex
+
+		self._warningCount =         warningCount
+		self._errorCount =           errorCount
+		self._fatalCount =           fatalCount
+		self._expectedWarningCount = expectedWarningCount
+		self._expectedErrorCount =   expectedErrorCount
+		self._expectedFatalCount =   expectedFatalCount
 
 		if keyValuePairs is not None and not isinstance(keyValuePairs, Mapping):
 			ex = TypeError(f"Parameter 'keyValuePairs' is not a mapping.")
@@ -539,6 +570,33 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		return self._fatalCount
 
+	@readonly
+	def ExpectedWarningCount(self) -> int:
+		"""
+		Read-only property returning the number of expected warnings.
+
+		:return: Count of expected warnings.
+		"""
+		return self._expectedWarningCount
+
+	@readonly
+	def ExpectedErrorCount(self) -> int:
+		"""
+		Read-only property returning the number of expected errors.
+
+		:return: Count of expected errors.
+		"""
+		return self._expectedErrorCount
+
+	@readonly
+	def ExpectedFatalCount(self) -> int:
+		"""
+		Read-only property returning the number of expected fatal errors.
+
+		:return: Count of expected fatal errors.
+		"""
+		return self._expectedFatalCount
+
 	def __len__(self) -> int:
 		"""
 		Returns the number of annotated key-value pairs.
@@ -640,6 +698,9 @@ class Testcase(Base):
 		warningCount: int = 0,
 		errorCount: int = 0,
 		fatalCount: int = 0,
+		expectedWarningCount: int = 0,
+		expectedErrorCount: int = 0,
+		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["Testsuite"] = None
 	):
@@ -677,13 +738,9 @@ class Testcase(Base):
 		super().__init__(
 			name,
 			startTime,
-			setupDuration,
-			testDuration,
-			teardownDuration,
-			totalDuration,
-			warningCount,
-			errorCount,
-			fatalCount,
+			setupDuration, testDuration, teardownDuration, totalDuration,
+			warningCount, errorCount, fatalCount,
+			expectedWarningCount, expectedErrorCount, expectedFatalCount,
 			keyValuePairs,
 			parent
 		)
@@ -795,7 +852,11 @@ class Testcase(Base):
 			self._warningCount,
 			self._errorCount,
 			self._fatalCount,
+			self._expectedWarningCount,
+			self._expectedErrorCount,
+			self._expectedFatalCount,
 		)
+		# TODO: copy key-value-pairs?
 
 	def Aggregate(self, strict: bool = True) -> TestcaseAggregateReturnType:
 		if self._status is TestcaseStatus.Unknown:
@@ -808,13 +869,13 @@ class Testcase(Base):
 			else:
 				self._status = TestcaseStatus.Failed
 
-			if self._warningCount > 0:
+			if self._warningCount - self._expectedWarningCount > 0:
 				self._status |= TestcaseStatus.Warned
 
-			if self._errorCount > 0:
+			if self._errorCount - self._expectedErrorCount > 0:
 				self._status |= TestcaseStatus.Errored
 
-			if self._fatalCount > 0:
+			if self._fatalCount - self._expectedFatalCount > 0:
 				self._status |= TestcaseStatus.Aborted
 
 				if strict:
@@ -825,7 +886,7 @@ class Testcase(Base):
 
 		totalDuration = timedelta() if self._totalDuration is None else self._totalDuration
 
-		return self._warningCount, self._errorCount, self._fatalCount, totalDuration
+		return self._warningCount, self._errorCount, self._fatalCount, self._expectedWarningCount, self._expectedErrorCount, self._expectedFatalCount, totalDuration
 
 	def __str__(self) -> str:
 		"""
@@ -925,6 +986,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			warningCount,
 			errorCount,
 			fatalCount,
+			0, 0, 0,
 			keyValuePairs,
 			parent
 		)
@@ -1142,10 +1204,14 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		errorCount = 0
 		fatalCount = 0
 
+		expectedWarningCount = 0
+		expectedErrorCount = 0
+		expectedFatalCount = 0
+
 		totalDuration = timedelta()
 
 		for testsuite in self._testsuites.values():
-			t, i, ex, s, e, w, f, p, wc, ec, fc, td = testsuite.Aggregate(strict)
+			t, i, ex, s, e, w, f, p, wc, ec, fc, ewc, eec, efc, td = testsuite.Aggregate(strict)
 			tests += t
 			inconsistent += i
 			excluded += ex
@@ -1159,9 +1225,13 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			errorCount += ec
 			fatalCount += fc
 
+			expectedWarningCount += ewc
+			expectedErrorCount += eec
+			expectedFatalCount += efc
+
 			totalDuration += td
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, expectedWarningCount, expectedErrorCount, expectedFatalCount, totalDuration
 
 	def AddTestsuite(self, testsuite: TestsuiteType) -> None:
 		"""
@@ -1371,16 +1441,20 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration = super().Aggregate()
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, expectedWarningCount, expectedErrorCount, expectedFatalCount, totalDuration = super().Aggregate()
 
 		for testcase in self._testcases.values():
-			wc, ec, fc, td = testcase.Aggregate(strict)
+			wc, ec, fc, ewc, eec, efc, td = testcase.Aggregate(strict)
 
 			tests += 1
 
 			warningCount += wc
 			errorCount +=   ec
 			fatalCount +=   fc
+
+			expectedWarningCount += ewc
+			expectedErrorCount +=   eec
+			expectedFatalCount +=   efc
 
 			totalDuration += td
 
@@ -1419,6 +1493,10 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		self._errorCount = errorCount
 		self._fatalCount = fatalCount
 
+		self._expectedWarningCount = expectedWarningCount
+		self._expectedErrorCount =   expectedErrorCount
+		self._expectedFatalCount =   expectedFatalCount
+
 		if self._totalDuration is None:
 			self._totalDuration = totalDuration
 
@@ -1435,7 +1513,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
+		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, expectedWarningCount, expectedErrorCount, expectedFatalCount, totalDuration
 
 	def AddTestcase(self, testcase: "Testcase") -> None:
 		"""
@@ -1536,7 +1614,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[TestsuiteType] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test summary.
 
@@ -1557,22 +1635,16 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		super().__init__(
 			name,
 			TestsuiteKind.Root,
-			startTime,
-			setupDuration,
-			testDuration,
-			teardownDuration,
-			totalDuration,
+			startTime, setupDuration, testDuration, teardownDuration, totalDuration,
 			status,
-			warningCount,
-			errorCount,
-			fatalCount,
+			warningCount, errorCount, fatalCount,
 			testsuites,
 			keyValuePairs,
 			parent
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration = super().Aggregate(strict)
+		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, expectedWarningCount, expectedErrorCount, expectedFatalCount, totalDuration = super().Aggregate(strict)
 
 		self._tests = tests
 		self._inconsistent = inconsistent
@@ -1586,6 +1658,10 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		self._warningCount = warningCount
 		self._errorCount = errorCount
 		self._fatalCount = fatalCount
+
+		self._expectedWarningCount = expectedWarningCount
+		self._expectedErrorCount =   expectedErrorCount
+		self._expectedFatalCount =   expectedFatalCount
 
 		if self._totalDuration is None:
 			self._totalDuration = totalDuration
@@ -1647,9 +1723,9 @@ class Document(metaclass=ExtendedType, mixin=True):
 	@readonly
 	def Path(self) -> Path:
 		"""
-		Read-only property returning the path to the file of this document.
+		Read-only property to access the path to the file of this document.
 
-		:return: The document's path to the file.
+		:returns: The document's path to the file.
 		"""
 		return self._path
 
@@ -1739,6 +1815,7 @@ class MergedTestcase(Testcase, Merged):
 			TestcaseStatus.Unknown,
 			testcase._assertionCount, testcase._failedAssertionCount, testcase._passedAssertionCount,
 			testcase._warningCount, testcase._errorCount, testcase._fatalCount,
+			testcase._expectedWarningCount, testcase._expectedErrorCount, testcase._expectedFatalCount,
 			parent
 		)
 		Merged.__init__(self)
@@ -1785,7 +1862,7 @@ class MergedTestcase(Testcase, Merged):
 
 		self._status = status
 
-		return warningCount, errorCount, fatalCount, totalDuration
+		return warningCount, errorCount, fatalCount, self._expectedWarningCount, self._expectedErrorCount, self._expectedFatalCount, totalDuration
 
 	def Merge(self, tc: Testcase) -> None:
 		self._mergedCount += 1

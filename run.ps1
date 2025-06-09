@@ -33,7 +33,7 @@ Param(
 )
 
 $PackageName = "pyEDAA.Reports"
-$PackageVersion = "0.16.0"
+$PackageVersion = "0.17.0"
 
 # set default values
 $EnableDebug =        [bool]$PSCmdlet.MyInvocation.BoundParameters["Debug"]
@@ -89,7 +89,7 @@ if ($build)
   rm -Force .\build\bdist.win-amd64
   rm -Force .\build\lib
   Write-Host -ForegroundColor Yellow        "[live][BUILD]      Building $PackageName package as wheel ..."
-  py -3.13 -m build --wheel
+  py -3.13 -m build --wheel --no-isolation
 
   Write-Host -ForegroundColor Yellow        "[live][BUILD]      Building wheel finished"
 }

@@ -10,7 +10,7 @@ available common options and commands. Each command has then it's own help page 
 be listed by calling ``pyedaa-reports <cmd> -h`` or ``pyedaa-reports help <cmd>``. The ``pyedaa-reports``'s version and
 license information is shown by calling ``pyedaa-reports version``.
 
-.. _References:cli:
+.. _References/cli:
 
 .. autoprogram:: pyEDAA.Reports.CLI:Application().MainParser
   :prog: pyedaa-reports

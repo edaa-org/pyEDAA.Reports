@@ -170,7 +170,7 @@ class JUnitReaderMode(Flag):
 
 TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
 TestcaseAggregateReturnType = Tuple[int, int, int]
-TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
+TestsuiteAggregateReturnType = Tuple[int, int, int, int, int, int]
 
 
 @export
@@ -544,6 +544,7 @@ class TestsuiteBase(BaseWithProperties):
 	_tests:     int
 	_skipped:   int
 	_errored:   int
+	_weak:      int
 	_failed:    int
 	_passed:    int
 
@@ -621,6 +622,7 @@ class TestsuiteBase(BaseWithProperties):
 		tests = 0
 		skipped = 0
 		errored = 0
+		weak = 0
 		failed = 0
 		passed = 0
 
@@ -633,7 +635,7 @@ class TestsuiteBase(BaseWithProperties):
 		# 	failed += f
 		# 	passed += p
 
-		return tests, skipped, errored, failed, passed
+		return tests, skipped, errored, weak, failed, passed
 
 	@mustoverride
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
@@ -872,35 +874,38 @@ class Testsuite(TestsuiteBase):
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, skipped, errored, failed, passed = super().Aggregate()
+		tests, skipped, errored, weak, failed, passed = super().Aggregate()
 
 		for testclass in self._testclasses.values():
-			_ = testclass.Aggregate(strict)
+			for testcase in  testclass._testcases.values():
+				_ = testcase.Aggregate()
 
-			tests += 1
-
-			status = testclass._status
-			if status is TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testclass '{testclass._name}' with state 'Unknown'.")
-			elif status is TestcaseStatus.Skipped:
-				skipped += 1
-			elif status is TestcaseStatus.Errored:
-				errored += 1
-			elif status is TestcaseStatus.Passed:
-				passed += 1
-			elif status is TestcaseStatus.Failed:
-				failed += 1
-			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testclass '{testclass._name}' with unsupported state '{status}'.")
-			else:
-				raise UnittestException(f"Internal error for testclass '{testclass._name}', field '_status' is '{status}'.")
+				status = testcase._status
+				if status is TestcaseStatus.Unknown:
+					raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+				elif status is TestcaseStatus.Skipped:
+					skipped += 1
+				elif status is TestcaseStatus.Errored:
+					errored += 1
+				elif status is TestcaseStatus.Passed:
+					passed += 1
+				elif status is TestcaseStatus.Failed:
+					failed += 1
+				elif status is TestcaseStatus.Weak:
+					weak += 1
+				elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
+					raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+				else:
+					raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
 		self._tests = tests
 		self._skipped = skipped
 		self._errored = errored
+		self._weak = weak
 		self._failed = failed
 		self._passed = passed
 
+		# FIXME: weak?
 		if errored > 0:
 			self._status = TestsuiteStatus.Errored
 		elif failed > 0:
@@ -914,7 +919,7 @@ class Testsuite(TestsuiteBase):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, skipped, errored, failed, passed
+		return tests, skipped, errored, weak, failed, passed
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		"""
@@ -1088,14 +1093,25 @@ class TestsuiteSummary(TestsuiteBase):
 			self.AddTestsuite(testsuite)
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
-		tests, skipped, errored, failed, passed = super().Aggregate()
+		tests, skipped, errored, weak, failed, passed = super().Aggregate()
+
+		for testsuite in self._testsuites.values():
+			t, s, e, w, f, p = testsuite.Aggregate()
+			tests += t
+			skipped += s
+			errored += e
+			weak += w
+			failed += f
+			passed += p
 
 		self._tests = tests
 		self._skipped = skipped
 		self._errored = errored
+		self._weak = weak
 		self._failed = failed
 		self._passed = passed
 
+		# FIXME: weak
 		if errored > 0:
 			self._status = TestsuiteStatus.Errored
 		elif failed > 0:
@@ -1109,7 +1125,7 @@ class TestsuiteSummary(TestsuiteBase):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, skipped, errored, failed, passed
+		return tests, skipped, errored, weak, failed, passed
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[Testsuite, Testcase], None, None]:
 		"""
