@@ -930,8 +930,6 @@ class Testsuite(TestsuiteBase):
 		:param scheme: Scheme how to iterate the test suite and its child elements.
 		:returns:      A generator for iterating the results filtered and in the order defined by the iteration scheme.
 		"""
-		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
-
 		if IterationScheme.PreOrder in scheme:
 			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
 				yield self
