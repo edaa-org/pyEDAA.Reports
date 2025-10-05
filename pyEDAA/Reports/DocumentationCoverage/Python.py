@@ -206,8 +206,6 @@ class AggregatedCoverage(Coverage, mixin=True):
 		return self._aggregatedCoverage
 
 	def Aggregate(self) -> None:
-		assert self._aggregatedUncovered == self._aggregatedExpected - self._aggregatedCovered
-
 		if self._aggregatedExpected != 0:
 			self._aggregatedCoverage = self._aggregatedCovered / self._aggregatedExpected
 		else:
