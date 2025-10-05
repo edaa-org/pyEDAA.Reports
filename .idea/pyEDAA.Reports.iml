@@ -8,6 +8,9 @@
       <excludeFolder url="file://$MODULE_DIR$/.vscode" />
       <excludeFolder url="file://$MODULE_DIR$/doc/_build/html" />
       <excludeFolder url="file://$MODULE_DIR$/report" />
+      <excludeFolder url="file://$MODULE_DIR$/.benchmarks" />
+      <excludeFolder url="file://$MODULE_DIR$/build/bdist.win-amd64" />
+      <excludeFolder url="file://$MODULE_DIR$/pyEDAA.Reports.egg-info" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

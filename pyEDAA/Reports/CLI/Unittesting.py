@@ -2,6 +2,8 @@ from argparse import Namespace
 from pathlib  import Path
 from typing   import List, Tuple, Type
 
+from lxml.etree                               import XMLSyntaxError
+from pyTooling.Decorators                     import readonly
 from pyTooling.MetaClasses                    import ExtendedType
 from pyTooling.Attributes.ArgParse            import CommandHandler
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
@@ -18,7 +20,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 	@LongValuedFlag("--merge", dest="merge", metaName='format:JUnit File', optional=True, help="Unit testing summary file (XML).")
 	@LongValuedFlag("--pytest", dest="pytest", metaName='cleanup;cleanup', optional=True, help="Remove pytest overhead.")
 	@LongValuedFlag("--render", dest="render", metaName='format', optional=True, help="Render unit testing results to <format>.")
-	@LongValuedFlag("--output", dest="output", metaName='format:JUnit File', help="Processed unit testing summary file (XML).")
+	@LongValuedFlag("--output", dest="output", metaName='format:JUnit File', optional=True, help="Processed unit testing summary file (XML).")
 	def HandleUnittest(self, args: Namespace) -> None:
 		"""Handle program calls with command ``unittest``."""
 		self._PrintHeadline()
@@ -41,8 +43,9 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				document = self._open(openTask)
 			except UnittestException as ex:
 				self.WriteFatal(ex, immediateExit=False)
-				for note in ex.__notes__:
-					self.WriteNormal(f"           {note}")
+				if (innerEx := ex.__cause__) is not None and isinstance(innerEx, XMLSyntaxError):
+					for note in innerEx.__notes__:
+						self.WriteNormal(f"           {note}")
 				self.Exit()
 
 			merged.Merge(document.ToTestsuiteSummary())
@@ -115,7 +118,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					raise UnittestException(f"Unsupported JUnit XML dialect for input: '{dataFormat}-{dialect}'")
 
 				self.WriteVerbose(f"  Reading {file}")
-				return documentClass(file, parse=True)
+				return documentClass(file, analyzeAndConvert=True)
 			else:
 				raise UnittestException(f"Unsupported unit testing report dataFormat for input: '{dataFormat}'")
 		else:
