@@ -1562,8 +1562,6 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			self.AddTestcase(testcase)
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
-		assert IterationScheme.PreOrder | IterationScheme.PostOrder not in scheme
-
 		if IterationScheme.PreOrder in scheme:
 			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
 				yield self
