@@ -95,7 +95,6 @@ jobs:
     with:
       package_namespace:   'pyEDAA'
       package_name:        'Reports'
-      python_version:      '3.13'
       python_version_list: '3.11 3.12 3.13 3.14 pypy-3.11'
 
   AppTestingParams:
