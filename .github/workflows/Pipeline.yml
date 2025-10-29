@@ -33,7 +33,7 @@ jobs:
       - name: List generated XML reports
         run: ls -lAh examples/Java/JUnit/build/*.xml
       - name: 📤 Upload JUnit XML files as artifact
-        uses: actions/upload-artifact@v4
+        uses: pyTooling/upload-artifact@v5
         with:
           name: Java-Ant-JUnit4
           path: examples/Java/JUnit/build/*.xml
@@ -62,7 +62,7 @@ jobs:
         run: |
           ls -lAh examples/Cpp/GoogleTest/*.xml
       - name: 📤 Upload JUnit XML files as artifact
-        uses: actions/upload-artifact@v4
+        uses: pyTooling/upload-artifact@v5
         with:
           name: Cpp-GoogleTest
           path: examples/Cpp/GoogleTest/*.xml
@@ -85,7 +85,7 @@ jobs:
       - name: List generated XML reports
         run: ls -lAh examples/Python/pytest/*.xml
       - name: 📤 Upload JUnit XML files as artifact
-        uses: actions/upload-artifact@v4
+        uses: pyTooling/upload-artifact@v5
         with:
           name: Python-pytest
           path: examples/Python/pytest/*.xml
