@@ -12,7 +12,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/bdist.win-amd64" />
       <excludeFolder url="file://$MODULE_DIR$/pyEDAA.Reports.egg-info" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.13" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.14" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

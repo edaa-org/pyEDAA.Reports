@@ -45,20 +45,20 @@ setup(
 		description="Various report abstract data models and report format converters.",
 		gitHubNamespace=gitHubNamespace,
 		unittestRequirementsFile=Path("tests/requirements.txt"),
-		developmentStatus="beta",
+		sourceFileWithVersion=packageInformationFile,
 		classifiers=list(DEFAULT_CLASSIFIERS) + [
 			"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
 		],
-		sourceFileWithVersion=packageInformationFile,
+		developmentStatus="beta",
 		pythonVersions=("3.11", "3.12", "3.13", "3.14"),
+		consoleScripts={
+			"pyedaa-reports": "pyEDAA.Reports.CLI:main"
+		},
 		dataFiles={
 			packageName: [
 				"py.typed",
 				"Resources/*.xsd"
 			]
-		},
-		consoleScripts={
-			"pyedaa-reports": "pyEDAA.Reports.CLI:main"
 		},
 		debug=True
 	)

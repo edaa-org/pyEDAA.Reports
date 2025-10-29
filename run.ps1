@@ -33,7 +33,7 @@ Param(
 )
 
 $PackageName = "pyEDAA.Reports"
-$PackageVersion = "0.17.0"
+$PackageVersion = "0.17.2"
 
 # set default values
 $EnableDebug =        [bool]$PSCmdlet.MyInvocation.BoundParameters["Debug"]
@@ -89,7 +89,7 @@ if ($build)
   rm -Force .\build\bdist.win-amd64
   rm -Force .\build\lib
   Write-Host -ForegroundColor Yellow        "[live][BUILD]      Building $PackageName package as wheel ..."
-  py -3.13 -m build --wheel --no-isolation
+  py -3.14 -m build --wheel --no-isolation
 
   Write-Host -ForegroundColor Yellow        "[live][BUILD]      Building wheel finished"
 }
@@ -103,9 +103,9 @@ if ($install)
   }
   else
   { Write-Host -ForegroundColor Cyan        "[ADMIN][UNINSTALL] Uninstalling $PackageName ..."
-    py -3.13 -m pip uninstall -y $PackageName
+    py -3.14 -m pip uninstall -y $PackageName
     Write-Host -ForegroundColor Cyan        "[ADMIN][INSTALL]   Installing $PackageName from wheel ..."
-    py -3.13 -m pip install .\dist\$($PackageName.Replace(".", "_").ToLower())-$PackageVersion-py3-none-any.whl
+    py -3.14 -m pip install .\dist\$($PackageName.Replace(".", "_").ToLower())-$PackageVersion-py3-none-any.whl
 
     Write-Host -ForegroundColor Cyan        "[ADMIN][INSTALL]   Closing window in 5 seconds ..."
     Start-Sleep -Seconds 5
@@ -142,9 +142,10 @@ if ($doccov)
 if ($liveunit)
 { Write-Host -ForegroundColor DarkYellow    "[live][UNIT]      Running Unit Tests using pytest ..."
 
-  $env:GHDL_PREFIX = "C:\Tools\GHDL\6.0.0.dev0-ucrt64-mcode\lib\ghdl"
   $env:ENVIRONMENT_NAME = "Windows (x86-64)"
-  pytest -raP --color=yes --junitxml=report/unit/unittest.xml --template=html1/index.html --report=report/unit/html/index.html --split-report tests/unit
+  pytest -raP --color=yes --junitxml=report/unit/TestReportSummary.xml --template=html1/index.html --report=report/unit/html/index.html --split-report tests/unit
+
+  pyedaa-reports -v unittest "--merge=pyTest-JUnit:report/unit/TestReportSummary.xml" "--name=$PackageName" "--pytest=rewrite-dunder-init;reduce-depth:pytest.tests.unit" "--output=pyTest-JUnit:report/unit/unittest.xml"
 
   if ($copyunit)
   { cp -Recurse -Force .\report\unit\html\* .\doc\_build\html\unittests
@@ -159,9 +160,10 @@ elseif ($unit)
 
   # Run unit tests
   $runUnitFunc = {
-    $env:GHDL_PREFIX = "C:\Tools\GHDL\6.0.0.dev0-ucrt64-mcode\lib\ghdl"
     $env:ENVIRONMENT_NAME = "Windows (x86-64)"
-    pytest -raP --color=yes --junitxml=report/unit/unittest.xml --template=html1/index.html --report=report/unit/html/index.html --split-report tests/unit
+    pytest -raP --color=yes --junitxml=report/unit/TestReportSummary.xml --template=html1/index.html --report=report/unit/html/index.html --split-report tests/unit
+
+    pyedaa-reports -v unittest "--merge=pyTest-JUnit:report/unit/TestReportSummary.xml" "--name=$PackageName" "--pytest=rewrite-dunder-init;reduce-depth:pytest.tests.unit" "--output=pyTest-JUnit:report/unit/unittest.xml"
   }
   $unitJob = Start-Job -Name "UnitTests" -ScriptBlock $runUnitFunc
   $jobs += $unitJob
@@ -170,7 +172,6 @@ elseif ($unit)
 if ($livecov)
 { Write-Host -ForegroundColor DarkMagenta   "[live][COV]       Running Unit Tests with coverage ..."
 
-  $env:GHDL_PREFIX = "C:\Tools\GHDL\6.0.0.dev0-ucrt64-mcode\lib\ghdl"
   $env:ENVIRONMENT_NAME = "Windows (x86-64)"
   coverage run --data-file=.coverage --rcfile=pyproject.toml -m pytest -ra --tb=line --color=yes tests/unit
 
@@ -199,7 +200,6 @@ elseif ($cov)
 
   # Collect coverage
   $collectCovFunc = {
-    $env:GHDL_PREFIX = "C:\Tools\GHDL\6.0.0.dev0-ucrt64-mcode\lib\ghdl"
     $env:ENVIRONMENT_NAME = "Windows (x86-64)"
     coverage run --data-file=.coverage --rcfile=pyproject.toml -m pytest -ra --tb=line --color=yes tests/unit
 
