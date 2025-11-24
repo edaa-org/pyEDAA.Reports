@@ -19,7 +19,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: ⏬ Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: ☕ Set up JDK 21 for x64
         uses: actions/setup-java@v5
         with:
@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: ⏬ Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: 🔧 Install dependencies
         run: sudo apt-get install -y --no-install-recommends ninja-build
       - name: 🛠 Run CMake
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: ⏬ Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: 🐍 Setup Python 3.12
         uses: actions/setup-python@v6
         with:
