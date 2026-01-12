@@ -42,7 +42,7 @@ if __name__ == "__main__": # pragma: no cover
 
 
 class PythonPyTest(TestCase):
-	def test_PyTest(self):
+	def test_PyTest(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")

@@ -4,7 +4,7 @@ from unittest import TestCase
 class A:
 	_value: int
 
-	def __init__(self, value: int = 0):
+	def __init__(self, value: int = 0) -> None:
 		self._value = value
 
 	@property
@@ -17,24 +17,24 @@ class A:
 
 
 class Instantiation(TestCase):
-	def test_NoParameter(self):
+	def test_NoParameter(self) -> None:
 		a = A()
 
 		self.assertEqual(0, a.Value)
 
-	def test_Parameter(self):
+	def test_Parameter(self) -> None:
 		a = A(5)
 
 		self.assertEqual(5, a.Value)
 
 
 class Properties(TestCase):
-	def test_Getter(self):
+	def test_Getter(self) -> None:
 		a = A(10)
 
 		self.assertEqual(10, a.Value)
 
-	def test_Setter(self):
+	def test_Setter(self) -> None:
 		a = A(15)
 		self.assertEqual(15, a.Value)
 

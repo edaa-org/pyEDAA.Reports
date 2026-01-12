@@ -189,7 +189,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	_parent:         Nullable["Testsuite"]
 	_name:           str
 
-	def __init__(self, name: str, parent: Nullable["Testsuite"] = None):
+	def __init__(self, name: str, parent: Nullable["Testsuite"] = None) -> None:
 		"""
 		Initializes the fields of the base-class.
 
@@ -253,7 +253,7 @@ class BaseWithProperties(Base):
 		duration: Nullable[timedelta] = None,
 		assertionCount: Nullable[int] = None,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of the base-class.
 
@@ -395,7 +395,7 @@ class Testcase(BaseWithProperties):
 		status: TestcaseStatus = TestcaseStatus.Unknown,
 		assertionCount: Nullable[int] = None,
 		parent: Nullable["Testclass"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test case.
 
@@ -555,7 +555,7 @@ class TestsuiteBase(BaseWithProperties):
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
 
@@ -657,7 +657,7 @@ class Testclass(Base):
 		classname: str,
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of the test class.
 
@@ -781,7 +781,7 @@ class Testsuite(TestsuiteBase):
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		testclasses: Nullable[Iterable["Testclass"]] = None,
 		parent: Nullable["TestsuiteSummary"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test suite.
 
@@ -1045,7 +1045,7 @@ class TestsuiteSummary(TestsuiteBase):
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		testsuites: Nullable[Iterable[Testsuite]] = None
-	):
+	) -> None:
 		super().__init__(name, startTime, duration, status, None)
 
 		self._testsuites = {}

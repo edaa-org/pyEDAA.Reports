@@ -48,7 +48,7 @@ if __name__ == "__main__": # pragma: no cover
 
 
 class CppGoogleTest(TestCase):
-	def test_gtest(self):
+	def test_gtest(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Cpp-GoogleTest/gtest.xml")
@@ -65,7 +65,7 @@ class CppGoogleTest(TestCase):
 		print(f"Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
-	def test_ReadWrite(self):
+	def test_ReadWrite(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Cpp-GoogleTest/gtest.xml")
@@ -111,7 +111,7 @@ class CppGoogleTest(TestCase):
 
 
 class CppGoogleTestCTest(TestCase):
-	def test_ctest(self):
+	def test_ctest(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Cpp-GoogleTest/ctest.xml")
@@ -128,7 +128,7 @@ class CppGoogleTestCTest(TestCase):
 		print(f"Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
-	def test_ReadWrite(self):
+	def test_ReadWrite(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Cpp-GoogleTest/ctest.xml")
@@ -174,7 +174,7 @@ class CppGoogleTestCTest(TestCase):
 
 
 class JavaAntJUnit4(TestCase):
-	def test_JUnit4(self):
+	def test_JUnit4(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Ant-JUnit4/TEST-my.AllTests.xml")
@@ -191,7 +191,7 @@ class JavaAntJUnit4(TestCase):
 		print(f"Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
-	def test_ReadWrite(self):
+	def test_ReadWrite(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Ant-JUnit4/TEST-my.AllTests.xml")
@@ -237,7 +237,7 @@ class JavaAntJUnit4(TestCase):
 
 
 class PythonPyTest(TestCase):
-	def test_Read(self):
+	def test_Read(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Python-pytest/TestReportSummary.xml")
@@ -259,7 +259,7 @@ class PythonPyTest(TestCase):
 		print(f"Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
-	def test_ReadWrite(self):
+	def test_ReadWrite(self) -> None:
 		print()
 
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Python-pytest/TestReportSummary.xml")

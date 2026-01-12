@@ -305,7 +305,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["TestsuiteBase"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of the base-class.
 
@@ -651,7 +651,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		yield from self._dict.items()
 
 	@abstractmethod
-	def Aggregate(self, strict: bool = True):
+	def Aggregate(self, strict: bool = True) -> None:
 		"""
 		Aggregate all test entities in the hierarchy.
 
@@ -703,7 +703,7 @@ class Testcase(Base):
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test case.
 
@@ -943,7 +943,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
 
@@ -1338,7 +1338,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[TestsuiteType] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test suite.
 
@@ -1708,7 +1708,7 @@ class Document(metaclass=ExtendedType, mixin=True):
 	_analysisDuration: float  #: TODO: replace by Timer; should be timedelta?
 	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
 
-	def __init__(self, reportFile: Path, analyzeAndConvert: bool = False):
+	def __init__(self, reportFile: Path, analyzeAndConvert: bool = False) -> None:
 		self._path = reportFile
 
 		self._analysisDuration = -1.0
@@ -1774,7 +1774,7 @@ class Merged(metaclass=ExtendedType, mixin=True):
 
 	_mergedCount: int
 
-	def __init__(self, mergedCount: int = 1):
+	def __init__(self, mergedCount: int = 1) -> None:
 		self._mergedCount = mergedCount
 
 	@readonly
@@ -1786,7 +1786,7 @@ class Merged(metaclass=ExtendedType, mixin=True):
 class Combined(metaclass=ExtendedType, mixin=True):
 	_combinedCount: int
 
-	def __init__(self, combinedCound: int = 1):
+	def __init__(self, combinedCound: int = 1) -> None:
 		self._combinedCount = combinedCound
 
 	@readonly
@@ -1802,7 +1802,7 @@ class MergedTestcase(Testcase, Merged):
 		self,
 		testcase: Testcase,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		if testcase is None:
 			raise ValueError(f"Parameter 'testcase' is None.")
 
@@ -1897,7 +1897,7 @@ class MergedTestsuite(Testsuite, Merged):
 		addTestsuites: bool = False,
 		addTestcases: bool = False,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		if testsuite is None:
 			raise ValueError(f"Parameter 'testsuite' is None.")
 
