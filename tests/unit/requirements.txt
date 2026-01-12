@@ -1,3 +1,10 @@
--r ../requirements.txt
+-r ../../requirements.txt
+
+# Coverage collection
+Coverage ~= 7.13
+
+# Test Runner
+pytest ~= 9.0
+pytest-cov ~= 7.0
 
 docstr_coverage ~= 2.3
