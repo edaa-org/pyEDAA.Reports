@@ -82,7 +82,7 @@ class Testsuite(ju_Testsuite):
 		adhering to the CTest JUnit dialect.
 
 		:param testsuite: Test suite from unified data model.
-		:return:          Test suite from JUnit specific data model (CTest JUnit dialect).
+		:returns:         Test suite from JUnit specific data model (CTest JUnit dialect).
 		"""
 		juTestsuite = cls(
 			testsuite._name,
@@ -132,7 +132,7 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 		summary object adhering to the CTest JUnit dialect.
 
 		:param testsuiteSummary: Test suite summary from unified data model.
-		:return:                 Test suite summary from JUnit specific data model (CTest JUnit dialect).
+		:returns:                Test suite summary from JUnit specific data model (CTest JUnit dialect).
 		"""
 		return cls(
 			testsuiteSummary._name,
@@ -326,7 +326,6 @@ class Document(ju_Document):
 
 		:param testcase:      The test case to convert to an XML data structures.
 		:param parentElement: The parent XML data structure element, this data structure part will be added to.
-		:return:
 		"""
 		testcaseElement = SubElement(parentElement, "testcase")
 		if testcase.Classname is not None:
