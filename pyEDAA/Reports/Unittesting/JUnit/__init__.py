@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2024-2025 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2024-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
 # Copyright 2023-2023 Patrick Lehmann - Bötzingen, Germany                                                             #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
@@ -189,15 +189,15 @@ class Base(metaclass=ExtendedType, slots=True):
 	_parent:         Nullable["Testsuite"]
 	_name:           str
 
-	def __init__(self, name: str, parent: Nullable["Testsuite"] = None):
+	def __init__(self, name: str, parent: Nullable["Testsuite"] = None) -> None:
 		"""
 		Initializes the fields of the base-class.
 
 		:param name:        Name of the test entity.
 		:param parent:      Reference to the parent test entity.
-		:raises ValueError: If parameter 'name' is None.
-		:raises TypeError:  If parameter 'name' is not a string.
-		:raises ValueError: If parameter 'name' is empty.
+		:raises ValueError: When parameter 'name' is None.
+		:raises TypeError:  When parameter 'name' is not a string.
+		:raises ValueError: When parameter 'name' is empty.
 		"""
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
@@ -217,7 +217,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the reference to the parent test entity.
 
-		:return: Reference to the parent entity.
+		:returns: Reference to the parent entity.
 		"""
 		return self._parent
 
@@ -228,7 +228,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the test entity's name.
 
-		:return:
+		:returns: Name of the test entity.
 		"""
 		return self._name
 
@@ -253,7 +253,7 @@ class BaseWithProperties(Base):
 		duration: Nullable[timedelta] = None,
 		assertionCount: Nullable[int] = None,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of the base-class.
 
@@ -292,7 +292,7 @@ class BaseWithProperties(Base):
 
 		   The JUnit format doesn't distinguish setup, run and teardown durations.
 
-		:return: Duration of the entity's execution.
+		:returns: Duration of the entity's execution.
 		"""
 		return self._duration
 
@@ -306,7 +306,7 @@ class BaseWithProperties(Base):
 
 		   The JUnit format doesn't distinguish passed and failed assertions.
 
-		:return: Number of assertions.
+		:returns: Number of assertions.
 		"""
 
 	def __len__(self) -> int:
@@ -315,7 +315,7 @@ class BaseWithProperties(Base):
 
 		Syntax: :pycode:`length = len(obj)`
 
-		:return: Number of annotated properties.
+		:returns: Number of annotated properties.
 		"""
 		return len(self._properties)
 
@@ -326,7 +326,7 @@ class BaseWithProperties(Base):
 		Syntax: :pycode:`value = obj[name]`
 
 		:param name: Name if the property.
-		:return:     Value of the accessed property.
+		:returns:    Value of the accessed property.
 		"""
 		return self._properties[name]
 
@@ -360,7 +360,7 @@ class BaseWithProperties(Base):
 		Syntax: :pycode:`name in obj`
 
 		:param name: Name of the property.
-		:return:     True, if the property was annotated.
+		:returns:    True, if the property was annotated.
 		"""
 		return name in self._properties
 
@@ -370,7 +370,7 @@ class BaseWithProperties(Base):
 
 		Syntax: :pycode:`for name, value in obj:`
 
-		:return: A generator of property tuples (name, value).
+		:returns: A generator of property tuples (name, value).
 		"""
 		yield from self._properties.items()
 
@@ -395,7 +395,7 @@ class Testcase(BaseWithProperties):
 		status: TestcaseStatus = TestcaseStatus.Unknown,
 		assertionCount: Nullable[int] = None,
 		parent: Nullable["Testclass"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test case.
 
@@ -431,7 +431,7 @@ class Testcase(BaseWithProperties):
 		"""
 		Read-only property returning the class name of the test case.
 
-		:return: The test case's class name.
+		:returns: The test case's class name.
 
 		.. note::
 
@@ -448,7 +448,7 @@ class Testcase(BaseWithProperties):
 		"""
 		Read-only property returning the status of the test case.
 
-		:return: The test case's status.
+		:returns: The test case's status.
 		"""
 		return self._status
 
@@ -461,7 +461,7 @@ class Testcase(BaseWithProperties):
 
 		   The JUnit format doesn't distinguish passed and failed assertions.
 
-		:return: Number of assertions.
+		:returns: Number of assertions.
 		"""
 		if self._assertionCount is None:
 			return 0
@@ -493,7 +493,7 @@ class Testcase(BaseWithProperties):
 		Convert a test case of the unified test entity data model to the JUnit specific data model's test case object.
 
 		:param testcase: Test case from unified data model.
-		:return:         Test case from JUnit specific data model.
+		:returns:        Test case from JUnit specific data model.
 		"""
 		return cls(
 			testcase._name,
@@ -555,7 +555,7 @@ class TestsuiteBase(BaseWithProperties):
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
 
@@ -657,7 +657,7 @@ class Testclass(Base):
 		classname: str,
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of the test class.
 
@@ -695,7 +695,7 @@ class Testclass(Base):
 		"""
 		Read-only property returning the name of the test class.
 
-		:return: The test class' name.
+		:returns: The test class' name.
 		"""
 		return self._name
 
@@ -704,7 +704,7 @@ class Testclass(Base):
 		"""
 		Read-only property returning a reference to the internal dictionary of test cases.
 
-		:return: Reference to the dictionary of test cases.
+		:returns: Reference to the dictionary of test cases.
 		"""
 		return self._testcases
 
@@ -713,7 +713,7 @@ class Testclass(Base):
 		"""
 		Read-only property returning the number of all test cases in the test entity hierarchy.
 
-		:return: Number of test cases.
+		:returns: Number of test cases.
 		"""
 		return len(self._testcases)
 
@@ -781,7 +781,7 @@ class Testsuite(TestsuiteBase):
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		testclasses: Nullable[Iterable["Testclass"]] = None,
 		parent: Nullable["TestsuiteSummary"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test suite.
 
@@ -955,7 +955,7 @@ class Testsuite(TestsuiteBase):
 		Convert a test suite of the unified test entity data model to the JUnit specific data model's test suite object.
 
 		:param testsuite: Test suite from unified data model.
-		:return:          Test suite from JUnit specific data model.
+		:returns:         Test suite from JUnit specific data model.
 		"""
 		juTestsuite = cls(
 			testsuite._name,
@@ -1045,7 +1045,7 @@ class TestsuiteSummary(TestsuiteBase):
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		testsuites: Nullable[Iterable[Testsuite]] = None
-	):
+	) -> None:
 		super().__init__(name, startTime, duration, status, None)
 
 		self._testsuites = {}
@@ -1149,7 +1149,7 @@ class TestsuiteSummary(TestsuiteBase):
 		Convert a test suite summary of the unified test entity data model to the JUnit specific data model's test suite.
 
 		:param testsuiteSummary: Test suite summary from unified data model.
-		:return:                 Test suite summary from JUnit specific data model.
+		:returns:                Test suite summary from JUnit specific data model.
 		"""
 		return cls(
 			testsuiteSummary._name,
@@ -1165,7 +1165,7 @@ class TestsuiteSummary(TestsuiteBase):
 
 		All fields are copied to the new instance. Child elements like test suites are copied recursively.
 
-		:return: A test suite summary of the unified test entity data model.
+		:returns: A test suite summary of the unified test entity data model.
 		"""
 		return ut_TestsuiteSummary(
 			self._name,
@@ -1202,7 +1202,7 @@ class Document(TestsuiteSummary, ut_Document):
 	_readerMode:        JUnitReaderMode
 	_xmlDocument:       Nullable[_ElementTree]
 
-	def __init__(self, xmlReportFile: Path, analyzeAndConvert: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default):
+	def __init__(self, xmlReportFile: Path, analyzeAndConvert: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default) -> None:
 		super().__init__("Unprocessed JUnit XML file")
 
 		self._readerMode = readerMode
@@ -1358,7 +1358,7 @@ class Document(TestsuiteSummary, ut_Document):
 		:param element:            The XML element node with a ``name`` attribute.
 		:param default:            The default value, if no ``name`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
-		:return:                   The ``name`` attribute's content if found, otherwise the given default value.
+		:returns:                  The ``name`` attribute's content if found, otherwise the given default value.
 		:raises UnittestException: If optional is false and no ``name`` attribute exists on the given element node.
 		"""
 		if "name" in element.attrib:
@@ -1374,7 +1374,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		:param element:            The XML element node with a ``timestamp`` attribute.
 		:param optional:           If false, an exception is raised for the missing attribute.
-		:return:                   The ``timestamp`` attribute's content if found, otherwise ``None``.
+		:returns:                  The ``timestamp`` attribute's content if found, otherwise ``None``.
 		:raises UnittestException: If optional is false and no ``timestamp`` attribute exists on the given element node.
 		"""
 		if "timestamp" in element.attrib:
@@ -1391,7 +1391,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		:param element:            The XML element node with a ``time`` attribute.
 		:param optional:           If false, an exception is raised for the missing attribute.
-		:return:                   The ``time`` attribute's content if found, otherwise ``None``.
+		:returns:                  The ``time`` attribute's content if found, otherwise ``None``.
 		:raises UnittestException: If optional is false and no ``time`` attribute exists on the given element node.
 		"""
 		if "time" in element.attrib:
@@ -1409,7 +1409,7 @@ class Document(TestsuiteSummary, ut_Document):
 		:param element:            The XML element node with a ``hostname`` attribute.
 		:param default:            The default value, if no ``hostname`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
-		:return:                   The ``hostname`` attribute's content if found, otherwise the given default value.
+		:returns:                  The ``hostname`` attribute's content if found, otherwise the given default value.
 		:raises UnittestException: If optional is false and no ``hostname`` attribute exists on the given element node.
 		"""
 		if "hostname" in element.attrib:
@@ -1424,7 +1424,7 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``classname`` attribute from an XML element node to a string.
 
 		:param element:            The XML element node with a ``classname`` attribute.
-		:return:                   The ``classname`` attribute's content.
+		:returns:                  The ``classname`` attribute's content.
 		:raises UnittestException: If no ``classname`` attribute exists on the given element node.
 		"""
 		if "classname" in element.attrib:
@@ -1439,7 +1439,7 @@ class Document(TestsuiteSummary, ut_Document):
 		:param element:            The XML element node with a ``tests`` attribute.
 		:param default:            The default value, if no ``tests`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
-		:return:                   The ``tests`` attribute's content if found, otherwise the given default value.
+		:returns:                  The ``tests`` attribute's content if found, otherwise the given default value.
 		:raises UnittestException: If optional is false and no ``tests`` attribute exists on the given element node.
 		"""
 		if "tests" in element.attrib:
@@ -1456,7 +1456,7 @@ class Document(TestsuiteSummary, ut_Document):
 		:param element:            The XML element node with a ``skipped`` attribute.
 		:param default:            The default value, if no ``skipped`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
-		:return:                   The ``skipped`` attribute's content if found, otherwise the given default value.
+		:returns:                  The ``skipped`` attribute's content if found, otherwise the given default value.
 		:raises UnittestException: If optional is false and no ``skipped`` attribute exists on the given element node.
 		"""
 		if "skipped" in element.attrib:
@@ -1473,7 +1473,7 @@ class Document(TestsuiteSummary, ut_Document):
 		:param element:            The XML element node with a ``errors`` attribute.
 		:param default:            The default value, if no ``errors`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
-		:return:                   The ``errors`` attribute's content if found, otherwise the given default value.
+		:returns:                  The ``errors`` attribute's content if found, otherwise the given default value.
 		:raises UnittestException: If optional is false and no ``errors`` attribute exists on the given element node.
 		"""
 		if "errors" in element.attrib:
@@ -1490,7 +1490,7 @@ class Document(TestsuiteSummary, ut_Document):
 		:param element:            The XML element node with a ``failures`` attribute.
 		:param default:            The default value, if no ``failures`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
-		:return:                   The ``failures`` attribute's content if found, otherwise the given default value.
+		:returns:                  The ``failures`` attribute's content if found, otherwise the given default value.
 		:raises UnittestException: If optional is false and no ``failures`` attribute exists on the given element node.
 		"""
 		if "failures" in element.attrib:
@@ -1507,7 +1507,7 @@ class Document(TestsuiteSummary, ut_Document):
 		:param element:            The XML element node with a ``assertions`` attribute.
 		:param default:            The default value, if no ``assertions`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
-		:return:                   The ``assertions`` attribute's content if found, otherwise the given default value.
+		:returns:                  The ``assertions`` attribute's content if found, otherwise the given default value.
 		:raises UnittestException: If optional is false and no ``assertions`` attribute exists on the given element node.
 		"""
 		if "assertions" in element.attrib:
@@ -1641,7 +1641,6 @@ class Document(TestsuiteSummary, ut_Document):
 
 		:param testsuite:     The test suite to convert to an XML data structures.
 		:param parentElement: The parent XML data structure element, this data structure part will be added to.
-		:return:
 		"""
 		testsuiteElement = SubElement(parentElement, "testsuite")
 		testsuiteElement.attrib["name"] = testsuite._name
@@ -1670,7 +1669,6 @@ class Document(TestsuiteSummary, ut_Document):
 
 		:param testcase:      The test case to convert to an XML data structures.
 		:param parentElement: The parent XML data structure element, this data structure part will be added to.
-		:return:
 		"""
 		testcaseElement = SubElement(parentElement, "testcase")
 		if testcase.Classname is not None:

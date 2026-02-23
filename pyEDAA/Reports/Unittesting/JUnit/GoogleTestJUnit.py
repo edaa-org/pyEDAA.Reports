@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2024-2025 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2024-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
 # Copyright 2023-2023 Patrick Lehmann - Bötzingen, Germany                                                             #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
@@ -81,7 +81,7 @@ class Testsuite(ju_Testsuite):
 		adhering to the GoogleTest JUnit dialect.
 
 		:param testsuite: Test suite from unified data model.
-		:return:          Test suite from JUnit specific data model (GoogleTest JUnit dialect).
+		:returns:         Test suite from JUnit specific data model (GoogleTest JUnit dialect).
 		"""
 		juTestsuite = cls(
 			testsuite._name,
@@ -131,7 +131,7 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 		summary object adhering to the GoogleTest JUnit dialect.
 
 		:param testsuiteSummary: Test suite summary from unified data model.
-		:return:                 Test suite summary from JUnit specific data model (GoogleTest JUnit dialect).
+		:returns:                Test suite summary from JUnit specific data model (GoogleTest JUnit dialect).
 		"""
 		return cls(
 			testsuiteSummary._name,
@@ -316,7 +316,6 @@ class Document(ju_Document):
 
 		:param testsuite:     The test suite to convert to an XML data structures.
 		:param parentElement: The parent XML data structure element, this data structure part will be added to.
-		:return:
 		"""
 		testsuiteElement = SubElement(parentElement, "testsuite")
 		testsuiteElement.attrib["name"] = testsuite._name
@@ -346,7 +345,6 @@ class Document(ju_Document):
 
 		:param testcase:      The test case to convert to an XML data structures.
 		:param parentElement: The parent XML data structure element, this data structure part will be added to.
-		:return:
 		"""
 		testcaseElement = SubElement(parentElement, "testcase")
 		if testcase.Classname is not None:

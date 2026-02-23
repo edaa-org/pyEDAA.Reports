@@ -7,15 +7,15 @@ Dependencies
    :alt: Libraries.io status for latest release
    :height: 22
    :target: https://libraries.io/github/edaa-org/pyEDAA.Reports
-.. |img-Reports-req-status| image:: https://img.shields.io/requires/github/pyEDAA/pyEDAA.Reports
-   :alt: Requires.io
+.. |img-Reports-vul-status| image:: https://img.shields.io/snyk/vulnerabilities/github/edaa-org/pyEDAA.Reports
+   :alt: Snyk Vulnerabilities for GitHub Repo
    :height: 22
-   :target: https://requires.io/github/edaa-org/pyEDAA.Reports/requirements/?branch=main
+   :target: https://img.shields.io/snyk/vulnerabilities/github/edaa-org/pyEDAA.Reports
 
 +------------------------------------------+------------------------------------------+
-| `Libraries.io <https://libraries.io/>`_  | `Requires.io <https://requires.io/>`_    |
+| `Libraries.io <https://libraries.io/>`_  | Vulnerabilities Summary                  |
 +==========================================+==========================================+
-| |img-Reports-lib-status|                 | |img-Reports-req-status|                 |
+| |img-Reports-lib-status|                 | |img-Reports-vul-status|                 |
 +------------------------------------------+------------------------------------------+
 
 

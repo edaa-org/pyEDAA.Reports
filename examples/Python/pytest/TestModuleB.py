@@ -4,7 +4,7 @@ from unittest import TestCase
 class C:
 	_value: int
 
-	def __init__(self, value: int = 0):
+	def __init__(self, value: int = 0) -> None:
 		self._value = value
 
 	def Add(self, value: int) -> int:
@@ -25,26 +25,26 @@ class C:
 
 
 class Instantiation(TestCase):
-	def test_NoParameter(self):
+	def test_NoParameter(self) -> None:
 		a = C()
 
 		self.assertEqual(0, a.Value)
 
-	def test_Parameter(self):
+	def test_Parameter(self) -> None:
 		a = C(5)
 
 		self.assertEqual(5, a.Value)
 
 
 class Operations(TestCase):
-	def test_Add(self):
+	def test_Add(self) -> None:
 		a = C(10)
 
 		self.assertEqual(10, a.Value)
 		self.assertEqual(15, a.Add(5))
 		self.assertEqual(15, a.Value)
 
-	def test_Sub(self):
+	def test_Sub(self) -> None:
 		a = C(10)
 
 		self.assertEqual(10, a.Value)

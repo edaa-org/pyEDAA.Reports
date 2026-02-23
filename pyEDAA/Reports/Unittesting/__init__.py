@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2024-2025 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2024-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -305,7 +305,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["TestsuiteBase"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of the base-class.
 
@@ -320,22 +320,22 @@ class Base(metaclass=ExtendedType, slots=True):
 		:param fatalCount:         Count of encountered fatal errors.
 		:param keyValuePairs:      Mapping of key-value pairs to initialize the test entity with.
 		:param parent:             Reference to the parent test entity.
-		:raises TypeError:         If parameter 'parent' is not a TestsuiteBase.
-		:raises ValueError:        If parameter 'name' is None.
-		:raises TypeError:         If parameter 'name' is not a string.
-		:raises ValueError:        If parameter 'name' is empty.
-		:raises TypeError:         If parameter 'testDuration' is not a timedelta.
-		:raises TypeError:         If parameter 'setupDuration' is not a timedelta.
-		:raises TypeError:         If parameter 'teardownDuration' is not a timedelta.
-		:raises TypeError:         If parameter 'totalDuration' is not a timedelta.
-		:raises TypeError:         If parameter 'warningCount' is not an integer.
-		:raises TypeError:         If parameter 'errorCount' is not an integer.
-		:raises TypeError:         If parameter 'fatalCount' is not an integer.
-		:raises TypeError:         If parameter 'expectedWarningCount' is not an integer.
-		:raises TypeError:         If parameter 'expectedErrorCount' is not an integer.
-		:raises TypeError:         If parameter 'expectedFatalCount' is not an integer.
-		:raises TypeError:         If parameter 'keyValuePairs' is not a Mapping.
-		:raises ValueError:        If parameter 'totalDuration' is not consistent.
+		:raises TypeError:         When parameter 'parent' is not a TestsuiteBase.
+		:raises ValueError:        When parameter 'name' is None.
+		:raises TypeError:         When parameter 'name' is not a string.
+		:raises ValueError:        When parameter 'name' is empty.
+		:raises TypeError:         When parameter 'testDuration' is not a timedelta.
+		:raises TypeError:         When parameter 'setupDuration' is not a timedelta.
+		:raises TypeError:         When parameter 'teardownDuration' is not a timedelta.
+		:raises TypeError:         When parameter 'totalDuration' is not a timedelta.
+		:raises TypeError:         When parameter 'warningCount' is not an integer.
+		:raises TypeError:         When parameter 'errorCount' is not an integer.
+		:raises TypeError:         When parameter 'fatalCount' is not an integer.
+		:raises TypeError:         When parameter 'expectedWarningCount' is not an integer.
+		:raises TypeError:         When parameter 'expectedErrorCount' is not an integer.
+		:raises TypeError:         When parameter 'expectedFatalCount' is not an integer.
+		:raises TypeError:         When parameter 'keyValuePairs' is not a Mapping.
+		:raises ValueError:        When parameter 'totalDuration' is not consistent.
 		"""
 
 		if parent is not None and not isinstance(parent, TestsuiteBase):
@@ -480,7 +480,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the reference to the parent test entity.
 
-		:return: Reference to the parent entity.
+		:returns: Reference to the parent entity.
 		"""
 		return self._parent
 
@@ -489,7 +489,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the test entity's name.
 
-		:return:
+		:returns: The test entities name.
 		"""
 		return self._name
 
@@ -498,7 +498,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the time when the test entity was started.
 
-		:return: Time when the test entity was started.
+		:returns: Time when the test entity was started.
 		"""
 		return self._startTime
 
@@ -507,7 +507,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the duration of the test entity's setup.
 
-		:return: Duration it took to set up the entity.
+		:returns: Duration it took to set up the entity.
 		"""
 		return self._setupDuration
 
@@ -519,7 +519,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		This duration is excluding setup and teardown durations. In case setup and/or teardown durations are unknown or not
 		distinguishable, assign setup and teardown durations with zero.
 
-		:return: Duration of the entity's test run.
+		:returns: Duration of the entity's test run.
 		"""
 		return self._testDuration
 
@@ -528,7 +528,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the duration of the test entity's teardown.
 
-		:return: Duration it took to tear down the entity.
+		:returns: Duration it took to tear down the entity.
 		"""
 		return self._teardownDuration
 
@@ -539,7 +539,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		this duration includes setup and teardown durations.
 
-		:return: Total duration of the entity's execution (setup + test + teardown)
+		:returns: Total duration of the entity's execution (setup + test + teardown)
 		"""
 		return self._totalDuration
 
@@ -548,7 +548,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the number of encountered warnings.
 
-		:return: Count of encountered warnings.
+		:returns: Count of encountered warnings.
 		"""
 		return self._warningCount
 
@@ -557,7 +557,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the number of encountered errors.
 
-		:return: Count of encountered errors.
+		:returns: Count of encountered errors.
 		"""
 		return self._errorCount
 
@@ -566,7 +566,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the number of encountered fatal errors.
 
-		:return: Count of encountered fatal errors.
+		:returns: Count of encountered fatal errors.
 		"""
 		return self._fatalCount
 
@@ -575,7 +575,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the number of expected warnings.
 
-		:return: Count of expected warnings.
+		:returns: Count of expected warnings.
 		"""
 		return self._expectedWarningCount
 
@@ -584,7 +584,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the number of expected errors.
 
-		:return: Count of expected errors.
+		:returns: Count of expected errors.
 		"""
 		return self._expectedErrorCount
 
@@ -593,7 +593,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property returning the number of expected fatal errors.
 
-		:return: Count of expected fatal errors.
+		:returns: Count of expected fatal errors.
 		"""
 		return self._expectedFatalCount
 
@@ -601,7 +601,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Returns the number of annotated key-value pairs.
 
-		:return: Number of annotated key-value pairs.
+		:returns: Number of annotated key-value pairs.
 		"""
 		return len(self._dict)
 
@@ -610,7 +610,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		Access a key-value pair by key.
 
 		:param key: Name if the key-value pair.
-		:return:    Value of the accessed key.
+		:returns:   Value of the accessed key.
 		"""
 		return self._dict[key]
 
@@ -638,7 +638,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		Returns True, if a key-value pairs was annotated by this key.
 
 		:param key: Name of the key-value pair.
-		:return:    True, if the pair was annotated.
+		:returns:   True, if the pair was annotated.
 		"""
 		return key in self._dict
 
@@ -646,16 +646,14 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Iterate all annotated key-value pairs.
 
-		:return: A generator of key-value pair tuples (key, value).
+		:returns: A generator of key-value pair tuples (key, value).
 		"""
 		yield from self._dict.items()
 
 	@abstractmethod
-	def Aggregate(self, strict: bool = True):
+	def Aggregate(self, strict: bool = True) -> None:
 		"""
 		Aggregate all test entities in the hierarchy.
-
-		:return:
 		"""
 
 	@abstractmethod
@@ -703,7 +701,7 @@ class Testcase(Base):
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test case.
 
@@ -807,7 +805,7 @@ class Testcase(Base):
 		"""
 		Read-only property returning the status of the test case.
 
-		:return: The test case's status.
+		:returns: The test case's status.
 		"""
 		return self._status
 
@@ -816,7 +814,7 @@ class Testcase(Base):
 		"""
 		Read-only property returning the number of assertions (checks) in a test case.
 
-		:return: Number of assertions.
+		:returns: Number of assertions.
 		"""
 		if self._assertionCount is None:
 			return 0
@@ -827,7 +825,7 @@ class Testcase(Base):
 		"""
 		Read-only property returning the number of failed assertions (failed checks) in a test case.
 
-		:return: Number of assertions.
+		:returns: Number of assertions.
 		"""
 		return self._failedAssertionCount
 
@@ -836,7 +834,7 @@ class Testcase(Base):
 		"""
 		Read-only property returning the number of passed assertions (successful checks) in a test case.
 
-		:return: Number of passed assertions.
+		:returns: Number of passed assertions.
 		"""
 		return self._passedAssertionCount
 
@@ -894,7 +892,7 @@ class Testcase(Base):
 
 		:pycode:`f"<Testcase {}: {} - assert/pass/fail:{}/{}/{} - warn/error/fatal:{}/{}/{} - setup/test/teardown:{}/{}/{}>"`
 
-		:return: Human-readable summary of a test case object.
+		:returns: Human-readable summary of a test case object.
 		"""
 		return (
 			f"<Testcase {self._name}: {self._status.name} -"
@@ -943,7 +941,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
 
@@ -1039,7 +1037,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 		Test summaries always return kind ``Root``.
 
-		:return: Kind of the test suite.
+		:returns: Kind of the test suite.
 		"""
 		return self._kind
 
@@ -1048,7 +1046,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the aggregated overall status of the test suite.
 
-		:return: Overall status of the test suite.
+		:returns: Overall status of the test suite.
 		"""
 		return self._status
 
@@ -1057,7 +1055,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning a reference to the internal dictionary of test suites.
 
-		:return: Reference to the dictionary of test suite.
+		:returns: Reference to the dictionary of test suite.
 		"""
 		return self._testsuites
 
@@ -1066,7 +1064,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of all test suites in the test suite hierarchy.
 
-		:return: Number of test suites.
+		:returns: Number of test suites.
 		"""
 		return 1 + sum(testsuite.TestsuiteCount for testsuite in self._testsuites.values())
 
@@ -1075,7 +1073,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of all test cases in the test entity hierarchy.
 
-		:return: Number of test cases.
+		:returns: Number of test cases.
 		"""
 		return sum(testsuite.TestcaseCount for testsuite in self._testsuites.values())
 
@@ -1084,7 +1082,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of all assertions in all test cases in the test entity hierarchy.
 
-		:return: Number of assertions in all test cases.
+		:returns: Number of assertions in all test cases.
 		"""
 		return sum(ts.AssertionCount for ts in self._testsuites.values())
 
@@ -1093,7 +1091,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of all failed assertions in all test cases in the test entity hierarchy.
 
-		:return: Number of failed assertions in all test cases.
+		:returns: Number of failed assertions in all test cases.
 		"""
 		raise NotImplementedError()
 		# return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
@@ -1103,7 +1101,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of all passed assertions in all test cases in the test entity hierarchy.
 
-		:return: Number of passed assertions in all test cases.
+		:returns: Number of passed assertions in all test cases.
 		"""
 		raise NotImplementedError()
 		# return self._assertionCount - (self._warningCount + self._errorCount + self._fatalCount)
@@ -1117,7 +1115,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of inconsistent tests in the test suite hierarchy.
 
-		:return: Number of inconsistent tests.
+		:returns: Number of inconsistent tests.
 		"""
 		return self._inconsistent
 
@@ -1126,7 +1124,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of excluded tests in the test suite hierarchy.
 
-		:return: Number of excluded tests.
+		:returns: Number of excluded tests.
 		"""
 		return self._excluded
 
@@ -1135,7 +1133,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of skipped tests in the test suite hierarchy.
 
-		:return: Number of skipped tests.
+		:returns: Number of skipped tests.
 		"""
 		return self._skipped
 
@@ -1144,7 +1142,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of tests with errors in the test suite hierarchy.
 
-		:return: Number of errored tests.
+		:returns: Number of errored tests.
 		"""
 		return self._errored
 
@@ -1153,7 +1151,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of weak tests in the test suite hierarchy.
 
-		:return: Number of weak tests.
+		:returns: Number of weak tests.
 		"""
 		return self._weak
 
@@ -1162,7 +1160,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of failed tests in the test suite hierarchy.
 
-		:return: Number of failed tests.
+		:returns: Number of failed tests.
 		"""
 		return self._failed
 
@@ -1171,7 +1169,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Read-only property returning the number of passed tests in the test suite hierarchy.
 
-		:return: Number of passed tests.
+		:returns: Number of passed tests.
 		"""
 		return self._passed
 
@@ -1338,7 +1336,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[TestsuiteType] = None
-	):
+	) -> None:
 		"""
 		Initializes the fields of a test suite.
 
@@ -1410,7 +1408,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		"""
 		Read-only property returning a reference to the internal dictionary of test cases.
 
-		:return: Reference to the dictionary of test cases.
+		:returns: Reference to the dictionary of test cases.
 		"""
 		return self._testcases
 
@@ -1419,7 +1417,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		"""
 		Read-only property returning the number of all test cases in the test entity hierarchy.
 
-		:return: Number of test cases.
+		:returns: Number of test cases.
 		"""
 		return super().TestcaseCount + len(self._testcases)
 
@@ -1708,7 +1706,7 @@ class Document(metaclass=ExtendedType, mixin=True):
 	_analysisDuration: float  #: TODO: replace by Timer; should be timedelta?
 	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
 
-	def __init__(self, reportFile: Path, analyzeAndConvert: bool = False):
+	def __init__(self, reportFile: Path, analyzeAndConvert: bool = False) -> None:
 		self._path = reportFile
 
 		self._analysisDuration = -1.0
@@ -1737,7 +1735,7 @@ class Document(metaclass=ExtendedType, mixin=True):
 		   This includes usually the duration to validate and parse the file format, but it excludes the time to convert the
 		   content to the test entity hierarchy.
 
-		:return: Duration to analyze the document.
+		:returns: Duration to analyze the document.
 		"""
 		return timedelta(seconds=self._analysisDuration)
 
@@ -1751,7 +1749,7 @@ class Document(metaclass=ExtendedType, mixin=True):
 		   This includes usually the duration to convert the document's content to the test entity hierarchy. It might also
 		   include the duration to (re-)aggregate all states and statistics in the hierarchy.
 
-		:return: Duration to convert the document.
+		:returns: Duration to convert the document.
 		"""
 		return timedelta(seconds=self._modelConversion)
 
@@ -1774,7 +1772,7 @@ class Merged(metaclass=ExtendedType, mixin=True):
 
 	_mergedCount: int
 
-	def __init__(self, mergedCount: int = 1):
+	def __init__(self, mergedCount: int = 1) -> None:
 		self._mergedCount = mergedCount
 
 	@readonly
@@ -1786,7 +1784,7 @@ class Merged(metaclass=ExtendedType, mixin=True):
 class Combined(metaclass=ExtendedType, mixin=True):
 	_combinedCount: int
 
-	def __init__(self, combinedCound: int = 1):
+	def __init__(self, combinedCound: int = 1) -> None:
 		self._combinedCount = combinedCound
 
 	@readonly
@@ -1802,7 +1800,7 @@ class MergedTestcase(Testcase, Merged):
 		self,
 		testcase: Testcase,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		if testcase is None:
 			raise ValueError(f"Parameter 'testcase' is None.")
 
@@ -1897,7 +1895,7 @@ class MergedTestsuite(Testsuite, Merged):
 		addTestsuites: bool = False,
 		addTestcases: bool = False,
 		parent: Nullable["Testsuite"] = None
-	):
+	) -> None:
 		if testsuite is None:
 			raise ValueError(f"Parameter 'testsuite' is None.")
 

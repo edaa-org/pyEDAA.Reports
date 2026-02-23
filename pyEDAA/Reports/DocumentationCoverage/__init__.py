@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2021-2025 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2021-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -74,7 +74,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	_name:   str
 	_status: CoverageState
 
-	def __init__(self, name: str, parent: Nullable["Base"] = None):
+	def __init__(self, name: str, parent: Nullable["Base"] = None) -> None:
 		if name is None:
 			raise ValueError(f"Parameter 'name' must not be None.")
 
