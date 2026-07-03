@@ -1701,7 +1701,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 class Document(metaclass=ExtendedType, mixin=True):
 	"""A mixin-class representing a unit test summary document (file)."""
 
-	_path:             Path
+	_path:             Path   #: Path to the YAML file.
 
 	_analysisDuration: float  #: TODO: replace by Timer; should be timedelta?
 	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?

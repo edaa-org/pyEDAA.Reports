@@ -2,15 +2,15 @@
   <a title="edaa-org.github.io/pyEDAA.Reports" href="https://edaa-org.github.io/pyEDAA.Reports"><img height="80px" src="doc/_static/logo.svg"/></a>
 </p>
 
-[![Sourcecode on GitHub](https://img.shields.io/badge/pyEDAA-Reports-29b6f6.svg?longCache=true&style=flat-square&logo=GitHub&labelColor=0277bd)](https://GitHub.com/edaa-org/pyEDAA.Reports)
+[![Sourcecode on GitHub](https://img.shields.io/badge/pyEDAA-Reports-29b6f6?longCache=true&style=flat-square&logo=GitHub&labelColor=0277bd)](https://GitHub.com/edaa-org/pyEDAA.Reports)
 [![Documentation](https://img.shields.io/website?longCache=true&style=flat-square&label=edaa-org.github.io%2FpyEDAA.Reports&logo=GitHub&logoColor=fff&up_color=blueviolet&up_message=Read%20now%20%E2%9E%9A&url=https%3A%2F%2Fedaa-org.github.io%2FpyEDAA.Reports%2Findex.html)](https://edaa-org.github.io/pyEDAA.Reports/)
-[![Gitter](https://img.shields.io/badge/chat-on%20gitter-4db797.svg?longCache=true&style=flat-square&logo=gitter&logoColor=e8ecef)](https://gitter.im/hdl/community)  
+[![Gitter](https://img.shields.io/badge/chat-on%20gitter-4db797?longCache=true&style=flat-square&logo=gitter&logoColor=e8ecef)](https://gitter.im/hdl/community)  
 [![GitHub Workflow - Build and Test Status](https://img.shields.io/github/actions/workflow/status/edaa-org/pyEDAA.Reports/Pipeline.yml?longCache=true&style=flat-square&label=Build%20and%20Test&logo=GitHub%20Actions&logoColor=FFFFFF)](https://GitHub.com/edaa-org/pyEDAA.Reports/actions/workflows/Pipeline.yml)
 [![Codacy - Quality](https://img.shields.io/codacy/grade/f8142b422c1742bdba38e8ac1893870c?longCache=true&style=flat-square&logo=Codacy)](https://app.codacy.com/gh/edaa-org/pyEDAA.Reports)
 
 <!--
 [![Sourcecode License](https://img.shields.io/pypi/l/pyEDAA.Reports?longCache=true&style=flat-square&logo=Apache&label=code)](LICENSE.md)
-[![Documentation License](https://img.shields.io/badge/doc-CC--BY%204.0-green?longCache=true&style=flat-square&logo=CreativeCommons&logoColor=fff)](LICENSE.md)
+[![Documentation License](https://img.shields.io/badge/doc-CC--BY%204.0-green?longCache=true&style=flat-square&logo=CreativeCommons&logoColor=fff)](doc/Doc-License.rst)
 
 [![PyPI](https://img.shields.io/pypi/v/pyEDAA.Reports?longCache=true&style=flat-square&logo=PyPI&logoColor=FBE072)](https://pypi.org/project/pyEDAA.Reports/)
 ![PyPI - Status](https://img.shields.io/pypi/status/pyEDAA.Reports?longCache=true&style=flat-square&logo=PyPI&logoColor=FBE072)
@@ -56,6 +56,16 @@ fancy coloring for better human readability.
 * Expression Coverage
 * State Coverage
 * Transition Coverage
+
+### Cobertura Format
+
+Schema Source: http://cobertura.sourceforge.net/xml/coverage-04.dtd
+
+### gcov JSON
+
+#### gcovr JSON
+
+Schema: https://gcovr.com/en/stable/output/json.html#json-format
 
 ## Functional Coverage
 
