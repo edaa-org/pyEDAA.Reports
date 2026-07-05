@@ -1,5 +1,4 @@
 -r ../../requirements.txt
 
 # Test Runner
-pytest ~= 9.0
-pytest-cov ~= 7.0
+pytest ~= 9.1

@@ -31,12 +31,15 @@
 """
 Various report abstract data models and report format converters.
 """
-__author__ =    "Patrick Lehmann"
-__email__ =     "Paebbels@gmail.com"
-__copyright__ = "2021-2026, Electronic Design Automation Abstraction (EDA²)"
-__license__ =   "Apache License, Version 2.0"
-__version__ =   "0.17.3"
-__keywords__ =  ["Reports", "Abstract Model", "Data Model", "Unit Testing", "Testcase", "Testsuite", "OSVVM", "YAML", "XML"]
+__author__ =            "Patrick Lehmann"
+__email__ =             "Paebbels@gmail.com"
+__copyright__ =         "2021-2026, Electronic Design Automation Abstraction (EDA²)"
+__license__ =           "Apache License, Version 2.0"
+__version__ =           "0.17.4"
+__keywords__ =          ["Reports", "Abstract Model", "Data Model", "Unit Testing", "Testcase", "Testsuite", "OSVVM", "YAML", "XML"]
+__project_url__ =       "https://github.com/edaa-org/pyEDAA.Reports"
+__documentation_url__ = "https://edaa-org.github.io/pyEDAA.Reports"
+__issue_tracker_url__ = "https://GitHub.com/edaa-org/pyEDAA.Reports/issues"
 
 from enum                 import Enum
 from sys                  import version_info
