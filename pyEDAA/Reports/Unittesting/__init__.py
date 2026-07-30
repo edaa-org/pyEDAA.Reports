@@ -478,7 +478,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def Parent(self) -> Nullable["TestsuiteBase"]:
 		"""
-		Read-only property returning the reference to the parent test entity.
+		Read-only property to access the reference to the parent test entity.
 
 		:returns: Reference to the parent entity.
 		"""
@@ -487,7 +487,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def Name(self) -> str:
 		"""
-		Read-only property returning the test entity's name.
+		Read-only property to access the test entity's name.
 
 		:returns: The test entities name.
 		"""
@@ -496,7 +496,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def StartTime(self) -> Nullable[datetime]:
 		"""
-		Read-only property returning the time when the test entity was started.
+		Read-only property to access the time when the test entity was started.
 
 		:returns: Time when the test entity was started.
 		"""
@@ -505,7 +505,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def SetupDuration(self) -> Nullable[timedelta]:
 		"""
-		Read-only property returning the duration of the test entity's setup.
+		Read-only property to access the duration of the test entity's setup.
 
 		:returns: Duration it took to set up the entity.
 		"""
@@ -514,7 +514,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def TestDuration(self) -> Nullable[timedelta]:
 		"""
-		Read-only property returning the duration of a test entities run.
+		Read-only property to access the duration of a test entities run.
 
 		This duration is excluding setup and teardown durations. In case setup and/or teardown durations are unknown or not
 		distinguishable, assign setup and teardown durations with zero.
@@ -526,7 +526,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def TeardownDuration(self) -> Nullable[timedelta]:
 		"""
-		Read-only property returning the duration of the test entity's teardown.
+		Read-only property to access the duration of the test entity's teardown.
 
 		:returns: Duration it took to tear down the entity.
 		"""
@@ -535,7 +535,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def TotalDuration(self) -> Nullable[timedelta]:
 		"""
-		Read-only property returning the total duration of a test entity run.
+		Read-only property to access the total duration of a test entity run.
 
 		this duration includes setup and teardown durations.
 
@@ -546,7 +546,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def WarningCount(self) -> int:
 		"""
-		Read-only property returning the number of encountered warnings.
+		Read-only property to access the number of encountered warnings.
 
 		:returns: Count of encountered warnings.
 		"""
@@ -555,7 +555,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def ErrorCount(self) -> int:
 		"""
-		Read-only property returning the number of encountered errors.
+		Read-only property to access the number of encountered errors.
 
 		:returns: Count of encountered errors.
 		"""
@@ -564,7 +564,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def FatalCount(self) -> int:
 		"""
-		Read-only property returning the number of encountered fatal errors.
+		Read-only property to access the number of encountered fatal errors.
 
 		:returns: Count of encountered fatal errors.
 		"""
@@ -573,7 +573,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def ExpectedWarningCount(self) -> int:
 		"""
-		Read-only property returning the number of expected warnings.
+		Read-only property to access the number of expected warnings.
 
 		:returns: Count of expected warnings.
 		"""
@@ -582,7 +582,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def ExpectedErrorCount(self) -> int:
 		"""
-		Read-only property returning the number of expected errors.
+		Read-only property to access the number of expected errors.
 
 		:returns: Count of expected errors.
 		"""
@@ -591,7 +591,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def ExpectedFatalCount(self) -> int:
 		"""
-		Read-only property returning the number of expected fatal errors.
+		Read-only property to access the number of expected fatal errors.
 
 		:returns: Count of expected fatal errors.
 		"""
@@ -803,7 +803,7 @@ class Testcase(Base):
 	@readonly
 	def Status(self) -> TestcaseStatus:
 		"""
-		Read-only property returning the status of the test case.
+		Read-only property to access the status of the test case.
 
 		:returns: The test case's status.
 		"""
@@ -812,7 +812,7 @@ class Testcase(Base):
 	@readonly
 	def AssertionCount(self) -> int:
 		"""
-		Read-only property returning the number of assertions (checks) in a test case.
+		Read-only property to return the number of assertions (checks) in a test case.
 
 		:returns: Number of assertions.
 		"""
@@ -823,7 +823,7 @@ class Testcase(Base):
 	@readonly
 	def FailedAssertionCount(self) -> int:
 		"""
-		Read-only property returning the number of failed assertions (failed checks) in a test case.
+		Read-only property to access the number of failed assertions (failed checks) in a test case.
 
 		:returns: Number of assertions.
 		"""
@@ -832,7 +832,7 @@ class Testcase(Base):
 	@readonly
 	def PassedAssertionCount(self) -> int:
 		"""
-		Read-only property returning the number of passed assertions (successful checks) in a test case.
+		Read-only property to access the number of passed assertions (successful checks) in a test case.
 
 		:returns: Number of passed assertions.
 		"""
@@ -1029,7 +1029,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def Kind(self) -> TestsuiteKind:
 		"""
-		Read-only property returning the kind of the test suite.
+		Read-only property to access the kind of the test suite.
 
 		Test suites are used to group test cases. This grouping can be due to language/framework specifics like tests
 		grouped by a module file or namespace. Others might be just logically grouped without any relation to a programming
@@ -1044,7 +1044,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def Status(self) -> TestsuiteStatus:
 		"""
-		Read-only property returning the aggregated overall status of the test suite.
+		Read-only property to access the aggregated overall status of the test suite.
 
 		:returns: Overall status of the test suite.
 		"""
@@ -1053,7 +1053,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def Testsuites(self) -> Dict[str, TestsuiteType]:
 		"""
-		Read-only property returning a reference to the internal dictionary of test suites.
+		Read-only property to access a reference to the internal dictionary of test suites.
 
 		:returns: Reference to the dictionary of test suite.
 		"""
@@ -1062,7 +1062,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def TestsuiteCount(self) -> int:
 		"""
-		Read-only property returning the number of all test suites in the test suite hierarchy.
+		Read-only property to return the number of all test suites in the test suite hierarchy.
 
 		:returns: Number of test suites.
 		"""
@@ -1071,7 +1071,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def TestcaseCount(self) -> int:
 		"""
-		Read-only property returning the number of all test cases in the test entity hierarchy.
+		Read-only property to return the number of all test cases in the test entity hierarchy.
 
 		:returns: Number of test cases.
 		"""
@@ -1080,7 +1080,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def AssertionCount(self) -> int:
 		"""
-		Read-only property returning the number of all assertions in all test cases in the test entity hierarchy.
+		Read-only property to return the number of all assertions in all test cases in the test entity hierarchy.
 
 		:returns: Number of assertions in all test cases.
 		"""
@@ -1089,7 +1089,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def FailedAssertionCount(self) -> int:
 		"""
-		Read-only property returning the number of all failed assertions in all test cases in the test entity hierarchy.
+		Read-only property to access the number of all failed assertions in all test cases in the test entity hierarchy.
 
 		:returns: Number of failed assertions in all test cases.
 		"""
@@ -1099,7 +1099,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def PassedAssertionCount(self) -> int:
 		"""
-		Read-only property returning the number of all passed assertions in all test cases in the test entity hierarchy.
+		Read-only property to access the number of all passed assertions in all test cases in the test entity hierarchy.
 
 		:returns: Number of passed assertions in all test cases.
 		"""
@@ -1108,12 +1108,17 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 	@readonly
 	def Tests(self) -> int:
+		"""
+		Read-only property to access the number of tests in this entity.
+
+		:returns: Number of tests.
+		"""
 		return self._tests
 
 	@readonly
 	def Inconsistent(self) -> int:
 		"""
-		Read-only property returning the number of inconsistent tests in the test suite hierarchy.
+		Read-only property to access the number of inconsistent tests in the test suite hierarchy.
 
 		:returns: Number of inconsistent tests.
 		"""
@@ -1122,7 +1127,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def Excluded(self) -> int:
 		"""
-		Read-only property returning the number of excluded tests in the test suite hierarchy.
+		Read-only property to access the number of excluded tests in the test suite hierarchy.
 
 		:returns: Number of excluded tests.
 		"""
@@ -1131,7 +1136,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def Skipped(self) -> int:
 		"""
-		Read-only property returning the number of skipped tests in the test suite hierarchy.
+		Read-only property to access the number of skipped tests in the test suite hierarchy.
 
 		:returns: Number of skipped tests.
 		"""
@@ -1140,7 +1145,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def Errored(self) -> int:
 		"""
-		Read-only property returning the number of tests with errors in the test suite hierarchy.
+		Read-only property to access the number of tests with errors in the test suite hierarchy.
 
 		:returns: Number of errored tests.
 		"""
@@ -1149,7 +1154,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def Weak(self) -> int:
 		"""
-		Read-only property returning the number of weak tests in the test suite hierarchy.
+		Read-only property to access the number of weak tests in the test suite hierarchy.
 
 		:returns: Number of weak tests.
 		"""
@@ -1158,7 +1163,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def Failed(self) -> int:
 		"""
-		Read-only property returning the number of failed tests in the test suite hierarchy.
+		Read-only property to access the number of failed tests in the test suite hierarchy.
 
 		:returns: Number of failed tests.
 		"""
@@ -1167,7 +1172,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	@readonly
 	def Passed(self) -> int:
 		"""
-		Read-only property returning the number of passed tests in the test suite hierarchy.
+		Read-only property to access the number of passed tests in the test suite hierarchy.
 
 		:returns: Number of passed tests.
 		"""
@@ -1175,16 +1180,31 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 	@readonly
 	def WarningCount(self) -> int:
+		"""
+		Read-only property to access the number of warnings in this entity.
+
+		:returns: Number of warnings.
+		"""
 		raise NotImplementedError()
 		# return self._warningCount
 
 	@readonly
 	def ErrorCount(self) -> int:
+		"""
+		Read-only property to access the number of errors in this entity.
+
+		:returns: Number of errors.
+		"""
 		raise NotImplementedError()
 		# return self._errorCount
 
 	@readonly
 	def FatalCount(self) -> int:
+		"""
+		Read-only property to access the number of fatal errors in this entity.
+
+		:returns: Number of fatal errors.
+		"""
 		raise NotImplementedError()
 		# return self._fatalCount
 
@@ -1406,7 +1426,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 	@readonly
 	def Testcases(self) -> Dict[str, "Testcase"]:
 		"""
-		Read-only property returning a reference to the internal dictionary of test cases.
+		Read-only property to access a reference to the internal dictionary of test cases.
 
 		:returns: Reference to the dictionary of test cases.
 		"""
@@ -1415,7 +1435,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 	@readonly
 	def TestcaseCount(self) -> int:
 		"""
-		Read-only property returning the number of all test cases in the test entity hierarchy.
+		Read-only property to return the number of all test cases in the test entity hierarchy.
 
 		:returns: Number of test cases.
 		"""
@@ -1423,6 +1443,11 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 	@readonly
 	def AssertionCount(self) -> int:
+		"""
+		Read-only property to return the number of assertions in this testsuite and its testcases.
+
+		:returns: Sum of the inherited assertion count and the testcases' assertion counts.
+		"""
 		return super().AssertionCount + sum(tc.AssertionCount for tc in self._testcases.values())
 
 	def Copy(self) -> "Testsuite":
@@ -1728,7 +1753,7 @@ class Document(metaclass=ExtendedType, mixin=True):
 	@readonly
 	def AnalysisDuration(self) -> timedelta:
 		"""
-		Read-only property returning analysis duration.
+		Read-only property to return analysis duration.
 
 		.. note::
 
@@ -1742,7 +1767,7 @@ class Document(metaclass=ExtendedType, mixin=True):
 	@readonly
 	def ModelConversionDuration(self) -> timedelta:
 		"""
-		Read-only property returning conversion duration.
+		Read-only property to return conversion duration.
 
 		.. note::
 
@@ -1777,6 +1802,11 @@ class Merged(metaclass=ExtendedType, mixin=True):
 
 	@readonly
 	def MergedCount(self) -> int:
+		"""
+		Read-only property to access how many source entities were merged into this one.
+
+		:returns: Number of merged entities.
+		"""
 		return self._mergedCount
 
 
@@ -1789,6 +1819,11 @@ class Combined(metaclass=ExtendedType, mixin=True):
 
 	@readonly
 	def CombinedCount(self) -> int:
+		"""
+		Read-only property to access how many source entities were combined into this one.
+
+		:returns: Number of combined entities.
+		"""
 		return self._combinedCount
 
 
@@ -1820,6 +1855,11 @@ class MergedTestcase(Testcase, Merged):
 
 	@readonly
 	def Status(self) -> TestcaseStatus:
+		"""
+		Read-only property to access the status merged from all source testcases.
+
+		:returns: Merged status. ``TestcaseStatus.Inconsistent`` if the sources disagree.
+		"""
 		if self._status is TestcaseStatus.Unknown:
 			status = self._mergedTestcases[0]._status
 			for mtc in self._mergedTestcases[1:]:
@@ -1831,14 +1871,29 @@ class MergedTestcase(Testcase, Merged):
 
 	@readonly
 	def SummedAssertionCount(self) -> int:
+		"""
+		Read-only property to return the number of assertions across all merged testcases.
+
+		:returns: Sum of the merged testcases' assertion counts.
+		"""
 		return sum(tc._assertionCount for tc in self._mergedTestcases)
 
 	@readonly
 	def SummedPassedAssertionCount(self) -> int:
+		"""
+		Read-only property to return the number of passed assertions across all merged testcases.
+
+		:returns: Sum of the merged testcases' passed assertion counts.
+		"""
 		return sum(tc._passedAssertionCount for tc in self._mergedTestcases)
 
 	@readonly
 	def SummedFailedAssertionCount(self) -> int:
+		"""
+		Read-only property to return the number of failed assertions across all merged testcases.
+
+		:returns: Sum of the merged testcases' failed assertion counts.
+		"""
 		return sum(tc._failedAssertionCount for tc in self._mergedTestcases)
 
 	def Aggregate(self, strict: bool = True) -> TestcaseAggregateReturnType:
