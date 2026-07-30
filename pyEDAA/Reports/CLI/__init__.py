@@ -56,7 +56,7 @@ from pyTooling.Attributes.ArgParse            import ArgParseHelperMixin, Defaul
 from pyTooling.Attributes.ArgParse.Argument   import StringArgument
 from pyTooling.TerminalUI                     import TerminalApplication
 
-from pyEDAA.Reports                           import __version__, __copyright__, __license__
+from pyEDAA.Reports                           import __version__, __copyright__, __license__, __issue_tracker_url__
 from pyEDAA.Reports.Unittesting               import UnittestException
 from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
 
@@ -79,7 +79,7 @@ class Application(ProgramBase, UnittestingHandlers, ArgParseHelperMixin):
 	"""Program class to implement the command line interface (CLI) using commands and options."""
 
 	programTitle: ClassVar[str] =      "Report Service Program"
-	ISSUE_TRACKER_URL: ClassVar[str] = "https://github.com/edaa-org/pyEDAA.Reports/issues"
+	ISSUE_TRACKER_URL: ClassVar[str] = __issue_tracker_url__
 
 	def __init__(self) -> None:
 		super().__init__()

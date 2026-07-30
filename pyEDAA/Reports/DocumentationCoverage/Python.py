@@ -35,6 +35,8 @@
 from pathlib                              import Path
 from typing                               import Optional as Nullable, Iterable, Dict, Union, Tuple, List
 
+from docstr_coverage                     import ResultCollection
+
 from pyTooling.Decorators                 import export, readonly
 from pyTooling.MetaClasses                import ExtendedType
 
@@ -446,8 +448,6 @@ class DocStrCoverage(metaclass=ExtendedType):
 	"""
 	A wrapper class for the docstr_coverage package and it's analyzer producing a documentation coverage model.
 	"""
-	from docstr_coverage import ResultCollection
-
 	_packageName:     str
 	_searchDirectory: Path
 	_moduleFiles:     List[Path]
@@ -478,7 +478,7 @@ class DocStrCoverage(metaclass=ExtendedType):
 		return self._coverageReport
 
 	def Analyze(self) -> ResultCollection:
-		from docstr_coverage import analyze, ResultCollection
+		from docstr_coverage import analyze
 
 		self._coverageReport: ResultCollection = analyze(self._moduleFiles, show_progress=False)
 		return self._coverageReport
