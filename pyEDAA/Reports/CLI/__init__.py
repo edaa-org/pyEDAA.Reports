@@ -56,29 +56,16 @@ from pyTooling.Attributes.ArgParse            import ArgParseHelperMixin, Defaul
 from pyTooling.Attributes.ArgParse.Argument   import StringArgument
 from pyTooling.TerminalUI                     import TerminalApplication
 
-from pyEDAA.Reports                           import __version__, __copyright__, __license__, __issue_tracker_url__
+from pyEDAA.Reports                           import __issue_tracker_url__
 from pyEDAA.Reports.Unittesting               import UnittestException
 from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
 
 
 @export
-class ProgramBase(TerminalApplication):
-	"""Base-class for all program classes."""
-
-	programTitle: ClassVar[str]
-
-	def _PrintHeadline(self) -> None:
-		"""Print the program's headline."""
-		print("{line}".format(line="=" * 120))
-		print("{headline: ^120s}".format(headline=self.programTitle))
-		print("{line}".format(line="=" * 120))
-
-
-@export
-class Application(ProgramBase, UnittestingHandlers, ArgParseHelperMixin):
+class Application(TerminalApplication, UnittestingHandlers, ArgParseHelperMixin):
 	"""Program class to implement the command line interface (CLI) using commands and options."""
 
-	programTitle: ClassVar[str] =      "Report Service Program"
+	HeadLine: ClassVar[str] =          "Report Service Program"
 	ISSUE_TRACKER_URL: ClassVar[str] = __issue_tracker_url__
 
 	def __init__(self) -> None:
@@ -128,12 +115,9 @@ class Application(ProgramBase, UnittestingHandlers, ArgParseHelperMixin):
 
 	def _PrintVersion(self) -> None:
 		"""Helper function to print the version information."""
-		print(dedent(f"""\
-			Copyright: {__copyright__}
-			License:   {__license__}
-			Version:   v{__version__}
-			""")
-		)
+		import pyEDAA.Reports as DunderModule
+
+		super()._PrintVersion(DunderModule, "pyEDAA.Reports")
 
 	def _PrintHelp(self, command: Nullable[str] = None) -> None:
 		"""Helper function to print the command line parsers help page(s)."""
