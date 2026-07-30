@@ -519,4 +519,3 @@ class DocStrCoverage(metaclass=ExtendedType):
 
 		return rootPackageCoverage
 
-	del ResultCollection

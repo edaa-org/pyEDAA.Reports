@@ -46,7 +46,7 @@ At next use this layer's service program to convert from UCDB to Cobertura forma
 
    pyedaa-ucis export --ucdb ucdb.xml --cobertura cobertura.xml
 """
-from typing   import NoReturn, Optional as Nullable
+from typing   import ClassVar, NoReturn, Optional as Nullable
 
 from argparse import RawDescriptionHelpFormatter, Namespace
 from textwrap import dedent
@@ -65,7 +65,7 @@ from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
 class ProgramBase(TerminalApplication):
 	"""Base-class for all program classes."""
 
-	programTitle: str
+	programTitle: ClassVar[str]
 
 	def _PrintHeadline(self) -> None:
 		"""Print the program's headline."""
@@ -78,8 +78,8 @@ class ProgramBase(TerminalApplication):
 class Application(ProgramBase, UnittestingHandlers, ArgParseHelperMixin):
 	"""Program class to implement the command line interface (CLI) using commands and options."""
 
-	programTitle = "Report Service Program"
-	ISSUE_TRACKER_URL = "https://github.com/edaa-org/pyEDAA.Reports/issues"
+	programTitle: ClassVar[str] =      "Report Service Program"
+	ISSUE_TRACKER_URL: ClassVar[str] = "https://github.com/edaa-org/pyEDAA.Reports/issues"
 
 	def __init__(self) -> None:
 		super().__init__()
