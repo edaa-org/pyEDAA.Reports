@@ -32,7 +32,7 @@
 from enum                  import Flag
 from typing                import Optional as Nullable
 
-from pyTooling.Decorators  import export
+from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType
 
 from pyEDAA.Reports        import ReportException
@@ -82,16 +82,31 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._name = name
 		self._status = CoverageState.Unknown
 
-	@property
+	@readonly
 	def Parent(self) -> Nullable["Base"]:
+		"""
+		Read-only property to access the reference to the parent coverage entity.
+
+		:returns: Reference to the parent entity, or ``None`` for the root entity.
+		"""
 		return self._parent
 
-	@property
+	@readonly
 	def Name(self) -> str:
+		"""
+		Read-only property to access the coverage entity's name.
+
+		:returns: Name of the coverage entity.
+		"""
 		return self._name
 
-	@property
+	@readonly
 	def Status(self) -> CoverageState:
+		"""
+		Read-only property to access the coverage entity's state.
+
+		:returns: Coverage state of the entity.
+		"""
 		return self._status
 
 
