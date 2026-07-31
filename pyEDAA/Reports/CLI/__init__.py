@@ -58,6 +58,8 @@ from pyTooling.TerminalUI                     import TerminalApplication
 
 from pyEDAA.Reports                           import __issue_tracker_url__
 from pyEDAA.Reports.Unittesting               import UnittestException
+# from pyEDAA.Reports.CLI.Coverage              import CoverageHandlers
+# from pyEDAA.Reports.CLI.Dependency            import DependencyHandlers
 from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
 
 
@@ -163,10 +165,6 @@ def main() -> NoReturn:
 		program.PrintNotImplementedError(ex)
 	except Exception as ex:
 		program.PrintException(ex)
-	# except CoberturaException as ex:
-	# 	print()
-	# 	print(f"[INTERNAL ERROR] {ex}")
-	# 	exit(1)
 
 
 if __name__ == "__main__":
