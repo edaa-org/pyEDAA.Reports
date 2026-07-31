@@ -83,30 +83,65 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 
 	@readonly
 	def Total(self) -> int:
+		"""
+		Read-only property to access the total number of documentable items.
+
+		:returns: Total number of items.
+		"""
 		return self._total
 
 	@readonly
 	def Excluded(self) -> int:
+		"""
+		Read-only property to access the number of items excluded from the analysis.
+
+		:returns: Number of excluded items.
+		"""
 		return self._excluded
 
 	@readonly
 	def Ignored(self) -> int:
+		"""
+		Read-only property to access the number of items ignored by the analysis.
+
+		:returns: Number of ignored items.
+		"""
 		return self._ignored
 
 	@readonly
 	def Expected(self) -> int:
+		"""
+		Read-only property to access the number of items expected to be documented.
+
+		:returns: Number of expected items.
+		"""
 		return self._expected
 
 	@readonly
 	def Covered(self) -> int:
+		"""
+		Read-only property to access the number of documented items.
+
+		:returns: Number of covered items.
+		"""
 		return self._covered
 
 	@readonly
 	def Uncovered(self) -> int:
+		"""
+		Read-only property to access the number of undocumented items.
+
+		:returns: Number of uncovered items.
+		"""
 		return self._uncovered
 
 	@readonly
 	def Coverage(self) -> float:
+		"""
+		Read-only property to access the ratio of covered to expected items.
+
+		:returns: Documentation coverage in the range 0.0 to 1.0.
+		"""
 		return self._coverage
 
 	def CalculateCoverage(self) -> None:
@@ -178,34 +213,74 @@ class AggregatedCoverage(Coverage, mixin=True):
 
 	@readonly
 	def File(self) -> Path:
+		"""
+		Read-only property to access the file this coverage was computed from.
+
+		:returns: Path to the analyzed file.
+		"""
 		return self._file
 
 	@readonly
 	def AggregatedTotal(self) -> int:
+		"""
+		Read-only property to access the total number of documentable items, including all children.
+
+		:returns: Aggregated total number of items.
+		"""
 		return self._aggregatedTotal
 
 	@readonly
 	def AggregatedExcluded(self) -> int:
+		"""
+		Read-only property to access the number of excluded items, including all children.
+
+		:returns: Aggregated number of excluded items.
+		"""
 		return self._aggregatedExcluded
 
 	@readonly
 	def AggregatedIgnored(self) -> int:
+		"""
+		Read-only property to access the number of ignored items, including all children.
+
+		:returns: Aggregated number of ignored items.
+		"""
 		return self._aggregatedIgnored
 
 	@readonly
 	def AggregatedExpected(self) -> int:
+		"""
+		Read-only property to access the number of expected items, including all children.
+
+		:returns: Aggregated number of expected items.
+		"""
 		return self._aggregatedExpected
 
 	@readonly
 	def AggregatedCovered(self) -> int:
+		"""
+		Read-only property to access the number of documented items, including all children.
+
+		:returns: Aggregated number of covered items.
+		"""
 		return self._aggregatedCovered
 
 	@readonly
 	def AggregatedUncovered(self) -> int:
+		"""
+		Read-only property to access the number of undocumented items, including all children.
+
+		:returns: Aggregated number of uncovered items.
+		"""
 		return self._aggregatedUncovered
 
 	@readonly
 	def AggregatedCoverage(self) -> float:
+		"""
+		Read-only property to access the coverage ratio, including all children.
+
+		:returns: Aggregated documentation coverage in the range 0.0 to 1.0.
+		"""
 		return self._aggregatedCoverage
 
 	def Aggregate(self) -> None:
@@ -237,14 +312,29 @@ class ClassCoverage(Class, Coverage):
 
 	@readonly
 	def Fields(self) -> Dict[str, CoverageState]:
+		"""
+		Read-only property to access the coverage states of the class' fields.
+
+		:returns: Dictionary of field names and their coverage states.
+		"""
 		return self._fields
 
 	@readonly
 	def Methods(self) -> Dict[str, CoverageState]:
+		"""
+		Read-only property to access the coverage states of the class' methods.
+
+		:returns: Dictionary of method names and their coverage states.
+		"""
 		return self._methods
 
 	@readonly
 	def Classes(self) -> Dict[str, "ClassCoverage"]:
+		"""
+		Read-only property to access the class' nested classes.
+
+		:returns: Dictionary of class names and their coverage.
+		"""
 		return self._classes
 
 	def CalculateCoverage(self) -> None:
@@ -286,14 +376,29 @@ class ModuleCoverage(Module, AggregatedCoverage):
 
 	@readonly
 	def Variables(self) -> Dict[str, CoverageState]:
+		"""
+		Read-only property to access the coverage states of the module's variables.
+
+		:returns: Dictionary of variable names and their coverage states.
+		"""
 		return self._variables
 
 	@readonly
 	def Functions(self) -> Dict[str, CoverageState]:
+		"""
+		Read-only property to access the coverage states of the module's functions.
+
+		:returns: Dictionary of function names and their coverage states.
+		"""
 		return self._functions
 
 	@readonly
 	def Classes(self) -> Dict[str, ClassCoverage]:
+		"""
+		Read-only property to access the module's classes.
+
+		:returns: Dictionary of class names and their coverage.
+		"""
 		return self._classes
 
 	def CalculateCoverage(self) -> None:
@@ -359,26 +464,56 @@ class PackageCoverage(Package, AggregatedCoverage):
 
 	@readonly
 	def FileCount(self) -> int:
+		"""
+		Read-only property to access the number of Python files in this package.
+
+		:returns: Number of files.
+		"""
 		return self._fileCount
 
 	@readonly
 	def Variables(self) -> Dict[str, CoverageState]:
+		"""
+		Read-only property to access the coverage states of the package's variables.
+
+		:returns: Dictionary of variable names and their coverage states.
+		"""
 		return self._variables
 
 	@readonly
 	def Functions(self) -> Dict[str, CoverageState]:
+		"""
+		Read-only property to access the coverage states of the package's functions.
+
+		:returns: Dictionary of function names and their coverage states.
+		"""
 		return self._functions
 
 	@readonly
 	def Classes(self) -> Dict[str, ClassCoverage]:
+		"""
+		Read-only property to access the package's classes.
+
+		:returns: Dictionary of class names and their coverage.
+		"""
 		return self._classes
 
 	@readonly
 	def Modules(self) -> Dict[str, ModuleCoverage]:
+		"""
+		Read-only property to access the package's modules.
+
+		:returns: Dictionary of module names and their coverage.
+		"""
 		return self._modules
 
 	@readonly
 	def Packages(self) -> Dict[str, "PackageCoverage"]:
+		"""
+		Read-only property to access the package's sub-packages.
+
+		:returns: Dictionary of package names and their coverage.
+		"""
 		return self._packages
 
 	def __getitem__(self, key: str) -> Union["PackageCoverage", ModuleCoverage]:
@@ -464,18 +599,38 @@ class DocStrCoverage(metaclass=ExtendedType):
 
 	@readonly
 	def SearchDirectories(self) -> Path:
+		"""
+		Read-only property to access the directory the analysis searches for Python files.
+
+		:returns: Path to the search directory.
+		"""
 		return self._searchDirectory
 
 	@readonly
 	def PackageName(self) -> str:
+		"""
+		Read-only property to access the name of the analyzed package.
+
+		:returns: Name of the package.
+		"""
 		return self._packageName
 
 	@readonly
 	def ModuleFiles(self) -> List[Path]:
+		"""
+		Read-only property to access the Python files found in the search directory.
+
+		:returns: List of module file paths.
+		"""
 		return self._moduleFiles
 
 	@readonly
 	def CoverageReport(self) -> ResultCollection:
+		"""
+		Read-only property to access the raw report produced by ``docstr_coverage``.
+
+		:returns: The analyzer's result collection.
+		"""
 		return self._coverageReport
 
 	def Analyze(self) -> ResultCollection:

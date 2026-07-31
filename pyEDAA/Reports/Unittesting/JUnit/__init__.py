@@ -215,7 +215,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def Parent(self) -> Nullable["Testsuite"]:
 		"""
-		Read-only property returning the reference to the parent test entity.
+		Read-only property to access the reference to the parent test entity.
 
 		:returns: Reference to the parent entity.
 		"""
@@ -226,7 +226,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@readonly
 	def Name(self) -> str:
 		"""
-		Read-only property returning the test entity's name.
+		Read-only property to access the test entity's name.
 
 		:returns: Name of the test entity.
 		"""
@@ -286,7 +286,7 @@ class BaseWithProperties(Base):
 	@readonly
 	def Duration(self) -> timedelta:
 		"""
-		Read-only property returning the duration of a test entity run.
+		Read-only property to access the duration of a test entity run.
 
 		.. note::
 
@@ -300,7 +300,7 @@ class BaseWithProperties(Base):
 	@abstractmethod
 	def AssertionCount(self) -> int:
 		"""
-		Read-only property returning the number of assertions (checks) in a test case.
+		Read-only property to access the number of assertions (checks) in a test case.
 
 		.. note::
 
@@ -429,7 +429,7 @@ class Testcase(BaseWithProperties):
 	@readonly
 	def Classname(self) -> str:
 		"""
-		Read-only property returning the class name of the test case.
+		Read-only property to access the class name of the test case.
 
 		:returns: The test case's class name.
 
@@ -446,7 +446,7 @@ class Testcase(BaseWithProperties):
 	@readonly
 	def Status(self) -> TestcaseStatus:
 		"""
-		Read-only property returning the status of the test case.
+		Read-only property to access the status of the test case.
 
 		:returns: The test case's status.
 		"""
@@ -455,7 +455,7 @@ class Testcase(BaseWithProperties):
 	@readonly
 	def AssertionCount(self) -> int:
 		"""
-		Read-only property returning the number of assertions (checks) in a test case.
+		Read-only property to return the number of assertions (checks) in a test case.
 
 		.. note::
 
@@ -587,35 +587,75 @@ class TestsuiteBase(BaseWithProperties):
 
 	@readonly
 	def StartTime(self) -> Nullable[datetime]:
+		"""
+		Read-only property to access the time the test entity's execution started.
+
+		:returns: Start time of the execution, or ``None`` if it wasn't recorded.
+		"""
 		return self._startTime
 
 	@readonly
 	def Status(self) -> TestsuiteStatus:
+		"""
+		Read-only property to access the test entity's aggregated status.
+
+		:returns: Status of the test entity.
+		"""
 		return self._status
 
 	@readonly
 	@mustoverride
 	def TestcaseCount(self) -> int:
+		"""
+		Read-only property to access the number of testcases in this entity.
+
+		:returns: Number of testcases.
+		"""
 		pass
 
 	@readonly
 	def Tests(self) -> int:
+		"""
+		Read-only property to access the number of testcases in this entity.
+
+		:returns: Number of testcases.
+		"""
 		return self.TestcaseCount
 
 	@readonly
 	def Skipped(self) -> int:
+		"""
+		Read-only property to access the number of skipped testcases.
+
+		:returns: Number of skipped testcases.
+		"""
 		return self._skipped
 
 	@readonly
 	def Errored(self) -> int:
+		"""
+		Read-only property to access the number of errored testcases.
+
+		:returns: Number of errored testcases.
+		"""
 		return self._errored
 
 	@readonly
 	def Failed(self) -> int:
+		"""
+		Read-only property to access the number of failed testcases.
+
+		:returns: Number of failed testcases.
+		"""
 		return self._failed
 
 	@readonly
 	def Passed(self) -> int:
+		"""
+		Read-only property to access the number of passed testcases.
+
+		:returns: Number of passed testcases.
+		"""
 		return self._passed
 
 	def Aggregate(self) -> TestsuiteAggregateReturnType:
@@ -693,7 +733,7 @@ class Testclass(Base):
 	@readonly
 	def Classname(self) -> str:
 		"""
-		Read-only property returning the name of the test class.
+		Read-only property to access the name of the test class.
 
 		:returns: The test class' name.
 		"""
@@ -702,7 +742,7 @@ class Testclass(Base):
 	@readonly
 	def Testcases(self) -> Dict[str, "Testcase"]:
 		"""
-		Read-only property returning a reference to the internal dictionary of test cases.
+		Read-only property to access a reference to the internal dictionary of test cases.
 
 		:returns: Reference to the dictionary of test cases.
 		"""
@@ -711,7 +751,7 @@ class Testclass(Base):
 	@readonly
 	def TestcaseCount(self) -> int:
 		"""
-		Read-only property returning the number of all test cases in the test entity hierarchy.
+		Read-only property to return the number of all test cases in the test entity hierarchy.
 
 		:returns: Number of test cases.
 		"""
@@ -719,6 +759,11 @@ class Testclass(Base):
 
 	@readonly
 	def AssertionCount(self) -> int:
+		"""
+		Read-only property to return the number of assertions across all testcases of this testclass.
+
+		:returns: Sum of the testcases' assertion counts.
+		"""
 		return sum(tc.AssertionCount for tc in self._testcases.values())
 
 	def AddTestcase(self, testcase: "Testcase") -> None:
@@ -822,14 +867,29 @@ class Testsuite(TestsuiteBase):
 
 	@readonly
 	def Hostname(self) -> Nullable[str]:
+		"""
+		Read-only property to access the host the testsuite was executed on.
+
+		:returns: Hostname, or ``None`` if it wasn't recorded.
+		"""
 		return self._hostname
 
 	@readonly
 	def Testclasses(self) -> Dict[str, "Testclass"]:
+		"""
+		Read-only property to access the testsuite's testclasses.
+
+		:returns: Dictionary of testclass names and testclasses.
+		"""
 		return self._testclasses
 
 	@readonly
 	def TestclassCount(self) -> int:
+		"""
+		Read-only property to return the number of testclasses in this testsuite.
+
+		:returns: Number of testclasses.
+		"""
 		return len(self._testclasses)
 
 	# @readonly
@@ -838,10 +898,20 @@ class Testsuite(TestsuiteBase):
 
 	@readonly
 	def TestcaseCount(self) -> int:
+		"""
+		Read-only property to return the number of testcases across all testclasses.
+
+		:returns: Sum of the testclasses' testcase counts.
+		"""
 		return sum(cls.TestcaseCount for cls in self._testclasses.values())
 
 	@readonly
 	def AssertionCount(self) -> int:
+		"""
+		Read-only property to return the number of assertions across all testclasses.
+
+		:returns: Sum of the testclasses' assertion counts.
+		"""
 		return sum(cls.AssertionCount for cls in self._testclasses.values())
 
 	def AddTestclass(self, testclass: "Testclass") -> None:
@@ -1062,18 +1132,38 @@ class TestsuiteSummary(TestsuiteBase):
 
 	@readonly
 	def Testsuites(self) -> Dict[str, Testsuite]:
+		"""
+		Read-only property to access the summary's testsuites.
+
+		:returns: Dictionary of testsuite names and testsuites.
+		"""
 		return self._testsuites
 
 	@readonly
 	def TestcaseCount(self) -> int:
+		"""
+		Read-only property to return the number of testcases across all testsuites.
+
+		:returns: Sum of the testsuites' testcase counts.
+		"""
 		return sum(ts.TestcaseCount for ts in self._testsuites.values())
 
 	@readonly
 	def TestsuiteCount(self) -> int:
+		"""
+		Read-only property to return the number of testsuites in this summary.
+
+		:returns: Number of testsuites.
+		"""
 		return len(self._testsuites)
 
 	@readonly
 	def AssertionCount(self) -> int:
+		"""
+		Read-only property to return the number of assertions across all testsuites.
+
+		:returns: Sum of the testsuites' assertion counts.
+		"""
 		return sum(ts.AssertionCount for ts in self._testsuites.values())
 
 	def AddTestsuite(self, testsuite: Testsuite) -> None:
