@@ -35,7 +35,8 @@
 from pathlib                              import Path
 from typing                               import Optional as Nullable, Iterable, Dict, Union, Tuple, List
 
-from docstr_coverage                     import ResultCollection
+from docstr_coverage                     import analyze, ResultCollection
+from docstr_coverage.result_collection   import FileCount
 
 from pyTooling.Decorators                 import export, readonly
 from pyTooling.MetaClasses                import ExtendedType
@@ -478,14 +479,10 @@ class DocStrCoverage(metaclass=ExtendedType):
 		return self._coverageReport
 
 	def Analyze(self) -> ResultCollection:
-		from docstr_coverage import analyze
-
 		self._coverageReport: ResultCollection = analyze(self._moduleFiles, show_progress=False)
 		return self._coverageReport
 
 	def Convert(self) -> PackageCoverage:
-		from docstr_coverage.result_collection import FileCount
-
 		rootPackageCoverage = PackageCoverage(self._packageName, self._searchDirectory / "__init__.py")
 
 		for key, value in self._coverageReport.files():
