@@ -253,7 +253,8 @@ class Document(ju_Document):
 		# failures = rootElement.getAttribute("failures")
 		# assertions = rootElement.getAttribute("assertions")
 
-		ts = Testsuite(self._name, startTime=self._startTime, duration=self._duration, parent=self)
+		hostname = self._ConvertHostname(rootElement, optional=True, default=None)
+		ts = Testsuite(self._name, hostname, startTime=self._startTime, duration=self._duration, parent=self)
 		self._ConvertTestsuiteChildren(rootElement, ts)
 
 		self.Aggregate()

@@ -34,6 +34,7 @@ from unittest import TestCase as ut_TestCase
 
 from pyEDAA.Reports.Unittesting                   import MergedTestsuiteSummary, Testsuite, TestsuiteSummary
 from pyEDAA.Reports.Unittesting.JUnit             import Document, JUnitReaderMode
+from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4   import Document as AntDocument
 from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit  import Document as CTestDocument
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document as PyTestDocument
 
@@ -126,6 +127,15 @@ class RoundTrip(ut_TestCase):
 		self.assertGreater(len(rereadDocument._testsuites), 0)
 		for testsuite in rereadDocument._testsuites.values():
 			self.assertIsNotNone(testsuite._hostname, f"Testsuite '{testsuite._name}' lost its hostname.")
+
+	def test_ATestsuiteRootedDialectKeepsItsHostname(self) -> None:
+		"""Ant and CTest root their report at <testsuite>, so the hostname sits on the element the document itself is."""
+		antFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Ant-JUnit4/TEST-my.AllTests.xml")
+
+		summary = AntDocument(antFile, analyzeAndConvert=True).ToTestsuiteSummary()
+
+		hostnames = [testsuite.Hostname for testsuite in summary._testsuites.values()]
+		self.assertEqual(["fv-az1153-136"], hostnames)
 
 	def test_CTestDialectWritesAHostnameAndNotTheWordNone(self) -> None:
 		"""CTest-JUnit.xsd requires the attribute, so an unrecorded host is named, never a stringified ``None``."""
