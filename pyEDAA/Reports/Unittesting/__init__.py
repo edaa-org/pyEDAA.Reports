@@ -740,7 +740,7 @@ class Testcase(Base):
 			warningCount, errorCount, fatalCount,
 			expectedWarningCount, expectedErrorCount, expectedFatalCount,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 		if not isinstance(status, TestcaseStatus):
@@ -986,7 +986,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			fatalCount,
 			0, 0, 0,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 		self._kind = kind
@@ -1397,7 +1397,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			fatalCount,
 			testsuites,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 		# self._testDuration = testDuration
@@ -1677,7 +1677,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 			warningCount, errorCount, fatalCount,
 			testsuites,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
@@ -1863,7 +1863,7 @@ class MergedTestcase(Testcase, Merged):
 			testcase._assertionCount, testcase._failedAssertionCount, testcase._passedAssertionCount,
 			testcase._warningCount, testcase._errorCount, testcase._fatalCount,
 			testcase._expectedWarningCount, testcase._expectedErrorCount, testcase._expectedFatalCount,
-			parent
+			parent=parent
 		)
 		Merged.__init__(self)
 
