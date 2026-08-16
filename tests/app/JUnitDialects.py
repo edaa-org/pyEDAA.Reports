@@ -81,9 +81,6 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 class ConversionMixin(ApplicationTestcaseMixin):
 	"""
 	Classic mixin: convert this dialect's reference report into every writable dialect, through the command line.
-
-	It is not created by :class:`~pyTooling.MetaClasses.ExtendedType`, because :class:`~unittest.TestCase` isn't
-	either and mixing the two requires ``__slots__`` on every base class.
 	"""
 
 	_consoleScript:  ClassVar[str] = "pyedaa-reports"
