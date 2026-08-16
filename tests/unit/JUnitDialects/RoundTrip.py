@@ -38,13 +38,17 @@ from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
-from pyTooling.MetaClasses import ExtendedType
 
 from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, collectTestcaseNames, countTestcases, readReference, writeAs
 
 
-class RoundTripMixin(metaclass=ExtendedType):
-	"""Base class: a report of this dialect is read, written and read back."""
+class RoundTripMixin:
+	"""
+	Classic mixin: a report of this dialect is read, written and read back.
+
+	It is not created by :class:`~pyTooling.MetaClasses.ExtendedType`, because :class:`~unittest.TestCase` isn't
+	either and mixing the two requires ``__slots__`` on every base class.
+	"""
 
 	_dialectName: ClassVar[str]
 

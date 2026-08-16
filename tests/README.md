@@ -31,9 +31,14 @@ classes.
 A method is a variant, not a second assertion style: "merge two suites with different hostnames" is a variant,
 "check the count as well" is not - that belongs in the same method or in another level.
 
-Where a dialect or a data format is the thing under test, level (c) is one class per dialect, derived from a base
-class that holds the checks. The base class sets `_dialectName = None` and skips itself, so the checks are written
-once and named per dialect in the report.
+Where a dialect or a data format is the thing under test, level (c) is one class per dialect, derived from a
+**classic mixin** that holds the checks - `SchemaMixin`, `RoundTripMixin`, `TranslationMixin`. The checks are
+written once and reported per dialect, and the mixin itself is not a `TestCase`, so it contributes no testcases of
+its own.
+
+The mixins are deliberately *not* created by `ExtendedType`: mixing it with `unittest.TestCase` raises
+`BaseClassWithoutSlotsError`, because `TestCase` has no `__slots__`. A classic mixin is the right tool where the
+foreign base class is out of our hands.
 
 ## The reference outputs are the ground truth
 

@@ -39,13 +39,17 @@ from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
-from pyTooling.MetaClasses import ExtendedType
 
 from . import DIALECTS, TESTSUITE_ROOTED_FILES, Dialect
 
 
-class SchemaMixin(metaclass=ExtendedType):
-	"""Base class: the schema of a dialect accepts every report that framework produced."""
+class SchemaMixin:
+	"""
+	Classic mixin: the schema of a dialect accepts every report that framework produced.
+
+	It is not created by :class:`~pyTooling.MetaClasses.ExtendedType`, because :class:`~unittest.TestCase` isn't
+	either and mixing the two requires ``__slots__`` on every base class.
+	"""
 
 	_dialectName: ClassVar[str]
 

@@ -40,7 +40,6 @@ from typing   import ClassVar, Dict, Tuple
 from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
-from pyTooling.MetaClasses import ExtendedType
 
 from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, readReference, writeAs
 
@@ -68,8 +67,13 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 }
 
 
-class TranslationMixin(metaclass=ExtendedType):
-	"""Base class: a report of this dialect is converted into every dialect, and read back in that dialect."""
+class TranslationMixin:
+	"""
+	Classic mixin: a report of this dialect is converted into every dialect, and read back in that dialect.
+
+	It is not created by :class:`~pyTooling.MetaClasses.ExtendedType`, because :class:`~unittest.TestCase` isn't
+	either and mixing the two requires ``__slots__`` on every base class.
+	"""
 
 	_dialectName: ClassVar[str]
 
