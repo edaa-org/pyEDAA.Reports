@@ -1029,6 +1029,7 @@ class Testsuite(TestsuiteBase):
 		"""
 		juTestsuite = cls(
 			testsuite._name,
+			hostname=testsuite._hostname,
 			startTime=testsuite._startTime,
 			duration=testsuite._totalDuration,
 			status= testsuite._status,
@@ -1064,6 +1065,7 @@ class Testsuite(TestsuiteBase):
 		testsuite = ut_Testsuite(
 			self._name,
 			TestsuiteKind.Logical,
+			self._hostname,
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,

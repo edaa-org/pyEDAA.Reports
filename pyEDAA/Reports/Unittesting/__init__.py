@@ -740,7 +740,7 @@ class Testcase(Base):
 			warningCount, errorCount, fatalCount,
 			expectedWarningCount, expectedErrorCount, expectedFatalCount,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 		if not isinstance(status, TestcaseStatus):
@@ -986,7 +986,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			fatalCount,
 			0, 0, 0,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 		self._kind = kind
@@ -1338,11 +1338,13 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 	"""
 
 	_testcases: Dict[str, "Testcase"]
+	_hostname:  Nullable[str]
 
 	def __init__(
 		self,
 		name: str,
 		kind: TestsuiteKind = TestsuiteKind.Logical,
+		hostname: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
@@ -1362,6 +1364,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 		:param name:               Name of the test suite.
 		:param kind:               Kind of the test suite.
+		:param hostname:           Name of the host the test suite was executed on, or ``None`` if it wasn't recorded.
 		:param startTime:          Time when the test suite was started.
 		:param setupDuration:      Duration it took to set up the test suite.
 		:param testDuration:       Duration of all tests listed in the test suite.
@@ -1394,10 +1397,11 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			fatalCount,
 			testsuites,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 		# self._testDuration = testDuration
+		self._hostname = hostname
 
 		self._testcases = {}
 		if testcases is not None:
@@ -1450,11 +1454,23 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		"""
 		return super().AssertionCount + sum(tc.AssertionCount for tc in self._testcases.values())
 
+	@readonly
+	def Hostname(self) -> Nullable[str]:
+		"""
+		Read-only property to access the name of the host this test suite was executed on (:attr:`_hostname`).
+
+		:returns: The hostname, or ``None`` if it wasn't recorded.
+		"""
+		return self._hostname
+
 	def Copy(self) -> "Testsuite":
 		return self.__class__(
 			self._name,
+			self._kind,
+			self._hostname,
 			self._startTime,
 			self._setupDuration,
+			self._testDuration,
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
@@ -1661,7 +1677,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 			warningCount, errorCount, fatalCount,
 			testsuites,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
@@ -1847,7 +1863,7 @@ class MergedTestcase(Testcase, Merged):
 			testcase._assertionCount, testcase._failedAssertionCount, testcase._passedAssertionCount,
 			testcase._warningCount, testcase._errorCount, testcase._fatalCount,
 			testcase._expectedWarningCount, testcase._expectedErrorCount, testcase._expectedFatalCount,
-			parent
+			parent=parent
 		)
 		Merged.__init__(self)
 
@@ -1957,11 +1973,12 @@ class MergedTestsuite(Testsuite, Merged):
 		super().__init__(
 			testsuite._name,
 			testsuite._kind,
+			testsuite._hostname,
 			testsuite._startTime,
 			testsuite._setupDuration, testsuite._testDuration, testsuite._teardownDuration, testsuite._totalDuration,
 			TestsuiteStatus.Unknown,
 			testsuite._warningCount, testsuite._errorCount, testsuite._fatalCount,
-			parent
+			parent=parent
 		)
 		Merged.__init__(self)
 
@@ -1975,8 +1992,26 @@ class MergedTestsuite(Testsuite, Merged):
 				mergedTestcase = MergedTestcase(tc)
 				self.AddTestcase(mergedTestcase)
 
+	def _MergeHostname(self, otherHostname: Nullable[str]) -> Nullable[str]:
+		"""
+		Combine this test suite's hostname with the hostname of a test suite being merged in.
+
+		A test suite without a hostname ran somewhere unrecorded, not somewhere else, so it keeps an otherwise
+		unanimous hostname.
+
+		:param otherHostname: The hostname of the test suite being merged in.
+		:returns:             The common hostname, ``"various"`` if they disagree, or ``None`` if neither has one.
+		"""
+		if otherHostname is None:
+			return self._hostname
+		elif self._hostname is None or self._hostname == otherHostname:
+			return otherHostname
+		else:
+			return "various"
+
 	def Merge(self, testsuite: Testsuite) -> None:
 		self._mergedCount += 1
+		self._hostname = self._MergeHostname(testsuite._hostname)
 
 		for ts in testsuite._testsuites.values():
 			if ts._name in self._testsuites:
@@ -1996,6 +2031,7 @@ class MergedTestsuite(Testsuite, Merged):
 		testsuite = Testsuite(
 			self._name,
 			self._kind,
+			self._hostname,
 			self._startTime,
 			self._setupDuration,
 			self._testDuration,

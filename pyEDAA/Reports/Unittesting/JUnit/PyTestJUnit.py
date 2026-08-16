@@ -85,6 +85,7 @@ class Testsuite(ju_Testsuite):
 		"""
 		juTestsuite = cls(
 			testsuite._name,
+			hostname=testsuite._hostname,
 			startTime=testsuite._startTime,
 			duration=testsuite._totalDuration,
 			status= testsuite._status,
