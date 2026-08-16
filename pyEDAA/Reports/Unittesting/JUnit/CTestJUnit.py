@@ -156,8 +156,7 @@ class Document(ju_Document):
 	entity data model. This data model can be written as XML into a file.
 	"""
 
-	_DIALECT: ClassVar[str] = "CTest + JUnit"
-
+	_DIALECT:   ClassVar[str] =            "CTest + JUnit"
 	_TESTCASE:  ClassVar[Type[Testcase]] =  Testcase
 	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass
 	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite
@@ -282,22 +281,6 @@ class Document(ju_Document):
 
 		self._ConvertTestsuiteChildren(testsuitesNode, newTestsuite)
 
-	def _RequiredTimestamp(self, startTime, element: str) -> str:
-		"""
-		Render a timestamp the schema requires, or refuse.
-
-		:param startTime:          The start time to render, or ``None`` if the report has none.
-		:param element:            Name of the XML element the attribute belongs to, for the message.
-		:returns:                  The timestamp in ISO 8601 format.
-		:raises UnittestException: If no start time was recorded, because the format cannot express such a report.
-		"""
-		if startTime is None:
-			raise UnittestException(
-				f"The {self._DIALECT} format requires a timestamp on <{element}>, but the report has none."
-			)
-
-		return startTime.isoformat()
-
 	def Generate(self, overwrite: bool = False) -> None:
 		"""
 		Generate the internal XML data structure from test suites and test cases.
@@ -319,7 +302,11 @@ class Document(ju_Document):
 
 		rootElement = Element("testsuite")
 		rootElement.attrib["name"] = self._name
-		rootElement.attrib["timestamp"] = self._RequiredTimestamp(self._startTime, rootElement.tag)
+		if self._startTime is None:
+			raise UnittestException(
+				f"The {self._DIALECT} format requires a timestamp on <testsuite>, but the report has none."
+			)
+		rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
 		if self._duration is not None:
 			rootElement.attrib["time"] = f"{self._duration.total_seconds():.6f}"
 		rootElement.attrib["tests"] = str(self._tests)

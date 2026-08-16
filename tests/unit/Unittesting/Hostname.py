@@ -33,13 +33,13 @@ from datetime import datetime
 from pathlib  import Path
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting                   import MergedTestsuiteSummary, Testsuite, TestsuiteSummary
-from pyEDAA.Reports.Unittesting                   import UnittestException
-from pyEDAA.Reports.Unittesting.JUnit             import Document, JUnitReaderMode
-from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4   import Document as AntDocument
-from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit  import Document as CTestDocument
+from pyEDAA.Reports.Unittesting                       import MergedTestsuiteSummary, Testsuite, TestsuiteSummary
+from pyEDAA.Reports.Unittesting                       import UnittestException
+from pyEDAA.Reports.Unittesting.JUnit                 import Document, JUnitReaderMode
+from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntDocument
+from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestDocument
 from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GoogleTestDocument
-from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document as PyTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestDocument
 
 
 class DataModel(ut_TestCase):
