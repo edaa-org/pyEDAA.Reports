@@ -46,9 +46,6 @@ from . import DIALECTS, TESTSUITE_ROOTED_FILES, Dialect
 class SchemaMixin:
 	"""
 	Classic mixin: the schema of a dialect accepts every report that framework produced.
-
-	It is not created by :class:`~pyTooling.MetaClasses.ExtendedType`, because :class:`~unittest.TestCase` isn't
-	either and mixing the two requires ``__slots__`` on every base class.
 	"""
 
 	_dialectName: ClassVar[str]
