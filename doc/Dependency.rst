@@ -27,11 +27,11 @@ pyEDAA.Reports Package
 +-----------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
 | **Package**                                                     | **Version** | **License**                                                                           | **Dependencies**     |
 +=================================================================+=============+=======================================================================================+======================+
-| `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__          | ≥8.19.0     | `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__ | *None*               |
+| `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__          | ≥8.19       | `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__ | *None*               |
 +-----------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
-| `ruamel.yaml <https://sourceforge.net/projects/ruamel-yaml/>`__ | ≥0.19.1     | `MIT <https://sourceforge.net/p/ruamel-yaml/code/ci/default/tree/LICENSE>`__          | *Not yet evaluated.* |
+| `ruamel.yaml <https://sourceforge.net/projects/ruamel-yaml/>`__ | ≥0.19       | `MIT <https://sourceforge.net/p/ruamel-yaml/code/ci/default/tree/LICENSE>`__          | *Not yet evaluated.* |
 +-----------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
-| `lxml <https://GitHub.com/lxml/lxml>`__                         | ≥6.1.1      | `BSD 3-Clause <https://GitHub.com/lxml/lxml/blob/master/LICENSE.txt>`__               | *Not yet evaluated.* |
+| `lxml <https://GitHub.com/lxml/lxml>`__                         | ≥6.1        | `BSD 3-Clause <https://GitHub.com/lxml/lxml/blob/master/LICENSE.txt>`__               | *Not yet evaluated.* |
 +-----------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
 
 
@@ -59,11 +59,11 @@ the mandatory dependencies too.
 +--------------------------------------------------------------------------+-------------+----------------------------------------------------------------------------------------+----------------------+
 | **Package**                                                              | **Version** | **License**                                                                            | **Dependencies**     |
 +==========================================================================+=============+========================================================================================+======================+
-| `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__                   | ≥8.19.0     | `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__  | *None*               |
+| `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__                   | ≥8.19       | `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__  | *None*               |
 +--------------------------------------------------------------------------+-------------+----------------------------------------------------------------------------------------+----------------------+
-| `ruamel.yaml <https://sourceforge.net/projects/ruamel-yaml/>`__          | ≥0.19.1     | `MIT <https://sourceforge.net/p/ruamel-yaml/code/ci/default/tree/LICENSE>`__           | *Not yet evaluated.* |
+| `ruamel.yaml <https://sourceforge.net/projects/ruamel-yaml/>`__          | ≥0.19       | `MIT <https://sourceforge.net/p/ruamel-yaml/code/ci/default/tree/LICENSE>`__           | *Not yet evaluated.* |
 +--------------------------------------------------------------------------+-------------+----------------------------------------------------------------------------------------+----------------------+
-| `lxml <https://GitHub.com/lxml/lxml>`__                                  | ≥6.1.1      | `BSD 3-Clause <https://GitHub.com/lxml/lxml/blob/master/LICENSE.txt>`__                | *Not yet evaluated.* |
+| `lxml <https://GitHub.com/lxml/lxml>`__                                  | ≥6.1        | `BSD 3-Clause <https://GitHub.com/lxml/lxml/blob/master/LICENSE.txt>`__                | *Not yet evaluated.* |
 +--------------------------------------------------------------------------+-------------+----------------------------------------------------------------------------------------+----------------------+
 | `Coverage <https://GitHub.com/nedbat/coveragepy>`__                      | ≥7.15       | `Apache License, 2.0 <https://GitHub.com/nedbat/coveragepy/blob/master/LICENSE.txt>`__ | *Not yet evaluated.* |
 +--------------------------------------------------------------------------+-------------+----------------------------------------------------------------------------------------+----------------------+
@@ -77,7 +77,7 @@ the mandatory dependencies too.
 +--------------------------------------------------------------------------+-------------+----------------------------------------------------------------------------------------+----------------------+
 | `typing_extensions`                                                      | ≥4.16       | *Unknown.*                                                                             | *Not yet evaluated.* |
 +--------------------------------------------------------------------------+-------------+----------------------------------------------------------------------------------------+----------------------+
-| `lxml-stubs <https://GitHub.com/lxml/lxml-stubs>`__                      | ≥0.5.1      | `Apache License, 2.0 <https://GitHub.com/lxml/lxml-stubs/blob/master/LICENSE>`__       | *Not yet evaluated.* |
+| `lxml-stubs <https://GitHub.com/lxml/lxml-stubs>`__                      | ≥0.5        | `Apache License, 2.0 <https://GitHub.com/lxml/lxml-stubs/blob/master/LICENSE>`__       | *Not yet evaluated.* |
 +--------------------------------------------------------------------------+-------------+----------------------------------------------------------------------------------------+----------------------+
 
 
@@ -105,15 +105,15 @@ the mandatory dependencies too.
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
 | **Package**                                                                          | **Version** | **License**                                                                                 | **Dependencies**     |
 +======================================================================================+=============+=============================================================================================+======================+
-| `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__                               | ≥8.19.0     | `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__       | *None*               |
+| `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__                               | ≥8.19       | `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__       | *None*               |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
-| `ruamel.yaml <https://sourceforge.net/projects/ruamel-yaml/>`__                      | ≥0.19.1     | `MIT <https://sourceforge.net/p/ruamel-yaml/code/ci/default/tree/LICENSE>`__                | *Not yet evaluated.* |
+| `ruamel.yaml <https://sourceforge.net/projects/ruamel-yaml/>`__                      | ≥0.19       | `MIT <https://sourceforge.net/p/ruamel-yaml/code/ci/default/tree/LICENSE>`__                | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
-| `lxml <https://GitHub.com/lxml/lxml>`__                                              | ≥6.1.1      | `BSD 3-Clause <https://GitHub.com/lxml/lxml/blob/master/LICENSE.txt>`__                     | *Not yet evaluated.* |
+| `lxml <https://GitHub.com/lxml/lxml>`__                                              | ≥6.1        | `BSD 3-Clause <https://GitHub.com/lxml/lxml/blob/master/LICENSE.txt>`__                     | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
 | `Sphinx <https://GitHub.com/sphinx-doc/sphinx>`__                                    | ≥9.1        | `BSD 3-Clause <https://GitHub.com/sphinx-doc/sphinx/blob/master/LICENSE>`__                 | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
-| `docutils <https://docutils.sourceforge.io>`__                                       | ≥0.22.0     | `BSD 2-Clause <https://docutils.sourceforge.io/COPYING.html>`__                             | *Not yet evaluated.* |
+| `docutils <https://docutils.sourceforge.io>`__                                       | ≥0.22       | `BSD 2-Clause <https://docutils.sourceforge.io/COPYING.html>`__                             | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
 | `docutils_stubs <https://GitHub.com/tk0miya/docutils-stubs>`__                       | ≥0.0.22     | `Unlicense <https://GitHub.com/tk0miya/docutils-stubs/blob/master/LICENSE>`__               | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
@@ -121,17 +121,17 @@ the mandatory dependencies too.
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
 | `sphinxcontrib-mermaid <https://GitHub.com/mgaitan/sphinxcontrib-mermaid>`__         | ≥2.1        | `BSD 2-Clause <https://GitHub.com/mgaitan/sphinxcontrib-mermaid/blob/master/LICENSE.rst>`__ | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
-| `sphinxcontrib-autoprogram <https://GitHub.com/sphinx-contrib/autoprogram>`__        | ≥0.1.9      | `BSD 2-Clause <https://GitHub.com/sphinx-contrib/autoprogram/blob/master/LICENSE>`__        | *Not yet evaluated.* |
+| `sphinxcontrib-autoprogram <https://GitHub.com/sphinx-contrib/autoprogram>`__        | ≥0.1        | `BSD 2-Clause <https://GitHub.com/sphinx-contrib/autoprogram/blob/master/LICENSE>`__        | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
-| `autoapi <https://autoapi.readthedocs.io>`__                                         | ≥2.0.1      | `Apache License, 2.0 <https://GitHub.com/carlos-jenkins/autoapi/blob/master/LICENSE>`__     | *Not yet evaluated.* |
+| `autoapi <https://autoapi.readthedocs.io>`__                                         | ≥2.0        | `Apache License, 2.0 <https://GitHub.com/carlos-jenkins/autoapi/blob/master/LICENSE>`__     | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
-| `sphinx_design <https://GitHub.com/executablebooks/sphinx-design>`__                 | ≥0.7.0      | `MIT <https://GitHub.com/executablebooks/sphinx-design/blob/main/LICENSE>`__                | *Not yet evaluated.* |
+| `sphinx_design <https://GitHub.com/executablebooks/sphinx-design>`__                 | ≥0.7        | `MIT <https://GitHub.com/executablebooks/sphinx-design/blob/main/LICENSE>`__                | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
-| `sphinx-copybutton <https://GitHub.com/executablebooks/sphinx-copybutton>`__         | ≥0.5.2      | `MIT <https://GitHub.com/executablebooks/sphinx-copybutton/blob/master/LICENSE>`__          | *Not yet evaluated.* |
+| `sphinx-copybutton <https://GitHub.com/executablebooks/sphinx-copybutton>`__         | ≥0.5        | `MIT <https://GitHub.com/executablebooks/sphinx-copybutton/blob/master/LICENSE>`__          | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
 | `sphinx_autodoc_typehints <https://GitHub.com/agronholm/sphinx-autodoc-typehints>`__ | ≥3.13       | `MIT <https://GitHub.com/agronholm/sphinx-autodoc-typehints/blob/master/LICENSE>`__         | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
-| `sphinx_reports <https://GitHub.com/pyTooling/sphinx_reports>`__                     | ≥0.11.2     | `Apache License, 2.0 <https://GitHub.com/pyTooling/sphinx_reports/blob/main/LICENSE.md>`__  | *Not yet evaluated.* |
+| `sphinx_reports <https://GitHub.com/pyTooling/sphinx_reports>`__                     | ≥0.11       | `Apache License, 2.0 <https://GitHub.com/pyTooling/sphinx_reports/blob/main/LICENSE.md>`__  | *Not yet evaluated.* |
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
 
 
@@ -156,13 +156,13 @@ install the mandatory dependencies too.
 
 .. rubric:: Dependency List
 
-+----------------------------------------------------------------------------+--------------+----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Package**                                                                | **Version**  | **License**                                                                                              | **Dependencies**                                                                                                                                     |
-+============================================================================+==============+==========================================================================================================+======================================================================================================================================================+
-| `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__                     | ≥8.18        | `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__                    | *None*                                                                                                                                               |
-+----------------------------------------------------------------------------+--------------+----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+
-| `wheel <https://GitHub.com/pypa/wheel>`__                                  | ≥0.45        | `MIT <https://github.com/pypa/wheel/blob/main/LICENSE.txt>`__                                            | *Not yet evaluated.*                                                                                                                                 |
-+----------------------------------------------------------------------------+--------------+----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------+
++--------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
+| **Package**                                            | **Version** | **License**                                                                           | **Dependencies**     |
++========================================================+=============+=======================================================================================+======================+
+| `setuptools <https://GitHub.com/pypa/setuptools>`__    | ≥84.0       | `MIT <https://GitHub.com/pypa/setuptools/blob/main/LICENSE>`__                        | *Not yet evaluated.* |
++--------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
+| `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__ | ≥8.19       | `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__ | *None*               |
++--------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
 
 
 .. _dependency-publishing:
@@ -190,7 +190,7 @@ install the mandatory dependencies too.
 +--------------------------------------------+-------------+---------------------------------------------------------------------------+----------------------+
 | **Package**                                | **Version** | **License**                                                               | **Dependencies**     |
 +============================================+=============+===========================================================================+======================+
-| `wheel <https://GitHub.com/pypa/wheel>`__  | ≥0.47.0     | `MIT <https://github.com/pypa/wheel/blob/main/LICENSE.txt>`__             | *Not yet evaluated.* |
+| `wheel <https://GitHub.com/pypa/wheel>`__  | ≥0.47       | `MIT <https://github.com/pypa/wheel/blob/main/LICENSE.txt>`__             | *Not yet evaluated.* |
 +--------------------------------------------+-------------+---------------------------------------------------------------------------+----------------------+
 | `Twine <https://GitHub.com/pypa/twine/>`__ | ≥7.0        | `Apache License, 2.0 <https://github.com/pypa/twine/blob/main/LICENSE>`__ | *Not yet evaluated.* |
 +--------------------------------------------+-------------+---------------------------------------------------------------------------+----------------------+
