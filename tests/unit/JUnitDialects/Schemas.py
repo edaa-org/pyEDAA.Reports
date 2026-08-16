@@ -39,18 +39,15 @@ from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
+from pyTooling.MetaClasses import ExtendedType
 
 from . import DIALECTS, TESTSUITE_ROOTED_FILES, Dialect
 
 
-class SchemaAcceptsItsReferenceOutput(ut_TestCase):
+class SchemaMixin(metaclass=ExtendedType):
 	"""Base class: the schema of a dialect accepts every report that framework produced."""
 
-	_dialectName: ClassVar[str] = None
-
-	def setUp(self) -> None:
-		if self._dialectName is None:
-			self.skipTest("Base class: it describes the checks, the derived classes name the dialect.")
+	_dialectName: ClassVar[str]
 
 	@readonly
 	def Dialect(self) -> Dialect:
@@ -78,23 +75,23 @@ class SchemaAcceptsItsReferenceOutput(ut_TestCase):
 				dialect.DocumentClass(referenceFile, analyzeAndConvert=True)
 
 
-class AntJUnit4(SchemaAcceptsItsReferenceOutput):
+class AntJUnit4(SchemaMixin, ut_TestCase):
 	_dialectName = "Ant-JUnit4"
 
 
-class CTestJUnit(SchemaAcceptsItsReferenceOutput):
+class CTestJUnit(SchemaMixin, ut_TestCase):
 	_dialectName = "CTest-JUnit"
 
 
-class GoogleTestJUnit(SchemaAcceptsItsReferenceOutput):
+class GoogleTestJUnit(SchemaMixin, ut_TestCase):
 	_dialectName = "GoogleTest-JUnit"
 
 
-class PyTestJUnit(SchemaAcceptsItsReferenceOutput):
+class PyTestJUnit(SchemaMixin, ut_TestCase):
 	_dialectName = "pyTest-JUnit"
 
 
-class AnyJUnit(SchemaAcceptsItsReferenceOutput):
+class AnyJUnit(SchemaMixin, ut_TestCase):
 	"""
 	``Any-JUnit`` is the permissive dialect, so it has to accept what the specific ones accept.
 

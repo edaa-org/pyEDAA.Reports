@@ -21,12 +21,12 @@ classes.
 
 ## Four structural levels
 
-| Level | Meaning | Here |
-|---|---|---|
-| a) package | the capability under test | `Unittesting/`, `DocumentationCoverage/`, `JUnitDialects/` |
-| b) module | a feature group of that capability | `DataModel.py`, `Merge.py`, `Hostname.py`, `RoundTrip.py` |
-| c) class | one specific feature, or one dialect | `Merging`, `RoundTrip.PyTestJUnit`, `Translation.FromAnyJUnit` |
-| d) method | one *variant* of that feature | `test_TwoHosts`, `test_ToCTestJUnit` |
+| Level      | Meaning                              | Here                                                           |
+|------------|--------------------------------------|----------------------------------------------------------------|
+| a) package | the capability under test            | `Unittesting/`, `DocumentationCoverage/`, `JUnitDialects/`     |
+| b) module  | a feature group of that capability   | `DataModel.py`, `Merge.py`, `Hostname.py`, `RoundTrip.py`      |
+| c) class   | one specific feature, or one dialect | `Merging`, `RoundTrip.PyTestJUnit`, `Translation.FromAnyJUnit` |
+| d) method  | one *variant* of that feature        | `test_TwoHosts`, `test_ToCTestJUnit`                           |
 
 A method is a variant, not a second assertion style: "merge two suites with different hostnames" is a variant,
 "check the count as well" is not - that belongs in the same method or in another level.

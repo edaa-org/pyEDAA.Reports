@@ -40,6 +40,7 @@ from typing   import ClassVar, Dict, Tuple
 from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
+from pyTooling.MetaClasses import ExtendedType
 
 from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, readReference, writeAs
 
@@ -67,14 +68,10 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 }
 
 
-class Translation(ut_TestCase):
+class TranslationMixin(metaclass=ExtendedType):
 	"""Base class: a report of this dialect is converted into every dialect, and read back in that dialect."""
 
-	_dialectName: ClassVar[str] = None
-
-	def setUp(self) -> None:
-		if self._dialectName is None:
-			self.skipTest("Base class: it describes the checks, the derived classes name the dialect.")
+	_dialectName: ClassVar[str]
 
 	@readonly
 	def Dialect(self) -> Dialect:
@@ -128,21 +125,21 @@ class Translation(ut_TestCase):
 		self._translate("Any-JUnit")
 
 
-class FromAntJUnit4(Translation):
+class FromAntJUnit4(TranslationMixin, ut_TestCase):
 	_dialectName = "Ant-JUnit4"
 
 
-class FromCTestJUnit(Translation):
+class FromCTestJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "CTest-JUnit"
 
 
-class FromGoogleTestJUnit(Translation):
+class FromGoogleTestJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "GoogleTest-JUnit"
 
 
-class FromPyTestJUnit(Translation):
+class FromPyTestJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "pyTest-JUnit"
 
 
-class FromAnyJUnit(Translation):
+class FromAnyJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "Any-JUnit"

@@ -38,18 +38,15 @@ from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
+from pyTooling.MetaClasses import ExtendedType
 
 from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, collectTestcaseNames, countTestcases, readReference, writeAs
 
 
-class RoundTrip(ut_TestCase):
+class RoundTripMixin(metaclass=ExtendedType):
 	"""Base class: a report of this dialect is read, written and read back."""
 
-	_dialectName: ClassVar[str] = None
-
-	def setUp(self) -> None:
-		if self._dialectName is None:
-			self.skipTest("Base class: it describes the checks, the derived classes name the dialect.")
+	_dialectName: ClassVar[str]
 
 	@readonly
 	def Dialect(self) -> Dialect:
@@ -103,21 +100,21 @@ class RoundTrip(ut_TestCase):
 				self.assertEqual(before, after)
 
 
-class AntJUnit4(RoundTrip):
+class AntJUnit4(RoundTripMixin, ut_TestCase):
 	_dialectName = "Ant-JUnit4"
 
 
-class CTestJUnit(RoundTrip):
+class CTestJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "CTest-JUnit"
 
 
-class GoogleTestJUnit(RoundTrip):
+class GoogleTestJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "GoogleTest-JUnit"
 
 
-class PyTestJUnit(RoundTrip):
+class PyTestJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "pyTest-JUnit"
 
 
-class AnyJUnit(RoundTrip):
+class AnyJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "Any-JUnit"
