@@ -44,9 +44,7 @@ from . import DIALECTS, TESTSUITE_ROOTED_FILES, Dialect
 
 
 class SchemaMixin:
-	"""
-	Classic mixin: the schema of a dialect accepts every report that framework produced.
-	"""
+	"""Classic mixin: the schema of a dialect accepts every report that framework produced."""
 
 	_dialectName: ClassVar[str]
 

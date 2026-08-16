@@ -68,12 +68,7 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 
 
 class TranslationMixin:
-	"""
-	Classic mixin: a report of this dialect is converted into every dialect, and read back in that dialect.
-
-	It is not created by :class:`~pyTooling.MetaClasses.ExtendedType`, because :class:`~unittest.TestCase` isn't
-	either and mixing the two requires ``__slots__`` on every base class.
-	"""
+	"""Classic mixin: a report of this dialect is converted into every dialect, and read back in that dialect."""
 
 	_dialectName: ClassVar[str]
 

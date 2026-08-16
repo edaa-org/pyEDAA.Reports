@@ -43,12 +43,7 @@ from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, collectTestcaseNames, countTe
 
 
 class RoundTripMixin:
-	"""
-	Classic mixin: a report of this dialect is read, written and read back.
-
-	It is not created by :class:`~pyTooling.MetaClasses.ExtendedType`, because :class:`~unittest.TestCase` isn't
-	either and mixing the two requires ``__slots__`` on every base class.
-	"""
+	"""Classic mixin: a report of this dialect is read, written and read back."""
 
 	_dialectName: ClassVar[str]
 
