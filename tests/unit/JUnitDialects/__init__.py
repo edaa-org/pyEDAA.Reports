@@ -40,7 +40,9 @@ rejects is wrong about the format too.
 from pathlib import Path
 from typing  import Dict, List, Tuple, Type
 
-from xmlschema import XMLSchema
+from pyTooling.Decorators import export, readonly
+from pyTooling.MetaClasses import ExtendedType
+from xmlschema             import XMLSchema
 
 from pyEDAA.Reports.Unittesting                      import TestsuiteSummary
 from pyEDAA.Reports.Unittesting.JUnit                import Document as AnyJUnitDocument
@@ -55,16 +57,30 @@ SCHEMA_DIRECTORY = Path("pyEDAA/Reports/Resources")
 OUTPUT_DIRECTORY = Path("tests/output/JUnitDialects")
 
 
-class Dialect:
+@export
+class Dialect(metaclass=ExtendedType, slots=True):
 	"""One JUnit dialect: the document class implementing it, its schema, and the reference outputs it must read."""
 
-	def __init__(self, name: str, documentClass: Type, schemaName: str, referenceFiles: List[Path]):
+	_name:           str
+	_documentClass:  Type
+	_schemaName:     str
+	_referenceFiles: List[Path]
+
+	def __init__(self, name: str, documentClass: Type, schemaName: str, referenceFiles: List[Path]) -> None:
+		"""
+		Initialize the description of a dialect.
+
+		:param name:           Name of the dialect, as the command line spells it.
+		:param documentClass:  The ``Document`` class implementing the dialect.
+		:param schemaName:     Base name of the dialect's XML schema in :file:`pyEDAA/Reports/Resources`.
+		:param referenceFiles: Reports the framework itself produced, which the dialect has to read.
+		"""
 		self._name = name
 		self._documentClass = documentClass
 		self._schemaName = schemaName
 		self._referenceFiles = referenceFiles
 
-	@property
+	@readonly
 	def Name(self) -> str:
 		"""
 		Read-only property to access the name of the dialect, as the command line spells it (:attr:`_name`).
@@ -73,7 +89,7 @@ class Dialect:
 		"""
 		return self._name
 
-	@property
+	@readonly
 	def DocumentClass(self) -> Type:
 		"""
 		Read-only property to access the document class implementing this dialect (:attr:`_documentClass`).
@@ -82,7 +98,7 @@ class Dialect:
 		"""
 		return self._documentClass
 
-	@property
+	@readonly
 	def SchemaFile(self) -> Path:
 		"""
 		Read-only property to return the path of the dialect's XML schema, derived from :attr:`_schemaName`.
@@ -91,7 +107,7 @@ class Dialect:
 		"""
 		return SCHEMA_DIRECTORY / f"{self._schemaName}.xsd"
 
-	@property
+	@readonly
 	def ReferenceFiles(self) -> List[Path]:
 		"""
 		Read-only property to access the reference outputs produced by the framework itself (:attr:`_referenceFiles`).
@@ -155,8 +171,11 @@ def readReference(dialect: Dialect, referenceFile: Path) -> TestsuiteSummary:
 	:returns:             The report as a test suite summary of the unified data model.
 	"""
 	document = dialect.DocumentClass(referenceFile, analyzeAndConvert=True)
+	summary = document.ToTestsuiteSummary()
+	# The metrics a writer emits are computed here, exactly as the command line does before writing.
+	summary.Aggregate()
 
-	return document.ToTestsuiteSummary()
+	return summary
 
 
 def writeAs(dialect: Dialect, summary: TestsuiteSummary, outputFile: Path) -> Path:

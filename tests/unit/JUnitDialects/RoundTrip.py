@@ -37,6 +37,8 @@ exactly this, twice.
 from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
+from pyTooling.Decorators import readonly
+
 from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, collectTestcaseNames, countTestcases, readReference, writeAs
 
 
@@ -49,7 +51,7 @@ class RoundTrip(ut_TestCase):
 		if self._dialectName is None:
 			self.skipTest("Base class: it describes the checks, the derived classes name the dialect.")
 
-	@property
+	@readonly
 	def Dialect(self) -> Dialect:
 		"""
 		Read-only property to return the dialect under test, looked up by :attr:`_dialectName`.

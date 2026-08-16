@@ -38,6 +38,8 @@ reader has to agree with the schema too - it is the same claim about the format,
 from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
+from pyTooling.Decorators import readonly
+
 from . import DIALECTS, TESTSUITE_ROOTED_FILES, Dialect
 
 
@@ -50,7 +52,7 @@ class SchemaAcceptsItsReferenceOutput(ut_TestCase):
 		if self._dialectName is None:
 			self.skipTest("Base class: it describes the checks, the derived classes name the dialect.")
 
-	@property
+	@readonly
 	def Dialect(self) -> Dialect:
 		"""
 		Read-only property to return the dialect under test, looked up by :attr:`_dialectName`.

@@ -32,30 +32,38 @@
 Converting a report of one dialect into another.
 
 This is what ``pyedaa-reports unittest --merge=<dialect>:... --output=<dialect>:...`` does, and it is where a
-dialect's writer meets another dialect's reader. Where a conversion cannot work today, the pair is listed in
-:data:`KNOWN_GAPS` with the reason and asserted to *keep* failing, so that fixing one shows up here as a failing
-expectation rather than passing unnoticed.
+dialect's writer meets another dialect's reader. Where a target format cannot express a report - it needs data the
+source never carried, or holds only one test suite - the pair is listed in :data:`FORMAT_LIMITS` with the reason and
+asserted to *keep* failing, so that lifting a limit shows up here rather than passing unnoticed.
 """
 from typing   import ClassVar, Dict, Tuple
 from unittest import TestCase as ut_TestCase
 
+from pyTooling.Decorators import readonly
+
 from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, readReference, writeAs
 
 
-#: (source dialect, target dialect) -> why the conversion does not work yet.
-KNOWN_GAPS: Dict[Tuple[str, str], str] = {
+#: (source dialect, target dialect) -> why the target format cannot express this report.
+#:
+#: These are limits of the formats, not defects: a dialect whose schema requires a timestamp cannot be written from
+#: a report that carries none, and a dialect holding exactly one test suite cannot hold many. Every entry names the
+#: data the target needs and the source lacks. A conversion that fails for any *other* reason is a defect and has
+#: no place here.
+FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 	("pyTest-JUnit", "CTest-JUnit"):
-		"The CTest writer emits a <testsuite> that CTest-JUnit.xsd rejects.",
+		"CTest-JUnit requires 'timestamp' on <testsuite>. pytest writes none on <testsuites>, so the summary has no "
+		"start time to carry over.",
 	("pyTest-JUnit", "GoogleTest-JUnit"):
-		"The GoogleTest writer emits a <testsuites> that GoogleTest-JUnit.xsd rejects.",
+		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which pytest does not write.",
 	("Any-JUnit", "Ant-JUnit4"):
-		"Ant + JUnit4 holds exactly one test suite, and the OSVVM report has many. A format limit, not a defect.",
+		"Ant + JUnit4 holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "CTest-JUnit"):
-		"CTest-JUnit holds exactly one test suite, and the OSVVM report has many. A format limit, not a defect.",
+		"CTest-JUnit holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "GoogleTest-JUnit"):
-		"The GoogleTest writer calls isoformat() on a timestamp the OSVVM report does not have.",
+		"GoogleTest-JUnit requires 'timestamp' down to <testcase>; the OSVVM report has none.",
 	("Any-JUnit", "pyTest-JUnit"):
-		"The pyTest reader requires a timestamp, and the OSVVM report has none to carry over.",
+		"pyTest-JUnit requires 'timestamp' on <testsuite>; the OSVVM report has none.",
 }
 
 
@@ -68,7 +76,7 @@ class Translation(ut_TestCase):
 		if self._dialectName is None:
 			self.skipTest("Base class: it describes the checks, the derived classes name the dialect.")
 
-	@property
+	@readonly
 	def Dialect(self) -> Dialect:
 		"""
 		Read-only property to return the source dialect, looked up by :attr:`_dialectName`.
@@ -91,17 +99,17 @@ class Translation(ut_TestCase):
 
 	def _translate(self, targetName: str) -> None:
 		"""
-		Convert into the named dialect, or assert that a known gap is still a gap.
+		Convert into the named dialect, or assert that a format limit still stands.
 
 		:param targetName: Name of the dialect to convert to.
 		"""
 		target = DIALECTS[targetName]
-		reason = KNOWN_GAPS.get((self._dialectName, targetName))
+		reason = FORMAT_LIMITS.get((self._dialectName, targetName))
 
 		if reason is None:
 			self._convert(target)
 		else:
-			with self.assertRaises(Exception, msg=f"This conversion works now: {reason}"):
+			with self.assertRaises(Exception, msg=f"This conversion works now, so the limit is gone: {reason}"):
 				self._convert(target)
 
 	def test_ToAntJUnit4(self) -> None:
