@@ -86,6 +86,7 @@ class Testsuite(ju_Testsuite):
 		"""
 		juTestsuite = cls(
 			testsuite._name,
+			hostname=testsuite._hostname,
 			startTime=testsuite._startTime,
 			duration=testsuite._totalDuration,
 			status= testsuite._status,
@@ -310,7 +311,9 @@ class Document(ju_Document):
 		rootElement.attrib["disabled"] = "0"                       # TODO: find a value
 		# if self._assertionCount is not None:
 		# 	rootElement.attrib["assertions"] = f"{self._assertionCount}"
-		rootElement.attrib["hostname"] = str(testsuite._hostname)  # TODO: find a value
+		# CTest-JUnit.xsd requires 'hostname', so an unrecorded host is written as the same default the reader
+		# applies when the attribute is absent.
+		rootElement.attrib["hostname"] = testsuite._hostname if testsuite._hostname is not None else "localhost"
 
 		self._xmlDocument = ElementTree(rootElement)
 
