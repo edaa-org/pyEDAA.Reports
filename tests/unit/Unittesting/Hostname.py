@@ -29,14 +29,17 @@
 # ==================================================================================================================== #
 #
 """The hostname of a test suite: on the data model, through a merge, and across a JUnit round trip."""
+from datetime import datetime
 from pathlib  import Path
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting                   import MergedTestsuiteSummary, Testsuite, TestsuiteSummary
-from pyEDAA.Reports.Unittesting.JUnit             import Document, JUnitReaderMode
-from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4   import Document as AntDocument
-from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit  import Document as CTestDocument
-from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document as PyTestDocument
+from pyEDAA.Reports.Unittesting                       import MergedTestsuiteSummary, Testsuite, TestsuiteSummary
+from pyEDAA.Reports.Unittesting                       import UnittestException
+from pyEDAA.Reports.Unittesting.JUnit                 import Document, JUnitReaderMode
+from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntDocument
+from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GoogleTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestDocument
 
 
 class DataModel(ut_TestCase):
@@ -139,7 +142,9 @@ class RoundTrip(ut_TestCase):
 
 	def test_CTestDialectWritesAHostnameAndNotTheWordNone(self) -> None:
 		"""CTest-JUnit.xsd requires the attribute, so an unrecorded host is named, never a stringified ``None``."""
-		summary = TestsuiteSummary("summary", testsuites=(Testsuite("suite"),))
+		# CTest-JUnit requires a timestamp, so the summary carries one; the hostname is what this testcase is about.
+		startTime = datetime(2026, 8, 16, 9, 0)
+		summary = TestsuiteSummary("summary", startTime=startTime, testsuites=(Testsuite("suite", startTime=startTime),))
 
 		outputFile = self._outputDirectory / "ctest.xml"
 		CTestDocument.FromTestsuiteSummary(outputFile, summary).Write(regenerate=True, overwrite=True)
@@ -148,3 +153,29 @@ class RoundTrip(ut_TestCase):
 
 		self.assertNotIn('hostname="None"', content)
 		self.assertIn('hostname="unknownhost"', content)
+
+
+class RequiredAttributes(ut_TestCase):
+	"""A writer refuses a report its format cannot express, instead of crashing or writing an invalid document."""
+
+	_outputDirectory = Path("tests/output/Hostname")
+
+	@classmethod
+	def setUpClass(cls) -> None:
+		cls._outputDirectory.mkdir(parents=True, exist_ok=True)
+
+	def _writeWithoutTimestamp(self, documentClass, name: str) -> None:
+		summary = TestsuiteSummary("summary", testsuites=(Testsuite("suite"),))
+		outputFile = self._outputDirectory / name
+
+		with self.assertRaises(UnittestException) as context:
+			documentClass.FromTestsuiteSummary(outputFile, summary).Write(regenerate=True, overwrite=True)
+
+		self.assertIn("requires a timestamp", str(context.exception))
+
+	def test_CTestRefusesAReportWithoutATimestamp(self) -> None:
+		self._writeWithoutTimestamp(CTestDocument, "ctest-no-timestamp.xml")
+
+	def test_GoogleTestRefusesAReportWithoutATimestamp(self) -> None:
+		"""It used to raise 'AttributeError: NoneType object has no attribute isoformat'."""
+		self._writeWithoutTimestamp(GoogleTestDocument, "gtest-no-timestamp.xml")

@@ -1287,6 +1287,7 @@ class TestsuiteSummary(TestsuiteBase):
 
 @export
 class Document(TestsuiteSummary, ut_Document):
+	_DIALECT:           ClassVar[str] =                    "Any-JUnit"
 	_TESTCASE:          ClassVar[Type[Testcase]] =         Testcase
 	_TESTCLASS:         ClassVar[Type[Testclass]] =        Testclass
 	_TESTSUITE:         ClassVar[Type[Testsuite]] =        Testsuite

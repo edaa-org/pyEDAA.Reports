@@ -156,6 +156,7 @@ class Document(ju_Document):
 	entity data model. This data model can be written as XML into a file.
 	"""
 
+	_DIALECT:   ClassVar[str] =            "CTest + JUnit"
 	_TESTCASE:  ClassVar[Type[Testcase]] =  Testcase
 	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass
 	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite
@@ -301,8 +302,11 @@ class Document(ju_Document):
 
 		rootElement = Element("testsuite")
 		rootElement.attrib["name"] = self._name
-		if self._startTime is not None:
-			rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
+		if self._startTime is None:
+			raise UnittestException(
+				f"The {self._DIALECT} format requires a timestamp on <testsuite>, but the report has none."
+			)
+		rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
 		if self._duration is not None:
 			rootElement.attrib["time"] = f"{self._duration.total_seconds():.6f}"
 		rootElement.attrib["tests"] = str(self._tests)
