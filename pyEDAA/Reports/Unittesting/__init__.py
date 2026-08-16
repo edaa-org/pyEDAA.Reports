@@ -1816,6 +1816,23 @@ class Merged(metaclass=ExtendedType, mixin=True):
 	def __init__(self, mergedCount: int = 1) -> None:
 		self._mergedCount = mergedCount
 
+	def _MergeStartTime(self, otherStartTime: Nullable[datetime]) -> Nullable[datetime]:
+		"""
+		Combine this entity's start time with the start time of an entity being merged in.
+
+		A merged entity started when the earliest of its parts started. An entity without a start time contributes
+		nothing rather than erasing what is known.
+
+		:param otherStartTime: The start time of the entity being merged in.
+		:returns:              The earlier of the two start times, or ``None`` if neither has one.
+		"""
+		if otherStartTime is None:
+			return self._startTime
+		elif self._startTime is None or otherStartTime < self._startTime:
+			return otherStartTime
+		else:
+			return self._startTime
+
 	@readonly
 	def MergedCount(self) -> int:
 		"""
@@ -2012,6 +2029,7 @@ class MergedTestsuite(Testsuite, Merged):
 	def Merge(self, testsuite: Testsuite) -> None:
 		self._mergedCount += 1
 		self._hostname = self._MergeHostname(testsuite._hostname)
+		self._startTime = self._MergeStartTime(testsuite._startTime)
 
 		for ts in testsuite._testsuites.values():
 			if ts._name in self._testsuites:
@@ -2074,6 +2092,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 		# FIXME: a summary is not necessarily a file
 		self._mergedCount += 1
 		self._mergedFiles[testsuiteSummary._name] = testsuiteSummary
+		self._startTime = self._MergeStartTime(testsuiteSummary._startTime)
 
 		for testsuite in testsuiteSummary._testsuites.values():
 			if testsuite._name in self._testsuites:
