@@ -155,6 +155,8 @@ class Document(ju_Document):
 	test entity data model. This data model can be written as XML into a file.
 	"""
 
+	_DIALECT: ClassVar[str] = "GoogleTest + JUnit"
+
 	_TESTCASE:  ClassVar[Type[Testcase]] =  Testcase
 	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass
 	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite
@@ -278,6 +280,22 @@ class Document(ju_Document):
 
 		self._ConvertTestsuiteChildren(testsuitesNode, newTestsuite)
 
+	def _RequiredTimestamp(self, startTime, element: str) -> str:
+		"""
+		Render a timestamp the schema requires, or refuse.
+
+		:param startTime:          The start time to render, or ``None`` if the report has none.
+		:param element:            Name of the XML element the attribute belongs to, for the message.
+		:returns:                  The timestamp in ISO 8601 format.
+		:raises UnittestException: If no start time was recorded, because the format cannot express such a report.
+		"""
+		if startTime is None:
+			raise UnittestException(
+				f"The {self._DIALECT} format requires a timestamp on <{element}>, but the report has none."
+			)
+
+		return startTime.isoformat()
+
 	def Generate(self, overwrite: bool = False) -> None:
 		"""
 		Generate the internal XML data structure from test suites and test cases.
@@ -292,8 +310,7 @@ class Document(ju_Document):
 
 		rootElement = Element("testsuites")
 		rootElement.attrib["name"] = self._name
-		if self._startTime is not None:
-			rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
+		rootElement.attrib["timestamp"] = self._RequiredTimestamp(self._startTime, rootElement.tag)
 		if self._duration is not None:
 			rootElement.attrib["time"] = f"{self._duration.total_seconds():.6f}"
 		rootElement.attrib["tests"] = str(self._tests)
@@ -320,8 +337,7 @@ class Document(ju_Document):
 		"""
 		testsuiteElement = SubElement(parentElement, "testsuite")
 		testsuiteElement.attrib["name"] = testsuite._name
-		if testsuite._startTime is not None:
-			testsuiteElement.attrib["timestamp"] = f"{testsuite._startTime.isoformat()}"
+		testsuiteElement.attrib["timestamp"] = self._RequiredTimestamp(testsuite._startTime, "testsuite")
 		if testsuite._duration is not None:
 			testsuiteElement.attrib["time"] = f"{testsuite._duration.total_seconds():.6f}"
 		testsuiteElement.attrib["tests"] = str(testsuite._tests)
@@ -356,7 +372,7 @@ class Document(ju_Document):
 		if testcase._assertionCount is not None:
 			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
 
-		testcaseElement.attrib["timestamp"] = f"{testcase._parent._parent._startTime.isoformat()}"     # TODO: find a value
+		testcaseElement.attrib["timestamp"] = self._RequiredTimestamp(testcase._parent._parent._startTime, "testcase")
 		testcaseElement.attrib["file"] = ""              # TODO: find a value
 		testcaseElement.attrib["line"] = "0"             # TODO: find a value
 		testcaseElement.attrib["status"] = "run"         # TODO: find a value
