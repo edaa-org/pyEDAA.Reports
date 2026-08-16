@@ -311,9 +311,8 @@ class Document(ju_Document):
 		rootElement.attrib["disabled"] = "0"                       # TODO: find a value
 		# if self._assertionCount is not None:
 		# 	rootElement.attrib["assertions"] = f"{self._assertionCount}"
-		# CTest-JUnit.xsd requires 'hostname', so an unrecorded host is written as the same default the reader
-		# applies when the attribute is absent.
-		rootElement.attrib["hostname"] = testsuite._hostname if testsuite._hostname is not None else "localhost"
+		# CTest-JUnit.xsd requires 'hostname', so an unrecorded host is named as unknown.
+		rootElement.attrib["hostname"] = testsuite._hostname if testsuite._hostname is not None else "unknownhost"
 
 		self._xmlDocument = ElementTree(rootElement)
 

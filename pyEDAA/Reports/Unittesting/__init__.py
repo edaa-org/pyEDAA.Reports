@@ -1344,6 +1344,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		self,
 		name: str,
 		kind: TestsuiteKind = TestsuiteKind.Logical,
+		hostname: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
@@ -1356,14 +1357,14 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		testcases: Nullable[Iterable["Testcase"]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable[TestsuiteType] = None,
-		hostname: Nullable[str] = None
+		parent: Nullable[TestsuiteType] = None
 	) -> None:
 		"""
 		Initializes the fields of a test suite.
 
 		:param name:               Name of the test suite.
 		:param kind:               Kind of the test suite.
+		:param hostname:           Name of the host the test suite was executed on, or ``None`` if it wasn't recorded.
 		:param startTime:          Time when the test suite was started.
 		:param setupDuration:      Duration it took to set up the test suite.
 		:param testDuration:       Duration of all tests listed in the test suite.
@@ -1377,7 +1378,6 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		:param testcases:          List of test cases to initialize the test suite with.
 		:param keyValuePairs:      Mapping of key-value pairs to initialize the test suite with.
 		:param parent:             Reference to the parent test entity.
-		:param hostname:           Name of the host the test suite was executed on, or ``None`` if it wasn't recorded.
 		:raises TypeError:         If parameter 'testcases' is not iterable.
 		:raises TypeError:         If element in parameter 'testcases' is not a Testcase.
 		:raises AlreadyInHierarchyException: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
@@ -1401,7 +1401,6 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		)
 
 		# self._testDuration = testDuration
-
 		self._hostname = hostname
 
 		self._testcases = {}
@@ -1467,17 +1466,17 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 	def Copy(self) -> "Testsuite":
 		return self.__class__(
 			self._name,
-			kind=self._kind,
-			startTime=self._startTime,
-			setupDuration=self._setupDuration,
-			testDuration=self._testDuration,
-			teardownDuration=self._teardownDuration,
-			totalDuration=self._totalDuration,
-			status=self._status,
-			warningCount=self._warningCount,
-			errorCount=self._errorCount,
-			fatalCount=self._fatalCount,
-			hostname=self._hostname
+			self._kind,
+			self._hostname,
+			self._startTime,
+			self._setupDuration,
+			self._testDuration,
+			self._teardownDuration,
+			self._totalDuration,
+			self._status,
+			self._warningCount,
+			self._errorCount,
+			self._fatalCount
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
@@ -1974,12 +1973,12 @@ class MergedTestsuite(Testsuite, Merged):
 		super().__init__(
 			testsuite._name,
 			testsuite._kind,
+			testsuite._hostname,
 			testsuite._startTime,
 			testsuite._setupDuration, testsuite._testDuration, testsuite._teardownDuration, testsuite._totalDuration,
 			TestsuiteStatus.Unknown,
 			testsuite._warningCount, testsuite._errorCount, testsuite._fatalCount,
-			parent=parent,
-			hostname=testsuite._hostname
+			parent=parent
 		)
 		Merged.__init__(self)
 
@@ -1993,30 +1992,26 @@ class MergedTestsuite(Testsuite, Merged):
 				mergedTestcase = MergedTestcase(tc)
 				self.AddTestcase(mergedTestcase)
 
-	@staticmethod
-	def _mergeHostname(hostname: Nullable[str], otherHostname: Nullable[str]) -> Nullable[str]:
+	def _MergeHostname(self, otherHostname: Nullable[str]) -> Nullable[str]:
 		"""
-		Combine the hostnames of two merged test suites.
+		Combine this test suite's hostname with the hostname of a test suite being merged in.
 
-		Merged test suites usually come from the same run on many machines, so a single hostname is only meaningful
-		when every input agrees on it. Where they disagree, the merged suite is marked as coming from ``various``
-		hosts. A test suite without a hostname was executed somewhere unrecorded rather than somewhere else, so it
-		doesn't turn an otherwise unanimous hostname into ``various``.
+		A test suite without a hostname ran somewhere unrecorded, not somewhere else, so it keeps an otherwise
+		unanimous hostname.
 
-		:param hostname:      The hostname collected so far, or ``None`` if none was recorded yet.
-		:param otherHostname: The hostname of the test suite being merged in, or ``None`` if it has none.
-		:returns:             The common hostname, ``"various"`` if the two disagree, or ``None`` if neither has one.
+		:param otherHostname: The hostname of the test suite being merged in.
+		:returns:             The common hostname, ``"various"`` if they disagree, or ``None`` if neither has one.
 		"""
 		if otherHostname is None:
-			return hostname
-		elif hostname is None or hostname == otherHostname:
+			return self._hostname
+		elif self._hostname is None or self._hostname == otherHostname:
 			return otherHostname
 		else:
 			return "various"
 
 	def Merge(self, testsuite: Testsuite) -> None:
 		self._mergedCount += 1
-		self._hostname = self._mergeHostname(self._hostname, testsuite._hostname)
+		self._hostname = self._MergeHostname(testsuite._hostname)
 
 		for ts in testsuite._testsuites.values():
 			if ts._name in self._testsuites:
@@ -2036,6 +2031,7 @@ class MergedTestsuite(Testsuite, Merged):
 		testsuite = Testsuite(
 			self._name,
 			self._kind,
+			self._hostname,
 			self._startTime,
 			self._setupDuration,
 			self._testDuration,
@@ -2046,8 +2042,7 @@ class MergedTestsuite(Testsuite, Merged):
 			self._errorCount,
 			self._fatalCount,
 			testsuites=(ts.ToTestsuite() for ts in self._testsuites.values()),
-			testcases=(tc.ToTestcase() for tc in self._testcases.values()),
-			hostname=self._hostname
+			testcases=(tc.ToTestcase() for tc in self._testcases.values())
 		)
 
 		testsuite._tests = self._tests

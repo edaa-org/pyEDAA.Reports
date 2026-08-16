@@ -1065,10 +1065,10 @@ class Testsuite(TestsuiteBase):
 		testsuite = ut_Testsuite(
 			self._name,
 			TestsuiteKind.Logical,
+			self._hostname,
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
-			hostname=self._hostname,
 		)
 
 		for testclass in self._testclasses.values():

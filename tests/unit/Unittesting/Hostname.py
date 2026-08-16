@@ -128,7 +128,7 @@ class RoundTrip(ut_TestCase):
 			self.assertIsNotNone(testsuite._hostname, f"Testsuite '{testsuite._name}' lost its hostname.")
 
 	def test_CTestDialectWritesAHostnameAndNotTheWordNone(self) -> None:
-		"""CTest-JUnit.xsd requires the attribute, so it must never be the string representation of ``None``."""
+		"""CTest-JUnit.xsd requires the attribute, so an unrecorded host is named, never a stringified ``None``."""
 		summary = TestsuiteSummary("summary", testsuites=(Testsuite("suite"),))
 
 		outputFile = self._outputDirectory / "ctest.xml"
@@ -137,4 +137,4 @@ class RoundTrip(ut_TestCase):
 		content = outputFile.read_text()
 
 		self.assertNotIn('hostname="None"', content)
-		self.assertIn('hostname="localhost"', content)
+		self.assertIn('hostname="unknownhost"', content)
