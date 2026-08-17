@@ -42,24 +42,13 @@ __documentation_url__ = "https://edaa-org.github.io/pyEDAA.Reports"
 __issue_tracker_url__ = "https://GitHub.com/edaa-org/pyEDAA.Reports/issues"
 
 from enum                 import Enum
-from sys                  import version_info
-from typing               import List
 
 from pyTooling.Decorators import export
 
 
 @export
 class ReportException(Exception):
-	# WORKAROUND: for Python <3.11
-	# Implementing a dummy method for Python versions before
-	if version_info < (3, 11):  # pragma: no cover
-		__notes__: List[str]
-
-		def add_note(self, message: str) -> None:
-			try:
-				self.__notes__.append(message)
-			except AttributeError:
-				self.__notes__ = [message]
+	"""Base-exception of all exceptions raised by pyEDAA.Reports."""
 
 
 @export
