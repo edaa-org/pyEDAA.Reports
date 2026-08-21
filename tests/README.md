@@ -36,10 +36,6 @@ Where a dialect or a data format is the thing under test, level (c) is one class
 written once and reported per dialect, and the mixin itself is not a `TestCase`, so it contributes no testcases of
 its own.
 
-The mixins are deliberately *not* created by `ExtendedType`: mixing it with `unittest.TestCase` raises
-`BaseClassWithoutSlotsError`, because `TestCase` has no `__slots__`. A classic mixin is the right tool where the
-foreign base class is out of our hands.
-
 ## The reference outputs are the ground truth
 
 `tests/data/JUnit/**` holds reports produced by the frameworks themselves - Ant, CTest, GoogleTest, pytest, VUnit,
