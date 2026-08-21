@@ -75,7 +75,6 @@ derived from a summary class.
 from datetime              import timedelta, datetime
 from enum                  import Flag, IntEnum
 from pathlib               import Path
-from sys                   import version_info
 from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar, Mapping
 
 from pyTooling.Common      import getFullyQualifiedName
@@ -340,16 +339,14 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		if parent is not None and not isinstance(parent, TestsuiteBase):
 			ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
 			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name.strip() == "":
 			raise ValueError(f"Parameter 'name' is empty.")
@@ -359,26 +356,22 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		if testDuration is not None and not isinstance(testDuration, timedelta):
 			ex = TypeError(f"Parameter 'testDuration' is not of type 'timedelta'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testDuration)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testDuration)}'.")
 			raise ex
 
 		if setupDuration is not None and not isinstance(setupDuration, timedelta):
 			ex = TypeError(f"Parameter 'setupDuration' is not of type 'timedelta'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(setupDuration)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(setupDuration)}'.")
 			raise ex
 
 		if teardownDuration is not None and not isinstance(teardownDuration, timedelta):
 			ex = TypeError(f"Parameter 'teardownDuration' is not of type 'timedelta'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(teardownDuration)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(teardownDuration)}'.")
 			raise ex
 
 		if totalDuration is not None and not isinstance(totalDuration, timedelta):
 			ex = TypeError(f"Parameter 'totalDuration' is not of type 'timedelta'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(totalDuration)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(totalDuration)}'.")
 			raise ex
 
 		if testDuration is not None:
@@ -425,38 +418,32 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		if not isinstance(warningCount, int):
 			ex = TypeError(f"Parameter 'warningCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(warningCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(warningCount)}'.")
 			raise ex
 
 		if not isinstance(errorCount, int):
 			ex = TypeError(f"Parameter 'errorCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(errorCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(errorCount)}'.")
 			raise ex
 
 		if not isinstance(fatalCount, int):
 			ex = TypeError(f"Parameter 'fatalCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(fatalCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(fatalCount)}'.")
 			raise ex
 
 		if not isinstance(expectedWarningCount, int):
 			ex = TypeError(f"Parameter 'expectedWarningCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(expectedWarningCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(expectedWarningCount)}'.")
 			raise ex
 
 		if not isinstance(expectedErrorCount, int):
 			ex = TypeError(f"Parameter 'expectedErrorCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(expectedErrorCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(expectedErrorCount)}'.")
 			raise ex
 
 		if not isinstance(expectedFatalCount, int):
 			ex = TypeError(f"Parameter 'expectedFatalCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(expectedFatalCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(expectedFatalCount)}'.")
 			raise ex
 
 		self._warningCount =         warningCount
@@ -468,8 +455,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		if keyValuePairs is not None and not isinstance(keyValuePairs, Mapping):
 			ex = TypeError(f"Parameter 'keyValuePairs' is not a mapping.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
 			raise ex
 
 		self._dict = {} if keyValuePairs is None else {k: v for k, v in keyValuePairs}
@@ -727,8 +713,7 @@ class Testcase(Base):
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testcases[name] = self
@@ -740,33 +725,29 @@ class Testcase(Base):
 			warningCount, errorCount, fatalCount,
 			expectedWarningCount, expectedErrorCount, expectedFatalCount,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 		if not isinstance(status, TestcaseStatus):
 			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 
 		self._status = status
 
 		if assertionCount is not None and not isinstance(assertionCount, int):
 			ex = TypeError(f"Parameter 'assertionCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
 			raise ex
 
 		if failedAssertionCount is not None and not isinstance(failedAssertionCount, int):
 			ex = TypeError(f"Parameter 'failedAssertionCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(failedAssertionCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(failedAssertionCount)}'.")
 			raise ex
 
 		if passedAssertionCount is not None and not isinstance(passedAssertionCount, int):
 			ex = TypeError(f"Parameter 'passedAssertionCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(passedAssertionCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(passedAssertionCount)}'.")
 			raise ex
 
 		self._assertionCount = assertionCount
@@ -968,8 +949,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testsuites[name] = self
@@ -986,7 +966,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			fatalCount,
 			0, 0, 0,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 		self._kind = kind
@@ -996,15 +976,13 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		if testsuites is not None:
 			if not isinstance(testsuites, Iterable):
 				ex = TypeError(f"Parameter 'testsuites' is not iterable.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
 				raise ex
 
 			for testsuite in testsuites:
 				if not isinstance(testsuite, Testsuite):
 					ex = TypeError(f"Element of parameter 'testsuites' is not of type 'Testsuite'.")
-					if version_info >= (3, 11):  # pragma: no cover
-						ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
 					raise ex
 
 				if testsuite._parent is not None:
@@ -1265,8 +1243,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			raise ValueError("Parameter 'testsuite' is None.")
 		elif not isinstance(testsuite, Testsuite):
 			ex = TypeError(f"Parameter 'testsuite' is not of type 'Testsuite'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
 			raise ex
 
 		if testsuite._parent is not None:
@@ -1290,8 +1267,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			raise ValueError("Parameter 'testsuites' is None.")
 		elif not isinstance(testsuites, Iterable):
 			ex = TypeError(f"Parameter 'testsuites' is not iterable.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
 			raise ex
 
 		for testsuite in testsuites:
@@ -1338,11 +1314,13 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 	"""
 
 	_testcases: Dict[str, "Testcase"]
+	_hostname:  Nullable[str]
 
 	def __init__(
 		self,
 		name: str,
 		kind: TestsuiteKind = TestsuiteKind.Logical,
+		hostname: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
@@ -1362,6 +1340,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 		:param name:               Name of the test suite.
 		:param kind:               Kind of the test suite.
+		:param hostname:           Name of the host the test suite was executed on, or ``None`` if it wasn't recorded.
 		:param startTime:          Time when the test suite was started.
 		:param setupDuration:      Duration it took to set up the test suite.
 		:param testDuration:       Duration of all tests listed in the test suite.
@@ -1394,24 +1373,23 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			fatalCount,
 			testsuites,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 		# self._testDuration = testDuration
+		self._hostname = hostname
 
 		self._testcases = {}
 		if testcases is not None:
 			if not isinstance(testcases, Iterable):
 				ex = TypeError(f"Parameter 'testcases' is not iterable.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
 				raise ex
 
 			for testcase in testcases:
 				if not isinstance(testcase, Testcase):
 					ex = TypeError(f"Element of parameter 'testcases' is not of type 'Testcase'.")
-					if version_info >= (3, 11):  # pragma: no cover
-						ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
 					raise ex
 
 				if testcase._parent is not None:
@@ -1450,11 +1428,23 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		"""
 		return super().AssertionCount + sum(tc.AssertionCount for tc in self._testcases.values())
 
+	@readonly
+	def Hostname(self) -> Nullable[str]:
+		"""
+		Read-only property to access the name of the host this test suite was executed on (:attr:`_hostname`).
+
+		:returns: The hostname, or ``None`` if it wasn't recorded.
+		"""
+		return self._hostname
+
 	def Copy(self) -> "Testsuite":
 		return self.__class__(
 			self._name,
+			self._kind,
+			self._hostname,
 			self._startTime,
 			self._setupDuration,
+			self._testDuration,
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
@@ -1552,8 +1542,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			raise ValueError("Parameter 'testcase' is None.")
 		elif not isinstance(testcase, Testcase):
 			ex = TypeError(f"Parameter 'testcase' is not of type 'Testcase'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
 			raise ex
 
 		if testcase._parent is not None:
@@ -1577,8 +1566,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			raise ValueError("Parameter 'testcases' is None.")
 		elif not isinstance(testcases, Iterable):
 			ex = TypeError(f"Parameter 'testcases' is not iterable.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
 			raise ex
 
 		for testcase in testcases:
@@ -1661,7 +1649,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 			warningCount, errorCount, fatalCount,
 			testsuites,
 			keyValuePairs,
-			parent
+			parent=parent
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
@@ -1800,6 +1788,23 @@ class Merged(metaclass=ExtendedType, mixin=True):
 	def __init__(self, mergedCount: int = 1) -> None:
 		self._mergedCount = mergedCount
 
+	def _MergeStartTime(self, otherStartTime: Nullable[datetime]) -> Nullable[datetime]:
+		"""
+		Combine this entity's start time with the start time of an entity being merged in.
+
+		A merged entity started when the earliest of its parts started. An entity without a start time contributes
+		nothing rather than erasing what is known.
+
+		:param otherStartTime: The start time of the entity being merged in.
+		:returns:              The earlier of the two start times, or ``None`` if neither has one.
+		"""
+		if otherStartTime is None:
+			return self._startTime
+		elif self._startTime is None or otherStartTime < self._startTime:
+			return otherStartTime
+		else:
+			return self._startTime
+
 	@readonly
 	def MergedCount(self) -> int:
 		"""
@@ -1847,7 +1852,7 @@ class MergedTestcase(Testcase, Merged):
 			testcase._assertionCount, testcase._failedAssertionCount, testcase._passedAssertionCount,
 			testcase._warningCount, testcase._errorCount, testcase._fatalCount,
 			testcase._expectedWarningCount, testcase._expectedErrorCount, testcase._expectedFatalCount,
-			parent
+			parent=parent
 		)
 		Merged.__init__(self)
 
@@ -1957,11 +1962,12 @@ class MergedTestsuite(Testsuite, Merged):
 		super().__init__(
 			testsuite._name,
 			testsuite._kind,
+			testsuite._hostname,
 			testsuite._startTime,
 			testsuite._setupDuration, testsuite._testDuration, testsuite._teardownDuration, testsuite._totalDuration,
 			TestsuiteStatus.Unknown,
 			testsuite._warningCount, testsuite._errorCount, testsuite._fatalCount,
-			parent
+			parent=parent
 		)
 		Merged.__init__(self)
 
@@ -1975,8 +1981,27 @@ class MergedTestsuite(Testsuite, Merged):
 				mergedTestcase = MergedTestcase(tc)
 				self.AddTestcase(mergedTestcase)
 
+	def _MergeHostname(self, otherHostname: Nullable[str]) -> Nullable[str]:
+		"""
+		Combine this test suite's hostname with the hostname of a test suite being merged in.
+
+		A test suite without a hostname ran somewhere unrecorded, not somewhere else, so it keeps an otherwise
+		unanimous hostname.
+
+		:param otherHostname: The hostname of the test suite being merged in.
+		:returns:             The common hostname, ``"various"`` if they disagree, or ``None`` if neither has one.
+		"""
+		if otherHostname is None:
+			return self._hostname
+		elif self._hostname is None or self._hostname == otherHostname:
+			return otherHostname
+		else:
+			return "various"
+
 	def Merge(self, testsuite: Testsuite) -> None:
 		self._mergedCount += 1
+		self._hostname = self._MergeHostname(testsuite._hostname)
+		self._startTime = self._MergeStartTime(testsuite._startTime)
 
 		for ts in testsuite._testsuites.values():
 			if ts._name in self._testsuites:
@@ -1996,6 +2021,7 @@ class MergedTestsuite(Testsuite, Merged):
 		testsuite = Testsuite(
 			self._name,
 			self._kind,
+			self._hostname,
 			self._startTime,
 			self._setupDuration,
 			self._testDuration,
@@ -2038,6 +2064,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 		# FIXME: a summary is not necessarily a file
 		self._mergedCount += 1
 		self._mergedFiles[testsuiteSummary._name] = testsuiteSummary
+		self._startTime = self._MergeStartTime(testsuiteSummary._startTime)
 
 		for testsuite in testsuiteSummary._testsuites.values():
 			if testsuite._name in self._testsuites:

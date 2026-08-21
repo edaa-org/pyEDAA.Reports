@@ -8,3 +8,6 @@ pytest ~= 9.1
 pytest-cov ~= 7.1
 
 docstr_coverage ~= 2.3
+
+# XML schema validation of the JUnit dialects
+xmlschema ~= 4.3

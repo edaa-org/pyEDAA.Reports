@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2021-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -29,36 +29,91 @@
 # ==================================================================================================================== #
 #
 """
-Various report abstract data models and report format converters.
+Reading a report, writing it out again and reading the result: the dialects have to survive their own output.
+
+A round trip is where a writer and a reader that disagree about the format show up - the merge pipelines in CI do
+exactly this, twice.
 """
-__author__ =            "Patrick Lehmann"
-__email__ =             "Paebbels@gmail.com"
-__copyright__ =         "2021-2026, Electronic Design Automation Abstraction (EDA²)"
-__license__ =           "Apache License, Version 2.0"
-__version__ =           "0.19.0"
-__keywords__ =          ["Reports", "Abstract Model", "Data Model", "Unit Testing", "Testcase", "Testsuite", "OSVVM", "YAML", "XML"]
-__project_url__ =       "https://github.com/edaa-org/pyEDAA.Reports"
-__documentation_url__ = "https://edaa-org.github.io/pyEDAA.Reports"
-__issue_tracker_url__ = "https://GitHub.com/edaa-org/pyEDAA.Reports/issues"
+from typing   import ClassVar
+from unittest import TestCase as ut_TestCase
 
-from enum                 import Enum
+from pyTooling.Decorators import readonly
 
-from pyTooling.Decorators import export
+from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, collectTestcaseNames, countTestcases, readReference, writeAs
 
 
-@export
-class ReportException(Exception):
-	"""Base-exception of all exceptions raised by pyEDAA.Reports."""
+class RoundTripMixin:
+	"""Classic mixin: a report of this dialect is read, written and read back."""
+
+	_dialectName: ClassVar[str]
+
+	@readonly
+	def Dialect(self) -> Dialect:
+		"""
+		Read-only property to return the dialect under test, looked up by :attr:`_dialectName`.
+
+		:returns: The dialect under test.
+		"""
+		return DIALECTS[self._dialectName]
+
+	def _roundTrip(self, referenceFile):
+		"""
+		Read a reference report, write it in the same dialect and read that back.
+
+		:param referenceFile: The reference report to round trip.
+		:returns:             A tuple of the summary read first, the file written, and the summary read back.
+		"""
+		dialect = self.Dialect
+		summary = readReference(dialect, referenceFile)
+		outputFile = writeAs(dialect, summary, OUTPUT_DIRECTORY / dialect.Name / referenceFile.name)
+		rereadSummary = readReference(dialect, outputFile)
+
+		return summary, outputFile, rereadSummary
+
+	def test_WrittenReportIsValid(self) -> None:
+		schema = self.Dialect.Schema()
+
+		for referenceFile in self.Dialect.ReferenceFiles:
+			with self.subTest(file=referenceFile.name):
+				_, outputFile, _ = self._roundTrip(referenceFile)
+				schema.validate(str(outputFile))
+
+	def test_TestcaseCountSurvives(self) -> None:
+		for referenceFile in self.Dialect.ReferenceFiles:
+			with self.subTest(file=referenceFile.name):
+				summary, _, rereadSummary = self._roundTrip(referenceFile)
+				self.assertEqual(countTestcases(summary), countTestcases(rereadSummary))
+
+	def test_TestcaseNamesSurvive(self) -> None:
+		for referenceFile in self.Dialect.ReferenceFiles:
+			with self.subTest(file=referenceFile.name):
+				summary, _, rereadSummary = self._roundTrip(referenceFile)
+				self.assertEqual(collectTestcaseNames(summary), collectTestcaseNames(rereadSummary))
+
+	def test_HostnameSurvives(self) -> None:
+		for referenceFile in self.Dialect.ReferenceFiles:
+			with self.subTest(file=referenceFile.name):
+				summary, _, rereadSummary = self._roundTrip(referenceFile)
+				before = {ts._name: ts._hostname for ts in summary._testsuites.values()}
+				after = {ts._name: ts._hostname for ts in rereadSummary._testsuites.values()}
+				self.assertEqual(before, after)
 
 
-@export
-class Severity(Enum):
-	Unknown = 0
-	Debug = 5
-	Verbose = 10
-	Normal = 20
-	Info = 25
-	Warning = 50
-	CriticalWarning = 55
-	Error = 60
-	Fatal = 70
+class AntJUnit4(RoundTripMixin, ut_TestCase):
+	_dialectName = "Ant-JUnit4"
+
+
+class CTestJUnit(RoundTripMixin, ut_TestCase):
+	_dialectName = "CTest-JUnit"
+
+
+class GoogleTestJUnit(RoundTripMixin, ut_TestCase):
+	_dialectName = "GoogleTest-JUnit"
+
+
+class PyTestJUnit(RoundTripMixin, ut_TestCase):
+	_dialectName = "pyTest-JUnit"
+
+
+class AnyJUnit(RoundTripMixin, ut_TestCase):
+	_dialectName = "Any-JUnit"

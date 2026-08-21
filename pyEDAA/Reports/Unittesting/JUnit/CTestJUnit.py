@@ -86,6 +86,7 @@ class Testsuite(ju_Testsuite):
 		"""
 		juTestsuite = cls(
 			testsuite._name,
+			hostname=testsuite._hostname,
 			startTime=testsuite._startTime,
 			duration=testsuite._totalDuration,
 			status= testsuite._status,
@@ -155,6 +156,7 @@ class Document(ju_Document):
 	entity data model. This data model can be written as XML into a file.
 	"""
 
+	_DIALECT:   ClassVar[str] =            "CTest + JUnit"
 	_TESTCASE:  ClassVar[Type[Testcase]] =  Testcase
 	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass
 	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite
@@ -252,7 +254,8 @@ class Document(ju_Document):
 		# failures = rootElement.getAttribute("failures")
 		# assertions = rootElement.getAttribute("assertions")
 
-		ts = Testsuite(self._name, startTime=self._startTime, duration=self._duration, parent=self)
+		hostname = self._ConvertHostname(rootElement, optional=True, default=None)
+		ts = Testsuite(self._name, hostname, startTime=self._startTime, duration=self._duration, parent=self)
 		self._ConvertTestsuiteChildren(rootElement, ts)
 
 		self.Aggregate()
@@ -299,8 +302,11 @@ class Document(ju_Document):
 
 		rootElement = Element("testsuite")
 		rootElement.attrib["name"] = self._name
-		if self._startTime is not None:
-			rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
+		if self._startTime is None:
+			raise UnittestException(
+				f"The {self._DIALECT} format requires a timestamp on <testsuite>, but the report has none."
+			)
+		rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
 		if self._duration is not None:
 			rootElement.attrib["time"] = f"{self._duration.total_seconds():.6f}"
 		rootElement.attrib["tests"] = str(self._tests)
@@ -310,7 +316,8 @@ class Document(ju_Document):
 		rootElement.attrib["disabled"] = "0"                       # TODO: find a value
 		# if self._assertionCount is not None:
 		# 	rootElement.attrib["assertions"] = f"{self._assertionCount}"
-		rootElement.attrib["hostname"] = str(testsuite._hostname)  # TODO: find a value
+		# CTest-JUnit.xsd requires 'hostname', so an unrecorded host is named as unknown.
+		rootElement.attrib["hostname"] = testsuite._hostname if testsuite._hostname is not None else "unknownhost"
 
 		self._xmlDocument = ElementTree(rootElement)
 

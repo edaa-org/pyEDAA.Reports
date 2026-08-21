@@ -85,6 +85,7 @@ class Testsuite(ju_Testsuite):
 		"""
 		juTestsuite = cls(
 			testsuite._name,
+			hostname=testsuite._hostname,
 			startTime=testsuite._startTime,
 			duration=testsuite._totalDuration,
 			status= testsuite._status,
@@ -154,6 +155,7 @@ class Document(ju_Document):
 	test entity data model. This data model can be written as XML into a file.
 	"""
 
+	_DIALECT:   ClassVar[str] =            "GoogleTest + JUnit"
 	_TESTCASE:  ClassVar[Type[Testcase]] =  Testcase
 	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass
 	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite
@@ -291,8 +293,11 @@ class Document(ju_Document):
 
 		rootElement = Element("testsuites")
 		rootElement.attrib["name"] = self._name
-		if self._startTime is not None:
-			rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
+		if self._startTime is None:
+			raise UnittestException(
+				f"The {self._DIALECT} format requires a timestamp on <testsuites>, but the report has none."
+			)
+		rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
 		if self._duration is not None:
 			rootElement.attrib["time"] = f"{self._duration.total_seconds():.6f}"
 		rootElement.attrib["tests"] = str(self._tests)
@@ -319,8 +324,11 @@ class Document(ju_Document):
 		"""
 		testsuiteElement = SubElement(parentElement, "testsuite")
 		testsuiteElement.attrib["name"] = testsuite._name
-		if testsuite._startTime is not None:
-			testsuiteElement.attrib["timestamp"] = f"{testsuite._startTime.isoformat()}"
+		if testsuite._startTime is None:
+			raise UnittestException(
+				f"The {self._DIALECT} format requires a timestamp on <testsuite>, but the report has none."
+			)
+		testsuiteElement.attrib["timestamp"] = f"{testsuite._startTime.isoformat()}"
 		if testsuite._duration is not None:
 			testsuiteElement.attrib["time"] = f"{testsuite._duration.total_seconds():.6f}"
 		testsuiteElement.attrib["tests"] = str(testsuite._tests)
@@ -355,7 +363,11 @@ class Document(ju_Document):
 		if testcase._assertionCount is not None:
 			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
 
-		testcaseElement.attrib["timestamp"] = f"{testcase._parent._parent._startTime.isoformat()}"     # TODO: find a value
+		if testcase._parent._parent._startTime is None:
+			raise UnittestException(
+				f"The {self._DIALECT} format requires a timestamp on <testcase>, but the report has none."
+			)
+		testcaseElement.attrib["timestamp"] = f"{testcase._parent._parent._startTime.isoformat()}"
 		testcaseElement.attrib["file"] = ""              # TODO: find a value
 		testcaseElement.attrib["line"] = "0"             # TODO: find a value
 		testcaseElement.attrib["status"] = "run"         # TODO: find a value

@@ -93,7 +93,6 @@ Ant + JUnit4 XML, a file format specific document is derived from a summary clas
 from datetime        import datetime, timedelta
 from enum            import Flag
 from pathlib         import Path
-from sys             import version_info
 from time            import perf_counter_ns
 from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
@@ -203,8 +202,7 @@ class Base(metaclass=ExtendedType, slots=True):
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
 			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name.strip() == "":
 			raise ValueError(f"Parameter 'name' is empty.")
@@ -268,14 +266,12 @@ class BaseWithProperties(Base):
 
 		if duration is not None and not isinstance(duration, timedelta):
 			ex = TypeError(f"Parameter 'duration' is not of type 'timedelta'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(duration)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(duration)}'.")
 			raise ex
 
 		if assertionCount is not None and not isinstance(assertionCount, int):
 			ex = TypeError(f"Parameter 'assertionCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
 			raise ex
 
 		self._duration = duration
@@ -410,8 +406,7 @@ class Testcase(BaseWithProperties):
 		if parent is not None:
 			if not isinstance(parent, Testclass):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testclass'.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testcases[name] = self
@@ -420,8 +415,7 @@ class Testcase(BaseWithProperties):
 
 		if not isinstance(status, TestcaseStatus):
 			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 
 		self._status = status
@@ -569,8 +563,7 @@ class TestsuiteBase(BaseWithProperties):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testsuites[name] = self
@@ -710,8 +703,7 @@ class Testclass(Base):
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testclasses[classname] = self
@@ -843,8 +835,7 @@ class Testsuite(TestsuiteBase):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testsuites[name] = self
@@ -1029,6 +1020,7 @@ class Testsuite(TestsuiteBase):
 		"""
 		juTestsuite = cls(
 			testsuite._name,
+			hostname=testsuite._hostname,
 			startTime=testsuite._startTime,
 			duration=testsuite._totalDuration,
 			status= testsuite._status,
@@ -1064,6 +1056,7 @@ class Testsuite(TestsuiteBase):
 		testsuite = ut_Testsuite(
 			self._name,
 			TestsuiteKind.Logical,
+			self._hostname,
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
@@ -1285,6 +1278,7 @@ class TestsuiteSummary(TestsuiteBase):
 
 @export
 class Document(TestsuiteSummary, ut_Document):
+	_DIALECT:           ClassVar[str] =                    "Any-JUnit"
 	_TESTCASE:          ClassVar[Type[Testcase]] =         Testcase
 	_TESTCLASS:         ClassVar[Type[Testclass]] =        Testclass
 	_TESTSUITE:         ClassVar[Type[Testsuite]] =        Testsuite
@@ -1359,9 +1353,8 @@ class Document(TestsuiteSummary, ut_Document):
 
 			self._xmlDocument = junitDocument
 		except XMLSyntaxError as ex:
-			if version_info >= (3, 11):  # pragma: no cover
-				for logEntry in junitParser.error_log:
-					ex.add_note(str(logEntry))
+			for logEntry in junitParser.error_log:
+				ex.add_note(str(logEntry))
 			raise UnittestException(f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'.") from ex
 		except Exception as ex:
 			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
