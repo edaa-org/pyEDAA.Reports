@@ -2,3 +2,6 @@
 
 # Test Runner
 pytest ~= 9.1
+
+# XML schema validation of the converted reports
+xmlschema ~= 4.3
