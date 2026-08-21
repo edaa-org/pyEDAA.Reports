@@ -75,7 +75,6 @@ derived from a summary class.
 from datetime              import timedelta, datetime
 from enum                  import Flag, IntEnum
 from pathlib               import Path
-from sys                   import version_info
 from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar, Mapping
 
 from pyTooling.Common      import getFullyQualifiedName
@@ -340,16 +339,14 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		if parent is not None and not isinstance(parent, TestsuiteBase):
 			ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
 			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name.strip() == "":
 			raise ValueError(f"Parameter 'name' is empty.")
@@ -359,26 +356,22 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		if testDuration is not None and not isinstance(testDuration, timedelta):
 			ex = TypeError(f"Parameter 'testDuration' is not of type 'timedelta'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testDuration)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testDuration)}'.")
 			raise ex
 
 		if setupDuration is not None and not isinstance(setupDuration, timedelta):
 			ex = TypeError(f"Parameter 'setupDuration' is not of type 'timedelta'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(setupDuration)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(setupDuration)}'.")
 			raise ex
 
 		if teardownDuration is not None and not isinstance(teardownDuration, timedelta):
 			ex = TypeError(f"Parameter 'teardownDuration' is not of type 'timedelta'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(teardownDuration)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(teardownDuration)}'.")
 			raise ex
 
 		if totalDuration is not None and not isinstance(totalDuration, timedelta):
 			ex = TypeError(f"Parameter 'totalDuration' is not of type 'timedelta'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(totalDuration)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(totalDuration)}'.")
 			raise ex
 
 		if testDuration is not None:
@@ -425,38 +418,32 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		if not isinstance(warningCount, int):
 			ex = TypeError(f"Parameter 'warningCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(warningCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(warningCount)}'.")
 			raise ex
 
 		if not isinstance(errorCount, int):
 			ex = TypeError(f"Parameter 'errorCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(errorCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(errorCount)}'.")
 			raise ex
 
 		if not isinstance(fatalCount, int):
 			ex = TypeError(f"Parameter 'fatalCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(fatalCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(fatalCount)}'.")
 			raise ex
 
 		if not isinstance(expectedWarningCount, int):
 			ex = TypeError(f"Parameter 'expectedWarningCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(expectedWarningCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(expectedWarningCount)}'.")
 			raise ex
 
 		if not isinstance(expectedErrorCount, int):
 			ex = TypeError(f"Parameter 'expectedErrorCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(expectedErrorCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(expectedErrorCount)}'.")
 			raise ex
 
 		if not isinstance(expectedFatalCount, int):
 			ex = TypeError(f"Parameter 'expectedFatalCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(expectedFatalCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(expectedFatalCount)}'.")
 			raise ex
 
 		self._warningCount =         warningCount
@@ -468,8 +455,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		if keyValuePairs is not None and not isinstance(keyValuePairs, Mapping):
 			ex = TypeError(f"Parameter 'keyValuePairs' is not a mapping.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
 			raise ex
 
 		self._dict = {} if keyValuePairs is None else {k: v for k, v in keyValuePairs}
@@ -727,8 +713,7 @@ class Testcase(Base):
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
 				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testcases[name] = self
@@ -745,28 +730,24 @@ class Testcase(Base):
 
 		if not isinstance(status, TestcaseStatus):
 			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 
 		self._status = status
 
 		if assertionCount is not None and not isinstance(assertionCount, int):
 			ex = TypeError(f"Parameter 'assertionCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
 			raise ex
 
 		if failedAssertionCount is not None and not isinstance(failedAssertionCount, int):
 			ex = TypeError(f"Parameter 'failedAssertionCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(failedAssertionCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(failedAssertionCount)}'.")
 			raise ex
 
 		if passedAssertionCount is not None and not isinstance(passedAssertionCount, int):
 			ex = TypeError(f"Parameter 'passedAssertionCount' is not of type 'int'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(passedAssertionCount)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(passedAssertionCount)}'.")
 			raise ex
 
 		self._assertionCount = assertionCount
@@ -968,8 +949,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
 				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
 			parent._testsuites[name] = self
@@ -996,15 +976,13 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		if testsuites is not None:
 			if not isinstance(testsuites, Iterable):
 				ex = TypeError(f"Parameter 'testsuites' is not iterable.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
 				raise ex
 
 			for testsuite in testsuites:
 				if not isinstance(testsuite, Testsuite):
 					ex = TypeError(f"Element of parameter 'testsuites' is not of type 'Testsuite'.")
-					if version_info >= (3, 11):  # pragma: no cover
-						ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
 					raise ex
 
 				if testsuite._parent is not None:
@@ -1265,8 +1243,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			raise ValueError("Parameter 'testsuite' is None.")
 		elif not isinstance(testsuite, Testsuite):
 			ex = TypeError(f"Parameter 'testsuite' is not of type 'Testsuite'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
 			raise ex
 
 		if testsuite._parent is not None:
@@ -1290,8 +1267,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			raise ValueError("Parameter 'testsuites' is None.")
 		elif not isinstance(testsuites, Iterable):
 			ex = TypeError(f"Parameter 'testsuites' is not iterable.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
 			raise ex
 
 		for testsuite in testsuites:
@@ -1407,15 +1383,13 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		if testcases is not None:
 			if not isinstance(testcases, Iterable):
 				ex = TypeError(f"Parameter 'testcases' is not iterable.")
-				if version_info >= (3, 11):  # pragma: no cover
-					ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
 				raise ex
 
 			for testcase in testcases:
 				if not isinstance(testcase, Testcase):
 					ex = TypeError(f"Element of parameter 'testcases' is not of type 'Testcase'.")
-					if version_info >= (3, 11):  # pragma: no cover
-						ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
 					raise ex
 
 				if testcase._parent is not None:
@@ -1568,8 +1542,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			raise ValueError("Parameter 'testcase' is None.")
 		elif not isinstance(testcase, Testcase):
 			ex = TypeError(f"Parameter 'testcase' is not of type 'Testcase'.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
 			raise ex
 
 		if testcase._parent is not None:
@@ -1593,8 +1566,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			raise ValueError("Parameter 'testcases' is None.")
 		elif not isinstance(testcases, Iterable):
 			ex = TypeError(f"Parameter 'testcases' is not iterable.")
-			if version_info >= (3, 11):  # pragma: no cover
-				ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
 			raise ex
 
 		for testcase in testcases:
