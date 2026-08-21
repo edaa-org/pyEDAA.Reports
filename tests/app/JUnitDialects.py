@@ -39,8 +39,7 @@ module adds.
 from pathlib   import Path
 from typing    import ClassVar, Dict, Tuple
 
-from pyTooling.Testing import ApplicationTestcaseMixin
-from unittest          import TestCase
+from pyTooling.Testing import ApplicationTestcase
 from xmlschema         import XMLSchema
 
 from ..unit.JUnitDialects import DIALECTS, SCHEMA_DIRECTORY
@@ -78,7 +77,7 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 }
 
 
-class ConversionMixin(ApplicationTestcaseMixin):
+class ConversionMixin:
 	"""
 	Classic mixin: convert this dialect's reference report into every writable dialect, through the command line.
 	"""
@@ -178,27 +177,27 @@ class ConversionMixin(ApplicationTestcaseMixin):
 		self._roundTripThroughTheCommandLine("pyTest-JUnit")
 
 
-class FromAntJUnit4(ConversionMixin, TestCase):
+class FromAntJUnit4(ConversionMixin, ApplicationTestcase):
 	_dialectName = "Ant-JUnit4"
 
 
-class FromCTestJUnit(ConversionMixin, TestCase):
+class FromCTestJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "CTest-JUnit"
 
 
-class FromGoogleTestJUnit(ConversionMixin, TestCase):
+class FromGoogleTestJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "GoogleTest-JUnit"
 
 
-class FromPyTestJUnit(ConversionMixin, TestCase):
+class FromPyTestJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "pyTest-JUnit"
 
 
-class FromAnyJUnit(ConversionMixin, TestCase):
+class FromAnyJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "Any-JUnit"
 
 
-class TheCommandLineVocabulary(ApplicationTestcaseMixin, TestCase):
+class TheCommandLineVocabulary(ApplicationTestcase):
 	"""What the command line accepts as a dialect, which is not what the documents and schemas call them."""
 
 	_consoleScript:  ClassVar[str] = "pyedaa-reports"
