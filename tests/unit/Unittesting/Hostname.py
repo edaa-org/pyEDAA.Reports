@@ -179,3 +179,39 @@ class RequiredAttributes(ut_TestCase):
 	def test_GoogleTestRefusesAReportWithoutATimestamp(self) -> None:
 		"""It used to raise 'AttributeError: NoneType object has no attribute isoformat'."""
 		self._writeWithoutTimestamp(GoogleTestDocument, "gtest-no-timestamp.xml")
+
+
+class MergingStartTimes(ut_TestCase):
+	"""A merged report started when the earliest of its parts started."""
+
+	@staticmethod
+	def _summary(startTime) -> TestsuiteSummary:
+		return TestsuiteSummary("summary", startTime=startTime, testsuites=(Testsuite("suite", startTime=startTime),))
+
+	def _mergedStartTime(self, *startTimes):
+		merged = MergedTestsuiteSummary("summary")
+		for startTime in startTimes:
+			merged.Merge(self._summary(startTime))
+
+		return merged.ToTestsuiteSummary()._startTime
+
+	def test_OneReport(self) -> None:
+		startTime = datetime(2026, 8, 16, 9, 0)
+
+		self.assertEqual(startTime, self._mergedStartTime(startTime))
+
+	def test_TheEarliestWins(self) -> None:
+		early = datetime(2026, 8, 16, 9, 0)
+		late = datetime(2026, 8, 16, 11, 0)
+
+		self.assertEqual(early, self._mergedStartTime(late, early))
+		self.assertEqual(early, self._mergedStartTime(early, late))
+
+	def test_AReportWithoutOneContributesNothing(self) -> None:
+		startTime = datetime(2026, 8, 16, 9, 0)
+
+		self.assertEqual(startTime, self._mergedStartTime(startTime, None))
+		self.assertEqual(startTime, self._mergedStartTime(None, startTime))
+
+	def test_NoneAtAll(self) -> None:
+		self.assertIsNone(self._mergedStartTime(None, None))
