@@ -90,6 +90,9 @@ Ant + JUnit4 XML, a file format specific document is derived from a summary clas
 		 classDef cls fill:#ff9966
 		 classDef case fill:#eeccff
 """
+
+from __future__      import annotations
+
 from datetime        import datetime, timedelta
 from enum            import Flag
 from pathlib         import Path
@@ -185,10 +188,10 @@ class Base(metaclass=ExtendedType, slots=True):
 	E.g. it's used as a test case name in the dictionary of test cases in a test class.
 	"""
 
-	_parent:         Nullable["Testsuite"]
+	_parent:         Nullable[Testsuite]
 	_name:           str
 
-	def __init__(self, name: str, parent: Nullable["Testsuite"] = None) -> None:
+	def __init__(self, name: str, parent: Nullable[Testsuite] = None) -> None:
 		"""
 		Initializes the fields of the base-class.
 
@@ -211,7 +214,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._name = name
 
 	@readonly
-	def Parent(self) -> Nullable["Testsuite"]:
+	def Parent(self) -> Nullable[Testsuite]:
 		"""
 		Read-only property to access the reference to the parent test entity.
 
@@ -250,7 +253,7 @@ class BaseWithProperties(Base):
 		name: str,
 		duration: Nullable[timedelta] = None,
 		assertionCount: Nullable[int] = None,
-		parent: Nullable["Testsuite"] = None
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of the base-class.
@@ -390,7 +393,7 @@ class Testcase(BaseWithProperties):
 		duration:  Nullable[timedelta] = None,
 		status: TestcaseStatus = TestcaseStatus.Unknown,
 		assertionCount: Nullable[int] = None,
-		parent: Nullable["Testclass"] = None
+		parent: Nullable[Testclass] = None
 	) -> None:
 		"""
 		Initializes the fields of a test case.
@@ -461,7 +464,7 @@ class Testcase(BaseWithProperties):
 			return 0
 		return self._assertionCount
 
-	def Copy(self) -> "Testcase":
+	def Copy(self) -> Testcase:
 		return self.__class__(
 			self._name,
 			self._duration,
@@ -482,7 +485,7 @@ class Testcase(BaseWithProperties):
 			# TODO: check for teardown errors
 
 	@classmethod
-	def FromTestcase(cls, testcase: ut_Testcase) -> "Testcase":
+	def FromTestcase(cls, testcase: ut_Testcase) -> Testcase:
 		"""
 		Convert a test case of the unified test entity data model to the JUnit specific data model's test case object.
 
@@ -548,7 +551,7 @@ class TestsuiteBase(BaseWithProperties):
 		startTime: Nullable[datetime] = None,
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
-		parent: Nullable["Testsuite"] = None
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
@@ -683,13 +686,13 @@ class Testclass(Base):
 	Test classes contain test cases and are grouped by a test suites.
 	"""
 
-	_testcases: Dict[str, "Testcase"]
+	_testcases: Dict[str, Testcase]
 
 	def __init__(
 		self,
 		classname: str,
-		testcases: Nullable[Iterable["Testcase"]] = None,
-		parent: Nullable["Testsuite"] = None
+		testcases: Nullable[Iterable[Testcase]] = None,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of the test class.
@@ -732,7 +735,7 @@ class Testclass(Base):
 		return self._name
 
 	@readonly
-	def Testcases(self) -> Dict[str, "Testcase"]:
+	def Testcases(self) -> Dict[str, Testcase]:
 		"""
 		Read-only property to access a reference to the internal dictionary of test cases.
 
@@ -758,7 +761,7 @@ class Testclass(Base):
 		"""
 		return sum(tc.AssertionCount for tc in self._testcases.values())
 
-	def AddTestcase(self, testcase: "Testcase") -> None:
+	def AddTestcase(self, testcase: Testcase) -> None:
 		if testcase._parent is not None:
 			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
@@ -768,7 +771,7 @@ class Testclass(Base):
 		testcase._parent = self
 		self._testcases[testcase._name] = testcase
 
-	def AddTestcases(self, testcases: Iterable["Testcase"]) -> None:
+	def AddTestcases(self, testcases: Iterable[Testcase]) -> None:
 		for testcase in testcases:
 			self.AddTestcase(testcase)
 
@@ -807,7 +810,7 @@ class Testsuite(TestsuiteBase):
 	"""
 
 	_hostname:    str
-	_testclasses: Dict[str, "Testclass"]
+	_testclasses: Dict[str, Testclass]
 
 	def __init__(
 		self,
@@ -816,8 +819,8 @@ class Testsuite(TestsuiteBase):
 		startTime: Nullable[datetime] = None,
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
-		testclasses: Nullable[Iterable["Testclass"]] = None,
-		parent: Nullable["TestsuiteSummary"] = None
+		testclasses: Nullable[Iterable[Testclass]] = None,
+		parent: Nullable[TestsuiteSummary] = None
 	) -> None:
 		"""
 		Initializes the fields of a test suite.
@@ -866,7 +869,7 @@ class Testsuite(TestsuiteBase):
 		return self._hostname
 
 	@readonly
-	def Testclasses(self) -> Dict[str, "Testclass"]:
+	def Testclasses(self) -> Dict[str, Testclass]:
 		"""
 		Read-only property to access the testsuite's testclasses.
 
@@ -905,7 +908,7 @@ class Testsuite(TestsuiteBase):
 		"""
 		return sum(cls.AssertionCount for cls in self._testclasses.values())
 
-	def AddTestclass(self, testclass: "Testclass") -> None:
+	def AddTestclass(self, testclass: Testclass) -> None:
 		if testclass._parent is not None:
 			raise ValueError(f"Class '{testclass._name}' is already part of a testsuite hierarchy.")
 
@@ -915,7 +918,7 @@ class Testsuite(TestsuiteBase):
 		testclass._parent = self
 		self._testclasses[testclass._name] = testclass
 
-	def AddTestclasses(self, testclasses: Iterable["Testclass"]) -> None:
+	def AddTestclasses(self, testclasses: Iterable[Testclass]) -> None:
 		for testcase in testclasses:
 			self.AddTestclass(testcase)
 
@@ -925,7 +928,7 @@ class Testsuite(TestsuiteBase):
 	def IterateTestcases(self, scheme: IterationScheme = IterationScheme.TestcaseDefault) -> Generator[Testcase, None, None]:
 		return self.Iterate(scheme)
 
-	def Copy(self) -> "Testsuite":
+	def Copy(self) -> Testsuite:
 		return self.__class__(
 			self._name,
 			self._hostname,
@@ -1011,7 +1014,7 @@ class Testsuite(TestsuiteBase):
 				yield self
 
 	@classmethod
-	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
+	def FromTestsuite(cls, testsuite: ut_Testsuite) -> Testsuite:
 		"""
 		Convert a test suite of the unified test entity data model to the JUnit specific data model's test suite object.
 
@@ -1227,7 +1230,7 @@ class TestsuiteSummary(TestsuiteBase):
 			yield self
 
 	@classmethod
-	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> "TestsuiteSummary":
+	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> TestsuiteSummary:
 		"""
 		Convert a test suite summary of the unified test entity data model to the JUnit specific data model's test suite.
 

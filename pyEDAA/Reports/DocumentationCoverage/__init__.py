@@ -29,6 +29,9 @@
 # ==================================================================================================================== #
 #
 """Abstraction of code documentation coverage data model."""
+
+from __future__            import annotations
+
 from enum                  import Flag
 from typing                import Optional as Nullable
 
@@ -70,11 +73,11 @@ class CoverageState(Flag):
 
 @export
 class Base(metaclass=ExtendedType, slots=True):
-	_parent: Nullable["Base"]
+	_parent: Nullable[Base]
 	_name:   str
 	_status: CoverageState
 
-	def __init__(self, name: str, parent: Nullable["Base"] = None) -> None:
+	def __init__(self, name: str, parent: Nullable[Base] = None) -> None:
 		if name is None:
 			raise ValueError(f"Parameter 'name' must not be None.")
 
@@ -83,7 +86,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._status = CoverageState.Unknown
 
 	@readonly
-	def Parent(self) -> Nullable["Base"]:
+	def Parent(self) -> Nullable[Base]:
 		"""
 		Read-only property to access the reference to the parent coverage entity.
 
