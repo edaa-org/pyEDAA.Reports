@@ -105,24 +105,24 @@ from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmetho
 from pyTooling.Tree             import Node
 
 from pyEDAA.Reports             import Resources
-from pyEDAA.Reports.Unittesting import UnittestException, AlreadyInHierarchyException, DuplicateTestsuiteException, DuplicateTestcaseException
+from pyEDAA.Reports.Unittesting import UnittestError, AlreadyInHierarchyError, DuplicateTestsuiteError, DuplicateTestcaseError
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, TestsuiteKind, IterationScheme
 from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
 from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut_Testcase
 
 
 @export
-class JUnitException:
-	"""An exception-mixin for JUnit format specific exceptions."""
+class JUnitErrorMixin:
+	"""An error-mixin for JUnit format specific errors."""
 
 
 @export
-class UnittestException(UnittestException, JUnitException):
+class UnittestError(UnittestError, JUnitErrorMixin):
 	pass
 
 
 @export
-class AlreadyInHierarchyException(AlreadyInHierarchyException, JUnitException):
+class AlreadyInHierarchyError(AlreadyInHierarchyError, JUnitErrorMixin):
 	"""
 	A unit test exception raised if the element is already part of a hierarchy.
 
@@ -136,7 +136,7 @@ class AlreadyInHierarchyException(AlreadyInHierarchyException, JUnitException):
 
 
 @export
-class DuplicateTestsuiteException(DuplicateTestsuiteException, JUnitException):
+class DuplicateTestsuiteError(DuplicateTestsuiteError, JUnitErrorMixin):
 	"""
 	A unit test exception raised on duplicate test suites (by name).
 
@@ -149,7 +149,7 @@ class DuplicateTestsuiteException(DuplicateTestsuiteException, JUnitException):
 
 
 @export
-class DuplicateTestcaseException(DuplicateTestcaseException, JUnitException):
+class DuplicateTestcaseError(DuplicateTestcaseError, JUnitErrorMixin):
 	"""
 	A unit test exception raised on duplicate test cases (by name).
 
@@ -434,7 +434,7 @@ class Testcase(BaseWithProperties):
 		   name is represented by its own level and instances of test classes.
 		"""
 		if self._parent is None:
-			raise UnittestException("Standalone Testcase instance is not linked to a Testclass.")
+			raise UnittestError("Standalone Testcase instance is not linked to a Testclass.")
 		return self._parent._name
 
 	@readonly
@@ -714,10 +714,10 @@ class Testclass(Base):
 		if testcases is not None:
 			for testcase in testcases:
 				if testcase._parent is not None:
-					raise AlreadyInHierarchyException(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 				if testcase._name in self._testcases:
-					raise DuplicateTestcaseException(f"Class already contains a testcase with same name '{testcase._name}'.")
+					raise DuplicateTestcaseError(f"Class already contains a testcase with same name '{testcase._name}'.")
 
 				testcase._parent = self
 				self._testcases[testcase._name] = testcase
@@ -763,7 +763,7 @@ class Testclass(Base):
 			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 		if testcase._name in self._testcases:
-			raise DuplicateTestcaseException(f"Class already contains a testcase with same name '{testcase._name}'.")
+			raise DuplicateTestcaseError(f"Class already contains a testcase with same name '{testcase._name}'.")
 
 		testcase._parent = self
 		self._testcases[testcase._name] = testcase
@@ -829,8 +829,8 @@ class Testsuite(TestsuiteBase):
 		:param parent:             Reference to the parent test summary.
 		:raises TypeError:         If parameter 'testcases' is not iterable.
 		:raises TypeError:         If element in parameter 'testcases' is not a Testcase.
-		:raises AlreadyInHierarchyException: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
+		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
@@ -851,7 +851,7 @@ class Testsuite(TestsuiteBase):
 					raise ValueError(f"Class '{testclass._name}' is already part of a testsuite hierarchy.")
 
 				if testclass._name in self._testclasses:
-					raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{testclass._name}'.")
+					raise DuplicateTestcaseError(f"Testsuite already contains a class with same name '{testclass._name}'.")
 
 				testclass._parent = self
 				self._testclasses[testclass._name] = testclass
@@ -910,7 +910,7 @@ class Testsuite(TestsuiteBase):
 			raise ValueError(f"Class '{testclass._name}' is already part of a testsuite hierarchy.")
 
 		if testclass._name in self._testclasses:
-			raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{testclass._name}'.")
+			raise DuplicateTestcaseError(f"Testsuite already contains a class with same name '{testclass._name}'.")
 
 		testclass._parent = self
 		self._testclasses[testclass._name] = testclass
@@ -943,7 +943,7 @@ class Testsuite(TestsuiteBase):
 
 				status = testcase._status
 				if status is TestcaseStatus.Unknown:
-					raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+					raise UnittestError(f"Found testcase '{testcase._name}' with state 'Unknown'.")
 				elif status is TestcaseStatus.Skipped:
 					skipped += 1
 				elif status is TestcaseStatus.Errored:
@@ -955,9 +955,9 @@ class Testsuite(TestsuiteBase):
 				elif status is TestcaseStatus.Weak:
 					weak += 1
 				elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-					raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+					raise UnittestError(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
 				else:
-					raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
+					raise UnittestError(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
 		self._tests = tests
 		self._skipped = skipped
@@ -1035,7 +1035,7 @@ class Testsuite(TestsuiteBase):
 		for tc in testsuite.IterateTestcases():
 			ts = tc._parent
 			if ts is None:
-				raise UnittestException(f"Testcase '{tc._name}' is not part of a hierarchy.")
+				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
 
 			classname = ts._name
 			ts = ts._parent
@@ -1118,7 +1118,7 @@ class TestsuiteSummary(TestsuiteBase):
 					raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 				if testsuite._name in self._testsuites:
-					raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+					raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
@@ -1164,7 +1164,7 @@ class TestsuiteSummary(TestsuiteBase):
 			raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 		if testsuite._name in self._testsuites:
-			raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+			raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 		testsuite._parent = self
 		self._testsuites[testsuite._name] = testsuite
@@ -1327,25 +1327,25 @@ class Document(TestsuiteSummary, ut_Document):
 
 	def _Analyze(self, xmlSchemaFile: str) -> None:
 		if not self._path.exists():
-			raise UnittestException(f"JUnit XML file '{self._path}' does not exist.") \
+			raise UnittestError(f"JUnit XML file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
 
 		startAnalysis = perf_counter_ns()
 		try:
 			xmlSchemaResourceFile = getResourceFile(Resources, xmlSchemaFile)
 		except ToolingException as ex:
-			raise UnittestException(f"Couldn't locate XML Schema '{xmlSchemaFile}' in package resources.") from ex
+			raise UnittestError(f"Couldn't locate XML Schema '{xmlSchemaFile}' in package resources.") from ex
 
 		try:
 			schemaParser = XMLParser(ns_clean=True)
 			schemaRoot = parse(xmlSchemaResourceFile, schemaParser)
 		except XMLSyntaxError as ex:
-			raise UnittestException(f"XML Syntax Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
+			raise UnittestError(f"XML Syntax Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
 
 		try:
 			junitSchema = XMLSchema(schemaRoot)
 		except XMLSchemaParseError as ex:
-			raise UnittestException(f"Error while parsing XML Schema '{xmlSchemaFile}'.")
+			raise UnittestError(f"Error while parsing XML Schema '{xmlSchemaFile}'.")
 
 		try:
 			junitParser = XMLParser(schema=junitSchema, ns_clean=True)
@@ -1355,9 +1355,9 @@ class Document(TestsuiteSummary, ut_Document):
 		except XMLSyntaxError as ex:
 			for logEntry in junitParser.error_log:
 				ex.add_note(str(logEntry))
-			raise UnittestException(f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'.") from ex
+			raise UnittestError(f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'.") from ex
 		except Exception as ex:
-			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
+			raise UnittestError(f"Couldn't open '{self._path}'.") from ex
 
 		endAnalysis = perf_counter_ns()
 		self._analysisDuration = (endAnalysis - startAnalysis) / 1e9
@@ -1369,22 +1369,22 @@ class Document(TestsuiteSummary, ut_Document):
 		:param path:               Optional path to the XMl file, if internal path shouldn't be used.
 		:param overwrite:          If true, overwrite an existing file.
 		:param regenerate:         If true, regenerate the XML structure from data model.
-		:raises UnittestException: If the file cannot be overwritten.
-		:raises UnittestException: If the internal XML data structure wasn't generated.
-		:raises UnittestException: If the file cannot be opened or written.
+		:raises UnittestError: If the file cannot be overwritten.
+		:raises UnittestError: If the internal XML data structure wasn't generated.
+		:raises UnittestError: If the file cannot be opened or written.
 		"""
 		if path is None:
 			path = self._path
 
 		if not overwrite and path.exists():
-			raise UnittestException(f"JUnit XML file '{path}' can not be overwritten.") \
+			raise UnittestError(f"JUnit XML file '{path}' can not be overwritten.") \
 				from FileExistsError(f"File '{path}' already exists.")
 
 		if regenerate:
 			self.Generate(overwrite=True)
 
 		if self._xmlDocument is None:
-			ex = UnittestException(f"Internal XML document tree is empty and needs to be generated before write is possible.")
+			ex = UnittestError(f"Internal XML document tree is empty and needs to be generated before write is possible.")
 			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
 			raise ex
 
@@ -1392,7 +1392,7 @@ class Document(TestsuiteSummary, ut_Document):
 			with path.open("wb") as file:
 				file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
 		except Exception as ex:
-			raise UnittestException(f"JUnit XML file '{path}' can not be written.") from ex
+			raise UnittestError(f"JUnit XML file '{path}' can not be written.") from ex
 
 	def Convert(self) -> None:
 		"""
@@ -1404,10 +1404,10 @@ class Document(TestsuiteSummary, ut_Document):
 
 		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
 
-		:raises UnittestException: If XML was not read and parsed before.
+		:raises UnittestError: If XML was not read and parsed before.
 		"""
 		if self._xmlDocument is None:
-			ex = UnittestException(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
+			ex = UnittestError(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
 			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
@@ -1442,12 +1442,12 @@ class Document(TestsuiteSummary, ut_Document):
 		:param default:            The default value, if no ``name`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
 		:returns:                  The ``name`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``name`` attribute exists on the given element node.
+		:raises UnittestError: If optional is false and no ``name`` attribute exists on the given element node.
 		"""
 		if "name" in element.attrib:
 			return element.attrib["name"]
 		elif not optional:
-			raise UnittestException(f"Required parameter 'name' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'name' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1458,13 +1458,13 @@ class Document(TestsuiteSummary, ut_Document):
 		:param element:            The XML element node with a ``timestamp`` attribute.
 		:param optional:           If false, an exception is raised for the missing attribute.
 		:returns:                  The ``timestamp`` attribute's content if found, otherwise ``None``.
-		:raises UnittestException: If optional is false and no ``timestamp`` attribute exists on the given element node.
+		:raises UnittestError: If optional is false and no ``timestamp`` attribute exists on the given element node.
 		"""
 		if "timestamp" in element.attrib:
 			timestamp = element.attrib["timestamp"]
 			return datetime.fromisoformat(timestamp)
 		elif not optional:
-			raise UnittestException(f"Required parameter 'timestamp' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'timestamp' not found in tag '{element.tag}'.")
 		else:
 			return None
 
@@ -1475,13 +1475,13 @@ class Document(TestsuiteSummary, ut_Document):
 		:param element:            The XML element node with a ``time`` attribute.
 		:param optional:           If false, an exception is raised for the missing attribute.
 		:returns:                  The ``time`` attribute's content if found, otherwise ``None``.
-		:raises UnittestException: If optional is false and no ``time`` attribute exists on the given element node.
+		:raises UnittestError: If optional is false and no ``time`` attribute exists on the given element node.
 		"""
 		if "time" in element.attrib:
 			time = element.attrib["time"]
 			return timedelta(seconds=float(time))
 		elif not optional:
-			raise UnittestException(f"Required parameter 'time' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'time' not found in tag '{element.tag}'.")
 		else:
 			return None
 
@@ -1493,12 +1493,12 @@ class Document(TestsuiteSummary, ut_Document):
 		:param default:            The default value, if no ``hostname`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
 		:returns:                  The ``hostname`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``hostname`` attribute exists on the given element node.
+		:raises UnittestError: If optional is false and no ``hostname`` attribute exists on the given element node.
 		"""
 		if "hostname" in element.attrib:
 			return element.attrib["hostname"]
 		elif not optional:
-			raise UnittestException(f"Required parameter 'hostname' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'hostname' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1508,12 +1508,12 @@ class Document(TestsuiteSummary, ut_Document):
 
 		:param element:            The XML element node with a ``classname`` attribute.
 		:returns:                  The ``classname`` attribute's content.
-		:raises UnittestException: If no ``classname`` attribute exists on the given element node.
+		:raises UnittestError: If no ``classname`` attribute exists on the given element node.
 		"""
 		if "classname" in element.attrib:
 			return element.attrib["classname"]
 		else:
-			raise UnittestException(f"Required parameter 'classname' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'classname' not found in tag '{element.tag}'.")
 
 	def _ConvertTests(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
 		"""
@@ -1523,12 +1523,12 @@ class Document(TestsuiteSummary, ut_Document):
 		:param default:            The default value, if no ``tests`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
 		:returns:                  The ``tests`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``tests`` attribute exists on the given element node.
+		:raises UnittestError: If optional is false and no ``tests`` attribute exists on the given element node.
 		"""
 		if "tests" in element.attrib:
 			return int(element.attrib["tests"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'tests' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'tests' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1540,12 +1540,12 @@ class Document(TestsuiteSummary, ut_Document):
 		:param default:            The default value, if no ``skipped`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
 		:returns:                  The ``skipped`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``skipped`` attribute exists on the given element node.
+		:raises UnittestError: If optional is false and no ``skipped`` attribute exists on the given element node.
 		"""
 		if "skipped" in element.attrib:
 			return int(element.attrib["skipped"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'skipped' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'skipped' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1557,12 +1557,12 @@ class Document(TestsuiteSummary, ut_Document):
 		:param default:            The default value, if no ``errors`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
 		:returns:                  The ``errors`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``errors`` attribute exists on the given element node.
+		:raises UnittestError: If optional is false and no ``errors`` attribute exists on the given element node.
 		"""
 		if "errors" in element.attrib:
 			return int(element.attrib["errors"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'errors' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'errors' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1574,12 +1574,12 @@ class Document(TestsuiteSummary, ut_Document):
 		:param default:            The default value, if no ``failures`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
 		:returns:                  The ``failures`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``failures`` attribute exists on the given element node.
+		:raises UnittestError: If optional is false and no ``failures`` attribute exists on the given element node.
 		"""
 		if "failures" in element.attrib:
 			return int(element.attrib["failures"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'failures' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'failures' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1591,12 +1591,12 @@ class Document(TestsuiteSummary, ut_Document):
 		:param default:            The default value, if no ``assertions`` attribute was found.
 		:param optional:           If false, an exception is raised for the missing attribute.
 		:returns:                  The ``assertions`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``assertions`` attribute exists on the given element node.
+		:raises UnittestError: If optional is false and no ``assertions`` attribute exists on the given element node.
 		"""
 		if "assertions" in element.attrib:
 			return int(element.attrib["assertions"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'assertions' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'assertions' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1679,7 +1679,7 @@ class Document(TestsuiteSummary, ut_Document):
 				elif node.tag == "properties":
 					pass
 				else:
-					raise UnittestException(f"Unknown element '{node.tag}' in junit file.")
+					raise UnittestError(f"Unknown element '{node.tag}' in junit file.")
 			else:
 				pass
 
@@ -1693,10 +1693,10 @@ class Document(TestsuiteSummary, ut_Document):
 		This method generates the XML root element (``<testsuites>``) and recursively calls other generated methods.
 
 		:param overwrite:          Overwrite the internal XML data structure.
-		:raises UnittestException: If overwrite is false and the internal XML data structure is not empty.
+		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
 		"""
 		if not overwrite and self._xmlDocument is not None:
-			raise UnittestException(f"Internal XML document is populated with data.")
+			raise UnittestError(f"Internal XML document is populated with data.")
 
 		rootElement = Element("testsuites")
 		rootElement.attrib["name"] = self._name

@@ -39,7 +39,7 @@ from typing               import Optional as Nullable, Generator, Tuple, Union, 
 from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
 from pyTooling.Decorators import export, InheritDocString
 
-from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind
+from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
 from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, Testsuite as ju_Testsuite
@@ -100,7 +100,7 @@ class Testsuite(ju_Testsuite):
 		for tc in testsuite.IterateTestcases():
 			ts = tc._parent
 			if ts is None:
-				raise UnittestException(f"Testcase '{tc._name}' is not part of a hierarchy.")
+				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
 
 			classname = ts._name
 			ts = ts._parent
@@ -198,22 +198,22 @@ class Document(ju_Document):
 		:param path:               Optional path to the XMl file, if internal path shouldn't be used.
 		:param overwrite:          If true, overwrite an existing file.
 		:param regenerate:         If true, regenerate the XML structure from data model.
-		:raises UnittestException: If the file cannot be overwritten.
-		:raises UnittestException: If the internal XML data structure wasn't generated.
-		:raises UnittestException: If the file cannot be opened or written.
+		:raises UnittestError: If the file cannot be overwritten.
+		:raises UnittestError: If the internal XML data structure wasn't generated.
+		:raises UnittestError: If the file cannot be opened or written.
 		"""
 		if path is None:
 			path = self._path
 
 		if not overwrite and path.exists():
-			raise UnittestException(f"JUnit XML file '{path}' can not be overwritten.") \
+			raise UnittestError(f"JUnit XML file '{path}' can not be overwritten.") \
 				from FileExistsError(f"File '{path}' already exists.")
 
 		if regenerate:
 			self.Generate(overwrite=True)
 
 		if self._xmlDocument is None:
-			ex = UnittestException(f"Internal XML document tree is empty and needs to be generated before write is possible.")
+			ex = UnittestError(f"Internal XML document tree is empty and needs to be generated before write is possible.")
 			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
 			raise ex
 
@@ -221,7 +221,7 @@ class Document(ju_Document):
 			with path.open("wb") as file:
 				file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
 		except Exception as ex:
-			raise UnittestException(f"JUnit XML file '{path}' can not be written.") from ex
+			raise UnittestError(f"JUnit XML file '{path}' can not be written.") from ex
 
 	def Convert(self) -> None:
 		"""
@@ -233,10 +233,10 @@ class Document(ju_Document):
 
 		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
 
-		:raises UnittestException: If XML was not read and parsed before.
+		:raises UnittestError: If XML was not read and parsed before.
 		"""
 		if self._xmlDocument is None:
-			ex = UnittestException(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
+			ex = UnittestError(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
 			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
@@ -286,15 +286,15 @@ class Document(ju_Document):
 		This method generates the XML root element (``<testsuites>``) and recursively calls other generated methods.
 
 		:param overwrite:          Overwrite the internal XML data structure.
-		:raises UnittestException: If overwrite is false and the internal XML data structure is not empty.
+		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
 		"""
 		if not overwrite and self._xmlDocument is not None:
-			raise UnittestException(f"Internal XML document is populated with data.")
+			raise UnittestError(f"Internal XML document is populated with data.")
 
 		rootElement = Element("testsuites")
 		rootElement.attrib["name"] = self._name
 		if self._startTime is None:
-			raise UnittestException(
+			raise UnittestError(
 				f"The {self._DIALECT} format requires a timestamp on <testsuites>, but the report has none."
 			)
 		rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
@@ -325,7 +325,7 @@ class Document(ju_Document):
 		testsuiteElement = SubElement(parentElement, "testsuite")
 		testsuiteElement.attrib["name"] = testsuite._name
 		if testsuite._startTime is None:
-			raise UnittestException(
+			raise UnittestError(
 				f"The {self._DIALECT} format requires a timestamp on <testsuite>, but the report has none."
 			)
 		testsuiteElement.attrib["timestamp"] = f"{testsuite._startTime.isoformat()}"
@@ -364,7 +364,7 @@ class Document(ju_Document):
 			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
 
 		if testcase._parent._parent._startTime is None:
-			raise UnittestException(
+			raise UnittestError(
 				f"The {self._DIALECT} format requires a timestamp on <testcase>, but the report has none."
 			)
 		testcaseElement.attrib["timestamp"] = f"{testcase._parent._parent._startTime.isoformat()}"

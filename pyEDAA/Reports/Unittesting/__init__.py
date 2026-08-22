@@ -86,12 +86,12 @@ from pyEDAA.Reports        import ReportException
 
 
 @export
-class UnittestException(ReportException):
+class UnittestError(ReportException):
 	"""Base-exception for all unit test related exceptions."""
 
 
 @export
-class AlreadyInHierarchyException(UnittestException):
+class AlreadyInHierarchyError(UnittestError):
 	"""
 	A unit test exception raised if the element is already part of a hierarchy.
 
@@ -105,7 +105,7 @@ class AlreadyInHierarchyException(UnittestException):
 
 
 @export
-class DuplicateTestsuiteException(UnittestException):
+class DuplicateTestsuiteError(UnittestError):
 	"""
 	A unit test exception raised on duplicate test suites (by name).
 
@@ -118,7 +118,7 @@ class DuplicateTestsuiteException(UnittestException):
 
 
 @export
-class DuplicateTestcaseException(UnittestException):
+class DuplicateTestcaseError(UnittestError):
 	"""
 	A unit test exception raised on duplicate test cases (by name).
 
@@ -943,8 +943,8 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		:raises TypeError:         If parameter 'parent' is not a TestsuiteBase.
 		:raises TypeError:         If parameter 'testsuites' is not iterable.
 		:raises TypeError:         If element in parameter 'testsuites' is not a Testsuite.
-		:raises AlreadyInHierarchyException: If a test suite in parameter 'testsuites' is already part of a test entity hierarchy.
-		:raises DuplicateTestsuiteException: If a test suite in parameter 'testsuites' is already listed (by name) in the list of test suites.
+		:raises AlreadyInHierarchyError: If a test suite in parameter 'testsuites' is already part of a test entity hierarchy.
+		:raises DuplicateTestsuiteError: If a test suite in parameter 'testsuites' is already listed (by name) in the list of test suites.
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
@@ -986,10 +986,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 					raise ex
 
 				if testsuite._parent is not None:
-					raise AlreadyInHierarchyException(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 				if testsuite._name in self._testsuites:
-					raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+					raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
@@ -1236,8 +1236,8 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		:param testsuite:   The test suite to add.
 		:raises ValueError: If parameter 'testsuite' is None.
 		:raises TypeError:  If parameter 'testsuite' is not a Testsuite.
-		:raises AlreadyInHierarchyException: If parameter 'testsuite' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If parameter 'testsuite' is already listed (by name) in the list of test suites.
+		:raises AlreadyInHierarchyError: If parameter 'testsuite' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If parameter 'testsuite' is already listed (by name) in the list of test suites.
 		"""
 		if testsuite is None:
 			raise ValueError("Parameter 'testsuite' is None.")
@@ -1247,10 +1247,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			raise ex
 
 		if testsuite._parent is not None:
-			raise AlreadyInHierarchyException(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
+			raise AlreadyInHierarchyError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 		if testsuite._name in self._testsuites:
-			raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+			raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 		testsuite._parent = self
 		self._testsuites[testsuite._name] = testsuite
@@ -1356,8 +1356,8 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		:param parent:             Reference to the parent test entity.
 		:raises TypeError:         If parameter 'testcases' is not iterable.
 		:raises TypeError:         If element in parameter 'testcases' is not a Testcase.
-		:raises AlreadyInHierarchyException: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
+		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
 		"""
 		super().__init__(
 			name,
@@ -1393,10 +1393,10 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 					raise ex
 
 				if testcase._parent is not None:
-					raise AlreadyInHierarchyException(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 				if testcase._name in self._testcases:
-					raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
+					raise DuplicateTestcaseError(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
 
 				testcase._parent = self
 				self._testcases[testcase._name] = testcase
@@ -1473,7 +1473,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 			status = testcase._status
 			if status is TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+				raise UnittestError(f"Found testcase '{testcase._name}' with state 'Unknown'.")
 			elif TestcaseStatus.Inconsistent in status:
 				inconsistent += 1
 			elif status is TestcaseStatus.Excluded:
@@ -1489,9 +1489,9 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			elif status is TestcaseStatus.Failed:
 				failed += 1
 			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+				raise UnittestError(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
 			else:
-				raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
+				raise UnittestError(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
 		self._tests = tests
 		self._inconsistent = inconsistent
@@ -1535,8 +1535,8 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		:param testcase:    The test case to add.
 		:raises ValueError: If parameter 'testcase' is None.
 		:raises TypeError:  If parameter 'testcase' is not a Testcase.
-		:raises AlreadyInHierarchyException: If parameter 'testcase' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If parameter 'testcase' is already listed (by name) in the list of test cases.
+		:raises AlreadyInHierarchyError: If parameter 'testcase' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If parameter 'testcase' is already listed (by name) in the list of test cases.
 		"""
 		if testcase is None:
 			raise ValueError("Parameter 'testcase' is None.")
@@ -1549,7 +1549,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 		if testcase._name in self._testcases:
-			raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
+			raise DuplicateTestcaseError(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
 
 		testcase._parent = self
 		self._testcases[testcase._name] = testcase
