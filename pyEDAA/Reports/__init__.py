@@ -44,10 +44,11 @@ __issue_tracker_url__ = "https://GitHub.com/edaa-org/pyEDAA.Reports/issues"
 from enum                 import Enum
 
 from pyTooling.Decorators import export
+from pyTooling.Exceptions import ExceptionBase
 
 
 @export
-class ReportException(Exception):
+class ReportException(ExceptionBase):
 	"""Base-exception of all exceptions raised by pyEDAA.Reports."""
 
 

@@ -56,7 +56,7 @@ from pyTooling.Attributes.ArgParse            import ArgParseHelperMixin, Defaul
 from pyTooling.Attributes.ArgParse.Argument   import StringArgument
 from pyTooling.TerminalUI                     import TerminalApplication
 
-from pyEDAA.Reports                           import __issue_tracker_url__
+from pyEDAA.Reports                           import ReportException, __issue_tracker_url__
 from pyEDAA.Reports.Unittesting               import UnittestException
 # from pyEDAA.Reports.CLI.Coverage              import CoverageHandlers
 # from pyEDAA.Reports.CLI.Dependency            import DependencyHandlers
@@ -161,6 +161,8 @@ def main() -> NoReturn:
 		if ex.__cause__ is not None:
 			program.WriteLineToStdErr(f"{{DARK_YELLOW}}Because of: {ex.__cause__}{{NOCOLOR}}".format(**Application.Foreground))
 
+	except ReportException as ex:
+		program.PrintExceptionBase(ex)
 	except NotImplementedError as ex:
 		program.PrintNotImplementedError(ex)
 	except Exception as ex:
