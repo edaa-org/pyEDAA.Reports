@@ -822,13 +822,13 @@ class Testsuite(TestsuiteBase):
 		"""
 		Initializes the fields of a test suite.
 
-		:param name:               Name of the test suite.
-		:param startTime:          Time when the test suite was started.
-		:param duration:           duration of the entity's execution.
-		:param status:             Overall status of the test suite.
-		:param parent:             Reference to the parent test summary.
-		:raises TypeError:         If parameter 'testcases' is not iterable.
-		:raises TypeError:         If element in parameter 'testcases' is not a Testcase.
+		:param name:                     Name of the test suite.
+		:param startTime:                Time when the test suite was started.
+		:param duration:                 duration of the entity's execution.
+		:param status:                   Overall status of the test suite.
+		:param parent:                   Reference to the parent test summary.
+		:raises TypeError:               If parameter 'testcases' is not iterable.
+		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
 		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
 		:raises DuplicateTestcaseError:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
 		"""
@@ -1366,9 +1366,9 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Write the data model as XML into a file adhering to the Any JUnit dialect.
 
-		:param path:               Optional path to the XMl file, if internal path shouldn't be used.
-		:param overwrite:          If true, overwrite an existing file.
-		:param regenerate:         If true, regenerate the XML structure from data model.
+		:param path:           Optional path to the XMl file, if internal path shouldn't be used.
+		:param overwrite:      If true, overwrite an existing file.
+		:param regenerate:     If true, regenerate the XML structure from data model.
 		:raises UnittestError: If the file cannot be overwritten.
 		:raises UnittestError: If the internal XML data structure wasn't generated.
 		:raises UnittestError: If the file cannot be opened or written.
@@ -1438,10 +1438,10 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``name`` attribute from an XML element node to a string.
 
-		:param element:            The XML element node with a ``name`` attribute.
-		:param default:            The default value, if no ``name`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``name`` attribute's content if found, otherwise the given default value.
+		:param element:        The XML element node with a ``name`` attribute.
+		:param default:        The default value, if no ``name`` attribute was found.
+		:param optional:       If false, an exception is raised for the missing attribute.
+		:returns:              The ``name`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``name`` attribute exists on the given element node.
 		"""
 		if "name" in element.attrib:
@@ -1455,9 +1455,9 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``timestamp`` attribute from an XML element node to a datetime.
 
-		:param element:            The XML element node with a ``timestamp`` attribute.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``timestamp`` attribute's content if found, otherwise ``None``.
+		:param element:        The XML element node with a ``timestamp`` attribute.
+		:param optional:       If false, an exception is raised for the missing attribute.
+		:returns:              The ``timestamp`` attribute's content if found, otherwise ``None``.
 		:raises UnittestError: If optional is false and no ``timestamp`` attribute exists on the given element node.
 		"""
 		if "timestamp" in element.attrib:
@@ -1472,9 +1472,9 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``time`` attribute from an XML element node to a timedelta.
 
-		:param element:            The XML element node with a ``time`` attribute.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``time`` attribute's content if found, otherwise ``None``.
+		:param element:        The XML element node with a ``time`` attribute.
+		:param optional:       If false, an exception is raised for the missing attribute.
+		:returns:              The ``time`` attribute's content if found, otherwise ``None``.
 		:raises UnittestError: If optional is false and no ``time`` attribute exists on the given element node.
 		"""
 		if "time" in element.attrib:
@@ -1489,10 +1489,10 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``hostname`` attribute from an XML element node to a string.
 
-		:param element:            The XML element node with a ``hostname`` attribute.
-		:param default:            The default value, if no ``hostname`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``hostname`` attribute's content if found, otherwise the given default value.
+		:param element:        The XML element node with a ``hostname`` attribute.
+		:param default:        The default value, if no ``hostname`` attribute was found.
+		:param optional:       If false, an exception is raised for the missing attribute.
+		:returns:              The ``hostname`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``hostname`` attribute exists on the given element node.
 		"""
 		if "hostname" in element.attrib:
@@ -1506,8 +1506,8 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``classname`` attribute from an XML element node to a string.
 
-		:param element:            The XML element node with a ``classname`` attribute.
-		:returns:                  The ``classname`` attribute's content.
+		:param element:        The XML element node with a ``classname`` attribute.
+		:returns:              The ``classname`` attribute's content.
 		:raises UnittestError: If no ``classname`` attribute exists on the given element node.
 		"""
 		if "classname" in element.attrib:
@@ -1519,10 +1519,10 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``tests`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``tests`` attribute.
-		:param default:            The default value, if no ``tests`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``tests`` attribute's content if found, otherwise the given default value.
+		:param element:        The XML element node with a ``tests`` attribute.
+		:param default:        The default value, if no ``tests`` attribute was found.
+		:param optional:       If false, an exception is raised for the missing attribute.
+		:returns:              The ``tests`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``tests`` attribute exists on the given element node.
 		"""
 		if "tests" in element.attrib:
@@ -1536,10 +1536,10 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``skipped`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``skipped`` attribute.
-		:param default:            The default value, if no ``skipped`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``skipped`` attribute's content if found, otherwise the given default value.
+		:param element:        The XML element node with a ``skipped`` attribute.
+		:param default:        The default value, if no ``skipped`` attribute was found.
+		:param optional:       If false, an exception is raised for the missing attribute.
+		:returns:              The ``skipped`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``skipped`` attribute exists on the given element node.
 		"""
 		if "skipped" in element.attrib:
@@ -1553,10 +1553,10 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``errors`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``errors`` attribute.
-		:param default:            The default value, if no ``errors`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``errors`` attribute's content if found, otherwise the given default value.
+		:param element:        The XML element node with a ``errors`` attribute.
+		:param default:        The default value, if no ``errors`` attribute was found.
+		:param optional:       If false, an exception is raised for the missing attribute.
+		:returns:              The ``errors`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``errors`` attribute exists on the given element node.
 		"""
 		if "errors" in element.attrib:
@@ -1570,10 +1570,10 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``failures`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``failures`` attribute.
-		:param default:            The default value, if no ``failures`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``failures`` attribute's content if found, otherwise the given default value.
+		:param element:        The XML element node with a ``failures`` attribute.
+		:param default:        The default value, if no ``failures`` attribute was found.
+		:param optional:       If false, an exception is raised for the missing attribute.
+		:returns:              The ``failures`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``failures`` attribute exists on the given element node.
 		"""
 		if "failures" in element.attrib:
@@ -1587,10 +1587,10 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``assertions`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``assertions`` attribute.
-		:param default:            The default value, if no ``assertions`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``assertions`` attribute's content if found, otherwise the given default value.
+		:param element:        The XML element node with a ``assertions`` attribute.
+		:param default:        The default value, if no ``assertions`` attribute was found.
+		:param optional:       If false, an exception is raised for the missing attribute.
+		:returns:              The ``assertions`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``assertions`` attribute exists on the given element node.
 		"""
 		if "assertions" in element.attrib:
@@ -1692,7 +1692,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		This method generates the XML root element (``<testsuites>``) and recursively calls other generated methods.
 
-		:param overwrite:          Overwrite the internal XML data structure.
+		:param overwrite:      Overwrite the internal XML data structure.
 		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
 		"""
 		if not overwrite and self._xmlDocument is not None:
