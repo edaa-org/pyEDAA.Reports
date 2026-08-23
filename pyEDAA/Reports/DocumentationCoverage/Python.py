@@ -159,7 +159,7 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 		covered =  0
 		for coverageState in iterator:
 			if coverageState is CoverageState.Unknown:
-				raise Exception(f"")
+				raise DocCoverageException(f"Element has coverage state 'Unknown', so it can't be counted.")
 
 			total += 1
 
