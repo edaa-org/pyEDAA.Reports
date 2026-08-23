@@ -72,7 +72,6 @@ derived from a summary class.
 		 classDef suite fill:#b3e6ff
 		 classDef case fill:#eeccff
 """
-
 from __future__            import annotations
 
 from datetime              import timedelta, datetime

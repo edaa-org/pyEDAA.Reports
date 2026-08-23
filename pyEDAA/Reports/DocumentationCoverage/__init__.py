@@ -29,7 +29,6 @@
 # ==================================================================================================================== #
 #
 """Abstraction of code documentation coverage data model."""
-
 from __future__            import annotations
 
 from enum                  import Flag

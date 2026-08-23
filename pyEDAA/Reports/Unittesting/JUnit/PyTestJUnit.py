@@ -32,7 +32,6 @@
 """
 Reader for JUnit unit testing summary files in XML format.
 """
-
 from __future__           import annotations
 
 from pathlib              import Path

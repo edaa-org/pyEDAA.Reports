@@ -90,7 +90,6 @@ Ant + JUnit4 XML, a file format specific document is derived from a summary clas
 		 classDef cls fill:#ff9966
 		 classDef case fill:#eeccff
 """
-
 from __future__      import annotations
 
 from datetime        import datetime, timedelta

@@ -32,7 +32,6 @@
 """
 **Abstract code documentation coverage data model for Python code.**
 """
-
 from __future__                           import annotations
 
 from pathlib                              import Path
