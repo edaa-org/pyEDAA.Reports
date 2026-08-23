@@ -32,6 +32,8 @@
 """
 Reader for JUnit unit testing summary files in XML format.
 """
+from __future__           import annotations
+
 from pathlib              import Path
 from time                 import perf_counter_ns
 from typing               import Optional as Nullable, Generator, Tuple, Union, TypeVar, Type, ClassVar
@@ -75,7 +77,7 @@ class Testsuite(ju_Testsuite):
 	"""
 
 	@classmethod
-	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
+	def FromTestsuite(cls, testsuite: ut_Testsuite) -> Testsuite:
 		"""
 		Convert a test suite of the unified test entity data model to the JUnit specific data model's test suite object
 		adhering to the GoogleTest JUnit dialect.
@@ -126,7 +128,7 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 	"""
 
 	@classmethod
-	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> "TestsuiteSummary":
+	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> TestsuiteSummary:
 		"""
 		Convert a test suite summary of the unified test entity data model to the JUnit specific data model's test suite
 		summary object adhering to the GoogleTest JUnit dialect.

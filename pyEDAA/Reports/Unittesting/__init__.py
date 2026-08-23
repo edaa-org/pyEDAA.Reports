@@ -72,6 +72,8 @@ derived from a summary class.
 		 classDef suite fill:#b3e6ff
 		 classDef case fill:#eeccff
 """
+from __future__            import annotations
+
 from datetime              import timedelta, datetime
 from enum                  import Flag, IntEnum
 from pathlib               import Path
@@ -159,7 +161,7 @@ class TestcaseStatus(Flag):
 	# TODO: timed out ?
 	# TODO: some passed (if merged, mixed results of passed and failed)
 
-	def __matmul__(self, other: "TestcaseStatus") -> "TestcaseStatus":
+	def __matmul__(self, other: TestcaseStatus) -> TestcaseStatus:
 		s = self & self.Mask
 		o = other & self.Mask
 		if s is self.Excluded:
@@ -269,7 +271,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	This feature is for example used by Ant + JUnit4's XML property fields.
 	"""
 
-	_parent:               Nullable["TestsuiteBase"]
+	_parent:               Nullable[TestsuiteBase]
 	_name:                 str
 
 	_startTime:            Nullable[datetime]
@@ -303,7 +305,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		expectedErrorCount: int = 0,
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable["TestsuiteBase"] = None
+		parent: Nullable[TestsuiteBase] = None
 	) -> None:
 		"""
 		Initializes the fields of the base-class.
@@ -462,7 +464,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 	# QUESTION: allow Parent as setter?
 	@readonly
-	def Parent(self) -> Nullable["TestsuiteBase"]:
+	def Parent(self) -> Nullable[TestsuiteBase]:
 		"""
 		Read-only property to access the reference to the parent test entity.
 
@@ -686,7 +688,7 @@ class Testcase(Base):
 		expectedErrorCount: int = 0,
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable["Testsuite"] = None
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of a test case.
@@ -819,7 +821,7 @@ class Testcase(Base):
 		"""
 		return self._passedAssertionCount
 
-	def Copy(self) -> "Testcase":
+	def Copy(self) -> Testcase:
 		return self.__class__(
 			self._name,
 			self._startTime,
@@ -921,7 +923,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable["Testsuite"] = None
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
@@ -1313,7 +1315,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 	hierarchy of test entities. The root of the hierarchy is a test summary.
 	"""
 
-	_testcases: Dict[str, "Testcase"]
+	_testcases: Dict[str, Testcase]
 	_hostname:  Nullable[str]
 
 	def __init__(
@@ -1331,7 +1333,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		errorCount: int = 0,
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
-		testcases: Nullable[Iterable["Testcase"]] = None,
+		testcases: Nullable[Iterable[Testcase]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[TestsuiteType] = None
 	) -> None:
@@ -1402,7 +1404,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 				self._testcases[testcase._name] = testcase
 
 	@readonly
-	def Testcases(self) -> Dict[str, "Testcase"]:
+	def Testcases(self) -> Dict[str, Testcase]:
 		"""
 		Read-only property to access a reference to the internal dictionary of test cases.
 
@@ -1437,7 +1439,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		"""
 		return self._hostname
 
-	def Copy(self) -> "Testsuite":
+	def Copy(self) -> Testsuite:
 		return self.__class__(
 			self._name,
 			self._kind,
@@ -1528,7 +1530,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, expectedWarningCount, expectedErrorCount, expectedFatalCount, totalDuration
 
-	def AddTestcase(self, testcase: "Testcase") -> None:
+	def AddTestcase(self, testcase: Testcase) -> None:
 		"""
 		Add a test case to the list of test cases.
 
@@ -1554,7 +1556,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testcase._parent = self
 		self._testcases[testcase._name] = testcase
 
-	def AddTestcases(self, testcases: Iterable["Testcase"]) -> None:
+	def AddTestcases(self, testcases: Iterable[Testcase]) -> None:
 		"""
 		Add a list of test cases to the list of test cases.
 
@@ -1839,7 +1841,7 @@ class MergedTestcase(Testcase, Merged):
 	def __init__(
 		self,
 		testcase: Testcase,
-		parent: Nullable["Testsuite"] = None
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		if testcase is None:
 			raise ValueError(f"Parameter 'testcase' is None.")
@@ -1954,7 +1956,7 @@ class MergedTestsuite(Testsuite, Merged):
 		testsuite: Testsuite,
 		addTestsuites: bool = False,
 		addTestcases: bool = False,
-		parent: Nullable["Testsuite"] = None
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		if testsuite is None:
 			raise ValueError(f"Parameter 'testsuite' is None.")
