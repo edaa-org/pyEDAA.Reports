@@ -88,7 +88,7 @@ the mandatory dependencies too.
 Application Testing (Optional)
 ******************************
 
-Additional Python packages needed to run the application tests, which exercise the installed ``pyedaa-reports``
+Additional Python packages needed to run the application tests, which exercise the installed :program:`pyedaa-reports`
 command line rather than the package's classes. These packages are only needed for developers or on a CI server,
 thus sub-dependencies are not evaluated further.
 
