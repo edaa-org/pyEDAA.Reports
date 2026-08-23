@@ -19,7 +19,7 @@ Dependencies
 +------------------------------------------+------------------------------------------+
 
 
-.. _dependency-package:
+.. _DEP/package:
 
 pyEDAA.Reports Package
 **********************
@@ -35,7 +35,7 @@ pyEDAA.Reports Package
 +-----------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
 
 
-.. _dependency-testing:
+.. _DEP/testing:
 
 Unit Testing / Coverage / Type Checking (Optional)
 **************************************************
@@ -83,12 +83,12 @@ the mandatory dependencies too.
 +--------------------------------------------------------------------------+-------------+----------------------------------------------------------------------------------------+----------------------+
 
 
-.. _dependency-apptesting:
+.. _DEP/apptesting:
 
 Application Testing (Optional)
 ******************************
 
-Additional Python packages needed to run the application tests, which exercise the installed ``pyedaa-reports``
+Additional Python packages needed to run the application tests, which exercise the installed :program:`pyedaa-reports`
 command line rather than the package's classes. These packages are only needed for developers or on a CI server,
 thus sub-dependencies are not evaluated further.
 
@@ -120,7 +120,7 @@ recursively install the mandatory dependencies too.
 +-----------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
 
 
-.. _dependency-documentation:
+.. _DEP/documentation:
 
 Sphinx Documentation (Optional)
 *******************************
@@ -174,7 +174,7 @@ the mandatory dependencies too.
 +--------------------------------------------------------------------------------------+-------------+---------------------------------------------------------------------------------------------+----------------------+
 
 
-.. _dependency-packaging:
+.. _DEP/packaging:
 
 Packaging (Optional)
 ********************
@@ -204,7 +204,7 @@ install the mandatory dependencies too.
 +--------------------------------------------------------+-------------+---------------------------------------------------------------------------------------+----------------------+
 
 
-.. _dependency-publishing:
+.. _DEP/publishing:
 
 Publishing (CI-Server only)
 ***************************
@@ -229,7 +229,7 @@ install the mandatory dependencies too.
 +--------------------------------------------+-------------+---------------------------------------------------------------------------+----------------------+
 | **Package**                                | **Version** | **License**                                                               | **Dependencies**     |
 +============================================+=============+===========================================================================+======================+
-| `wheel <https://GitHub.com/pypa/wheel>`__  | ≥0.47       | `MIT <https://github.com/pypa/wheel/blob/main/LICENSE.txt>`__             | *Not yet evaluated.* |
+| `wheel <https://GitHub.com/pypa/wheel>`__  | ≥0.48       | `MIT <https://github.com/pypa/wheel/blob/main/LICENSE.txt>`__             | *Not yet evaluated.* |
 +--------------------------------------------+-------------+---------------------------------------------------------------------------+----------------------+
 | `Twine <https://GitHub.com/pypa/twine/>`__ | ≥7.0        | `Apache License, 2.0 <https://github.com/pypa/twine/blob/main/LICENSE>`__ | *Not yet evaluated.* |
 +--------------------------------------------+-------------+---------------------------------------------------------------------------+----------------------+

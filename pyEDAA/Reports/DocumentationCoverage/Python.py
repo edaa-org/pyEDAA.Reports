@@ -32,6 +32,8 @@
 """
 **Abstract code documentation coverage data model for Python code.**
 """
+from __future__                           import annotations
+
 from pathlib                              import Path
 from typing                               import Optional as Nullable, Iterable, Dict, Union, Tuple, List
 
@@ -41,7 +43,7 @@ from docstr_coverage.result_collection   import FileCount
 from pyTooling.Decorators                 import export, readonly
 from pyTooling.MetaClasses                import ExtendedType
 
-from pyEDAA.Reports.DocumentationCoverage import Class, Module, Package, CoverageState, DocCoverageException
+from pyEDAA.Reports.DocumentationCoverage import Class, Module, Package, CoverageState, DocCoverageError
 
 
 @export
@@ -159,7 +161,7 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 		covered =  0
 		for coverageState in iterator:
 			if coverageState is CoverageState.Unknown:
-				raise Exception(f"")
+				raise DocCoverageException(f"Element has coverage state 'Unknown', so it can't be counted.")
 
 			total += 1
 
@@ -297,9 +299,9 @@ class ClassCoverage(Class, Coverage):
 	"""
 	_fields:  Dict[str, CoverageState]
 	_methods: Dict[str, CoverageState]
-	_classes: Dict[str, "ClassCoverage"]
+	_classes: Dict[str, ClassCoverage]
 
-	def __init__(self, name: str, parent: Union["PackageCoverage", "ClassCoverage", None] = None) -> None:
+	def __init__(self, name: str, parent: Union[PackageCoverage, ClassCoverage, None] = None) -> None:
 		super().__init__(name, parent)
 		Coverage.__init__(self)
 
@@ -329,7 +331,7 @@ class ClassCoverage(Class, Coverage):
 		return self._methods
 
 	@readonly
-	def Classes(self) -> Dict[str, "ClassCoverage"]:
+	def Classes(self) -> Dict[str, ClassCoverage]:
 		"""
 		Read-only property to access the class' nested classes.
 
@@ -362,7 +364,7 @@ class ModuleCoverage(Module, AggregatedCoverage):
 	_functions: Dict[str, CoverageState]
 	_classes:   Dict[str, ClassCoverage]
 
-	def __init__(self, name: str, file: Path, parent: Nullable["PackageCoverage"] = None) -> None:
+	def __init__(self, name: str, file: Path, parent: Nullable[PackageCoverage] = None) -> None:
 		super().__init__(name, parent)
 		AggregatedCoverage.__init__(self, file)
 
@@ -445,9 +447,9 @@ class PackageCoverage(Package, AggregatedCoverage):
 	_functions: Dict[str, CoverageState]
 	_classes:   Dict[str, ClassCoverage]
 	_modules:   Dict[str, ModuleCoverage]
-	_packages:  Dict[str, "PackageCoverage"]
+	_packages:  Dict[str, PackageCoverage]
 
-	def __init__(self, name: str, file: Path, parent: Nullable["PackageCoverage"] = None) -> None:
+	def __init__(self, name: str, file: Path, parent: Nullable[PackageCoverage] = None) -> None:
 		super().__init__(name, parent)
 		AggregatedCoverage.__init__(self, file)
 
@@ -508,7 +510,7 @@ class PackageCoverage(Package, AggregatedCoverage):
 		return self._modules
 
 	@readonly
-	def Packages(self) -> Dict[str, "PackageCoverage"]:
+	def Packages(self) -> Dict[str, PackageCoverage]:
 		"""
 		Read-only property to access the package's sub-packages.
 
@@ -516,7 +518,7 @@ class PackageCoverage(Package, AggregatedCoverage):
 		"""
 		return self._packages
 
-	def __getitem__(self, key: str) -> Union["PackageCoverage", ModuleCoverage]:
+	def __getitem__(self, key: str) -> Union[PackageCoverage, ModuleCoverage]:
 		try:
 			return self._modules[key]
 		except KeyError:
@@ -575,7 +577,7 @@ class PackageCoverage(Package, AggregatedCoverage):
 
 
 @export
-class DocStrCoverageError(DocCoverageException):
+class DocStrCoverageError(DocCoverageError):
 	pass
 
 

@@ -177,7 +177,7 @@ Any JUnit
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: Convert to and from Unified Data Model
@@ -204,7 +204,7 @@ Any JUnit
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
 
@@ -236,7 +236,7 @@ Ant + JUnit4
                xmlReport = Path("AntJUnit4-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: Convert to and from Unified Data Model
@@ -263,7 +263,7 @@ Ant + JUnit4
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
 
@@ -296,7 +296,7 @@ CTest JUnit
                xmlReport = Path("CTestJUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: Convert to and from Unified Data Model
@@ -323,7 +323,7 @@ CTest JUnit
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
 
@@ -355,7 +355,7 @@ GoogleTest JUnit
                xmlReport = Path("GoogleTestJUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: Convert to and from Unified Data Model
@@ -382,7 +382,7 @@ GoogleTest JUnit
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
 
@@ -414,7 +414,7 @@ pyTest JUnit
                xmlReport = Path("PyTestJUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: Convert to and from Unified Data Model
@@ -441,5 +441,5 @@ pyTest JUnit
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
