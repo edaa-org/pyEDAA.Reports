@@ -57,7 +57,7 @@ from pyTooling.Attributes.ArgParse.Argument   import StringArgument
 from pyTooling.TerminalUI                     import TerminalApplication
 
 from pyEDAA.Reports                           import ReportException, __issue_tracker_url__
-from pyEDAA.Reports.Unittesting               import UnittestException
+from pyEDAA.Reports.Unittesting               import UnittestError
 # from pyEDAA.Reports.CLI.Coverage              import CoverageHandlers
 # from pyEDAA.Reports.CLI.Dependency            import DependencyHandlers
 from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
@@ -156,7 +156,7 @@ def main() -> NoReturn:
 	)
 	try:
 		program.Run()
-	except UnittestException as ex:
+	except UnittestError as ex:
 		program.WriteLineToStdErr(f"{{RED}}[ERROR] {ex}{{NOCOLOR}}".format(**Application.Foreground))
 		if ex.__cause__ is not None:
 			program.WriteLineToStdErr(f"{{DARK_YELLOW}}Because of: {ex.__cause__}{{NOCOLOR}}".format(**Application.Foreground))

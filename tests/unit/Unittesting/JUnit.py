@@ -35,7 +35,7 @@ from unittest import TestCase as py_TestCase
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary
 from pyEDAA.Reports.Unittesting       import Testsuite as ut_Testsuite, Testcase as ut_Testcase
-from pyEDAA.Reports.Unittesting.JUnit import UnittestException
+from pyEDAA.Reports.Unittesting.JUnit import UnittestError
 from pyEDAA.Reports.Unittesting.JUnit import Testcase, Testclass, Testsuite, TestsuiteSummary, Document as JUnitDocument
 
 
@@ -44,7 +44,7 @@ class Instantiation(py_TestCase):
 		tc = Testcase("tc")
 
 		self.assertEqual("tc", tc.Name)
-		with self.assertRaises(UnittestException):
+		with self.assertRaises(UnittestError):
 			_ = tc.Classname
 		self.assertEqual(TestcaseStatus.Unknown, tc.Status)
 		self.assertIsNone(tc.Duration)

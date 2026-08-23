@@ -86,12 +86,12 @@ from pyEDAA.Reports        import ReportException
 
 
 @export
-class UnittestException(ReportException):
+class UnittestError(ReportException):
 	"""Base-exception for all unit test related exceptions."""
 
 
 @export
-class AlreadyInHierarchyException(UnittestException):
+class AlreadyInHierarchyError(UnittestError):
 	"""
 	A unit test exception raised if the element is already part of a hierarchy.
 
@@ -105,7 +105,7 @@ class AlreadyInHierarchyException(UnittestException):
 
 
 @export
-class DuplicateTestsuiteException(UnittestException):
+class DuplicateTestsuiteError(UnittestError):
 	"""
 	A unit test exception raised on duplicate test suites (by name).
 
@@ -118,7 +118,7 @@ class DuplicateTestsuiteException(UnittestException):
 
 
 @export
-class DuplicateTestcaseException(UnittestException):
+class DuplicateTestcaseError(UnittestError):
 	"""
 	A unit test exception raised on duplicate test cases (by name).
 
@@ -926,25 +926,25 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Initializes the based-class fields of a test suite or test summary.
 
-		:param name:               Name of the test entity.
-		:param kind:               Kind of the test entity.
-		:param startTime:          Time when the test entity was started.
-		:param setupDuration:      Duration it took to set up the entity.
-		:param testDuration:       Duration of all tests listed in the test entity.
-		:param teardownDuration:   Duration it took to tear down the entity.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
-		:param status:             Overall status of the test entity.
-		:param warningCount:       Count of encountered warnings incl. warnings from sub-elements.
-		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
-		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
-		:param testsuites:         List of test suites to initialize the test entity with.
-		:param keyValuePairs:      Mapping of key-value pairs to initialize the test entity with.
-		:param parent:             Reference to the parent test entity.
-		:raises TypeError:         If parameter 'parent' is not a TestsuiteBase.
-		:raises TypeError:         If parameter 'testsuites' is not iterable.
-		:raises TypeError:         If element in parameter 'testsuites' is not a Testsuite.
-		:raises AlreadyInHierarchyException: If a test suite in parameter 'testsuites' is already part of a test entity hierarchy.
-		:raises DuplicateTestsuiteException: If a test suite in parameter 'testsuites' is already listed (by name) in the list of test suites.
+		:param name:                     Name of the test entity.
+		:param kind:                     Kind of the test entity.
+		:param startTime:                Time when the test entity was started.
+		:param setupDuration:            Duration it took to set up the entity.
+		:param testDuration:             Duration of all tests listed in the test entity.
+		:param teardownDuration:         Duration it took to tear down the entity.
+		:param totalDuration:            Total duration of the entity's execution (setup + test + teardown)
+		:param status:                   Overall status of the test entity.
+		:param warningCount:             Count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:               Count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:               Count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:               List of test suites to initialize the test entity with.
+		:param keyValuePairs:            Mapping of key-value pairs to initialize the test entity with.
+		:param parent:                   Reference to the parent test entity.
+		:raises TypeError:               If parameter 'parent' is not a TestsuiteBase.
+		:raises TypeError:               If parameter 'testsuites' is not iterable.
+		:raises TypeError:               If element in parameter 'testsuites' is not a Testsuite.
+		:raises AlreadyInHierarchyError: If a test suite in parameter 'testsuites' is already part of a test entity hierarchy.
+		:raises DuplicateTestsuiteError: If a test suite in parameter 'testsuites' is already listed (by name) in the list of test suites.
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
@@ -986,10 +986,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 					raise ex
 
 				if testsuite._parent is not None:
-					raise AlreadyInHierarchyException(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 				if testsuite._name in self._testsuites:
-					raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+					raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
@@ -1233,11 +1233,11 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Add a test suite to the list of test suites.
 
-		:param testsuite:   The test suite to add.
-		:raises ValueError: If parameter 'testsuite' is None.
-		:raises TypeError:  If parameter 'testsuite' is not a Testsuite.
-		:raises AlreadyInHierarchyException: If parameter 'testsuite' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If parameter 'testsuite' is already listed (by name) in the list of test suites.
+		:param testsuite:                The test suite to add.
+		:raises ValueError:              If parameter 'testsuite' is None.
+		:raises TypeError:               If parameter 'testsuite' is not a Testsuite.
+		:raises AlreadyInHierarchyError: If parameter 'testsuite' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If parameter 'testsuite' is already listed (by name) in the list of test suites.
 		"""
 		if testsuite is None:
 			raise ValueError("Parameter 'testsuite' is None.")
@@ -1247,10 +1247,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			raise ex
 
 		if testsuite._parent is not None:
-			raise AlreadyInHierarchyException(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
+			raise AlreadyInHierarchyError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 		if testsuite._name in self._testsuites:
-			raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+			raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 		testsuite._parent = self
 		self._testsuites[testsuite._name] = testsuite
@@ -1338,26 +1338,26 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		"""
 		Initializes the fields of a test suite.
 
-		:param name:               Name of the test suite.
-		:param kind:               Kind of the test suite.
-		:param hostname:           Name of the host the test suite was executed on, or ``None`` if it wasn't recorded.
-		:param startTime:          Time when the test suite was started.
-		:param setupDuration:      Duration it took to set up the test suite.
-		:param testDuration:       Duration of all tests listed in the test suite.
-		:param teardownDuration:   Duration it took to tear down the test suite.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
-		:param status:             Overall status of the test suite.
-		:param warningCount:       Count of encountered warnings incl. warnings from sub-elements.
-		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
-		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
-		:param testsuites:         List of test suites to initialize the test suite with.
-		:param testcases:          List of test cases to initialize the test suite with.
-		:param keyValuePairs:      Mapping of key-value pairs to initialize the test suite with.
-		:param parent:             Reference to the parent test entity.
-		:raises TypeError:         If parameter 'testcases' is not iterable.
-		:raises TypeError:         If element in parameter 'testcases' is not a Testcase.
-		:raises AlreadyInHierarchyException: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
+		:param name:                     Name of the test suite.
+		:param kind:                     Kind of the test suite.
+		:param hostname:                 Name of the host the test suite was executed on, or ``None`` if it wasn't recorded.
+		:param startTime:                Time when the test suite was started.
+		:param setupDuration:            Duration it took to set up the test suite.
+		:param testDuration:             Duration of all tests listed in the test suite.
+		:param teardownDuration:         Duration it took to tear down the test suite.
+		:param totalDuration:            Total duration of the entity's execution (setup + test + teardown)
+		:param status:                   Overall status of the test suite.
+		:param warningCount:             Count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:               Count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:               Count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:               List of test suites to initialize the test suite with.
+		:param testcases:                List of test cases to initialize the test suite with.
+		:param keyValuePairs:            Mapping of key-value pairs to initialize the test suite with.
+		:param parent:                   Reference to the parent test entity.
+		:raises TypeError:               If parameter 'testcases' is not iterable.
+		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
+		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
 		"""
 		super().__init__(
 			name,
@@ -1393,10 +1393,10 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 					raise ex
 
 				if testcase._parent is not None:
-					raise AlreadyInHierarchyException(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 				if testcase._name in self._testcases:
-					raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
+					raise DuplicateTestcaseError(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
 
 				testcase._parent = self
 				self._testcases[testcase._name] = testcase
@@ -1473,7 +1473,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 			status = testcase._status
 			if status is TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+				raise UnittestError(f"Found testcase '{testcase._name}' with state 'Unknown'.")
 			elif TestcaseStatus.Inconsistent in status:
 				inconsistent += 1
 			elif status is TestcaseStatus.Excluded:
@@ -1489,9 +1489,9 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			elif status is TestcaseStatus.Failed:
 				failed += 1
 			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+				raise UnittestError(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
 			else:
-				raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
+				raise UnittestError(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
 		self._tests = tests
 		self._inconsistent = inconsistent
@@ -1532,11 +1532,11 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		"""
 		Add a test case to the list of test cases.
 
-		:param testcase:    The test case to add.
-		:raises ValueError: If parameter 'testcase' is None.
-		:raises TypeError:  If parameter 'testcase' is not a Testcase.
-		:raises AlreadyInHierarchyException: If parameter 'testcase' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If parameter 'testcase' is already listed (by name) in the list of test cases.
+		:param testcase:                 The test case to add.
+		:raises ValueError:              If parameter 'testcase' is None.
+		:raises TypeError:               If parameter 'testcase' is not a Testcase.
+		:raises AlreadyInHierarchyError: If parameter 'testcase' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If parameter 'testcase' is already listed (by name) in the list of test cases.
 		"""
 		if testcase is None:
 			raise ValueError("Parameter 'testcase' is None.")
@@ -1549,7 +1549,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 		if testcase._name in self._testcases:
-			raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
+			raise DuplicateTestcaseError(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
 
 		testcase._parent = self
 		self._testcases[testcase._name] = testcase

@@ -39,7 +39,7 @@ from pyEDAA.Reports        import ReportException
 
 
 @export
-class DocCoverageException(ReportException):
+class DocCoverageError(ReportException):
 	pass
 
 

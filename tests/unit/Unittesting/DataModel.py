@@ -30,7 +30,7 @@
 #
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting import DuplicateTestsuiteException, DuplicateTestcaseException, TestsuiteStatus
+from pyEDAA.Reports.Unittesting import DuplicateTestsuiteError, DuplicateTestcaseError, TestsuiteStatus
 from pyEDAA.Reports.Unittesting import TestcaseStatus, Testcase, Testsuite, TestsuiteSummary, IterationScheme
 
 
@@ -254,14 +254,14 @@ class Duplicates(ut_TestCase):
 		ts2 = Testsuite("ts1")
 
 		ts.AddTestsuite(ts1)
-		with self.assertRaises(DuplicateTestsuiteException):
+		with self.assertRaises(DuplicateTestsuiteError):
 			ts.AddTestsuite(ts2)
 
 	def test_DuplicateTestsuites(self) -> None:
 		ts1 = Testsuite("ts1")
 		ts2 = Testsuite("ts1")
 
-		with self.assertRaises(DuplicateTestsuiteException):
+		with self.assertRaises(DuplicateTestsuiteError):
 			_ = Testsuite("root", testsuites=(ts1, ts2))
 
 	def test_DuplicateTestcase(self) -> None:
@@ -271,14 +271,14 @@ class Duplicates(ut_TestCase):
 		tc2 = Testcase("tc1")
 
 		ts.AddTestcase(tc1)
-		with self.assertRaises(DuplicateTestcaseException):
+		with self.assertRaises(DuplicateTestcaseError):
 			ts.AddTestcase(tc2)
 
 	def test_DuplicateTestcases(self) -> None:
 		tc1 = Testcase("tc1")
 		tc2 = Testcase("tc1")
 
-		with self.assertRaises(DuplicateTestcaseException):
+		with self.assertRaises(DuplicateTestcaseError):
 			_ = Testsuite("root", testcases=(tc1, tc2))
 
 

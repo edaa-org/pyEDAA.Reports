@@ -129,7 +129,7 @@ Reading unittest reports
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: Ant + JUnit4
@@ -142,7 +142,7 @@ Reading unittest reports
                xmlReport = Path("AntJUnit4-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: CTest JUnit
@@ -155,7 +155,7 @@ Reading unittest reports
                xmlReport = Path("CTest-JUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: GoogleTest JUnit
@@ -168,7 +168,7 @@ Reading unittest reports
                xmlReport = Path("GoogleTest-JUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: pyTest JUnit
@@ -181,7 +181,7 @@ Reading unittest reports
                xmlReport = Path("pyTest-JUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
 
@@ -219,7 +219,7 @@ Converting unittest reports
                xmlReport = Path("JUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
                # Convert to unified test data model
@@ -434,7 +434,7 @@ Writing unittest reports
                # Write to XML file
                try:
                   newDoc.Write()
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: Ant + JUnit4
@@ -451,7 +451,7 @@ Writing unittest reports
                # Write to XML file
                try:
                   newDoc.Write()
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: CTest JUnit
@@ -468,7 +468,7 @@ Writing unittest reports
                # Write to XML file
                try:
                   newDoc.Write()
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: GoogleTest JUnit
@@ -485,7 +485,7 @@ Writing unittest reports
                # Write to XML file
                try:
                   newDoc.Write()
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...
 
          .. tab-item:: pyTest JUnit
@@ -502,5 +502,5 @@ Writing unittest reports
                # Write to XML file
                try:
                   newDoc.Write()
-               except UnittestException as ex:
+               except UnittestError as ex:
                  ...

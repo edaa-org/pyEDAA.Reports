@@ -41,7 +41,7 @@ from docstr_coverage.result_collection   import FileCount
 from pyTooling.Decorators                 import export, readonly
 from pyTooling.MetaClasses                import ExtendedType
 
-from pyEDAA.Reports.DocumentationCoverage import Class, Module, Package, CoverageState, DocCoverageException
+from pyEDAA.Reports.DocumentationCoverage import Class, Module, Package, CoverageState, DocCoverageError
 
 
 @export
@@ -575,7 +575,7 @@ class PackageCoverage(Package, AggregatedCoverage):
 
 
 @export
-class DocStrCoverageError(DocCoverageException):
+class DocStrCoverageError(DocCoverageError):
 	pass
 
 

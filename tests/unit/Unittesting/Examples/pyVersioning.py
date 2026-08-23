@@ -35,7 +35,7 @@ from typing   import List
 from unittest import TestCase as ut_TestCase
 
 from pyEDAA.Reports.Unittesting                   import MergedTestsuiteSummary, IterationScheme, TestcaseStatus
-from pyEDAA.Reports.Unittesting.JUnit             import JUnitReaderMode, UnittestException
+from pyEDAA.Reports.Unittesting.JUnit             import JUnitReaderMode, UnittestError
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
 
@@ -69,7 +69,7 @@ class pyVersioning(ut_TestCase):
 			print(f"  Parsing {file} ", end="")
 			try:
 				junitDocument = Document(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName)
-			except UnittestException as ex:
+			except UnittestError as ex:
 				exceptionCount += 1
 				print("FAILED")
 				print(f"    {ex}")
