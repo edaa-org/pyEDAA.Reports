@@ -37,6 +37,7 @@ from pyEDAA.Reports.Unittesting           import Testcase as ut_Testcase, Testca
 from pyEDAA.Reports.Unittesting           import UnittestError, TestsuiteSummary, MergedTestsuiteSummary
 from pyEDAA.Reports.Unittesting.pyTooling import Document
 from pyTooling.Testing                    import Testcase
+from pyTooling.Versioning                 import SemanticVersion
 
 
 REPORT = dedent("""\
@@ -118,7 +119,7 @@ class Reader(Testcase):
 	def test_Hierarchy(self) -> None:
 		document = Document(self._reportFile, analyzeAndConvert=True)
 
-		self.assertEqual("v0.1", document.SchemaVersion)
+		self.assertEqual(SemanticVersion(0, 1), document.SchemaVersion)
 		self.assertEqual("TestReport", document.Name)
 		self.assertEqual(6, document.TestcaseCount)
 		self.assertEqual(TestsuiteStatus.Failed, document.Status)
@@ -225,3 +226,12 @@ class Reader(Testcase):
 	def test_MissingFile(self) -> None:
 		with self.assertRaises(UnittestError):
 			_ = Document(Path("tests/data/pyTooling/missing.xml"), analyzeAndConvert=True)
+
+	def test_SchemaVersionNotAnalyzed(self) -> None:
+		document = Document(self._reportFile)
+
+		with self.assertRaises(UnittestError):
+			_ = document.SchemaVersion
+
+		document.Analyze()
+		self.assertEqual(SemanticVersion(0, 1), document.SchemaVersion)
