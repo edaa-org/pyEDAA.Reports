@@ -196,9 +196,9 @@ class Document(ju_Document):
 		"""
 		Write the data model as XML into a file adhering to the pyTest dialect.
 
-		:param path:           Optional path to the XMl file, if internal path shouldn't be used.
-		:param overwrite:      If true, overwrite an existing file.
-		:param regenerate:     If true, regenerate the XML structure from data model.
+		:param path:           Optional, path to the XML file, if internal path shouldn't be used.
+		:param overwrite:      Optional, if true, overwrite an existing file.
+		:param regenerate:     Optional, if true, regenerate the XML structure from data model.
 		:raises UnittestError: If the file cannot be overwritten.
 		:raises UnittestError: If the internal XML data structure wasn't generated.
 		:raises UnittestError: If the file cannot be opened or written.
@@ -286,7 +286,7 @@ class Document(ju_Document):
 
 		This method generates the XML root element (``<testsuites>``) and recursively calls other generated methods.
 
-		:param overwrite:      Overwrite the internal XML data structure.
+		:param overwrite:      Optional, overwrite the internal XML data structure.
 		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
 		"""
 		if not overwrite and self._xmlDocument is not None:
