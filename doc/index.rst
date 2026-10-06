@@ -177,6 +177,7 @@ This layer is used by:
 
 * `pyTooling/Actions → PublishTestResults <https://github.com/pyTooling/Actions/>`__
 * 🚧 `pyTooling/Sphinx-Reports <https://github.com/pyTooling/sphinx-reports>`__
+* 🚧 `pyTooling/pyTooling.Sphinx <https://github.com/pyTooling/pyTooling.Sphinx>`__ - its domain ``report``
 
 
 .. _CONTRIBUTORS:

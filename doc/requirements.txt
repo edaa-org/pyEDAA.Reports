@@ -15,4 +15,7 @@ autoapi >= 2.0.1
 sphinx_design ~= 0.7.0
 sphinx-copybutton >= 0.5.2
 sphinx_autodoc_typehints ~= 3.13
-sphinx_reports ~= 0.11.2
+pyTooling.Sphinx @ git+https://github.com/pyTooling/pyTooling.Sphinx.git@dev
+
+# Domain 'report': documentation coverage
+docstr_coverage ~= 2.3
