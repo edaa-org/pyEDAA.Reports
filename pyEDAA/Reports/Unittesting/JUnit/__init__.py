@@ -95,13 +95,13 @@ from __future__      import annotations
 from datetime        import datetime, timedelta
 from enum            import Flag
 from pathlib         import Path
-from time            import perf_counter_ns
 from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
 from lxml.etree                 import XMLParser, parse, XMLSchema, ElementTree, Element, SubElement, tostring
 from lxml.etree                 import XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
 from pyTooling.Common           import getFullyQualifiedName, getResourceFile
 from pyTooling.Decorators       import export, readonly
+from pyTooling.Stopwatch        import Stopwatch
 from pyTooling.Exceptions       import ToolingException
 from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmethod
 from pyTooling.Tree             import Node
@@ -1361,37 +1361,38 @@ class Document(TestsuiteSummary, ut_Document):
 			raise UnittestError(f"JUnit XML file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
 
-		startAnalysis = perf_counter_ns()
-		try:
-			xmlSchemaResourceFile = getResourceFile(Resources, xmlSchemaFile)
-		except ToolingException as ex:
-			raise UnittestError(f"Couldn't locate XML Schema '{xmlSchemaFile}' in package resources.") from ex
+		with Stopwatch() as sw:
+			try:
+				xmlSchemaResourceFile = getResourceFile(Resources, xmlSchemaFile)
+			except ToolingException as ex:
+				raise UnittestError(f"Couldn't locate XML Schema '{xmlSchemaFile}' in package resources.") from ex
 
-		try:
-			schemaParser = XMLParser(ns_clean=True)
-			schemaRoot = parse(xmlSchemaResourceFile, schemaParser)
-		except XMLSyntaxError as ex:
-			raise UnittestError(f"XML Syntax Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
+			try:
+				schemaParser = XMLParser(ns_clean=True)
+				schemaRoot = parse(xmlSchemaResourceFile, schemaParser)
+			except XMLSyntaxError as ex:
+				raise UnittestError(f"XML Syntax Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
 
-		try:
-			junitSchema = XMLSchema(schemaRoot)
-		except XMLSchemaParseError as ex:
-			raise UnittestError(f"Error while parsing XML Schema '{xmlSchemaFile}'.")
+			try:
+				junitSchema = XMLSchema(schemaRoot)
+			except XMLSchemaParseError as ex:
+				raise UnittestError(f"Error while parsing XML Schema '{xmlSchemaFile}'.")
 
-		try:
-			junitParser = XMLParser(schema=junitSchema, ns_clean=True)
-			junitDocument = parse(self._path, parser=junitParser)
+			try:
+				junitParser = XMLParser(schema=junitSchema, ns_clean=True)
+				junitDocument = parse(self._path, parser=junitParser)
 
-			self._xmlDocument = junitDocument
-		except XMLSyntaxError as ex:
-			for logEntry in junitParser.error_log:
-				ex.add_note(str(logEntry))
-			raise UnittestError(f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'.") from ex
-		except Exception as ex:
-			raise UnittestError(f"Couldn't open '{self._path}'.") from ex
+				self._xmlDocument = junitDocument
+			except XMLSyntaxError as ex:
+				for logEntry in junitParser.error_log:
+					ex.add_note(str(logEntry))
+				raise UnittestError(
+					f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'."
+				) from ex
+			except Exception as ex:
+				raise UnittestError(f"Couldn't open '{self._path}'.") from ex
 
-		endAnalysis = perf_counter_ns()
-		self._analysisDuration = (endAnalysis - startAnalysis) / 1e9
+		self._analysisDuration = sw.Duration
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
 		"""
@@ -1442,28 +1443,27 @@ class Document(TestsuiteSummary, ut_Document):
 			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
-		startConversion = perf_counter_ns()
-		rootElement: _Element = self._xmlDocument.getroot()
+		with Stopwatch() as sw:
+			rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name = self._ConvertName(rootElement, optional=True)
-		self._startTime = self._ConvertTimestamp(rootElement, optional=True)
-		self._duration = self._ConvertTime(rootElement, optional=True)
+			self._name = self._ConvertName(rootElement, optional=True)
+			self._startTime = self._ConvertTimestamp(rootElement, optional=True)
+			self._duration = self._ConvertTime(rootElement, optional=True)
 
-		if False:  # self._readerMode is JUnitReaderMode.
-			self._tests = self._ConvertTests(testsuitesNode)
-			self._skipped = self._ConvertSkipped(testsuitesNode)
-			self._errored = self._ConvertErrors(testsuitesNode)
-			self._failed = self._ConvertFailures(testsuitesNode)
-			self._assertionCount = self._ConvertAssertions(testsuitesNode)
+			if False:  # self._readerMode is JUnitReaderMode.
+				self._tests = self._ConvertTests(testsuitesNode)
+				self._skipped = self._ConvertSkipped(testsuitesNode)
+				self._errored = self._ConvertErrors(testsuitesNode)
+				self._failed = self._ConvertFailures(testsuitesNode)
+				self._assertionCount = self._ConvertAssertions(testsuitesNode)
 
-		for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
-			self._ConvertTestsuite(self, rootNode)
+			for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
+				self._ConvertTestsuite(self, rootNode)
 
-		if True:  # self._readerMode is JUnitReaderMode.
-			self.Aggregate()
+			if True:  # self._readerMode is JUnitReaderMode.
+				self.Aggregate()
 
-		endConversation = perf_counter_ns()
-		self._modelConversion = (endConversation - startConversion) / 1e9
+		self._modelConversion = sw.Duration
 
 	def _ConvertName(self, element: _Element, default: str = "root", optional: bool = True) -> str:
 		"""

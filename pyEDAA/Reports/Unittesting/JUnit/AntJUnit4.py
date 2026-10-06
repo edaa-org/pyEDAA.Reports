@@ -35,12 +35,12 @@ Reader for JUnit unit testing summary files in XML format.
 from __future__           import annotations
 
 from pathlib              import Path
-from time                 import perf_counter_ns
 from typing               import Optional as Nullable, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
 from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
 from pyTooling.Common     import firstValue
 from pyTooling.Decorators import export, InheritDocString
+from pyTooling.Stopwatch  import Stopwatch
 
 from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
@@ -241,26 +241,26 @@ class Document(ju_Document):
 			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
-		startConversion = perf_counter_ns()
-		rootElement: _Element = self._xmlDocument.getroot()
+		with Stopwatch() as sw:
+			rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name = self._ConvertName(rootElement, optional=True)
-		self._startTime =self._ConvertTimestamp(rootElement, optional=True)
-		self._duration = self._ConvertTime(rootElement, optional=True)
+			self._name = self._ConvertName(rootElement, optional=True)
+			self._startTime =self._ConvertTimestamp(rootElement, optional=True)
+			self._duration = self._ConvertTime(rootElement, optional=True)
 
-		# tests = rootElement.getAttribute("tests")
-		# skipped = rootElement.getAttribute("skipped")
-		# errors = rootElement.getAttribute("errors")
-		# failures = rootElement.getAttribute("failures")
-		# assertions = rootElement.getAttribute("assertions")
+			# tests = rootElement.getAttribute("tests")
+			# skipped = rootElement.getAttribute("skipped")
+			# errors = rootElement.getAttribute("errors")
+			# failures = rootElement.getAttribute("failures")
+			# assertions = rootElement.getAttribute("assertions")
 
-		hostname = self._ConvertHostname(rootElement, optional=True, default=None)
-		ts = Testsuite(self._name, hostname, startTime=self._startTime, duration=self._duration, parent=self)
-		self._ConvertTestsuiteChildren(rootElement, ts)
+			hostname = self._ConvertHostname(rootElement, optional=True, default=None)
+			ts = Testsuite(self._name, hostname, startTime=self._startTime, duration=self._duration, parent=self)
+			self._ConvertTestsuiteChildren(rootElement, ts)
 
-		self.Aggregate()
-		endConversation = perf_counter_ns()
-		self._modelConversion = (endConversation - startConversion) / 1e9
+			self.Aggregate()
+
+		self._modelConversion = sw.Duration
 
 	def _ConvertTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
 		"""
