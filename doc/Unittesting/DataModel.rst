@@ -270,6 +270,14 @@ Testcase
 
          :pycode:`AssertionCount := PassedAssertionCount + FailedAssertionCount`
 
+      :data:`~pyEDAA.Reports.Unittesting.TestcaseOutputMixin.Message`, :data:`~pyEDAA.Reports.Unittesting.TestcaseOutputMixin.Details`
+         A test case's status can be explained by a :dfn:`message` and :dfn:`details`, e.g. the message of a failed
+         assertion and its traceback, or why a test case was skipped. If unknown, these values are ``None``.
+
+      :data:`~pyEDAA.Reports.Unittesting.TestcaseOutputMixin.StandardOutput`, :data:`~pyEDAA.Reports.Unittesting.TestcaseOutputMixin.StandardError`
+         The test case's :dfn:`standard output` and :dfn:`standard error` captured while it ran. If not captured, these
+         values are ``None``.
+
       :meth:`~pyEDAA.Reports.Unittesting.Testcase.Copy`
         tbd
 
@@ -301,6 +309,10 @@ Testcase
                warningCount: int = 0,
                errorCount: int = 0,
                fatalCount: int = 0,
+               message: Nullable[str] = None,
+               details: Nullable[str] = None,
+               standardOutput: Nullable[str] = None,
+               standardError: Nullable[str] = None,
                parent: Nullable["Testsuite"] = None
             ):
               ...
@@ -377,6 +389,22 @@ Testcase
 
             @readonly
             def PassedAssertionCount(self) -> int:
+              ...
+
+            @readonly
+            def Message(self) -> Nullable[str]:
+              ...
+
+            @readonly
+            def Details(self) -> Nullable[str]:
+              ...
+
+            @readonly
+            def StandardOutput(self) -> Nullable[str]:
+              ...
+
+            @readonly
+            def StandardError(self) -> Nullable[str]:
               ...
 
             def Copy(self) -> "Testcase":

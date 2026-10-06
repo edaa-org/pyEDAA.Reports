@@ -652,7 +652,101 @@ class Base(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Testcase(Base):
+class TestcaseOutputMixin(metaclass=ExtendedType, mixin=True):
+	"""
+	A mixin-class adding the output of a test case run: a message, details and the captured output streams.
+
+	A test case's status can be explained by a short message and details, like the message of a failed assertion and its
+	traceback. These are the explanation of a failure, an error or why a test case was skipped. |br|
+	In addition, the test case's standard output and standard error can be captured while it runs.
+
+	All fields are ``None``, if the information wasn't recorded.
+	"""
+
+	_message:        Nullable[str]  #: Message explaining the test case's status (e.g. a failed assertion).
+	_details:        Nullable[str]  #: Details explaining the test case's status (e.g. a traceback).
+	_standardOutput: Nullable[str]  #: Captured standard output of the test case.
+	_standardError:  Nullable[str]  #: Captured standard error of the test case.
+
+	def __init__(
+		self,
+		message: Nullable[str] = None,
+		details: Nullable[str] = None,
+		standardOutput: Nullable[str] = None,
+		standardError: Nullable[str] = None
+	) -> None:
+		"""
+		Initializes the fields of the mixin-class.
+
+		:param message:        Optional, message explaining the test case's status.
+		:param details:        Optional, details explaining the test case's status.
+		:param standardOutput: Optional, captured standard output of the test case.
+		:param standardError:  Optional, captured standard error of the test case.
+		:raises TypeError:     If parameter 'message' is not a string.
+		:raises TypeError:     If parameter 'details' is not a string.
+		:raises TypeError:     If parameter 'standardOutput' is not a string.
+		:raises TypeError:     If parameter 'standardError' is not a string.
+		"""
+		for parameterName, value in (
+			("message", message), ("details", details), ("standardOutput", standardOutput), ("standardError", standardError)
+		):
+			if value is not None and not isinstance(value, str):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'str'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
+
+		self._message =        message
+		self._details =        details
+		self._standardOutput = standardOutput
+		self._standardError =  standardError
+
+	@readonly
+	def Message(self) -> Nullable[str]:
+		"""
+		Read-only property to access the message explaining the test case's status (:attr:`_message`).
+
+		In a JUnit XML file, it's the ``message`` attribute of a ``<failure>``, ``<error>`` or ``<skipped>`` element.
+
+		:returns: The message, or ``None`` if it wasn't recorded.
+		"""
+		return self._message
+
+	@readonly
+	def Details(self) -> Nullable[str]:
+		"""
+		Read-only property to access the details explaining the test case's status (:attr:`_details`).
+
+		In a JUnit XML file, it's the text of a ``<failure>``, ``<error>`` or ``<skipped>`` element, e.g. a traceback.
+
+		:returns: The details, or ``None`` if they weren't recorded.
+		"""
+		return self._details
+
+	@readonly
+	def StandardOutput(self) -> Nullable[str]:
+		"""
+		Read-only property to access the captured standard output of the test case (:attr:`_standardOutput`).
+
+		In a JUnit XML file, it's the text of a ``<system-out>`` element.
+
+		:returns: The captured standard output, or ``None`` if it wasn't recorded.
+		"""
+		return self._standardOutput
+
+	@readonly
+	def StandardError(self) -> Nullable[str]:
+		"""
+		Read-only property to access the captured standard error of the test case (:attr:`_standardError`).
+
+		In a JUnit XML file, it's the text of a ``<system-err>`` element.
+
+		:returns: The captured standard error, or ``None`` if it wasn't recorded.
+		"""
+		return self._standardError
+
+
+@export
+class Testcase(Base, TestcaseOutputMixin):
 	"""
 	A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
 
@@ -661,7 +755,8 @@ class Testcase(Base):
 	Every test case has an overall status like unknown, skipped, failed or passed.
 
 	In addition to all features from its base-class, test cases provide additional statistics for passed and failed
-	assertions (checks) as well as a sum thereof.
+	assertions (checks) as well as a sum thereof. The message and details explaining the status, as well as the
+	captured output streams are provided by :class:`TestcaseOutputMixin`.
 	"""
 
 	_status:               TestcaseStatus
@@ -688,6 +783,10 @@ class Testcase(Base):
 		expectedErrorCount: int = 0,
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		message: Nullable[str] = None,
+		details: Nullable[str] = None,
+		standardOutput: Nullable[str] = None,
+		standardError: Nullable[str] = None,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
@@ -706,7 +805,14 @@ class Testcase(Base):
 		:param warningCount:         Count of encountered warnings.
 		:param errorCount:           Count of encountered errors.
 		:param fatalCount:           Count of encountered fatal errors.
+		:param expectedWarningCount: Count of expected warnings.
+		:param expectedErrorCount:   Count of expected errors.
+		:param expectedFatalCount:   Count of expected fatal errors.
 		:param keyValuePairs:        Mapping of key-value pairs to initialize the test case.
+		:param message:              Optional, message explaining the test case's status.
+		:param details:              Optional, details explaining the test case's status (e.g. a traceback).
+		:param standardOutput:       Optional, captured standard output of the test case.
+		:param standardError:        Optional, captured standard error of the test case.
 		:param parent:               Reference to the parent test suite.
 		:raises TypeError:           If parameter 'parent' is not a Testsuite.
 		:raises ValueError:          If parameter 'assertionCount' is not consistent.
@@ -729,6 +835,7 @@ class Testcase(Base):
 			keyValuePairs,
 			parent=parent
 		)
+		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
 		if not isinstance(status, TestcaseStatus):
 			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
@@ -830,12 +937,19 @@ class Testcase(Base):
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
-			self._warningCount,
-			self._errorCount,
-			self._fatalCount,
-			self._expectedWarningCount,
-			self._expectedErrorCount,
-			self._expectedFatalCount,
+			self._assertionCount,
+			self._failedAssertionCount,
+			self._passedAssertionCount,
+			warningCount=self._warningCount,
+			errorCount=self._errorCount,
+			fatalCount=self._fatalCount,
+			expectedWarningCount=self._expectedWarningCount,
+			expectedErrorCount=self._expectedErrorCount,
+			expectedFatalCount=self._expectedFatalCount,
+			message=self._message,
+			details=self._details,
+			standardOutput=self._standardOutput,
+			standardError=self._standardError
 		)
 		# TODO: copy key-value-pairs?
 
@@ -1836,7 +1950,14 @@ class Combined(metaclass=ExtendedType, mixin=True):
 
 @export
 class MergedTestcase(Testcase, Merged):
-	_mergedTestcases: List[Testcase]
+	"""
+	A test case merged from the same test case found in multiple test reports.
+
+	The message, details and captured output streams (see :class:`TestcaseOutputMixin`) are taken from the first merged
+	test case that has them.
+	"""
+
+	_mergedTestcases: List[Testcase]  #: List of test cases merged into this test case.
 
 	def __init__(
 		self,
@@ -1854,6 +1975,10 @@ class MergedTestcase(Testcase, Merged):
 			testcase._assertionCount, testcase._failedAssertionCount, testcase._passedAssertionCount,
 			testcase._warningCount, testcase._errorCount, testcase._fatalCount,
 			testcase._expectedWarningCount, testcase._expectedErrorCount, testcase._expectedFatalCount,
+			message=testcase._message,
+			details=testcase._details,
+			standardOutput=testcase._standardOutput,
+			standardError=testcase._standardError,
 			parent=parent
 		)
 		Merged.__init__(self)
@@ -1923,6 +2048,14 @@ class MergedTestcase(Testcase, Merged):
 		return warningCount, errorCount, fatalCount, self._expectedWarningCount, self._expectedErrorCount, self._expectedFatalCount, totalDuration
 
 	def Merge(self, tc: Testcase) -> None:
+		"""
+		Merge another occurrence of this test case into this merged test case.
+
+		Warning, error and fatal counts are summed up. The message, details and captured output streams are kept from the
+		first merged test case that has them.
+
+		:param tc: The test case to merge.
+		"""
 		self._mergedCount += 1
 
 		self._mergedTestcases.append(tc)
@@ -1930,6 +2063,18 @@ class MergedTestcase(Testcase, Merged):
 		self._warningCount += tc._warningCount
 		self._errorCount += tc._errorCount
 		self._fatalCount += tc._fatalCount
+
+		if self._message is None:
+			self._message = tc._message
+
+		if self._details is None:
+			self._details = tc._details
+
+		if self._standardOutput is None:
+			self._standardOutput = tc._standardOutput
+
+		if self._standardError is None:
+			self._standardError = tc._standardError
 
 	def ToTestcase(self) -> Testcase:
 		return Testcase(
@@ -1945,7 +2090,11 @@ class MergedTestcase(Testcase, Merged):
 			self._passedAssertionCount,
 			self._warningCount,
 			self._errorCount,
-			self._fatalCount
+			self._fatalCount,
+			message=self._message,
+			details=self._details,
+			standardOutput=self._standardOutput,
+			standardError=self._standardError
 		)
 
 

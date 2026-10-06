@@ -109,6 +109,7 @@ from pyTooling.Tree             import Node
 from pyEDAA.Reports             import Resources
 from pyEDAA.Reports.Unittesting import UnittestError, AlreadyInHierarchyError, DuplicateTestsuiteError, DuplicateTestcaseError
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, TestsuiteKind, IterationScheme
+from pyEDAA.Reports.Unittesting import TestcaseOutputMixin
 from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
 from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut_Testcase
 
@@ -374,14 +375,16 @@ class BaseWithProperties(Base):
 
 
 @export
-class Testcase(BaseWithProperties):
+class Testcase(BaseWithProperties, TestcaseOutputMixin):
 	"""
 	A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
 
 	Test cases are grouped by test classes in the test entity hierarchy. These are again grouped by test suites. The root
 	of the hierarchy is a test summary.
 
-	Every test case has an overall status like unknown, skipped, failed or passed.
+	Every test case has an overall status like unknown, skipped, failed or passed. The message and details of a
+	``<failure>``, ``<error>`` or ``<skipped>`` element, as well as the captured output of ``<system-out>`` and
+	``<system-err>`` are provided by :class:`~pyEDAA.Reports.Unittesting.TestcaseOutputMixin`.
 	"""
 
 	_status:         TestcaseStatus
@@ -392,6 +395,10 @@ class Testcase(BaseWithProperties):
 		duration:  Nullable[timedelta] = None,
 		status: TestcaseStatus = TestcaseStatus.Unknown,
 		assertionCount: Nullable[int] = None,
+		message: Nullable[str] = None,
+		details: Nullable[str] = None,
+		standardOutput: Nullable[str] = None,
+		standardError: Nullable[str] = None,
 		parent: Nullable[Testclass] = None
 	) -> None:
 		"""
@@ -401,8 +408,12 @@ class Testcase(BaseWithProperties):
 		:param duration:       Duration of the entity's execution.
 		:param status:         Status of the test case.
 		:param assertionCount: Number of assertions within the test.
+		:param message:        Optional, message explaining the test case's status.
+		:param details:        Optional, details explaining the test case's status (e.g. a traceback).
+		:param standardOutput: Optional, captured standard output of the test case.
+		:param standardError:  Optional, captured standard error of the test case.
 		:param parent:         Reference to the parent test class.
-		:raises TypeError:     If parameter 'parent' is not a Testsuite.
+		:raises TypeError:     If parameter 'parent' is not a Testclass.
 		:raises ValueError:    If parameter 'assertionCount' is not consistent.
 		"""
 		if parent is not None:
@@ -414,6 +425,7 @@ class Testcase(BaseWithProperties):
 			parent._testcases[name] = self
 
 		super().__init__(name, duration, assertionCount, parent)
+		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
 		if not isinstance(status, TestcaseStatus):
 			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
@@ -468,7 +480,11 @@ class Testcase(BaseWithProperties):
 			self._name,
 			self._duration,
 			self._status,
-			self._assertionCount
+			self._assertionCount,
+			self._message,
+			self._details,
+			self._standardOutput,
+			self._standardError
 		)
 
 	def Aggregate(self) -> None:
@@ -495,7 +511,11 @@ class Testcase(BaseWithProperties):
 			testcase._name,
 			duration=testcase._testDuration,
 			status= testcase._status,
-			assertionCount=testcase._assertionCount
+			assertionCount=testcase._assertionCount,
+			message=testcase._message,
+			details=testcase._details,
+			standardOutput=testcase._standardOutput,
+			standardError=testcase._standardError
 		)
 
 	def ToTestcase(self) -> ut_Testcase:
@@ -505,7 +525,11 @@ class Testcase(BaseWithProperties):
 			status=self._status,
 			assertionCount=self._assertionCount,
 			# TODO: as only assertions are recorded by JUnit files, all are marked as passed
-			passedAssertionCount=self._assertionCount
+			passedAssertionCount=self._assertionCount,
+			message=self._message,
+			details=self._details,
+			standardOutput=self._standardOutput,
+			standardError=self._standardError
 		)
 
 	def ToTree(self) -> Node:
@@ -1664,20 +1688,44 @@ class Document(TestsuiteSummary, ut_Document):
 			return self._TESTCLASS(className, parent=parent)
 
 	def _ConvertTestcaseChildren(self, testcaseNode: _Element, newTestcase: Testcase) -> None:
+		"""
+		Convert the child elements of a ``<testcase>`` to the test case's status, message, details and captured output.
+
+		A ``<skipped>``, ``<failure>`` or ``<error>`` element sets the status. Its ``message`` attribute becomes the test
+		case's message, its text becomes the test case's details. The texts of ``<system-out>`` and ``<system-err>``
+		become the captured standard output and standard error; multiple such elements are concatenated.
+
+		:param testcaseNode:   The current XML element node representing a test case.
+		:param newTestcase:    The test case to update.
+		:raises UnittestError: If an unknown element is found.
+		"""
 		for node in testcaseNode.iterchildren():   # type: _Element
 			if isinstance(node, _Comment):
 				pass
 			elif isinstance(node, _Element):
 				if node.tag == "skipped":
 					newTestcase._status = TestcaseStatus.Skipped
+					self._ConvertStatusMessage(node, newTestcase)
 				elif node.tag == "failure":
 					newTestcase._status = TestcaseStatus.Failed
+					self._ConvertStatusMessage(node, newTestcase)
 				elif node.tag == "error":
 					newTestcase._status = TestcaseStatus.Errored
+					self._ConvertStatusMessage(node, newTestcase)
 				elif node.tag == "system-out":
-					pass
+					if node.text is None:
+						pass
+					elif newTestcase._standardOutput is None:
+						newTestcase._standardOutput = node.text
+					else:
+						newTestcase._standardOutput += node.text
 				elif node.tag == "system-err":
-					pass
+					if node.text is None:
+						pass
+					elif newTestcase._standardError is None:
+						newTestcase._standardError = node.text
+					else:
+						newTestcase._standardError += node.text
 				elif node.tag == "properties":
 					pass
 				else:
@@ -1687,6 +1735,18 @@ class Document(TestsuiteSummary, ut_Document):
 
 		if newTestcase._status is TestcaseStatus.Unknown:
 			newTestcase._status = TestcaseStatus.Passed
+
+	def _ConvertStatusMessage(self, element: _Element, testcase: Testcase) -> None:
+		"""
+		Convert the ``message`` attribute and the text of a ``<skipped>``, ``<failure>`` or ``<error>`` element.
+
+		An empty text (only whitespace) is not recorded.
+
+		:param element:  The XML element node explaining the test case's status.
+		:param testcase: The test case to update.
+		"""
+		testcase._message = element.attrib.get("message", None)
+		testcase._details = None if element.text is None or element.text.strip() == "" else element.text
 
 	def Generate(self, overwrite: bool = False) -> None:
 		"""
@@ -1764,14 +1824,40 @@ class Document(TestsuiteSummary, ut_Document):
 		if testcase._assertionCount is not None:
 			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
 
+		self._GenerateTestcaseChildren(testcase, testcaseElement)
+
+	def _GenerateTestcaseChildren(self, testcase: Testcase, testcaseElement: _Element) -> None:
+		"""
+		Generate the child elements of a ``<testcase>`` from the test case's status, message, details and captured output.
+
+		A failed, skipped or errored test case gets a ``<failure>``, ``<skipped>`` or ``<error>`` element carrying the
+		message (``message`` attribute) and details (text). Captured standard output and standard error are written as
+		``<system-out>`` and ``<system-err>`` elements.
+
+		:param testcase:        The test case to convert to XML child elements.
+		:param testcaseElement: The ``<testcase>`` element, the child elements will be added to.
+		"""
 		if testcase._status is TestcaseStatus.Passed:
-			pass
+			statusElement = None
 		elif testcase._status is TestcaseStatus.Failed:
-			failureElement = SubElement(testcaseElement, "failure")
+			statusElement = SubElement(testcaseElement, "failure")
 		elif testcase._status is TestcaseStatus.Skipped:
-			skippedElement = SubElement(testcaseElement, "skipped")
+			statusElement = SubElement(testcaseElement, "skipped")
 		else:
-			errorElement = SubElement(testcaseElement, "error")
+			statusElement = SubElement(testcaseElement, "error")
+
+		if statusElement is not None:
+			if testcase._message is not None:
+				statusElement.attrib["message"] = testcase._message
+
+			if testcase._details is not None:
+				statusElement.text = testcase._details
+
+		if testcase._standardOutput is not None:
+			SubElement(testcaseElement, "system-out").text = testcase._standardOutput
+
+		if testcase._standardError is not None:
+			SubElement(testcaseElement, "system-err").text = testcase._standardError
 
 	def __str__(self) -> str:
 		moduleName = self.__module__.split(".")[-1]
