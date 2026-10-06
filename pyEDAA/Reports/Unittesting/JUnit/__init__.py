@@ -395,11 +395,11 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		duration:  Nullable[timedelta] = None,
 		status: TestcaseStatus = TestcaseStatus.Unknown,
 		assertionCount: Nullable[int] = None,
-		parent: Nullable[Testclass] = None,
 		message: Nullable[str] = None,
 		details: Nullable[str] = None,
 		standardOutput: Nullable[str] = None,
-		errorOutput: Nullable[str] = None
+		standardError: Nullable[str] = None,
+		parent: Nullable[Testclass] = None
 	) -> None:
 		"""
 		Initializes the fields of a test case.
@@ -408,12 +408,12 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		:param duration:       Duration of the entity's execution.
 		:param status:         Status of the test case.
 		:param assertionCount: Number of assertions within the test.
-		:param parent:         Reference to the parent test class.
 		:param message:        Optional, message explaining the test case's status.
 		:param details:        Optional, details explaining the test case's status (e.g. a traceback).
 		:param standardOutput: Optional, captured standard output of the test case.
-		:param errorOutput:    Optional, captured error output of the test case.
-		:raises TypeError:     If parameter 'parent' is not a Testsuite.
+		:param standardError:  Optional, captured standard error of the test case.
+		:param parent:         Reference to the parent test class.
+		:raises TypeError:     If parameter 'parent' is not a Testclass.
 		:raises ValueError:    If parameter 'assertionCount' is not consistent.
 		"""
 		if parent is not None:
@@ -425,7 +425,7 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 			parent._testcases[name] = self
 
 		super().__init__(name, duration, assertionCount, parent)
-		TestcaseOutputMixin.__init__(self, message, details, standardOutput, errorOutput)
+		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
 		if not isinstance(status, TestcaseStatus):
 			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
@@ -481,10 +481,10 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 			self._duration,
 			self._status,
 			self._assertionCount,
-			message=self._message,
-			details=self._details,
-			standardOutput=self._standardOutput,
-			errorOutput=self._errorOutput
+			self._message,
+			self._details,
+			self._standardOutput,
+			self._standardError
 		)
 
 	def Aggregate(self) -> None:
@@ -515,7 +515,7 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 			message=testcase._message,
 			details=testcase._details,
 			standardOutput=testcase._standardOutput,
-			errorOutput=testcase._errorOutput
+			standardError=testcase._standardError
 		)
 
 	def ToTestcase(self) -> ut_Testcase:
@@ -529,7 +529,7 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 			message=self._message,
 			details=self._details,
 			standardOutput=self._standardOutput,
-			errorOutput=self._errorOutput
+			standardError=self._standardError
 		)
 
 	def ToTree(self) -> Node:
@@ -1693,7 +1693,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		A ``<skipped>``, ``<failure>`` or ``<error>`` element sets the status. Its ``message`` attribute becomes the test
 		case's message, its text becomes the test case's details. The texts of ``<system-out>`` and ``<system-err>``
-		become the captured standard output and error output; multiple such elements are concatenated.
+		become the captured standard output and standard error; multiple such elements are concatenated.
 
 		:param testcaseNode:   The current XML element node representing a test case.
 		:param newTestcase:    The test case to update.
@@ -1722,10 +1722,10 @@ class Document(TestsuiteSummary, ut_Document):
 				elif node.tag == "system-err":
 					if node.text is None:
 						pass
-					elif newTestcase._errorOutput is None:
-						newTestcase._errorOutput = node.text
+					elif newTestcase._standardError is None:
+						newTestcase._standardError = node.text
 					else:
-						newTestcase._errorOutput += node.text
+						newTestcase._standardError += node.text
 				elif node.tag == "properties":
 					pass
 				else:
@@ -1831,7 +1831,7 @@ class Document(TestsuiteSummary, ut_Document):
 		Generate the child elements of a ``<testcase>`` from the test case's status, message, details and captured output.
 
 		A failed, skipped or errored test case gets a ``<failure>``, ``<skipped>`` or ``<error>`` element carrying the
-		message (``message`` attribute) and details (text). Captured standard output and error output are written as
+		message (``message`` attribute) and details (text). Captured standard output and standard error are written as
 		``<system-out>`` and ``<system-err>`` elements.
 
 		:param testcase:        The test case to convert to XML child elements.
@@ -1856,8 +1856,8 @@ class Document(TestsuiteSummary, ut_Document):
 		if testcase._standardOutput is not None:
 			SubElement(testcaseElement, "system-out").text = testcase._standardOutput
 
-		if testcase._errorOutput is not None:
-			SubElement(testcaseElement, "system-err").text = testcase._errorOutput
+		if testcase._standardError is not None:
+			SubElement(testcaseElement, "system-err").text = testcase._standardError
 
 	def __str__(self) -> str:
 		moduleName = self.__module__.split(".")[-1]

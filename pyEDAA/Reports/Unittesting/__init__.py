@@ -658,7 +658,7 @@ class TestcaseOutputMixin(metaclass=ExtendedType, mixin=True):
 
 	A test case's status can be explained by a short message and details, like the message of a failed assertion and its
 	traceback. These are the explanation of a failure, an error or why a test case was skipped. |br|
-	In addition, the test case's standard output and error output can be captured while it runs.
+	In addition, the test case's standard output and standard error can be captured while it runs.
 
 	All fields are ``None``, if the information wasn't recorded.
 	"""
@@ -666,14 +666,14 @@ class TestcaseOutputMixin(metaclass=ExtendedType, mixin=True):
 	_message:        Nullable[str]  #: Message explaining the test case's status (e.g. a failed assertion).
 	_details:        Nullable[str]  #: Details explaining the test case's status (e.g. a traceback).
 	_standardOutput: Nullable[str]  #: Captured standard output of the test case.
-	_errorOutput:    Nullable[str]  #: Captured error output of the test case.
+	_standardError:  Nullable[str]  #: Captured standard error of the test case.
 
 	def __init__(
 		self,
 		message: Nullable[str] = None,
 		details: Nullable[str] = None,
 		standardOutput: Nullable[str] = None,
-		errorOutput: Nullable[str] = None
+		standardError: Nullable[str] = None
 	) -> None:
 		"""
 		Initializes the fields of the mixin-class.
@@ -681,14 +681,14 @@ class TestcaseOutputMixin(metaclass=ExtendedType, mixin=True):
 		:param message:        Optional, message explaining the test case's status.
 		:param details:        Optional, details explaining the test case's status.
 		:param standardOutput: Optional, captured standard output of the test case.
-		:param errorOutput:    Optional, captured error output of the test case.
+		:param standardError:  Optional, captured standard error of the test case.
 		:raises TypeError:     If parameter 'message' is not a string.
 		:raises TypeError:     If parameter 'details' is not a string.
 		:raises TypeError:     If parameter 'standardOutput' is not a string.
-		:raises TypeError:     If parameter 'errorOutput' is not a string.
+		:raises TypeError:     If parameter 'standardError' is not a string.
 		"""
 		for parameterName, value in (
-			("message", message), ("details", details), ("standardOutput", standardOutput), ("errorOutput", errorOutput)
+			("message", message), ("details", details), ("standardOutput", standardOutput), ("standardError", standardError)
 		):
 			if value is not None and not isinstance(value, str):
 				ex = TypeError(f"Parameter '{parameterName}' is not of type 'str'.")
@@ -698,7 +698,7 @@ class TestcaseOutputMixin(metaclass=ExtendedType, mixin=True):
 		self._message =        message
 		self._details =        details
 		self._standardOutput = standardOutput
-		self._errorOutput =    errorOutput
+		self._standardError =  standardError
 
 	@readonly
 	def Message(self) -> Nullable[str]:
@@ -734,15 +734,15 @@ class TestcaseOutputMixin(metaclass=ExtendedType, mixin=True):
 		return self._standardOutput
 
 	@readonly
-	def ErrorOutput(self) -> Nullable[str]:
+	def StandardError(self) -> Nullable[str]:
 		"""
-		Read-only property to access the captured error output of the test case (:attr:`_errorOutput`).
+		Read-only property to access the captured standard error of the test case (:attr:`_standardError`).
 
 		In a JUnit XML file, it's the text of a ``<system-err>`` element.
 
-		:returns: The captured error output, or ``None`` if it wasn't recorded.
+		:returns: The captured standard error, or ``None`` if it wasn't recorded.
 		"""
-		return self._errorOutput
+		return self._standardError
 
 
 @export
@@ -783,11 +783,11 @@ class Testcase(Base, TestcaseOutputMixin):
 		expectedErrorCount: int = 0,
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable[Testsuite] = None,
 		message: Nullable[str] = None,
 		details: Nullable[str] = None,
 		standardOutput: Nullable[str] = None,
-		errorOutput: Nullable[str] = None
+		standardError: Nullable[str] = None,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of a test case.
@@ -809,11 +809,11 @@ class Testcase(Base, TestcaseOutputMixin):
 		:param expectedErrorCount:   Count of expected errors.
 		:param expectedFatalCount:   Count of expected fatal errors.
 		:param keyValuePairs:        Mapping of key-value pairs to initialize the test case.
-		:param parent:               Reference to the parent test suite.
 		:param message:              Optional, message explaining the test case's status.
 		:param details:              Optional, details explaining the test case's status (e.g. a traceback).
 		:param standardOutput:       Optional, captured standard output of the test case.
-		:param errorOutput:          Optional, captured error output of the test case.
+		:param standardError:        Optional, captured standard error of the test case.
+		:param parent:               Reference to the parent test suite.
 		:raises TypeError:           If parameter 'parent' is not a Testsuite.
 		:raises ValueError:          If parameter 'assertionCount' is not consistent.
 		"""
@@ -835,7 +835,7 @@ class Testcase(Base, TestcaseOutputMixin):
 			keyValuePairs,
 			parent=parent
 		)
-		TestcaseOutputMixin.__init__(self, message, details, standardOutput, errorOutput)
+		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
 		if not isinstance(status, TestcaseStatus):
 			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
@@ -949,7 +949,7 @@ class Testcase(Base, TestcaseOutputMixin):
 			message=self._message,
 			details=self._details,
 			standardOutput=self._standardOutput,
-			errorOutput=self._errorOutput
+			standardError=self._standardError
 		)
 		# TODO: copy key-value-pairs?
 
@@ -1975,11 +1975,11 @@ class MergedTestcase(Testcase, Merged):
 			testcase._assertionCount, testcase._failedAssertionCount, testcase._passedAssertionCount,
 			testcase._warningCount, testcase._errorCount, testcase._fatalCount,
 			testcase._expectedWarningCount, testcase._expectedErrorCount, testcase._expectedFatalCount,
-			parent=parent,
 			message=testcase._message,
 			details=testcase._details,
 			standardOutput=testcase._standardOutput,
-			errorOutput=testcase._errorOutput
+			standardError=testcase._standardError,
+			parent=parent
 		)
 		Merged.__init__(self)
 
@@ -2073,8 +2073,8 @@ class MergedTestcase(Testcase, Merged):
 		if self._standardOutput is None:
 			self._standardOutput = tc._standardOutput
 
-		if self._errorOutput is None:
-			self._errorOutput = tc._errorOutput
+		if self._standardError is None:
+			self._standardError = tc._standardError
 
 	def ToTestcase(self) -> Testcase:
 		return Testcase(
@@ -2094,7 +2094,7 @@ class MergedTestcase(Testcase, Merged):
 			message=self._message,
 			details=self._details,
 			standardOutput=self._standardOutput,
-			errorOutput=self._errorOutput
+			standardError=self._standardError
 		)
 
 

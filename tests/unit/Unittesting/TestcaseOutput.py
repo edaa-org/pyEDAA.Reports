@@ -70,23 +70,23 @@ class DataModel(Testcase):
 		self.assertIsNone(testcase.Message)
 		self.assertIsNone(testcase.Details)
 		self.assertIsNone(testcase.StandardOutput)
-		self.assertIsNone(testcase.ErrorOutput)
+		self.assertIsNone(testcase.StandardError)
 
 	def test_Values(self) -> None:
-		testcase = ut_Testcase("tc", message="msg", details="trace", standardOutput="out", errorOutput="err")
+		testcase = ut_Testcase("tc", message="msg", details="trace", standardOutput="out", standardError="err")
 
 		self.assertEqual("msg", testcase.Message)
 		self.assertEqual("trace", testcase.Details)
 		self.assertEqual("out", testcase.StandardOutput)
-		self.assertEqual("err", testcase.ErrorOutput)
+		self.assertEqual("err", testcase.StandardError)
 
 	def test_Values_JUnit(self) -> None:
-		testcase = ju_Testcase("tc", message="msg", details="trace", standardOutput="out", errorOutput="err")
+		testcase = ju_Testcase("tc", message="msg", details="trace", standardOutput="out", standardError="err")
 
 		self.assertEqual("msg", testcase.Message)
 		self.assertEqual("trace", testcase.Details)
 		self.assertEqual("out", testcase.StandardOutput)
-		self.assertEqual("err", testcase.ErrorOutput)
+		self.assertEqual("err", testcase.StandardError)
 
 	def test_WrongType(self) -> None:
 		with self.assertRaises(TypeError) as context:
@@ -96,25 +96,25 @@ class DataModel(Testcase):
 		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 	def test_Copy(self) -> None:
-		testcase = ut_Testcase("tc", message="msg", details="trace", standardOutput="out", errorOutput="err")
+		testcase = ut_Testcase("tc", message="msg", details="trace", standardOutput="out", standardError="err")
 
 		copy = testcase.Copy()
 
 		self.assertEqual("msg", copy.Message)
 		self.assertEqual("trace", copy.Details)
 		self.assertEqual("out", copy.StandardOutput)
-		self.assertEqual("err", copy.ErrorOutput)
+		self.assertEqual("err", copy.StandardError)
 
 	def test_Conversion(self) -> None:
 		"""The JUnit data model and the unified data model convert the fields into each other."""
-		testcase = ju_Testcase("tc", message="msg", details="trace", standardOutput="out", errorOutput="err")
+		testcase = ju_Testcase("tc", message="msg", details="trace", standardOutput="out", standardError="err")
 
 		converted = ju_Testcase.FromTestcase(testcase.ToTestcase())
 
 		self.assertEqual("msg", converted.Message)
 		self.assertEqual("trace", converted.Details)
 		self.assertEqual("out", converted.StandardOutput)
-		self.assertEqual("err", converted.ErrorOutput)
+		self.assertEqual("err", converted.StandardError)
 
 
 class Merging(Testcase):
@@ -123,14 +123,14 @@ class Merging(Testcase):
 	def test_FirstNonNone(self) -> None:
 		merged = MergedTestcase(ut_Testcase("tc", standardOutput="out1"))
 		merged.Merge(ut_Testcase("tc", message="msg2", standardOutput="out2"))
-		merged.Merge(ut_Testcase("tc", message="msg3", errorOutput="err3"))
+		merged.Merge(ut_Testcase("tc", message="msg3", standardError="err3"))
 
 		testcase = merged.ToTestcase()
 
 		self.assertEqual("msg2", testcase.Message)
 		self.assertIsNone(testcase.Details)
 		self.assertEqual("out1", testcase.StandardOutput)
-		self.assertEqual("err3", testcase.ErrorOutput)
+		self.assertEqual("err3", testcase.StandardError)
 
 
 class JUnitReader(Testcase):
@@ -156,14 +156,14 @@ class JUnitReader(Testcase):
 		self.assertIsNone(passed.Message)
 		self.assertIsNone(passed.Details)
 		self.assertIsNone(passed.StandardOutput)
-		self.assertIsNone(passed.ErrorOutput)
+		self.assertIsNone(passed.StandardError)
 
 		failed = testcases["test_Failed"]
 		self.assertEqual(TestcaseStatus.Failed, failed.Status)
 		self.assertEqual("AssertionError: assert 1 == 2", failed.Message)
 		self.assertEqual("Traceback (most recent call last):\nAssertionError: assert 1 == 2", failed.Details)
 		self.assertEqual("Hello stdout", failed.StandardOutput)
-		self.assertEqual("Hello stderr", failed.ErrorOutput)
+		self.assertEqual("Hello stderr", failed.StandardError)
 
 		errored = testcases["test_Errored"]
 		self.assertEqual(TestcaseStatus.Errored, errored.Status)
@@ -187,7 +187,7 @@ class JUnitReader(Testcase):
 		self.assertEqual("AssertionError: assert 1 == 2", failed.Message)
 		self.assertEqual("Traceback (most recent call last):\nAssertionError: assert 1 == 2", failed.Details)
 		self.assertEqual("Hello stdout", failed.StandardOutput)
-		self.assertEqual("Hello stderr", failed.ErrorOutput)
+		self.assertEqual("Hello stderr", failed.StandardError)
 
 	def test_RoundTrip(self) -> None:
 		"""A written report carries the fields, so reading it back restores them."""
@@ -203,7 +203,7 @@ class JUnitReader(Testcase):
 		self.assertEqual("AssertionError: assert 1 == 2", failed.Message)
 		self.assertEqual("Traceback (most recent call last):\nAssertionError: assert 1 == 2", failed.Details)
 		self.assertEqual("Hello stdout", failed.StandardOutput)
-		self.assertEqual("Hello stderr", failed.ErrorOutput)
+		self.assertEqual("Hello stderr", failed.StandardError)
 
 		skipped = testcases["test_Skipped"]
 		self.assertEqual(TestcaseStatus.Skipped, skipped.Status)
