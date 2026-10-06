@@ -17,13 +17,18 @@ a page of the :ref:`schema overview <SCHEMAS>`.
 
 .. rubric:: Usage
 
+:func:`~pyTooling.Common.getResourceFile` returns a resource file's **path**, for handing the file to another tool, and
+:func:`~pyTooling.Common.readResourceFile` returns its **content**, for reading it directly.
+
 .. admonition:: ``example.py``
 
    .. code-block:: python
 
       from pathlib          import Path
-      from pyEDAA.Reports   import Resources
-      from pyTooling.Common import getResourceFile
+      from pyTooling.Common import getResourceFile, readResourceFile
 
-      schemaPath: Path = getResourceFile(Resources, "PyTest-JUnit.xsd")
+      from pyEDAA.Reports   import Resources  # Declare a module name that can be handed over.
+
+      schemaPath:    Path = getResourceFile(Resources, "PyTest-JUnit.xsd")
+      schemaContent: str  = readResourceFile(Resources, "PyTest-JUnit.xsd")
 """

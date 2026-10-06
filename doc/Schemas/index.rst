@@ -1,7 +1,7 @@
 .. _SCHEMAS:
 
-Overview
-########
+Schemas
+#######
 
 pyEDAA.Reports ships the **XML schemas** of the file formats it reads, and validates every file against the schema
 of its format before converting it. Each schema is listed here with its full source, ready to read, to copy, or to
@@ -43,17 +43,22 @@ Available schemas
 Reaching a schema from Python
 *****************************
 
-The schemas are shipped in the resource package :mod:`pyEDAA.Reports.Resources`:
+The schemas are shipped in the resource package :mod:`pyEDAA.Reports.Resources`. Two functions of pyTooling reach a
+resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkout:
+:func:`~pyTooling.Common.getResourceFile` returns its **path**, for handing the file to another tool, and
+:func:`~pyTooling.Common.readResourceFile` returns its **content**, for reading it directly.
 
 .. admonition:: ``example.py``
 
    .. code-block:: python
 
       from pathlib          import Path
-      from pyEDAA.Reports   import Resources
-      from pyTooling.Common import getResourceFile
+      from pyTooling.Common import getResourceFile, readResourceFile
 
-      schemaPath: Path = getResourceFile(Resources, "PyTest-JUnit.xsd")
+      from pyEDAA.Reports   import Resources  # Declare a module name that can be handed over.
+
+      schemaPath:    Path = getResourceFile(Resources, "PyTest-JUnit.xsd")
+      schemaContent: str  = readResourceFile(Resources, "PyTest-JUnit.xsd")
 
 .. toctree::
    :hidden:
