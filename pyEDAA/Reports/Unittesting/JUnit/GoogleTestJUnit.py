@@ -54,7 +54,7 @@ TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
 
 
 @export
-@InheritDocString(ju_Testcase, DocStringMergeStrategy.BaseFirst)
+@InheritDocString(ju_Testcase, DocStringMergeStrategy.BaseLast)
 class Testcase(ju_Testcase):
 	"""
 	This is a derived implementation for the GoogleTest JUnit dialect.
@@ -62,7 +62,7 @@ class Testcase(ju_Testcase):
 
 
 @export
-@InheritDocString(ju_Testclass, DocStringMergeStrategy.BaseFirst)
+@InheritDocString(ju_Testclass, DocStringMergeStrategy.BaseLast)
 class Testclass(ju_Testclass):
 	"""
 	This is a derived implementation for the GoogleTest JUnit dialect.
@@ -70,7 +70,7 @@ class Testclass(ju_Testclass):
 
 
 @export
-@InheritDocString(ju_Testsuite, DocStringMergeStrategy.BaseFirst)
+@InheritDocString(ju_Testsuite, DocStringMergeStrategy.BaseLast)
 class Testsuite(ju_Testsuite):
 	"""
 	This is a derived implementation for the GoogleTest JUnit dialect.
@@ -121,7 +121,7 @@ class Testsuite(ju_Testsuite):
 
 
 @export
-@InheritDocString(ju_TestsuiteSummary, DocStringMergeStrategy.BaseFirst)
+@InheritDocString(ju_TestsuiteSummary, DocStringMergeStrategy.BaseLast)
 class TestsuiteSummary(ju_TestsuiteSummary):
 	"""
 	This is a derived implementation for the GoogleTest JUnit dialect.
