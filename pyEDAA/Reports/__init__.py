@@ -31,6 +31,8 @@
 """
 Various report abstract data models and report format converters.
 """
+from __future__           import annotations
+
 __author__ =            "Patrick Lehmann"
 __email__ =             "Paebbels@gmail.com"
 __copyright__ =         "2021-2026, Electronic Design Automation Abstraction (EDA²)"

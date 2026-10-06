@@ -46,6 +46,8 @@ At next use this layer's service program to convert from UCDB to Cobertura forma
 
    pyedaa-ucis export --ucdb ucdb.xml --cobertura cobertura.xml
 """
+from __future__ import annotations
+
 from typing   import ClassVar, NoReturn, Optional as Nullable
 
 from argparse import RawDescriptionHelpFormatter, Namespace
