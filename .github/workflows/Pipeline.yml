@@ -249,11 +249,13 @@ jobs:
   PublishToGitHubPages:
     uses: pyTooling/Actions/.github/workflows/PublishToGitHubPages.yml@r8
     needs:
+      - Prepare
       - UnitTestingParams
       - Documentation
 #      - PDFDocumentation
       - PublishCoverageResults
       - StaticTypeCheck
+    if: needs.Prepare.outputs.publish_pages == 'true'
     with:
       doc:      ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).documentation_html }}
       coverage: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).codecoverage_html }}
@@ -268,7 +270,11 @@ jobs:
       - Package
       - AppTesting
       - PublishToGitHubPages
-    if: needs.Prepare.outputs.is_release_commit == 'true' && github.event_name != 'schedule'
+    if: >-
+      ${{ !failure() && !cancelled()
+       && needs.Prepare.outputs.is_release_commit == 'true'
+       && github.event_name != 'schedule'
+      }}
     permissions:
       contents: write  # required for create tag
       actions:  write  # required for trigger workflow
@@ -286,7 +292,10 @@ jobs:
       - Package
       - AppTesting
       - PublishToGitHubPages
-    if: needs.Prepare.outputs.is_release_tag == 'true'
+    if: >-
+      ${{ !failure() && !cancelled()
+       && needs.Prepare.outputs.is_release_tag == 'true'
+      }}
     permissions:
       contents: write
       actions:  write
@@ -320,6 +329,7 @@ jobs:
       - PublishToGitHubPages
       - AppTesting
       - IntermediateCleanUp
+    if: ${{ !cancelled() }}
     with:
       package: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
       remaining: |
