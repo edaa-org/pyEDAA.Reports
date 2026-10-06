@@ -371,25 +371,16 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._parent = parent
 		self._name = name
 
-		if testDuration is not None and not isinstance(testDuration, timedelta):
-			ex = TypeError(f"Parameter 'testDuration' is not of type 'timedelta'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(testDuration)}'.")
-			raise ex
-
-		if setupDuration is not None and not isinstance(setupDuration, timedelta):
-			ex = TypeError(f"Parameter 'setupDuration' is not of type 'timedelta'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(setupDuration)}'.")
-			raise ex
-
-		if teardownDuration is not None and not isinstance(teardownDuration, timedelta):
-			ex = TypeError(f"Parameter 'teardownDuration' is not of type 'timedelta'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(teardownDuration)}'.")
-			raise ex
-
-		if totalDuration is not None and not isinstance(totalDuration, timedelta):
-			ex = TypeError(f"Parameter 'totalDuration' is not of type 'timedelta'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(totalDuration)}'.")
-			raise ex
+		for parameterName, value in (
+			("testDuration", testDuration),
+			("setupDuration", setupDuration),
+			("teardownDuration", teardownDuration),
+			("totalDuration", totalDuration)
+		):
+			if value is not None and not isinstance(value, timedelta):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'timedelta'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
 
 		if testDuration is not None:
 			if setupDuration is not None:
@@ -433,35 +424,18 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._teardownDuration = teardownDuration
 		self._totalDuration = totalDuration
 
-		if not isinstance(warningCount, int):
-			ex = TypeError(f"Parameter 'warningCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(warningCount)}'.")
-			raise ex
-
-		if not isinstance(errorCount, int):
-			ex = TypeError(f"Parameter 'errorCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(errorCount)}'.")
-			raise ex
-
-		if not isinstance(fatalCount, int):
-			ex = TypeError(f"Parameter 'fatalCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(fatalCount)}'.")
-			raise ex
-
-		if not isinstance(expectedWarningCount, int):
-			ex = TypeError(f"Parameter 'expectedWarningCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(expectedWarningCount)}'.")
-			raise ex
-
-		if not isinstance(expectedErrorCount, int):
-			ex = TypeError(f"Parameter 'expectedErrorCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(expectedErrorCount)}'.")
-			raise ex
-
-		if not isinstance(expectedFatalCount, int):
-			ex = TypeError(f"Parameter 'expectedFatalCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(expectedFatalCount)}'.")
-			raise ex
+		for parameterName, value in (
+			("warningCount", warningCount),
+			("errorCount", errorCount),
+			("fatalCount", fatalCount),
+			("expectedWarningCount", expectedWarningCount),
+			("expectedErrorCount", expectedErrorCount),
+			("expectedFatalCount", expectedFatalCount)
+		):
+			if not isinstance(value, int):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
 
 		self._warningCount =         warningCount
 		self._errorCount =           errorCount
@@ -905,20 +879,15 @@ class Testcase(Base, TestcaseOutputMixin):
 
 		self._status = status
 
-		if assertionCount is not None and not isinstance(assertionCount, int):
-			ex = TypeError(f"Parameter 'assertionCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
-			raise ex
-
-		if failedAssertionCount is not None and not isinstance(failedAssertionCount, int):
-			ex = TypeError(f"Parameter 'failedAssertionCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(failedAssertionCount)}'.")
-			raise ex
-
-		if passedAssertionCount is not None and not isinstance(passedAssertionCount, int):
-			ex = TypeError(f"Parameter 'passedAssertionCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(passedAssertionCount)}'.")
-			raise ex
+		for parameterName, value in (
+			("assertionCount", assertionCount),
+			("failedAssertionCount", failedAssertionCount),
+			("passedAssertionCount", passedAssertionCount)
+		):
+			if value is not None and not isinstance(value, int):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
 
 		self._assertionCount = assertionCount
 		if assertionCount is not None:
