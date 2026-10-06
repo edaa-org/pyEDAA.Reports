@@ -114,6 +114,10 @@ Reading unittest reports
       class. Because JUnit has so many dialects, a derived subclass for the dialect might be required. By choosing the
       right Document class, also the XML schema for XML schema validation gets pre-selected.
 
+      A test report written by pyTooling's pytest plugin (``--pytooling-xml``) is read by
+      :class:`pyEDAA.Reports.Unittesting.pyTooling.Document`. Its format version is taken from the report's
+      ``xsi:noNamespaceSchemaLocation`` attribute.
+
    .. grid-item::
       :columns: 6
 
@@ -181,6 +185,19 @@ Reading unittest reports
                xmlReport = Path("pyTest-JUnit-Report.xml")
                try:
                  doc = Document(xmlReport, parse=True)
+               except UnittestError as ex:
+                 ...
+
+         .. tab-item:: pyTooling
+            :sync: pyTooling
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.pyTooling import Document
+
+               xmlReport = Path("TestReport.xml")
+               try:
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 

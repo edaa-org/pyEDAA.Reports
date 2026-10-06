@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+	Authors:
+	  Patrick Lehmann
+
+	Copyright 2026-2026 Patrick Lehmann - Bötzingen, Germany
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	  http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+	SPDX-License-Identifier: Apache-2.0
+-->
+<xsd:schema
+	version="0.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			pyTooling's test report format.
+
+			It differs from JUnit XML in two ways that JUnit cannot express: test suites nest, instead of being
+			flattened into a dotted 'classname'; and every item carries four distinct names - an identifier, a title, a
+			summary and a description - instead of one name and a bag of properties.
+		</xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:simpleType name="preservingstring">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="preserve" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="status">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">The outcome of a testcase.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="passed" />
+			<xsd:enumeration value="failed" />
+			<xsd:enumeration value="errored" />
+			<xsd:enumeration value="skipped" />
+			<xsd:enumeration value="expectedToFail" />
+			<xsd:enumeration value="unexpectedlyPassed" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:group name="names">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				The three names an item carries besides its identifier. The identifier is the 'name' attribute.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="Title" type="xsd:string" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						A short label, written for a reader rather than for Python.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Summary" type="xsd:string" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">The first paragraph of the item's doc-string.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="Description" type="preservingstring" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">The item's doc-string, with its line breaks preserved.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:group>
+
+	<xsd:complexType name="testcase">
+		<xsd:sequence>
+			<xsd:group ref="names" />
+			<xsd:element name="Message" type="preservingstring" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						Why the testcase did not pass: the failure, error or skip reason.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="status" type="status" use="required" />
+		<xsd:attribute name="duration" type="xsd:float" use="optional" />
+		<xsd:attribute name="nodeID" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					The test runner's own identifier for this testcase, so a reader of the report can re-run it.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuite">
+		<xsd:sequence>
+			<xsd:group ref="names" />
+			<xsd:element name="Testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded" />
+			<xsd:element name="Testcase" type="testcase" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="tests" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="duration" type="xsd:float" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="testreport">
+		<xsd:sequence>
+			<xsd:group ref="names" />
+			<xsd:element name="Testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="timestamp" type="xsd:dateTime" use="optional" />
+		<xsd:attribute name="duration" type="xsd:float" use="optional" />
+		<xsd:attribute name="tests" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="failures" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="errors" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="skipped" type="xsd:nonNegativeInteger" use="optional" />
+	</xsd:complexType>
+
+	<xsd:element name="TestReport" type="testreport">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">The results of one test session.</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+</xsd:schema>
