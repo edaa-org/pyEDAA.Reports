@@ -39,7 +39,7 @@ from typing               import Optional as Nullable, Generator, Tuple, Union, 
 
 from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
 from pyTooling.Common     import firstValue
-from pyTooling.Decorators import export, InheritDocString
+from pyTooling.Decorators import export, InheritDocString, DocStringMergeStrategy
 from pyTooling.Stopwatch  import Stopwatch
 
 from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind
@@ -55,7 +55,7 @@ TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
 
 
 @export
-@InheritDocString(ju_Testcase, merge=True)
+@InheritDocString(ju_Testcase, DocStringMergeStrategy.BaseLast)
 class Testcase(ju_Testcase):
 	"""
 	This is a derived implementation for the CTest JUnit dialect.
@@ -63,7 +63,7 @@ class Testcase(ju_Testcase):
 
 
 @export
-@InheritDocString(ju_Testclass, merge=True)
+@InheritDocString(ju_Testclass, DocStringMergeStrategy.BaseLast)
 class Testclass(ju_Testclass):
 	"""
 	This is a derived implementation for the CTest JUnit dialect.
@@ -71,7 +71,7 @@ class Testclass(ju_Testclass):
 
 
 @export
-@InheritDocString(ju_Testsuite, merge=True)
+@InheritDocString(ju_Testsuite, DocStringMergeStrategy.BaseLast)
 class Testsuite(ju_Testsuite):
 	"""
 	This is a derived implementation for the CTest JUnit dialect.
@@ -122,7 +122,7 @@ class Testsuite(ju_Testsuite):
 
 
 @export
-@InheritDocString(ju_TestsuiteSummary, merge=True)
+@InheritDocString(ju_TestsuiteSummary, DocStringMergeStrategy.BaseLast)
 class TestsuiteSummary(ju_TestsuiteSummary):
 	"""
 	This is a derived implementation for the CTest JUnit dialect.
