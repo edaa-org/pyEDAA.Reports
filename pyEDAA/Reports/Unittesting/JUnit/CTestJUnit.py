@@ -347,11 +347,4 @@ class Document(ju_Document):
 
 		testcaseElement.attrib["status"] = "run"     # TODO: find a value
 
-		if testcase._status is TestcaseStatus.Passed:
-			pass
-		elif testcase._status is TestcaseStatus.Failed:
-			failureElement = SubElement(testcaseElement, "failure")
-		elif testcase._status is TestcaseStatus.Skipped:
-			skippedElement = SubElement(testcaseElement, "skipped")
-		else:
-			errorElement = SubElement(testcaseElement, "error")
+		self._GenerateTestcaseChildren(testcase, testcaseElement)

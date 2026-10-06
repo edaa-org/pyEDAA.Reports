@@ -356,11 +356,4 @@ class Document(ju_Document):
 		if testcase._assertionCount is not None:
 			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
 
-		if testcase._status is TestcaseStatus.Passed:
-			pass
-		elif testcase._status is TestcaseStatus.Failed:
-			failureElement = SubElement(testcaseElement, "failure")
-		elif testcase._status is TestcaseStatus.Skipped:
-			skippedElement = SubElement(testcaseElement, "skipped")
-		else:
-			errorElement = SubElement(testcaseElement, "error")
+		self._GenerateTestcaseChildren(testcase, testcaseElement)
