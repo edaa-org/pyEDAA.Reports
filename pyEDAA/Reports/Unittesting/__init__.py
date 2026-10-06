@@ -311,10 +311,10 @@ class Base(metaclass=ExtendedType, slots=True):
 		expectedErrorCount: int = 0,
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable[TestsuiteBase] = None,
 		title: Nullable[str] = None,
 		summary: Nullable[str] = None,
-		description: Nullable[str] = None
+		description: Nullable[str] = None,
+		parent: Nullable[TestsuiteBase] = None
 	) -> None:
 		"""
 		Initializes the fields of the base-class.
@@ -329,10 +329,10 @@ class Base(metaclass=ExtendedType, slots=True):
 		:param errorCount:         Count of encountered errors.
 		:param fatalCount:         Count of encountered fatal errors.
 		:param keyValuePairs:      Mapping of key-value pairs to initialize the test entity with.
-		:param parent:             Reference to the parent test entity.
 		:param title:              Optional, short label of the test entity, written for a reader.
 		:param summary:            Optional, summary of the test entity.
 		:param description:        Optional, description of the test entity.
+		:param parent:             Reference to the parent test entity.
 		:raises TypeError:         When parameter 'parent' is not a TestsuiteBase.
 		:raises ValueError:        When parameter 'name' is None.
 		:raises TypeError:         When parameter 'name' is not a string.
@@ -893,10 +893,10 @@ class Testcase(Base, TestcaseOutputMixin):
 			warningCount, errorCount, fatalCount,
 			expectedWarningCount, expectedErrorCount, expectedFatalCount,
 			keyValuePairs,
-			parent=parent,
 			title=title,
 			summary=summary,
-			description=description
+			description=description,
+			parent=parent
 		)
 		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
@@ -1103,10 +1103,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable[Testsuite] = None,
 		title: Nullable[str] = None,
 		summary: Nullable[str] = None,
-		description: Nullable[str] = None
+		description: Nullable[str] = None,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
@@ -1124,10 +1124,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		:param fatalCount:               Count of encountered fatal errors incl. fatal errors from sub-elements.
 		:param testsuites:               List of test suites to initialize the test entity with.
 		:param keyValuePairs:            Mapping of key-value pairs to initialize the test entity with.
-		:param parent:                   Reference to the parent test entity.
 		:param title:                    Optional, short label of the test entity, written for a reader.
 		:param summary:                  Optional, summary of the test entity.
 		:param description:              Optional, description of the test entity.
+		:param parent:                   Reference to the parent test entity.
 		:raises TypeError:               If parameter 'parent' is not a TestsuiteBase.
 		:raises TypeError:               If parameter 'testsuites' is not iterable.
 		:raises TypeError:               If element in parameter 'testsuites' is not a Testsuite.
@@ -1154,10 +1154,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			fatalCount,
 			0, 0, 0,
 			keyValuePairs,
-			parent=parent,
 			title=title,
 			summary=summary,
-			description=description
+			description=description,
+			parent=parent
 		)
 
 		self._kind = kind
@@ -1524,10 +1524,10 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		testcases: Nullable[Iterable[Testcase]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable[TestsuiteType] = None,
 		title: Nullable[str] = None,
 		summary: Nullable[str] = None,
-		description: Nullable[str] = None
+		description: Nullable[str] = None,
+		parent: Nullable[TestsuiteType] = None
 	) -> None:
 		"""
 		Initializes the fields of a test suite.
@@ -1547,10 +1547,10 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		:param testsuites:               List of test suites to initialize the test suite with.
 		:param testcases:                List of test cases to initialize the test suite with.
 		:param keyValuePairs:            Mapping of key-value pairs to initialize the test suite with.
-		:param parent:                   Reference to the parent test entity.
 		:param title:                    Optional, short label of the test suite, written for a reader.
 		:param summary:                  Optional, summary of the test suite.
 		:param description:              Optional, description of the test suite.
+		:param parent:                   Reference to the parent test entity.
 		:raises TypeError:               If parameter 'testcases' is not iterable.
 		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
 		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
@@ -1570,10 +1570,10 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			fatalCount,
 			testsuites,
 			keyValuePairs,
-			parent=parent,
 			title=title,
 			summary=summary,
-			description=description
+			description=description,
+			parent=parent
 		)
 
 		# self._testDuration = testDuration
@@ -1829,10 +1829,10 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable[TestsuiteType] = None,
 		title: Nullable[str] = None,
 		summary: Nullable[str] = None,
-		description: Nullable[str] = None
+		description: Nullable[str] = None,
+		parent: Nullable[TestsuiteType] = None
 	) -> None:
 		"""
 		Initializes the fields of a test summary.
@@ -1849,10 +1849,10 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
 		:param testsuites:         List of test suites to initialize the test summary with.
 		:param keyValuePairs:      Mapping of key-value pairs to initialize the test summary with.
-		:param parent:             Reference to the parent test summary.
 		:param title:              Optional, short label of the test summary, written for a reader.
 		:param summary:            Optional, summary of the test summary.
 		:param description:        Optional, description of the test summary.
+		:param parent:             Reference to the parent test summary.
 		"""
 		super().__init__(
 			name,
@@ -1862,10 +1862,10 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 			warningCount, errorCount, fatalCount,
 			testsuites,
 			keyValuePairs,
-			parent=parent,
 			title=title,
 			summary=summary,
-			description=description
+			description=description,
+			parent=parent
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
@@ -2241,10 +2241,10 @@ class MergedTestsuite(Testsuite, Merged):
 			testsuite._setupDuration, testsuite._testDuration, testsuite._teardownDuration, testsuite._totalDuration,
 			TestsuiteStatus.Unknown,
 			testsuite._warningCount, testsuite._errorCount, testsuite._fatalCount,
-			parent=parent,
 			title=testsuite._title,
 			summary=testsuite._summary,
-			description=testsuite._description
+			description=testsuite._description,
+			parent=parent
 		)
 		Merged.__init__(self)
 

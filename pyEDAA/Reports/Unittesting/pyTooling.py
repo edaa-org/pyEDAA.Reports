@@ -262,8 +262,8 @@ class Document(TestsuiteSummary, ut_Document):
 			testcaseElement.attrib["name"],
 			totalDuration=self._ConvertDuration(testcaseElement),
 			status=STATUS_MAP[testcaseElement.attrib["status"]],
-			parent=parent,
-			message=None if messageElement is None else messageElement.text
+			message=None if messageElement is None else messageElement.text,
+			parent=parent
 		)
 		self._ConvertTexts(testcaseElement, testcase)
 
