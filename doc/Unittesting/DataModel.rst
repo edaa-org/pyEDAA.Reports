@@ -229,6 +229,10 @@ Testcase
          recreate such an hierarchical name, :class:`~pyEDAA.Reports.Unittesting.TestsuiteKind` is applied accordingly
          to test suite's :data:`~pyEDAA.Reports.Unittesting.TestsuiteBase.Kind` field.
 
+      :data:`~pyEDAA.Reports.Unittesting.Base.Title`, :data:`~pyEDAA.Reports.Unittesting.Base.Summary`, :data:`~pyEDAA.Reports.Unittesting.Base.Description`
+         The test case can carry a :dfn:`title`, a :dfn:`summary` and a :dfn:`description` written for a reader, e.g.
+         taken from a doc-string. Formats like JUnit XML can't express them, so they are ``None`` then.
+
       :data:`~pyEDAA.Reports.Unittesting.Base.StartTime`
          The test case stores a time when the individual test run was started. In combination with
          :data:`~pyEDAA.Reports.Unittesting.Base.TotalDuration`, the end time can be calculated. If the start time is
@@ -447,6 +451,10 @@ Testsuite
          recreate such an hierarchical name, :class:`~pyEDAA.Reports.Unittesting.TestsuiteKind` is applied accordingly
          to test suite's :data:`~pyEDAA.Reports.Unittesting.TestsuiteBase.Kind` field.
 
+      :data:`~pyEDAA.Reports.Unittesting.Base.Title`, :data:`~pyEDAA.Reports.Unittesting.Base.Summary`, :data:`~pyEDAA.Reports.Unittesting.Base.Description`
+         The test suite can carry a :dfn:`title`, a :dfn:`summary` and a :dfn:`description` written for a reader, e.g.
+         taken from a doc-string. Formats like JUnit XML can't express them, so they are ``None`` then.
+
       :data:`~pyEDAA.Reports.Unittesting.Base.StartTime`
          The test suite stores a time when the first test run was started. In combination with
          :data:`~pyEDAA.Reports.Unittesting.Base.TotalDuration`, the end time can be calculated. If the start time is
@@ -630,6 +638,10 @@ TestsuiteSummary
 
       :data:`~pyEDAA.Reports.Unittesting.Base.Name`
          The test suite summary has a name.
+
+      :data:`~pyEDAA.Reports.Unittesting.Base.Title`, :data:`~pyEDAA.Reports.Unittesting.Base.Summary`, :data:`~pyEDAA.Reports.Unittesting.Base.Description`
+         The test suite summary can carry a :dfn:`title`, a :dfn:`summary` and a :dfn:`description` written for a
+         reader, e.g. taken from a doc-string. Formats like JUnit XML can't express them, so they are ``None`` then.
 
       :data:`~pyEDAA.Reports.Unittesting.Base.StartTime`
          The test suite summary stores a time when the first test runs was started. In combination with

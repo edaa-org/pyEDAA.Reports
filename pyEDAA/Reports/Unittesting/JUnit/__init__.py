@@ -196,7 +196,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		Initializes the fields of the base-class.
 
 		:param name:        Name of the test entity.
-		:param parent:      Reference to the parent test entity.
+		:param parent:      Optional, reference to the parent test entity.
 		:raises ValueError: When parameter 'name' is None.
 		:raises TypeError:  When parameter 'name' is not a string.
 		:raises ValueError: When parameter 'name' is empty.
@@ -259,9 +259,9 @@ class BaseWithProperties(Base):
 		Initializes the fields of the base-class.
 
 		:param name:           Name of the test entity.
-		:param duration:       Duration of the entity's execution.
-		:param assertionCount: Number of assertions within the test.
-		:param parent:         Reference to the parent test entity.
+		:param duration:       Optional, duration of the entity's execution.
+		:param assertionCount: Optional, number of assertions within the test.
+		:param parent:         Optional, reference to the parent test entity.
 		:raises TypeError:     If parameter 'duration' is not a timedelta.
 		:raises TypeError:     If parameter 'assertionCount' is not an integer.
 		"""
@@ -405,14 +405,14 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		Initializes the fields of a test case.
 
 		:param name:           Name of the test entity.
-		:param duration:       Duration of the entity's execution.
-		:param status:         Status of the test case.
-		:param assertionCount: Number of assertions within the test.
+		:param duration:       Optional, duration of the entity's execution.
+		:param status:         Optional, status of the test case.
+		:param assertionCount: Optional, number of assertions within the test.
 		:param message:        Optional, message explaining the test case's status.
 		:param details:        Optional, details explaining the test case's status (e.g. a traceback).
 		:param standardOutput: Optional, captured standard output of the test case.
 		:param standardError:  Optional, captured standard error of the test case.
-		:param parent:         Reference to the parent test class.
+		:param parent:         Optional, reference to the parent test class.
 		:raises TypeError:     If parameter 'parent' is not a Testclass.
 		:raises ValueError:    If parameter 'assertionCount' is not consistent.
 		"""
@@ -580,10 +580,10 @@ class TestsuiteBase(BaseWithProperties):
 		Initializes the based-class fields of a test suite or test summary.
 
 		:param name:       Name of the test entity.
-		:param startTime:  Time when the test entity was started.
-		:param duration:   Duration of the entity's execution.
-		:param status:     Overall status of the test entity.
-		:param parent:     Reference to the parent test entity.
+		:param startTime:  Optional, time when the test entity was started.
+		:param duration:   Optional, duration of the entity's execution.
+		:param status:     Optional, overall status of the test entity.
+		:param parent:     Optional, reference to the parent test entity.
 		:raises TypeError: If parameter 'parent' is not a TestsuiteBase.
 		"""
 		if parent is not None:
@@ -721,7 +721,7 @@ class Testclass(Base):
 		Initializes the fields of the test class.
 
 		:param classname:   Classname of the test entity.
-		:param parent:      Reference to the parent test suite.
+		:param parent:      Optional, reference to the parent test suite.
 		:raises ValueError: If parameter 'classname' is None.
 		:raises TypeError:  If parameter 'classname' is not a string.
 		:raises ValueError: If parameter 'classname' is empty.
@@ -801,7 +801,7 @@ class Testclass(Base):
 	def ToTestsuite(self) -> ut_Testsuite:
 		return ut_Testsuite(
 			self._name,
-			TestsuiteKind.Class,
+			kind=TestsuiteKind.Class,
 			# startTime=self._startTime,
 			# totalDuration=self._duration,
 			# status=self._status,
@@ -849,10 +849,10 @@ class Testsuite(TestsuiteBase):
 		Initializes the fields of a test suite.
 
 		:param name:                     Name of the test suite.
-		:param startTime:                Time when the test suite was started.
-		:param duration:                 duration of the entity's execution.
-		:param status:                   Overall status of the test suite.
-		:param parent:                   Reference to the parent test summary.
+		:param startTime:                Optional, time when the test suite was started.
+		:param duration:                 Optional, duration of the entity's execution.
+		:param status:                   Optional, overall status of the test suite.
+		:param parent:                   Optional, reference to the parent test summary.
 		:raises TypeError:               If parameter 'testcases' is not iterable.
 		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
 		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
@@ -1014,7 +1014,7 @@ class Testsuite(TestsuiteBase):
 
 		If no scheme is given, use the default scheme.
 
-		:param scheme: Scheme how to iterate the test suite and its child elements.
+		:param scheme: Optional, scheme how to iterate the test suite and its child elements.
 		:returns:      A generator for iterating the results filtered and in the order defined by the iteration scheme.
 		"""
 		if IterationScheme.PreOrder in scheme:
@@ -1081,8 +1081,8 @@ class Testsuite(TestsuiteBase):
 	def ToTestsuite(self) -> ut_Testsuite:
 		testsuite = ut_Testsuite(
 			self._name,
-			TestsuiteKind.Logical,
-			self._hostname,
+			kind=TestsuiteKind.Logical,
+			hostname=self._hostname,
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
@@ -1240,7 +1240,7 @@ class TestsuiteSummary(TestsuiteBase):
 
 		If no scheme is given, use the default scheme.
 
-		:param scheme: Scheme how to iterate the test suite summary and its child elements.
+		:param scheme: Optional, scheme how to iterate the test suite summary and its child elements.
 		:returns:      A generator for iterating the results filtered and in the order defined by the iteration scheme.
 		"""
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
@@ -1392,9 +1392,9 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Write the data model as XML into a file adhering to the Any JUnit dialect.
 
-		:param path:           Optional path to the XMl file, if internal path shouldn't be used.
-		:param overwrite:      If true, overwrite an existing file.
-		:param regenerate:     If true, regenerate the XML structure from data model.
+		:param path:           Optional, path to the XML file, if internal path shouldn't be used.
+		:param overwrite:      Optional, if true, overwrite an existing file.
+		:param regenerate:     Optional, if true, regenerate the XML structure from data model.
 		:raises UnittestError: If the file cannot be overwritten.
 		:raises UnittestError: If the internal XML data structure wasn't generated.
 		:raises UnittestError: If the file cannot be opened or written.
@@ -1465,8 +1465,8 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``name`` attribute from an XML element node to a string.
 
 		:param element:        The XML element node with a ``name`` attribute.
-		:param default:        The default value, if no ``name`` attribute was found.
-		:param optional:       If false, an exception is raised for the missing attribute.
+		:param default:        Optional, the default value, if no ``name`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
 		:returns:              The ``name`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``name`` attribute exists on the given element node.
 		"""
@@ -1482,7 +1482,7 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``timestamp`` attribute from an XML element node to a datetime.
 
 		:param element:        The XML element node with a ``timestamp`` attribute.
-		:param optional:       If false, an exception is raised for the missing attribute.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
 		:returns:              The ``timestamp`` attribute's content if found, otherwise ``None``.
 		:raises UnittestError: If optional is false and no ``timestamp`` attribute exists on the given element node.
 		"""
@@ -1499,7 +1499,7 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``time`` attribute from an XML element node to a timedelta.
 
 		:param element:        The XML element node with a ``time`` attribute.
-		:param optional:       If false, an exception is raised for the missing attribute.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
 		:returns:              The ``time`` attribute's content if found, otherwise ``None``.
 		:raises UnittestError: If optional is false and no ``time`` attribute exists on the given element node.
 		"""
@@ -1516,8 +1516,8 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``hostname`` attribute from an XML element node to a string.
 
 		:param element:        The XML element node with a ``hostname`` attribute.
-		:param default:        The default value, if no ``hostname`` attribute was found.
-		:param optional:       If false, an exception is raised for the missing attribute.
+		:param default:        Optional, the default value, if no ``hostname`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
 		:returns:              The ``hostname`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``hostname`` attribute exists on the given element node.
 		"""
@@ -1546,8 +1546,8 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``tests`` attribute from an XML element node to an integer.
 
 		:param element:        The XML element node with a ``tests`` attribute.
-		:param default:        The default value, if no ``tests`` attribute was found.
-		:param optional:       If false, an exception is raised for the missing attribute.
+		:param default:        Optional, the default value, if no ``tests`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
 		:returns:              The ``tests`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``tests`` attribute exists on the given element node.
 		"""
@@ -1563,8 +1563,8 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``skipped`` attribute from an XML element node to an integer.
 
 		:param element:        The XML element node with a ``skipped`` attribute.
-		:param default:        The default value, if no ``skipped`` attribute was found.
-		:param optional:       If false, an exception is raised for the missing attribute.
+		:param default:        Optional, the default value, if no ``skipped`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
 		:returns:              The ``skipped`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``skipped`` attribute exists on the given element node.
 		"""
@@ -1580,8 +1580,8 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``errors`` attribute from an XML element node to an integer.
 
 		:param element:        The XML element node with a ``errors`` attribute.
-		:param default:        The default value, if no ``errors`` attribute was found.
-		:param optional:       If false, an exception is raised for the missing attribute.
+		:param default:        Optional, the default value, if no ``errors`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
 		:returns:              The ``errors`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``errors`` attribute exists on the given element node.
 		"""
@@ -1597,8 +1597,8 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``failures`` attribute from an XML element node to an integer.
 
 		:param element:        The XML element node with a ``failures`` attribute.
-		:param default:        The default value, if no ``failures`` attribute was found.
-		:param optional:       If false, an exception is raised for the missing attribute.
+		:param default:        Optional, the default value, if no ``failures`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
 		:returns:              The ``failures`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``failures`` attribute exists on the given element node.
 		"""
@@ -1614,8 +1614,8 @@ class Document(TestsuiteSummary, ut_Document):
 		Convert the ``assertions`` attribute from an XML element node to an integer.
 
 		:param element:        The XML element node with a ``assertions`` attribute.
-		:param default:        The default value, if no ``assertions`` attribute was found.
-		:param optional:       If false, an exception is raised for the missing attribute.
+		:param default:        Optional, the default value, if no ``assertions`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
 		:returns:              The ``assertions`` attribute's content if found, otherwise the given default value.
 		:raises UnittestError: If optional is false and no ``assertions`` attribute exists on the given element node.
 		"""
@@ -1754,7 +1754,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		This method generates the XML root element (``<testsuites>``) and recursively calls other generated methods.
 
-		:param overwrite:      Overwrite the internal XML data structure.
+		:param overwrite:      Optional, overwrite the internal XML data structure.
 		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
 		"""
 		if not overwrite and self._xmlDocument is not None:

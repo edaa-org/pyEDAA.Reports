@@ -7,9 +7,9 @@ Unittesting
 testcases grouped in testsuites. Testsuites can be nested in other testsuites. The data model's root element is a
 special testsuite called testsuite summary. It contains only testsuites, but no testcases.
 
-The data model can be filled from various sources like **Ant JUnit test reports** or **OSVVM testsuite summaries** (more
-to be added). Many programming languages and/or unit testing frameworks support exporting results in the Ant JUnit
-format. See below for supported formats and their variations (dialects).
+The data model can be filled from various sources like **Ant JUnit test reports**, **pyTooling test reports** or
+**OSVVM testsuite summaries** (more to be added). Many programming languages and/or unit testing frameworks support
+exporting results in the Ant JUnit format. See below for supported formats and their variations (dialects).
 
 .. attention::
 
@@ -101,6 +101,20 @@ missing file format for JUnit5 as well as the problems of Ant + JUnit4.
 OTR defines a structure of test groups and tests, but no specifics of a certain programming languge. The logical
 structure of tests and test groups is decoupled from language specifics like namespaces, packages or classes hosting the
 individual tests.
+
+
+.. _UNITTEST/FileFormats/pyTooling:
+
+pyTooling Test Report
+=====================
+
+`pyTooling <https://github.com/pyTooling/pyTooling>`__ provides a pytest plugin writing a test report in a format of
+its own (pytest option ``--pytooling-xml=PATH``). Unlike JUnit XML, test suites nest, and every test suite and test case
+can carry a title, a summary and a description besides its name. The format is defined by an XML schema; its version is
+part of the schema's file name (e.g. ``TestReport-v0.1.xsd``), which every report names in its
+``xsi:noNamespaceSchemaLocation`` attribute.
+
+The report is read by :class:`pyEDAA.Reports.Unittesting.pyTooling.Document` into the unified data model.
 
 
 .. _UNITTEST/FileFormats/OSVVM:

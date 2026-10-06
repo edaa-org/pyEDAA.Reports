@@ -239,6 +239,7 @@ Contributors
    CodeCoverage
    Doc. Coverage Report <DocCoverage>
    Static Type Check Report ➚ <typing/index>
+   Schemas/index
 
 .. raw:: latex
 
