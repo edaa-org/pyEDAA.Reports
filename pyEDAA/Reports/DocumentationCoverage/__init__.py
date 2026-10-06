@@ -76,7 +76,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	_name:   str
 	_status: CoverageState
 
-	def __init__(self, name: str, parent: Nullable[Base] = None) -> None:
+	def __init__(self, name: str, *, parent: Nullable[Base] = None) -> None:
 		if name is None:
 			raise ValueError(f"Parameter 'name' must not be None.")
 

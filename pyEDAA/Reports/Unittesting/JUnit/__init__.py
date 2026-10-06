@@ -191,7 +191,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	_parent:         Nullable[Testsuite]
 	_name:           str
 
-	def __init__(self, name: str, parent: Nullable[Testsuite] = None) -> None:
+	def __init__(self, name: str, *, parent: Nullable[Testsuite] = None) -> None:
 		"""
 		Initializes the fields of the base-class.
 
@@ -253,6 +253,7 @@ class BaseWithProperties(Base):
 		name: str,
 		duration: Nullable[timedelta] = None,
 		assertionCount: Nullable[int] = None,
+		*,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
@@ -265,7 +266,7 @@ class BaseWithProperties(Base):
 		:raises TypeError:     If parameter 'duration' is not a timedelta.
 		:raises TypeError:     If parameter 'assertionCount' is not an integer.
 		"""
-		super().__init__(name, parent)
+		super().__init__(name, parent=parent)
 
 		if duration is not None and not isinstance(duration, timedelta):
 			ex = TypeError(f"Parameter 'duration' is not of type 'timedelta'.")
@@ -399,6 +400,7 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		details: Nullable[str] = None,
 		standardOutput: Nullable[str] = None,
 		standardError: Nullable[str] = None,
+		*,
 		parent: Nullable[Testclass] = None
 	) -> None:
 		"""
@@ -424,7 +426,7 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 
 			parent._testcases[name] = self
 
-		super().__init__(name, duration, assertionCount, parent)
+		super().__init__(name, duration, assertionCount, parent=parent)
 		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
 		if not isinstance(status, TestcaseStatus):
@@ -574,6 +576,7 @@ class TestsuiteBase(BaseWithProperties):
 		startTime: Nullable[datetime] = None,
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
+		*,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
@@ -594,7 +597,7 @@ class TestsuiteBase(BaseWithProperties):
 
 			parent._testsuites[name] = self
 
-		super().__init__(name, duration, None, parent)
+		super().__init__(name, duration, None, parent=parent)
 
 		self._startTime = startTime
 		self._status = status
@@ -715,6 +718,7 @@ class Testclass(Base):
 		self,
 		classname: str,
 		testcases: Nullable[Iterable[Testcase]] = None,
+		*,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
@@ -734,7 +738,7 @@ class Testclass(Base):
 
 			parent._testclasses[classname] = self
 
-		super().__init__(classname, parent)
+		super().__init__(classname, parent=parent)
 
 		self._testcases = {}
 		if testcases is not None:
@@ -843,6 +847,7 @@ class Testsuite(TestsuiteBase):
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		testclasses: Nullable[Iterable[Testclass]] = None,
+		*,
 		parent: Nullable[TestsuiteSummary] = None
 	) -> None:
 		"""
@@ -866,7 +871,7 @@ class Testsuite(TestsuiteBase):
 
 			parent._testsuites[name] = self
 
-		super().__init__(name, startTime, duration, status, parent)
+		super().__init__(name, startTime, duration, status, parent=parent)
 
 		self._hostname = hostname
 
@@ -1135,7 +1140,7 @@ class TestsuiteSummary(TestsuiteBase):
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		testsuites: Nullable[Iterable[Testsuite]] = None
 	) -> None:
-		super().__init__(name, startTime, duration, status, None)
+		super().__init__(name, startTime, duration, status)
 
 		self._testsuites = {}
 		if testsuites is not None:
