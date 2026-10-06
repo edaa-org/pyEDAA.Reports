@@ -252,6 +252,7 @@ Contributors
 
    License
    Doc-License
+   Abbreviations
    Glossary
    genindex
    Python Module Index <modindex>
