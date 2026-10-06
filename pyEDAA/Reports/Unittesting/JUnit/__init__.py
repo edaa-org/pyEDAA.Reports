@@ -801,7 +801,7 @@ class Testclass(Base):
 	def ToTestsuite(self) -> ut_Testsuite:
 		return ut_Testsuite(
 			self._name,
-			TestsuiteKind.Class,
+			kind=TestsuiteKind.Class,
 			# startTime=self._startTime,
 			# totalDuration=self._duration,
 			# status=self._status,
@@ -1081,8 +1081,8 @@ class Testsuite(TestsuiteBase):
 	def ToTestsuite(self) -> ut_Testsuite:
 		testsuite = ut_Testsuite(
 			self._name,
-			TestsuiteKind.Logical,
-			self._hostname,
+			kind=TestsuiteKind.Logical,
+			hostname=self._hostname,
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,

@@ -299,6 +299,9 @@ class Base(metaclass=ExtendedType, slots=True):
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
@@ -311,15 +314,15 @@ class Base(metaclass=ExtendedType, slots=True):
 		expectedErrorCount: int = 0,
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		title: Nullable[str] = None,
-		summary: Nullable[str] = None,
-		description: Nullable[str] = None,
 		parent: Nullable[TestsuiteBase] = None
 	) -> None:
 		"""
 		Initializes the fields of the base-class.
 
 		:param name:               Name of the test entity.
+		:param title:              Optional, short label of the test entity, written for a reader.
+		:param summary:            Optional, summary of the test entity.
+		:param description:        Optional, description of the test entity.
 		:param startTime:          Optional, time when the test entity was started.
 		:param setupDuration:      Optional, duration it took to set up the entity.
 		:param testDuration:       Optional, duration of the entity's test run.
@@ -329,9 +332,6 @@ class Base(metaclass=ExtendedType, slots=True):
 		:param errorCount:         Optional, count of encountered errors.
 		:param fatalCount:         Optional, count of encountered fatal errors.
 		:param keyValuePairs:      Optional, mapping of key-value pairs to initialize the test entity with.
-		:param title:              Optional, short label of the test entity, written for a reader.
-		:param summary:            Optional, summary of the test entity.
-		:param description:        Optional, description of the test entity.
 		:param parent:             Optional, reference to the parent test entity.
 		:raises TypeError:         When parameter 'parent' is not a TestsuiteBase.
 		:raises ValueError:        When parameter 'name' is None.
@@ -821,6 +821,9 @@ class Testcase(Base, TestcaseOutputMixin):
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
@@ -841,15 +844,15 @@ class Testcase(Base, TestcaseOutputMixin):
 		details: Nullable[str] = None,
 		standardOutput: Nullable[str] = None,
 		standardError: Nullable[str] = None,
-		title: Nullable[str] = None,
-		summary: Nullable[str] = None,
-		description: Nullable[str] = None,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of a test case.
 
 		:param name:                 Name of the test entity.
+		:param title:                Optional, short label of the test case, written for a reader.
+		:param summary:              Optional, summary of the test case.
+		:param description:          Optional, description of the test case.
 		:param startTime:            Optional, time when the test entity was started.
 		:param setupDuration:        Optional, duration it took to set up the entity.
 		:param testDuration:         Optional, duration of the entity's test run.
@@ -870,9 +873,6 @@ class Testcase(Base, TestcaseOutputMixin):
 		:param details:              Optional, details explaining the test case's status (e.g. a traceback).
 		:param standardOutput:       Optional, captured standard output of the test case.
 		:param standardError:        Optional, captured standard error of the test case.
-		:param title:                Optional, short label of the test case, written for a reader.
-		:param summary:              Optional, summary of the test case.
-		:param description:          Optional, description of the test case.
 		:param parent:               Optional, reference to the parent test suite.
 		:raises TypeError:           If parameter 'parent' is not a Testsuite.
 		:raises ValueError:          If parameter 'assertionCount' is not consistent.
@@ -888,14 +888,12 @@ class Testcase(Base, TestcaseOutputMixin):
 
 		super().__init__(
 			name,
+			title, summary, description,
 			startTime,
 			setupDuration, testDuration, teardownDuration, totalDuration,
 			warningCount, errorCount, fatalCount,
 			expectedWarningCount, expectedErrorCount, expectedFatalCount,
 			keyValuePairs,
-			title=title,
-			summary=summary,
-			description=description,
 			parent=parent
 		)
 		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
@@ -994,6 +992,7 @@ class Testcase(Base, TestcaseOutputMixin):
 	def Copy(self) -> Testcase:
 		return self.__class__(
 			self._name,
+			self._title, self._summary, self._description,
 			self._startTime,
 			self._setupDuration,
 			self._testDuration,
@@ -1012,10 +1011,7 @@ class Testcase(Base, TestcaseOutputMixin):
 			message=self._message,
 			details=self._details,
 			standardOutput=self._standardOutput,
-			standardError=self._standardError,
-			title=self._title,
-			summary=self._summary,
-			description=self._description
+			standardError=self._standardError
 		)
 		# TODO: copy key-value-pairs?
 
@@ -1091,6 +1087,9 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		kind: TestsuiteKind = TestsuiteKind.Logical,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
@@ -1103,15 +1102,15 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		title: Nullable[str] = None,
-		summary: Nullable[str] = None,
-		description: Nullable[str] = None,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
 
 		:param name:                     Name of the test entity.
+		:param title:                    Optional, short label of the test entity, written for a reader.
+		:param summary:                  Optional, summary of the test entity.
+		:param description:              Optional, description of the test entity.
 		:param kind:                     Optional, kind of the test entity.
 		:param startTime:                Optional, time when the test entity was started.
 		:param setupDuration:            Optional, duration it took to set up the entity.
@@ -1124,9 +1123,6 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		:param fatalCount:               Optional, count of encountered fatal errors incl. fatal errors from sub-elements.
 		:param testsuites:               Optional, list of test suites to initialize the test entity with.
 		:param keyValuePairs:            Optional, mapping of key-value pairs to initialize the test entity with.
-		:param title:                    Optional, short label of the test entity, written for a reader.
-		:param summary:                  Optional, summary of the test entity.
-		:param description:              Optional, description of the test entity.
 		:param parent:                   Optional, reference to the parent test entity.
 		:raises TypeError:               If parameter 'parent' is not a TestsuiteBase.
 		:raises TypeError:               If parameter 'testsuites' is not iterable.
@@ -1144,6 +1140,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 		super().__init__(
 			name,
+			title, summary, description,
 			startTime,
 			setupDuration,
 			testDuration,
@@ -1154,9 +1151,6 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			fatalCount,
 			0, 0, 0,
 			keyValuePairs,
-			title=title,
-			summary=summary,
-			description=description,
 			parent=parent
 		)
 
@@ -1510,6 +1504,9 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		kind: TestsuiteKind = TestsuiteKind.Logical,
 		hostname: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
@@ -1524,15 +1521,15 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		testcases: Nullable[Iterable[Testcase]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		title: Nullable[str] = None,
-		summary: Nullable[str] = None,
-		description: Nullable[str] = None,
 		parent: Nullable[TestsuiteType] = None
 	) -> None:
 		"""
 		Initializes the fields of a test suite.
 
 		:param name:                     Name of the test suite.
+		:param title:                    Optional, short label of the test suite, written for a reader.
+		:param summary:                  Optional, summary of the test suite.
+		:param description:              Optional, description of the test suite.
 		:param kind:                     Optional, kind of the test suite.
 		:param hostname:                 Optional, name of the host the test suite was executed on, or ``None`` if it wasn't
 		                                 recorded.
@@ -1548,9 +1545,6 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		:param testsuites:               Optional, list of test suites to initialize the test suite with.
 		:param testcases:                Optional, list of test cases to initialize the test suite with.
 		:param keyValuePairs:            Optional, mapping of key-value pairs to initialize the test suite with.
-		:param title:                    Optional, short label of the test suite, written for a reader.
-		:param summary:                  Optional, summary of the test suite.
-		:param description:              Optional, description of the test suite.
 		:param parent:                   Optional, reference to the parent test entity.
 		:raises TypeError:               If parameter 'testcases' is not iterable.
 		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
@@ -1559,6 +1553,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		"""
 		super().__init__(
 			name,
+			title, summary, description,
 			kind,
 			startTime,
 			setupDuration,
@@ -1571,9 +1566,6 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			fatalCount,
 			testsuites,
 			keyValuePairs,
-			title=title,
-			summary=summary,
-			description=description,
 			parent=parent
 		)
 
@@ -1641,6 +1633,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 	def Copy(self) -> Testsuite:
 		return self.__class__(
 			self._name,
+			self._title, self._summary, self._description,
 			self._kind,
 			self._hostname,
 			self._startTime,
@@ -1651,10 +1644,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			self._status,
 			self._warningCount,
 			self._errorCount,
-			self._fatalCount,
-			title=self._title,
-			summary=self._summary,
-			description=self._description
+			self._fatalCount
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
@@ -1819,6 +1809,9 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
@@ -1830,15 +1823,15 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		title: Nullable[str] = None,
-		summary: Nullable[str] = None,
-		description: Nullable[str] = None,
 		parent: Nullable[TestsuiteType] = None
 	) -> None:
 		"""
 		Initializes the fields of a test summary.
 
 		:param name:               Name of the test summary.
+		:param title:              Optional, short label of the test summary, written for a reader.
+		:param summary:            Optional, summary of the test summary.
+		:param description:        Optional, description of the test summary.
 		:param startTime:          Optional, time when the test summary was started.
 		:param setupDuration:      Optional, duration it took to set up the test summary.
 		:param testDuration:       Optional, duration of all tests listed in the test summary.
@@ -1850,22 +1843,17 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		:param fatalCount:         Optional, count of encountered fatal errors incl. fatal errors from sub-elements.
 		:param testsuites:         Optional, list of test suites to initialize the test summary with.
 		:param keyValuePairs:      Optional, mapping of key-value pairs to initialize the test summary with.
-		:param title:              Optional, short label of the test summary, written for a reader.
-		:param summary:            Optional, summary of the test summary.
-		:param description:        Optional, description of the test summary.
 		:param parent:             Optional, reference to the parent test summary.
 		"""
 		super().__init__(
 			name,
+			title, summary, description,
 			TestsuiteKind.Root,
 			startTime, setupDuration, testDuration, teardownDuration, totalDuration,
 			status,
 			warningCount, errorCount, fatalCount,
 			testsuites,
 			keyValuePairs,
-			title=title,
-			summary=summary,
-			description=description,
 			parent=parent
 		)
 
@@ -2085,6 +2073,7 @@ class MergedTestcase(Testcase, Merged):
 
 		super().__init__(
 			testcase._name,
+			testcase._title, testcase._summary, testcase._description,
 			testcase._startTime,
 			testcase._setupDuration, testcase._testDuration, testcase._teardownDuration, testcase._totalDuration,
 			TestcaseStatus.Unknown,
@@ -2095,9 +2084,6 @@ class MergedTestcase(Testcase, Merged):
 			details=testcase._details,
 			standardOutput=testcase._standardOutput,
 			standardError=testcase._standardError,
-			title=testcase._title,
-			summary=testcase._summary,
-			description=testcase._description,
 			parent=parent
 		)
 		Merged.__init__(self)
@@ -2200,6 +2186,7 @@ class MergedTestcase(Testcase, Merged):
 	def ToTestcase(self) -> Testcase:
 		return Testcase(
 			self._name,
+			self._title, self._summary, self._description,
 			self._startTime,
 			self._setupDuration,
 			self._testDuration,
@@ -2215,10 +2202,7 @@ class MergedTestcase(Testcase, Merged):
 			message=self._message,
 			details=self._details,
 			standardOutput=self._standardOutput,
-			standardError=self._standardError,
-			title=self._title,
-			summary=self._summary,
-			description=self._description
+			standardError=self._standardError
 		)
 
 
@@ -2236,15 +2220,13 @@ class MergedTestsuite(Testsuite, Merged):
 
 		super().__init__(
 			testsuite._name,
+			testsuite._title, testsuite._summary, testsuite._description,
 			testsuite._kind,
 			testsuite._hostname,
 			testsuite._startTime,
 			testsuite._setupDuration, testsuite._testDuration, testsuite._teardownDuration, testsuite._totalDuration,
 			TestsuiteStatus.Unknown,
 			testsuite._warningCount, testsuite._errorCount, testsuite._fatalCount,
-			title=testsuite._title,
-			summary=testsuite._summary,
-			description=testsuite._description,
 			parent=parent
 		)
 		Merged.__init__(self)
@@ -2299,6 +2281,7 @@ class MergedTestsuite(Testsuite, Merged):
 	def ToTestsuite(self) -> Testsuite:
 		testsuite = Testsuite(
 			self._name,
+			self._title, self._summary, self._description,
 			self._kind,
 			self._hostname,
 			self._startTime,
@@ -2311,10 +2294,7 @@ class MergedTestsuite(Testsuite, Merged):
 			self._errorCount,
 			self._fatalCount,
 			testsuites=(ts.ToTestsuite() for ts in self._testsuites.values()),
-			testcases=(tc.ToTestcase() for tc in self._testcases.values()),
-			title=self._title,
-			summary=self._summary,
-			description=self._description
+			testcases=(tc.ToTestcase() for tc in self._testcases.values())
 		)
 
 		testsuite._tests = self._tests
@@ -2359,6 +2339,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 	def ToTestsuiteSummary(self) -> TestsuiteSummary:
 		testsuiteSummary = TestsuiteSummary(
 			self._name,
+			self._title, self._summary, self._description,
 			self._startTime,
 			self._setupDuration,
 			self._testDuration,
@@ -2368,10 +2349,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 			self._warningCount,
 			self._errorCount,
 			self._fatalCount,
-			testsuites=(ts.ToTestsuite() for ts in self._testsuites.values()),
-			title=self._title,
-			summary=self._summary,
-			description=self._description
+			testsuites=(ts.ToTestsuite() for ts in self._testsuites.values())
 		)
 
 		testsuiteSummary._tests = self._tests

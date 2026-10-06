@@ -237,7 +237,7 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		testsuite = Testsuite(
 			testsuiteElement.attrib["name"],
-			TestsuiteKind.Logical,
+			kind=TestsuiteKind.Logical,
 			totalDuration=self._ConvertDuration(testsuiteElement),
 			parent=parent
 		)
