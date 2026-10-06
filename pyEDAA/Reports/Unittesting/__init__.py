@@ -314,6 +314,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		expectedErrorCount: int = 0,
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		*,
 		parent: Nullable[TestsuiteBase] = None
 	) -> None:
 		"""
@@ -844,6 +845,7 @@ class Testcase(Base, TestcaseOutputMixin):
 		details: Nullable[str] = None,
 		standardOutput: Nullable[str] = None,
 		standardError: Nullable[str] = None,
+		*,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
@@ -1102,6 +1104,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		*,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
@@ -1521,6 +1524,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		testcases: Nullable[Iterable[Testcase]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		*,
 		parent: Nullable[TestsuiteType] = None
 	) -> None:
 		"""
@@ -1823,6 +1827,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		*,
 		parent: Nullable[TestsuiteType] = None
 	) -> None:
 		"""
@@ -2066,6 +2071,7 @@ class MergedTestcase(Testcase, Merged):
 	def __init__(
 		self,
 		testcase: Testcase,
+		*,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		if testcase is None:
@@ -2213,6 +2219,7 @@ class MergedTestsuite(Testsuite, Merged):
 		testsuite: Testsuite,
 		addTestsuites: bool = False,
 		addTestcases: bool = False,
+		*,
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		if testsuite is None:

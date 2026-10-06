@@ -317,6 +317,7 @@ Testcase
                details: Nullable[str] = None,
                standardOutput: Nullable[str] = None,
                standardError: Nullable[str] = None,
+               *,
                parent: Nullable["Testsuite"] = None
             ):
               ...
@@ -529,6 +530,7 @@ Testsuite
                fatalCount: int = 0,
                testsuites: Nullable[Iterable[TestsuiteType]] = None,
                testcases: Nullable[Iterable["Testcase"]] = None,
+               *,
                parent: Nullable[TestsuiteType] = None
             ):
               ...
@@ -704,6 +706,7 @@ TestsuiteSummary
                errorCount: int = 0,
                fatalCount: int = 0,
                testsuites: Nullable[Iterable[TestsuiteType]] = None,
+               *,
                parent: Nullable[TestsuiteType] = None
             ):
               ...

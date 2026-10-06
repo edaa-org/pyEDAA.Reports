@@ -301,8 +301,8 @@ class ClassCoverage(Class, Coverage):
 	_methods: Dict[str, CoverageState]
 	_classes: Dict[str, ClassCoverage]
 
-	def __init__(self, name: str, parent: Union[PackageCoverage, ClassCoverage, None] = None) -> None:
-		super().__init__(name, parent)
+	def __init__(self, name: str, *, parent: Union[PackageCoverage, ClassCoverage, None] = None) -> None:
+		super().__init__(name, parent=parent)
 		Coverage.__init__(self)
 
 		if parent is not None:
@@ -364,8 +364,8 @@ class ModuleCoverage(Module, AggregatedCoverage):
 	_functions: Dict[str, CoverageState]
 	_classes:   Dict[str, ClassCoverage]
 
-	def __init__(self, name: str, file: Path, parent: Nullable[PackageCoverage] = None) -> None:
-		super().__init__(name, parent)
+	def __init__(self, name: str, file: Path, *, parent: Nullable[PackageCoverage] = None) -> None:
+		super().__init__(name, parent=parent)
 		AggregatedCoverage.__init__(self, file)
 
 		if parent is not None:
@@ -449,8 +449,8 @@ class PackageCoverage(Package, AggregatedCoverage):
 	_modules:   Dict[str, ModuleCoverage]
 	_packages:  Dict[str, PackageCoverage]
 
-	def __init__(self, name: str, file: Path, parent: Nullable[PackageCoverage] = None) -> None:
-		super().__init__(name, parent)
+	def __init__(self, name: str, file: Path, *, parent: Nullable[PackageCoverage] = None) -> None:
+		super().__init__(name, parent=parent)
 		AggregatedCoverage.__init__(self, file)
 
 		if parent is not None:
@@ -654,10 +654,10 @@ class DocStrCoverage(metaclass=ExtendedType):
 				try:
 					currentCoverageObject = currentCoverageObject[packageName]
 				except KeyError:
-					currentCoverageObject = PackageCoverage(packageName, path, currentCoverageObject)
+					currentCoverageObject = PackageCoverage(packageName, path, parent=currentCoverageObject)
 
 			if moduleName != "__init__":
-				currentCoverageObject = ModuleCoverage(moduleName, path, currentCoverageObject)
+				currentCoverageObject = ModuleCoverage(moduleName, path, parent=currentCoverageObject)
 
 			currentCoverageObject._expected = perFileResult.needed
 			currentCoverageObject._covered = perFileResult.found
