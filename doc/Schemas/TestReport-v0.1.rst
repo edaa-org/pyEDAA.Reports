@@ -4,34 +4,13 @@ pyTooling TestReport v0.1
 #########################
 
 pyTooling's own test report format, which pyTooling's pytest plugin writes. Unlike JUnit XML, test suites nest,
-and every test suite and test case carries a title, a summary and a description. This file is a copy of the one
-pyTooling ships in ``pyTooling.Resources``.
+and every test suite and test case carries a title, a summary and a description.
 
-Read by :class:`pyEDAA.Reports.Unittesting.pyTooling.Document` - see :ref:`UNITTEST/FileFormats/pyTooling`.
+Read by :class:`pyEDAA.Reports.Unittesting.pyTooling.Document` - see :ref:`UNITTEST/FileFormats/pyTooling`. The
+schema is pyTooling's: the reader takes :file:`TestReport-v0.1.xsd` from :mod:`pyTooling.Resources`, the package
+pyTooling ships it in, so pyEDAA.Reports carries no copy of it.
 
-.. grid:: 2
+.. seealso::
 
-   .. grid-item::
-      :columns: 6
-
-      .. admonition:: Download
-
-         :download:`TestReport-v0.1.xsd <../../pyEDAA/Reports/Resources/TestReport-v0.1.xsd>`
-
-   .. grid-item::
-      :columns: 6
-
-      .. admonition:: Validate a report
-
-         .. code-block:: bash
-
-            xmllint --schema TestReport-v0.1.xsd --noout report.xml
-
-.. _SCHEMAS/TestReport-v0.1/Source:
-
-Source
-******
-
-.. literalinclude:: ../../pyEDAA/Reports/Resources/TestReport-v0.1.xsd
-   :language: xml
-   :linenos:
+   :ref:`TestReport v0.1 <pyTool:SCHEMAS/TestReport-v0.1>`
+      |rarr| pyTooling's page of the schema: download, validation, diagram and source.

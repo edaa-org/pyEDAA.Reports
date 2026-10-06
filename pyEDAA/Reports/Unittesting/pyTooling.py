@@ -58,13 +58,13 @@ from typing                     import Dict, Optional as Nullable
 
 from lxml.etree                 import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError, parse
 from lxml.etree                 import _Element, _ElementTree
+from pyTooling                  import Resources as pyToolingResources
 from pyTooling.Common           import getResourceFile
 from pyTooling.Decorators       import export, readonly
 from pyTooling.Exceptions       import ToolingException
 from pyTooling.Stopwatch        import Stopwatch
 from pyTooling.Versioning       import SemanticVersion
 
-from pyEDAA.Reports             import Resources
 from pyEDAA.Reports.Unittesting import UnittestError, TestcaseStatus, TestsuiteKind
 from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary, Testsuite, Testcase
 
@@ -179,9 +179,9 @@ class Document(TestsuiteSummary, ut_Document):
 				raise ex from None
 
 			try:
-				schemaResourceFile = getResourceFile(Resources, schemaFile)
+				schemaResourceFile = getResourceFile(pyToolingResources, schemaFile)
 			except ToolingException as ex:
-				raise UnittestError(f"Couldn't locate XML Schema '{schemaFile}' in package resources.") from ex
+				raise UnittestError(f"Couldn't locate XML Schema '{schemaFile}' in pyTooling's package resources.") from ex
 
 			try:
 				xmlSchema = XMLSchema(parse(schemaResourceFile, XMLParser(ns_clean=True)))
