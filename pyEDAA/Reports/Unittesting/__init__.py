@@ -320,19 +320,19 @@ class Base(metaclass=ExtendedType, slots=True):
 		Initializes the fields of the base-class.
 
 		:param name:               Name of the test entity.
-		:param startTime:          Time when the test entity was started.
-		:param setupDuration:      Duration it took to set up the entity.
-		:param testDuration:       Duration of the entity's test run.
-		:param teardownDuration:   Duration it took to tear down the entity.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown).
-		:param warningCount:       Count of encountered warnings.
-		:param errorCount:         Count of encountered errors.
-		:param fatalCount:         Count of encountered fatal errors.
-		:param keyValuePairs:      Mapping of key-value pairs to initialize the test entity with.
+		:param startTime:          Optional, time when the test entity was started.
+		:param setupDuration:      Optional, duration it took to set up the entity.
+		:param testDuration:       Optional, duration of the entity's test run.
+		:param teardownDuration:   Optional, duration it took to tear down the entity.
+		:param totalDuration:      Optional, total duration of the entity's execution (setup + test + teardown).
+		:param warningCount:       Optional, count of encountered warnings.
+		:param errorCount:         Optional, count of encountered errors.
+		:param fatalCount:         Optional, count of encountered fatal errors.
+		:param keyValuePairs:      Optional, mapping of key-value pairs to initialize the test entity with.
 		:param title:              Optional, short label of the test entity, written for a reader.
 		:param summary:            Optional, summary of the test entity.
 		:param description:        Optional, description of the test entity.
-		:param parent:             Reference to the parent test entity.
+		:param parent:             Optional, reference to the parent test entity.
 		:raises TypeError:         When parameter 'parent' is not a TestsuiteBase.
 		:raises ValueError:        When parameter 'name' is None.
 		:raises TypeError:         When parameter 'name' is not a string.
@@ -850,22 +850,22 @@ class Testcase(Base, TestcaseOutputMixin):
 		Initializes the fields of a test case.
 
 		:param name:                 Name of the test entity.
-		:param startTime:            Time when the test entity was started.
-		:param setupDuration:        Duration it took to set up the entity.
-		:param testDuration:         Duration of the entity's test run.
-		:param teardownDuration:     Duration it took to tear down the entity.
-		:param totalDuration:        Total duration of the entity's execution (setup + test + teardown)
-		:param status:               Status of the test case.
-		:param assertionCount:       Number of assertions within the test.
-		:param failedAssertionCount: Number of failed assertions within the test.
-		:param passedAssertionCount: Number of passed assertions within the test.
-		:param warningCount:         Count of encountered warnings.
-		:param errorCount:           Count of encountered errors.
-		:param fatalCount:           Count of encountered fatal errors.
-		:param expectedWarningCount: Count of expected warnings.
-		:param expectedErrorCount:   Count of expected errors.
-		:param expectedFatalCount:   Count of expected fatal errors.
-		:param keyValuePairs:        Mapping of key-value pairs to initialize the test case.
+		:param startTime:            Optional, time when the test entity was started.
+		:param setupDuration:        Optional, duration it took to set up the entity.
+		:param testDuration:         Optional, duration of the entity's test run.
+		:param teardownDuration:     Optional, duration it took to tear down the entity.
+		:param totalDuration:        Optional, total duration of the entity's execution (setup + test + teardown)
+		:param status:               Optional, status of the test case.
+		:param assertionCount:       Optional, number of assertions within the test.
+		:param failedAssertionCount: Optional, number of failed assertions within the test.
+		:param passedAssertionCount: Optional, number of passed assertions within the test.
+		:param warningCount:         Optional, count of encountered warnings.
+		:param errorCount:           Optional, count of encountered errors.
+		:param fatalCount:           Optional, count of encountered fatal errors.
+		:param expectedWarningCount: Optional, count of expected warnings.
+		:param expectedErrorCount:   Optional, count of expected errors.
+		:param expectedFatalCount:   Optional, count of expected fatal errors.
+		:param keyValuePairs:        Optional, mapping of key-value pairs to initialize the test case.
 		:param message:              Optional, message explaining the test case's status.
 		:param details:              Optional, details explaining the test case's status (e.g. a traceback).
 		:param standardOutput:       Optional, captured standard output of the test case.
@@ -873,7 +873,7 @@ class Testcase(Base, TestcaseOutputMixin):
 		:param title:                Optional, short label of the test case, written for a reader.
 		:param summary:              Optional, summary of the test case.
 		:param description:          Optional, description of the test case.
-		:param parent:               Reference to the parent test suite.
+		:param parent:               Optional, reference to the parent test suite.
 		:raises TypeError:           If parameter 'parent' is not a Testsuite.
 		:raises ValueError:          If parameter 'assertionCount' is not consistent.
 		"""
@@ -1112,22 +1112,22 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		Initializes the based-class fields of a test suite or test summary.
 
 		:param name:                     Name of the test entity.
-		:param kind:                     Kind of the test entity.
-		:param startTime:                Time when the test entity was started.
-		:param setupDuration:            Duration it took to set up the entity.
-		:param testDuration:             Duration of all tests listed in the test entity.
-		:param teardownDuration:         Duration it took to tear down the entity.
-		:param totalDuration:            Total duration of the entity's execution (setup + test + teardown)
-		:param status:                   Overall status of the test entity.
-		:param warningCount:             Count of encountered warnings incl. warnings from sub-elements.
-		:param errorCount:               Count of encountered errors incl. errors from sub-elements.
-		:param fatalCount:               Count of encountered fatal errors incl. fatal errors from sub-elements.
-		:param testsuites:               List of test suites to initialize the test entity with.
-		:param keyValuePairs:            Mapping of key-value pairs to initialize the test entity with.
+		:param kind:                     Optional, kind of the test entity.
+		:param startTime:                Optional, time when the test entity was started.
+		:param setupDuration:            Optional, duration it took to set up the entity.
+		:param testDuration:             Optional, duration of all tests listed in the test entity.
+		:param teardownDuration:         Optional, duration it took to tear down the entity.
+		:param totalDuration:            Optional, total duration of the entity's execution (setup + test + teardown)
+		:param status:                   Optional, overall status of the test entity.
+		:param warningCount:             Optional, count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:               Optional, count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:               Optional, count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:               Optional, list of test suites to initialize the test entity with.
+		:param keyValuePairs:            Optional, mapping of key-value pairs to initialize the test entity with.
 		:param title:                    Optional, short label of the test entity, written for a reader.
 		:param summary:                  Optional, summary of the test entity.
 		:param description:              Optional, description of the test entity.
-		:param parent:                   Reference to the parent test entity.
+		:param parent:                   Optional, reference to the parent test entity.
 		:raises TypeError:               If parameter 'parent' is not a TestsuiteBase.
 		:raises TypeError:               If parameter 'testsuites' is not iterable.
 		:raises TypeError:               If element in parameter 'testsuites' is not a Testsuite.
@@ -1533,24 +1533,25 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		Initializes the fields of a test suite.
 
 		:param name:                     Name of the test suite.
-		:param kind:                     Kind of the test suite.
-		:param hostname:                 Name of the host the test suite was executed on, or ``None`` if it wasn't recorded.
-		:param startTime:                Time when the test suite was started.
-		:param setupDuration:            Duration it took to set up the test suite.
-		:param testDuration:             Duration of all tests listed in the test suite.
-		:param teardownDuration:         Duration it took to tear down the test suite.
-		:param totalDuration:            Total duration of the entity's execution (setup + test + teardown)
-		:param status:                   Overall status of the test suite.
-		:param warningCount:             Count of encountered warnings incl. warnings from sub-elements.
-		:param errorCount:               Count of encountered errors incl. errors from sub-elements.
-		:param fatalCount:               Count of encountered fatal errors incl. fatal errors from sub-elements.
-		:param testsuites:               List of test suites to initialize the test suite with.
-		:param testcases:                List of test cases to initialize the test suite with.
-		:param keyValuePairs:            Mapping of key-value pairs to initialize the test suite with.
+		:param kind:                     Optional, kind of the test suite.
+		:param hostname:                 Optional, name of the host the test suite was executed on, or ``None`` if it wasn't
+		                                 recorded.
+		:param startTime:                Optional, time when the test suite was started.
+		:param setupDuration:            Optional, duration it took to set up the test suite.
+		:param testDuration:             Optional, duration of all tests listed in the test suite.
+		:param teardownDuration:         Optional, duration it took to tear down the test suite.
+		:param totalDuration:            Optional, total duration of the entity's execution (setup + test + teardown)
+		:param status:                   Optional, overall status of the test suite.
+		:param warningCount:             Optional, count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:               Optional, count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:               Optional, count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:               Optional, list of test suites to initialize the test suite with.
+		:param testcases:                Optional, list of test cases to initialize the test suite with.
+		:param keyValuePairs:            Optional, mapping of key-value pairs to initialize the test suite with.
 		:param title:                    Optional, short label of the test suite, written for a reader.
 		:param summary:                  Optional, summary of the test suite.
 		:param description:              Optional, description of the test suite.
-		:param parent:                   Reference to the parent test entity.
+		:param parent:                   Optional, reference to the parent test entity.
 		:raises TypeError:               If parameter 'testcases' is not iterable.
 		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
 		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
@@ -1838,21 +1839,21 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		Initializes the fields of a test summary.
 
 		:param name:               Name of the test summary.
-		:param startTime:          Time when the test summary was started.
-		:param setupDuration:      Duration it took to set up the test summary.
-		:param testDuration:       Duration of all tests listed in the test summary.
-		:param teardownDuration:   Duration it took to tear down the test summary.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
-		:param status:             Overall status of the test summary.
-		:param warningCount:       Count of encountered warnings incl. warnings from sub-elements.
-		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
-		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
-		:param testsuites:         List of test suites to initialize the test summary with.
-		:param keyValuePairs:      Mapping of key-value pairs to initialize the test summary with.
+		:param startTime:          Optional, time when the test summary was started.
+		:param setupDuration:      Optional, duration it took to set up the test summary.
+		:param testDuration:       Optional, duration of all tests listed in the test summary.
+		:param teardownDuration:   Optional, duration it took to tear down the test summary.
+		:param totalDuration:      Optional, total duration of the entity's execution (setup + test + teardown)
+		:param status:             Optional, overall status of the test summary.
+		:param warningCount:       Optional, count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:         Optional, count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:         Optional, count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:         Optional, list of test suites to initialize the test summary with.
+		:param keyValuePairs:      Optional, mapping of key-value pairs to initialize the test summary with.
 		:param title:              Optional, short label of the test summary, written for a reader.
 		:param summary:            Optional, summary of the test summary.
 		:param description:        Optional, description of the test summary.
-		:param parent:             Reference to the parent test summary.
+		:param parent:             Optional, reference to the parent test summary.
 		"""
 		super().__init__(
 			name,
