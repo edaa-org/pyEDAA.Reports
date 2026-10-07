@@ -36,8 +36,8 @@ The model has two hierarchies over the same lines:
 * The **physical** hierarchy - :class:`CoverageSummary`, :class:`Directory`, :class:`File` - is built from the file
   paths a report names. A file holds its executable lines; every format has them.
 * The **logical** hierarchy holds the language units a report names - :class:`Package`, :class:`Module`,
-  :class:`Class`, :class:`Function`, :class:`Method` -, each with the file and the lines it covers. A unit's lines are
-  the file's :class:`Line` objects, so both hierarchies count the same lines.
+  :class:`SourceFile`, :class:`Class`, :class:`Function`, :class:`Method` -, each with the file and the lines it
+  covers. A unit's lines are the file's :class:`Line` objects, so both hierarchies count the same lines.
 
 A :class:`Line` and a :class:`Branch` carry a :class:`LineCoverageStatus` and - if the report says - a count: how
 often the line ran, or the branch was taken. :meth:`CoverageSummary.Aggregate` computes the counters of every file,
@@ -1215,6 +1215,11 @@ class Package(Unit):
 @export
 class Module(Unit):
 	"""A module: e.g. a Python module, a VHDL package or entity."""
+
+
+@export
+class SourceFile(Unit):
+	"""A source file as a unit, where the file is the language's unit: e.g. a C translation unit, a Bash or TCL script."""
 
 
 @export

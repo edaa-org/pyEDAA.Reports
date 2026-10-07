@@ -33,7 +33,7 @@
 from pathlib                     import Path
 
 from pyEDAA.Reports.CodeCoverage import Branch, Class, CodeCoverageError, CoverageSummary, Directory, File, Function
-from pyEDAA.Reports.CodeCoverage import Line, LineCoverageStatus, Method, Module, Package
+from pyEDAA.Reports.CodeCoverage import Line, LineCoverageStatus, Method, Module, Package, SourceFile
 from pyTooling.Testing           import Testcase
 
 
@@ -226,6 +226,24 @@ class Units(Testcase):
 		self.assertEqual((3, 2, 2), (klass.TotalLines, klass.CoveredLines, klass.TotalBranches))
 		self.assertEqual((3, 2), (package.TotalLines, package.CoveredLines))
 		self.assertEqual("<Method src.a.Shape.Area: 50.0%>", repr(method))
+
+	def test_SourceFile(self) -> None:
+		"""In C, the file is the unit containing the functions."""
+		summary = CoverageSummary("report")
+		file = summary.GetOrAddFile("src/main.c")
+		for line in (Line(3, Covered, 1), Line(4, Covered, 1), Line(8, Uncovered, 0)):
+			line.Parent = file
+
+		sourceFile = SourceFile("main.c", file=file, startLine=file.Lines[3], endLine=file.Lines[8], parent=summary)
+		function = Function("main", file=file, startLine=file.Lines[3], endLine=file.Lines[4], parent=sourceFile)
+		for line in file.Lines.values():
+			sourceFile.AddLine(line)
+
+		summary.Aggregate()
+
+		self.assertEqual("main.c.main", function.QualifiedName)
+		self.assertEqual([sourceFile, function], file.Units)
+		self.assertEqual((3, 2), (sourceFile.TotalLines, sourceFile.CoveredLines))
 
 	def test_DuplicateUnit(self) -> None:
 		summary = CoverageSummary("report")

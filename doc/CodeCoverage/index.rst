@@ -54,14 +54,16 @@ The common model is a superset: it has two hierarchies over the same lines.
    └─ logical hierarchy        the language units the report names
       └── Package              e.g. src
           └── Class            e.g. Counter_vhdl - file, first and last line, lines
-              └── Method       also: Module, Function
+              └── Method       also: Module, SourceFile, Function
 
 * Every format has files and lines, so lines, branches and their counts live in the **physical** hierarchy.
 * A **unit** - :class:`~pyEDAA.Reports.CodeCoverage.Package`, :class:`~pyEDAA.Reports.CodeCoverage.Module`,
-  :class:`~pyEDAA.Reports.CodeCoverage.Class`, :class:`~pyEDAA.Reports.CodeCoverage.Function`,
-  :class:`~pyEDAA.Reports.CodeCoverage.Method` - names its file, its first and last line and its lines, which are the
-  file's :class:`~pyEDAA.Reports.CodeCoverage.Line` objects. So both hierarchies count the same lines. A unit can state
-  how often it was called.
+  :class:`~pyEDAA.Reports.CodeCoverage.SourceFile`, :class:`~pyEDAA.Reports.CodeCoverage.Class`,
+  :class:`~pyEDAA.Reports.CodeCoverage.Function`, :class:`~pyEDAA.Reports.CodeCoverage.Method` - names its file, its
+  first and last line and its lines, which are the file's :class:`~pyEDAA.Reports.CodeCoverage.Line` objects. So both
+  hierarchies count the same lines. A unit can state how often it was called.
+* A :class:`~pyEDAA.Reports.CodeCoverage.SourceFile` is the unit of a language without modules or classes, where the
+  file is the unit: e.g. a C translation unit, a Bash or TCL script.
 * Every element knows the element containing it - :attr:`~pyEDAA.Reports.CodeCoverage.Base.Parent` - and the report's
   root - :attr:`~pyEDAA.Reports.CodeCoverage.Base.Root`. Assigning a parent, in the constructor or later, adds the
   element to it and passes the root on to the elements it contains.
