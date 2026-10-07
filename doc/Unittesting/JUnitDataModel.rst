@@ -134,7 +134,7 @@ Document
 JUnit Dialects
 ==============
 
-As the JUnit XML format was not well specified and no XML Schema Definition (XSD) was provided, many variants and
+As the JUnit XML format was not well specified and no :acf:`XSD` was provided, many variants and
 dialects (and simplifications) were created by the various frameworks emitting JUnit XML files.
 
 .. rubric:: JUnit Dialect Comparison
