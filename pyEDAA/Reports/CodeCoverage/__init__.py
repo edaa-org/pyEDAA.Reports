@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2021-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -39,9 +39,9 @@ The model has two hierarchies over the same lines:
   :class:`Class`, :class:`Function`, :class:`Method` -, each with the file and the lines it covers. A unit's lines are
   the file's :class:`Line` objects, so both hierarchies count the same lines.
 
-A :class:`Line` and a :class:`Branch` carry a :class:`CoverageStatus` and - if the report says - a count: how often the
-line ran, or the branch was taken. :meth:`CoverageCountersMixin.Aggregate` computes the counters of a file, a directory
-or a unit.
+A :class:`Line` and a :class:`Branch` carry a :class:`LineCoverageStatus` and - if the report says - a count: how
+often the line ran, or the branch was taken. :meth:`CoverageSummary.Aggregate` computes the counters of every file,
+directory and unit.
 
 The report formats have models of their own, which convert to this one:
 
@@ -54,7 +54,7 @@ from __future__            import annotations
 
 from datetime              import timedelta
 from enum                  import Enum
-from pathlib               import Path, PurePath, PurePosixPath
+from pathlib               import Path
 from typing                import Generator, Iterable, Optional as Nullable
 
 from pyTooling.Common      import getFullyQualifiedName
@@ -70,7 +70,7 @@ class CodeCoverageError(ReportException):
 
 
 @export
-class CoverageStatus(Enum):
+class LineCoverageStatus(Enum):
 	"""The coverage state of a line, a branch or a unit, as a report states it."""
 
 	Unknown =          0  #: The report doesn't say.
@@ -80,7 +80,7 @@ class CoverageStatus(Enum):
 	Excluded =         4  #: Excluded from the measurement, e.g. by a pragma comment.
 
 
-def _checkCount(count: Nullable[int], status: CoverageStatus) -> None:
+def _checkCount(count: Nullable[int], status: LineCoverageStatus) -> None:
 	"""
 	Check a count against a coverage state: a count of ``0`` is uncovered, a positive count covered.
 
@@ -100,8 +100,8 @@ def _checkCount(count: Nullable[int], status: CoverageStatus) -> None:
 		ex = ValueError(f"Parameter 'count' is negative.")
 		ex.add_note(f"Got value '{count}'.")
 		raise ex
-	elif (count == 0 and status in (CoverageStatus.Covered, CoverageStatus.PartiallyCovered)) or \
-			(count > 0 and status is CoverageStatus.Uncovered):
+	elif (count == 0 and status in (LineCoverageStatus.Covered, LineCoverageStatus.PartiallyCovered)) or \
+			(count > 0 and status is LineCoverageStatus.Uncovered):
 		ex = ValueError(f"Parameter 'count' contradicts parameter 'status'.")
 		ex.add_note(f"Got count '{count}' for status '{status.name}'.")
 		raise ex
@@ -113,24 +113,24 @@ class Branch(metaclass=ExtendedType, slots=True):
 	A branch of a line: whether it was taken, how often - if the report says -, and where it goes - if the report says.
 	"""
 
-	_status: CoverageStatus  #: Whether the branch was taken.
-	_count:  Nullable[int]   #: How often the branch was taken, if the report says.
-	_target: Nullable[int]   #: The line the branch goes to, if the report says.
+	_status: LineCoverageStatus  #: Whether the branch was taken.
+	_count:  Nullable[int]       #: How often the branch was taken, if the report says.
+	_target: Nullable[int]       #: The line the branch goes to, if the report says.
 
-	def __init__(self, status: CoverageStatus, count: Nullable[int] = None, target: Nullable[int] = None) -> None:
+	def __init__(self, status: LineCoverageStatus, count: Nullable[int] = None, target: Nullable[int] = None) -> None:
 		"""
 		Initialize a branch.
 
 		:param status:      Whether the branch was taken.
 		:param count:       Optional, how often the branch was taken, if the report says. Default: ``None``.
 		:param target:      Optional, the line the branch goes to, if the report says. Default: ``None``.
-		:raises TypeError:  If parameter ``status`` isn't of type :class:`CoverageStatus`.
+		:raises TypeError:  If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
 		:raises TypeError:  If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``count`` is negative.
 		:raises ValueError: If parameter ``count`` contradicts parameter ``status``.
 		"""
-		if not isinstance(status, CoverageStatus):
-			ex = TypeError(f"Parameter 'status' is not of type 'CoverageStatus'.")
+		if not isinstance(status, LineCoverageStatus):
+			ex = TypeError(f"Parameter 'status' is not of type 'LineCoverageStatus'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 
@@ -141,11 +141,11 @@ class Branch(metaclass=ExtendedType, slots=True):
 		self._target = target
 
 	@readonly
-	def Status(self) -> CoverageStatus:
+	def Status(self) -> LineCoverageStatus:
 		"""
 		Read-only property to access whether the branch was taken (:attr:`_status`).
 
-		:returns: :attr:`CoverageStatus.Covered`, if the branch was taken.
+		:returns: :attr:`LineCoverageStatus.Covered`, if the branch was taken.
 		"""
 		return self._status
 
@@ -177,64 +177,64 @@ class Line(metaclass=ExtendedType, slots=True):
 	A report lists only executable lines; a line it doesn't list - a comment, a declaration - has no :class:`Line`.
 	"""
 
-	_number:   int             #: Line number, counted from 1.
-	_status:   CoverageStatus  #: Coverage state of the line.
-	_count:    Nullable[int]   #: How often the line ran, if the report says.
-	_branches: list[Branch]    #: The branches starting at this line.
+	_lineNumber: int                 #: Line number, counted from 1.
+	_status:     LineCoverageStatus  #: Coverage state of the line.
+	_count:      Nullable[int]       #: How often the line ran, if the report says.
+	_branches:   list[Branch]        #: The branches starting at this line.
 
 	def __init__(
 		self,
-		number: int,
-		status: CoverageStatus,
+		lineNumber: int,
+		status: LineCoverageStatus,
 		count: Nullable[int] = None,
 		branches: Iterable[Branch] = ()
 	) -> None:
 		"""
 		Initialize a line's coverage.
 
-		:param number:      Line number, counted from 1.
+		:param lineNumber:  Line number, counted from 1.
 		:param status:      Coverage state of the line.
 		:param count:       Optional, how often the line ran, if the report says. Default: ``None``.
 		:param branches:    Optional, the branches starting at this line. Default: none.
-		:raises TypeError:  If parameter ``number`` isn't of type :class:`int`.
-		:raises ValueError: If parameter ``number`` is less than 1.
-		:raises TypeError:  If parameter ``status`` isn't of type :class:`CoverageStatus`.
+		:raises TypeError:  If parameter ``lineNumber`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``lineNumber`` is less than 1.
+		:raises TypeError:  If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
 		:raises TypeError:  If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``count`` is negative.
 		:raises ValueError: If parameter ``count`` contradicts parameter ``status``.
 		"""
-		if not isinstance(number, int):
-			ex = TypeError(f"Parameter 'number' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(number)}'.")
+		if not isinstance(lineNumber, int):
+			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
-		elif number < 1:
-			ex = ValueError(f"Parameter 'number' is less than 1.")
-			ex.add_note(f"Got value '{number}'.")
+		elif lineNumber < 1:
+			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
-		if not isinstance(status, CoverageStatus):
-			ex = TypeError(f"Parameter 'status' is not of type 'CoverageStatus'.")
+		if not isinstance(status, LineCoverageStatus):
+			ex = TypeError(f"Parameter 'status' is not of type 'LineCoverageStatus'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 
 		_checkCount(count, status)
 
-		self._number =   number
-		self._status =   status
-		self._count =    count
-		self._branches = list(branches)
+		self._lineNumber = lineNumber
+		self._status =     status
+		self._count =      count
+		self._branches =   list(branches)
 
 	@readonly
-	def Number(self) -> int:
+	def LineNumber(self) -> int:
 		"""
-		Read-only property to access the line number (:attr:`_number`).
+		Read-only property to access the line number (:attr:`_lineNumber`).
 
 		:returns: The line number, counted from 1.
 		"""
-		return self._number
+		return self._lineNumber
 
 	@readonly
-	def Status(self) -> CoverageStatus:
+	def Status(self) -> LineCoverageStatus:
 		"""
 		Read-only property to access the line's coverage state (:attr:`_status`).
 
@@ -265,9 +265,9 @@ class Line(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to return the number of this line's branches, which were taken.
 
-		:returns: The number of branches with state :attr:`CoverageStatus.Covered`.
+		:returns: The number of branches with state :attr:`LineCoverageStatus.Covered`.
 		"""
-		return sum(1 for branch in self._branches if branch._status is CoverageStatus.Covered)
+		return sum(1 for branch in self._branches if branch._status is LineCoverageStatus.Covered)
 
 	def __repr__(self) -> str:
 		"""
@@ -276,7 +276,7 @@ class Line(metaclass=ExtendedType, slots=True):
 		:returns: The line number, the state and the branches, e.g. ``<Line 12: PartiallyCovered (1/2 branches)>``.
 		"""
 		branches = f" ({self.CoveredBranches}/{len(self._branches)} branches)" if len(self._branches) > 0 else ""
-		return f"<Line {self._number}: {self._status.name}{branches}>"
+		return f"<Line {self._lineNumber}: {self._status.name}{branches}>"
 
 
 @export
@@ -285,7 +285,8 @@ class CoverageCountersMixin(metaclass=ExtendedType, mixin=True):
 	A mixin-class adding the counters of lines and branches, computed from the lines of a file or a unit, or summed over
 	a directory's children.
 
-	The counters are zero until :meth:`Aggregate` computed them.
+	The counters are zero until :meth:`Base.Aggregate` - of a directory or a file - or :meth:`Unit.Aggregate` computed
+	them.
 	"""
 
 	_totalLines:      int  #: Number of executable lines, without the excluded ones.
@@ -320,17 +321,18 @@ class CoverageCountersMixin(metaclass=ExtendedType, mixin=True):
 		"""
 		self._ResetCounters()
 		for line in lines:
-			if line._status is CoverageStatus.Excluded:
+			if line._status is LineCoverageStatus.Excluded:
 				self._excludedLines += 1
 				continue
 
 			self._totalLines += 1
 			self._totalBranches += len(line._branches)
 			self._coveredBranches += line.CoveredBranches
-			if line._status in (CoverageStatus.Covered, CoverageStatus.PartiallyCovered):
+			if line._status is LineCoverageStatus.Covered:
 				self._coveredLines += 1
-				if line._status is CoverageStatus.PartiallyCovered:
-					self._partialLines += 1
+			elif line._status is LineCoverageStatus.PartiallyCovered:
+				self._coveredLines += 1
+				self._partialLines += 1
 
 	@readonly
 	def TotalLines(self) -> int:
@@ -434,14 +436,7 @@ class CoverageCountersMixin(metaclass=ExtendedType, mixin=True):
 		total = self._totalLines + self._totalBranches
 		return 1.0 if total == 0 else (self._coveredLines + self._coveredBranches) / total
 
-	@abstractmethod
-	def Aggregate(self) -> None:
-		"""
-		Compute the counters.
-		"""
-
-
-	def _AddCounters(self, other: CoverageCountersMixin) -> None:
+	def _AggregateCounters(self, other: CoverageCountersMixin) -> None:
 		"""
 		Add the counters of another directory, file or unit to this one's.
 
@@ -504,16 +499,22 @@ class Base(CoverageCountersMixin):
 		return self._parent
 
 	@readonly
-	def Path(self) -> PurePosixPath:
+	def Path(self) -> Path:
 		"""
 		Read-only property to return the path below the root: the names of the parent directories and the own name.
 
 		:returns: The path, e.g. ``src/Counter.vhdl``; the name, if there is no parent.
 		"""
 		if self._parent is None:
-			return PurePosixPath(self._name)
+			return Path(self._name)
 
 		return self._parent.Path / self._name
+
+	@abstractmethod
+	def Aggregate(self) -> None:
+		"""
+		Compute the counters.
+		"""
 
 
 @export
@@ -570,10 +571,10 @@ class File(Base):
 		:param line:               The line.
 		:raises CodeCoverageError: If the file already has a line with this number.
 		"""
-		if line._number in self._lines:
-			raise CodeCoverageError(f"Line {line._number} of file '{self.Path}' is added twice.")
+		if line._lineNumber in self._lines:
+			raise CodeCoverageError(f"Line {line._lineNumber} of file '{self.Path}' is added twice.")
 
-		self._lines[line._number] = line
+		self._lines[line._lineNumber] = line
 
 	def Aggregate(self) -> None:
 		"""
@@ -657,7 +658,7 @@ class Directory(Base):
 		else:
 			self._files[child._name] = child  # type: ignore[assignment]
 
-	def GetOrAddFile(self, path: PurePath | str) -> File:
+	def GetOrAddFile(self, path: Path | str) -> File:
 		"""
 		Return the source file at a path below this directory, adding it and the directories on its way, if missing.
 
@@ -670,7 +671,7 @@ class Directory(Base):
 		                           directory's.
 		"""
 		if isinstance(path, str):
-			path = PurePosixPath(path.replace("\\", "/"))
+			path = Path(path.replace("\\", "/"))
 
 		parts = [part for part in path.parts if part not in ("", ".", "/")]
 		if len(parts) == 0:
@@ -710,7 +711,7 @@ class Directory(Base):
 		self._ResetCounters()
 		for child in (*self._directories.values(), *self._files.values()):
 			child.Aggregate()
-			self._AddCounters(child)
+			self._AggregateCounters(child)
 
 	def __repr__(self) -> str:
 		"""
@@ -728,10 +729,10 @@ class CoverageSummary(Directory):
 	of the logical hierarchy.
 	"""
 
-	_sourceDirectories: list[PurePath]   #: The directories the report names as where the sources were, if any.
+	_sourceDirectories: list[Path]   #: The directories the report names as where the sources were, if any.
 	_units:             dict[str, Unit]  #: The top-level units, by name.
 
-	def __init__(self, name: str, *, sourceDirectories: Iterable[PurePath] = ()) -> None:
+	def __init__(self, name: str, *, sourceDirectories: Iterable[Path] = ()) -> None:
 		"""
 		Initialize the root of a code coverage report.
 
@@ -744,7 +745,7 @@ class CoverageSummary(Directory):
 		self._units = {}
 
 	@readonly
-	def Path(self) -> PurePosixPath:
+	def Path(self) -> Path:
 		"""
 		Read-only property to return the path below the root, which is the root's own: ``.``.
 
@@ -752,10 +753,10 @@ class CoverageSummary(Directory):
 
 		:returns: ``.``
 		"""
-		return PurePosixPath(".")
+		return Path(".")
 
 	@readonly
-	def SourceDirectories(self) -> list[PurePath]:
+	def SourceDirectories(self) -> list[Path]:
 		"""
 		Read-only property to access the directories the report names as where the sources were
 		(:attr:`_sourceDirectories`).
@@ -803,15 +804,15 @@ class Unit(CoverageCountersMixin):
 	Its counters are computed from its own lines and those of the units it contains, each line counted once.
 	"""
 
-	_name:      str                                        #: Name of the unit.
-	_parent:    Nullable[Unit | CoverageSummary]           #: The unit containing this one, or the report's root.
-	_units:     dict[str, Unit]                            #: The units this one contains, by name.
-	_file:      Nullable[File]                             #: The source file the unit is in, if the report says.
-	_startLine: Nullable[int]                              #: The unit's first line, if the report says.
-	_endLine:   Nullable[int]                              #: The unit's last line, if the report says.
-	_status:    CoverageStatus                             #: Whether the unit was called, if the report says.
-	_count:     Nullable[int]                              #: How often the unit was called, if the report says.
-	_lines:     dict[int, Line]                            #: The lines of the unit itself, by line number.
+	_name:      str                               #: Name of the unit.
+	_parent:    Nullable[Unit | CoverageSummary]  #: The unit containing this one, or the report's root.
+	_units:     dict[str, Unit]                   #: The units this one contains, by name.
+	_file:      Nullable[File]                    #: The source file the unit is in, if the report says.
+	_startLine: Nullable[int]                     #: The unit's first line, if the report says.
+	_endLine:   Nullable[int]                     #: The unit's last line, if the report says.
+	_status:    LineCoverageStatus                #: Whether the unit was called, if the report says.
+	_count:     Nullable[int]                     #: How often the unit was called, if the report says.
+	_lines:     dict[int, Line]                   #: The executable lines of the unit itself, by line number.
 
 	def __init__(
 		self,
@@ -820,7 +821,7 @@ class Unit(CoverageCountersMixin):
 		file: Nullable[File] = None,
 		startLine: Nullable[int] = None,
 		endLine: Nullable[int] = None,
-		status: CoverageStatus = CoverageStatus.Unknown,
+		status: LineCoverageStatus = LineCoverageStatus.Unknown,
 		count: Nullable[int] = None,
 		parent: Nullable[Unit | CoverageSummary] = None
 	) -> None:
@@ -831,7 +832,7 @@ class Unit(CoverageCountersMixin):
 		:param file:               Optional, the source file the unit is in. Default: ``None``.
 		:param startLine:          Optional, the unit's first line. Default: ``None``.
 		:param endLine:            Optional, the unit's last line. Default: ``None``.
-		:param status:             Optional, whether the unit was called. Default: :attr:`CoverageStatus.Unknown`.
+		:param status:             Optional, whether the unit was called. Default: :attr:`LineCoverageStatus.Unknown`.
 		:param count:              Optional, how often the unit was called. Default: ``None``.
 		:param parent:             Optional, the unit or report containing this unit. Default: ``None``.
 		:raises ValueError:        If parameter ``name`` is ``None`` or empty.
@@ -933,11 +934,11 @@ class Unit(CoverageCountersMixin):
 		return self._endLine
 
 	@readonly
-	def Status(self) -> CoverageStatus:
+	def Status(self) -> LineCoverageStatus:
 		"""
 		Read-only property to access whether the unit was called (:attr:`_status`).
 
-		:returns: The coverage state; :attr:`CoverageStatus.Unknown`, if the report doesn't say.
+		:returns: The coverage state; :attr:`LineCoverageStatus.Unknown`, if the report doesn't say.
 		"""
 		return self._status
 
@@ -965,7 +966,7 @@ class Unit(CoverageCountersMixin):
 
 		:param line: The line.
 		"""
-		self._lines[line._number] = line
+		self._lines[line._lineNumber] = line
 
 	def IterateUnits(self) -> Generator[Unit, None, None]:
 		"""

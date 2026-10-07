@@ -47,7 +47,7 @@ The common model is a superset: it has two hierarchies over the same lines.
    ├─ physical hierarchy       built from the file paths the report names
    │  ├── Directory            e.g. src/
    │  │   └── File             e.g. src/Counter.vhdl
-   │  │       └── Line         number, CoverageStatus, count, branches
+   │  │       └── Line         line number, LineCoverageStatus, count, branches
    │  └── File
    │
    └─ logical hierarchy        the language units the report names
@@ -62,9 +62,9 @@ The common model is a superset: it has two hierarchies over the same lines.
   :class:`~pyEDAA.Reports.CodeCoverage.Line` objects. So both hierarchies count the same lines. A unit can state how
   often it was called.
 
-A line, a branch and a unit carry a :class:`~pyEDAA.Reports.CodeCoverage.CoverageStatus` and - if the report says - a
-count: how often the line ran, the branch was taken, the unit was called. A count of ``0`` is uncovered, a positive
-count covered.
+A line, a branch and a unit carry a :class:`~pyEDAA.Reports.CodeCoverage.LineCoverageStatus` and - if the report
+says - a count: how often the line ran, the branch was taken, the unit was called. A count of ``0`` is uncovered, a
+positive count covered.
 
 .. list-table::
    :header-rows: 1
@@ -85,8 +85,8 @@ count covered.
 
 A line a report doesn't list - a comment, a declaration - isn't executable and has no line object.
 
-:meth:`~pyEDAA.Reports.CodeCoverage.CoverageCountersMixin.Aggregate` computes the counters of a file from its lines,
-of a directory from its directories and files, and of a unit from its lines and those of its units, each line counted
+:meth:`~pyEDAA.Reports.CodeCoverage.CoverageSummary.Aggregate` computes the counters of a file from its lines, of a
+directory from its directories and files, and of a unit from its lines and those of its units, each line counted
 once: executable, covered, missing, excluded and partially covered lines, branches, covered and missing branches. The
 ratios :attr:`~pyEDAA.Reports.CodeCoverage.CoverageCountersMixin.LineCoverage`,
 :attr:`~pyEDAA.Reports.CodeCoverage.CoverageCountersMixin.BranchCoverage` and
