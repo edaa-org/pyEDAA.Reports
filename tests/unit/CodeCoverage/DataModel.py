@@ -53,14 +53,16 @@ class Lines(Testcase):
 	"""A line and a branch carry a coverage state and, if the report says, a count."""
 
 	def test_Properties(self) -> None:
-		line = Line(12, PartiallyCovered, 7, (Branch(Covered, 7, 13), Branch(Uncovered, 0)))
+		target = Line(13, Covered, 7)
+		line = Line(12, PartiallyCovered, 7, (Branch(Covered, 7, target), Branch(Uncovered, 0)))
 
 		self.assertEqual(12, line.LineNumber)
 		self.assertIs(PartiallyCovered, line.Status)
 		self.assertEqual(7, line.Count)
 		self.assertEqual(2, len(line.Branches))
 		self.assertEqual(1, line.CoveredBranches)
-		self.assertEqual(13, line.Branches[0].Target)
+		self.assertIs(target, line.Branches[0].Target)
+		self.assertIsNone(line.Branches[1].Target)
 		self.assertEqual("<Line 12: PartiallyCovered (1/2 branches)>", repr(line))
 
 	def test_WithoutCount(self) -> None:
@@ -344,6 +346,13 @@ class Checks(Testcase):
 			_ = File("a.py", lines=1)
 
 		self.assertEqual("Parameter 'lines' is not iterable.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
+
+	def test_TargetType(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Branch(Covered, target=13)
+
+		self.assertEqual("Parameter 'target' is not of type 'Line'.", str(context.exception))
 		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 	def test_UnitLines(self) -> None:

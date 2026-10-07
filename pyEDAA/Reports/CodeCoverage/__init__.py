@@ -212,13 +212,13 @@ class Branch(BaseWithStatus):
 	Its parent is the :class:`Line` it starts at.
 	"""
 
-	_target: Nullable[int]  #: The line the branch goes to, if the report says.
+	_target: Nullable[Line]  #: The line the branch goes to, if the report says.
 
 	def __init__(
 		self,
 		status: LineCoverageStatus,
 		count: Nullable[int] = None,
-		target: Nullable[int] = None,
+		target: Nullable[Line] = None,
 		parent: Nullable[Line] = None
 	) -> None:
 		"""
@@ -226,20 +226,21 @@ class Branch(BaseWithStatus):
 
 		:param status:      Whether the branch was taken.
 		:param count:       Optional, how often the branch was taken, if the report says. Default: ``None``.
-		:param target:      Optional, the line the branch goes to, if the report says. Default: ``None``.
+		:param target:      Optional, the line the branch goes to, if the report says; ``None`` for an exit of a function.
+		                    Default: ``None``.
 		:param parent:      Optional, the line the branch starts at. Default: ``None``.
 		:raises ValueError: If parameter ``status`` is ``None``.
 		:raises TypeError:  If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
 		:raises TypeError:  If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``count`` is negative.
 		:raises ValueError: If parameter ``count`` contradicts parameter ``status``.
-		:raises TypeError:  If parameter ``target`` isn't of type :class:`int`.
+		:raises TypeError:  If parameter ``target`` isn't of type :class:`Line`.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Line`.
 		"""
 		super().__init__(status, count)
 
-		if target is not None and not isinstance(target, int):
-			ex = TypeError(f"Parameter 'target' is not of type 'int'.")
+		if target is not None and not isinstance(target, Line):
+			ex = TypeError(f"Parameter 'target' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(target)}'.")
 			raise ex
 
@@ -261,12 +262,11 @@ class Branch(BaseWithStatus):
 		parent._branches.append(self)
 
 	@readonly
-	def Target(self) -> Nullable[int]:
+	def Target(self) -> Nullable[Line]:
 		"""
 		Read-only property to access the line the branch goes to (:attr:`_target`).
 
-		:returns: The line number, or ``None`` if the report doesn't say; coverage.py states a negative number for an
-		          exit of a function.
+		:returns: The line, or ``None`` if the report doesn't say or the branch exits the function.
 		"""
 		return self._target
 
