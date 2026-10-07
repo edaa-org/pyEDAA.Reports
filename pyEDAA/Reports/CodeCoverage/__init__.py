@@ -54,7 +54,6 @@ from __future__            import annotations
 
 from datetime              import timedelta
 from enum                  import Enum
-from itertools             import chain
 from pathlib               import Path
 from typing                import Generator, Iterable, Optional as Nullable
 
@@ -709,7 +708,7 @@ class Directory(Base):
 		Aggregate the directories and files in this directory, then sum their counters.
 		"""
 		self._ResetCounters()
-		for child in chain(self._directories.values(), self._files.values()):
+		for child in (*self._directories.values(), *self._files.values()):
 			child.Aggregate()
 			self._AggregateCounters(child)
 
