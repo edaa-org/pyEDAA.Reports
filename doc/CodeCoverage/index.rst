@@ -45,16 +45,20 @@ The common model is a superset: it has two hierarchies over the same lines.
    CoverageSummary             the report
    │
    ├─ physical hierarchy       built from the file paths the report names
-   │  ├── Directory            e.g. src/
-   │  │   └── File             e.g. src/Counter.vhdl
+   │  ├── Directory            e.g. myPackage/
+   │  │   └── File             e.g. myPackage/Shapes.py
    │  │       └── Line         line number, LineCoverageStatus, count
    │  │           └── Branch   LineCoverageStatus, count, target
    │  └── File
    │
-   └─ logical hierarchy        the language units the report names
-      └── Package              e.g. src
-          └── Class            e.g. Counter_vhdl - file, first and last line, lines
-              └── Method       also: Module, SourceFile, Function
+   └─ logical hierarchy        the language units the report names - each: file, first and last line, lines
+      └── Package              e.g. myPackage
+          ├── Module           e.g. myPackage.Shapes
+          │   ├── Class        e.g. myPackage.Shapes.Circle
+          │   │   └── Method   e.g. myPackage.Shapes.Circle.Area
+          │   └── Function     e.g. myPackage.Shapes.Distance
+          └── SourceFile       e.g. main.c - for languages, where the file is the unit
+              └── Function     e.g. main
 
 * Every format has files and lines, so lines, branches and their counts live in the **physical** hierarchy.
 * A **unit** - :class:`~pyEDAA.Reports.CodeCoverage.Package`, :class:`~pyEDAA.Reports.CodeCoverage.Module`,
