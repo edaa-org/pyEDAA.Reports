@@ -25,6 +25,12 @@ Available schemas
    * - :ref:`Ant + JUnit4 <SCHEMAS/Ant-JUnit4>`
      - :file:`Ant-JUnit4.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.AntJUnit4.Document`
+   * - :ref:`Any Cobertura <SCHEMAS/Any-Cobertura>`
+     - :file:`Any-Cobertura.xsd`
+     - :class:`pyEDAA.Reports.CodeCoverage.Cobertura.Document`
+   * - :ref:`Cobertura 04 <SCHEMAS/Cobertura-04>`
+     - :file:`Cobertura-04.xsd`
+     - strict translation of Cobertura's DTD ``coverage-04.dtd``
    * - :ref:`CTest JUnit <SCHEMAS/CTest-JUnit>`
      - :file:`CTest-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.CTestJUnit.Document`
@@ -68,6 +74,8 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
 
    Any-JUnit
    Ant-JUnit4
+   Any-Cobertura
+   Cobertura-04
    CTest-JUnit
    GoogleTest-JUnit
    PyTest-JUnit
