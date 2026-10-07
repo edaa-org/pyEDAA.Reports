@@ -88,7 +88,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	root.
 	"""
 
-	_PARENT_TYPE: ClassVar[tuple[type, ...]] = ()  #: The types a parent may have.
+	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: The types a parent may have; assigned by each class having a parent.
 
 	_parent: Nullable[Base]             #: The element containing this one, or ``None``.
 	_root:   Nullable[CoverageSummary]  #: The report's root, or ``None`` while the element isn't part of a report.
@@ -126,6 +126,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		:returns:                  The parent, or ``None``.
 		:raises ValueError:        If ``None`` is assigned.
 		:raises TypeError:         If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
+		:raises CodeCoverageError: If the element is the report's root, which has no parent.
 		:raises CodeCoverageError: If the assigned parent already contains an element of this name or line number.
 		"""
 		return self._parent
@@ -139,6 +140,8 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex = TypeError(f"Parameter 'parent' is not of type {typeNames}.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
+		elif self._root is self:
+			raise CodeCoverageError(f"The report's root can't have a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent
@@ -481,7 +484,7 @@ class Directory(BaseWithPath):
 	A directory: its directories and source files, and their summed counters.
 	"""
 
-	_PARENT_TYPE: ClassVar[tuple[type, ...]] = ()  #: A directory is in a directory; set below the class.
+	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: A directory is in a directory; assigned below the class.
 
 	_directories: dict[str, Directory]  #: The directories in this directory, by name.
 	_files:       dict[str, File]       #: The source files in this directory, by name.
@@ -641,8 +644,6 @@ class CoverageSummary(Directory):
 
 	It is its own root.
 	"""
-
-	_PARENT_TYPE: ClassVar[tuple[type, ...]] = ()  #: The report's root has no parent.
 
 	_sourceDirectories: list[Path]       #: The directories the report names as where the sources were, if any.
 	_units:             dict[str, Unit]  #: The top-level units, by name.
@@ -1130,7 +1131,7 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 	counts the lines of the units it contains, each line once.
 	"""
 
-	_PARENT_TYPE: ClassVar[tuple[type, ...]] = ()  #: A unit is in a unit or the report's root; set below the class.
+	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: A unit is in a unit or the report's root; assigned below the class.
 
 	_name:      str              #: Name of the unit.
 	_units:     dict[str, Unit]  #: The units this one contains, by name.
