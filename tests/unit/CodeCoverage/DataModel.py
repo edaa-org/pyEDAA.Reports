@@ -303,6 +303,13 @@ class Tree(Testcase):
 
 				self.assertEqual(f"Parameter 'parent' is not of type '{expected}'.", str(context.exception))
 
+	def test_ParentType_Setter(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			File("a.py").Parent = Line(1, Covered)
+
+		self.assertEqual("Parameter 'parent' is not of type 'Directory'.", str(context.exception))
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Line'."], context.exception.__notes__)
+
 	def test_ParentNone(self) -> None:
 		with self.assertRaises(ValueError) as context:
 			File("a.py").Parent = None
