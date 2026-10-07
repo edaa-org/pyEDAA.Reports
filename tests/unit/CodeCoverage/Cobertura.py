@@ -173,7 +173,9 @@ class Conversion(Testcase):
 
 		method = summary.Units["p"].Units["A"].Units["run"]
 		self.assertIsInstance(method, Method)
-		self.assertIs(file.Lines[4], method.Lines[4])
+		self.assertEqual((file.Lines[4], file.Lines[4]), (method.StartLine, method.EndLine))
+		klass = summary.Units["p"].Units["A"]
+		self.assertEqual((file.Lines[3], file.Lines[4]), (klass.StartLine, klass.EndLine))
 		self.assertEqual(["A", "A$Inner"], list(summary.Units["p"].Units))
 
 

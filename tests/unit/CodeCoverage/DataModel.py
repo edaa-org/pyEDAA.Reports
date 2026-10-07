@@ -220,12 +220,6 @@ class Units(Testcase):
 			"Area", file=fileA, startLine=lines[2], endLine=lines[3], status=Covered, coverageCount=4, parent=klass
 		)
 		function = Function("helper", file=fileA, status=Uncovered, coverageCount=0, parent=module)
-		for number in (1, 2, 3):
-			klass.AddLine(lines[number])
-
-		for number in (2, 3):
-			method.AddLine(lines[number])
-
 		summary.Aggregate()
 
 		self.assertEqual("src.a.Shape.Area", method.QualifiedName)
@@ -239,6 +233,8 @@ class Units(Testcase):
 		self.assertEqual((3, 2, 2), (klass.TotalLines, klass.CoveredLines, klass.TotalBranches))
 		self.assertEqual((3, 2), (package.TotalLines, package.CoveredLines))
 		self.assertEqual("<Method src.a.Shape.Area: 50.0%>", repr(method))
+		self.assertEqual([lines[2], lines[3]], list(method.IterateLines()))
+		self.assertEqual([], list(function.IterateLines()))
 
 	def test_SourceFile(self) -> None:
 		"""In C, the file is the unit containing the functions."""
@@ -249,14 +245,21 @@ class Units(Testcase):
 
 		sourceFile = SourceFile("main.c", file=file, startLine=file.Lines[3], endLine=file.Lines[8], parent=summary)
 		function = Function("main", file=file, startLine=file.Lines[3], endLine=file.Lines[4], parent=sourceFile)
-		for line in file.Lines.values():
-			sourceFile.AddLine(line)
-
 		summary.Aggregate()
 
 		self.assertEqual("main.c.main", function.QualifiedName)
 		self.assertEqual([sourceFile, function], file.Units)
 		self.assertEqual((3, 2), (sourceFile.TotalLines, sourceFile.CoveredLines))
+		self.assertEqual((2, 2), (function.TotalLines, function.CoveredLines))
+
+	def test_IterateLines(self) -> None:
+		"""A file's lines are walked from a first to a last line by line number; lines it doesn't list are skipped."""
+		file = File("a.c", lines=(Line(8, Covered), Line(3, Covered), Line(5, Uncovered), Line(4, Excluded)))
+
+		self.assertEqual([3, 4, 5, 8], [line.LineNumber for line in file.IterateLines()])
+		self.assertEqual([4, 5], [line.LineNumber for line in file.IterateLines(file.Lines[4], file.Lines[5])])
+		self.assertEqual([5, 8], [line.LineNumber for line in file.IterateLines(startLine=file.Lines[5])])
+		self.assertEqual([], list(File("empty.c").IterateLines()))
 
 	def test_DuplicateUnit(self) -> None:
 		summary = CoverageSummary("report")
@@ -409,10 +412,22 @@ class Checks(Testcase):
 
 		self.assertEqual("Parameter 'startLine' is not of type 'Line'.", str(context.exception))
 
-		with self.assertRaises(TypeError) as context:
-			Class("Shape").AddLine(1)
+		file = File("a.py", lines=(Line(1, Covered), Line(2, Covered)))
+		with self.assertRaises(ValueError) as context:
+			_ = Class("Shape", file=File("b.py"), startLine=file.Lines[1])
 
-		self.assertEqual("Parameter 'line' is not of type 'Line'.", str(context.exception))
+		self.assertEqual("Parameter 'startLine' is not a line of parameter 'file'.", str(context.exception))
+
+		with self.assertRaises(ValueError) as context:
+			_ = Class("Shape", file=file, startLine=file.Lines[2], endLine=file.Lines[1])
+
+		self.assertEqual("Parameter 'endLine' is before parameter 'startLine'.", str(context.exception))
+		self.assertEqual(["Got lines 2 to 1."], context.exception.__notes__)
+
+		with self.assertRaises(ValueError) as context:
+			_ = list(File("b.py").IterateLines(file.Lines[1]))
+
+		self.assertEqual("Parameter 'startLine' is not a line of file 'b.py'.", str(context.exception))
 
 	def test_PathType(self) -> None:
 		with self.assertRaises(TypeError) as context:

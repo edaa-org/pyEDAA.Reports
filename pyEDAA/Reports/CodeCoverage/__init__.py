@@ -36,8 +36,8 @@ The model has two hierarchies over the same lines:
 * The **physical** hierarchy - :class:`CoverageSummary`, :class:`Directory`, :class:`File` - is built from the file
   paths a report names. A file holds its executable lines; every format has them.
 * The **logical** hierarchy holds the language units a report names - :class:`Package`, :class:`Module`,
-  :class:`SourceFile`, :class:`Class`, :class:`Function`, :class:`Method` -, each with the file and the lines it
-  covers. A unit's lines are the file's :class:`Line` objects, so both hierarchies count the same lines.
+  :class:`SourceFile`, :class:`Class`, :class:`Function`, :class:`Method` -, each spanning its file from a first to a
+  last :class:`Line`, so both hierarchies count the same lines.
 
 A :class:`Line` and a :class:`Branch` carry a :class:`LineCoverageStatus` and - if the report says - a count: how
 often the line ran, or the branch was taken. :meth:`CoverageSummary.Aggregate` computes the counters of every file,
@@ -851,6 +851,48 @@ class File(BaseWithPath):
 		"""
 		return self._units
 
+	def IterateLines(
+		self,
+		startLine: Nullable[Line] = None,
+		endLine: Nullable[Line] = None
+	) -> Generator[Line, None, None]:
+		"""
+		Iterate the executable lines of this file from a first to a last line, both included, by line number.
+
+		:param startLine:   Optional, the first line. Default: ``None``, the file's first line.
+		:param endLine:     Optional, the last line. Default: ``None``, the file's last line.
+		:returns:           A generator of the lines.
+		:raises TypeError:  If parameter ``startLine`` isn't of type :class:`Line`.
+		:raises ValueError: If parameter ``startLine`` isn't a line of this file.
+		:raises TypeError:  If parameter ``endLine`` isn't of type :class:`Line`.
+		:raises ValueError: If parameter ``endLine`` isn't a line of this file.
+		"""
+		if startLine is None:
+			first = min(self._lines, default=1)
+		elif not isinstance(startLine, Line):
+			ex = TypeError(f"Parameter 'startLine' is not of type 'Line'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
+			raise ex
+		elif startLine._parent is not self:
+			raise ValueError(f"Parameter 'startLine' is not a line of file '{self.Path.as_posix()}'.")
+		else:
+			first = startLine._lineNumber
+
+		if endLine is None:
+			last = max(self._lines, default=0)
+		elif not isinstance(endLine, Line):
+			ex = TypeError(f"Parameter 'endLine' is not of type 'Line'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
+			raise ex
+		elif endLine._parent is not self:
+			raise ValueError(f"Parameter 'endLine' is not a line of file '{self.Path.as_posix()}'.")
+		else:
+			last = endLine._lineNumber
+
+		for lineNumber in range(first, last + 1):
+			if (line := self._lines.get(lineNumber)) is not None:
+				yield line
+
 	def Aggregate(self) -> None:
 		"""
 		Aggregate the file's lines, then compute the counters from them.
@@ -1080,11 +1122,12 @@ class Branch(BaseWithStatus):
 class Unit(BaseWithStatus, CoverageCountersMixin):
 	"""
 	Base-class of the logical hierarchy: a language unit - a package, a module, a class, a function, a method -, the
-	units it contains, and the lines it covers.
+	units it contains, and the lines it spans.
 
-	Its parent is the :class:`Unit` containing it, or the report's :class:`CoverageSummary`. A unit's lines are
-	:class:`Line` objects of its file, so the physical and the logical hierarchy count the same lines. Its counters are
-	computed from its own lines and those of the units it contains, each line counted once.
+	Its parent is the :class:`Unit` containing it, or the report's :class:`CoverageSummary`. A unit spans the lines of
+	its file from its first to its last line - a language construct wraps the constructs nested in it -, so the
+	physical and the logical hierarchy count the same lines. A unit without lines, e.g. a package of several files,
+	counts the lines of the units it contains, each line once.
 	"""
 
 	_PARENT_TYPE: ClassVar[tuple[type, ...]] = ()  #: A unit is in a unit or the report's root; set below the class.
@@ -1094,7 +1137,6 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 	_file:      Nullable[File]   #: The source file the unit is in, if the report says.
 	_startLine: Nullable[Line]   #: The unit's first line, if the report says.
 	_endLine:   Nullable[Line]   #: The unit's last line, if the report says.
-	_lines:     dict[int, Line]  #: The executable lines of the unit itself, by line number.
 
 	def __init__(
 		self,
@@ -1128,7 +1170,10 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		:raises ValueError:        If parameter ``name`` is empty.
 		:raises TypeError:         If parameter ``file`` isn't of type :class:`File`.
 		:raises TypeError:         If parameter ``startLine`` isn't of type :class:`Line`.
+		:raises ValueError:        If parameter ``startLine`` isn't a line of parameter ``file``.
 		:raises TypeError:         If parameter ``endLine`` isn't of type :class:`Line`.
+		:raises ValueError:        If parameter ``endLine`` isn't a line of parameter ``file``.
+		:raises ValueError:        If parameter ``endLine`` is before parameter ``startLine``.
 		:raises CodeCoverageError: If the parent already contains a unit of this name.
 		"""
 		super().__init__(status, coverageCount, parent=parent)
@@ -1148,22 +1193,31 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
-		if startLine is not None and not isinstance(startLine, Line):
-			ex = TypeError(f"Parameter 'startLine' is not of type 'Line'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
-			raise ex
+		if startLine is not None:
+			if not isinstance(startLine, Line):
+				ex = TypeError(f"Parameter 'startLine' is not of type 'Line'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
+				raise ex
+			elif startLine._parent is not file:
+				raise ValueError(f"Parameter 'startLine' is not a line of parameter 'file'.")
 
-		if endLine is not None and not isinstance(endLine, Line):
-			ex = TypeError(f"Parameter 'endLine' is not of type 'Line'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
-			raise ex
+		if endLine is not None:
+			if not isinstance(endLine, Line):
+				ex = TypeError(f"Parameter 'endLine' is not of type 'Line'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
+				raise ex
+			elif endLine._parent is not file:
+				raise ValueError(f"Parameter 'endLine' is not a line of parameter 'file'.")
+			elif startLine is not None and endLine._lineNumber < startLine._lineNumber:
+				ex = ValueError(f"Parameter 'endLine' is before parameter 'startLine'.")
+				ex.add_note(f"Got lines {startLine._lineNumber} to {endLine._lineNumber}.")
+				raise ex
 
 		self._name =      name
 		self._units =     {}
 		self._file =      file
 		self._startLine = startLine
 		self._endLine =   endLine
-		self._lines =     {}
 
 		if parent is not None:
 			parent._AddElement(self)
@@ -1250,31 +1304,14 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		"""
 		return self._endLine
 
-	@readonly
-	def Lines(self) -> dict[int, Line]:
+	def IterateLines(self) -> Generator[Line, None, None]:
 		"""
-		Read-only property to access the executable lines of the unit itself (:attr:`_lines`).
+		Iterate the executable lines of this unit's file from its first to its last line, both included.
 
-		:returns: The lines, by line number; the lines of the units it contains aren't included.
+		:returns: A generator of the lines; nothing, if the unit has no file, or no first or last line.
 		"""
-		return self._lines
-
-	def AddLine(self, line: Line) -> None:
-		"""
-		Add a line of the unit's file to the unit; a line added twice is kept once.
-
-		:param line:        The line.
-		:raises ValueError: If parameter ``line`` is ``None``.
-		:raises TypeError:  If parameter ``line`` isn't of type :class:`Line`.
-		"""
-		if line is None:
-			raise ValueError(f"Parameter 'line' is None.")
-		elif not isinstance(line, Line):
-			ex = TypeError(f"Parameter 'line' is not of type 'Line'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
-			raise ex
-
-		self._lines[line._lineNumber] = line
+		if self._file is not None and self._startLine is not None and self._endLine is not None:
+			yield from self._file.IterateLines(self._startLine, self._endLine)
 
 	def IterateUnits(self) -> Generator[Unit, None, None]:
 		"""
@@ -1288,19 +1325,22 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 
 	def Aggregate(self) -> None:
 		"""
-		Aggregate the units this one contains, then compute the counters from the lines of this unit and its units, each
-		line counted once.
+		Aggregate the units this one contains, then compute the counters from the lines this unit spans.
 
-		The lines are aggregated by their files - :meth:`CoverageSummary.Aggregate` does that first.
+		A unit without first and last line counts the lines the units below it span, each line once. The lines are
+		aggregated by their files - :meth:`CoverageSummary.Aggregate` does that first.
 		"""
 		for unit in self._units.values():
 			unit.Aggregate()
 
-		lines: dict[int, Line] = {}
-		for unit in self.IterateUnits():
-			lines.update((id(line), line) for line in unit._lines.values())
+		if self._startLine is not None and self._endLine is not None:
+			self._CountLines(self.IterateLines())
+		else:
+			lines: dict[int, Line] = {}
+			for unit in self.IterateUnits():
+				lines.update((id(line), line) for line in unit.IterateLines())
 
-		self._CountLines(lines.values())
+			self._CountLines(lines.values())
 
 	def __repr__(self) -> str:
 		"""

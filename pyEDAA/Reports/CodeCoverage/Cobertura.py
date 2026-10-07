@@ -46,7 +46,7 @@ A report is validated against :file:`Any-Cobertura.xsd`, which accepts the attri
 * A line's ``hits`` is its count; a branching line's ``condition-coverage`` - e.g. ``50% (1/2)`` - states its taken and
   all branches, which become as many branches without count.
 * The packages, classes and methods become units of the logical hierarchy; a package's name is split at ``.`` into
-  nested packages.
+  nested packages. A class or method spans its file from the first to the last line it lists.
 * The format has no excluded lines.
 
 .. rubric:: Example
@@ -763,7 +763,7 @@ class Document(Coverage, cc_Document):
 
 		Several classes of one file - e.g. Java's nested classes - are one file: a line listed by several of them ran, if
 		one of them says so, its hits are added, and of its branches the higher counts are kept. Every package, class and
-		method becomes a unit, which names the file's lines.
+		method becomes a unit; a class or method spans its file from its first to its last line.
 
 		:returns:                  The report's root of the common model, named after the report file.
 		:raises CodeCoverageError: If a file's path runs through another file.
@@ -803,23 +803,26 @@ class Document(Coverage, cc_Document):
 
 			for klass in package._classes:
 				file = summary.GetOrAddFile(klass._filename)
-				if klass._name in parent._units:
-					classUnit = parent._units[klass._name]
-				else:
-					classUnit = cc_Class(klass._name, file=file, parent=parent)
-
-				for number in klass._lines:
-					classUnit.AddLine(file._lines[number])
+				if (classUnit := parent._units.get(klass._name)) is None:
+					numbers = [number for number in klass._lines if number in file._lines]
+					classUnit = cc_Class(
+						klass._name,
+						file=file,
+						startLine=file._lines[min(numbers)] if len(numbers) > 0 else None,
+						endLine=file._lines[max(numbers)] if len(numbers) > 0 else None,
+						parent=parent
+					)
 
 				for key, method in klass._methods.items():
-					if key in classUnit._units:
-						methodUnit = classUnit._units[key]
-					else:
-						methodUnit = cc_Method(key, file=file, parent=classUnit)
-
-					for number in method._lines:
-						if number in file._lines:
-							methodUnit.AddLine(file._lines[number])
+					if key not in classUnit._units:
+						numbers = [number for number in method._lines if number in file._lines]
+						cc_Method(
+							key,
+							file=file,
+							startLine=file._lines[min(numbers)] if len(numbers) > 0 else None,
+							endLine=file._lines[max(numbers)] if len(numbers) > 0 else None,
+							parent=classUnit
+						)
 
 		summary.Aggregate()
 		return summary
