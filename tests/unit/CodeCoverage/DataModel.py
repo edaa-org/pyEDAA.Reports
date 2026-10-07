@@ -55,6 +55,9 @@ class Lines(Testcase):
 	def test_Properties(self) -> None:
 		target = Line(13, Covered, 7)
 		line = Line(12, PartiallyCovered, 7, (Branch(Covered, 7, target), Branch(Uncovered, 0)))
+		self.assertEqual(0, line.CoveredBranches)
+
+		line.Aggregate()
 
 		self.assertEqual(12, line.LineNumber)
 		self.assertIs(PartiallyCovered, line.Status)

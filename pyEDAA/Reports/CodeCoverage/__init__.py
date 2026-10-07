@@ -276,6 +276,8 @@ class CoverageCountersMixin(metaclass=ExtendedType, mixin=True):
 		"""
 		Set the counters to the counts of lines.
 
+		A line's covered branches are those its :meth:`Line.Aggregate` computed.
+
 		:param lines: The lines.
 		"""
 		self._ResetCounters()
@@ -286,7 +288,7 @@ class CoverageCountersMixin(metaclass=ExtendedType, mixin=True):
 
 			self._totalLines += 1
 			self._totalBranches += len(line._branches)
-			self._coveredBranches += line.CoveredBranches
+			self._coveredBranches += line._coveredBranches
 			if line._status is LineCoverageStatus.Covered:
 				self._coveredLines += 1
 			elif line._status is LineCoverageStatus.PartiallyCovered:
@@ -851,8 +853,11 @@ class File(BaseWithPath):
 
 	def Aggregate(self) -> None:
 		"""
-		Compute the counters from the file's lines.
+		Aggregate the file's lines, then compute the counters from them.
 		"""
+		for line in self._lines.values():
+			line.Aggregate()
+
 		self._CountLines(self._lines.values())
 
 	def __repr__(self) -> str:
@@ -875,8 +880,9 @@ class Line(BaseWithStatus):
 
 	_PARENT_TYPE: ClassVar[tuple[type, ...]] = (File, )  #: A line is in a file.
 
-	_lineNumber: int           #: Line number, counted from 1.
-	_branches:   list[Branch]  #: The branches starting at this line.
+	_lineNumber:      int           #: Line number, counted from 1.
+	_branches:        list[Branch]  #: The branches starting at this line.
+	_coveredBranches: int           #: Number of branches, which were taken; zero until :meth:`Aggregate` computed it.
 
 	def __init__(
 		self,
@@ -921,8 +927,9 @@ class Line(BaseWithStatus):
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
-		self._lineNumber = lineNumber
-		self._branches =   []
+		self._lineNumber =      lineNumber
+		self._branches =        []
+		self._coveredBranches = 0
 
 		if parent is not None:
 			parent._AddElement(self)
@@ -980,11 +987,18 @@ class Line(BaseWithStatus):
 	@readonly
 	def CoveredBranches(self) -> int:
 		"""
-		Read-only property to return the number of this line's branches, which were taken.
+		Read-only property to access the number of this line's branches, which were taken (:attr:`_coveredBranches`).
 
-		:returns: The number of branches with state :attr:`LineCoverageStatus.Covered`.
+		:returns: The number of branches with state :attr:`LineCoverageStatus.Covered`; zero until :meth:`Aggregate`
+		          computed it.
 		"""
-		return sum(1 for branch in self._branches if branch._status is LineCoverageStatus.Covered)
+		return self._coveredBranches
+
+	def Aggregate(self) -> None:
+		"""
+		Compute the number of this line's branches, which were taken.
+		"""
+		self._coveredBranches = sum(1 for branch in self._branches if branch._status is LineCoverageStatus.Covered)
 
 	def __repr__(self) -> str:
 		"""
@@ -1276,6 +1290,8 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		"""
 		Aggregate the units this one contains, then compute the counters from the lines of this unit and its units, each
 		line counted once.
+
+		The lines are aggregated by their files - :meth:`CoverageSummary.Aggregate` does that first.
 		"""
 		for unit in self._units.values():
 			unit.Aggregate()
