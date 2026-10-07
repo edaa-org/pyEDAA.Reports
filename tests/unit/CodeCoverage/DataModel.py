@@ -157,6 +157,12 @@ class Hierarchy(Testcase):
 
 		self.assertEqual("Line 3 of file 'Counter.vhdl' is added twice.", str(context.exception))
 
+	def test_DuplicateLine_Parameter(self) -> None:
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = File("Counter.vhdl", lines=(Line(3, Covered), Line(3, Uncovered)))
+
+		self.assertEqual("Line 3 of file 'Counter.vhdl' is added twice.", str(context.exception))
+
 	def test_IterateFiles(self) -> None:
 		summary = CoverageSummary("report")
 		for path in ("src/b/x.c", "src/a.c", "z.c", "src/c.c"):
@@ -274,6 +280,16 @@ class Tree(Testcase):
 		for element in (summary, fileA, line, line.Branches[0]):
 			with self.subTest(element=repr(element)):
 				self.assertIs(summary, element.Root)
+
+	def test_ConstructorChildren(self) -> None:
+		"""Lines and branches given to a constructor get the parent and the root of the element they are given to."""
+		summary = CoverageSummary("report")
+		branch = Branch(Covered)
+		line = Line(1, Covered, 1, (branch, ))
+		file = File("a.py", lines=(line, ), parent=summary)
+
+		self.assertEqual((file, line), (line.Parent, branch.Parent))
+		self.assertEqual((summary, summary), (line.Root, branch.Root))
 
 	def test_AttachSubtree(self) -> None:
 		directory = Directory("src")

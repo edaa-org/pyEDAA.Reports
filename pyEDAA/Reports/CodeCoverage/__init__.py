@@ -799,8 +799,15 @@ class File(BaseWithPath):
 					ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
 					raise ex
+				elif line._lineNumber in self._lines:
+					raise CodeCoverageError(f"Line {line._lineNumber} of file '{self.Path.as_posix()}' is added twice.")
 
-				line.Parent = self
+				line._parent = self
+				line._root =   self._root
+				for branch in line._branches:
+					branch._root = self._root
+
+				self._lines[line._lineNumber] = line
 
 	def _AddElement(self, line: Line) -> None:
 		"""
@@ -932,7 +939,9 @@ class Line(BaseWithStatus):
 					ex.add_note(f"Got type '{getFullyQualifiedName(branch)}'.")
 					raise ex
 
-				branch.Parent = self
+				branch._parent = self
+				branch._root =   self._root
+				self._branches.append(branch)
 
 	def _AddElement(self, branch: Branch) -> None:
 		"""
