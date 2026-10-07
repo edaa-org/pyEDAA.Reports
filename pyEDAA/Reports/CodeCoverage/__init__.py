@@ -285,7 +285,8 @@ class CoverageCountersMixin(metaclass=ExtendedType, mixin=True):
 	A mixin-class adding the counters of lines and branches, computed from the lines of a file or a unit, or summed over
 	a directory's children.
 
-	The counters are zero until the host's ``Aggregate()`` computed them.
+	The counters are zero until :meth:`Base.Aggregate` - of a directory or a file - or :meth:`Unit.Aggregate` computed
+	them.
 	"""
 
 	_totalLines:      int  #: Number of executable lines, without the excluded ones.
