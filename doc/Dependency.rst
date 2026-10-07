@@ -51,7 +51,6 @@ PyPI (see :ref:`INSTALL`).
 
 .. dependency-table:: package
    :caption: Mandatory dependencies of the pyEDAA.Reports package.
-   :depth: 2
 
 
 .. _DEP/testing:
@@ -88,7 +87,6 @@ application tests and static type checking at once.
 
 .. dependency-table:: unittest
    :caption: Dependencies for unit testing and code coverage.
-   :depth: 1
 
 
 .. _DEP/apptesting:
@@ -124,7 +122,6 @@ recursively install the mandatory dependencies too.
 
 .. dependency-table:: apptest
    :caption: Dependencies for application testing.
-   :depth: 1
 
 
 .. _DEP/typing:
@@ -160,7 +157,6 @@ recursively install the mandatory dependencies too.
 
 .. dependency-table:: typing
    :caption: Dependencies for static type checking.
-   :depth: 1
 
 
 .. _DEP/documentation:
@@ -196,7 +192,6 @@ the mandatory dependencies too.
 
 .. dependency-table:: documentation
    :caption: Dependencies for building this documentation.
-   :depth: 1
 
 
 .. _DEP/packaging:
@@ -257,4 +252,3 @@ install the mandatory dependencies too.
 
 .. dependency-table:: publishing
    :caption: Dependencies for publishing the package.
-   :depth: 1
