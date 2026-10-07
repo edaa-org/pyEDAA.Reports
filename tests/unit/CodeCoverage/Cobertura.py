@@ -128,7 +128,7 @@ class Conversion(Testcase):
 
 		shapes = summary.Files["Shapes.py"]
 		self.assertIs(LineCoverageStatus.PartiallyCovered, shapes.Lines[7].Status)
-		self.assertEqual(1, shapes.Lines[7].Count)
+		self.assertEqual(1, shapes.Lines[7].CoverageCount)
 		self.assertEqual(
 			[LineCoverageStatus.Covered, LineCoverageStatus.Uncovered], [branch.Status for branch in shapes.Lines[7].Branches]
 		)
@@ -150,7 +150,7 @@ class Conversion(Testcase):
 		self.assertIsInstance(counter, Class)
 		self.assertIs(summary.Directories["src"].Files["Counter.vhdl"], counter.File)
 		self.assertEqual((8, 7), (counter.TotalLines, counter.CoveredLines))
-		self.assertEqual(2048, counter.File.Lines[25].Count)
+		self.assertEqual(2048, counter.File.Lines[25].CoverageCount)
 
 	def test_MergedClasses(self) -> None:
 		"""Two classes of one source file, as Java's nested classes, become one file; their lines are merged."""
@@ -167,7 +167,7 @@ class Conversion(Testcase):
 
 		file = summary.Files["A.java"]
 		self.assertEqual([3, 4], sorted(file.Lines))
-		self.assertEqual(2, file.Lines[4].Count)
+		self.assertEqual(2, file.Lines[4].CoverageCount)
 		self.assertIs(LineCoverageStatus.Covered, file.Lines[4].Status)
 		self.assertIs(LineCoverageStatus.PartiallyCovered, file.Lines[3].Status)
 

@@ -174,24 +174,24 @@ class BaseWithStatus(Base):
 	Base-class of the elements with a coverage state and a count: lines, branches and units.
 	"""
 
-	_status: LineCoverageStatus  #: The coverage state.
-	_count:  Nullable[int]       #: How often it ran, was taken or was called, if the report says.
+	_status:        LineCoverageStatus  #: The coverage state.
+	_coverageCount: Nullable[int]       #: How often it ran, was taken or was called, if the report says.
 
-	def __init__(self, status: LineCoverageStatus, count: Nullable[int], parent: Nullable[Base]) -> None:
+	def __init__(self, status: LineCoverageStatus, coverageCount: Nullable[int], parent: Nullable[Base]) -> None:
 		"""
 		Initialize the coverage state and the count, and add the element to its parent.
 
 		A count of ``0`` is uncovered, a positive count covered.
 
 		:param status:             The coverage state.
-		:param count:              How often the line ran, the branch was taken or the unit was called; ``None``, if the
+		:param coverageCount:      How often the line ran, the branch was taken or the unit was called; ``None``, if the
 		                           report doesn't say.
 		:param parent:             The element containing this one, or ``None``.
 		:raises ValueError:        If parameter ``status`` is ``None``.
 		:raises TypeError:         If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
-		:raises TypeError:         If parameter ``count`` isn't of type :class:`int`.
-		:raises ValueError:        If parameter ``count`` is negative.
-		:raises ValueError:        If parameter ``count`` contradicts parameter ``status``.
+		:raises TypeError:         If parameter ``coverageCount`` isn't of type :class:`int`.
+		:raises ValueError:        If parameter ``coverageCount`` is negative.
+		:raises ValueError:        If parameter ``coverageCount`` contradicts parameter ``status``.
 		:raises TypeError:         If parameter ``parent`` isn't of a type the class declares in :attr:`_PARENT_TYPE`.
 		:raises CodeCoverageError: If the parent already contains an element of this name or line number.
 		"""
@@ -202,23 +202,23 @@ class BaseWithStatus(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 
-		if count is not None:
-			if not isinstance(count, int):
-				ex = TypeError(f"Parameter 'count' is not of type 'int'.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
+		if coverageCount is not None:
+			if not isinstance(coverageCount, int):
+				ex = TypeError(f"Parameter 'coverageCount' is not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(coverageCount)}'.")
 				raise ex
-			elif count < 0:
-				ex = ValueError(f"Parameter 'count' is negative.")
-				ex.add_note(f"Got value '{count}'.")
+			elif coverageCount < 0:
+				ex = ValueError(f"Parameter 'coverageCount' is negative.")
+				ex.add_note(f"Got value '{coverageCount}'.")
 				raise ex
-			elif (count == 0 and status in (LineCoverageStatus.Covered, LineCoverageStatus.PartiallyCovered)) or \
-					(count > 0 and status is LineCoverageStatus.Uncovered):
-				ex = ValueError(f"Parameter 'count' contradicts parameter 'status'.")
-				ex.add_note(f"Got count '{count}' for status '{status.name}'.")
+			elif (coverageCount == 0 and status in (LineCoverageStatus.Covered, LineCoverageStatus.PartiallyCovered)) or \
+					(coverageCount > 0 and status is LineCoverageStatus.Uncovered):
+				ex = ValueError(f"Parameter 'coverageCount' contradicts parameter 'status'.")
+				ex.add_note(f"Got count '{coverageCount}' for status '{status.name}'.")
 				raise ex
 
-		self._status = status
-		self._count =  count
+		self._status =        status
+		self._coverageCount = coverageCount
 
 		super().__init__(parent)
 
@@ -232,13 +232,13 @@ class BaseWithStatus(Base):
 		return self._status
 
 	@readonly
-	def Count(self) -> Nullable[int]:
+	def CoverageCount(self) -> Nullable[int]:
 		"""
-		Read-only property to access how often the line ran, the branch was taken or the unit was called (:attr:`_count`).
+		Read-only property to access how often it ran, was taken or was called (:attr:`_coverageCount`).
 
 		:returns: The count, or ``None`` if the report doesn't say.
 		"""
-		return self._count
+		return self._coverageCount
 
 
 @export
@@ -881,7 +881,7 @@ class Line(BaseWithStatus):
 		self,
 		lineNumber: int,
 		status: LineCoverageStatus,
-		count: Nullable[int] = None,
+		coverageCount: Nullable[int] = None,
 		branches: Iterable[Branch] = (),
 		parent: Nullable[File] = None
 	) -> None:
@@ -890,7 +890,7 @@ class Line(BaseWithStatus):
 
 		:param lineNumber:         Line number, counted from 1.
 		:param status:             Coverage state of the line.
-		:param count:              Optional, how often the line ran, if the report says. Default: ``None``.
+		:param coverageCount:      Optional, how often the line ran, if the report says. Default: ``None``.
 		:param branches:           Optional, the branches starting at this line. Default: none.
 		:param parent:             Optional, the file the line is in. Default: ``None``.
 		:raises ValueError:        If parameter ``lineNumber`` is ``None``.
@@ -901,9 +901,9 @@ class Line(BaseWithStatus):
 		:raises TypeError:         If parameter ``branches`` contains an element not of type :class:`Branch`.
 		:raises ValueError:        If parameter ``status`` is ``None``.
 		:raises TypeError:         If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
-		:raises TypeError:         If parameter ``count`` isn't of type :class:`int`.
-		:raises ValueError:        If parameter ``count`` is negative.
-		:raises ValueError:        If parameter ``count`` contradicts parameter ``status``.
+		:raises TypeError:         If parameter ``coverageCount`` isn't of type :class:`int`.
+		:raises ValueError:        If parameter ``coverageCount`` is negative.
+		:raises ValueError:        If parameter ``coverageCount`` contradicts parameter ``status``.
 		:raises TypeError:         If parameter ``parent`` isn't of type :class:`File`.
 		:raises CodeCoverageError: If the file already has a line of this number.
 		"""
@@ -937,7 +937,7 @@ class Line(BaseWithStatus):
 		self._lineNumber = lineNumber
 		self._branches =   []
 
-		super().__init__(status, count, parent)
+		super().__init__(status, coverageCount, parent)
 
 		for branch in branchList:
 			branch.Parent = self
@@ -1011,25 +1011,25 @@ class Branch(BaseWithStatus):
 	def __init__(
 		self,
 		status: LineCoverageStatus,
-		count: Nullable[int] = None,
+		coverageCount: Nullable[int] = None,
 		target: Nullable[Line] = None,
 		parent: Nullable[Line] = None
 	) -> None:
 		"""
 		Initialize a branch, and add it to its line.
 
-		:param status:      Whether the branch was taken.
-		:param count:       Optional, how often the branch was taken, if the report says. Default: ``None``.
-		:param target:      Optional, the line the branch goes to, if the report says; ``None`` for an exit of a function.
-		                    Default: ``None``.
-		:param parent:      Optional, the line the branch starts at. Default: ``None``.
-		:raises TypeError:  If parameter ``target`` isn't of type :class:`Line`.
-		:raises ValueError: If parameter ``status`` is ``None``.
-		:raises TypeError:  If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
-		:raises TypeError:  If parameter ``count`` isn't of type :class:`int`.
-		:raises ValueError: If parameter ``count`` is negative.
-		:raises ValueError: If parameter ``count`` contradicts parameter ``status``.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Line`.
+		:param status:        Whether the branch was taken.
+		:param coverageCount: Optional, how often the branch was taken, if the report says. Default: ``None``.
+		:param target:        Optional, the line the branch goes to, if the report says; ``None`` for an exit of a function.
+		                      Default: ``None``.
+		:param parent:        Optional, the line the branch starts at. Default: ``None``.
+		:raises TypeError:    If parameter ``target`` isn't of type :class:`Line`.
+		:raises ValueError:   If parameter ``status`` is ``None``.
+		:raises TypeError:    If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
+		:raises TypeError:    If parameter ``coverageCount`` isn't of type :class:`int`.
+		:raises ValueError:   If parameter ``coverageCount`` is negative.
+		:raises ValueError:   If parameter ``coverageCount`` contradicts parameter ``status``.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Line`.
 		"""
 		if target is not None and not isinstance(target, Line):
 			ex = TypeError(f"Parameter 'target' is not of type 'Line'.")
@@ -1038,7 +1038,7 @@ class Branch(BaseWithStatus):
 
 		self._target = target
 
-		super().__init__(status, count, parent)
+		super().__init__(status, coverageCount, parent)
 
 	@readonly
 	def Target(self) -> Nullable[Line]:
@@ -1078,7 +1078,7 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		startLine: Nullable[Line] = None,
 		endLine: Nullable[Line] = None,
 		status: LineCoverageStatus = LineCoverageStatus.Unknown,
-		count: Nullable[int] = None,
+		coverageCount: Nullable[int] = None,
 		parent: Nullable[Unit | CoverageSummary] = None
 	) -> None:
 		"""
@@ -1089,7 +1089,7 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		:param startLine:          Optional, the unit's first line. Default: ``None``.
 		:param endLine:            Optional, the unit's last line. Default: ``None``.
 		:param status:             Optional, whether the unit was called. Default: :attr:`LineCoverageStatus.Unknown`.
-		:param count:              Optional, how often the unit was called. Default: ``None``.
+		:param coverageCount:      Optional, how often the unit was called. Default: ``None``.
 		:param parent:             Optional, the unit or report containing this unit. Default: ``None``.
 		:raises ValueError:        If parameter ``name`` is ``None``.
 		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
@@ -1099,9 +1099,9 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		:raises TypeError:         If parameter ``endLine`` isn't of type :class:`Line`.
 		:raises ValueError:        If parameter ``status`` is ``None``.
 		:raises TypeError:         If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
-		:raises TypeError:         If parameter ``count`` isn't of type :class:`int`.
-		:raises ValueError:        If parameter ``count`` is negative.
-		:raises ValueError:        If parameter ``count`` contradicts parameter ``status``.
+		:raises TypeError:         If parameter ``coverageCount`` isn't of type :class:`int`.
+		:raises ValueError:        If parameter ``coverageCount`` is negative.
+		:raises ValueError:        If parameter ``coverageCount`` contradicts parameter ``status``.
 		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Unit` or :class:`CoverageSummary`.
 		:raises CodeCoverageError: If the parent already contains a unit of this name.
 		"""
@@ -1137,7 +1137,7 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		self._lines =     {}
 		CoverageCountersMixin.__init__(self)
 
-		super().__init__(status, count, parent)
+		super().__init__(status, coverageCount, parent)
 
 		if file is not None:
 			file._units.append(self)

@@ -58,7 +58,7 @@ class Lines(Testcase):
 
 		self.assertEqual(12, line.LineNumber)
 		self.assertIs(PartiallyCovered, line.Status)
-		self.assertEqual(7, line.Count)
+		self.assertEqual(7, line.CoverageCount)
 		self.assertEqual(2, len(line.Branches))
 		self.assertEqual(1, line.CoveredBranches)
 		self.assertIs(target, line.Branches[0].Target)
@@ -69,7 +69,7 @@ class Lines(Testcase):
 		"""coverage.py states whether a line ran, but not how often."""
 		line = Line(1, Covered)
 
-		self.assertIsNone(line.Count)
+		self.assertIsNone(line.CoverageCount)
 		self.assertEqual([], line.Branches)
 
 	def test_NumberType(self) -> None:
@@ -94,19 +94,19 @@ class Lines(Testcase):
 		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 	def test_CountContradiction(self) -> None:
-		for status, count in ((Covered, 0), (PartiallyCovered, 0), (Uncovered, 3)):
+		for status, coverageCount in ((Covered, 0), (PartiallyCovered, 0), (Uncovered, 3)):
 			with self.subTest(status=status.name):
 				with self.assertRaises(ValueError) as context:
-					_ = Line(1, status, count)
+					_ = Line(1, status, coverageCount)
 
-				self.assertEqual("Parameter 'count' contradicts parameter 'status'.", str(context.exception))
-				self.assertEqual([f"Got count '{count}' for status '{status.name}'."], context.exception.__notes__)
+				self.assertEqual("Parameter 'coverageCount' contradicts parameter 'status'.", str(context.exception))
+				self.assertEqual([f"Got count '{coverageCount}' for status '{status.name}'."], context.exception.__notes__)
 
 	def test_NegativeCount(self) -> None:
 		with self.assertRaises(ValueError) as context:
 			_ = Branch(Uncovered, -1)
 
-		self.assertEqual("Parameter 'count' is negative.", str(context.exception))
+		self.assertEqual("Parameter 'coverageCount' is negative.", str(context.exception))
 		self.assertEqual(["Got value '-1'."], context.exception.__notes__)
 
 
@@ -207,8 +207,10 @@ class Units(Testcase):
 		module = Module("a", file=fileA, parent=package)
 		lines = fileA.Lines
 		klass = Class("Shape", file=fileA, startLine=lines[1], endLine=lines[3], parent=module)
-		method = Method("Area", file=fileA, startLine=lines[2], endLine=lines[3], status=Covered, count=4, parent=klass)
-		function = Function("helper", file=fileA, status=Uncovered, count=0, parent=module)
+		method = Method(
+			"Area", file=fileA, startLine=lines[2], endLine=lines[3], status=Covered, coverageCount=4, parent=klass
+		)
+		function = Function("helper", file=fileA, status=Uncovered, coverageCount=0, parent=module)
 		for number in (1, 2, 3):
 			klass.AddLine(lines[number])
 
@@ -220,7 +222,9 @@ class Units(Testcase):
 		self.assertEqual("src.a.Shape.Area", method.QualifiedName)
 		self.assertEqual([package, module, klass, method, function], list(summary.IterateUnits()))
 		self.assertEqual([module, klass, method, function], fileA.Units)
-		self.assertEqual((lines[2], lines[3], 4, Covered), (method.StartLine, method.EndLine, method.Count, method.Status))
+		self.assertEqual(
+			(lines[2], lines[3], 4, Covered), (method.StartLine, method.EndLine, method.CoverageCount, method.Status)
+		)
 		self.assertIs(summary, method.Root)
 		self.assertEqual((2, 1, 1), (method.TotalLines, method.CoveredLines, method.PartialLines))
 		self.assertEqual((3, 2, 2), (klass.TotalLines, klass.CoveredLines, klass.TotalBranches))
@@ -349,7 +353,7 @@ class Checks(Testcase):
 		with self.assertRaises(TypeError) as context:
 			_ = Line(1, Covered, "1")
 
-		self.assertEqual("Parameter 'count' is not of type 'int'.", str(context.exception))
+		self.assertEqual("Parameter 'coverageCount' is not of type 'int'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
 	def test_Elements(self) -> None:

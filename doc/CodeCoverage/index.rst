@@ -47,8 +47,8 @@ The common model is a superset: it has two hierarchies over the same lines.
    ├─ physical hierarchy       built from the file paths the report names
    │  ├── Directory            e.g. myPackage/
    │  │   └── File             e.g. myPackage/Shapes.py
-   │  │       └── Line         line number, LineCoverageStatus, count
-   │  │           └── Branch   LineCoverageStatus, count, target
+   │  │       └── Line         line number, LineCoverageStatus, coverage count
+   │  │           └── Branch   LineCoverageStatus, coverage count, target
    │  └── File
    │
    └─ logical hierarchy        the language units the report names - each: file, first and last line, lines
