@@ -85,8 +85,8 @@ positive count covered.
 
 A line a report doesn't list - a comment, a declaration - isn't executable and has no line object.
 
-:meth:`~pyEDAA.Reports.CodeCoverage.CoverageCountersMixin.Aggregate` computes the counters of a file from its lines,
-of a directory from its directories and files, and of a unit from its lines and those of its units, each line counted
+:meth:`~pyEDAA.Reports.CodeCoverage.CoverageSummary.Aggregate` computes the counters of a file from its lines, of a
+directory from its directories and files, and of a unit from its lines and those of its units, each line counted
 once: executable, covered, missing, excluded and partially covered lines, branches, covered and missing branches. The
 ratios :attr:`~pyEDAA.Reports.CodeCoverage.CoverageCountersMixin.LineCoverage`,
 :attr:`~pyEDAA.Reports.CodeCoverage.CoverageCountersMixin.BranchCoverage` and
