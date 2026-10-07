@@ -4,8 +4,9 @@ Schemas
 #######
 
 pyEDAA.Reports validates every file it reads against the **XML schema** of its format before converting it. It ships
-the schemas of the JUnit dialects; the schema of pyTooling's test report comes with pyTooling. Each schema is listed
-here, the shipped ones with their full source, ready to read, to copy, or to download.
+the schemas of the JUnit dialects and of Cobertura's code coverage format; the schema of pyTooling's test report comes
+with pyTooling. Each schema is listed here, the shipped ones with their full source, ready to read, to copy, or to
+download.
 
 .. _SCHEMAS/Files:
 
