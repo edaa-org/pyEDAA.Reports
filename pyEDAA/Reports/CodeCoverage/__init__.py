@@ -764,12 +764,15 @@ class CoverageSummary(Directory):
 class File(BaseWithPath):
 	"""
 	A source file: the coverage of its executable lines, and the units of the logical hierarchy it holds.
+
+	The lines are a list indexed by line number: index 0 is unused, and a line the report doesn't list - a comment, a
+	declaration - is ``None``. Lines are iterated in order, and looked up without hashing.
 	"""
 
 	_PARENT_TYPE: ClassVar[tuple[type, ...]] = (Directory, )  #: A file is in a directory.
 
-	_lines: dict[int, Line]  #: The executable lines, by line number.
-	_units: list[Unit]       #: The units naming this file, in the order they were added.
+	_lines: list[Nullable[Line]]  #: The executable lines by line number; ``None`` at index 0 and for unlisted lines.
+	_units: list[Unit]            #: The units naming this file, in the order they were added.
 
 	def __init__(self, name: str, *, lines: Nullable[Iterable[Line]] = None, parent: Nullable[Directory] = None) -> None:
 		"""
@@ -789,7 +792,7 @@ class File(BaseWithPath):
 		"""
 		super().__init__(name, parent=parent)
 
-		self._lines = {}
+		self._lines = [None]
 		self._units = []
 
 		if parent is not None:
@@ -806,15 +809,22 @@ class File(BaseWithPath):
 					ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
 					raise ex
-				elif line._lineNumber in self._lines:
-					raise CodeCoverageError(f"Line {line._lineNumber} of file '{self.Path.as_posix()}' is added twice.")
+
+				lineNumber = line._lineNumber
+				if (gap := lineNumber - len(self._lines)) >= 0:
+					if gap > 0:
+						self._lines.extend([None] * gap)
+
+					self._lines.append(line)
+				elif self._lines[lineNumber] is None:
+					self._lines[lineNumber] = line
+				else:
+					raise CodeCoverageError(f"Line {lineNumber} of file '{self.Path.as_posix()}' is added twice.")
 
 				line._parent = self
 				line._root =   self._root
 				for branch in line._branches:
 					branch._root = self._root
-
-				self._lines[line._lineNumber] = line
 
 	def _AddElement(self, line: Line) -> None:
 		"""
@@ -823,10 +833,17 @@ class File(BaseWithPath):
 		:param line:               The line.
 		:raises CodeCoverageError: If the file already has a line of this number.
 		"""
-		if line._lineNumber in self._lines:
-			raise CodeCoverageError(f"Line {line._lineNumber} of file '{self.Path.as_posix()}' is added twice.")
+		lines =      self._lines
+		lineNumber = line._lineNumber
+		if (gap := lineNumber - len(lines)) >= 0:
+			if gap > 0:
+				lines.extend([None] * gap)
 
-		self._lines[line._lineNumber] = line
+			lines.append(line)
+		elif lines[lineNumber] is None:
+			lines[lineNumber] = line
+		else:
+			raise CodeCoverageError(f"Line {lineNumber} of file '{self.Path.as_posix()}' is added twice.")
 
 	def IterateElements(self) -> Generator[Base, None, None]:
 		"""
@@ -834,18 +851,55 @@ class File(BaseWithPath):
 
 		:returns: A generator of the elements below this file.
 		"""
-		for line in self._lines.values():
-			yield line
-			yield from line.IterateElements()
+		for line in self._lines:
+			if line is not None:
+				yield line
+				yield from line.IterateElements()
 
 	@readonly
-	def Lines(self) -> dict[int, Line]:
+	def Lines(self) -> list[Nullable[Line]]:
 		"""
 		Read-only property to access the executable lines (:attr:`_lines`).
 
-		:returns: The lines, by line number.
+		:returns: The lines, indexed by line number; ``None`` for index 0 and for a line the report doesn't list.
 		"""
 		return self._lines
+
+	@readonly
+	def LastLineNumber(self) -> int:
+		"""
+		Read-only property to return the number of the last line the report lists.
+
+		:returns: The line number; ``0``, if the report lists no line.
+		"""
+		return len(self._lines) - 1
+
+	def GetLine(self, lineNumber: int) -> Nullable[Line]:
+		"""
+		Return the line of a line number.
+
+		A line beyond the last line the report lists is as unknown as an unlisted line before it.
+
+		:param lineNumber:  The line number, counted from 1.
+		:returns:           The line, or ``None`` if the report doesn't list it.
+		:raises ValueError: If parameter ``lineNumber`` is ``None``.
+		:raises TypeError:  If parameter ``lineNumber`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``lineNumber`` is less than 1.
+		"""
+		if lineNumber is None:
+			raise ValueError(f"Parameter 'lineNumber' is None.")
+		elif not isinstance(lineNumber, int):
+			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
+			raise ex
+		elif lineNumber < 1:
+			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex.add_note(f"Got value '{lineNumber}'.")
+			raise ex
+		elif lineNumber >= len(self._lines):
+			return None
+
+		return self._lines[lineNumber]
 
 	@readonly
 	def Units(self) -> list[Unit]:
@@ -873,7 +927,7 @@ class File(BaseWithPath):
 		:raises ValueError: If parameter ``endLine`` isn't a line of this file.
 		"""
 		if startLine is None:
-			first = min(self._lines, default=1)
+			first = 1
 		elif not isinstance(startLine, Line):
 			ex = TypeError(f"Parameter 'startLine' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
@@ -884,7 +938,7 @@ class File(BaseWithPath):
 			first = startLine._lineNumber
 
 		if endLine is None:
-			last = max(self._lines, default=0)
+			last = len(self._lines) - 1
 		elif not isinstance(endLine, Line):
 			ex = TypeError(f"Parameter 'endLine' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
@@ -895,17 +949,18 @@ class File(BaseWithPath):
 			last = endLine._lineNumber
 
 		for lineNumber in range(first, last + 1):
-			if (line := self._lines.get(lineNumber)) is not None:
+			if (line := self._lines[lineNumber]) is not None:
 				yield line
 
 	def Aggregate(self) -> None:
 		"""
 		Aggregate the file's lines, then compute the counters from them.
 		"""
-		for line in self._lines.values():
+		lines = [line for line in self._lines if line is not None]
+		for line in lines:
 			line.Aggregate()
 
-		self._CountLines(self._lines.values())
+		self._CountLines(lines)
 
 	def __repr__(self) -> str:
 		"""

@@ -160,6 +160,31 @@ class Hierarchy(Testcase):
 
 		self.assertEqual("Line 3 of file 'Counter.vhdl' is added twice.", str(context.exception))
 
+	def test_LineList(self) -> None:
+		"""A file's lines are a list indexed by line number; unlisted lines are None, also when added out of order."""
+		file = File("a.c", lines=(Line(5, Covered), ))
+		Line(2, Uncovered, parent=file)
+		Line(7, Excluded, parent=file)
+
+		lineNumbers = [None if line is None else line.LineNumber for line in file.Lines]
+		self.assertEqual([None, None, 2, None, None, 5, None, 7], lineNumbers)
+		self.assertEqual(7, file.LastLineNumber)
+		self.assertIs(file.Lines[5], file.GetLine(5))
+		self.assertIsNone(file.GetLine(3))
+		self.assertIsNone(file.GetLine(8))
+
+	def test_GetLine(self) -> None:
+		for lineNumber, exceptionType, message in (
+			(None, ValueError, "Parameter 'lineNumber' is None."),
+			("1",  TypeError,  "Parameter 'lineNumber' is not of type 'int'."),
+			(0,    ValueError, "Parameter 'lineNumber' is less than 1.")
+		):
+			with self.subTest(lineNumber=lineNumber):
+				with self.assertRaises(exceptionType) as context:
+					_ = File("a.c").GetLine(lineNumber)
+
+				self.assertEqual(message, str(context.exception))
+
 	def test_DuplicateLine_Parameter(self) -> None:
 		with self.assertRaises(CodeCoverageError) as context:
 			_ = File("Counter.vhdl", lines=(Line(3, Covered), Line(3, Uncovered)))

@@ -94,7 +94,10 @@ positive count covered.
    * - ``Unknown``
      - The report doesn't say.
 
-A line a report doesn't list - a comment, a declaration - isn't executable and has no line object.
+A line a report doesn't list - a comment, a declaration - isn't executable and has no line object. A file keeps its
+lines in a list indexed by line number, with ``None`` for such a line;
+:meth:`~pyEDAA.Reports.CodeCoverage.File.IterateLines` walks the lines in order and
+:meth:`~pyEDAA.Reports.CodeCoverage.File.GetLine` looks one up.
 
 :meth:`~pyEDAA.Reports.CodeCoverage.CoverageSummary.Aggregate` computes the counters of a file from its lines, of a
 directory from its directories and files, and of a unit from its lines and those of its units, each line counted
