@@ -93,16 +93,15 @@ class Base(metaclass=ExtendedType, slots=True):
 	_parent: Nullable[Base]             #: The element containing this one, or ``None``.
 	_root:   Nullable[CoverageSummary]  #: The report's root, or ``None`` while the element isn't part of a report.
 
-	def __init__(self, parent: Nullable[Base] = None) -> None:
+	def __init__(self, *, parent: Nullable[Base] = None) -> None:
 		"""
-		Initialize an element, and add it to its parent.
+		Initialize an element with its parent and the parent's root.
 
-		The element is added to its parent last, so a class deriving from this one sets its own fields - e.g. the name
-		the parent stores it by - before it calls this initializer.
+		The parent doesn't list the element yet: the class setting the field the parent stores it by - a name, a line
+		number - adds it with ``parent._AddElement(self)``.
 
-		:param parent:             Optional, the element containing this one. Default: ``None``.
-		:raises TypeError:         If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises CodeCoverageError: If the parent already contains an element of this name or line number.
+		:param parent:     Optional, the element containing this one. Default: ``None``.
+		:raises TypeError: If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		"""
 		if parent is None:
 			self._parent = None
@@ -113,10 +112,8 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 		else:
-			parent._AddElement(self)
 			self._parent = parent
-			for element in self.IterateElements():
-				element._root = parent._root
+			self._root =   parent._root
 
 	@property
 	def Parent(self) -> Nullable[Base]:
@@ -145,6 +142,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		parent._AddElement(self)
 		self._parent = parent
+		self._root =   parent._root
 		for element in self.IterateElements():
 			element._root = parent._root
 
@@ -159,13 +157,13 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		return self._root
 
+	@abstractmethod
 	def IterateElements(self) -> Generator[Base, None, None]:
 		"""
-		Iterate this element and every element below it, depth-first.
+		Iterate every element below this one, depth-first.
 
-		:returns: A generator of the elements, this one first.
+		:returns: A generator of the elements below this one.
 		"""
-		yield self
 
 
 @export
@@ -177,24 +175,25 @@ class BaseWithStatus(Base):
 	_status:        LineCoverageStatus  #: The coverage state.
 	_coverageCount: Nullable[int]       #: How often it ran, was taken or was called, if the report says.
 
-	def __init__(self, status: LineCoverageStatus, coverageCount: Nullable[int], parent: Nullable[Base]) -> None:
+	def __init__(self, status: LineCoverageStatus, coverageCount: Nullable[int], *, parent: Nullable[Base]) -> None:
 		"""
-		Initialize the coverage state and the count, and add the element to its parent.
+		Initialize the parent, the coverage state and the count.
 
 		A count of ``0`` is uncovered, a positive count covered.
 
-		:param status:             The coverage state.
-		:param coverageCount:      How often the line ran, the branch was taken or the unit was called; ``None``, if the
-		                           report doesn't say.
-		:param parent:             The element containing this one, or ``None``.
-		:raises ValueError:        If parameter ``status`` is ``None``.
-		:raises TypeError:         If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
-		:raises TypeError:         If parameter ``coverageCount`` isn't of type :class:`int`.
-		:raises ValueError:        If parameter ``coverageCount`` is negative.
-		:raises ValueError:        If parameter ``coverageCount`` contradicts parameter ``status``.
-		:raises TypeError:         If parameter ``parent`` isn't of a type the class declares in :attr:`_PARENT_TYPE`.
-		:raises CodeCoverageError: If the parent already contains an element of this name or line number.
+		:param status:        The coverage state.
+		:param coverageCount: How often the line ran, the branch was taken or the unit was called; ``None``, if the report
+		                      doesn't say.
+		:param parent:        The element containing this one, or ``None``.
+		:raises TypeError:    If parameter ``parent`` isn't of a type the class declares in :attr:`_PARENT_TYPE`.
+		:raises ValueError:   If parameter ``status`` is ``None``.
+		:raises TypeError:    If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
+		:raises TypeError:    If parameter ``coverageCount`` isn't of type :class:`int`.
+		:raises ValueError:   If parameter ``coverageCount`` is negative.
+		:raises ValueError:   If parameter ``coverageCount`` contradicts parameter ``status``.
 		"""
+		super().__init__(parent=parent)
+
 		if status is None:
 			raise ValueError(f"Parameter 'status' is None.")
 		elif not isinstance(status, LineCoverageStatus):
@@ -219,8 +218,6 @@ class BaseWithStatus(Base):
 
 		self._status =        status
 		self._coverageCount = coverageCount
-
-		super().__init__(parent)
 
 	@readonly
 	def Status(self) -> LineCoverageStatus:
@@ -423,18 +420,20 @@ class BaseWithPath(Base, CoverageCountersMixin):
 
 	_name: str  #: Name of the directory or file.
 
-	def __init__(self, name: str, parent: Nullable[Directory]) -> None:
+	def __init__(self, name: str, *, parent: Nullable[Directory]) -> None:
 		"""
-		Initialize the name and the counters, and add the directory or file to its parent directory.
+		Initialize the parent, the name and the counters.
 
-		:param name:               Name of the directory or file.
-		:param parent:             The directory containing this one, or ``None``.
-		:raises ValueError:        If parameter ``name`` is ``None``.
-		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``name`` is empty.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Directory`.
-		:raises CodeCoverageError: If the parent directory already contains a file or directory of this name.
+		:param name:        Name of the directory or file.
+		:param parent:      The directory containing this one, or ``None``.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Directory`.
+		:raises ValueError: If parameter ``name`` is ``None``.
+		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``name`` is empty.
 		"""
+		super().__init__(parent=parent)
+		CoverageCountersMixin.__init__(self)
+
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
@@ -445,9 +444,6 @@ class BaseWithPath(Base, CoverageCountersMixin):
 			raise ValueError(f"Parameter 'name' is empty.")
 
 		self._name = name
-		CoverageCountersMixin.__init__(self)
-
-		super().__init__(parent)
 
 	@readonly
 	def Name(self) -> str:
@@ -494,18 +490,21 @@ class Directory(BaseWithPath):
 
 		:param name:               Name of the directory.
 		:param parent:             Optional, the directory containing this one. Default: ``None``.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError:        If parameter ``name`` is ``None``.
 		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:        If parameter ``name`` is empty.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises CodeCoverageError: If the parent directory already contains a file or directory of this name.
 		"""
+		super().__init__(name, parent=parent)
+
 		self._directories = {}
 		self._files =       {}
 
-		super().__init__(name, parent)
+		if parent is not None:
+			parent._AddElement(self)
 
-	def _AddElement(self, element: BaseWithPath) -> None:
+	def _AddElement(self, element: Directory | File) -> None:
 		"""
 		Add a directory or file, which names this directory as its parent.
 
@@ -518,16 +517,16 @@ class Directory(BaseWithPath):
 		if isinstance(element, Directory):
 			self._directories[element._name] = element
 		else:
-			self._files[element._name] = element  # type: ignore[assignment]
+			self._files[element._name] = element
 
 	def IterateElements(self) -> Generator[Base, None, None]:
 		"""
-		Iterate this directory, then the directories and files in it and the elements below them.
+		Iterate the directories and files in this directory, each followed by the elements below it.
 
-		:returns: A generator of the directory and the elements below it.
+		:returns: A generator of the elements below this directory.
 		"""
-		yield self
 		for child in (*self._directories.values(), *self._files.values()):
+			yield child
 			yield from child.IterateElements()
 
 	@readonly
@@ -646,7 +645,7 @@ class CoverageSummary(Directory):
 	_sourceDirectories: list[Path]       #: The directories the report names as where the sources were, if any.
 	_units:             dict[str, Unit]  #: The top-level units, by name.
 
-	def __init__(self, name: str, *, sourceDirectories: Iterable[Path] = ()) -> None:
+	def __init__(self, name: str, *, sourceDirectories: Nullable[Iterable[Path]] = None) -> None:
 		"""
 		Initialize the root of a code coverage report.
 
@@ -655,33 +654,30 @@ class CoverageSummary(Directory):
 		:raises ValueError:       If parameter ``name`` is ``None``.
 		:raises TypeError:        If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:       If parameter ``name`` is empty.
-		:raises ValueError:       If parameter ``sourceDirectories`` is ``None``.
 		:raises TypeError:        If parameter ``sourceDirectories`` isn't iterable.
 		:raises TypeError:        If parameter ``sourceDirectories`` contains an element not of type :class:`~pathlib.Path`.
 		"""
-		if sourceDirectories is None:
-			raise ValueError(f"Parameter 'sourceDirectories' is None.")
-		elif not isinstance(sourceDirectories, Iterable):
-			ex = TypeError(f"Parameter 'sourceDirectories' is not iterable.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(sourceDirectories)}'.")
-			raise ex
-
-		self._sourceDirectories = []
-		for sourceDirectory in sourceDirectories:
-			if not isinstance(sourceDirectory, Path):
-				ex = TypeError(f"Parameter 'sourceDirectories' contains an element not of type 'Path'.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(sourceDirectory)}'.")
-				raise ex
-
-			self._sourceDirectories.append(sourceDirectory)
-
-		self._units = {}
-
 		super().__init__(name)
 
-		self._root = self
+		self._root =              self
+		self._sourceDirectories = []
+		self._units =             {}
 
-	def _AddElement(self, element: BaseWithPath | Unit) -> None:
+		if sourceDirectories is not None:
+			if not isinstance(sourceDirectories, Iterable):
+				ex = TypeError(f"Parameter 'sourceDirectories' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(sourceDirectories)}'.")
+				raise ex
+
+			for sourceDirectory in sourceDirectories:
+				if not isinstance(sourceDirectory, Path):
+					ex = TypeError(f"Parameter 'sourceDirectories' contains an element not of type 'Path'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(sourceDirectory)}'.")
+					raise ex
+
+				self._sourceDirectories.append(sourceDirectory)
+
+	def _AddElement(self, element: Directory | File | Unit) -> None:
 		"""
 		Add a top-level unit, directory or file, which names the report's root as its parent.
 
@@ -698,12 +694,13 @@ class CoverageSummary(Directory):
 
 	def IterateElements(self) -> Generator[Base, None, None]:
 		"""
-		Iterate the report's root, the elements of the physical hierarchy, then those of the logical hierarchy.
+		Iterate the elements of the physical hierarchy, then those of the logical hierarchy.
 
-		:returns: A generator of the root and every element below it.
+		:returns: A generator of every element below the report's root.
 		"""
 		yield from super().IterateElements()
 		for unit in self._units.values():
+			yield unit
 			yield from unit.IterateElements()
 
 	@readonly
@@ -767,46 +764,43 @@ class File(BaseWithPath):
 	_lines: dict[int, Line]  #: The executable lines, by line number.
 	_units: list[Unit]       #: The units naming this file, in the order they were added.
 
-	def __init__(self, name: str, *, lines: Iterable[Line] = (), parent: Nullable[Directory] = None) -> None:
+	def __init__(self, name: str, *, lines: Nullable[Iterable[Line]] = None, parent: Nullable[Directory] = None) -> None:
 		"""
 		Initialize a source file, and add it to its directory.
 
 		:param name:               Name of the file.
-		:param lines:              Optional, the executable lines. Default: no line.
+		:param lines:              Optional, the executable lines. Default: ``None``.
 		:param parent:             Optional, the directory containing the file. Default: ``None``.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError:        If parameter ``name`` is ``None``.
 		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:        If parameter ``name`` is empty.
-		:raises ValueError:        If parameter ``lines`` is ``None``.
+		:raises CodeCoverageError: If the directory already contains a file or directory of this name.
 		:raises TypeError:         If parameter ``lines`` isn't iterable.
 		:raises TypeError:         If parameter ``lines`` contains an element not of type :class:`Line`.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Directory`.
-		:raises CodeCoverageError: If the directory already contains a file or directory of this name.
 		:raises CodeCoverageError: If two lines have the same number.
 		"""
-		if lines is None:
-			raise ValueError(f"Parameter 'lines' is None.")
-		elif not isinstance(lines, Iterable):
-			ex = TypeError(f"Parameter 'lines' is not iterable.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
-			raise ex
-
-		lineList = []
-		for line in lines:
-			if not isinstance(line, Line):
-				ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
-				raise ex
-
-			lineList.append(line)
+		super().__init__(name, parent=parent)
 
 		self._lines = {}
 		self._units = []
 
-		super().__init__(name, parent)
+		if parent is not None:
+			parent._AddElement(self)
 
-		for line in lineList:
-			line.Parent = self
+		if lines is not None:
+			if not isinstance(lines, Iterable):
+				ex = TypeError(f"Parameter 'lines' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
+				raise ex
+
+			for line in lines:
+				if not isinstance(line, Line):
+					ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
+					raise ex
+
+				line.Parent = self
 
 	def _AddElement(self, line: Line) -> None:
 		"""
@@ -822,12 +816,12 @@ class File(BaseWithPath):
 
 	def IterateElements(self) -> Generator[Base, None, None]:
 		"""
-		Iterate this file, then its lines and their branches.
+		Iterate the lines of this file, each followed by its branches.
 
-		:returns: A generator of the file and the elements below it.
+		:returns: A generator of the elements below this file.
 		"""
-		yield self
 		for line in self._lines.values():
+			yield line
 			yield from line.IterateElements()
 
 	@readonly
@@ -882,7 +876,8 @@ class Line(BaseWithStatus):
 		lineNumber: int,
 		status: LineCoverageStatus,
 		coverageCount: Nullable[int] = None,
-		branches: Iterable[Branch] = (),
+		branches: Nullable[Iterable[Branch]] = None,
+		*,
 		parent: Nullable[File] = None
 	) -> None:
 		"""
@@ -891,22 +886,23 @@ class Line(BaseWithStatus):
 		:param lineNumber:         Line number, counted from 1.
 		:param status:             Coverage state of the line.
 		:param coverageCount:      Optional, how often the line ran, if the report says. Default: ``None``.
-		:param branches:           Optional, the branches starting at this line. Default: none.
+		:param branches:           Optional, the branches starting at this line. Default: ``None``.
 		:param parent:             Optional, the file the line is in. Default: ``None``.
-		:raises ValueError:        If parameter ``lineNumber`` is ``None``.
-		:raises TypeError:         If parameter ``lineNumber`` isn't of type :class:`int`.
-		:raises ValueError:        If parameter ``lineNumber`` is less than 1.
-		:raises ValueError:        If parameter ``branches`` is ``None``.
-		:raises TypeError:         If parameter ``branches`` isn't iterable.
-		:raises TypeError:         If parameter ``branches`` contains an element not of type :class:`Branch`.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`File`.
 		:raises ValueError:        If parameter ``status`` is ``None``.
 		:raises TypeError:         If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
 		:raises TypeError:         If parameter ``coverageCount`` isn't of type :class:`int`.
 		:raises ValueError:        If parameter ``coverageCount`` is negative.
 		:raises ValueError:        If parameter ``coverageCount`` contradicts parameter ``status``.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`File`.
+		:raises ValueError:        If parameter ``lineNumber`` is ``None``.
+		:raises TypeError:         If parameter ``lineNumber`` isn't of type :class:`int`.
+		:raises ValueError:        If parameter ``lineNumber`` is less than 1.
 		:raises CodeCoverageError: If the file already has a line of this number.
+		:raises TypeError:         If parameter ``branches`` isn't iterable.
+		:raises TypeError:         If parameter ``branches`` contains an element not of type :class:`Branch`.
 		"""
+		super().__init__(status, coverageCount, parent=parent)
+
 		if lineNumber is None:
 			raise ValueError(f"Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
@@ -918,29 +914,25 @@ class Line(BaseWithStatus):
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
-		if branches is None:
-			raise ValueError(f"Parameter 'branches' is None.")
-		elif not isinstance(branches, Iterable):
-			ex = TypeError(f"Parameter 'branches' is not iterable.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(branches)}'.")
-			raise ex
-
-		branchList = []
-		for branch in branches:
-			if not isinstance(branch, Branch):
-				ex = TypeError(f"Parameter 'branches' contains an element not of type 'Branch'.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(branch)}'.")
-				raise ex
-
-			branchList.append(branch)
-
 		self._lineNumber = lineNumber
 		self._branches =   []
 
-		super().__init__(status, coverageCount, parent)
+		if parent is not None:
+			parent._AddElement(self)
 
-		for branch in branchList:
-			branch.Parent = self
+		if branches is not None:
+			if not isinstance(branches, Iterable):
+				ex = TypeError(f"Parameter 'branches' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(branches)}'.")
+				raise ex
+
+			for branch in branches:
+				if not isinstance(branch, Branch):
+					ex = TypeError(f"Parameter 'branches' contains an element not of type 'Branch'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(branch)}'.")
+					raise ex
+
+				branch.Parent = self
 
 	def _AddElement(self, branch: Branch) -> None:
 		"""
@@ -952,11 +944,10 @@ class Line(BaseWithStatus):
 
 	def IterateElements(self) -> Generator[Base, None, None]:
 		"""
-		Iterate this line, then its branches.
+		Iterate the branches of this line.
 
-		:returns: A generator of the line and its branches.
+		:returns: A generator of the branches.
 		"""
-		yield self
 		yield from self._branches
 
 	@readonly
@@ -1013,6 +1004,7 @@ class Branch(BaseWithStatus):
 		status: LineCoverageStatus,
 		coverageCount: Nullable[int] = None,
 		target: Nullable[Line] = None,
+		*,
 		parent: Nullable[Line] = None
 	) -> None:
 		"""
@@ -1023,14 +1015,16 @@ class Branch(BaseWithStatus):
 		:param target:        Optional, the line the branch goes to, if the report says; ``None`` for an exit of a function.
 		                      Default: ``None``.
 		:param parent:        Optional, the line the branch starts at. Default: ``None``.
-		:raises TypeError:    If parameter ``target`` isn't of type :class:`Line`.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Line`.
 		:raises ValueError:   If parameter ``status`` is ``None``.
 		:raises TypeError:    If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
 		:raises TypeError:    If parameter ``coverageCount`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``coverageCount`` is negative.
 		:raises ValueError:   If parameter ``coverageCount`` contradicts parameter ``status``.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Line`.
+		:raises TypeError:    If parameter ``target`` isn't of type :class:`Line`.
 		"""
+		super().__init__(status, coverageCount, parent=parent)
+
 		if target is not None and not isinstance(target, Line):
 			ex = TypeError(f"Parameter 'target' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(target)}'.")
@@ -1038,7 +1032,16 @@ class Branch(BaseWithStatus):
 
 		self._target = target
 
-		super().__init__(status, coverageCount, parent)
+		if parent is not None:
+			parent._AddElement(self)
+
+	def IterateElements(self) -> Generator[Base, None, None]:
+		"""
+		Iterate the elements below this branch: none, a branch is a leaf.
+
+		:returns: An empty generator.
+		"""
+		yield from ()
 
 	@readonly
 	def Target(self) -> Nullable[Line]:
@@ -1091,20 +1094,23 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		:param status:             Optional, whether the unit was called. Default: :attr:`LineCoverageStatus.Unknown`.
 		:param coverageCount:      Optional, how often the unit was called. Default: ``None``.
 		:param parent:             Optional, the unit or report containing this unit. Default: ``None``.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Unit` or :class:`CoverageSummary`.
+		:raises ValueError:        If parameter ``status`` is ``None``.
+		:raises TypeError:         If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
+		:raises TypeError:         If parameter ``coverageCount`` isn't of type :class:`int`.
+		:raises ValueError:        If parameter ``coverageCount`` is negative.
+		:raises ValueError:        If parameter ``coverageCount`` contradicts parameter ``status``.
 		:raises ValueError:        If parameter ``name`` is ``None``.
 		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:        If parameter ``name`` is empty.
 		:raises TypeError:         If parameter ``file`` isn't of type :class:`File`.
 		:raises TypeError:         If parameter ``startLine`` isn't of type :class:`Line`.
 		:raises TypeError:         If parameter ``endLine`` isn't of type :class:`Line`.
-		:raises ValueError:        If parameter ``status`` is ``None``.
-		:raises TypeError:         If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
-		:raises TypeError:         If parameter ``coverageCount`` isn't of type :class:`int`.
-		:raises ValueError:        If parameter ``coverageCount`` is negative.
-		:raises ValueError:        If parameter ``coverageCount`` contradicts parameter ``status``.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Unit` or :class:`CoverageSummary`.
 		:raises CodeCoverageError: If the parent already contains a unit of this name.
 		"""
+		super().__init__(status, coverageCount, parent=parent)
+		CoverageCountersMixin.__init__(self)
+
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
@@ -1135,9 +1141,9 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		self._startLine = startLine
 		self._endLine =   endLine
 		self._lines =     {}
-		CoverageCountersMixin.__init__(self)
 
-		super().__init__(status, coverageCount, parent)
+		if parent is not None:
+			parent._AddElement(self)
 
 		if file is not None:
 			file._units.append(self)
@@ -1156,12 +1162,12 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 
 	def IterateElements(self) -> Generator[Base, None, None]:
 		"""
-		Iterate this unit, then the units it contains and the units below them.
+		Iterate the units this unit contains, each followed by the units below it.
 
-		:returns: A generator of the unit and the units below it.
+		:returns: A generator of the units below this one.
 		"""
-		yield self
 		for unit in self._units.values():
+			yield unit
 			yield from unit.IterateElements()
 
 	@readonly
