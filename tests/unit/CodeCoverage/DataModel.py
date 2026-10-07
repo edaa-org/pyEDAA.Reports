@@ -151,7 +151,7 @@ class Hierarchy(Testcase):
 		file = File("Counter.vhdl", lines=(Line(3, Covered), ))
 
 		with self.assertRaises(CodeCoverageError) as context:
-			file.AddLine(Line(3, Uncovered))
+			_ = Line(3, Uncovered, parent=file)
 
 		self.assertEqual("Line 3 of file 'Counter.vhdl' is added twice.", str(context.exception))
 
@@ -203,20 +203,23 @@ class Units(Testcase):
 
 		package = Package("src", parent=summary)
 		module = Module("a", file=fileA, parent=package)
-		klass = Class("Shape", file=fileA, startLine=1, endLine=3, parent=module)
-		method = Method("Area", file=fileA, startLine=2, endLine=3, status=Covered, count=4, parent=klass)
+		lines = fileA.Lines
+		klass = Class("Shape", file=fileA, startLine=lines[1], endLine=lines[3], parent=module)
+		method = Method("Area", file=fileA, startLine=lines[2], endLine=lines[3], status=Covered, count=4, parent=klass)
 		function = Function("helper", file=fileA, status=Uncovered, count=0, parent=module)
 		for number in (1, 2, 3):
-			klass.AddLine(fileA.Lines[number])
+			klass.AddLine(lines[number])
 
 		for number in (2, 3):
-			method.AddLine(fileA.Lines[number])
+			method.AddLine(lines[number])
+
 		summary.Aggregate()
 
 		self.assertEqual("src.a.Shape.Area", method.QualifiedName)
 		self.assertEqual([package, module, klass, method, function], list(summary.IterateUnits()))
 		self.assertEqual([module, klass, method, function], fileA.Units)
-		self.assertEqual((2, 3, 4, Covered), (method.StartLine, method.EndLine, method.Count, method.Status))
+		self.assertEqual((lines[2], lines[3], 4, Covered), (method.StartLine, method.EndLine, method.Count, method.Status))
+		self.assertIs(summary, method.Root)
 		self.assertEqual((2, 1, 1), (method.TotalLines, method.CoveredLines, method.PartialLines))
 		self.assertEqual((3, 2, 2), (klass.TotalLines, klass.CoveredLines, klass.TotalBranches))
 		self.assertEqual((3, 2), (package.TotalLines, package.CoveredLines))
@@ -232,6 +235,135 @@ class Units(Testcase):
 		self.assertEqual("Unit 'src' is added twice to 'report'.", str(context.exception))
 
 
+class Tree(Testcase):
+	"""Every element has a parent and the report's root; attaching a subtree passes the root on."""
+
+	def test_Parents(self) -> None:
+		summary = _Example()
+		fileA = summary.Directories["src"].Files["a.py"]
+		line = fileA.Lines[2]
+
+		self.assertIs(fileA, line.Parent)
+		self.assertIs(line, line.Branches[0].Parent)
+		self.assertIs(summary, fileA.Parent.Parent)
+		self.assertIsNone(summary.Parent)
+		for element in (summary, fileA, line, line.Branches[0]):
+			with self.subTest(element=repr(element)):
+				self.assertIs(summary, element.Root)
+
+	def test_AttachSubtree(self) -> None:
+		directory = Directory("src")
+		line = Line(1, PartiallyCovered, 1, (Branch(Covered), Branch(Uncovered)))
+		file = File("a.py", lines=(line, ), parent=directory)
+		unit = Package("src")
+		Module("a", file=file, parent=unit)
+		self.assertIsNone(file.Lines[1].Root)
+
+		summary = CoverageSummary("report")
+		directory.Parent = summary
+		unit.Parent = summary
+
+		self.assertIs(directory, summary.Directories["src"])
+		self.assertIs(unit, summary.Units["src"])
+		for element in (directory, file, file.Lines[1], file.Lines[1].Branches[1], unit, unit.Units["a"]):
+			with self.subTest(element=repr(element)):
+				self.assertIs(summary, element.Root)
+
+	def test_ParentType(self) -> None:
+		for create, expected in (
+			(lambda: Branch(Covered, parent=File("a.py")),      "Line"),
+			(lambda: Line(1, Covered, parent=Directory("src")), "File"),
+			(lambda: File("a.py", parent=Line(1, Covered)),     "Directory"),
+			(lambda: Directory("src", parent=File("a.py")),     "Directory"),
+			(lambda: Package("src", parent=Directory("src")),   "Unit' or 'CoverageSummary")
+		):
+			with self.subTest(expected=expected):
+				with self.assertRaises(TypeError) as context:
+					_ = create()
+
+				self.assertEqual(f"Parameter 'parent' is not of type '{expected}'.", str(context.exception))
+
+	def test_ParentNone(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			File("a.py").Parent = None
+
+		self.assertEqual("Parameter 'parent' is None.", str(context.exception))
+
+
+class Checks(Testcase):
+	"""Parameters are checked for None, then their type, then their value."""
+
+	def test_Name(self) -> None:
+		for create in (lambda name: File(name), lambda name: Directory(name), lambda name: Package(name)):
+			for name, exceptionType, message in (
+				(None, ValueError, "Parameter 'name' is None."),
+				(1,    TypeError,  "Parameter 'name' is not of type 'str'."),
+				("",   ValueError, "Parameter 'name' is empty.")
+			):
+				with self.subTest(name=name):
+					with self.assertRaises(exceptionType) as context:
+						_ = create(name)
+
+					self.assertEqual(message, str(context.exception))
+
+	def test_LineNumberNone(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Line(None, Covered)
+
+		self.assertEqual("Parameter 'lineNumber' is None.", str(context.exception))
+
+	def test_StatusNone(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Branch(None)
+
+		self.assertEqual("Parameter 'status' is None.", str(context.exception))
+
+	def test_CountType(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Line(1, Covered, "1")
+
+		self.assertEqual("Parameter 'count' is not of type 'int'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_Elements(self) -> None:
+		for create, parameter, typeName in (
+			(lambda: File("a.py", lines=(1, )),                        "lines",             "Line"),
+			(lambda: Line(1, Covered, branches=(Covered, )),           "branches",          "Branch"),
+			(lambda: CoverageSummary("report", sourceDirectories="/"), "sourceDirectories", "Path")
+		):
+			with self.subTest(parameter=parameter):
+				with self.assertRaises(TypeError) as context:
+					_ = create()
+
+				self.assertEqual(
+					f"Parameter '{parameter}' contains an element not of type '{typeName}'.", str(context.exception)
+				)
+
+	def test_NotIterable(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = File("a.py", lines=1)
+
+		self.assertEqual("Parameter 'lines' is not iterable.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
+
+	def test_UnitLines(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Class("Shape", startLine=1)
+
+		self.assertEqual("Parameter 'startLine' is not of type 'Line'.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			Class("Shape").AddLine(1)
+
+		self.assertEqual("Parameter 'line' is not of type 'Line'.", str(context.exception))
+
+	def test_PathType(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = CoverageSummary("report").GetOrAddFile(1)
+
+		self.assertEqual("Parameter 'path' is not of type 'Path' or 'str'.", str(context.exception))
+
+
 def _Example() -> CoverageSummary:
 	"""
 	Build a report of two files: ``src/a.py`` with a covered, a partially covered, an uncovered and an excluded line,
@@ -245,14 +377,14 @@ def _Example() -> CoverageSummary:
 		Line(1, Covered, 2), Line(2, PartiallyCovered, 1, (Branch(Covered), Branch(Uncovered))), Line(3, Uncovered, 0),
 		Line(4, Excluded)
 	):
-		fileA.AddLine(line)
+		line.Parent = fileA
 
 	fileB = summary.GetOrAddFile("src/sub/b.py")
 	for line in (
 		Line(1, Covered, 1, (Branch(Covered), Branch(Covered))),
 		Line(2, Uncovered, 0, (Branch(Uncovered), Branch(Uncovered)))
 	):
-		fileB.AddLine(line)
+		line.Parent = fileB
 
 	summary.Aggregate()
 	return summary

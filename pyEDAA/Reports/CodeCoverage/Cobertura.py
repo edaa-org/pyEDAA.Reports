@@ -794,7 +794,7 @@ class Document(Coverage, cc_Document):
 					status = LineCoverageStatus.PartiallyCovered
 				else:
 					status = LineCoverageStatus.Covered
-				file.AddLine(cc_Line(number, status, hits, branches))
+				cc_Line(number, status, hits, branches, parent=file)
 
 		for package in self._packages:
 			parent: cc_Unit | CoverageSummary = summary

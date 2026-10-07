@@ -47,20 +47,24 @@ The common model is a superset: it has two hierarchies over the same lines.
    ├─ physical hierarchy       built from the file paths the report names
    │  ├── Directory            e.g. src/
    │  │   └── File             e.g. src/Counter.vhdl
-   │  │       └── Line         line number, LineCoverageStatus, count, branches
+   │  │       └── Line         line number, LineCoverageStatus, count
+   │  │           └── Branch   LineCoverageStatus, count, target
    │  └── File
    │
    └─ logical hierarchy        the language units the report names
       └── Package              e.g. src
-          └── Class            e.g. Counter_vhdl - file and lines
+          └── Class            e.g. Counter_vhdl - file, first and last line, lines
               └── Method       also: Module, Function
 
 * Every format has files and lines, so lines, branches and their counts live in the **physical** hierarchy.
 * A **unit** - :class:`~pyEDAA.Reports.CodeCoverage.Package`, :class:`~pyEDAA.Reports.CodeCoverage.Module`,
   :class:`~pyEDAA.Reports.CodeCoverage.Class`, :class:`~pyEDAA.Reports.CodeCoverage.Function`,
-  :class:`~pyEDAA.Reports.CodeCoverage.Method` - names its file, its line range and its lines, which are the file's
-  :class:`~pyEDAA.Reports.CodeCoverage.Line` objects. So both hierarchies count the same lines. A unit can state how
-  often it was called.
+  :class:`~pyEDAA.Reports.CodeCoverage.Method` - names its file, its first and last line and its lines, which are the
+  file's :class:`~pyEDAA.Reports.CodeCoverage.Line` objects. So both hierarchies count the same lines. A unit can state
+  how often it was called.
+* Every element knows the element containing it - :attr:`~pyEDAA.Reports.CodeCoverage.Base.Parent` - and the report's
+  root - :attr:`~pyEDAA.Reports.CodeCoverage.Base.Root`. Assigning a parent, in the constructor or later, adds the
+  element to it and passes the root on to the elements it contains.
 
 A line, a branch and a unit carry a :class:`~pyEDAA.Reports.CodeCoverage.LineCoverageStatus` and - if the report
 says - a count: how often the line ran, the branch was taken, the unit was called. A count of ``0`` is uncovered, a
