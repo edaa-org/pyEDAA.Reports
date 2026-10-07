@@ -780,7 +780,7 @@ class Directory(BaseWithPath):
 	@Base.Root.setter
 	def Root(self, root: Nullable[CoverageSummary]) -> None:
 		Base.Root.fset(self, root)
-		for child in chain(self._directories.values(), self._files.values()):
+		for child in (*self._directories.values(), *self._files.values()):
 			child.Root = root
 
 	@readonly
