@@ -4,7 +4,7 @@ Schemas
 #######
 
 pyEDAA.Reports validates every file it reads against the **XML schema** of its format before converting it. It ships
-the schemas of the JUnit dialects and of Cobertura's code coverage format; the schema of pyTooling's test report comes
+the schemas of Cobertura's code coverage format and of the JUnit dialects; the schema of pyTooling's test report comes
 with pyTooling. Each schema is listed here, the shipped ones with their full source, ready to read, to copy, or to
 download.
 
@@ -20,18 +20,18 @@ Available schemas
    * - Schema
      - File
      - Read by
-   * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
-     - :file:`Any-JUnit.xsd`
-     - :class:`pyEDAA.Reports.Unittesting.JUnit.Document`
-   * - :ref:`Ant + JUnit4 <SCHEMAS/Ant-JUnit4>`
-     - :file:`Ant-JUnit4.xsd`
-     - :class:`pyEDAA.Reports.Unittesting.JUnit.AntJUnit4.Document`
    * - :ref:`Any Cobertura <SCHEMAS/Any-Cobertura>`
      - :file:`Any-Cobertura.xsd`
      - :class:`pyEDAA.Reports.CodeCoverage.Cobertura.Document`
    * - :ref:`Cobertura 04 <SCHEMAS/Cobertura-04>`
      - :file:`Cobertura-04.xsd`
      - strict translation of Cobertura's DTD ``coverage-04.dtd``
+   * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
+     - :file:`Any-JUnit.xsd`
+     - :class:`pyEDAA.Reports.Unittesting.JUnit.Document`
+   * - :ref:`Ant + JUnit4 <SCHEMAS/Ant-JUnit4>`
+     - :file:`Ant-JUnit4.xsd`
+     - :class:`pyEDAA.Reports.Unittesting.JUnit.AntJUnit4.Document`
    * - :ref:`CTest JUnit <SCHEMAS/CTest-JUnit>`
      - :file:`CTest-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.CTestJUnit.Document`
@@ -73,10 +73,10 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
 .. toctree::
    :hidden:
 
-   Any-JUnit
-   Ant-JUnit4
    Any-Cobertura
    Cobertura-04
+   Any-JUnit
+   Ant-JUnit4
    CTest-JUnit
    GoogleTest-JUnit
    PyTest-JUnit
