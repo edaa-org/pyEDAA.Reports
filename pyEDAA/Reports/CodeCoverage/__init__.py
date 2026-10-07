@@ -126,7 +126,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		:returns:                  The parent, or ``None``.
 		:raises ValueError:        If ``None`` is assigned.
 		:raises TypeError:         If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises CodeCoverageError: If the element is the report's root, which has no parent.
+		:raises TypeError:         If a parent is assigned to a :class:`CoverageSummary`, which has no parent.
 		:raises CodeCoverageError: If the assigned parent already contains an element of this name or line number.
 		"""
 		return self._parent
@@ -140,8 +140,6 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex = TypeError(f"Parameter 'parent' is not of type {typeNames}.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
-		elif self._root is self:
-			raise CodeCoverageError(f"The report's root can't have a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent
@@ -679,6 +677,12 @@ class CoverageSummary(Directory):
 					raise ex
 
 				self._sourceDirectories.append(sourceDirectory)
+
+	@Base.Parent.setter
+	def Parent(self, parent: None) -> None:
+		ex = TypeError(f"A '{getFullyQualifiedName(self)}' has no parent.")
+		ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+		raise ex
 
 	def _AddElement(self, element: Directory | File | Unit) -> None:
 		"""

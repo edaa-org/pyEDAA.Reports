@@ -337,10 +337,11 @@ class Tree(Testcase):
 		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Line'."], context.exception.__notes__)
 
 	def test_ParentOfRoot(self) -> None:
-		with self.assertRaises(CodeCoverageError) as context:
+		with self.assertRaises(TypeError) as context:
 			CoverageSummary("report").Parent = Directory("src")
 
-		self.assertEqual("The report's root can't have a parent.", str(context.exception))
+		self.assertEqual("A 'pyEDAA.Reports.CodeCoverage.CoverageSummary' has no parent.", str(context.exception))
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Directory'."], context.exception.__notes__)
 
 	def test_ParentNone(self) -> None:
 		with self.assertRaises(ValueError) as context:
