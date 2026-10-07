@@ -3,9 +3,9 @@
 Schemas
 #######
 
-pyEDAA.Reports ships the **XML schemas** of the file formats it reads, and validates every file against the schema
-of its format before converting it. Each schema is listed here with its full source, ready to read, to copy, or to
-download.
+pyEDAA.Reports validates every file it reads against the **XML schema** of its format before converting it. It ships
+the schemas of the JUnit dialects; the schema of pyTooling's test report comes with pyTooling. Each schema is listed
+here, the shipped ones with their full source, ready to read, to copy, or to download.
 
 .. _SCHEMAS/Files:
 
@@ -37,6 +37,9 @@ Available schemas
    * - :ref:`pyTooling TestReport v0.1 <SCHEMAS/TestReport-v0.1>`
      - :file:`TestReport-v0.1.xsd`
      - :class:`pyEDAA.Reports.Unittesting.pyTooling.Document`
+
+:file:`TestReport-v0.1.xsd` is pyTooling's: the reader takes it from :mod:`pyTooling.Resources`, and its source is on
+:ref:`pyTooling's schema page <pyTool:SCHEMAS/TestReport-v0.1>`.
 
 .. _SCHEMAS/Programmatically:
 
