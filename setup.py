@@ -57,7 +57,8 @@ setup(
 		dataFiles={
 			packageName: [
 				"py.typed",
-				"Resources/*.xsd"
+				"Resources/*.xsd",
+				"Resources/*.schema.json"
 			]
 		},
 		debug=True
