@@ -37,7 +37,7 @@ from lxml.etree                            import XMLSchema, parse
 from pyTooling.Common                      import getResourceFile
 
 from pyEDAA.Reports                        import Resources
-from pyEDAA.Reports.CodeCoverage           import Class, CodeCoverageError, CoverageStatus, Method, Package
+from pyEDAA.Reports.CodeCoverage           import Class, CodeCoverageError, LineCoverageStatus, Method, Package
 from pyEDAA.Reports.CodeCoverage.Cobertura import READ_SCHEMA, STRICT_SCHEMA, Document
 from pyTooling.Testing                     import Testcase
 
@@ -119,7 +119,7 @@ class Conversion(Testcase):
 		self.assertEqual(["myPackage"], [str(directory) for directory in summary.SourceDirectories])
 		self.assertEqual(
 			["Shapes.py", "__init__.py", "Units/Length.py", "Units/__init__.py"],
-			[str(file.Path) for file in summary.IterateFiles()]
+			[file.Path.as_posix() for file in summary.IterateFiles()]
 		)
 		self.assertEqual(
 			(report.LinesValid, report.LinesCovered, report.BranchesValid, report.BranchesCovered),
@@ -127,12 +127,12 @@ class Conversion(Testcase):
 		)
 
 		shapes = summary.Files["Shapes.py"]
-		self.assertIs(CoverageStatus.PartiallyCovered, shapes.Lines[7].Status)
+		self.assertIs(LineCoverageStatus.PartiallyCovered, shapes.Lines[7].Status)
 		self.assertEqual(1, shapes.Lines[7].Count)
 		self.assertEqual(
-			[CoverageStatus.Covered, CoverageStatus.Uncovered], [branch.Status for branch in shapes.Lines[7].Branches]
+			[LineCoverageStatus.Covered, LineCoverageStatus.Uncovered], [branch.Status for branch in shapes.Lines[7].Branches]
 		)
-		self.assertIs(CoverageStatus.Uncovered, shapes.Lines[8].Status)
+		self.assertIs(LineCoverageStatus.Uncovered, shapes.Lines[8].Status)
 
 	def test_VHDL(self) -> None:
 		"""gcovr's packages - directories joined by '.' - become nested packages holding the classes."""
@@ -168,8 +168,8 @@ class Conversion(Testcase):
 		file = summary.Files["A.java"]
 		self.assertEqual([3, 4], sorted(file.Lines))
 		self.assertEqual(2, file.Lines[4].Count)
-		self.assertIs(CoverageStatus.Covered, file.Lines[4].Status)
-		self.assertIs(CoverageStatus.PartiallyCovered, file.Lines[3].Status)
+		self.assertIs(LineCoverageStatus.Covered, file.Lines[4].Status)
+		self.assertIs(LineCoverageStatus.PartiallyCovered, file.Lines[3].Status)
 
 		method = summary.Units["p"].Units["A"].Units["run"]
 		self.assertIsInstance(method, Method)

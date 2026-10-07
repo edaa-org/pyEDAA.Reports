@@ -30,10 +30,10 @@
 #
 #
 """Unit tests of the code coverage data model: lines, branches, files, directories, units and their counters."""
-from pathlib                     import PurePosixPath
+from pathlib                     import Path
 
-from pyEDAA.Reports.CodeCoverage import Branch, Class, CodeCoverageError, CoverageStatus, CoverageSummary, Directory
-from pyEDAA.Reports.CodeCoverage import File, Function, Line, Method, Module, Package
+from pyEDAA.Reports.CodeCoverage import Branch, Class, CodeCoverageError, CoverageSummary, Directory, File, Function
+from pyEDAA.Reports.CodeCoverage import Line, LineCoverageStatus, Method, Module, Package
 from pyTooling.Testing           import Testcase
 
 
@@ -43,10 +43,10 @@ if __name__ == "__main__":  # pragma: no cover
 	exit(1)
 
 
-Covered =          CoverageStatus.Covered           #: Shortcut of a coverage state.
-PartiallyCovered = CoverageStatus.PartiallyCovered  #: Shortcut of a coverage state.
-Uncovered =        CoverageStatus.Uncovered         #: Shortcut of a coverage state.
-Excluded =         CoverageStatus.Excluded          #: Shortcut of a coverage state.
+Covered =          LineCoverageStatus.Covered           #: Shortcut of a coverage state.
+PartiallyCovered = LineCoverageStatus.PartiallyCovered  #: Shortcut of a coverage state.
+Uncovered =        LineCoverageStatus.Uncovered         #: Shortcut of a coverage state.
+Excluded =         LineCoverageStatus.Excluded          #: Shortcut of a coverage state.
 
 
 class Lines(Testcase):
@@ -55,7 +55,7 @@ class Lines(Testcase):
 	def test_Properties(self) -> None:
 		line = Line(12, PartiallyCovered, 7, (Branch(Covered, 7, 13), Branch(Uncovered, 0)))
 
-		self.assertEqual(12, line.Number)
+		self.assertEqual(12, line.LineNumber)
 		self.assertIs(PartiallyCovered, line.Status)
 		self.assertEqual(7, line.Count)
 		self.assertEqual(2, len(line.Branches))
@@ -74,21 +74,21 @@ class Lines(Testcase):
 		with self.assertRaises(TypeError) as context:
 			_ = Line("1", Covered)
 
-		self.assertEqual("Parameter 'number' is not of type 'int'.", str(context.exception))
+		self.assertEqual("Parameter 'lineNumber' is not of type 'int'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
 	def test_NumberRange(self) -> None:
 		with self.assertRaises(ValueError) as context:
 			_ = Line(0, Covered)
 
-		self.assertEqual("Parameter 'number' is less than 1.", str(context.exception))
+		self.assertEqual("Parameter 'lineNumber' is less than 1.", str(context.exception))
 		self.assertEqual(["Got value '0'."], context.exception.__notes__)
 
 	def test_StatusType(self) -> None:
 		with self.assertRaises(TypeError) as context:
 			_ = Line(1, 1)
 
-		self.assertEqual("Parameter 'status' is not of type 'CoverageStatus'.", str(context.exception))
+		self.assertEqual("Parameter 'status' is not of type 'LineCoverageStatus'.", str(context.exception))
 		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 	def test_CountContradiction(self) -> None:
@@ -115,13 +115,13 @@ class Hierarchy(Testcase):
 		summary = CoverageSummary("report")
 		file = summary.GetOrAddFile("src/Utilities/Functions.vhdl")
 
-		self.assertIs(file, summary.GetOrAddFile(PurePosixPath("src/Utilities/Functions.vhdl")))
+		self.assertIs(file, summary.GetOrAddFile(Path("src/Utilities/Functions.vhdl")))
 		self.assertIs(file, summary.GetOrAddFile("src\\Utilities\\Functions.vhdl"))
-		self.assertEqual(PurePosixPath("src/Utilities/Functions.vhdl"), file.Path)
+		self.assertEqual(Path("src/Utilities/Functions.vhdl"), file.Path)
 		self.assertEqual("Functions.vhdl", file.Name)
 		self.assertIsInstance(file.Parent, Directory)
 		self.assertEqual(["src"], list(summary.Directories))
-		self.assertEqual(PurePosixPath("."), summary.Path)
+		self.assertEqual(Path("."), summary.Path)
 
 	def test_GetOrAddFile_Empty(self) -> None:
 		with self.assertRaises(ValueError) as context:
@@ -160,7 +160,9 @@ class Hierarchy(Testcase):
 		for path in ("src/b/x.c", "src/a.c", "z.c", "src/c.c"):
 			summary.GetOrAddFile(path)
 
-		self.assertEqual(["z.c", "src/a.c", "src/c.c", "src/b/x.c"], [str(file.Path) for file in summary.IterateFiles()])
+		self.assertEqual(
+			["z.c", "src/a.c", "src/c.c", "src/b/x.c"], [file.Path.as_posix() for file in summary.IterateFiles()]
+		)
 		self.assertEqual(4, summary.FileCount)
 
 	def test_Aggregate(self) -> None:

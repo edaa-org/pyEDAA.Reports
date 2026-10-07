@@ -63,7 +63,7 @@ A report is validated against :file:`Any-Cobertura.xsd`, which accepts the attri
 """
 from __future__                  import annotations
 
-from pathlib                     import Path, PurePath
+from pathlib                     import Path
 from re                          import compile as re_compile
 from typing                      import Optional as Nullable
 
@@ -76,8 +76,8 @@ from pyTooling.MetaClasses       import ExtendedType
 from pyTooling.Stopwatch         import Stopwatch
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, CoverageStatus
-from pyEDAA.Reports.CodeCoverage import CoverageSummary, Document as cc_Document, File as cc_File, Line as cc_Line
+from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, CoverageSummary
+from pyEDAA.Reports.CodeCoverage import Document as cc_Document, File as cc_File, Line as cc_Line, LineCoverageStatus
 from pyEDAA.Reports.CodeCoverage import Method as cc_Method, Package as cc_Package, Unit as cc_Unit
 
 
@@ -768,7 +768,7 @@ class Document(Coverage, cc_Document):
 		:returns:                  The report's root of the common model, named after the report file.
 		:raises CodeCoverageError: If a file's path runs through another file.
 		"""
-		summary = CoverageSummary(self._path.stem, sourceDirectories=[PurePath(source) for source in self._sources])
+		summary = CoverageSummary(self._path.stem, sourceDirectories=[Path(source) for source in self._sources])
 
 		merged: dict[int, dict[int, tuple[int, int, int]]] = {}
 		files: dict[int, cc_File] = {}
@@ -786,14 +786,14 @@ class Document(Coverage, cc_Document):
 			file = files[fileID]
 			for number in sorted(lines):
 				hits, covered, total = lines[number]
-				branches = [cc_Branch(CoverageStatus.Covered) for _ in range(covered)]
-				branches.extend(cc_Branch(CoverageStatus.Uncovered) for _ in range(total - covered))
+				branches = [cc_Branch(LineCoverageStatus.Covered) for _ in range(covered)]
+				branches.extend(cc_Branch(LineCoverageStatus.Uncovered) for _ in range(total - covered))
 				if hits == 0:
-					status = CoverageStatus.Uncovered
+					status = LineCoverageStatus.Uncovered
 				elif covered < total:
-					status = CoverageStatus.PartiallyCovered
+					status = LineCoverageStatus.PartiallyCovered
 				else:
-					status = CoverageStatus.Covered
+					status = LineCoverageStatus.Covered
 				file.AddLine(cc_Line(number, status, hits, branches))
 
 		for package in self._packages:

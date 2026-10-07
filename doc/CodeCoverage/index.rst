@@ -47,7 +47,7 @@ The common model is a superset: it has two hierarchies over the same lines.
    ├─ physical hierarchy       built from the file paths the report names
    │  ├── Directory            e.g. src/
    │  │   └── File             e.g. src/Counter.vhdl
-   │  │       └── Line         number, CoverageStatus, count, branches
+   │  │       └── Line         line number, LineCoverageStatus, count, branches
    │  └── File
    │
    └─ logical hierarchy        the language units the report names
@@ -62,9 +62,9 @@ The common model is a superset: it has two hierarchies over the same lines.
   :class:`~pyEDAA.Reports.CodeCoverage.Line` objects. So both hierarchies count the same lines. A unit can state how
   often it was called.
 
-A line, a branch and a unit carry a :class:`~pyEDAA.Reports.CodeCoverage.CoverageStatus` and - if the report says - a
-count: how often the line ran, the branch was taken, the unit was called. A count of ``0`` is uncovered, a positive
-count covered.
+A line, a branch and a unit carry a :class:`~pyEDAA.Reports.CodeCoverage.LineCoverageStatus` and - if the report
+says - a count: how often the line ran, the branch was taken, the unit was called. A count of ``0`` is uncovered, a
+positive count covered.
 
 .. list-table::
    :header-rows: 1
