@@ -161,9 +161,11 @@ the functions and classes of each file.
 * A file's path is relative to the directory coverage.py ran in.
 * Executed lines are covered - partially covered, if one of their branches wasn't taken -, missing lines uncovered,
   excluded lines excluded. The format has no counts.
-* A branch becomes a branch of its source line, naming its target line.
-* A file's directories become packages, the file a module; its classes and functions - qualified names like
-  ``Circle.Area`` - become classes, methods and functions, each with its first and last line.
+* A branch becomes a branch of its source line, naming its target line; an exit of a function - a negative number -
+  has none.
+* A file's directories become packages, the file a module spanning the whole file; its classes and functions -
+  qualified names like ``Circle.Area`` - become classes, methods and functions, each spanning its ``class`` or ``def``
+  line to its last line. coverage.py's own summary of a function counts the ``def`` line for the enclosing scope.
 
 .. code-block:: Python
 

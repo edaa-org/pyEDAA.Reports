@@ -11,7 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
+# Copyright 2021-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -41,9 +41,11 @@ format's model keeps what the report states: a :class:`Document` holds :class:`F
 * A file's path is relative to the directory coverage.py ran in.
 * Executed lines are covered - partially covered, if one of their branches wasn't taken -, missing lines uncovered,
   excluded lines excluded. The format has no counts.
-* A branch is a pair of source and destination line; it becomes a branch of its source line, naming its target.
-* A file's directories become packages, the file a module; its classes and functions - named by qualified names like
-  ``Circle.Area`` - become classes, methods and functions.
+* A branch is a pair of source and destination line; it becomes a branch of its source line, naming its target line -
+  none for an exit of a function, which coverage.py states as a negative number.
+* A file's directories become packages, the file a module spanning the whole file; its classes and functions - named by
+  qualified names like ``Circle.Area`` - become classes, methods and functions, each spanning its ``class`` or ``def``
+  line to its last line. coverage.py's own summary of a function counts the ``def`` line for the enclosing scope.
 
 .. rubric:: Example
 
@@ -58,9 +60,8 @@ format's model keeps what the report states: a :class:`Document` holds :class:`F
 """
 from __future__                  import annotations
 
-from collections                 import defaultdict
 from json                        import JSONDecodeError, loads
-from pathlib                     import Path, PurePosixPath
+from pathlib                     import Path
 from typing                      import Any, Optional as Nullable
 
 from jsonschema                  import Draft202012Validator
@@ -71,10 +72,10 @@ from pyTooling.MetaClasses       import ExtendedType
 from pyTooling.Stopwatch         import Stopwatch
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, CoverageStatus
-from pyEDAA.Reports.CodeCoverage import CoverageSummary, Document as cc_Document, File as cc_File
-from pyEDAA.Reports.CodeCoverage import Function as cc_Function, Line as cc_Line, Method as cc_Method
-from pyEDAA.Reports.CodeCoverage import Module as cc_Module, Package as cc_Package, Unit as cc_Unit
+from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, CoverageSummary
+from pyEDAA.Reports.CodeCoverage import Document as cc_Document, File as cc_File, Function as cc_Function
+from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus, Method as cc_Method, Module as cc_Module
+from pyEDAA.Reports.CodeCoverage import Package as cc_Package, Unit as cc_Unit
 
 
 __all__ = ["SCHEMA"]
@@ -565,28 +566,29 @@ class Document(Report, cc_Document):
 		:param file:       The file of the format's model.
 		:param commonFile: The file of the common model.
 		"""
-		branches: dict[int, list[cc_Branch]] = defaultdict(list)
-		for source, target in file._executedBranches:
-			branches[source].append(cc_Branch(CoverageStatus.Covered, target=target))
+		missingSources = {source for source, _ in file._missingBranches}
 
-		for source, target in file._missingBranches:
-			branches[source].append(cc_Branch(CoverageStatus.Uncovered, target=target))
-
-		lines: dict[int, cc_Line] = {}
+		statuses: dict[int, LineCoverageStatus] = {}
 		for number in file._executedLines:
-			lineBranches = branches.get(number, [])
-			partial = any(branch._status is CoverageStatus.Uncovered for branch in lineBranches)
-			status = CoverageStatus.PartiallyCovered if partial else CoverageStatus.Covered
-			lines[number] = cc_Line(number, status, branches=lineBranches)
+			partial = number in missingSources
+			statuses[number] = LineCoverageStatus.PartiallyCovered if partial else LineCoverageStatus.Covered
 
 		for number in file._missingLines:
-			lines[number] = cc_Line(number, CoverageStatus.Uncovered, branches=branches.get(number, []))
+			statuses[number] = LineCoverageStatus.Uncovered
 
 		for number in file._excludedLines:
-			lines[number] = cc_Line(number, CoverageStatus.Excluded)
+			statuses[number] = LineCoverageStatus.Excluded
 
-		for number in sorted(lines):
-			commonFile.AddLine(lines[number])
+		for number in sorted(statuses):
+			cc_Line(number, statuses[number], parent=commonFile)
+
+		lines = commonFile._lines
+		for status, arcs in (
+			(LineCoverageStatus.Covered,   file._executedBranches),
+			(LineCoverageStatus.Uncovered, file._missingBranches)
+		):
+			for source, target in arcs:
+				cc_Branch(status, target=lines.get(target), parent=lines[source])
 
 	@staticmethod
 	def _ConvertUnits(file: File, commonFile: cc_File, summary: CoverageSummary) -> None:
@@ -598,14 +600,20 @@ class Document(Report, cc_Document):
 		:param commonFile: The file of the common model.
 		:param summary:    The report's root of the common model.
 		"""
-		path = PurePosixPath(file._path.replace("\\", "/"))
+		path = Path(file._path.replace("\\", "/"))
 		parent: cc_Unit | CoverageSummary = summary
 		for part in path.parent.parts:
 			parent = parent._units[part] if part in parent._units else cc_Package(part, parent=parent)
 
-		module = cc_Module(path.stem, file=commonFile, parent=parent)
-		for line in commonFile._lines.values():
-			module.AddLine(line)
+		lines = commonFile._lines
+		numbers = sorted(lines)
+		module = cc_Module(
+			path.stem,
+			file=commonFile,
+			startLine=lines[numbers[0]] if len(numbers) > 0 else None,
+			endLine=lines[numbers[-1]] if len(numbers) > 0 else None,
+			parent=parent
+		)
 
 		for kind, regions in (("class", file._classes), ("function", file._functions)):
 			for name in sorted(regions):
@@ -628,9 +636,14 @@ class Document(Report, cc_Document):
 				else:
 					unitClass = cc_Function
 
-				lines = region.AllLines
-				endLine = max(lines, default=region._startLine)
-				unit = unitClass(ownName, file=commonFile, startLine=region._startLine, endLine=endLine, parent=container)
-				for number in lines:
-					if number in commonFile._lines:
-						unit.AddLine(commonFile._lines[number])
+				numbers = [number for number in region.AllLines if number in lines]
+				if region._startLine in lines:
+					numbers.append(region._startLine)
+
+				unitClass(
+					ownName,
+					file=commonFile,
+					startLine=lines[min(numbers)] if len(numbers) > 0 else None,
+					endLine=lines[max(numbers)] if len(numbers) > 0 else None,
+					parent=container
+				)

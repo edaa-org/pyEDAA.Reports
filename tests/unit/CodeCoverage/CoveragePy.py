@@ -35,7 +35,7 @@ from pathlib                                import Path
 from tempfile                               import TemporaryDirectory
 from typing                                 import Any
 
-from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, CoverageStatus, Function, Method, Module
+from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, Function, LineCoverageStatus, Method, Module
 from pyEDAA.Reports.CodeCoverage            import Package
 from pyEDAA.Reports.CodeCoverage.CoveragePy import Document
 from pyTooling.Testing                      import Testcase
@@ -101,9 +101,9 @@ class Conversion(Testcase):
 		summary = report.ToCoverageSummary()
 
 		pairs = [(summary, report.Totals)]
-		pairs.extend((file, report.Files[str(file.Path)].Summary) for file in summary.IterateFiles())
+		pairs.extend((file, report.Files[file.Path.as_posix()].Summary) for file in summary.IterateFiles())
 		for entity, stated in pairs:
-			with self.subTest(entity=str(entity.Path)):
+			with self.subTest(entity=entity.Path.as_posix()):
 				self.assertEqual(
 					(stated.NumStatements, stated.CoveredLines, stated.ExcludedLines, stated.NumBranches,
 					 stated.CoveredBranches, stated.NumPartialBranches),
@@ -116,13 +116,13 @@ class Conversion(Testcase):
 		shapes = Document(REPORT, analyzeAndConvert=True).ToCoverageSummary().Directories["myPackage"].Files["Shapes.py"]
 
 		line = shapes.Lines[7]
-		self.assertIs(CoverageStatus.PartiallyCovered, line.Status)
-		self.assertIsNone(line.Count)
-		self.assertEqual([(CoverageStatus.Covered, 9), (CoverageStatus.Uncovered, 8)], [
-			(branch.Status, branch.Target) for branch in line.Branches
+		self.assertIs(LineCoverageStatus.PartiallyCovered, line.Status)
+		self.assertIsNone(line.CoverageCount)
+		self.assertEqual([(LineCoverageStatus.Covered, 9), (LineCoverageStatus.Uncovered, 8)], [
+			(branch.Status, branch.Target.LineNumber) for branch in line.Branches
 		])
-		self.assertIs(CoverageStatus.Uncovered, shapes.Lines[8].Status)
-		self.assertIs(CoverageStatus.Excluded, shapes.Lines[28].Status)
+		self.assertIs(LineCoverageStatus.Uncovered, shapes.Lines[8].Status)
+		self.assertIs(LineCoverageStatus.Excluded, shapes.Lines[28].Status)
 
 	def test_Units(self) -> None:
 		summary = Document(REPORT, analyzeAndConvert=True).ToCoverageSummary()
@@ -137,9 +137,10 @@ class Conversion(Testcase):
 				self.assertIsInstance(units[name], unitClass)
 
 		isSquare = units["myPackage.Shapes.Rectangle.IsSquare"]
-		self.assertEqual((23, 26), (isSquare.StartLine, isSquare.EndLine))
-		self.assertEqual((3, 2, 1), (isSquare.TotalLines, isSquare.CoveredLines, isSquare.PartialLines))
-		self.assertIs(summary.Directories["myPackage"].Files["Shapes.py"].Lines[24], isSquare.Lines[24])
+		self.assertEqual((23, 26), (isSquare.StartLine.LineNumber, isSquare.EndLine.LineNumber))
+		# the unit spans its 'def' line too, which coverage.py's function summary counts for the enclosing scope
+		self.assertEqual((4, 3, 1), (isSquare.TotalLines, isSquare.CoveredLines, isSquare.PartialLines))
+		self.assertIn(summary.Directories["myPackage"].Files["Shapes.py"].Lines[24], list(isSquare.IterateLines()))
 
 	def test_Format2(self) -> None:
 		"""Format 2 has no regions: a file becomes a module only."""
@@ -159,7 +160,7 @@ class Conversion(Testcase):
 		common = report.ToCoverageSummary()
 		self.assertEqual(["pkg.mod"], [unit.QualifiedName for unit in common.IterateUnits()][1:])
 		self.assertEqual((2, 1, 0), (common.TotalLines, common.CoveredLines, common.TotalBranches))
-		self.assertEqual("pkg/mod.py", str(next(common.IterateFiles()).Path))
+		self.assertEqual("pkg/mod.py", next(common.IterateFiles()).Path.as_posix())
 
 
 class Schema(Testcase):
