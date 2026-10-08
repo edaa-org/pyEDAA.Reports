@@ -85,6 +85,7 @@ from pyEDAA.Reports                           import Resources
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, CoverageSummary
 from pyEDAA.Reports.CodeCoverage              import Document as cc_Document, File as cc_File, Function as cc_Function
 from pyEDAA.Reports.CodeCoverage              import Line as cc_Line, LineCoverageStatus, SourceFile as cc_SourceFile
+from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function, Line
 
 
 __all__ = ["SCHEMAS"]
@@ -247,10 +248,6 @@ class File(metaclass=ExtendedType, slots=True):
 		:returns: The lines; a line several functions share is listed once per function.
 		"""
 		return self._lines
-
-
-# 'Records' imports 'File', the parent of its records, so it's imported after 'File' is defined.
-from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function, Line
 
 
 @export
