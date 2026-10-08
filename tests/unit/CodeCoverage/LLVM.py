@@ -38,7 +38,7 @@ from typing                                   import Any
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
 from pyEDAA.Reports.CodeCoverage.LLVM         import Document
-from pyEDAA.Reports.CodeCoverage.LLVM.Records import RegionKind
+from pyEDAA.Reports.CodeCoverage.LLVM.Regions import RegionKind
 from pyTooling.Testing                        import Testcase
 from pyTooling.Versioning                     import SemanticVersion
 
