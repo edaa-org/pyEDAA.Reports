@@ -60,6 +60,7 @@ format's model keeps what the report states: a :class:`Document` holds :class:`F
 """
 from __future__                  import annotations
 
+from datetime                    import datetime
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from typing                      import Any, Optional as Nullable
@@ -386,7 +387,7 @@ class Report(metaclass=ExtendedType, slots=True):
 
 	_format:         Nullable[int]              #: Version of the report format.
 	_version:        Nullable[SemanticVersion]  #: Version of coverage.py.
-	_timestamp:      Nullable[str]              #: Time the report was written, ISO 8601.
+	_timestamp:      Nullable[datetime]         #: Time the report was written, local time without time zone.
 	_branchCoverage: bool                       #: Whether branch coverage was measured.
 	_showContexts:   bool                       #: Whether the lines' contexts are listed.
 	_files:          dict[Path, File]           #: The measured files, by path.
@@ -423,11 +424,11 @@ class Report(metaclass=ExtendedType, slots=True):
 		return self._version
 
 	@readonly
-	def Timestamp(self) -> Nullable[str]:
+	def Timestamp(self) -> Nullable[datetime]:
 		"""
 		Read-only property to access the time the report was written (:attr:`_timestamp`).
 
-		:returns: The time, ISO 8601.
+		:returns: The time in the writer's local time, without a time zone; ``None`` before the report was converted.
 		"""
 		return self._timestamp
 
@@ -541,7 +542,7 @@ class Document(Report, cc_Document):
 			meta = self._jsonDocument["meta"]
 			self._format =         meta["format"]
 			self._version =        SemanticVersion.Parse(meta["version"])
-			self._timestamp =      meta["timestamp"]
+			self._timestamp =      datetime.fromisoformat(meta["timestamp"])
 			self._branchCoverage = meta["branch_coverage"]
 			self._showContexts =   meta["show_contexts"]
 			self._files =          {}

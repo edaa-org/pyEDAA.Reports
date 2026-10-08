@@ -30,6 +30,7 @@
 #
 #
 """Unit tests of coverage.py's JSON format: its model, its JSON Schema and the conversion to the common model."""
+from datetime                               import datetime
 from json                                   import dumps, loads
 from pathlib                                import Path
 from tempfile                               import TemporaryDirectory
@@ -75,6 +76,7 @@ class FormatModel(Testcase):
 			(3, "7.16.1", True, False), (report.Format, report.Version, report.BranchCoverage, report.ShowContexts)
 		)
 		self.assertIsInstance(report.Version, SemanticVersion)
+		self.assertEqual(datetime(2026, 10, 7, 9, 14, 51, 108137), report.Timestamp)
 		self.assertEqual(
 			["myPackage/Shapes.py", "myPackage/Units/Length.py", "myPackage/Units/__init__.py", "myPackage/__init__.py"],
 			sorted(path.as_posix() for path in report.Files)
