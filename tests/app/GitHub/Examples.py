@@ -38,6 +38,8 @@ from pyTooling.Common import getResourceFile, zipdicts
 from pyEDAA.Reports                                   import Resources
 from pyEDAA.Reports.CodeCoverage.Cobertura            import STRICT_SCHEMA, Document as CoberturaDocument
 from pyEDAA.Reports.CodeCoverage.CoveragePy           import Document as CoveragePyDocument
+from pyEDAA.Reports.CodeCoverage.Gcov                 import Document as GcovDocument
+from pyEDAA.Reports.CodeCoverage.Gcov                 import FormatVersion as GcovFormatVersion
 from pyEDAA.Reports.Unittesting                       import TestcaseStatus, UnittestError
 from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument
 # FIXME: change to generic JUnit
@@ -178,6 +180,30 @@ class CppGoogleTestCTest(TestCase):
 					self.assertEqual(tc.Status, sameTC.Status)
 					self.assertEqual(tc.Duration, sameTC.Duration)
 					self.assertEqual(tc.AssertionCount, sameTC.AssertionCount)
+
+
+class CppGoogleTestCoverage(TestCase):
+	"""gcov measures the library of the GoogleTest example in its direct test run and writes gcov JSON."""
+
+	def test_Gcov(self) -> None:
+		report = GcovDocument(Path("tests/data/CodeCoverage/Cpp-GoogleTest/Counter.cpp.gcov.json"), analyzeAndConvert=True)
+
+		self.assertEqual(1, len(report.DataFiles))
+		self.assertEqual(GcovFormatVersion.Version2, report.DataFiles[0].FormatVersion)
+
+		summary = report.ToCoverageSummary()
+		files = list(summary.IterateFiles())
+		self.assertEqual(1, len(files))
+		self.assertEqual(("src", "Counter.cpp"), files[0].Path.parts[-2:])
+		self.assertEqual((6, 6), (files[0].TotalLines, files[0].CoveredLines))
+		self.assertEqual(
+			[(3, 4), (4, 4), (7, 1), (8, 1), (11, 1), (12, 1)],
+			[(line.LineNumber, line.CoverageCount) for line in files[0].IterateLines()]
+		)
+		self.assertEqual(
+			["Counter::Decrement()", "Counter::Increment()", "Counter::Value()"],
+			sorted(unit.Name for unit in summary.IterateUnits() if unit.Name.startswith("Counter::"))
+		)
 
 
 class CppCatch2(TestCase):
