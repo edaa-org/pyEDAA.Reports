@@ -114,7 +114,7 @@ RECORD_SYNTAX: dict[str, str] = {
 
 
 @export
-class Tracefile(metaclass=ExtendedType, slots=True):
+class Tracefile(metaclass=ExtendedType, mixin=True):
 	"""
 	A tracefile: its comments and sections.
 	"""
@@ -151,7 +151,7 @@ class Tracefile(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Document(Tracefile, cc_Document):
+class Document(cc_Document, Tracefile):
 	"""
 	An lcov tracefile: read into the format's model, and converted to the common model.
 	"""
@@ -165,11 +165,14 @@ class Document(Tracefile, cc_Document):
 		:param tracefile:         Path to the tracefile.
 		:param analyzeAndConvert: Optional, if true, analyze the file and convert its content. Default: ``False``.
 		"""
-		super().__init__()
+		super().__init__(tracefile)
+		Tracefile.__init__(self)
 
 		self._records = None
 
-		cc_Document.__init__(self, tracefile, analyzeAndConvert)
+		if analyzeAndConvert:
+			self.Analyze()
+			self.Convert()
 
 	def Analyze(self) -> None:
 		"""

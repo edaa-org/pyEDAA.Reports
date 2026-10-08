@@ -34,7 +34,7 @@ from pathlib                                  import Path
 from tempfile                                 import TemporaryDirectory
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.LCOV         import RECORD_SYNTAX, Document, Tracefile
+from pyEDAA.Reports.CodeCoverage.LCOV         import RECORD_SYNTAX, Document
 from pyEDAA.Reports.CodeCoverage.LCOV.Records import Function as lcov_Function, Line, Section
 from pyTooling.Testing                        import Testcase
 
@@ -125,7 +125,7 @@ class Parents(Testcase):
 		self.assertIsNone(lcov_Function(1, None).Parent)
 
 	def test_Section(self) -> None:
-		tracefile = Tracefile()
+		tracefile = Document(Path("coverage.info"))
 		first = Section("", Path("a.c"), parent=tracefile)
 		second = Section("t", Path("b.c"), parent=tracefile)
 
@@ -136,8 +136,8 @@ class Parents(Testcase):
 	def test_WrongParent(self) -> None:
 		section = Section("", Path("a.c"))
 		for create, expected in (
-			(lambda: Line(1, 0, parent=Tracefile()), "Section"),
-			(lambda: lcov_Function(1, None, parent=Tracefile()), "Section"),
+			(lambda: Line(1, 0, parent=Document(Path("coverage.info"))), "Section"),
+			(lambda: lcov_Function(1, None, parent=Document(Path("coverage.info"))), "Section"),
 			(lambda: Section("", Path("a.c"), parent=section), "Tracefile")
 		):
 			with self.subTest(expected=expected):
