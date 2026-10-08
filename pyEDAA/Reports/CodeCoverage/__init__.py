@@ -793,19 +793,19 @@ class File(BaseWithPath):
 		"""
 		super().__init__(name, parent=parent)
 
-		self._lines =          [None]
-		self._lastLineNumber = 0
-		self._units =          []
+		self._units = []
 
 		if parent is not None:
 			parent._AddElement(self)
 
-		if lines is not None:
-			if not isinstance(lines, Iterable):
-				ex = TypeError(f"Parameter 'lines' is not iterable.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
-				raise ex
-
+		if lines is None:
+			self._lines =          [None]
+			self._lastLineNumber = 0
+		elif not isinstance(lines, Iterable):
+			ex = TypeError(f"Parameter 'lines' is not iterable.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
+			raise ex
+		else:
 			# check the lines and find the last line number, then allocate the list once at its final size
 			lineList = []
 			lastLineNumber = 0
