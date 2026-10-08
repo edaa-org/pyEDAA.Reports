@@ -46,7 +46,10 @@ if __name__ == "__main__":  # pragma: no cover
 
 
 DATA = Path(__file__).parent.parent.parent / "data" / "CodeCoverage"  #: Directory of the reports and their sources.
+GCC =  DATA / "lcov" / "C" / "GCC.info"                               #: lcov's tracefile of the C fixture, from GCC.
+LLVM = DATA / "lcov" / "C" / "LLVM.info"                              #: llvm-cov's tracefile of the C fixture.
 GHDL = DATA / "lcov" / "VHDL" / "GHDL.info"                           #: GHDL's tracefile of the VHDL fixture.
+PY =   DATA / "Python" / "coverage.info"                              #: coverage.py's tracefile of the Python fixture.
 
 
 def _write(directory: str, content: str) -> Path:
@@ -63,7 +66,53 @@ def _write(directory: str, content: str) -> Path:
 
 
 class FormatModel(Testcase):
-	"""The format's model keeps what the tracefile states: sections, functions, lines, summaries."""
+	"""The format's model keeps what the tracefile states: sections, functions, lines, branches, conditions, summaries."""
+
+	def test_GCC(self) -> None:
+		"""lcov 2.3 writes functions as leader and aliases, MC/DC conditions, and checksums."""
+		tracefile = Document(GCC, analyzeAndConvert=True)
+
+		self.assertEqual([("Classify", Path("Clamp.h")), ("Classify", Path("Classify.c"))], [
+			(section.TestName, section.SourceFile) for section in tracefile.Sections
+		])
+		section = tracefile.Sections[1]
+		self.assertEqual((20, 14, 14, 9, 4, 3, 14, 9), (
+			section.LinesFound, section.LinesHit, section.BranchesFound, section.BranchesHit, section.FunctionsFound,
+			section.FunctionsHit, section.ConditionsFound, section.ConditionsHit
+		))
+
+		twice = section.Functions[1]
+		self.assertEqual((1, "Twice", 17, 21, {"Twice": 0}, 0), (
+			twice.Index, twice.Name, twice.StartLine, twice.EndLine, twice.Aliases, twice.Count
+		))
+		self.assertEqual((5, 3, "i6lS0TI+70N3scXJXzSuRg"), (
+			section.Lines[5].Number, section.Lines[5].Count, section.Lines[5].Checksum
+		))
+		self.assertEqual([(18, 0, "0", None, False), (18, 0, "1", None, False)], [
+			(branch.LineNumber, branch.Block, branch.Expression, branch.Taken, branch.IsException)
+			for branch in section.Branches if branch.LineNumber == 18
+		])
+		self.assertEqual([(2, True, 1, "1"), (2, False, 0, "1")], [
+			(condition.GroupSize, condition.Sense, condition.Taken, condition.Expression)
+			for condition in section.Conditions if condition.LineNumber == 14 and condition.Index == 1
+		])
+		self.assertGreaterEqual(tracefile.AnalysisDuration.total_seconds(), 0.0)
+
+	def test_LLVM(self) -> None:
+		"""llvm-cov writes no test name, functions without end line, and a header's static function prefixed by its unit."""
+		tracefile = Document(LLVM, analyzeAndConvert=True)
+
+		clamp = tracefile.Sections[0].Functions[0]
+		self.assertEqual(("", Path("Clamp.h")), (tracefile.Sections[0].TestName, tracefile.Sections[0].SourceFile))
+		self.assertEqual((None, "Classify.c:Clamp", 2, None, 2), (
+			clamp.Index, clamp.Name, clamp.StartLine, clamp.EndLine, clamp.Count
+		))
+		section = tracefile.Sections[1]
+		self.assertEqual(["main", "Sign", "InRange", "Twice"], [function.Name for function in section.Functions])
+		self.assertEqual([(1, "2", 2), (1, "3", 0)], [
+			(branch.Block, branch.Expression, branch.Taken) for branch in section.Branches if branch.Block == 1
+		])
+		self.assertEqual([], section.Conditions)
 
 	def test_GHDL(self) -> None:
 		"""GHDL states a file as a function 'file' at line 1, and no summaries."""
@@ -80,6 +129,21 @@ class FormatModel(Testcase):
 		self.assertEqual({11: 1, 12: 0, 14: 1, 16: 0, 21: 1}, {
 			number: line.Count for number, line in section.Lines.items()
 		})
+
+	def test_CoveragePy(self) -> None:
+		"""coverage.py writes branches as human-readable expressions, and '-' for a branch of a line, which never ran."""
+		sections = Document(PY, analyzeAndConvert=True).Sections
+
+		length = sections[1]
+		self.assertEqual([("jump to line 15", None), ("jump to line 17", None)], [
+			(branch.Expression, branch.Taken) for branch in length.Branches if branch.LineNumber == 14
+		])
+		self.assertEqual(("ToMeters", 4, 17, 1), (
+			length.Functions[0].Name, length.Functions[0].StartLine, length.Functions[0].EndLine, length.Functions[0].Count
+		))
+		self.assertEqual((Path("myPackage/Units/__init__.py"), {}, None), (
+			sections[2].SourceFile, sections[2].Lines, sections[2].LinesFound
+		))
 
 	def test_Records(self) -> None:
 		"""Comments, versions, aliases, a line listed twice, and a path written on Windows."""
@@ -102,6 +166,18 @@ class FormatModel(Testcase):
 		))
 		self.assertEqual((1, 11, None, {"Box<int>::Box": 0}), (box.Index, box.StartLine, box.EndLine, box.Aliases))
 		self.assertEqual((5, None), (section.Lines[4].Count, section.Lines[4].Checksum))
+
+	def test_Branches(self) -> None:
+		"""An exception branch, a branch never evaluated, and an expression with commas."""
+		with TemporaryDirectory() as directory:
+			section = Document(_write(directory,
+				"SF:a.cpp\nBRDA:4,e0,1,5\nBRDA:4,0,2,-\nBRDA:7,1,f(a, b),0\nDA:4,5\nDA:7,1\nend_of_record\n"
+			), analyzeAndConvert=True).Sections[0]
+
+		self.assertEqual([(4, 0, "1", 5, True), (4, 0, "2", None, False), (7, 1, "f(a, b)", 0, False)], [
+			(branch.LineNumber, branch.Block, branch.Expression, branch.Taken, branch.IsException)
+			for branch in section.Branches
+		])
 
 
 class Parents(Testcase):
@@ -162,7 +238,7 @@ class Parents(Testcase):
 
 
 class Conversion(Testcase):
-	"""The conversion to the common model: files and lines, and source files and functions as units."""
+	"""The conversion to the common model: files, lines and branches, and source files and functions as units."""
 
 	def test_GHDL(self) -> None:
 		"""GHDL's function 'file' at line 1 spans no listed line."""
@@ -204,6 +280,67 @@ class Conversion(Testcase):
 			for name, unit in units.items()
 		])
 
+	def test_Summaries(self) -> None:
+		"""The computed counters agree with the summaries each section states."""
+		for path in (GCC, LLVM, PY):
+			tracefile = Document(path, analyzeAndConvert=True)
+			summary = tracefile.ToCoverageSummary()
+			for section in tracefile.Sections:
+				with self.subTest(tracefile=path.name, section=section.SourceFile.as_posix()):
+					file = summary.GetOrAddFile(section.SourceFile)
+					functions = [unit for unit in file.Units if isinstance(unit, Function)]
+					self.assertEqual(
+						(section.LinesFound or 0, section.LinesHit or 0, section.BranchesFound or 0,
+						 section.BranchesHit or 0, section.FunctionsFound or 0, section.FunctionsHit or 0),
+						(file.TotalLines, file.CoveredLines, file.TotalBranches, file.CoveredBranches, len(functions),
+						 sum(1 for function in functions if function.Status is LineCoverageStatus.Covered))
+					)
+
+	def test_Lines(self) -> None:
+		classify = Document(GCC, analyzeAndConvert=True).ToCoverageSummary().Files["Classify.c"]
+
+		line = classify.Lines[6]
+		self.assertEqual((LineCoverageStatus.PartiallyCovered, 3), (line.Status, line.CoverageCount))
+		self.assertEqual([(LineCoverageStatus.Uncovered, 0), (LineCoverageStatus.Covered, 3)], [
+			(branch.Status, branch.CoverageCount) for branch in line.Branches
+		])
+		self.assertEqual([None, None], [branch.Target for branch in line.Branches])
+
+		line = classify.Lines[18]
+		self.assertEqual((LineCoverageStatus.Uncovered, 0), (line.Status, line.CoverageCount))
+		self.assertEqual([(LineCoverageStatus.Uncovered, None)] * 2, [
+			(branch.Status, branch.CoverageCount) for branch in line.Branches
+		])
+		self.assertIs(LineCoverageStatus.Covered, classify.Lines[5].Status)
+		self.assertIsNone(classify.Lines[4])
+
+	def test_Units(self) -> None:
+		summary = Document(GCC, analyzeAndConvert=True).ToCoverageSummary()
+
+		self.assertEqual(
+			["Clamp.h", "Clamp.h.Clamp", "Classify.c", "Classify.c.InRange", "Classify.c.Sign", "Classify.c.Twice",
+			 "Classify.c.main"],
+			[unit.QualifiedName for unit in summary.IterateUnits()]
+		)
+		classify = summary.Units["Classify.c"]
+		self.assertIsInstance(classify, SourceFile)
+		self.assertEqual((5, 32, 20, 14), (
+			classify.StartLine.LineNumber, classify.EndLine.LineNumber, classify.TotalLines, classify.CoveredLines
+		))
+
+		twice = classify.Units["Twice"]
+		self.assertIsInstance(twice, Function)
+		self.assertEqual((LineCoverageStatus.Uncovered, 0, 17, 20, 4, 0), (
+			twice.Status, twice.CoverageCount, twice.StartLine.LineNumber, twice.EndLine.LineNumber, twice.TotalLines,
+			twice.CoveredLines
+		))
+
+	def test_Units_WithoutEndLine(self) -> None:
+		"""llvm-cov's functions have no end line: they name their start line only."""
+		sign = Document(LLVM, analyzeAndConvert=True).ToCoverageSummary().Units["Classify.c"].Units["Sign"]
+
+		self.assertEqual((5, None, 0, 3), (sign.StartLine.LineNumber, sign.EndLine, sign.TotalLines, sign.CoverageCount))
+
 	def test_MergedTests(self) -> None:
 		"""Two tests' sections of one file are one file: the counts of lines and functions are added."""
 		with TemporaryDirectory() as directory:
@@ -218,6 +355,30 @@ class Conversion(Testcase):
 		self.assertEqual((LineCoverageStatus.Covered, 2, 3, 2), (
 			function.Status, function.CoverageCount, function.TotalLines, function.CoveredLines
 		))
+
+	def test_MergedTests_Branches(self) -> None:
+		"""Two tests' counts of a branch are added; a branch never evaluated in one test takes the other's count."""
+		with TemporaryDirectory() as directory:
+			summary = Document(_write(directory,
+				"TN:first\nSF:a.c\nBRDA:2,0,0,-\nBRDA:2,0,1,-\nDA:2,0\nend_of_record\n"
+				"TN:second\nSF:a.c\nBRDA:2,0,0,2\nBRDA:2,0,1,-\nDA:2,2\nend_of_record\n"
+			), analyzeAndConvert=True).ToCoverageSummary()
+
+		line = summary.Files["a.c"].Lines[2]
+		self.assertEqual((LineCoverageStatus.PartiallyCovered, 2), (line.Status, line.CoverageCount))
+		self.assertEqual([(LineCoverageStatus.Covered, 2), (LineCoverageStatus.Uncovered, None)], [
+			(branch.Status, branch.CoverageCount) for branch in line.Branches
+		])
+
+	def test_BranchWithoutLine(self) -> None:
+		"""A line with branches, but without 'DA' record, has an unknown state."""
+		with TemporaryDirectory() as directory:
+			tracefile = Document(_write(directory, "SF:a.c\nBRDA:3,0,0,1\nBRDA:3,0,1,0\nend_of_record\n"))
+			tracefile.Analyze()
+			tracefile.Convert()
+
+		line = tracefile.ToCoverageSummary().Files["a.c"].Lines[3]
+		self.assertEqual((LineCoverageStatus.Unknown, None, 2), (line.Status, line.CoverageCount, len(line.Branches)))
 
 
 class Parser(Testcase):
