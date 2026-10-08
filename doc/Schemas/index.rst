@@ -4,8 +4,9 @@ Schemas
 #######
 
 pyEDAA.Reports validates every file it reads against the **XML schema** of its format before converting it. It ships
-the schemas of the JUnit dialects; the schema of pyTooling's test report comes with pyTooling. Each schema is listed
-here, the shipped ones with their full source, ready to read, to copy, or to download.
+the schemas of Cobertura's code coverage format and of the JUnit dialects; the schema of pyTooling's test report comes
+with pyTooling. Each schema is listed here, the shipped ones with their full source, ready to read, to copy, or to
+download.
 
 .. _SCHEMAS/Files:
 
@@ -19,6 +20,12 @@ Available schemas
    * - Schema
      - File
      - Read by
+   * - :ref:`Any Cobertura <SCHEMAS/Any-Cobertura>`
+     - :file:`Any-Cobertura.xsd`
+     - :class:`pyEDAA.Reports.CodeCoverage.Cobertura.Document`
+   * - :ref:`Cobertura 04 <SCHEMAS/Cobertura-04>`
+     - :file:`Cobertura-04.xsd`
+     - strict translation of Cobertura's DTD ``coverage-04.dtd``
    * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
      - :file:`Any-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.Document`
@@ -66,6 +73,8 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
 .. toctree::
    :hidden:
 
+   Any-Cobertura
+   Cobertura-04
    Any-JUnit
    Ant-JUnit4
    CTest-JUnit

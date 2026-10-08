@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hand-written fixture in the shape gcovr writes for a GCC-instrumented simulation; not produced by a simulator. -->
+<coverage line-rate="0.75" branch-rate="0.6667" lines-covered="12" lines-valid="16"
+          branches-covered="8" branches-valid="12" complexity="0.0" timestamp="1791360000" version="gcovr 8.4">
+	<sources>
+		<source>.</source>
+	</sources>
+	<packages>
+		<package name="src" line-rate="0.875" branch-rate="0.75" complexity="0.0">
+			<classes>
+				<class name="Counter_vhdl" filename="src/Counter.vhdl" line-rate="0.875" branch-rate="0.75" complexity="0.0">
+					<methods/>
+					<lines>
+						<line number="23" hits="1"/>
+						<line number="25" hits="2048" branch="true" condition-coverage="100% (2/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="100%"/>
+							</conditions>
+						</line>
+						<line number="26" hits="1024" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="27" hits="0"/>
+						<line number="28" hits="1024" branch="true" condition-coverage="100% (2/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="100%"/>
+							</conditions>
+						</line>
+						<line number="29" hits="700"/>
+						<line number="34" hits="701"/>
+						<line number="35" hits="701" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+					</lines>
+				</class>
+			</classes>
+		</package>
+		<package name="src.Utilities" line-rate="0.625" branch-rate="0.5" complexity="0.0">
+			<classes>
+				<class name="Functions_vhdl" filename="src/Utilities/Functions.vhdl"
+				       line-rate="0.625" branch-rate="0.5" complexity="0.0">
+					<methods/>
+					<lines>
+						<line number="13" hits="1"/>
+						<line number="15" hits="4" branch="true" condition-coverage="100% (2/2)"/>
+						<line number="16" hits="3"/>
+						<line number="18" hits="1"/>
+						<line number="23" hits="0" branch="true" condition-coverage="0% (0/2)"/>
+						<line number="24" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="28" hits="1"/>
+					</lines>
+				</class>
+			</classes>
+		</package>
+	</packages>
+</coverage>
