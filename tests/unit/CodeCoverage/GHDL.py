@@ -30,6 +30,7 @@
 #
 #
 """Unit tests of GHDL's JSON coverage format: its model, its JSON Schema, merging and the conversion to the common model."""
+from datetime                         import datetime, timezone
 from json                             import dumps, loads
 from pathlib                          import Path
 from tempfile                         import TemporaryDirectory
@@ -38,6 +39,7 @@ from typing                           import Any
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, CoverageSummary, LineCoverageStatus
 from pyEDAA.Reports.CodeCoverage.GHDL import Document, File, MergedReport
 from pyTooling.Testing                import Testcase
+from pyTooling.Versioning             import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -102,12 +104,16 @@ class FormatModel(Testcase):
 		report = Document(COUNT, analyzeAndConvert=True)
 
 		self.assertEqual(("1.0.0", "unknown"), (report.Version, report.Testcase))
-		self.assertRegex(report.Timestamp, r"^\d{14}\.\d{3}$")
-		self.assertEqual(["src/Counter.vhdl", "src/Utilities/Functions.vhdl", "tb/Counter_tb.vhdl"], sorted(report.Files))
-
-		counter = report.Files["src/Counter.vhdl"]
+		self.assertIsInstance(report.Version, SemanticVersion)
+		self.assertEqual(datetime(2026, 10, 8, 10, 48, 12, 89000, tzinfo=timezone.utc), report.Timestamp)
 		self.assertEqual(
-			("src/Counter.vhdl", ".", "1a6afa99b014932646ce6591101aa1ac3695349a", "stmt", 35),
+			["src/Counter.vhdl", "src/Utilities/Functions.vhdl", "tb/Counter_tb.vhdl"],
+			sorted(path.as_posix() for path in report.Files)
+		)
+
+		counter = report.Files[Path("src/Counter.vhdl")]
+		self.assertEqual(
+			(Path("src/Counter.vhdl"), Path("."), "1a6afa99b014932646ce6591101aa1ac3695349a", "stmt", 35),
 			(counter.Name, counter.Directory, counter.SHA1, counter.Mode, counter.MaxLine)
 		)
 		self.assertEqual({25: True, 26: True, 27: False, 29: True, 34: True, 35: True}, counter.Result)
@@ -120,7 +126,7 @@ class FormatModel(Testcase):
 			("/home/user/project/", "src/Counter.vhdl",            "/home/user/project/src/Counter.vhdl")
 		):
 			with self.subTest(directory=directory):
-				self.assertEqual(path, File(name, directory, "0" * 40, "stmt", 1, {1: True}).Path)
+				self.assertEqual(Path(path), File(Path(name), Path(directory), "0" * 40, "stmt", 1, {1: True}).Path)
 
 
 class Conversion(Testcase):
@@ -178,7 +184,7 @@ class Merge(Testcase):
 
 		self.assertEqual("Counter", merged.Name)
 		self.assertEqual([count, reset], merged.Reports)
-		self.assertEqual(66, merged.Files["tb/Counter_tb.vhdl"].MaxLine)
+		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].MaxLine)
 
 		summary = merged.ToCoverageSummary()
 		self.assertEqual("Counter", summary.Name)
@@ -190,7 +196,7 @@ class Merge(Testcase):
 		self.assertIs(LineCoverageStatus.Uncovered, testbench[66])  # ran in no run
 
 		# the merged reports are left unchanged
-		self.assertFalse(count.Files["src/Counter.vhdl"].Result[27])
+		self.assertFalse(count.Files[Path("src/Counter.vhdl")].Result[27])
 
 	def test_Merge_Order(self) -> None:
 		"""The order of the coverage files doesn't matter."""
@@ -219,7 +225,7 @@ class Merge(Testcase):
 			shorter = Document(_write(directory, content), analyzeAndConvert=True)
 
 		merged = MergedReport("Counter", (shorter, Document(COUNT, analyzeAndConvert=True)))
-		self.assertEqual(66, merged.Files["tb/Counter_tb.vhdl"].MaxLine)
+		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].MaxLine)
 
 	def test_Merge_Checksum(self) -> None:
 		"""A source file changed between two runs can't be merged."""

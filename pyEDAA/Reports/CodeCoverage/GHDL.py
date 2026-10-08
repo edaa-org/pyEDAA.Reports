@@ -61,6 +61,7 @@ GHDL, which accepts format version 1.0.0. The format's model keeps what the file
 from __future__                  import annotations
 
 from collections.abc             import Iterable
+from datetime                    import datetime, timezone
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from typing                      import Any, Optional as Nullable
@@ -71,6 +72,7 @@ from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
 from pyTooling.MetaClasses       import ExtendedType
 from pyTooling.Stopwatch         import Stopwatch
+from pyTooling.Versioning        import SemanticVersion
 
 from pyEDAA.Reports              import Resources
 from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Document as cc_Document, Line as cc_Line
@@ -81,6 +83,10 @@ __all__ = ["SCHEMA"]
 
 SCHEMA = "GHDL-Coverage-JSON.schema.json"  #: The JSON Schema a coverage file is validated against.
 
+# A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
+# body's namespace, where annotations are evaluated, binds the name to the property.
+_Path = Path
+
 
 @export
 class File(metaclass=ExtendedType, slots=True):
@@ -88,14 +94,14 @@ class File(metaclass=ExtendedType, slots=True):
 	An entry of ``outputs``: a source file, where it was analyzed, its checksum, and its lines with coverage points.
 	"""
 
-	_name:      str              #: The file's name, as given to the analysis.
-	_directory: str              #: The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
+	_name:      _Path            #: The file's name, as given to the analysis.
+	_directory: _Path            #: The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
 	_sha1:      str              #: SHA-1 checksum of the file's content.
 	_mode:      str              #: Kind of coverage: ``stmt`` for statement coverage.
 	_maxLine:   int              #: The last line with a coverage point.
 	_result:    dict[int, bool]  #: Per line with a coverage point, whether the line ran.
 
-	def __init__(self, name: str, directory: str, sha1: str, mode: str, maxLine: int, result: dict[int, bool]) -> None:
+	def __init__(self, name: Path, directory: Path, sha1: str, mode: str, maxLine: int, result: dict[int, bool]) -> None:
 		"""
 		Initialize the file from the fields of its JSON object.
 
@@ -114,7 +120,7 @@ class File(metaclass=ExtendedType, slots=True):
 		self._result =    result
 
 	@readonly
-	def Name(self) -> str:
+	def Name(self) -> Path:
 		"""
 		Read-only property to access the file's name, as given to the analysis (:attr:`_name`).
 
@@ -123,22 +129,22 @@ class File(metaclass=ExtendedType, slots=True):
 		return self._name
 
 	@readonly
-	def Directory(self) -> str:
+	def Directory(self) -> Path:
 		"""
 		Read-only property to access the directory the file was analyzed in (:attr:`_directory`).
 
-		:returns: The directory, ending with a separator; ``.`` for the directory GHDL ran in, empty for an absolute name.
+		:returns: The directory; ``.`` for the directory GHDL ran in and for an absolute name.
 		"""
 		return self._directory
 
 	@readonly
-	def Path(self) -> str:
+	def Path(self) -> Path:
 		"""
 		Read-only property to return the file's path: its :attr:`Name`, prefixed by its :attr:`Directory` unless ``.``.
 
 		:returns: The path, as ``ghdl coverage`` names the file.
 		"""
-		return self._name if self._directory == "." else f"{self._directory}{self._name}"
+		return self._directory / self._name
 
 	@readonly
 	def SHA1(self) -> str:
@@ -183,10 +189,10 @@ class Report(metaclass=ExtendedType, slots=True):
 	The coverage file's root: the format's version, when it was written, and the source files.
 	"""
 
-	_version:   Nullable[str]    #: Version of the format.
-	_testcase:  Nullable[str]    #: Name of the testcase.
-	_timestamp: Nullable[str]    #: Time the file was written.
-	_files:     dict[str, File]  #: The source files, by path.
+	_version:   Nullable[SemanticVersion]  #: Version of the format.
+	_testcase:  Nullable[str]              #: Name of the testcase.
+	_timestamp: Nullable[datetime]         #: Time the file was written, UTC.
+	_files:     dict[Path, File]           #: The source files, by path.
 
 	def __init__(self) -> None:
 		"""
@@ -198,7 +204,7 @@ class Report(metaclass=ExtendedType, slots=True):
 		self._files =     {}
 
 	@readonly
-	def Version(self) -> Nullable[str]:
+	def Version(self) -> Nullable[SemanticVersion]:
 		"""
 		Read-only property to access the version of the format (:attr:`_version`).
 
@@ -216,16 +222,18 @@ class Report(metaclass=ExtendedType, slots=True):
 		return self._testcase
 
 	@readonly
-	def Timestamp(self) -> Nullable[str]:
+	def Timestamp(self) -> Nullable[datetime]:
 		"""
 		Read-only property to access the time the coverage file was written (:attr:`_timestamp`).
 
-		:returns: The time, UTC, as ``YYYYMMDDhhmmss.mmm``.
+		GHDL states it in UTC, to the millisecond, as ``YYYYMMDDhhmmss.mmm``.
+
+		:returns: The time, with time zone UTC; ``None`` before the coverage file was converted.
 		"""
 		return self._timestamp
 
 	@readonly
-	def Files(self) -> dict[str, File]:
+	def Files(self) -> dict[Path, File]:
 		"""
 		Read-only property to access the source files (:attr:`_files`).
 
@@ -306,15 +314,17 @@ class Document(Report, cc_Document):
 			raise ex
 
 		with Stopwatch() as sw:
-			self._version =   self._jsonDocument["version"]
-			self._testcase =  self._jsonDocument["testcase"]
-			self._timestamp = self._jsonDocument["timestamp"]
+			timestamp = datetime.strptime(self._jsonDocument["timestamp"], "%Y%m%d%H%M%S.%f")
 
-			files: dict[str, File] = {}
+			self._version =   SemanticVersion.Parse(self._jsonDocument["version"])
+			self._testcase =  self._jsonDocument["testcase"]
+			self._timestamp = timestamp.replace(tzinfo=timezone.utc)
+
+			files: dict[Path, File] = {}
 			for output in self._jsonDocument["outputs"]:
 				file = File(
-					output["file"],
-					output["dir"],
+					Path(output["file"].replace("\\", "/")),
+					Path(output["dir"].replace("\\", "/")),
 					output["sha1"],
 					output["mode"],
 					output["max-line"],
@@ -353,9 +363,9 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 	the line.
 	"""
 
-	_name:    str              #: Name of the merged report.
-	_reports: list[Report]     #: The merged reports, in the order they were merged.
-	_files:   dict[str, File]  #: The merged source files, by path.
+	_name:    str               #: Name of the merged report.
+	_reports: list[Report]      #: The merged reports, in the order they were merged.
+	_files:   dict[Path, File]  #: The merged source files, by path.
 
 	def __init__(self, name: str, reports: Nullable[Iterable[Report]] = None) -> None:
 		"""
@@ -451,7 +461,7 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 		return self._reports
 
 	@readonly
-	def Files(self) -> dict[str, File]:
+	def Files(self) -> dict[Path, File]:
 		"""
 		Read-only property to access the merged source files (:attr:`_files`).
 
