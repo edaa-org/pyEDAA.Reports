@@ -34,13 +34,14 @@ The records of GCC's gcov JSON format below a file: its functions and lines.
 from __future__                       import annotations
 
 from collections.abc                  import Iterable
-from typing                           import Any, Optional as Nullable, Self
+from typing                           import TYPE_CHECKING, Any, Optional as Nullable, Self
 
 from pyTooling.Common                 import getFullyQualifiedName
 from pyTooling.Decorators             import export, readonly
 from pyTooling.MetaClasses            import ExtendedType
 
-from pyEDAA.Reports.CodeCoverage.Gcov import File
+if TYPE_CHECKING:
+	from pyEDAA.Reports.CodeCoverage.Gcov import File
 
 
 @export
@@ -87,8 +88,10 @@ class Line(metaclass=ExtendedType, slots=True):
 		:raises TypeError:      If parameter ``functionName`` isn't of type :class:`str`.
 		:raises TypeError:      If parameter ``blockIDs`` isn't iterable.
 		:raises TypeError:      If parameter ``blockIDs`` contains an element not of type :class:`int`.
-		:raises TypeError:      If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.File`.
+		:raises TypeError:      If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Gcov.File`.
 		"""
+		from pyEDAA.Reports.CodeCoverage.Gcov import File
+
 		if lineNumber is None:
 			raise ValueError(f"Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
@@ -299,8 +302,10 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises ValueError:    If parameter ``executionCount`` is ``None``.
 		:raises TypeError:     If parameter ``executionCount`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``executionCount`` is negative.
-		:raises TypeError:     If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.File`.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Gcov.File`.
 		"""
+		from pyEDAA.Reports.CodeCoverage.Gcov import File
+
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
