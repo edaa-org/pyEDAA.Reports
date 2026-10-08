@@ -424,6 +424,10 @@ pytest
 
 * https://github.com/pytest-dev/pytest
 
+The pipeline job ``Python-pytest`` runs the tests in :file:`examples/Python/pytest` and writes pytest's JUnit XML
+report, measured by coverage.py, which writes its :ref:`JSON <CODECOV/Formats/CoveragePy>` and
+:ref:`Cobertura XML <CODECOV/Formats/Cobertura>` reports.
+
 
 .. _UNITTEST/Tool/VUnit:
 

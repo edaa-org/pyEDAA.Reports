@@ -32,24 +32,38 @@ jobs:
       - name: ⏬ Checkout repository
         uses: actions/checkout@v7
 
-      - name: 🐍 Setup Python 3.12
+      - name: 🐍 Setup Python 3.14
         uses: actions/setup-python@v7
         with:
           python-version: 3.14
 
-      - name: 🔧 Install pytest and other dependencies
-        run: python -m pip install --disable-pip-version-check -U pytest
+      - name: 🔧 Install pytest and coverage.py
+        run: python -m pip install --disable-pip-version-check -U pytest coverage
 
-      - name: ✅ Run pytest
+      - name: ✅ Run pytest, measured by coverage.py
         run: |
           cd examples/Python/pytest
-          python3 -m pytest -rAP --color=yes --junitxml=TestReportSummary.xml .
+          python3 -m coverage run --branch -m pytest -rAP --color=yes --junitxml=TestReportSummary.xml .
 
-      - name: List generated XML reports
-        run: ls -lAh examples/Python/pytest/*.xml
+      - name: 📊 Write coverage.py's JSON and Cobertura XML reports
+        run: |
+          cd examples/Python/pytest
+          python3 -m coverage json -o coverage.json
+          python3 -m coverage xml -o coverage.xml
+
+      - name: List generated reports
+        run: ls -lAh examples/Python/pytest/*.xml examples/Python/pytest/*.json
 
       - name: 📤 Upload JUnit XML files as artifact
         uses: pyTooling/upload-artifact@v7
         with:
           name: Python-pytest
-          path: examples/Python/pytest/*.xml
+          path: examples/Python/pytest/TestReportSummary.xml
+
+      - name: 📤 Upload code coverage files as artifact
+        uses: pyTooling/upload-artifact@v7
+        with:
+          name: Python-pytest-Coverage
+          path: |
+            examples/Python/pytest/coverage.json
+            examples/Python/pytest/coverage.xml

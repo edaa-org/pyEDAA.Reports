@@ -293,6 +293,9 @@ the functions and classes of each file.
    for unit in summary.IterateUnits():
      print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
 
+The pipeline job ``Python-pytest`` measures the example in :file:`examples/Python/pytest` and writes both reports,
+JSON and Cobertura XML; see :ref:`UNITTEST/Tool/pytest`.
+
 .. hint::
 
    coverage.py writes Cobertura XML too, from the same measurement, naming the files relative to the measured source
