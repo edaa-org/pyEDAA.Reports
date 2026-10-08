@@ -109,12 +109,13 @@ class File(metaclass=ExtendedType, slots=True):
 	An entry of ``outputs``: a source file, where it was analyzed, its checksum, and its lines with coverage points.
 	"""
 
-	_name:      _Path            #: The file's name, as given to the analysis.
-	_directory: _Path            #: The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
-	_sha1:      str              #: SHA-1 checksum of the file's content.
-	_mode:      CoverageMode     #: Kind of coverage, e.g. statement coverage.
-	_lastLine:  int              #: The last line with a coverage point.
-	_result:    dict[int, bool]  #: Per line with a coverage point, whether the line ran.
+	_parent:    Nullable[Report | MergedReport]  #: The report the file belongs to.
+	_name:      _Path                            #: The file's name, as given to the analysis.
+	_directory: _Path                            #: The directory the file was analyzed in; ``.`` if GHDL ran there.
+	_sha1:      str                              #: SHA-1 checksum of the file's content.
+	_mode:      CoverageMode                     #: Kind of coverage, e.g. statement coverage.
+	_lastLine:  int                              #: The last line with a coverage point.
+	_result:    dict[int, bool]                  #: Per line with a coverage point, whether the line ran.
 
 	def __init__(
 		self,
@@ -123,24 +124,47 @@ class File(metaclass=ExtendedType, slots=True):
 		sha1: str,
 		mode: CoverageMode,
 		lastLine: int,
-		result: dict[int, bool]
+		result: dict[int, bool],
+		*,
+		parent: Nullable[Report | MergedReport] = None
 	) -> None:
 		"""
-		Initialize the file from the fields of its JSON object.
+		Initialize the file from the fields of its JSON object, and add it to the files of its report.
 
-		:param name:      The file's name, as given to the analysis.
-		:param directory: The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
-		:param sha1:      SHA-1 checksum of the file's content.
-		:param mode:      Kind of coverage, e.g. statement coverage.
-		:param lastLine:  The last line with a coverage point.
-		:param result:    Per line with a coverage point, whether the line ran.
+		:param name:       The file's name, as given to the analysis.
+		:param directory:  The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
+		:param sha1:       SHA-1 checksum of the file's content.
+		:param mode:       Kind of coverage, e.g. statement coverage.
+		:param lastLine:   The last line with a coverage point.
+		:param result:     Per line with a coverage point, whether the line ran.
+		:param parent:     Optional, the report the file belongs to; the file is added to its files by :attr:`Path`.
+		                   Default: ``None``.
+		:raises TypeError: If parameter ``parent`` isn't of type :class:`Report` or :class:`MergedReport`.
 		"""
+		if parent is not None and not isinstance(parent, (Report, MergedReport)):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Report' or 'MergedReport'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =    parent
 		self._name =      name
 		self._directory = directory
 		self._sha1 =      sha1
 		self._mode =      mode
 		self._lastLine =  lastLine
 		self._result =    result
+
+		if parent is not None:
+			parent._files[self.Path] = self
+
+	@readonly
+	def Parent(self) -> Nullable[Report | MergedReport]:
+		"""
+		Read-only property to access the report the file belongs to (:attr:`_parent`).
+
+		:returns: The :class:`Report` or :class:`MergedReport`; ``None`` if the file belongs to no report.
+		"""
+		return self._parent
 
 	@readonly
 	def Name(self) -> Path:
@@ -343,27 +367,21 @@ class Document(Report, cc_Document):
 			self._testcase =  self._jsonDocument["testcase"]
 			self._timestamp = timestamp.replace(tzinfo=timezone.utc)
 
-			files: dict[Path, File] = {}
+			self._files = {}
 			for output in self._jsonDocument["outputs"]:
-				file = File(
-					Path(output["file"].replace("\\", "/")),
-					Path(output["dir"].replace("\\", "/")),
-					output["sha1"],
-					CoverageMode.Parse(output["mode"]),
-					output["max-line"],
-					{int(number): ran == 1 for number, ran in output["result"].items()}
-				)
+				name =      Path(output["file"].replace("\\", "/"))
+				directory = Path(output["dir"].replace("\\", "/"))
+				lastLine =  output["max-line"]
+				result =    {int(number): ran == 1 for number, ran in output["result"].items()}
 
-				if (path := file.Path) in files:
+				if (path := directory / name) in self._files:
 					raise CodeCoverageError(f"GHDL coverage file '{self._path}' names source file '{path}' twice.")
-				elif (line := max(file._result)) > file._lastLine:
+				elif (line := max(result)) > lastLine:
 					ex = CodeCoverageError(f"GHDL coverage file '{self._path}' names a line of '{path}' beyond 'max-line'.")
-					ex.add_note(f"Got line {line} for 'max-line' {file._lastLine}.")
+					ex.add_note(f"Got line {line} for 'max-line' {lastLine}.")
 					raise ex
 
-				files[path] = file
-
-			self._files = files
+				File(name, directory, output["sha1"], CoverageMode.Parse(output["mode"]), lastLine, result, parent=self)
 
 		self._conversionDuration = sw.Duration
 
@@ -450,8 +468,8 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 
 		for path, file in report._files.items():
 			if (merged := self._files.get(path)) is None:
-				self._files[path] = File(
-					file._name, file._directory, file._sha1, file._mode, file._lastLine, dict(file._result)
+				File(
+					file._name, file._directory, file._sha1, file._mode, file._lastLine, dict(file._result), parent=self
 				)
 			elif merged._sha1 != file._sha1:
 				ex = CodeCoverageError(f"Content of source file '{path}' differs from the reports merged before.")

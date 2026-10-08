@@ -37,7 +37,7 @@ from tempfile                         import TemporaryDirectory
 from typing                           import Any
 
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, CoverageSummary, LineCoverageStatus
-from pyEDAA.Reports.CodeCoverage.GHDL import CoverageMode, Document, File, MergedReport
+from pyEDAA.Reports.CodeCoverage.GHDL import CoverageMode, Document, File, MergedReport, Report
 from pyTooling.Testing                import Testcase
 from pyTooling.Versioning             import SemanticVersion
 
@@ -136,6 +136,31 @@ class FormatModel(Testcase):
 				file = File(Path(name), Path(directory), "0" * 40, CoverageMode.Statement, 1, {1: True})
 				self.assertEqual(Path(path), file.Path)
 
+	def test_Parent(self) -> None:
+		"""A file given a parent is added to the parent's files by its path."""
+		file = File(Path("src/Counter.vhdl"), Path("."), "0" * 40, CoverageMode.Statement, 1, {1: True})
+		self.assertIsNone(file.Parent)
+
+		report = Report()
+		file = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 1, {1: True}, parent=report)
+		self.assertIs(report, file.Parent)
+		self.assertEqual({Path("src/Counter.vhdl"): file}, report.Files)
+
+	def test_Parent_Converted(self) -> None:
+		"""The files of a converted coverage file belong to its document."""
+		document = Document(COUNT, analyzeAndConvert=True)
+
+		for file in document.Files.values():
+			with self.subTest(path=file.Path.as_posix()):
+				self.assertIs(document, file.Parent)
+
+	def test_Parent_Type(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("src/Counter.vhdl"), Path("."), "0" * 40, CoverageMode.Statement, 1, {1: True}, parent=1)
+
+		self.assertEqual("Parameter 'parent' is not of type 'Report' or 'MergedReport'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
+
 
 class Conversion(Testcase):
 	"""The conversion to the common model agrees with GHDL's own conversion to lcov."""
@@ -192,6 +217,8 @@ class Merge(Testcase):
 
 		self.assertEqual("Counter", merged.Name)
 		self.assertEqual([count, reset], merged.Reports)
+		for file in merged.Files.values():
+			self.assertIs(merged, file.Parent)
 		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].LastLine)
 
 		summary = merged.ToCoverageSummary()
