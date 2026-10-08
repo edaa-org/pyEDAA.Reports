@@ -34,11 +34,12 @@ The records of LLVM's code coverage export below a file or a function: segments,
 records, expansions, and the summaries' counters.
 
 A report states a segment or a region as a JSON array - a tuple of numbers and flags. A region names its source range by
-line and column, and the file by an index into the file names of its function or expansion.
+line and column, and the file by an index into the file paths of its function or expansion.
 """
 from __future__            import annotations
 
 from enum                  import Enum
+from pathlib               import Path
 from typing                import Any, Optional as Nullable
 
 from pyTooling.Decorators  import export, readonly
@@ -152,7 +153,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	_columnStart:    int            #: Column the region starts at.
 	_lineEnd:        int            #: Line the region ends at.
 	_columnEnd:      int            #: Column the region ends at.
-	_fileID:         Nullable[int]  #: Index of the region's file in the file names of its function or expansion.
+	_fileID:         Nullable[int]  #: Index of the region's file in the file paths of its function or expansion.
 	_expandedFileID: int            #: Index of the file an expansion region expands to.
 	_kind:           RegionKind     #: The kind of the region.
 
@@ -161,7 +162,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		Initialize the source range from the first four elements of a region's JSON array, and the region's files and kind.
 
 		:param record:         The JSON array of the region.
-		:param fileID:         Index of the region's file in the file names of its function or expansion, if stated.
+		:param fileID:         Index of the region's file in the file paths of its function or expansion, if stated.
 		:param expandedFileID: Index of the file an expansion region expands to.
 		:param kind:           The number of the region's kind.
 		"""
@@ -214,7 +215,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the index of the region's file (:attr:`_fileID`).
 
-		:returns: The index into the file names of the region's function or expansion; ``None`` for an MC/DC record before
+		:returns: The index into the file paths of the region's function or expansion; ``None`` for an MC/DC record before
 		          format version 3.0.1.
 		"""
 		return self._fileID
@@ -224,7 +225,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the index of the file an expansion region expands to (:attr:`_expandedFileID`).
 
-		:returns: The index into the file names of the region's function or expansion; ``0`` for other kinds of regions.
+		:returns: The index into the file paths of the region's function or expansion; ``0`` for other kinds of regions.
 		"""
 		return self._expandedFileID
 
@@ -437,7 +438,7 @@ class Expansion(metaclass=ExtendedType, slots=True):
 	A macro expansion in a file: the region it is expanded at, the regions of the function it is in, and its branches.
 	"""
 
-	_filenames:     list[str]           #: The file names the file IDs of the regions index.
+	_filePaths:     list[Path]          #: The paths of the files, which the file IDs of the regions index.
 	_sourceRegion:  Region              #: The region the macro is expanded at.
 	_targetRegions: list[Region]        #: The regions of the function the expansion is in.
 	_branches:      list[BranchRegion]  #: The branch regions in the expansion, and in the expansions nested in it.
@@ -448,19 +449,19 @@ class Expansion(metaclass=ExtendedType, slots=True):
 
 		:param expansion: The JSON object of the expansion.
 		"""
-		self._filenames =     expansion["filenames"]
+		self._filePaths =     [Path(filename.replace("\\", "/")) for filename in expansion["filenames"]]
 		self._sourceRegion =  Region(expansion["source_region"])
 		self._targetRegions = [Region(region) for region in expansion["target_regions"]]
 		self._branches =      [BranchRegion(branch) for branch in expansion.get("branches", [])]
 
 	@readonly
-	def Filenames(self) -> list[str]:
+	def FilePaths(self) -> list[Path]:
 		"""
-		Read-only property to access the file names the file IDs of the regions index (:attr:`_filenames`).
+		Read-only property to access the paths of the files, which the file IDs of the regions index (:attr:`_filePaths`).
 
-		:returns: The file names.
+		:returns: The paths, as the compiler named them.
 		"""
-		return self._filenames
+		return self._filePaths
 
 	@readonly
 	def SourceRegion(self) -> Region:

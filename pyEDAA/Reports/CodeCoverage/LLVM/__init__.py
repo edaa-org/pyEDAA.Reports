@@ -69,7 +69,7 @@ from __future__                               import annotations
 
 from json                                     import JSONDecodeError, loads
 from os.path                                  import commonprefix
-from pathlib                                  import Path, PurePosixPath
+from pathlib                                  import Path
 from re                                       import match
 from typing                                   import Any, Optional as Nullable
 
@@ -92,6 +92,11 @@ __all__ = ["SCHEMA"]
 
 SCHEMA = "LLVM-Coverage-JSON.schema.json"  #: The JSON Schema a report is validated against.
 
+# A class with a property named like a class - ``Path``, ``Summary`` - can't name that class in the annotation of a
+# field: the class body's namespace, where annotations are evaluated, binds the name to the property.
+_Path =    Path
+_Summary = Summary
+
 
 @export
 class File(metaclass=ExtendedType, slots=True):
@@ -101,12 +106,12 @@ class File(metaclass=ExtendedType, slots=True):
 	A report written with ``-summary-only`` has only the summary, one written with ``-skip-expansions`` no expansions.
 	"""
 
-	_filename:    str                 #: The file's path, as the compiler named it.
+	_path:        _Path               #: The file's path, as the compiler named it.
 	_segments:    list[Segment]       #: The segments, by position.
 	_branches:    list[BranchRegion]  #: The branch regions of the file's functions.
 	_mcdcRecords: list[MCDCRecord]    #: The MC/DC records of the file's functions.
 	_expansions:  list[Expansion]     #: The macro expansions in the file.
-	_summary:     Summary             #: The counters llvm-cov computed.
+	_summary:     _Summary            #: The counters llvm-cov computed.
 
 	def __init__(self, file: dict[str, Any]) -> None:
 		"""
@@ -114,7 +119,7 @@ class File(metaclass=ExtendedType, slots=True):
 
 		:param file: The JSON object of the file.
 		"""
-		self._filename =    file["filename"]
+		self._path =        Path(file["filename"].replace("\\", "/"))
 		self._segments =    [Segment(segment) for segment in file.get("segments", [])]
 		self._branches =    [BranchRegion(branch) for branch in file.get("branches", [])]
 		self._mcdcRecords = [MCDCRecord(record) for record in file.get("mcdc_records", [])]
@@ -122,13 +127,13 @@ class File(metaclass=ExtendedType, slots=True):
 		self._summary =     Summary(file["summary"])
 
 	@readonly
-	def Filename(self) -> str:
+	def Path(self) -> Path:
 		"""
-		Read-only property to access the file's path (:attr:`_filename`).
+		Read-only property to access the file's path (:attr:`_path`).
 
 		:returns: The path, as the compiler named it - usually absolute.
 		"""
-		return self._filename
+		return self._path
 
 	@readonly
 	def Segments(self) -> list[Segment]:
@@ -190,7 +195,7 @@ class Function(metaclass=ExtendedType, slots=True):
 	_regions:     list[Region]        #: The regions.
 	_branches:    list[BranchRegion]  #: The branch regions.
 	_mcdcRecords: list[MCDCRecord]    #: The MC/DC records.
-	_filenames:   list[str]           #: The file names the file IDs of the regions index.
+	_filePaths:   list[Path]          #: The paths of the files, which the file IDs of the regions index.
 
 	def __init__(self, function: dict[str, Any]) -> None:
 		"""
@@ -203,7 +208,7 @@ class Function(metaclass=ExtendedType, slots=True):
 		self._regions =     [Region(region) for region in function["regions"]]
 		self._branches =    [BranchRegion(branch) for branch in function.get("branches", [])]
 		self._mcdcRecords = [MCDCRecord(record) for record in function.get("mcdc_records", [])]
-		self._filenames =   function["filenames"]
+		self._filePaths =   [Path(filename.replace("\\", "/")) for filename in function["filenames"]]
 
 	@readonly
 	def Name(self) -> str:
@@ -252,13 +257,13 @@ class Function(metaclass=ExtendedType, slots=True):
 		return self._mcdcRecords
 
 	@readonly
-	def Filenames(self) -> list[str]:
+	def FilePaths(self) -> list[Path]:
 		"""
-		Read-only property to access the file names the file IDs of the regions index (:attr:`_filenames`).
+		Read-only property to access the paths of the files, which the file IDs of the regions index (:attr:`_filePaths`).
 
-		:returns: The file names.
+		:returns: The paths, as the compiler named them.
 		"""
-		return self._filenames
+		return self._filePaths
 
 	@readonly
 	def MainFileID(self) -> Nullable[int]:
@@ -266,10 +271,10 @@ class Function(metaclass=ExtendedType, slots=True):
 		Read-only property to return the file ID of the file the function is in: the first file no expansion region
 		expands to.
 
-		:returns: The index into :attr:`Filenames`, or ``None`` if every file is expanded to.
+		:returns: The index into :attr:`FilePaths`, or ``None`` if every file is expanded to.
 		"""
 		expanded = {region._expandedFileID for region in self._regions if region._kind is RegionKind.Expansion}
-		return next((fileID for fileID in range(len(self._filenames)) if fileID not in expanded), None)
+		return next((fileID for fileID in range(len(self._filePaths)) if fileID not in expanded), None)
 
 
 @export
@@ -279,7 +284,7 @@ class Report(metaclass=ExtendedType, slots=True):
 	"""
 
 	_version:   Nullable[str]      #: Version of the report format.
-	_files:     dict[str, File]    #: The files, by file name.
+	_files:     dict[Path, File]   #: The files, by path.
 	_functions: list[Function]     #: The functions.
 	_totals:    Nullable[Summary]  #: The counters of the whole report.
 
@@ -302,11 +307,11 @@ class Report(metaclass=ExtendedType, slots=True):
 		return self._version
 
 	@readonly
-	def Files(self) -> dict[str, File]:
+	def Files(self) -> dict[Path, File]:
 		"""
 		Read-only property to access the files (:attr:`_files`).
 
-		:returns: The files, by file name.
+		:returns: The files, by path.
 		"""
 		return self._files
 
@@ -403,9 +408,13 @@ class Document(Report, cc_Document):
 		with Stopwatch() as sw:
 			export = self._jsonDocument["data"][0]
 			self._version =   self._jsonDocument["version"]
-			self._files =     {file["filename"]: File(file) for file in export["files"]}
+			self._files =     {}
 			self._functions = [Function(function) for function in export.get("functions", [])]
 			self._totals =    Summary(export["totals"])
+
+			for record in export["files"]:
+				file =                    File(record)
+				self._files[file._path] = file
 
 		self._conversionDuration = sw.Duration
 
@@ -417,37 +426,34 @@ class Document(Report, cc_Document):
 		:raises CodeCoverageError: If a file's path runs through another file.
 		:raises CodeCoverageError: If a function has a branch region in a file, which none of its regions expands to.
 		"""
-		filenameParts = {filename: PurePosixPath(filename.replace("\\", "/")).parts for filename in self._files}
-		common =        commonprefix([parts[:-1] for parts in filenameParts.values()])
+		common = commonprefix([path.parent.parts for path in self._files])
 
 		summary = CoverageSummary(self._path.stem, sourceDirectories=[Path(*common)] if len(common) > 0 else [])
-		commonFiles = {
-			filename: summary.GetOrAddFile("/".join(parts[len(common):])) for filename, parts in filenameParts.items()
-		}
+		commonFiles = {path: summary.GetOrAddFile("/".join(path.parts[len(common):])) for path in self._files}
 
 		branches = self._CollectBranches()
-		for filename, file in self._files.items():
-			self._ConvertLines(file, commonFiles[filename], branches[filename])
+		for path, file in self._files.items():
+			self._ConvertLines(file, commonFiles[path], branches[path])
 
 		self._ConvertUnits(commonFiles, summary)
 
 		summary.Aggregate()
 		return summary
 
-	def _CollectBranches(self) -> dict[str, dict[tuple[Any, ...], list[int]]]:
+	def _CollectBranches(self) -> dict[Path, dict[tuple[Any, ...], list[int]]]:
 		"""
 		Collect the branch regions of the functions by file, each at the line it starts at, or at the line its macro is
 		expanded at; the counts of a branch region found in several functions - e.g. the instantiations of a template - are
 		summed.
 
-		:returns:                  By file name, the summed true and false counts of each branch region, keyed by the line
+		:returns:                  By path, the summed true and false counts of each branch region, keyed by the line
 		                           number first.
 		:raises CodeCoverageError: If a function has a branch region in a file, which none of its regions expands to.
 		"""
-		branches: dict[str, dict[tuple[Any, ...], list[int]]] = {filename: {} for filename in self._files}
+		branches: dict[Path, dict[tuple[Any, ...], list[int]]] = {path: {} for path in self._files}
 		for function in self._functions:
 			mainFileID = function.MainFileID
-			if mainFileID is None or (fileBranches := branches.get(function._filenames[mainFileID])) is None:
+			if mainFileID is None or (fileBranches := branches.get(function._filePaths[mainFileID])) is None:
 				continue
 
 			expansions = {
@@ -459,14 +465,14 @@ class Document(Report, cc_Document):
 				while fileID != mainFileID:
 					if (expansion := expansions.get(fileID)) is None:
 						ex = CodeCoverageError(f"Function '{function._name}' has a branch region in a file no region expands to.")
-						ex.add_note(f"Got file ID {fileID} of file '{function._filenames[fileID]}'.")
+						ex.add_note(f"Got file ID {fileID} of file '{function._filePaths[fileID]}'.")
 						raise ex
 
 					lineNumber = expansion._lineStart
 					fileID =     expansion._fileID
 
 				key = (
-					lineNumber, function._filenames[branch._fileID],
+					lineNumber, function._filePaths[branch._fileID],
 					branch._lineStart, branch._columnStart, branch._lineEnd, branch._columnEnd
 				)
 				if (counts := fileBranches.get(key)) is None:
@@ -533,7 +539,7 @@ class Document(Report, cc_Document):
 				for count in branches[key]:
 					cc_Branch(LineCoverageStatus.Covered if count > 0 else LineCoverageStatus.Uncovered, count, parent=line)
 
-	def _ConvertUnits(self, commonFiles: dict[str, cc_File], summary: CoverageSummary) -> None:
+	def _ConvertUnits(self, commonFiles: dict[Path, cc_File], summary: CoverageSummary) -> None:
 		"""
 		Convert the files to source file units, and the functions to function units of their files.
 
@@ -541,13 +547,13 @@ class Document(Report, cc_Document):
 		file - e.g. a header's inline function compiled in several translation units - become one unit, their counts
 		summed.
 
-		:param commonFiles: The files of the common model, by file name.
+		:param commonFiles: The files of the common model, by path.
 		:param summary:     The report's root of the common model.
 		"""
-		functions: dict[tuple[str, str], list[int]] = {}
+		functions: dict[tuple[Path, str], list[int]] = {}
 		for function in self._functions:
 			mainFileID = function.MainFileID
-			if mainFileID is None or (filename := function._filenames[mainFileID]) not in commonFiles:
+			if mainFileID is None or (path := function._filePaths[mainFileID]) not in commonFiles:
 				continue
 
 			name = function._name
@@ -557,17 +563,17 @@ class Document(Report, cc_Document):
 			regions =         [region for region in function._regions if region._fileID == mainFileID]
 			firstLineNumber = min((region._lineStart for region in regions), default=0)
 			lastLineNumber =  max((region._lineEnd for region in regions), default=0)
-			if (span := functions.get((filename, name))) is None:
-				functions[(filename, name)] = [function._count, firstLineNumber, lastLineNumber]
+			if (span := functions.get((path, name))) is None:
+				functions[(path, name)] = [function._count, firstLineNumber, lastLineNumber]
 			else:
 				span[0] += function._count
 				span[1] =  min(span[1], firstLineNumber)
 				span[2] =  max(span[2], lastLineNumber)
 
-		sourceFiles: dict[str, cc_SourceFile] = {}
-		for filename, commonFile in commonFiles.items():
+		sourceFiles: dict[Path, cc_SourceFile] = {}
+		for path, commonFile in commonFiles.items():
 			lastLineNumber = commonFile._lastLineNumber
-			sourceFiles[filename] = cc_SourceFile(
+			sourceFiles[path] = cc_SourceFile(
 				commonFile.Path.as_posix(),
 				file=commonFile,
 				startLine=next(commonFile.IterateLines(), None),
@@ -575,8 +581,8 @@ class Document(Report, cc_Document):
 				parent=summary
 			)
 
-		for (filename, name), (count, firstLineNumber, lastLineNumber) in functions.items():
-			commonFile = commonFiles[filename]
+		for (path, name), (count, firstLineNumber, lastLineNumber) in functions.items():
+			commonFile = commonFiles[path]
 			lines =      [line for line in commonFile._lines[firstLineNumber:lastLineNumber + 1] if line is not None]
 			cc_Function(
 				name,
@@ -585,5 +591,5 @@ class Document(Report, cc_Document):
 				endLine=lines[-1] if len(lines) > 0 else None,
 				status=LineCoverageStatus.Covered if count > 0 else LineCoverageStatus.Uncovered,
 				coverageCount=count,
-				parent=sourceFiles[filename]
+				parent=sourceFiles[path]
 			)
