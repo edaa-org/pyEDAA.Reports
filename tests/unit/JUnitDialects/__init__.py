@@ -49,6 +49,7 @@ from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUni
 from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntJUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit     import Document as Catch2JUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport   import Document as GoJUnitReportDocument
 from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GoogleTestJUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit    import Document as NextestJUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestJUnitDocument
@@ -149,6 +150,10 @@ DIALECTS: Dict[str, Dialect] = {
 		Dialect(
 			"CTest-JUnit", CTestJUnitDocument, "CTest-JUnit",
 			[DATA_DIRECTORY / "pyEDAA.Reports/Cpp-GoogleTest/ctest.xml"]
+		),
+		Dialect(
+			"GoJUnitReport-JUnit", GoJUnitReportDocument, "GoJUnitReport-JUnit",
+			[DATA_DIRECTORY / "pyEDAA.Reports/Go-Test/go-junit-report.xml"]
 		),
 		Dialect(
 			"GoogleTest-JUnit", GoogleTestJUnitDocument, "GoogleTest-JUnit",

@@ -44,12 +44,14 @@ from pyEDAA.Reports.CodeCoverage.CoveragePy             import Document as Cover
 from pyEDAA.Reports.CodeCoverage.GHDL                   import Document as GHDLDocument, MergedReport
 from pyEDAA.Reports.CodeCoverage.Gcov                   import Document as GcovDocument
 from pyEDAA.Reports.CodeCoverage.Gcov                   import FormatVersion as GcovFormatVersion
-from pyEDAA.Reports.Unittesting                         import TestcaseStatus, UnittestError
+from pyEDAA.Reports.Unittesting                         import TestcaseStatus, TestsuiteKind, TestsuiteStatus
+from pyEDAA.Reports.Unittesting                         import UnittestError
 from pyEDAA.Reports.Unittesting.JUnit                   import Document as AnyJUnitDocument
 # FIXME: change to generic JUnit
 from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4         import Document as JUnit4Document
 from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit       import Document as Catch2Document
 from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit        import Document as CTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport     import Document as GoJUnitReportDocument
 from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit   import Document as GTestDocument
 from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit      import Document as NextestDocument
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit       import Document as PyTestDocument
@@ -372,13 +374,170 @@ class GoTest(TestCase):
 		"""Specific dialects reject gotestsum's report; pyTest-JUnit's schema accepts it, its reader needs a hostname."""
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/gotestsum.xml")
 
-		for documentClass in (JUnit4Document, CTestDocument, GTestDocument, PyTestDocument):
+		for documentClass in (JUnit4Document, CTestDocument, GoJUnitReportDocument, GTestDocument, PyTestDocument):
 			with self.subTest(dialect=documentClass.__module__):
 				with self.assertRaises(UnittestError):
 					documentClass(junitExampleFile, analyzeAndConvert=True)
 
 	def test_GoJUnitReport(self) -> None:
-		"""Known gap: no dialect reads go-junit-report's report, because of the ``id`` attribute of ``<testsuite>``."""
+		"""go-junit-report's report: a test suite per package, a test case per test, subtest and example."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		doc = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(3, doc.TestsuiteCount)
+		self.assertEqual(18, doc.TestcaseCount)
+		self.assertEqual(0, doc.Errored)
+		self.assertEqual(1, doc.Skipped)
+		self.assertEqual(4, doc.Failed)
+		self.assertEqual(13, doc.Passed)
+		self.assertEqual(18, doc.Tests)
+
+		module = "github.com/edaa-org/pyEDAA.Reports/examples/Go/testing"
+		counter = doc._testsuites[f"{module}/counter"]._testclasses[f"{module}/counter"]
+		stack = doc._testsuites[f"{module}/stack"]._testclasses[f"{module}/stack"]
+		# Statuses as 'go test -v' prints them: '--- PASS', '--- FAIL', '--- SKIP'.
+		self.assertEqual(
+			{
+				"TestNew":                            TestcaseStatus.Passed,
+				"TestOperations":                     TestcaseStatus.Passed,
+				"TestOperations/Increment":           TestcaseStatus.Passed,
+				"TestOperations/Decrement":           TestcaseStatus.Passed,
+				"TestOperations/Decrement/Underflow": TestcaseStatus.Passed,
+				"TestIncrementFrom":                  TestcaseStatus.Passed,
+				"TestIncrementFrom/start=0":          TestcaseStatus.Passed,
+				"TestIncrementFrom/start=1":          TestcaseStatus.Passed,
+				"TestIncrementFrom/start=41":         TestcaseStatus.Passed,
+				"TestFailing":                        TestcaseStatus.Failed,
+				"TestSkipped":                        TestcaseStatus.Skipped,
+				"ExampleCounter":                     TestcaseStatus.Passed,
+			},
+			{name: testcase.Status for name, testcase in counter._testcases.items()}
+		)
+		self.assertEqual(
+			{
+				"TestPushPop":           TestcaseStatus.Failed,
+				"TestPushPop/one_item":  TestcaseStatus.Passed,
+				"TestPushPop/two_items": TestcaseStatus.Passed,
+				"TestPushPop/sorted":    TestcaseStatus.Failed,
+				"TestLen":               TestcaseStatus.Passed,
+				"TestPopEmpty":          TestcaseStatus.Failed,
+			},
+			{name: testcase.Status for name, testcase in stack._testcases.items()}
+		)
+
+		failing = counter._testcases["TestFailing"]
+		skipped = counter._testcases["TestSkipped"]
+		logging = counter._testcases["TestIncrementFrom/start=41"]
+		panicking = stack._testcases["TestPopEmpty"]
+		self.assertEqual(("Failed", "    counter_test.go:64: Increment() = 1, want 2"), (failing.Message, failing.Details))
+		self.assertEqual(("Skipped", "    counter_test.go:70: Reset isn't tested yet."), (skipped.Message, skipped.Details))
+		self.assertEqual("    counter_test.go:50: Incrementing from 41.", logging.StandardOutput)
+		# A panic's stack trace is in the package's <system-out>, the failure of the test case is empty.
+		self.assertEqual(("Failed", None), (panicking.Message, panicking.Details))
+
+	def test_GoJUnitReport_PackageWithoutTests(self) -> None:
+		"""go-junit-report writes an empty name for a package without tests; the import path is in its <system-out>."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		doc = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		version = doc._testsuites["github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/version"]
+		self.assertEqual(0, version.TestcaseCount)
+		self.assertEqual(TestsuiteStatus.Empty, version.Status)
+		# Host and time of the conversion by go-junit-report, not of the test run.
+		self.assertEqual("dffa20ef8728", version.Hostname)
+		self.assertEqual(datetime(2026, 10, 8, 11, 5, 11, tzinfo=timezone.utc), version.StartTime)
+
+	def test_GoJUnitReport_PackagesWithoutTests(self) -> None:
+		"""Each package without tests has an empty name; each is named by the import path in its <system-out>."""
+		report = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml").read_text()
+		start = report.index('<testsuite name="" ')
+		end = report.index("</testsuite>", start) + len("</testsuite>")
+		secondPackage = report[start:end].replace('id="2"', 'id="3"').replace("/version", "/version2")
+
+		junitExampleFile = Path("tests/output/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.packages-without-tests.xml")
+		junitExampleFile.parent.mkdir(parents=True, exist_ok=True)
+		junitExampleFile.write_text(f"{report[:end]}\n\t{secondPackage}{report[end:]}")
+		doc = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		module = "github.com/edaa-org/pyEDAA.Reports/examples/Go/testing"
+		self.assertEqual(
+			[f"{module}/counter", f"{module}/stack", f"{module}/version", f"{module}/version2"],
+			list(doc._testsuites)
+		)
+
+	def test_GoJUnitReport_EmptyName(self) -> None:
+		"""A test suite with an empty name and without a result line naming the package is rejected."""
+		report = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml").read_text()
+		start = report.index("<system-out>", report.index('<testsuite name="" '))
+		end = report.index("</system-out>", start) + len("</system-out>")
+
+		junitExampleFile = Path("tests/output/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.empty-name.xml")
+		junitExampleFile.parent.mkdir(parents=True, exist_ok=True)
+		junitExampleFile.write_text(f"{report[:start]}{report[end:]}")
+
+		with self.assertRaises(UnittestError) as context:
+			GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual("Test suite with id '2' has an empty name.", str(context.exception))
+
+	def test_GoJUnitReport_Unified(self) -> None:
+		"""In the unified data model, a package's test cases are in a test suite named by the whole import path."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		summary = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True).ToTestsuiteSummary()
+
+		module = "github.com/edaa-org/pyEDAA.Reports/examples/Go/testing"
+		self.assertEqual([f"{module}/counter", f"{module}/stack", f"{module}/version"], list(summary.Testsuites))
+		counter = summary.Testsuites[f"{module}/counter"]
+		self.assertEqual([f"{module}/counter"], list(counter.Testsuites))
+		self.assertEqual(TestsuiteKind.Class, counter.Testsuites[f"{module}/counter"].Kind)
+		self.assertEqual(12, len(counter.Testsuites[f"{module}/counter"].Testcases))
+
+	def test_GoJUnitReport_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		doc = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = GoJUnitReportDocument(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.Hostname, sameTS.Hostname)
+			self.assertEqual(ts.StartTime, sameTS.StartTime)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+					self.assertEqual(tc.Message, sameTC.Message)
+					self.assertEqual(tc.Details, sameTC.Details)
+					self.assertEqual(tc.StandardOutput, sameTC.StandardOutput)
+
+	def test_GoJUnitReport_OtherDialects(self) -> None:
+		"""Only the go-junit-report dialect reads go-junit-report's report."""
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
 
 		for documentClass in (AnyJUnitDocument, JUnit4Document, CTestDocument, GTestDocument, PyTestDocument):

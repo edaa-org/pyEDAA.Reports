@@ -139,15 +139,15 @@ dialects (and simplifications) were created by the various frameworks emitting J
 
 .. rubric:: JUnit Dialect Comparison
 
-+------------------------+--------------+--------------+--------------+--------------------+------------------+---------------------+--------------+
-| Feature                | Any JUnit    | Ant + JUnit4 | Catch2 JUnit | CTest JUnit        | GoogleTest JUnit | cargo-nextest JUnit | pyTest JUnit |
-+========================+==============+==============+==============+====================+==================+=====================+==============+
-| Root element           | testsuites   | testsuite    | testsuites   | testsuite          | testsuites       | testsuites          | testsuites   |
-+------------------------+--------------+--------------+--------------+--------------------+------------------+---------------------+--------------+
-| Supports properties    |     ☑        |     ☑        |     ☑        |                    |       ⸺          |                     |              |
-+------------------------+--------------+--------------+--------------+--------------------+------------------+---------------------+--------------+
-| Testcase status        | ...          | ...          | always run   | more status values |                  | reruns              |              |
-+------------------------+--------------+--------------+--------------+--------------------+------------------+---------------------+--------------+
++------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+
+| Feature                | Any JUnit    | Ant + JUnit4 | Catch2 JUnit | CTest JUnit        | go-junit-report | GoogleTest JUnit | cargo-nextest JUnit | pyTest JUnit |
++========================+==============+==============+==============+====================+=================+==================+=====================+==============+
+| Root element           | testsuites   | testsuite    | testsuites   | testsuite          | testsuites      | testsuites       | testsuites          | testsuites   |
++------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+
+| Supports properties    |     ☑        |     ☑        |     ☑        |                    |     ☑           |       ⸺          |                     |              |
++------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+
+| Testcase status        | ...          | ...          | always run   | more status values |                 |                  | reruns              |              |
++------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+
 
 .. _UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit:
 
@@ -408,6 +408,98 @@ CTest JUnit
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
                  ...
+
+
+.. _UNITTEST/SpecificDataModel/JUnit/Dialect/GoJUnitReport:
+
+go-junit-report JUnit
+---------------------
+
+.. grid:: 2
+
+   .. grid-item::
+      :columns: 6
+
+      The JUnit format written by `go-junit-report <https://github.com/jstemmer/go-junit-report>`__ (v2) uses
+      ``<testsuites>`` as a root element. It converts the output of ``go test`` (option ``-parser gotest``, the default)
+      or of ``go test -json`` (option ``-parser gojson``).
+
+      * A ``<testsuite>`` is a Go package, named by its import path. It carries an ``id`` (its index in the report), and
+        the ``hostname`` and ``timestamp`` of the conversion, not of the test run.
+      * A ``<testcase>`` is a test, a subtest (``TestName/Subtest``) or an example. Its ``classname`` is the package's
+        import path. A parent test is a test case of its own, besides its subtests.
+      * ``<failure message="Failed">`` holds the failure's log lines, ``<skipped message="Skipped">`` the reason. An
+        ``<error>`` is a build error, a runtime error of the test binary or a test without a result. A passed test's log
+        is in its ``<system-out>``.
+
+   .. grid-item::
+      :columns: 6
+
+      .. tab-set::
+
+         .. tab-item:: Reading go-junit-report JUnit
+            :sync: ReadJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport import Document
+
+               xmlReport = Path("go-junit-report.xml")
+               try:
+                 doc = Document(xmlReport, analyzeAndConvert=True)
+               except UnittestError as ex:
+                 ...
+
+         .. tab-item:: Convert to and from Unified Data Model
+            :sync: ConvertToFrom
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport import Document
+
+               # Convert to unified test data model
+               summary = doc.ToTestsuiteSummary()
+
+               # Convert back to a document
+               newXmlReport = Path("New JUnit-Report.xml")
+               newDoc = Document.FromTestsuiteSummary(newXmlReport, summary)
+
+         .. tab-item:: Writing go-junit-report JUnit
+            :sync: WriteJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport import Document
+
+               xmlReport = Path("go-junit-report.xml")
+               try:
+                 newDoc.Write(xmlReport)
+               except UnittestError as ex:
+                 ...
+
+.. rubric:: Reader
+
+* A package without tests, run with code coverage (``go test -coverprofile=...``), is written as
+  ``<testsuite name="">``: go-junit-report doesn't recognize ``go test``'s result line of such a package
+  (``<tab><import path><tab><tab>coverage: 0.0% of statements``) and names the package by its option
+  ``-package-name``, which is empty by default. The line is the test suite's ``<system-out>``, and the reader names the
+  test suite by the import path in it. A test suite with an empty name and without such a line is rejected.
+* A panic ends the package's test binary. Its stack trace is written to the package's ``<system-out>``, which isn't
+  read, and the ``<failure>`` of the panicking test is empty. A parent test failed by a subtest has an empty
+  ``<failure>`` too.
+* ``<properties>`` (``coverage.statements.pct``, and the properties of the options ``-p`` and ``-go-version``) and the
+  ``id`` attribute aren't read.
+* In the unified data model, a test class becomes a test suite of kind class named by the whole import path; it isn't
+  split at ``.`` into packages.
+* Option ``-subtest-mode`` changes the parent tests: ``ignore-parent-results`` writes them as passed,
+  ``exclude-parents`` leaves them out.
+
+.. rubric:: Writer
+
+* ``id`` is the test suite's index in the document.
+* A test suite without a duration gets the sum of its test cases' durations as ``time``, as go-junit-report does.
+* Every ``<skipped>``, ``<error>`` and ``<failure>`` gets a ``message`` attribute; it's empty for a test case without
+  a message.
 
 
 .. _UNITTEST/SpecificDataModel/JUnit/Dialect/GoogleTest:

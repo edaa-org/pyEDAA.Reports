@@ -35,14 +35,14 @@ Each schema in :file:`pyEDAA/Reports/Resources` was reverse-engineered from real
 :file:`tests/data/JUnit` are the ground truth: a schema that rejects one of them describes the format wrongly. The
 reader has to agree with the schema too - it is the same claim about the format, written twice.
 """
-from pathlib  import Path
+from re       import sub
 from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
 from pyTooling.Testing    import Testcase
 
-from . import DATA_DIRECTORY, DIALECTS, TESTSUITE_ROOTED_FILES, Dialect
+from . import DATA_DIRECTORY, DIALECTS, OUTPUT_DIRECTORY, TESTSUITE_ROOTED_FILES, Dialect
 
 
 class SchemaMixin:
@@ -159,24 +159,43 @@ class NextestJUnit(SchemaMixin, ut_TestCase):
 		}, errors)
 
 
-class GoJUnitReport(ut_TestCase):
-	"""go-junit-report's report is Any-JUnit, except for the ``id`` attribute of ``<testsuite>``: no dialect reads it."""
+class GoJUnitReport(SchemaMixin, ut_TestCase):
+	"""
+	go-junit-report's report and Any-JUnit.
 
-	_referenceFile: ClassVar[Path] = DATA_DIRECTORY / "pyEDAA.Reports/Go-Test/go-junit-report.xml"
+	Any-JUnit's schema rejects the report only for the ``id`` attribute of ``<testsuite>``. Without it, Any-JUnit's
+	reader still rejects the ``<testsuite>`` with an empty name, which go-junit-report writes for a package without tests.
+	"""
 
-	def test_Schemas(self) -> None:
-		"""Known gap: when this starts failing, a dialect accepts the report and it becomes a reference file."""
+	_dialectName = "GoJUnitReport-JUnit"
+
+	def test_OtherSchemas(self) -> None:
+		referenceFile = self.Dialect.ReferenceFiles[0]
+
 		for dialect in DIALECTS.values():
+			if dialect is self.Dialect:
+				continue
+
 			with self.subTest(dialect=dialect.Name):
-				schema = dialect.Schema()
-				self.assertFalse(schema.is_valid(str(self._referenceFile)), f"{dialect.Name} accepts the report now.")
+				self.assertFalse(dialect.Schema().is_valid(str(referenceFile)), f"{dialect.Name} accepts the report now.")
 
 	def test_AnyJUnit(self) -> None:
 		schema = DIALECTS["Any-JUnit"].Schema()
 
-		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(self._referenceFile))}
+		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(self.Dialect.ReferenceFiles[0]))}
 
 		self.assertEqual({("testsuite", "'id' attribute not allowed for element")}, errors)
+
+	def test_AnyJUnit_Reader(self) -> None:
+		withoutIds = OUTPUT_DIRECTORY / "go-junit-report.without-id.xml"
+		withoutIds.parent.mkdir(parents=True, exist_ok=True)
+		withoutIds.write_text(sub(r' id="\d+"', "", self.Dialect.ReferenceFiles[0].read_text()))
+
+		DIALECTS["Any-JUnit"].Schema().validate(str(withoutIds))
+		with self.assertRaises(ValueError) as context:
+			DIALECTS["Any-JUnit"].DocumentClass(withoutIds, analyzeAndConvert=True)
+
+		self.assertEqual("Parameter 'name' is empty.", str(context.exception))
 
 
 class JunitXmlTestLogger(Testcase):
