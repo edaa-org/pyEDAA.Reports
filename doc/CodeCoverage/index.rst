@@ -130,6 +130,11 @@ binary format of their own, which only the tool itself or its API reads.
      - —
      - —
      - :file:`cobertura.ser`
+   * - `JaCoCo <https://www.jacoco.org/jacoco/>`__ (Java)
+     - JaCoCo XML (``report.dtd``)
+     - —
+     - CSV
+     - :file:`*.exec`
    * - `coverage.py <https://coverage.readthedocs.io/>`__ (Python)
      - Cobertura dialect (``coverage xml``)
      - ``coverage json``
@@ -155,13 +160,53 @@ binary format of their own, which only the tool itself or its API reads.
      - ``llvm-cov export -format=text``
      - lcov (``llvm-cov export -format=lcov``), :file:`*.gcov` (``llvm-cov gcov``), ``llvm-cov report``
      - :file:`*.profraw`, :file:`*.profdata`
+   * - `cargo-llvm-cov <https://github.com/taiki-e/cargo-llvm-cov>`__ (Rust)
+     - Cobertura (``--cobertura``)
+     - LLVM's export format (``--json``)
+     - lcov (``--lcov``), ``--text``
+     - — (reads LLVM's data)
+   * - `grcov <https://github.com/mozilla/grcov>`__ (Rust)
+     - Cobertura (``-t cobertura``)
+     - covdir (``-t covdir``), Coveralls (``-t coveralls``)
+     - lcov (``-t lcov``)
+     - — (reads LLVM's or GCC's data)
+   * - `Go <https://pkg.go.dev/cmd/cover>`__ (``go test``)
+     - —
+     - —
+     - cover profile (``go test -coverprofile``)
+     - :file:`covmeta.*`, :file:`covcounters.*` (``GOCOVERDIR``)
+   * - `gocover-cobertura <https://github.com/boumenot/gocover-cobertura>`__ (Go)
+     - Cobertura
+     - —
+     - —
+     - — (reads a cover profile)
+   * - `gcov2lcov <https://github.com/jandelgado/gcov2lcov>`__ (Go)
+     - —
+     - —
+     - lcov
+     - — (reads a cover profile)
+   * - `coverlet <https://github.com/coverlet-coverage/coverlet>`__ (.NET)
+     - Cobertura, OpenCover
+     - coverlet JSON
+     - lcov
+     - —
+   * - `Microsoft Code Coverage <https://learn.microsoft.com/dotnet/core/additional-tools/dotnet-coverage>`__ (.NET)
+     - Cobertura
+     - —
+     - —
+     - :file:`*.coverage`
+   * - `ReportGenerator <https://reportgenerator.io/>`__ (.NET)
+     - Cobertura, among others
+     - —
+     - lcov, among others
+     - — (reads other reports)
    * - `GHDL <https://github.com/ghdl/ghdl>`__ (VHDL)
      - —
      - :file:`coverage-*.json` (``ghdl -r --coverage``), gcovr JSON (``ghdl coverage --format=gcovr``)
      - lcov, :file:`*.gcov` (``ghdl coverage --format=lcov|gcov``)
      - — (GCC backend: GCC's data)
    * - `NVC <https://www.nickg.me.uk/nvc/>`__ (VHDL)
-     - Cobertura (``nvc --cover-export --format=cobertura``), NVC XML (``--format=xml``)
+     - Cobertura (``nvc --cover-export --format=cobertura``); an undocumented internal dump (``--format=xml``)
      - —
      - —
      - :file:`*.ncdb`
@@ -171,12 +216,12 @@ binary format of their own, which only the tool itself or its API reads.
      - —
      - ACDB
    * - Siemens QuestaSim
-     - ?
+     - UCIS XML (`Accellera UCIS <https://www.accellera.org/downloads/standards/ucis>`__)
      - —
      - —
      - UCDB (read via the UCIS API)
 
-A ``?`` is not verified yet. pyEDAA.Reports reads Cobertura XML, including coverage.py's dialect.
+pyEDAA.Reports reads Cobertura XML - also coverage.py's - and coverage.py's JSON.
 
 .. _CODECOV/Formats/Cobertura:
 
