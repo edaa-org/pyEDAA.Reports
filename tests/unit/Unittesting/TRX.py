@@ -28,19 +28,23 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-#
 """
-Unit tests documenting Visual Studio's test results format (TRX), as ``dotnet test --logger trx`` writes it.
+Reading Visual Studio's test results format (TRX), as ``dotnet test --logger trx`` writes it.
 
-No reader exists yet. The report in :file:`tests/data/JUnit/pyEDAA.Reports/CSharp-xUnit` is written by the example
-:file:`examples/CSharp/xUnit`.
+The reader reads the test run and its summary; the results and test definitions are inspected as XML.
+
+The reports in :file:`tests/data/TRX` are written by VSTest's TRX logger: :file:`CSharp-xUnit` by the example
+:file:`examples/CSharp/xUnit`, :file:`CSharp-MSTest` and :file:`CSharp-NUnit` by small MSTest and NUnit test projects.
 """
+from datetime                         import datetime, timedelta, timezone
 from pathlib                          import Path
+from uuid                             import UUID
 
 from lxml.etree                       import parse
 
 from pyEDAA.Reports.Unittesting       import UnittestError
-from pyEDAA.Reports.Unittesting.JUnit import Document
+from pyEDAA.Reports.Unittesting       import TRX
+from pyEDAA.Reports.Unittesting.JUnit import Document as JUnitDocument
 from pyTooling.Testing                import Testcase
 
 
@@ -50,19 +54,123 @@ if __name__ == "__main__":  # pragma: no cover
 	exit(1)
 
 
-#: The TRX file of the example.
-TRX_FILE = Path(__file__).parent.parent.parent / "data/JUnit/pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.trx"
-NAMESPACES = {"trx": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}  #: XML namespace of TRX.
+DATA = Path(__file__).parent.parent.parent / "data/TRX"     #: Directory of the TRX files.
+OUTPUT = Path(__file__).parent.parent.parent / "output/TRX"  #: Directory of modified TRX files.
+XUNIT_FILE = DATA / "CSharp-xUnit/MyLibrary.Tests.trx"       #: TRX file of the xUnit.net example.
+MSTEST_FILE = DATA / "CSharp-MSTest/MSTestSample.trx"        #: TRX file of the MSTest test project.
+NUNIT_FILE = DATA / "CSharp-NUnit/NUnitSample.trx"           #: TRX file of the NUnit test project.
+NAMESPACES = {"trx": TRX.TRX_NAMESPACE}                      #: XML namespace of TRX.
 
+
+class Schema(Testcase):
+	"""Every TRX file is validated against the schema reverse engineered from VSTest's TRX logger."""
+
+	@classmethod
+	def setUpClass(cls) -> None:
+		OUTPUT.mkdir(parents=True, exist_ok=True)
+
+	def test_Fixtures(self) -> None:
+		for path in (XUNIT_FILE, MSTEST_FILE, NUNIT_FILE):
+			with self.subTest(path=path.parent.name):
+				document = TRX.Document(path)
+				document.Analyze()
+
+				self.assertGreater(document.AnalysisDuration, timedelta())
+
+	def test_UnknownTestId(self) -> None:
+		"""A result referring to no test definition is invalid."""
+		path = OUTPUT / "UnknownTestId.trx"
+		path.write_text(
+			XUNIT_FILE.read_text(encoding="utf-8-sig").replace(
+				'testId="1de947dc-261b-bd9c-9a22-722b2250cb86" testName',
+				'testId="00000000-0000-0000-0000-000000000000" testName'
+			),
+			encoding="utf-8"
+		)
+
+		with self.assertRaises(UnittestError) as context:
+			_ = TRX.Document(path, analyzeAndConvert=True)
+
+		self.assertEqual(f"Validation error for '{path}' using XSD schema 'VSTest-TRX.xsd'.", str(context.exception))
+		self.assertIn(
+			"No match found for key-sequence ['00000000-0000-0000-0000-000000000000']",
+			context.exception.__notes__[0]
+		)
+
+	def test_JUnitFile(self) -> None:
+		path = DATA.parent / "JUnit/pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml"
+
+		with self.assertRaises(UnittestError) as context:
+			_ = TRX.Document(path, analyzeAndConvert=True)
+
+		self.assertEqual(
+			f"Root element of '{path}' is not '<TestRun>' in namespace '{TRX.TRX_NAMESPACE}'.",
+			str(context.exception)
+		)
+		self.assertEqual(["Got root element 'testsuites'."], context.exception.__notes__)
+
+	def test_JUnitReader(self) -> None:
+		"""The JUnit reader rejects a TRX file."""
+		with self.assertRaises(UnittestError):
+			_ = JUnitDocument(XUNIT_FILE, analyzeAndConvert=True)
+
+	def test_NotAnalyzed(self) -> None:
+		document = TRX.Document(XUNIT_FILE)
+
+		with self.assertRaises(UnittestError) as context:
+			document.Convert()
+
+		self.assertEqual(f"TRX file '{XUNIT_FILE}' needs to be read and analyzed by an XML parser.", str(context.exception))
+
+	def test_Missing(self) -> None:
+		path = OUTPUT / "Missing.trx"
+
+		with self.assertRaises(UnittestError) as context:
+			_ = TRX.Document(path, analyzeAndConvert=True)
+
+		self.assertEqual(f"TRX file '{path}' does not exist.", str(context.exception))
+
+
+class XUnit(Testcase):
+	"""The TRX file of the xUnit.net example."""
+
+	def test_TestRun(self) -> None:
+		document = TRX.Document(XUNIT_FILE, analyzeAndConvert=True)
+
+		self.assertEqual(UUID("0da8d99b-7a14-4e6a-bb1d-2e7625ca5720"), document.Id)
+		self.assertEqual("@dffa20ef8728 2026-10-08 11:09:27", document.Name)
+		self.assertEqual(datetime(2026, 10, 8, 11, 9, 26, 184828, tzinfo=timezone.utc), document.StartTime)
+		self.assertEqual(datetime(2026, 10, 8, 11, 9, 27, 732372, tzinfo=timezone.utc), document.FinishTime)
+		self.assertIs(TRX.TestOutcome.Failed, document.Outcome)
+		self.assertEqual(
+			{
+				UUID("8c84fa94-04c1-424b-9868-57a2d4851a1d"): "Results Not in a List",
+				UUID("19431567-8539-422a-85d7-44ee4e166bda"): "All Loaded Results"
+			},
+			document.TestLists
+		)
+		self.assertTrue(document.StandardOutput.startswith("[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0"))
+		self.assertTrue(
+			document.StandardOutput.endswith("Test 'MyLibrary.Tests.CalculatorTests.Multiply' was skipped in the test run.\n")
+		)
+		self.assertGreater(document.ModelConversionDuration, timedelta())
+
+	def test_Counters(self) -> None:
+		"""The skipped test is counted in ``total`` only: ``executed`` excludes it, ``notExecuted`` doesn't count it."""
+		document = TRX.Document(XUNIT_FILE, analyzeAndConvert=True)
+
+		self.assertEqual(
+			{"total": 11, "executed": 10, "passed": 7, "failed": 3, "error": 0, "notExecuted": 0},
+			{name: document.Counters[name] for name in ("total", "executed", "passed", "failed", "error", "notExecuted")}
+		)
 
 class StatusQuo(Testcase):
-	"""A TRX file lists results, test definitions and a summary of a test run; no reader exists yet."""
+	"""The reader doesn't read results and test definitions yet; the XML shows what a TRX file lists."""
 
 	def test_Results(self) -> None:
 		"""An exception fails a test like an assertion does; a skipped test isn't executed."""
-		root = parse(TRX_FILE).getroot()
+		root = parse(XUNIT_FILE).getroot()
 
-		self.assertEqual(f"{{{NAMESPACES['trx']}}}TestRun", root.tag)
 		self.assertEqual(
 			{
 				"MyLibrary.Tests.CalculatorTests.Absolute(value: -3, expected: 3)": "Passed",
@@ -83,22 +191,9 @@ class StatusQuo(Testcase):
 			}
 		)
 
-		def message(testName: str) -> str:
-			"""Nested function returning the message of a test's result."""
-			return root.findtext(
-				f"trx:Results/trx:UnitTestResult[@testName='{testName}']/trx:Output/trx:ErrorInfo/trx:Message",
-				namespaces=NAMESPACES
-			)
-
-		self.assertEqual(
-			"System.DivideByZeroException : Attempted to divide by zero.",
-			message("MyLibrary.Tests.CalculatorTests.DivideByZero")
-		)
-		self.assertEqual("Multiplication isn't implemented yet.", message("MyLibrary.Tests.CalculatorTests.Multiply"))
-
 	def test_Definitions(self) -> None:
 		"""A test definition names the class and method; each data row of a theory is a test of its own."""
-		root = parse(TRX_FILE).getroot()
+		root = parse(XUNIT_FILE).getroot()
 		methods = root.findall("trx:TestDefinitions/trx:UnitTest/trx:TestMethod", NAMESPACES)
 
 		self.assertEqual(3, len([method for method in methods if method.get("name") == "Absolute"]))
@@ -107,16 +202,20 @@ class StatusQuo(Testcase):
 			{method.get("className") for method in methods}
 		)
 
-	def test_Counters(self) -> None:
-		"""The skipped test is counted in ``total`` only: ``executed`` excludes it, ``notExecuted`` doesn't count it."""
-		counters = parse(TRX_FILE).getroot().find("trx:ResultSummary/trx:Counters", NAMESPACES)
 
-		self.assertEqual(
-			{"total": "11", "executed": "10", "passed": "7", "failed": "3", "error": "0", "notExecuted": "0"},
-			{name: counters.get(name) for name in ("total", "executed", "passed", "failed", "error", "notExecuted")}
-		)
+class DataModel(Testcase):
+	"""Parameter checks of the TRX data model."""
 
-	def test_JUnit(self) -> None:
-		"""The JUnit reader rejects a TRX file."""
-		with self.assertRaises(UnittestError):
-			_ = Document(TRX_FILE, analyzeAndConvert=True)
+	def test_TestRun(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = TRX.TestRun(None)
+		self.assertEqual("Parameter 'name' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = TRX.TestRun("run", counters={"total": "11"})
+		self.assertEqual("Value of parameter 'counters' is not of type 'int'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+		with self.assertRaises(TypeError) as context:
+			_ = TRX.TestRun("run", outcome="Failed")
+		self.assertEqual("Parameter 'outcome' is not of type 'TestOutcome'.", str(context.exception))

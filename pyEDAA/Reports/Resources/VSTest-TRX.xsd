@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:trx="http://microsoft.com/schemas/VisualStudio/TeamTest/2010"
+	targetNamespace="http://microsoft.com/schemas/VisualStudio/TeamTest/2010"
+	elementFormDefault="qualified">
+	<xs:annotation>
+		<xs:documentation>
+			Visual Studio test results (TRX) as written by VSTest's TRX logger ('dotnet test --logger trx',
+			'vstest.console /logger:trx').
+
+			Reverse engineered from the logger's source code: https://github.com/microsoft/vstest, directory
+			'src/Microsoft.TestPlatform.Extensions.TrxLogger' (MIT license). Elements, attributes and their order follow the
+			logger's 'Save' methods; an attribute or element the logger omits when its value is empty or the default is
+			optional. Visual Studio's own schema 'vstst.xsd' isn't redistributable; it describes more than the logger writes.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:simpleType name="Guid">
+		<xs:annotation>
+			<xs:documentation>
+				A GUID as .NET formats it by default, e.g. '8c84fa94-04c1-424b-9868-57a2d4851a1d'.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="TimeSpan">
+		<xs:annotation>
+			<xs:documentation>
+				A .NET TimeSpan in its invariant format '[d.]hh:mm:ss[.fffffff]', e.g. '00:00:00.0010000'.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="(\d+\.)?\d{2}:\d{2}:\d{2}(\.\d{7})?"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="TestOutcome">
+		<xs:annotation>
+			<xs:documentation>
+				Outcome of a test, of a run-level message or of the test run. The logger writes 'Passed', 'Failed' and
+				'NotExecuted' for a test, 'Completed', 'Failed' and 'Error' for the test run.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Error"/>
+			<xs:enumeration value="Failed"/>
+			<xs:enumeration value="Timeout"/>
+			<xs:enumeration value="Aborted"/>
+			<xs:enumeration value="Inconclusive"/>
+			<xs:enumeration value="PassedButRunAborted"/>
+			<xs:enumeration value="NotRunnable"/>
+			<xs:enumeration value="NotExecuted"/>
+			<xs:enumeration value="Disconnected"/>
+			<xs:enumeration value="Warning"/>
+			<xs:enumeration value="Passed"/>
+			<xs:enumeration value="Completed"/>
+			<xs:enumeration value="InProgress"/>
+			<xs:enumeration value="Pending"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="ResultFiles">
+		<xs:sequence>
+			<xs:element name="ResultFile" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:attribute name="path" type="xs:string" use="required"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="CollectorDataEntries">
+		<xs:sequence>
+			<xs:element name="Collector" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="UriAttachments" minOccurs="0">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="UriAttachment" maxOccurs="unbounded">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="A">
+													<xs:complexType>
+														<xs:simpleContent>
+															<xs:extension base="xs:string">
+																<xs:attribute name="href" type="xs:string" use="required"/>
+															</xs:extension>
+														</xs:simpleContent>
+													</xs:complexType>
+												</xs:element>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="agentName"            type="xs:string" use="required"/>
+					<xs:attribute name="uri"                  type="xs:anyURI" use="required"/>
+					<xs:attribute name="collectorDisplayName" type="xs:string"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="TestResult">
+		<xs:annotation>
+			<xs:documentation>
+				Result of a test. 'outcome' is omitted, if it's 'Error'. A data-driven test or an ordered test lists the results
+				of its rows or tests in 'InnerResults'.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Output" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="StdOut"     type="xs:string" minOccurs="0"/>
+						<xs:element name="StdErr"     type="xs:string" minOccurs="0"/>
+						<xs:element name="DebugTrace" type="xs:string" minOccurs="0"/>
+						<xs:element name="ErrorInfo"  minOccurs="0">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Message"    type="xs:string" minOccurs="0"/>
+									<xs:element name="StackTrace" type="xs:string" minOccurs="0"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="TextMessages" minOccurs="0">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Message" type="xs:string" maxOccurs="unbounded"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ResultFiles"          type="trx:ResultFiles"          minOccurs="0"/>
+			<xs:element name="CollectorDataEntries" type="trx:CollectorDataEntries" minOccurs="0"/>
+			<xs:element name="InnerResults"         type="trx:Results"              minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute name="executionId"              type="trx:Guid"        use="required"/>
+		<xs:attribute name="parentExecutionId"        type="trx:Guid"/>
+		<xs:attribute name="testId"                   type="trx:Guid"        use="required"/>
+		<xs:attribute name="testName"                 type="xs:string"       use="required"/>
+		<xs:attribute name="computerName"             type="xs:string"       use="required"/>
+		<xs:attribute name="duration"                 type="trx:TimeSpan"/>
+		<xs:attribute name="startTime"                type="xs:dateTime"/>
+		<xs:attribute name="endTime"                  type="xs:dateTime"/>
+		<xs:attribute name="testType"                 type="trx:Guid"        use="required"/>
+		<xs:attribute name="outcome"                  type="trx:TestOutcome"/>
+		<xs:attribute name="testListId"               type="trx:Guid"        use="required"/>
+		<xs:attribute name="relativeResultsDirectory" type="xs:string"       use="required"/>
+		<xs:attribute name="dataRowInfo"              type="xs:int"/>
+		<xs:attribute name="resultType"               type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="Results">
+		<xs:choice maxOccurs="unbounded">
+			<xs:element name="UnitTestResult"        type="trx:TestResult"/>
+			<xs:element name="TestResultAggregation" type="trx:TestResult"/>
+		</xs:choice>
+	</xs:complexType>
+
+	<xs:complexType name="TestElement">
+		<xs:annotation>
+			<xs:documentation>Definition of a test: name, assembly (storage) and its optional metadata.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Owners" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Owner">
+							<xs:complexType>
+								<xs:attribute name="name" type="xs:string" use="required"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="TestCategory" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="TestCategoryItem" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:attribute name="TestCategory" type="xs:string" use="required"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Execution" minOccurs="0">
+				<xs:complexType>
+					<xs:attribute name="id"       type="trx:Guid"/>
+					<xs:attribute name="parentId" type="trx:Guid"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Workitems" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Workitem" type="xs:int" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="name"     type="xs:string" use="required"/>
+		<xs:attribute name="storage"  type="xs:string" use="required"/>
+		<xs:attribute name="priority" type="xs:int"/>
+		<xs:attribute name="id"       type="trx:Guid"  use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="UnitTest">
+		<xs:annotation>
+			<xs:documentation>
+				Definition of a test method: its class, its method and the test adapter running it.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="trx:TestElement">
+				<xs:sequence>
+					<xs:element name="TestMethod">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="isValid" type="xs:boolean" minOccurs="0"/>
+							</xs:sequence>
+							<xs:attribute name="codeBase"        type="xs:string" use="required"/>
+							<xs:attribute name="adapterTypeName" type="xs:string" use="required"/>
+							<xs:attribute name="className"       type="xs:string" use="required"/>
+							<xs:attribute name="name"            type="xs:string" use="required"/>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="OrderedTest">
+		<xs:annotation>
+			<xs:documentation>Definition of an ordered test: the tests it runs, in order.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="trx:TestElement">
+				<xs:sequence>
+					<xs:element name="TestLinks" minOccurs="0">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="TestLink" maxOccurs="unbounded">
+									<xs:complexType>
+										<xs:attribute name="id"      type="trx:Guid"  use="required"/>
+										<xs:attribute name="name"    type="xs:string" use="required"/>
+										<xs:attribute name="storage" type="xs:string"/>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="TestEntries">
+		<xs:sequence>
+			<xs:element name="TestEntry" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="TestEntries" type="trx:TestEntries" minOccurs="0"/>
+					</xs:sequence>
+					<xs:attribute name="testId"            type="trx:Guid" use="required"/>
+					<xs:attribute name="executionId"       type="trx:Guid" use="required"/>
+					<xs:attribute name="parentExecutionId" type="trx:Guid"/>
+					<xs:attribute name="testListId"        type="trx:Guid" use="required"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="Count">
+		<xs:restriction base="xs:nonNegativeInteger"/>
+	</xs:simpleType>
+
+	<xs:element name="TestRun">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Times">
+					<xs:complexType>
+						<xs:attribute name="creation" type="xs:dateTime" use="required"/>
+						<xs:attribute name="queuing"  type="xs:dateTime" use="required"/>
+						<xs:attribute name="start"    type="xs:dateTime" use="required"/>
+						<xs:attribute name="finish"   type="xs:dateTime" use="required"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="TestSettings">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Deployment">
+								<xs:complexType>
+									<xs:attribute name="runDeploymentRoot" type="xs:string" use="required"/>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="name" type="xs:string" use="required"/>
+						<xs:attribute name="id"   type="trx:Guid"  use="required"/>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Results" type="trx:Results" minOccurs="0"/>
+				<xs:element name="TestDefinitions" minOccurs="0">
+					<xs:complexType>
+						<xs:choice maxOccurs="unbounded">
+							<xs:element name="UnitTest"    type="trx:UnitTest"/>
+							<xs:element name="OrderedTest" type="trx:OrderedTest"/>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="TestEntries" type="trx:TestEntries" minOccurs="0"/>
+				<xs:element name="TestLists">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="TestList" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="name"         type="xs:string" use="required"/>
+									<xs:attribute name="id"           type="trx:Guid"  use="required"/>
+									<xs:attribute name="parentListId" type="trx:Guid"/>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="ResultSummary">
+					<xs:annotation>
+						<xs:documentation>
+							Outcome and counters of the test run. The logger counts the results it received ('total'), and 'passed'
+							and 'failed' among them; 'executed' is their sum, every other counter is always '0'.
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Counters">
+								<xs:complexType>
+									<xs:attribute name="total"               type="trx:Count" use="required"/>
+									<xs:attribute name="executed"            type="trx:Count" use="required"/>
+									<xs:attribute name="passed"              type="trx:Count" use="required"/>
+									<xs:attribute name="failed"              type="trx:Count" use="required"/>
+									<xs:attribute name="error"               type="trx:Count" use="required"/>
+									<xs:attribute name="timeout"             type="trx:Count" use="required"/>
+									<xs:attribute name="aborted"             type="trx:Count" use="required"/>
+									<xs:attribute name="inconclusive"        type="trx:Count" use="required"/>
+									<xs:attribute name="passedButRunAborted" type="trx:Count" use="required"/>
+									<xs:attribute name="notRunnable"         type="trx:Count" use="required"/>
+									<xs:attribute name="notExecuted"         type="trx:Count" use="required"/>
+									<xs:attribute name="disconnected"        type="trx:Count" use="required"/>
+									<xs:attribute name="warning"             type="trx:Count" use="required"/>
+									<xs:attribute name="completed"           type="trx:Count" use="required"/>
+									<xs:attribute name="inProgress"          type="trx:Count" use="required"/>
+									<xs:attribute name="pending"             type="trx:Count" use="required"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Output" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="StdOut" type="xs:string"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="RunInfos" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="RunInfo" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="Text"      type="xs:string" minOccurs="0"/>
+													<xs:element name="Exception" type="xs:string" minOccurs="0"/>
+												</xs:sequence>
+												<xs:attribute name="computerName" type="xs:string"/>
+												<xs:attribute name="outcome"      type="trx:TestOutcome" use="required"/>
+												<xs:attribute name="timestamp"    type="xs:dateTime"     use="required"/>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ResultFiles"          type="trx:ResultFiles"          minOccurs="0"/>
+							<xs:element name="CollectorDataEntries" type="trx:CollectorDataEntries" minOccurs="0"/>
+						</xs:sequence>
+						<xs:attribute name="outcome" type="trx:TestOutcome" use="required"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="id"      type="trx:Guid"  use="required"/>
+			<xs:attribute name="name"    type="xs:string" use="required"/>
+			<xs:attribute name="runUser" type="xs:string"/>
+		</xs:complexType>
+
+		<xs:key name="TestDefinitionId">
+			<xs:selector xpath="trx:TestDefinitions/*"/>
+			<xs:field xpath="@id"/>
+		</xs:key>
+		<xs:keyref name="ResultTestId" refer="trx:TestDefinitionId">
+			<xs:selector xpath=".//trx:UnitTestResult|.//trx:TestResultAggregation"/>
+			<xs:field xpath="@testId"/>
+		</xs:keyref>
+		<xs:keyref name="EntryTestId" refer="trx:TestDefinitionId">
+			<xs:selector xpath=".//trx:TestEntry"/>
+			<xs:field xpath="@testId"/>
+		</xs:keyref>
+		<xs:key name="TestListId">
+			<xs:selector xpath="trx:TestLists/trx:TestList"/>
+			<xs:field xpath="@id"/>
+		</xs:key>
+		<xs:keyref name="ResultTestListId" refer="trx:TestListId">
+			<xs:selector xpath=".//trx:UnitTestResult|.//trx:TestResultAggregation"/>
+			<xs:field xpath="@testListId"/>
+		</xs:keyref>
+		<xs:keyref name="EntryTestListId" refer="trx:TestListId">
+			<xs:selector xpath=".//trx:TestEntry"/>
+			<xs:field xpath="@testListId"/>
+		</xs:keyref>
+	</xs:element>
+</xs:schema>

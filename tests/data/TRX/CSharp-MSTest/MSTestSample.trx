@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="c764a33e-7dd4-4fd7-93a4-4b3444655269" name="@dffa20ef8728 2026-10-08 11:52:45" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-08T11:52:45.5923695+00:00" queuing="2026-10-08T11:52:45.5923695+00:00" start="2026-10-08T11:52:45.0551825+00:00" finish="2026-10-08T11:52:45.6141675+00:00" />
+  <TestSettings name="default" id="6206cf6c-2867-4843-83bc-b355ff7067ec">
+    <Deployment runDeploymentRoot="_dffa20ef8728_2026-10-08_11_52_45" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="0a66336f-268c-4186-895f-0ed3679119a8" testId="16db936a-449d-8e0c-af86-2aee54f46d52" testName="Add" computerName="dffa20ef8728" duration="00:00:00.0086794" startTime="2026-10-08T11:52:45.3748447+00:00" endTime="2026-10-08T11:52:45.4006692+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0a66336f-268c-4186-895f-0ed3679119a8">
+      <Output>
+        <StdOut>Adding</StdOut>
+        <StdErr>on stderr</StdErr>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6dd7aeff-c140-4cf7-990f-cea69eebc257" testId="1f29f975-50bf-88c1-9e83-aebafea88f54" testName="Folded (2,3)" computerName="dffa20ef8728" duration="00:00:00.0004394" startTime="2026-10-08T11:52:45.5232861+00:00" endTime="2026-10-08T11:52:45.5270325+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6dd7aeff-c140-4cf7-990f-cea69eebc257">
+      <Output>
+        <ErrorInfo>
+          <Message>Assertion failed. Expected values to be equal.
+
+expected: 2
+actual:   3
+
+Assert.AreEqual(a, b)</Message>
+          <StackTrace>   at Sample.Tests.FoldedTests.Folded(Int32 a, Int32 b) in /home/user/MSTestSample/Tests.cs:line 44
+   at InvokeStub_FoldedTests.Folded(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2ab9f998-7df6-4bca-8e6d-97cdf7b8e9d7" testId="1f29f975-50bf-88c1-9e83-aebafea88f54" testName="Folded (1,1)" computerName="dffa20ef8728" duration="00:00:00.0001276" startTime="2026-10-08T11:52:45.5232861+00:00" endTime="2026-10-08T11:52:45.5270325+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ab9f998-7df6-4bca-8e6d-97cdf7b8e9d7" />
+    <UnitTestResult executionId="5bd024cd-8e05-4b88-ac28-fab519d92866" testId="1cfaad95-5389-877b-9872-6c3e1f46cb1f" testName="Inconclusive" computerName="dffa20ef8728" duration="00:00:00.0002825" startTime="2026-10-08T11:52:45.4170729+00:00" endTime="2026-10-08T11:52:45.4173764+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5bd024cd-8e05-4b88-ac28-fab519d92866">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive. Can't decide.</Message>
+          <StackTrace>   at Sample.Tests.CalculatorTests.Inconclusive() in /home/user/MSTestSample/Tests.cs:line 26
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="662b2e8d-6ced-402e-b971-d01e55bef5e7" testId="17f62522-91de-8e8f-aea3-7e16089955f4" testName="Slow" computerName="dffa20ef8728" duration="00:00:00.1015217" startTime="2026-10-08T11:52:45.4201671+00:00" endTime="2026-10-08T11:52:45.5231591+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="662b2e8d-6ced-402e-b971-d01e55bef5e7">
+      <Output>
+        <ErrorInfo>
+          <Message>Test 'Slow' timed out after 100ms</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f270f86a-d535-4b0f-9a7e-fb75b9239b39" testId="1f9e14c4-2b1b-8f7e-a8f9-4cc4c1e9837a" testName="Throws" computerName="dffa20ef8728" duration="00:00:00.0007664" startTime="2026-10-08T11:52:45.4150607+00:00" endTime="2026-10-08T11:52:45.4158868+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f270f86a-d535-4b0f-9a7e-fb75b9239b39">
+      <Output>
+        <ErrorInfo>
+          <Message>Test method Sample.Tests.CalculatorTests.Throws threw exception:&#xD;
+System.InvalidOperationException: boom</Message>
+          <StackTrace>   at Sample.Tests.CalculatorTests.Throws() in /home/user/MSTestSample/Tests.cs:line 19
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="28368746-0d15-490d-adee-c942a15abe78" testId="14f9fc08-110e-8b7a-a4d9-994d226b96f0" testName="Ignored" computerName="dffa20ef8728" startTime="2026-10-08T11:52:45.4159940+00:00" endTime="2026-10-08T11:52:45.4170314+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="28368746-0d15-490d-adee-c942a15abe78">
+      <Output>
+        <ErrorInfo>
+          <Message>Not implemented yet.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="90c1dac5-46cb-4a6c-be9e-693847d6db1b" testId="18f88053-6f80-828e-8310-658e638bf828" testName="Rows (1,1)" computerName="dffa20ef8728" duration="00:00:00.0000737" startTime="2026-10-08T11:52:45.4175379+00:00" endTime="2026-10-08T11:52:45.4196237+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="90c1dac5-46cb-4a6c-be9e-693847d6db1b" />
+    <UnitTestResult executionId="e9d77d73-0368-400c-8563-5c789e285335" testId="1f2533eb-0678-842a-8f23-2af1cec869f4" testName="Rows (2,3)" computerName="dffa20ef8728" duration="00:00:00.0004314" startTime="2026-10-08T11:52:45.4196490+00:00" endTime="2026-10-08T11:52:45.4201448+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e9d77d73-0368-400c-8563-5c789e285335">
+      <Output>
+        <ErrorInfo>
+          <Message>Assertion failed. Expected values to be equal.
+
+expected: 2
+actual:   3
+
+Assert.AreEqual(a, b)</Message>
+          <StackTrace>   at Sample.Tests.CalculatorTests.Rows(Int32 a, Int32 b) in /home/user/MSTestSample/Tests.cs:line 31
+   at InvokeStub_CalculatorTests.Rows(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6d66e804-2a71-4efd-8ac6-cd905bd983e5" testId="1511133c-377d-8b17-b4b1-1fe35bda9ab7" testName="Fails" computerName="dffa20ef8728" duration="00:00:00.0078818" startTime="2026-10-08T11:52:45.4064857+00:00" endTime="2026-10-08T11:52:45.4147485+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6d66e804-2a71-4efd-8ac6-cd905bd983e5">
+      <Output>
+        <ErrorInfo>
+          <Message>Assertion failed. Expected values to be equal.
+
+expected: 5
+actual:   4
+
+Assert.AreEqual(5, 4)</Message>
+          <StackTrace>   at Sample.Tests.CalculatorTests.Fails() in /home/user/MSTestSample/Tests.cs:line 16
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Ignored" storage="/home/user/mstestsample/bin/debug/net10.0/mstestsample.dll" id="14f9fc08-110e-8b7a-a4d9-994d226b96f0">
+      <Execution id="28368746-0d15-490d-adee-c942a15abe78" />
+      <TestMethod codeBase="/home/user/MSTestSample/bin/Debug/net10.0/MSTestSample.dll" adapterTypeName="executor://mstestadapter/v4" className="Sample.Tests.CalculatorTests" name="Ignored" />
+    </UnitTest>
+    <UnitTest name="Slow" storage="/home/user/mstestsample/bin/debug/net10.0/mstestsample.dll" id="17f62522-91de-8e8f-aea3-7e16089955f4">
+      <Execution id="662b2e8d-6ced-402e-b971-d01e55bef5e7" />
+      <TestMethod codeBase="/home/user/MSTestSample/bin/Debug/net10.0/MSTestSample.dll" adapterTypeName="executor://mstestadapter/v4" className="Sample.Tests.CalculatorTests" name="Slow" />
+    </UnitTest>
+    <UnitTest name="Inconclusive" storage="/home/user/mstestsample/bin/debug/net10.0/mstestsample.dll" id="1cfaad95-5389-877b-9872-6c3e1f46cb1f">
+      <Execution id="5bd024cd-8e05-4b88-ac28-fab519d92866" />
+      <TestMethod codeBase="/home/user/MSTestSample/bin/Debug/net10.0/MSTestSample.dll" adapterTypeName="executor://mstestadapter/v4" className="Sample.Tests.CalculatorTests" name="Inconclusive" />
+    </UnitTest>
+    <UnitTest name="Rows (1,1)" storage="/home/user/mstestsample/bin/debug/net10.0/mstestsample.dll" id="18f88053-6f80-828e-8310-658e638bf828">
+      <Execution id="90c1dac5-46cb-4a6c-be9e-693847d6db1b" />
+      <TestMethod codeBase="/home/user/MSTestSample/bin/Debug/net10.0/MSTestSample.dll" adapterTypeName="executor://mstestadapter/v4" className="Sample.Tests.CalculatorTests" name="Rows" />
+    </UnitTest>
+    <UnitTest name="Folded" storage="/home/user/mstestsample/bin/debug/net10.0/mstestsample.dll" id="1f29f975-50bf-88c1-9e83-aebafea88f54">
+      <Execution id="2ab9f998-7df6-4bca-8e6d-97cdf7b8e9d7" />
+      <TestMethod codeBase="/home/user/MSTestSample/bin/Debug/net10.0/MSTestSample.dll" adapterTypeName="executor://mstestadapter/v4" className="Sample.Tests.FoldedTests" name="Folded" />
+    </UnitTest>
+    <UnitTest name="Add" storage="/home/user/mstestsample/bin/debug/net10.0/mstestsample.dll" priority="1" id="16db936a-449d-8e0c-af86-2aee54f46d52">
+      <Owners>
+        <Owner name="Patrick" />
+      </Owners>
+      <TestCategory>
+        <TestCategoryItem TestCategory="Arithmetic" />
+      </TestCategory>
+      <Execution id="0a66336f-268c-4186-895f-0ed3679119a8" />
+      <TestMethod codeBase="/home/user/MSTestSample/bin/Debug/net10.0/MSTestSample.dll" adapterTypeName="executor://mstestadapter/v4" className="Sample.Tests.CalculatorTests" name="Add" />
+    </UnitTest>
+    <UnitTest name="Fails" storage="/home/user/mstestsample/bin/debug/net10.0/mstestsample.dll" id="1511133c-377d-8b17-b4b1-1fe35bda9ab7">
+      <Execution id="6d66e804-2a71-4efd-8ac6-cd905bd983e5" />
+      <TestMethod codeBase="/home/user/MSTestSample/bin/Debug/net10.0/MSTestSample.dll" adapterTypeName="executor://mstestadapter/v4" className="Sample.Tests.CalculatorTests" name="Fails" />
+    </UnitTest>
+    <UnitTest name="Rows (2,3)" storage="/home/user/mstestsample/bin/debug/net10.0/mstestsample.dll" id="1f2533eb-0678-842a-8f23-2af1cec869f4">
+      <Execution id="e9d77d73-0368-400c-8563-5c789e285335" />
+      <TestMethod codeBase="/home/user/MSTestSample/bin/Debug/net10.0/MSTestSample.dll" adapterTypeName="executor://mstestadapter/v4" className="Sample.Tests.CalculatorTests" name="Rows" />
+    </UnitTest>
+    <UnitTest name="Throws" storage="/home/user/mstestsample/bin/debug/net10.0/mstestsample.dll" id="1f9e14c4-2b1b-8f7e-a8f9-4cc4c1e9837a">
+      <Execution id="f270f86a-d535-4b0f-9a7e-fb75b9239b39" />
+      <TestMethod codeBase="/home/user/MSTestSample/bin/Debug/net10.0/MSTestSample.dll" adapterTypeName="executor://mstestadapter/v4" className="Sample.Tests.CalculatorTests" name="Throws" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="16db936a-449d-8e0c-af86-2aee54f46d52" executionId="0a66336f-268c-4186-895f-0ed3679119a8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f29f975-50bf-88c1-9e83-aebafea88f54" executionId="6dd7aeff-c140-4cf7-990f-cea69eebc257" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f29f975-50bf-88c1-9e83-aebafea88f54" executionId="2ab9f998-7df6-4bca-8e6d-97cdf7b8e9d7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1cfaad95-5389-877b-9872-6c3e1f46cb1f" executionId="5bd024cd-8e05-4b88-ac28-fab519d92866" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="17f62522-91de-8e8f-aea3-7e16089955f4" executionId="662b2e8d-6ced-402e-b971-d01e55bef5e7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f9e14c4-2b1b-8f7e-a8f9-4cc4c1e9837a" executionId="f270f86a-d535-4b0f-9a7e-fb75b9239b39" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="14f9fc08-110e-8b7a-a4d9-994d226b96f0" executionId="28368746-0d15-490d-adee-c942a15abe78" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="18f88053-6f80-828e-8310-658e638bf828" executionId="90c1dac5-46cb-4a6c-be9e-693847d6db1b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f2533eb-0678-842a-8f23-2af1cec869f4" executionId="e9d77d73-0368-400c-8563-5c789e285335" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1511133c-377d-8b17-b4b1-1fe35bda9ab7" executionId="6d66e804-2a71-4efd-8ac6-cd905bd983e5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="10" executed="8" passed="3" failed="5" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>Test 'Ignored' was skipped in the test run.
+Test 'Inconclusive' was skipped in the test run.
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

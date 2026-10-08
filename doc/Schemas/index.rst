@@ -5,7 +5,8 @@ Schemas
 
 pyEDAA.Reports validates every file it reads against the schema of its format before converting it: an **XML schema**
 or a **JSON Schema**. It ships the schemas of the code coverage formats - e.g. Cobertura's XML or coverage.py's JSON
-report -, of the JUnit dialects and of Open Test Reporting; the schema of pyTooling's test report comes with pyTooling.
+report -, of the JUnit dialects, of Open Test Reporting and of VSTest's TRX files; the schema of pyTooling's test
+report comes with pyTooling.
 Each schema is listed here, the shipped ones with their full source, ready to read, to copy, or to download.
 
 .. _SCHEMAS/Files:
@@ -84,6 +85,9 @@ Available schemas
    * - :ref:`pyTooling TestReport v0.1 <SCHEMAS/TestReport-v0.1>`
      - :file:`TestReport-v0.1.xsd`
      - :class:`pyEDAA.Reports.Unittesting.pyTooling.Document`
+   * - :ref:`VSTest TRX <SCHEMAS/VSTest-TRX>`
+     - :file:`VSTest-TRX.xsd`
+     - :class:`pyEDAA.Reports.Unittesting.TRX.Document`
 
 :file:`TestReport-v0.1.xsd` is pyTooling's: the reader takes it from :mod:`pyTooling.Resources`, and its source is on
 :ref:`pyTooling's schema page <pyTool:SCHEMAS/TestReport-v0.1>`.
@@ -134,3 +138,4 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    TestLogger-JUnit
    OpenTestReporting
    TestReport-v0.1
+   VSTest-TRX

@@ -5,7 +5,7 @@ Each schema is shown, with its source, on a page of the :ref:`schema overview <S
 
 .. rubric:: Unit Test Report Schemas
 
-The XML schemas the JUnit dialects are validated against. pyTooling's test report is validated against
+The XML schemas the JUnit dialects and TRX files are validated against. pyTooling's test report is validated against
 :file:`TestReport-v0.1.xsd`, which pyTooling ships in :mod:`pyTooling.Resources`.
 
 * :file:`Any-JUnit.xsd` - the common denominator of the JUnit dialects, read by
@@ -18,6 +18,8 @@ The XML schemas the JUnit dialects are validated against. pyTooling's test repor
 * :file:`Nextest-JUnit.xsd` - JUnit XML as written by cargo-nextest.
 * :file:`PyTest-JUnit.xsd` - JUnit XML as written by pytest.
 * :file:`TestLogger-JUnit.xsd` - JUnit XML as written by the .NET test logger ``JunitXml.TestLogger``.
+* :file:`VSTest-TRX.xsd` - Visual Studio test results (TRX) as written by VSTest's TRX logger, read by
+  :class:`pyEDAA.Reports.Unittesting.TRX.Document`.
 
 The schemas of Open Test Reporting are in the resource package :mod:`pyEDAA.Reports.Resources.OpenTestReporting`.
 
