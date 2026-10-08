@@ -37,7 +37,7 @@ from tempfile                         import TemporaryDirectory
 from typing                           import Any
 
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, CoverageSummary, LineCoverageStatus
-from pyEDAA.Reports.CodeCoverage.GHDL import Document, File, MergedReport
+from pyEDAA.Reports.CodeCoverage.GHDL import CoverageMode, Document, File, MergedReport, Report
 from pyTooling.Testing                import Testcase
 from pyTooling.Versioning             import SemanticVersion
 
@@ -113,10 +113,17 @@ class FormatModel(Testcase):
 
 		counter = report.Files[Path("src/Counter.vhdl")]
 		self.assertEqual(
-			(Path("src/Counter.vhdl"), Path("."), "1a6afa99b014932646ce6591101aa1ac3695349a", "stmt", 35),
-			(counter.Name, counter.Directory, counter.SHA1, counter.Mode, counter.MaxLine)
+			(Path("src/Counter.vhdl"), Path("."), "1a6afa99b014932646ce6591101aa1ac3695349a", CoverageMode.Statement, 35),
+			(counter.Name, counter.Directory, counter.SHA1, counter.Mode, counter.LastLine)
 		)
 		self.assertEqual({25: True, 26: True, 27: False, 29: True, 34: True, 35: True}, counter.Result)
+
+	def test_Mode(self) -> None:
+		"""A file's ``mode`` is converted to a member of :class:`CoverageMode`."""
+		counter = Document(COUNT, analyzeAndConvert=True).Files[Path("src/Counter.vhdl")]
+
+		self.assertIs(CoverageMode.Statement, counter.Mode)
+		self.assertEqual("stmt", counter.Mode)
 
 	def test_Path(self) -> None:
 		"""A file's path is its name, prefixed by the directory it was analyzed in, unless GHDL ran there."""
@@ -126,7 +133,33 @@ class FormatModel(Testcase):
 			("/home/user/project/", "src/Counter.vhdl",            "/home/user/project/src/Counter.vhdl")
 		):
 			with self.subTest(directory=directory):
-				self.assertEqual(Path(path), File(Path(name), Path(directory), "0" * 40, "stmt", 1, {1: True}).Path)
+				file = File(Path(name), Path(directory), "0" * 40, CoverageMode.Statement, 1, {1: True})
+				self.assertEqual(Path(path), file.Path)
+
+	def test_Parent(self) -> None:
+		"""A file given a parent is added to the parent's files by its path."""
+		file = File(Path("src/Counter.vhdl"), Path("."), "0" * 40, CoverageMode.Statement, 1, {1: True})
+		self.assertIsNone(file.Parent)
+
+		report = Report()
+		file = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 1, {1: True}, parent=report)
+		self.assertIs(report, file.Parent)
+		self.assertEqual({Path("src/Counter.vhdl"): file}, report.Files)
+
+	def test_Parent_Converted(self) -> None:
+		"""The files of a converted coverage file belong to its document."""
+		document = Document(COUNT, analyzeAndConvert=True)
+
+		for file in document.Files.values():
+			with self.subTest(path=file.Path.as_posix()):
+				self.assertIs(document, file.Parent)
+
+	def test_Parent_Type(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("src/Counter.vhdl"), Path("."), "0" * 40, CoverageMode.Statement, 1, {1: True}, parent=1)
+
+		self.assertEqual("Parameter 'parent' is not of type 'Report' or 'MergedReport'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 
 class Conversion(Testcase):
@@ -184,7 +217,9 @@ class Merge(Testcase):
 
 		self.assertEqual("Counter", merged.Name)
 		self.assertEqual([count, reset], merged.Reports)
-		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].MaxLine)
+		for file in merged.Files.values():
+			self.assertIs(merged, file.Parent)
+		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].LastLine)
 
 		summary = merged.ToCoverageSummary()
 		self.assertEqual("Counter", summary.Name)
@@ -216,7 +251,7 @@ class Merge(Testcase):
 		merged.Merge(Document(RESET, analyzeAndConvert=True))
 		self.assertEqual(25, merged.ToCoverageSummary().CoveredLines)
 
-	def test_Merge_MaxLine(self) -> None:
+	def test_Merge_LastLine(self) -> None:
 		"""A merged file's last line with a coverage point is the largest of the merged files."""
 		content = loads(COUNT.read_text(encoding="utf-8"))
 		del content["outputs"][0]["result"]["66"]
@@ -225,7 +260,7 @@ class Merge(Testcase):
 			shorter = Document(_write(directory, content), analyzeAndConvert=True)
 
 		merged = MergedReport("Counter", (shorter, Document(COUNT, analyzeAndConvert=True)))
-		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].MaxLine)
+		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].LastLine)
 
 	def test_Merge_Checksum(self) -> None:
 		"""A source file changed between two runs can't be merged."""
@@ -287,7 +322,7 @@ class Schema(Testcase):
 				_ = Document(jsonFile, analyzeAndConvert=True)
 
 		self.assertEqual(
-			f"Validation error for '{jsonFile}' using JSON Schema 'GHDL-Coverage-JSON.schema.json'.", str(context.exception)
+			f"Validation error for '{jsonFile}' using JSON Schema 'GHDL-Coverage.schema.json'.", str(context.exception)
 		)
 		self.assertEqual(notes, context.exception.__notes__)
 
@@ -349,7 +384,7 @@ class Consistency(Testcase):
 			f"GHDL coverage file '{jsonFile}' names source file 'tb/Counter_tb.vhdl' twice.", str(context.exception)
 		)
 
-	def test_BeyondMaxLine(self) -> None:
+	def test_BeyondLastLine(self) -> None:
 		content = loads(COUNT.read_text(encoding="utf-8"))
 		content["outputs"][0]["max-line"] = 60
 		with TemporaryDirectory() as directory:

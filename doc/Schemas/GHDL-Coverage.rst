@@ -1,7 +1,7 @@
-.. _SCHEMAS/GHDL-Coverage-JSON:
+.. _SCHEMAS/GHDL-Coverage:
 
-GHDL coverage JSON
-##################
+GHDL coverage
+#############
 
 The coverage file GHDL writes when simulating with ``ghdl -r --coverage``, format version 1.0.0, as a JSON Schema.
 
@@ -18,7 +18,7 @@ required, a ``result`` is ``0`` or ``1`` per line number, and an unknown field i
 
       .. admonition:: Download
 
-         :download:`GHDL-Coverage-JSON.schema.json <../../pyEDAA/Reports/Resources/GHDL-Coverage-JSON.schema.json>`
+         :download:`GHDL-Coverage.schema.json <../../pyEDAA/Reports/Resources/GHDL-Coverage.schema.json>`
 
    .. grid-item::
       :columns: 6
@@ -27,13 +27,13 @@ required, a ``result`` is ``0`` or ``1`` per line number, and an unknown field i
 
          .. code-block:: bash
 
-            check-jsonschema --schemafile GHDL-Coverage-JSON.schema.json coverage-*.json
+            check-jsonschema --schemafile GHDL-Coverage.schema.json coverage-*.json
 
-.. _SCHEMAS/GHDL-Coverage-JSON/Source:
+.. _SCHEMAS/GHDL-Coverage/Source:
 
 Source
 ******
 
-.. literalinclude:: ../../pyEDAA/Reports/Resources/GHDL-Coverage-JSON.schema.json
+.. literalinclude:: ../../pyEDAA/Reports/Resources/GHDL-Coverage.schema.json
    :language: json
    :linenos:

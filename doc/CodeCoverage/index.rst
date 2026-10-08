@@ -301,9 +301,10 @@ GHDL coverage JSON
 GHDL writes a coverage file when simulating with ``ghdl -r --coverage``, by default to
 :file:`coverage-<timestamp>.json`, or to the file named by ``--coverage-output=<file>``.
 :class:`pyEDAA.Reports.CodeCoverage.GHDL.Document` validates it against the JSON Schema
-:ref:`GHDL-Coverage-JSON.schema.json <SCHEMAS/GHDL-Coverage-JSON>` - format version 1.0.0 - and reads it into the
-format's model: the source files, each with the directory it was analyzed in, its SHA-1 checksum and the kind of
-coverage - ``stmt``, statement coverage -, and per line with a coverage point, whether a statement of the line ran.
+:ref:`GHDL-Coverage.schema.json <SCHEMAS/GHDL-Coverage>` - format version 1.0.0 - and reads it into the
+format's model: the source files, each with the directory it was analyzed in, its SHA-1 checksum, the kind of
+coverage as a :class:`~pyEDAA.Reports.CodeCoverage.GHDL.CoverageMode` - GHDL writes only ``stmt``, statement
+coverage -, and per line with a coverage point, whether a statement of the line ran.
 GHDL instruments the design's sources, not the libraries ``ieee`` and ``std``.
 
 :meth:`~pyEDAA.Reports.CodeCoverage.GHDL.Document.ToCoverageSummary` converts it to the common model, as
@@ -323,7 +324,10 @@ ran, if it ran in one of the runs. The files must agree on each source file's ch
    from pathlib import Path
    from pyEDAA.Reports.CodeCoverage.GHDL import Document, MergedReport
 
-   documents = [Document(path, analyzeAndConvert=True) for path in sorted(Path(".").glob("coverage-*.json"))]
+   documents = []
+   for path in sorted(Path(".").glob("coverage-*.json")):
+     documents.append(Document(path, analyzeAndConvert=True))
+
    summary = MergedReport("Counter", documents).ToCoverageSummary()
    for file in summary.IterateFiles():
      print(f"{file.Path}: {file.LineCoverage:.1%}")
