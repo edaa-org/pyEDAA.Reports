@@ -36,7 +36,7 @@ from tempfile                                 import TemporaryDirectory
 from typing                                   import Any
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.Gcov         import Coverage, DataFile, Document, File, FormatVersion, SCHEMAS
+from pyEDAA.Reports.CodeCoverage.Gcov         import DataFile, Document, File, FormatVersion, SCHEMAS
 from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function as gcov_Function, Line
 from pyTooling.Testing                        import Testcase
 from pyTooling.Versioning                     import SemanticVersion
@@ -239,11 +239,11 @@ class ParentRelation(Testcase):
 	"""Each record below the report names its parent and is added to it."""
 
 	def test_DataFile(self) -> None:
-		coverage = Coverage()
-		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"), parent=coverage)
+		document = Document(Path("coverage.json"))
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"), parent=document)
 
-		self.assertIs(coverage, dataFile.Parent)
-		self.assertEqual([dataFile], coverage.DataFiles)
+		self.assertIs(document, dataFile.Parent)
+		self.assertEqual([dataFile], document.DataFiles)
 
 	def test_File(self) -> None:
 		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"))
@@ -290,9 +290,9 @@ class ParentRelation(Testcase):
 
 	def test_File_Parent(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = File(Path("main.c"), parent=Coverage())
+			_ = File(Path("main.c"), parent=Document(Path("coverage.json")))
 		self.assertEqual("Parameter 'parent' is not of type 'DataFile'.", str(context.exception))
-		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.Coverage'."], context.exception.__notes__)
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.Document'."], context.exception.__notes__)
 
 	def test_Function_Parent(self) -> None:
 		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"))

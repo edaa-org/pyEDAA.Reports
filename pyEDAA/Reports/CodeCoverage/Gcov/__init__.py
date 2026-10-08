@@ -428,7 +428,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Coverage(metaclass=ExtendedType, slots=True):
+class Coverage(metaclass=ExtendedType, mixin=True):
 	"""
 	The content of a report file: the data files.
 
@@ -454,7 +454,7 @@ class Coverage(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Document(Coverage, cc_Document):
+class Document(cc_Document, Coverage):
 	"""
 	A gcov JSON code coverage report: read into the format's model, and converted to the common model.
 	"""
@@ -468,11 +468,14 @@ class Document(Coverage, cc_Document):
 		:param jsonReportFile:    Path to the JSON file, gzip-compressed or plain.
 		:param analyzeAndConvert: Optional, if true, analyze the file and convert its content. Default: ``False``.
 		"""
-		super().__init__()
+		super().__init__(jsonReportFile)
+		Coverage.__init__(self)
 
 		self._jsonDocuments = None
 
-		cc_Document.__init__(self, jsonReportFile, analyzeAndConvert)
+		if analyzeAndConvert:
+			self.Analyze()
+			self.Convert()
 
 	def Analyze(self) -> None:
 		"""
