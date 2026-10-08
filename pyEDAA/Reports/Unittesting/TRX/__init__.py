@@ -256,13 +256,15 @@ class TestRun(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the counters of the run's summary (:attr:`_counters`).
 
+		A counter is named by its attribute of ``<Counters>``, e.g. ``total`` or ``passed``.
+
 		.. attention::
 
 		   The counters can contradict the results. VSTest's TRX logger counts every result in ``total``, but only passed
 		   and failed results in ``executed``; it writes ``0`` for every other counter, e.g. ``notExecuted``. A skipped
 		   test is counted in ``total`` only.
 
-		:returns: The counters, by attribute name, e.g. ``total`` or ``notExecuted``.
+		:returns: The counters, by attribute name.
 		"""
 		return self._counters
 
