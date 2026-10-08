@@ -586,6 +586,27 @@ The report states no figures and no ratios.
 There is no reader yet.
 
 
+.. _CODECOV/CLI:
+
+Command Line
+************
+
+The command ``coverage`` of :program:`pyedaa-reports` reads a report of any format above, which a reader exists for,
+shows its line and branch figures and, with ``--output``, writes it as Cobertura XML - so any format becomes the format
+most tools read (see :ref:`References/cli`):
+
+.. code-block:: console
+
+   $ pyedaa-reports coverage --input=Gcov-JSON:main.gcov.json.gz --output=Cobertura:coverage.xml
+   Reading code coverage report 'main.gcov.json.gz' (Gcov-JSON) ...
+   Lines:    26 of 27 covered (96.3%)
+   Writing Cobertura XML report 'coverage.xml' ...
+
+``--input`` names the format - ``Any-Cobertura``, ``CoveragePy-Cobertura``, ``CoveragePy-JSON``, ``Gcov-JSON`` or
+``GHDL-JSON`` (case-insensitive) - and the file, ``--output`` the format ``Cobertura`` and the file. ``-v`` adds the
+figures of each file.
+
+
 .. _CODECOV/Tools:
 
 Tools
