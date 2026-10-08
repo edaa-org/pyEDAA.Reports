@@ -75,7 +75,7 @@ class FormatModel(Testcase):
 		)
 		self.assertEqual(
 			["myPackage/Shapes.py", "myPackage/Units/Length.py", "myPackage/Units/__init__.py", "myPackage/__init__.py"],
-			sorted(report.Files)
+			sorted(path.as_posix() for path in report.Files)
 		)
 		totals = report.Totals
 		self.assertEqual((27, 22, 5, 2, 10, 5, 3), (
@@ -83,7 +83,7 @@ class FormatModel(Testcase):
 			totals.CoveredBranches, totals.PartialBranchCount
 		))
 
-		shapes = report.Files["myPackage/Shapes.py"]
+		shapes = report.Files[Path("myPackage/Shapes.py")]
 		self.assertEqual([8, 25], shapes.MissingLines)
 		self.assertEqual([28, 29], shapes.ExcludedLines)
 		self.assertIn((7, 8), shapes.MissingBranches)
@@ -101,7 +101,7 @@ class Conversion(Testcase):
 		summary = report.ToCoverageSummary()
 
 		pairs = [(summary, report.Totals)]
-		pairs.extend((file, report.Files[file.Path.as_posix()].Summary) for file in summary.IterateFiles())
+		pairs.extend((file, report.Files[file.Path].Summary) for file in summary.IterateFiles())
 		for entity, stated in pairs:
 			with self.subTest(entity=entity.Path.as_posix()):
 				self.assertEqual(

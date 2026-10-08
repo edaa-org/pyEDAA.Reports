@@ -82,6 +82,10 @@ __all__ = ["SCHEMA"]
 
 SCHEMA = "CoveragePy-JSON.schema.json"  #: The JSON Schema a report is validated against.
 
+# A class with a property named like a class - ``Path``, ``Summary`` - can't name that class in the annotation of a
+# field: the class body's namespace, where annotations are evaluated, binds the name to the property.
+_Path = Path
+
 
 @export
 class Summary(metaclass=ExtendedType, slots=True):
@@ -187,6 +191,9 @@ class Summary(metaclass=ExtendedType, slots=True):
 		return self._partialBranchCount
 
 
+_Summary = Summary
+
+
 @export
 class Base(metaclass=ExtendedType, slots=True):
 	"""
@@ -198,7 +205,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	_excludedLines:    list[int]              #: The excluded lines.
 	_executedBranches: list[tuple[int, int]]  #: The taken branches, as pairs of source and destination line.
 	_missingBranches:  list[tuple[int, int]]  #: The branches never taken, as pairs of source and destination line.
-	_summary:          Summary                #: The counters coverage.py computed.
+	_summary:          _Summary               #: The counters coverage.py computed.
 
 	def __init__(self, record: dict[str, Any]) -> None:
 		"""
@@ -325,11 +332,11 @@ class File(Base):
 	The regions named ``""`` - the lines outside of every function or class - aren't kept.
 	"""
 
-	_path:      str                #: The file's path, relative to the directory coverage.py ran in.
+	_path:      _Path              #: The file's path, relative to the directory coverage.py ran in.
 	_functions: dict[str, Region]  #: The functions, by qualified name.
 	_classes:   dict[str, Region]  #: The classes, by qualified name.
 
-	def __init__(self, path: str, record: dict[str, Any]) -> None:
+	def __init__(self, path: Path, record: dict[str, Any]) -> None:
 		"""
 		Initialize the file from its JSON object.
 
@@ -343,7 +350,7 @@ class File(Base):
 		self._classes =   {name: Region(name, region) for name, region in record.get("classes", {}).items() if name != ""}
 
 	@readonly
-	def Path(self) -> str:
+	def Path(self) -> Path:
 		"""
 		Read-only property to access the file's path (:attr:`_path`).
 
@@ -381,7 +388,7 @@ class Report(metaclass=ExtendedType, slots=True):
 	_timestamp:      Nullable[str]      #: Time the report was written, ISO 8601.
 	_branchCoverage: bool               #: Whether branch coverage was measured.
 	_showContexts:   bool               #: Whether the lines' contexts are listed.
-	_files:          dict[str, File]    #: The measured files, by path.
+	_files:          dict[Path, File]   #: The measured files, by path.
 	_totals:         Nullable[Summary]  #: The counters of the whole report.
 
 	def __init__(self) -> None:
@@ -442,7 +449,7 @@ class Report(metaclass=ExtendedType, slots=True):
 		return self._showContexts
 
 	@readonly
-	def Files(self) -> dict[str, File]:
+	def Files(self) -> dict[Path, File]:
 		"""
 		Read-only property to access the measured files (:attr:`_files`).
 
@@ -536,8 +543,12 @@ class Document(Report, cc_Document):
 			self._timestamp =      meta["timestamp"]
 			self._branchCoverage = meta["branch_coverage"]
 			self._showContexts =   meta["show_contexts"]
-			self._files =          {path: File(path, record) for path, record in self._jsonDocument["files"].items()}
+			self._files =          {}
 			self._totals =         Summary(self._jsonDocument["totals"])
+
+			for name, record in self._jsonDocument["files"].items():
+				path =              Path(name.replace("\\", "/"))
+				self._files[path] = File(path, record)
 
 		self._conversionDuration = sw.Duration
 
@@ -601,7 +612,7 @@ class Document(Report, cc_Document):
 		:param commonFile: The file of the common model.
 		:param summary:    The report's root of the common model.
 		"""
-		path = Path(file._path.replace("\\", "/"))
+		path = file._path
 		parent: cc_Unit | CoverageSummary = summary
 		for part in path.parent.parts:
 			parent = parent._units[part] if part in parent._units else cc_Package(part, parent=parent)
