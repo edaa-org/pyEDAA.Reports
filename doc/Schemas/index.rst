@@ -4,7 +4,7 @@ Schemas
 #######
 
 pyEDAA.Reports validates every file it reads against the schema of its format before converting it: an **XML schema**
-or a **JSON Schema**. It ships the schemas of the code coverage formats - Cobertura's XML and coverage.py's JSON
+or a **JSON Schema**. It ships the schemas of the code coverage formats - e.g. Cobertura's XML or coverage.py's JSON
 report - and of the JUnit dialects; the schema of pyTooling's test report comes with pyTooling. Each schema is listed
 here, the shipped ones with their full source, ready to read, to copy, or to download.
 
@@ -29,6 +29,9 @@ Available schemas
    * - :ref:`coverage.py JSON <SCHEMAS/CoveragePy-JSON>`
      - :file:`CoveragePy-JSON.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.CoveragePy.Document`
+   * - :ref:`GHDL coverage <SCHEMAS/GHDL-Coverage>`
+     - :file:`GHDL-Coverage.schema.json`
+     - :class:`pyEDAA.Reports.CodeCoverage.GHDL.Document`
    * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
      - :file:`Any-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.Document`
@@ -79,6 +82,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    Any-Cobertura
    Cobertura-04
    CoveragePy-JSON
+   GHDL-Coverage
    Any-JUnit
    Ant-JUnit4
    CTest-JUnit
