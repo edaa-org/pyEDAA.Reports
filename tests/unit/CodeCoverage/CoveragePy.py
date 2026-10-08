@@ -39,6 +39,7 @@ from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, Fun
 from pyEDAA.Reports.CodeCoverage            import Module, Package
 from pyEDAA.Reports.CodeCoverage.CoveragePy import Document
 from pyTooling.Testing                      import Testcase
+from pyTooling.Versioning                   import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -73,6 +74,7 @@ class FormatModel(Testcase):
 		self.assertEqual(
 			(3, "7.16.1", True, False), (report.Format, report.Version, report.BranchCoverage, report.ShowContexts)
 		)
+		self.assertIsInstance(report.Version, SemanticVersion)
 		self.assertEqual(
 			["myPackage/Shapes.py", "myPackage/Units/Length.py", "myPackage/Units/__init__.py", "myPackage/__init__.py"],
 			sorted(path.as_posix() for path in report.Files)

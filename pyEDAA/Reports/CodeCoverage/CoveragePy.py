@@ -70,6 +70,7 @@ from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
 from pyTooling.MetaClasses       import ExtendedType
 from pyTooling.Stopwatch         import Stopwatch
+from pyTooling.Versioning        import SemanticVersion
 
 from pyEDAA.Reports              import Resources
 from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, CoverageSummary
@@ -383,13 +384,13 @@ class Report(metaclass=ExtendedType, slots=True):
 	The report's root: how and when it was written, the measured files, and the totals.
 	"""
 
-	_format:         Nullable[int]      #: Version of the report format.
-	_version:        Nullable[str]      #: Version of coverage.py.
-	_timestamp:      Nullable[str]      #: Time the report was written, ISO 8601.
-	_branchCoverage: bool               #: Whether branch coverage was measured.
-	_showContexts:   bool               #: Whether the lines' contexts are listed.
-	_files:          dict[Path, File]   #: The measured files, by path.
-	_totals:         Nullable[Summary]  #: The counters of the whole report.
+	_format:         Nullable[int]              #: Version of the report format.
+	_version:        Nullable[SemanticVersion]  #: Version of coverage.py.
+	_timestamp:      Nullable[str]              #: Time the report was written, ISO 8601.
+	_branchCoverage: bool                       #: Whether branch coverage was measured.
+	_showContexts:   bool                       #: Whether the lines' contexts are listed.
+	_files:          dict[Path, File]           #: The measured files, by path.
+	_totals:         Nullable[Summary]          #: The counters of the whole report.
 
 	def __init__(self) -> None:
 		"""
@@ -413,11 +414,11 @@ class Report(metaclass=ExtendedType, slots=True):
 		return self._format
 
 	@readonly
-	def Version(self) -> Nullable[str]:
+	def Version(self) -> Nullable[SemanticVersion]:
 		"""
 		Read-only property to access the version of coverage.py, which wrote the report (:attr:`_version`).
 
-		:returns: The version, e.g. ``7.16.1``.
+		:returns: The version, e.g. ``7.16.1``; ``None`` before the report was converted.
 		"""
 		return self._version
 
@@ -539,7 +540,7 @@ class Document(Report, cc_Document):
 		with Stopwatch() as sw:
 			meta = self._jsonDocument["meta"]
 			self._format =         meta["format"]
-			self._version =        meta["version"]
+			self._version =        SemanticVersion.Parse(meta["version"])
 			self._timestamp =      meta["timestamp"]
 			self._branchCoverage = meta["branch_coverage"]
 			self._showContexts =   meta["show_contexts"]
