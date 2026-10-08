@@ -393,6 +393,90 @@ class JavaGradleJUnit5(Testcase):
 					self.assertEqual(tc.Status, sameTC.Status)
 					self.assertEqual(tc.Duration, sameTC.Duration)
 
+
+class JavaGradleJUnit6(Testcase):
+	def test_JUnit6(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(1, doc.TestsuiteCount)
+		self.assertEqual(8, doc.TestcaseCount)
+		self.assertEqual(8, doc.Tests)
+		self.assertEqual(3, doc.Passed)
+		self.assertEqual(3, doc.Failed)
+		self.assertEqual(0, doc.Errored)
+		self.assertEqual(2, doc.Skipped)
+
+	def test_Names(self) -> None:
+		"""Test suite and test cases are named by their display names; ``classname`` is the class' name."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(["Tests of MyClass"], list(doc._testsuites))
+		testsuite = doc._testsuites["Tests of MyClass"]
+		self.assertEqual(["my.pack.MyClassTest"], list(testsuite._testclasses))
+		self.assertEqual(
+			{
+				'[1] "5", "5"':                TestcaseStatus.Passed,
+				'[2] "-5", "5"':               TestcaseStatus.Passed,
+				'[3] "0", "1"':                TestcaseStatus.Failed,
+				"testAssumption()":            TestcaseStatus.Skipped,
+				"testDivideByZero()":          TestcaseStatus.Failed,
+				"testReturnTrue()":            TestcaseStatus.Failed,
+				"testDisabled()":              TestcaseStatus.Skipped,
+				"returnFalse() returns false": TestcaseStatus.Passed,
+			},
+			{name: testcase.Status for name, testcase in testsuite._testclasses["my.pack.MyClassTest"]._testcases.items()}
+		)
+
+	def test_NestedClass(self) -> None:
+		"""A nested test class is a test suite and a file of its own."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest$Divide.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(["my.pack.MyClassTest$Divide"], list(doc._testsuites))
+		self.assertEqual(1, doc.Passed)
+
+	def test_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = JUnit4Document(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.StartTime, sameTS.StartTime)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+
 class PythonPyTest(TestCase):
 	def test_Read(self) -> None:
 		print()

@@ -219,11 +219,11 @@ JUnit5
 * https://github.com/junit-team/junit-framework
 * https://docs.junit.org/
 
-JUnit 5 and its successor JUnit 6 run tests on the JUnit Platform. The example :file:`examples/Java/Gradle-JUnit5`
-runs JUnit 5 tests by `Gradle <https://github.com/gradle/gradle>`__ in the pipeline and writes both: Gradle's Ant +
-JUnit4 XML files, read by the :ref:`Ant + JUnit4 dialect <UNITTEST/SpecificDataModel/JUnit/Dialect/AntJUnit4>`, and
-the JUnit Platform's :ref:`Open Test Reporting <UNITTEST/FileFormats/OTR>` file. Compared to JUnit 4 tests, Gradle's
-files differ:
+JUnit 5 and its successor JUnit 6 run tests on the JUnit Platform. The examples :file:`examples/Java/Gradle-JUnit5`
+and :file:`examples/Java/Gradle-JUnit6` run JUnit 5 and JUnit 6 tests by `Gradle <https://github.com/gradle/gradle>`__
+in the pipeline and write both: Gradle's Ant + JUnit4 XML files, read by the
+:ref:`Ant + JUnit4 dialect <UNITTEST/SpecificDataModel/JUnit/Dialect/AntJUnit4>`, and the JUnit Platform's
+:ref:`Open Test Reporting <UNITTEST/FileFormats/OTR>` file. Compared to JUnit 4 tests, Gradle's files differ:
 
 * The test suite is named by the test class' display name (``@DisplayName``), the file by the class' name.
 * A test case is named by its display name: the method name with its parameter types, e.g. ``testReturnTrue()``, or
@@ -237,6 +237,9 @@ files differ:
   ``<skipped>`` with ``message``, ``type`` and the stack trace.
 * The JUnit Platform removes JUnit's and Gradle's stack frames calling the test method from stack traces; the JDK's
   frames remain.
+* Compared to JUnit 5, JUnit 6 quotes the arguments in the display name of a parameterized test (``[1] "5", "5"``
+  instead of ``[1] 5, 5``), and removes the JDK's frames calling the test method and the assertion's internal frames
+  from stack traces too.
 
 
 .. _UNITTEST/Tool/OSVVM:
