@@ -418,7 +418,7 @@ class Schema(Testcase):
 				_ = Document(jsonFile, analyzeAndConvert=True)
 
 		self.assertEqual(
-			f"Validation error for '{jsonFile}' using JSON Schema 'Gcov-JSON.schema.json'.", str(context.exception)
+			f"Validation error for '{jsonFile}' using JSON Schema 'Gcov.schema.json'.", str(context.exception)
 		)
 		self.assertEqual(["/format_version: '3' is not one of ['1', '2']"], context.exception.__notes__)
 

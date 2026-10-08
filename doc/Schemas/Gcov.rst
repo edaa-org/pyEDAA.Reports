@@ -1,4 +1,4 @@
-.. _SCHEMAS/Gcov-JSON:
+.. _SCHEMAS/Gcov:
 
 gcov JSON
 #########
@@ -20,7 +20,7 @@ object: gcov's standard output holds one per data file, each validated on its ow
 
       .. admonition:: Download
 
-         :download:`Gcov-JSON.schema.json <../../pyEDAA/Reports/Resources/Gcov-JSON.schema.json>`
+         :download:`Gcov.schema.json <../../pyEDAA/Reports/Resources/Gcov.schema.json>`
 
    .. grid-item::
       :columns: 6
@@ -30,13 +30,13 @@ object: gcov's standard output holds one per data file, each validated on its ow
          .. code-block:: bash
 
             gunzip --keep main.gcov.json.gz
-            check-jsonschema --schemafile Gcov-JSON.schema.json main.gcov.json
+            check-jsonschema --schemafile Gcov.schema.json main.gcov.json
 
-.. _SCHEMAS/Gcov-JSON/Source:
+.. _SCHEMAS/Gcov/Source:
 
 Source
 ******
 
-.. literalinclude:: ../../pyEDAA/Reports/Resources/Gcov-JSON.schema.json
+.. literalinclude:: ../../pyEDAA/Reports/Resources/Gcov.schema.json
    :language: json
    :linenos:

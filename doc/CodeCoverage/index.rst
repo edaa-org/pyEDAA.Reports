@@ -346,7 +346,7 @@ gcov JSON
 GCC's gcov writes its JSON report with ``gcov --json-format``, for any language GCC compiles - e.g. C, C++, Fortran,
 Ada, or VHDL with GHDL's GCC backend: gzip-compressed to a :file:`*.gcov.json.gz` file per data file, or - with
 ``--stdout`` - as plain JSON, one line per data file. :class:`pyEDAA.Reports.CodeCoverage.Gcov.Document` reads either,
-validates each JSON object against the JSON Schema :ref:`Gcov-JSON.schema.json <SCHEMAS/Gcov-JSON>` - format versions
+validates each JSON object against the JSON Schema :ref:`Gcov.schema.json <SCHEMAS/Gcov>` - format versions
 1 and 2 - and reads it into the format's model: the data files, their source files, functions and lines - in format 2
 with the IDs of the basic blocks of a line.
 
