@@ -1,13 +1,13 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/GHDL-Coverage.schema.json",
-	"title": "GHDL coverage file",
-	"description": "The coverage file GHDL writes with 'ghdl -r --coverage', version 1.0.0. Reverse-engineered from GHDL's writer 'src/ghdldrv/ghdlcovout.adb' and reader 'src/ghdldrv/ghdlcov.adb'.",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/GHDL-Coverage-1.0.0.schema.json",
+	"title": "GHDL coverage file, format version 1.0.0",
+	"description": "The coverage file GHDL writes with 'ghdl -r --coverage', format version 1.0.0. Reverse-engineered from GHDL's writer 'src/ghdldrv/ghdlcovout.adb' and reader 'src/ghdldrv/ghdlcov.adb'.",
 	"type": "object",
 	"required": ["app", "version", "testcase", "timestamp", "outputs"],
 	"properties": {
 		"app":       {"description": "Kind of the file.", "const": "GHDL coverage output file"},
-		"version":   {"description": "Version of the format.", "enum": ["1.0.0"]},
+		"version":   {"description": "Version of the format.", "const": "1.0.0"},
 		"testcase":  {"description": "Name of the testcase; GHDL writes 'unknown'.", "type": "string"},
 		"timestamp": {"description": "Time the file was written, UTC, as YYYYMMDDhhmmss.mmm.", "type": "string", "pattern": "^[0-9]{14}\\.[0-9]{3}$"},
 		"outputs": {

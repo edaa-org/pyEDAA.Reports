@@ -35,9 +35,8 @@ from textwrap import dedent
 
 from pyEDAA.Reports.Unittesting           import Testcase as ut_Testcase, TestcaseStatus, Testsuite, TestsuiteStatus
 from pyEDAA.Reports.Unittesting           import UnittestError, TestsuiteSummary, MergedTestsuiteSummary
-from pyEDAA.Reports.Unittesting.pyTooling import Document
+from pyEDAA.Reports.Unittesting.pyTooling import SCHEMA_FILES, Document, FormatVersion
 from pyTooling.Testing                    import Testcase
-from pyTooling.Versioning                 import SemanticVersion
 
 
 REPORT = dedent("""\
@@ -119,7 +118,8 @@ class Reader(Testcase):
 	def test_Hierarchy(self) -> None:
 		document = Document(self._reportFile, analyzeAndConvert=True)
 
-		self.assertEqual(SemanticVersion(0, 1), document.SchemaVersion)
+		self.assertEqual(FormatVersion.Version0_1, document.SchemaVersion)
+		self.assertIsInstance(document.SchemaVersion, FormatVersion)
 		self.assertEqual("TestReport", document.Name)
 		self.assertEqual(6, document.TestcaseCount)
 		self.assertEqual(TestsuiteStatus.Failed, document.Status)
@@ -234,4 +234,10 @@ class Reader(Testcase):
 			_ = document.SchemaVersion
 
 		document.Analyze()
-		self.assertEqual(SemanticVersion(0, 1), document.SchemaVersion)
+		self.assertEqual(FormatVersion.Version0_1, document.SchemaVersion)
+
+	def test_SchemaPerVersion(self) -> None:
+		"""Each format version has one XML schema, named after the version."""
+		self.assertEqual(list(FormatVersion), list(SCHEMA_FILES.values()))
+		for schemaFile, version in SCHEMA_FILES.items():
+			self.assertEqual(f"TestReport-v{version}.xsd", schemaFile)

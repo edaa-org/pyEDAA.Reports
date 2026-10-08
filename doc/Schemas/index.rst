@@ -32,8 +32,8 @@ Available schemas
    * - :ref:`coverage.py JSON <SCHEMAS/CoveragePy-JSON>`
      - :file:`CoveragePy-JSON.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.CoveragePy.Document`
-   * - :ref:`GHDL coverage <SCHEMAS/GHDL-Coverage>`
-     - :file:`GHDL-Coverage.schema.json`
+   * - :ref:`GHDL coverage 1.0.0 <SCHEMAS/GHDL-Coverage-1.0.0>`
+     - :file:`GHDL-Coverage-1.0.0.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.GHDL.Document`
    * - :ref:`gcov JSON 1 <SCHEMAS/Gcov-1>`
      - :file:`Gcov-1.schema.json`
@@ -102,7 +102,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    Cobertura-04
    CoveragePy-Cobertura
    CoveragePy-JSON
-   GHDL-Coverage
+   GHDL-Coverage-1.0.0
    Gcov-1
    Gcov-2
    NVC-Cobertura
