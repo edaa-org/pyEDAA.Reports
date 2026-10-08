@@ -159,6 +159,30 @@ GoogleTest (gtest)
 * https://github.com/google/googletest
 
 
+.. _UNITTEST/Tool/Gradle:
+
+Gradle
+======
+
+* https://github.com/gradle/gradle
+* https://docs.gradle.org/current/userguide/java_testing.html
+
+Gradle's ``test`` task writes one Ant + JUnit4 XML file per test class into :file:`build/test-results/test/`, named
+:file:`TEST-<class>.xml` like Ant's. The
+:ref:`Ant + JUnit4 dialect <UNITTEST/SpecificDataModel/JUnit/Dialect/AntJUnit4>` reads them. The example
+:file:`examples/Java/Gradle-JUnit4` runs JUnit 4 tests by Gradle in the pipeline. Compared to Ant's ``<junit>`` task,
+Gradle writes:
+
+* an exception other than a failed assertion as ``<failure>``, never as ``<error>``. ``errors`` is always ``0``.
+* an empty ``<properties/>`` element. Ant lists the JVM's system properties and the build's properties.
+* ``timestamp`` in UTC with milliseconds, e.g. ``2026-10-08T10:41:52.384Z``. Ant writes the local time without
+  fraction or time zone.
+* an ignored test (``@Ignore``) as an empty ``<skipped/>``, without the reason, and a failed assumption as
+  ``<skipped>`` with ``message``, ``type`` and the stack trace. Ant writes both as ``<skipped message="..."/>``.
+* the exception's class name and message into ``message`` of ``<failure>``, and the unfiltered stack trace as its text.
+  Ant writes the exception's message only and removes JUnit's and Ant's stack frames.
+
+
 .. _UNITTEST/Tool/JUnit4:
 
 JUnit4
