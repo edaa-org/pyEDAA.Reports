@@ -143,7 +143,7 @@ class Segment(metaclass=ExtendedType, slots=True):
 
 
 @export
-class BaseRegion(metaclass=ExtendedType, slots=True):
+class Base(metaclass=ExtendedType, slots=True):
 	"""
 	Base-class of the source regions: a source range, the file it is in, the file it expands to, and its kind.
 	"""
@@ -239,7 +239,7 @@ class BaseRegion(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Region(BaseRegion):
+class Region(Base):
 	"""
 	A region of a function or an expansion: a source range with a count.
 
@@ -269,7 +269,7 @@ class Region(BaseRegion):
 
 
 @export
-class BranchRegion(BaseRegion):
+class BranchRegion(Base):
 	"""
 	A branch region: a condition with the counts of its true and false outcome.
 
@@ -360,7 +360,7 @@ class TestVector(metaclass=ExtendedType, slots=True):
 
 
 @export
-class MCDCRecord(BaseRegion):
+class MCDCRecord(Base):
 	"""
 	An MC/DC record: a decision of conditions, and for each condition, whether a pair of test vectors showed its
 	independent effect on the outcome.
