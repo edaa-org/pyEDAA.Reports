@@ -36,7 +36,9 @@ gcov writes the format with ``gcov --json-format``: gzip-compressed to a :file:`
 it is validated against the JSON Schema :file:`Gcov-JSON.schema.json`, reverse-engineered from GCC, which accepts
 format versions 1 (GCC 9 to 13) and 2 (GCC 14 and later). The format's model keeps what the report states: a
 :class:`Document` holds :class:`DataFile` records, a data file :class:`File` records, and a file its
-:class:`Function` and :class:`Line` records - a line in format 2 with the IDs of its basic blocks.
+:class:`Function` and :class:`Line` records - a line in format 2 with the IDs of its basic blocks. Each record's
+constructor takes typed values, so the model can be built by hand; its class method ``Parse`` reads the record's JSON
+object.
 
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
@@ -61,15 +63,16 @@ format versions 1 (GCC 9 to 13) and 2 (GCC 14 and later). The format's model kee
 """
 from __future__                  import annotations
 
+from collections.abc             import Iterable
 from gzip                        import BadGzipFile, decompress
 from json                        import JSONDecodeError, JSONDecoder, loads
 from pathlib                     import Path
 from re                          import compile as re_compile
-from typing                      import Any, Optional as Nullable
+from typing                      import Any, Optional as Nullable, Self
 from zlib                        import error as ZLibError
 
 from jsonschema                  import Draft202012Validator
-from pyTooling.Common            import readResourceFile
+from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
 from pyTooling.MetaClasses       import ExtendedType
@@ -103,17 +106,103 @@ class Line(metaclass=ExtendedType, slots=True):
 	_unexecutedBlock: bool           #: Whether a basic block of the line, not only reached by exceptions, never ran.
 	_blockIDs:        list[int]      #: IDs of the basic blocks ending on this line, in format 2.
 
-	def __init__(self, record: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		lineNumber:      int,
+		count:           int,
+		unexecutedBlock: bool,
+		functionName:    Nullable[str] = None,
+		blockIDs:        Nullable[Iterable[int]] = None
+	) -> None:
 		"""
-		Initialize the line from its JSON object.
+		Initialize the line.
+
+		:param lineNumber:      Line number, counted from 1.
+		:param count:           Number of times the line ran.
+		:param unexecutedBlock: Whether a basic block of the line, not only reached by exceptions, never ran.
+		:param functionName:    Optional, mangled name of the function the line belongs to. Default: ``None``.
+		:param blockIDs:        Optional, IDs of the basic blocks ending on this line. Default: none.
+		:raises ValueError:     If parameter ``lineNumber`` is ``None``.
+		:raises TypeError:      If parameter ``lineNumber`` isn't of type :class:`int`.
+		:raises ValueError:     If parameter ``lineNumber`` is less than 1.
+		:raises ValueError:     If parameter ``count`` is ``None``.
+		:raises TypeError:      If parameter ``count`` isn't of type :class:`int`.
+		:raises ValueError:     If parameter ``count`` is negative.
+		:raises ValueError:     If parameter ``unexecutedBlock`` is ``None``.
+		:raises TypeError:      If parameter ``unexecutedBlock`` isn't of type :class:`bool`.
+		:raises TypeError:      If parameter ``functionName`` isn't of type :class:`str`.
+		:raises TypeError:      If parameter ``blockIDs`` isn't iterable.
+		:raises TypeError:      If parameter ``blockIDs`` contains an element not of type :class:`int`.
+		"""
+		if lineNumber is None:
+			raise ValueError(f"Parameter 'lineNumber' is None.")
+		elif not isinstance(lineNumber, int):
+			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
+			raise ex
+		elif lineNumber < 1:
+			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex.add_note(f"Got value '{lineNumber}'.")
+			raise ex
+
+		if count is None:
+			raise ValueError(f"Parameter 'count' is None.")
+		elif not isinstance(count, int):
+			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
+			raise ex
+		elif count < 0:
+			ex = ValueError(f"Parameter 'count' is negative.")
+			ex.add_note(f"Got value '{count}'.")
+			raise ex
+
+		if unexecutedBlock is None:
+			raise ValueError(f"Parameter 'unexecutedBlock' is None.")
+		elif not isinstance(unexecutedBlock, bool):
+			ex = TypeError(f"Parameter 'unexecutedBlock' is not of type 'bool'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(unexecutedBlock)}'.")
+			raise ex
+
+		if functionName is not None and not isinstance(functionName, str):
+			ex = TypeError(f"Parameter 'functionName' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(functionName)}'.")
+			raise ex
+
+		self._lineNumber =      lineNumber
+		self._functionName =    functionName
+		self._count =           count
+		self._unexecutedBlock = unexecutedBlock
+		self._blockIDs =        []
+
+		if blockIDs is not None:
+			if not isinstance(blockIDs, Iterable):
+				ex = TypeError(f"Parameter 'blockIDs' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(blockIDs)}'.")
+				raise ex
+
+			for blockID in blockIDs:
+				if not isinstance(blockID, int):
+					ex = TypeError(f"Parameter 'blockIDs' contains an element not of type 'int'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(blockID)}'.")
+					raise ex
+
+				self._blockIDs.append(blockID)
+
+	@classmethod
+	def Parse(cls, record: dict[str, Any]) -> Self:
+		"""
+		Parse a line from its JSON object.
 
 		:param record: The JSON object of the line.
+		:returns:      The line.
 		"""
-		self._lineNumber =      record["line_number"]
-		self._functionName =    record.get("function_name")
-		self._count =           record["count"]
-		self._unexecutedBlock = record["unexecuted_block"]
-		self._blockIDs =        record.get("block_ids", [])
+		return cls(
+			record["line_number"],
+			record["count"],
+			record["unexecuted_block"],
+			record.get("function_name"),
+			record.get("block_ids")
+		)
 
 	@readonly
 	def LineNumber(self) -> int:
@@ -179,21 +268,182 @@ class Function(metaclass=ExtendedType, slots=True):
 	_blocksExecuted: int  #: Number of executed basic blocks.
 	_executionCount: int  #: Number of times the function ran.
 
-	def __init__(self, record: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		name:           str,
+		demangledName:  str,
+		startLine:      int,
+		startColumn:    int,
+		endLine:        int,
+		endColumn:      int,
+		blocks:         int,
+		blocksExecuted: int,
+		executionCount: int
+	) -> None:
 		"""
-		Initialize the function from its JSON object.
+		Initialize the function.
+
+		:param name:           Name of the function, mangled.
+		:param demangledName:  Name of the function, demangled.
+		:param startLine:      The function's first line.
+		:param startColumn:    The function's first column.
+		:param endLine:        The function's last line.
+		:param endColumn:      The function's last column.
+		:param blocks:         Number of basic blocks.
+		:param blocksExecuted: Number of executed basic blocks.
+		:param executionCount: Number of times the function ran.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``name`` is empty.
+		:raises ValueError:    If parameter ``demangledName`` is ``None``.
+		:raises TypeError:     If parameter ``demangledName`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``demangledName`` is empty.
+		:raises ValueError:    If parameter ``startLine`` is ``None``.
+		:raises TypeError:     If parameter ``startLine`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``startLine`` is negative.
+		:raises ValueError:    If parameter ``startColumn`` is ``None``.
+		:raises TypeError:     If parameter ``startColumn`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``startColumn`` is negative.
+		:raises ValueError:    If parameter ``endLine`` is ``None``.
+		:raises TypeError:     If parameter ``endLine`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``endLine`` is negative.
+		:raises ValueError:    If parameter ``endColumn`` is ``None``.
+		:raises TypeError:     If parameter ``endColumn`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``endColumn`` is negative.
+		:raises ValueError:    If parameter ``blocks`` is ``None``.
+		:raises TypeError:     If parameter ``blocks`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``blocks`` is negative.
+		:raises ValueError:    If parameter ``blocksExecuted`` is ``None``.
+		:raises TypeError:     If parameter ``blocksExecuted`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``blocksExecuted`` is negative.
+		:raises ValueError:    If parameter ``executionCount`` is ``None``.
+		:raises TypeError:     If parameter ``executionCount`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``executionCount`` is negative.
+		"""
+		if name is None:
+			raise ValueError(f"Parameter 'name' is None.")
+		elif not isinstance(name, str):
+			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			raise ex
+		elif name == "":
+			raise ValueError(f"Parameter 'name' is empty.")
+
+		if demangledName is None:
+			raise ValueError(f"Parameter 'demangledName' is None.")
+		elif not isinstance(demangledName, str):
+			ex = TypeError(f"Parameter 'demangledName' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(demangledName)}'.")
+			raise ex
+		elif demangledName == "":
+			raise ValueError(f"Parameter 'demangledName' is empty.")
+
+		if startLine is None:
+			raise ValueError(f"Parameter 'startLine' is None.")
+		elif not isinstance(startLine, int):
+			ex = TypeError(f"Parameter 'startLine' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
+			raise ex
+		elif startLine < 0:
+			ex = ValueError(f"Parameter 'startLine' is negative.")
+			ex.add_note(f"Got value '{startLine}'.")
+			raise ex
+
+		if startColumn is None:
+			raise ValueError(f"Parameter 'startColumn' is None.")
+		elif not isinstance(startColumn, int):
+			ex = TypeError(f"Parameter 'startColumn' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(startColumn)}'.")
+			raise ex
+		elif startColumn < 0:
+			ex = ValueError(f"Parameter 'startColumn' is negative.")
+			ex.add_note(f"Got value '{startColumn}'.")
+			raise ex
+
+		if endLine is None:
+			raise ValueError(f"Parameter 'endLine' is None.")
+		elif not isinstance(endLine, int):
+			ex = TypeError(f"Parameter 'endLine' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
+			raise ex
+		elif endLine < 0:
+			ex = ValueError(f"Parameter 'endLine' is negative.")
+			ex.add_note(f"Got value '{endLine}'.")
+			raise ex
+
+		if endColumn is None:
+			raise ValueError(f"Parameter 'endColumn' is None.")
+		elif not isinstance(endColumn, int):
+			ex = TypeError(f"Parameter 'endColumn' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(endColumn)}'.")
+			raise ex
+		elif endColumn < 0:
+			ex = ValueError(f"Parameter 'endColumn' is negative.")
+			ex.add_note(f"Got value '{endColumn}'.")
+			raise ex
+
+		if blocks is None:
+			raise ValueError(f"Parameter 'blocks' is None.")
+		elif not isinstance(blocks, int):
+			ex = TypeError(f"Parameter 'blocks' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(blocks)}'.")
+			raise ex
+		elif blocks < 0:
+			ex = ValueError(f"Parameter 'blocks' is negative.")
+			ex.add_note(f"Got value '{blocks}'.")
+			raise ex
+
+		if blocksExecuted is None:
+			raise ValueError(f"Parameter 'blocksExecuted' is None.")
+		elif not isinstance(blocksExecuted, int):
+			ex = TypeError(f"Parameter 'blocksExecuted' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(blocksExecuted)}'.")
+			raise ex
+		elif blocksExecuted < 0:
+			ex = ValueError(f"Parameter 'blocksExecuted' is negative.")
+			ex.add_note(f"Got value '{blocksExecuted}'.")
+			raise ex
+
+		if executionCount is None:
+			raise ValueError(f"Parameter 'executionCount' is None.")
+		elif not isinstance(executionCount, int):
+			ex = TypeError(f"Parameter 'executionCount' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(executionCount)}'.")
+			raise ex
+		elif executionCount < 0:
+			ex = ValueError(f"Parameter 'executionCount' is negative.")
+			ex.add_note(f"Got value '{executionCount}'.")
+			raise ex
+
+		self._name =           name
+		self._demangledName =  demangledName
+		self._startLine =      startLine
+		self._startColumn =    startColumn
+		self._endLine =        endLine
+		self._endColumn =      endColumn
+		self._blocks =         blocks
+		self._blocksExecuted = blocksExecuted
+		self._executionCount = executionCount
+
+	@classmethod
+	def Parse(cls, record: dict[str, Any]) -> Self:
+		"""
+		Parse a function from its JSON object.
 
 		:param record: The JSON object of the function.
+		:returns:      The function.
 		"""
-		self._name =           record["name"]
-		self._demangledName =  record["demangled_name"]
-		self._startLine =      record["start_line"]
-		self._startColumn =    record["start_column"]
-		self._endLine =        record["end_line"]
-		self._endColumn =      record["end_column"]
-		self._blocks =         record["blocks"]
-		self._blocksExecuted = record["blocks_executed"]
-		self._executionCount = record["execution_count"]
+		return cls(
+			record["name"],
+			record["demangled_name"],
+			record["start_line"],
+			record["start_column"],
+			record["end_line"],
+			record["end_column"],
+			record["blocks"],
+			record["blocks_executed"],
+			record["execution_count"]
+		)
 
 	@readonly
 	def Name(self) -> str:
@@ -289,15 +539,80 @@ class File(metaclass=ExtendedType, slots=True):
 	_functions: dict[str, Function]  #: The functions, by mangled name.
 	_lines:     list[Line]           #: The executable lines, in order; a line of several functions once per function.
 
-	def __init__(self, record: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		path:      Path,
+		functions: Nullable[Iterable[Function]] = None,
+		lines:     Nullable[Iterable[Line]] = None
+	) -> None:
 		"""
-		Initialize the file from its JSON object.
+		Initialize the file.
+
+		:param path:        The file's path, as the compiler named it.
+		:param functions:   Optional, the functions. Default: none.
+		:param lines:       Optional, the executable lines, in order; a line of several functions once per function.
+		                    Default: none.
+		:raises ValueError: If parameter ``path`` is ``None``.
+		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises TypeError:  If parameter ``functions`` isn't iterable.
+		:raises TypeError:  If parameter ``functions`` contains an element not of type :class:`Function`.
+		:raises TypeError:  If parameter ``lines`` isn't iterable.
+		:raises TypeError:  If parameter ``lines`` contains an element not of type :class:`Line`.
+		"""
+		if path is None:
+			raise ValueError(f"Parameter 'path' is None.")
+		elif not isinstance(path, Path):
+			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
+			raise ex
+
+		self._path =      path
+		self._functions = {}
+		self._lines =     []
+
+		if functions is not None:
+			if not isinstance(functions, Iterable):
+				ex = TypeError(f"Parameter 'functions' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(functions)}'.")
+				raise ex
+
+			for function in functions:
+				if not isinstance(function, Function):
+					ex = TypeError(f"Parameter 'functions' contains an element not of type 'Function'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(function)}'.")
+					raise ex
+
+				self._functions[function._name] = function
+
+		if lines is not None:
+			if not isinstance(lines, Iterable):
+				ex = TypeError(f"Parameter 'lines' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
+				raise ex
+
+			for line in lines:
+				if not isinstance(line, Line):
+					ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
+					raise ex
+
+				self._lines.append(line)
+
+	@classmethod
+	def Parse(cls, record: dict[str, Any]) -> Self:
+		"""
+		Parse a file, its functions and lines from its JSON object.
+
+		A backslash in the path - as a report written on Windows has them - separates directories.
 
 		:param record: The JSON object of the file.
+		:returns:      The file.
 		"""
-		self._path =      Path(record["file"].replace("\\", "/"))
-		self._functions = {function["name"]: Function(function) for function in record["functions"]}
-		self._lines =     [Line(line) for line in record["lines"]]
+		return cls(
+			Path(record["file"].replace("\\", "/")),
+			[Function.Parse(function) for function in record["functions"]],
+			[Line.Parse(line) for line in record["lines"]]
+		)
 
 	@readonly
 	def Path(self) -> Path:
@@ -339,24 +654,105 @@ class DataFile(metaclass=ExtendedType, slots=True):
 	_currentWorkingDirectory: Nullable[_Path]    #: The directory the compiler ran in, if the report says.
 	_files:                   dict[_Path, File]  #: The source files, by path.
 
-	def __init__(self, record: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		path:                    Path,
+		formatVersion:           int,
+		gccVersion:              SemanticVersion,
+		currentWorkingDirectory: Nullable[Path] = None,
+		files:                   Nullable[Iterable[File]] = None
+	) -> None:
 		"""
-		Initialize the data file from its JSON object.
+		Initialize the data file.
 
-		:param record: The JSON object of the data file: a report's root object.
+		:param path:                    Path of the data file, as gcov was called with it.
+		:param formatVersion:           Version of the report format: ``1`` or ``2``.
+		:param gccVersion:              Version of GCC.
+		:param currentWorkingDirectory: Optional, the directory the compiler ran in. Default: ``None``.
+		:param files:                   Optional, the source files. Default: none.
+		:raises ValueError:             If parameter ``path`` is ``None``.
+		:raises TypeError:              If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:             If parameter ``formatVersion`` is ``None``.
+		:raises TypeError:              If parameter ``formatVersion`` isn't of type :class:`int`.
+		:raises ValueError:             If parameter ``formatVersion`` isn't ``1`` or ``2``.
+		:raises ValueError:             If parameter ``gccVersion`` is ``None``.
+		:raises TypeError:              If parameter ``gccVersion`` isn't of type
+		                                :class:`~pyTooling.Versioning.SemanticVersion`.
+		:raises TypeError:              If parameter ``currentWorkingDirectory`` isn't of type :class:`~pathlib.Path`.
+		:raises TypeError:              If parameter ``files`` isn't iterable.
+		:raises TypeError:              If parameter ``files`` contains an element not of type :class:`File`.
 		"""
-		self._path =                    Path(record["data_file"].replace("\\", "/"))
-		self._formatVersion =           int(record["format_version"])
-		self._gccVersion =              SemanticVersion.Parse(record["gcc_version"].split(" ", 1)[0])
-		self._currentWorkingDirectory = None
+		if path is None:
+			raise ValueError(f"Parameter 'path' is None.")
+		elif not isinstance(path, Path):
+			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
+			raise ex
+
+		if formatVersion is None:
+			raise ValueError(f"Parameter 'formatVersion' is None.")
+		elif not isinstance(formatVersion, int):
+			ex = TypeError(f"Parameter 'formatVersion' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(formatVersion)}'.")
+			raise ex
+		elif formatVersion not in (1, 2):
+			ex = ValueError(f"Parameter 'formatVersion' is not 1 or 2.")
+			ex.add_note(f"Got value '{formatVersion}'.")
+			raise ex
+
+		if gccVersion is None:
+			raise ValueError(f"Parameter 'gccVersion' is None.")
+		elif not isinstance(gccVersion, SemanticVersion):
+			ex = TypeError(f"Parameter 'gccVersion' is not of type 'SemanticVersion'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(gccVersion)}'.")
+			raise ex
+
+		if currentWorkingDirectory is not None and not isinstance(currentWorkingDirectory, Path):
+			ex = TypeError(f"Parameter 'currentWorkingDirectory' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(currentWorkingDirectory)}'.")
+			raise ex
+
+		self._path =                    path
+		self._formatVersion =           formatVersion
+		self._gccVersion =              gccVersion
+		self._currentWorkingDirectory = currentWorkingDirectory
 		self._files =                   {}
 
-		if (directory := record.get("current_working_directory")) is not None:
-			self._currentWorkingDirectory = Path(directory.replace("\\", "/"))
+		if files is not None:
+			if not isinstance(files, Iterable):
+				ex = TypeError(f"Parameter 'files' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(files)}'.")
+				raise ex
 
-		for fileRecord in record["files"]:
-			file =                    File(fileRecord)
-			self._files[file._path] = file
+			for file in files:
+				if not isinstance(file, File):
+					ex = TypeError(f"Parameter 'files' contains an element not of type 'File'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
+					raise ex
+
+				self._files[file._path] = file
+
+	@classmethod
+	def Parse(cls, record: dict[str, Any]) -> Self:
+		"""
+		Parse a data file and its source files from its JSON object.
+
+		The format version is a string, e.g. ``"2"``; a development build of GCC states its date and phase behind its
+		version, e.g. ``15.0.1 20250418 (experimental)``. A backslash in a path - as a report written on Windows has
+		them - separates directories.
+
+		:param record: The JSON object of the data file: a report's root object.
+		:returns:      The data file.
+		"""
+		directory = record.get("current_working_directory")
+
+		return cls(
+			Path(record["data_file"].replace("\\", "/")),
+			int(record["format_version"]),
+			SemanticVersion.Parse(record["gcc_version"].split(" ", 1)[0]),
+			Path(directory.replace("\\", "/")) if directory is not None else None,
+			[File.Parse(file) for file in record["files"]]
+		)
 
 	@readonly
 	def Path(self) -> Path:
@@ -531,7 +927,7 @@ class Document(Coverage, cc_Document):
 			raise ex
 
 		with Stopwatch() as sw:
-			self._dataFiles = [DataFile(jsonDocument) for jsonDocument in self._jsonDocuments]
+			self._dataFiles = [DataFile.Parse(jsonDocument) for jsonDocument in self._jsonDocuments]
 
 		self._conversionDuration = sw.Duration
 

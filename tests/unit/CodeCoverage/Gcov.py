@@ -36,7 +36,7 @@ from tempfile                         import TemporaryDirectory
 from typing                           import Any
 
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.Gcov import Document
+from pyEDAA.Reports.CodeCoverage.Gcov import DataFile, Document, File, Function as gcov_Function, Line
 from pyTooling.Testing                import Testcase
 from pyTooling.Versioning             import SemanticVersion
 
@@ -140,6 +140,155 @@ class FormatModel(Testcase):
 
 		self.assertEqual((Path("C:/build"), Path("src/Main.cpp")), (dataFile.CurrentWorkingDirectory, dataFile.Path))
 		self.assertEqual(Path("Containers/Stack.hpp"), dataFile.Files[Path("Containers/Stack.hpp")].Path)
+
+
+class Construction(Testcase):
+	"""The format's model is built by hand: each constructor takes typed values and checks them."""
+
+	def test_Line(self) -> None:
+		line = Line(21, 1, False, "_ZN10Containers5Stack3PopEv", (3, 4, 5, 8))
+
+		self.assertEqual((21, 1, False, "_ZN10Containers5Stack3PopEv", [3, 4, 5, 8]),
+		                 (line.LineNumber, line.Count, line.UnexecutedBlock, line.FunctionName, line.BlockIDs))
+
+	def test_Line_Defaults(self) -> None:
+		line = Line(3, 0, True)
+
+		self.assertEqual((None, []), (line.FunctionName, line.BlockIDs))
+
+	def test_Function(self) -> None:
+		pop = gcov_Function("_ZN10Containers5Stack3PopEv", "Containers::Stack::Pop()", 19, 8, 23, 4, 8, 7, 3)
+
+		self.assertEqual(("_ZN10Containers5Stack3PopEv", "Containers::Stack::Pop()"), (pop.Name, pop.DemangledName))
+		self.assertEqual((19, 8, 23, 4), (pop.StartLine, pop.StartColumn, pop.EndLine, pop.EndColumn))
+		self.assertEqual((8, 7, 3), (pop.Blocks, pop.BlocksExecuted, pop.ExecutionCount))
+
+	def test_File(self) -> None:
+		main = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1)
+		lines = [Line(1, 1, False, "main"), Line(2, 1, False, "main")]
+		file = File(Path("main.c"), [main], lines)
+
+		self.assertEqual((Path("main.c"), {"main": main}, lines), (file.Path, file.Functions, file.Lines))
+		self.assertEqual(({}, []), (File(Path("empty.c")).Functions, File(Path("empty.c")).Lines))
+
+	def test_DataFile(self) -> None:
+		file = File(Path("main.c"))
+		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), Path("/build"), [file])
+
+		self.assertEqual((Path("main.c"), 2, "14.2.0", Path("/build")),
+		                 (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion, dataFile.CurrentWorkingDirectory))
+		self.assertEqual({Path("main.c"): file}, dataFile.Files)
+
+	def test_DataFile_Defaults(self) -> None:
+		dataFile = DataFile(Path("main.c"), 1, SemanticVersion.Parse("13.2.0"))
+
+		self.assertEqual((None, {}), (dataFile.CurrentWorkingDirectory, dataFile.Files))
+
+	def test_Line_LineNumber(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Line(None, 0, False)
+		self.assertEqual("Parameter 'lineNumber' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = Line("1", 0, False)
+		self.assertEqual("Parameter 'lineNumber' is not of type 'int'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+		with self.assertRaises(ValueError) as context:
+			_ = Line(0, 0, False)
+		self.assertEqual("Parameter 'lineNumber' is less than 1.", str(context.exception))
+		self.assertEqual(["Got value '0'."], context.exception.__notes__)
+
+	def test_Line_BlockIDs(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Line(1, 0, False, blockIDs=[3, "4"])
+		self.assertEqual("Parameter 'blockIDs' contains an element not of type 'int'.", str(context.exception))
+
+	def test_Function_Name(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = gcov_Function("", "main", 1, 5, 3, 1, 4, 4, 1)
+		self.assertEqual("Parameter 'name' is empty.", str(context.exception))
+
+	def test_Function_ExecutionCount(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, -1)
+		self.assertEqual("Parameter 'executionCount' is negative.", str(context.exception))
+		self.assertEqual(["Got value '-1'."], context.exception.__notes__)
+
+	def test_File_Path(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = File("main.c")
+		self.assertEqual("Parameter 'path' is not of type 'Path'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_File_Lines(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("main.c"), lines=[Line(1, 0, False), 2])
+		self.assertEqual("Parameter 'lines' contains an element not of type 'Line'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
+
+	def test_DataFile_FormatVersion(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = DataFile(Path("main.c"), 3, SemanticVersion.Parse("14.2.0"))
+		self.assertEqual("Parameter 'formatVersion' is not 1 or 2.", str(context.exception))
+		self.assertEqual(["Got value '3'."], context.exception.__notes__)
+
+	def test_DataFile_GCCVersion(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = DataFile(Path("main.c"), 2, "14.2.0")
+		self.assertEqual("Parameter 'gccVersion' is not of type 'SemanticVersion'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_DataFile_Files(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), files=File(Path("main.c")))
+		self.assertEqual("Parameter 'files' is not iterable.", str(context.exception))
+
+
+class Parsing(Testcase):
+	"""Each class of the format's model parses its JSON object."""
+
+	def test_Line(self) -> None:
+		line = Line.Parse({
+			"line_number": 21, "function_name": "_ZN10Containers5Stack3PopEv", "count": 1, "unexecuted_block": False,
+			"block_ids": [3, 4, 5, 8], "branches": []
+		})
+
+		self.assertEqual((21, 1, False, "_ZN10Containers5Stack3PopEv", [3, 4, 5, 8]),
+		                 (line.LineNumber, line.Count, line.UnexecutedBlock, line.FunctionName, line.BlockIDs))
+
+	def test_Line_Format1(self) -> None:
+		"""A line of format 1 has no basic blocks; a line of inlined statements has no function."""
+		line = Line.Parse({"line_number": 3, "count": 0, "unexecuted_block": True, "branches": []})
+
+		self.assertEqual((None, []), (line.FunctionName, line.BlockIDs))
+
+	def test_Function(self) -> None:
+		pop = gcov_Function.Parse({
+			"name": "_ZN10Containers5Stack3PopEv", "demangled_name": "Containers::Stack::Pop()", "start_line": 19,
+			"start_column": 8, "end_line": 23, "end_column": 4, "blocks": 8, "blocks_executed": 7, "execution_count": 3
+		})
+
+		self.assertEqual(("_ZN10Containers5Stack3PopEv", "Containers::Stack::Pop()"), (pop.Name, pop.DemangledName))
+		self.assertEqual((19, 8, 23, 4, 8, 7, 3), (
+			pop.StartLine, pop.StartColumn, pop.EndLine, pop.EndColumn, pop.Blocks, pop.BlocksExecuted, pop.ExecutionCount
+		))
+
+	def test_File(self) -> None:
+		"""The backslashes of a path written on Windows separate directories."""
+		file = File.Parse(_stream()[1]["files"][1] | {"file": "Containers\\Stack.hpp"})
+
+		self.assertEqual(Path("Containers/Stack.hpp"), file.Path)
+		self.assertEqual("Containers::Stack::Pop()", file.Functions["_ZN10Containers5Stack3PopEv"].DemangledName)
+		self.assertEqual([19, 20, 21, 22], [line.LineNumber for line in file.Lines if line.LineNumber in range(19, 24)])
+
+	def test_DataFile(self) -> None:
+		"""The format version is a string; a development build of GCC states its date and phase behind the version."""
+		dataFile = DataFile.Parse(_stream()[1] | {"gcc_version": "15.0.1 20250418 (experimental)"})
+
+		self.assertEqual((Path("Main.cpp"), 2, "15.0.1"), (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion))
+		self.assertIsInstance(dataFile.GCCVersion, SemanticVersion)
+		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(dataFile.Files))
 
 
 class Conversion(Testcase):
