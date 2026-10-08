@@ -68,7 +68,9 @@ class FormatModel(Testcase):
 		"""GHDL states a file as a function 'file' at line 1, and no summaries."""
 		tracefile = Document(GHDL, analyzeAndConvert=True)
 
-		self.assertEqual(["Testbench.vhdl", "Classify.vhdl"], [section.SourceFile for section in tracefile.Sections])
+		self.assertEqual(
+			[Path("Testbench.vhdl"), Path("Classify.vhdl")], [section.SourceFile for section in tracefile.Sections]
+		)
 		section = tracefile.Sections[1]
 		self.assertEqual(("", None, None), (section.TestName, section.LinesFound, section.FunctionsFound))
 		self.assertEqual([("file", 1, None, 1)], [
@@ -79,18 +81,19 @@ class FormatModel(Testcase):
 		})
 
 	def test_Records(self) -> None:
-		"""Comments, versions, aliases, and a line listed twice."""
+		"""Comments, versions, aliases, a line listed twice, and a path written on Windows."""
 		with TemporaryDirectory() as directory:
 			tracefile = Document(_write(directory,
-				"#written by hand\nTN:\nSF:a.cpp\nVER:1.2\n"
+				"#written by hand\nTN:\nSF:src\\a.cpp\nVER:1.2\n"
 				"FNL:0,3,9\nFNA:0,2,Box<int>::Size\nFNA:0,1,Box<float>::Size\nFNL:1,11\nFNA:1,0,Box<int>::Box\n"
 				"FNF:2\nFNH:1\nDA:4,2\nDA:4,3\nLF:1\nLH:1\n\nend_of_record\n"
 			), analyzeAndConvert=True)
 
 		self.assertEqual(["written by hand"], tracefile.Comments)
 		section = tracefile.Sections[0]
-		self.assertEqual(("1.2", 2, 1, 1, 1), (
-			section.Version, section.FunctionsFound, section.FunctionsHit, section.LinesFound, section.LinesHit
+		self.assertEqual((Path("src/a.cpp"), "1.2", 2, 1, 1, 1), (
+			section.SourceFile, section.Version, section.FunctionsFound, section.FunctionsHit, section.LinesFound,
+			section.LinesHit
 		))
 		size, box = section.Functions
 		self.assertEqual(("Box<int>::Size", {"Box<int>::Size": 2, "Box<float>::Size": 1}, 3), (
