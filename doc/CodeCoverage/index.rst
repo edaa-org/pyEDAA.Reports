@@ -302,8 +302,9 @@ GHDL writes a coverage file when simulating with ``ghdl -r --coverage``, by defa
 :file:`coverage-<timestamp>.json`, or to the file named by ``--coverage-output=<file>``.
 :class:`pyEDAA.Reports.CodeCoverage.GHDL.Document` validates it against the JSON Schema
 :ref:`GHDL-Coverage.schema.json <SCHEMAS/GHDL-Coverage>` - format version 1.0.0 - and reads it into the
-format's model: the source files, each with the directory it was analyzed in, its SHA-1 checksum and the kind of
-coverage - ``stmt``, statement coverage -, and per line with a coverage point, whether a statement of the line ran.
+format's model: the source files, each with the directory it was analyzed in, its SHA-1 checksum, the kind of
+coverage as a :class:`~pyEDAA.Reports.CodeCoverage.GHDL.CoverageMode` - GHDL writes only ``stmt``, statement
+coverage -, and per line with a coverage point, whether a statement of the line ran.
 GHDL instruments the design's sources, not the libraries ``ieee`` and ``std``.
 
 :meth:`~pyEDAA.Reports.CodeCoverage.GHDL.Document.ToCoverageSummary` converts it to the common model, as

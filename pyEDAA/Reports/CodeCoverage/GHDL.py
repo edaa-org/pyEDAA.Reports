@@ -70,7 +70,7 @@ from pathlib                     import Path
 from typing                      import Any, Optional as Nullable
 
 from jsonschema                  import Draft202012Validator
-from pyTooling.Common            import getFullyQualifiedName, readResourceFile
+from pyTooling.Common            import getFullyQualifiedName, readResourceFile, StringEnum
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
 from pyTooling.MetaClasses       import ExtendedType
@@ -92,6 +92,18 @@ _Path = Path
 
 
 @export
+class CoverageMode(StringEnum):
+	"""
+	Kind of coverage of a source file, as stated by an entry's ``mode``.
+
+	GHDL writes only ``stmt``: its writer :file:`src/ghdldrv/ghdlcovout.adb` knows no other kind of coverage, and its
+	reader :file:`src/ghdldrv/ghdlcov.adb` skips the field.
+	"""
+
+	Statement = "stmt"  #: Statement coverage: per line with a statement, whether a statement of the line ran.
+
+
+@export
 class File(metaclass=ExtendedType, slots=True):
 	"""
 	An entry of ``outputs``: a source file, where it was analyzed, its checksum, and its lines with coverage points.
@@ -100,18 +112,26 @@ class File(metaclass=ExtendedType, slots=True):
 	_name:      _Path            #: The file's name, as given to the analysis.
 	_directory: _Path            #: The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
 	_sha1:      str              #: SHA-1 checksum of the file's content.
-	_mode:      str              #: Kind of coverage: ``stmt`` for statement coverage.
+	_mode:      CoverageMode     #: Kind of coverage, e.g. statement coverage.
 	_maxLine:   int              #: The last line with a coverage point.
 	_result:    dict[int, bool]  #: Per line with a coverage point, whether the line ran.
 
-	def __init__(self, name: Path, directory: Path, sha1: str, mode: str, maxLine: int, result: dict[int, bool]) -> None:
+	def __init__(
+		self,
+		name: Path,
+		directory: Path,
+		sha1: str,
+		mode: CoverageMode,
+		maxLine: int,
+		result: dict[int, bool]
+	) -> None:
 		"""
 		Initialize the file from the fields of its JSON object.
 
 		:param name:      The file's name, as given to the analysis.
 		:param directory: The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
 		:param sha1:      SHA-1 checksum of the file's content.
-		:param mode:      Kind of coverage: ``stmt`` for statement coverage.
+		:param mode:      Kind of coverage, e.g. statement coverage.
 		:param maxLine:   The last line with a coverage point.
 		:param result:    Per line with a coverage point, whether the line ran.
 		"""
@@ -159,11 +179,11 @@ class File(metaclass=ExtendedType, slots=True):
 		return self._sha1
 
 	@readonly
-	def Mode(self) -> str:
+	def Mode(self) -> CoverageMode:
 		"""
 		Read-only property to access the kind of coverage (:attr:`_mode`).
 
-		:returns: ``stmt`` for statement coverage.
+		:returns: The kind of coverage, e.g. :attr:`CoverageMode.Statement`.
 		"""
 		return self._mode
 
@@ -329,7 +349,7 @@ class Document(Report, cc_Document):
 					Path(output["file"].replace("\\", "/")),
 					Path(output["dir"].replace("\\", "/")),
 					output["sha1"],
-					output["mode"],
+					CoverageMode.Parse(output["mode"]),
 					output["max-line"],
 					{int(number): ran == 1 for number, ran in output["result"].items()}
 				)

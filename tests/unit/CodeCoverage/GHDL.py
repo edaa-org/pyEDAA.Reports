@@ -37,7 +37,7 @@ from tempfile                         import TemporaryDirectory
 from typing                           import Any
 
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, CoverageSummary, LineCoverageStatus
-from pyEDAA.Reports.CodeCoverage.GHDL import Document, File, MergedReport
+from pyEDAA.Reports.CodeCoverage.GHDL import CoverageMode, Document, File, MergedReport
 from pyTooling.Testing                import Testcase
 from pyTooling.Versioning             import SemanticVersion
 
@@ -113,10 +113,17 @@ class FormatModel(Testcase):
 
 		counter = report.Files[Path("src/Counter.vhdl")]
 		self.assertEqual(
-			(Path("src/Counter.vhdl"), Path("."), "1a6afa99b014932646ce6591101aa1ac3695349a", "stmt", 35),
+			(Path("src/Counter.vhdl"), Path("."), "1a6afa99b014932646ce6591101aa1ac3695349a", CoverageMode.Statement, 35),
 			(counter.Name, counter.Directory, counter.SHA1, counter.Mode, counter.MaxLine)
 		)
 		self.assertEqual({25: True, 26: True, 27: False, 29: True, 34: True, 35: True}, counter.Result)
+
+	def test_Mode(self) -> None:
+		"""A file's ``mode`` is converted to a member of :class:`CoverageMode`."""
+		counter = Document(COUNT, analyzeAndConvert=True).Files[Path("src/Counter.vhdl")]
+
+		self.assertIs(CoverageMode.Statement, counter.Mode)
+		self.assertEqual("stmt", counter.Mode)
 
 	def test_Path(self) -> None:
 		"""A file's path is its name, prefixed by the directory it was analyzed in, unless GHDL ran there."""
@@ -126,7 +133,8 @@ class FormatModel(Testcase):
 			("/home/user/project/", "src/Counter.vhdl",            "/home/user/project/src/Counter.vhdl")
 		):
 			with self.subTest(directory=directory):
-				self.assertEqual(Path(path), File(Path(name), Path(directory), "0" * 40, "stmt", 1, {1: True}).Path)
+				file = File(Path(name), Path(directory), "0" * 40, CoverageMode.Statement, 1, {1: True})
+				self.assertEqual(Path(path), file.Path)
 
 
 class Conversion(Testcase):
