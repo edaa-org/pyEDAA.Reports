@@ -82,14 +82,14 @@ class FormatModel(Testcase):
 	def test_DataFiles(self) -> None:
 		report = Document(STREAM, analyzeAndConvert=True)
 
-		self.assertEqual(["Statistics.c", "Main.cpp"], [dataFile.Name for dataFile in report.DataFiles])
+		self.assertEqual(["Statistics.c", "Main.cpp"], [dataFile.Path.as_posix() for dataFile in report.DataFiles])
 		main = report.DataFiles[1]
 		self.assertEqual(("2", "14.2.0"), (main.FormatVersion, main.GCCVersion))
-		self.assertTrue(main.CurrentWorkingDirectory.startswith("/"))
-		self.assertEqual(["Main.cpp", "Containers/Stack.hpp"], list(main.Files))
+		self.assertTrue(main.CurrentWorkingDirectory.is_absolute())
+		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(main.Files))
 
 	def test_Functions(self) -> None:
-		stack = Document(STREAM, analyzeAndConvert=True).DataFiles[1].Files["Containers/Stack.hpp"]
+		stack = Document(STREAM, analyzeAndConvert=True).DataFiles[1].Files[Path("Containers/Stack.hpp")]
 
 		pop = stack.Functions["_ZN10Containers5Stack3PopEv"]
 		self.assertEqual("Containers::Stack::Pop()", pop.DemangledName)
@@ -97,7 +97,7 @@ class FormatModel(Testcase):
 		self.assertEqual((8, 7, 3), (pop.Blocks, pop.BlocksExecuted, pop.ExecutionCount))
 
 	def test_Lines(self) -> None:
-		stack = Document(STREAM, analyzeAndConvert=True).DataFiles[1].Files["Containers/Stack.hpp"]
+		stack = Document(STREAM, analyzeAndConvert=True).DataFiles[1].Files[Path("Containers/Stack.hpp")]
 
 		line = next(line for line in stack.Lines if line.LineNumber == 21)
 		self.assertEqual(("_ZN10Containers5Stack3PopEv", 1, False, [3, 4, 5, 8]),
@@ -105,7 +105,7 @@ class FormatModel(Testcase):
 
 	def test_Template(self) -> None:
 		"""A line of a template is listed once per instantiation."""
-		main = Document(STREAM, analyzeAndConvert=True).DataFiles[1].Files["Main.cpp"]
+		main = Document(STREAM, analyzeAndConvert=True).DataFiles[1].Files[Path("Main.cpp")]
 
 		self.assertEqual([("_Z7MaximumIdET_S0_S0_", 1), ("_Z7MaximumIiET_S0_S0_", 1)], [
 			(line.FunctionName, line.Count) for line in main.Lines if line.LineNumber == 9
@@ -115,8 +115,20 @@ class FormatModel(Testcase):
 		"""gcov's compressed report holds the same as its standard output."""
 		dataFile, = Document(GZIP, analyzeAndConvert=True).DataFiles
 
-		self.assertEqual("Main.cpp", dataFile.Name)
-		self.assertEqual(["Main.cpp", "Containers/Stack.hpp"], list(dataFile.Files))
+		self.assertEqual(Path("Main.cpp"), dataFile.Path)
+		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(dataFile.Files))
+
+	def test_Backslashes(self) -> None:
+		"""The backslashes of a report written on Windows separate directories."""
+		main = _stream()[1]
+		main["current_working_directory"] = "C:\\build"
+		main["data_file"] =                 "src\\Main.cpp"
+		main["files"][1]["file"] =          "Containers\\Stack.hpp"
+		with TemporaryDirectory() as directory:
+			dataFile, = Document(_write(directory, dumps(main)), analyzeAndConvert=True).DataFiles
+
+		self.assertEqual((Path("C:/build"), Path("src/Main.cpp")), (dataFile.CurrentWorkingDirectory, dataFile.Path))
+		self.assertEqual(Path("Containers/Stack.hpp"), dataFile.Files[Path("Containers/Stack.hpp")].Path)
 
 
 class Conversion(Testcase):
@@ -184,7 +196,7 @@ class Conversion(Testcase):
 	def test_SourceDirectories(self) -> None:
 		report = Document(STREAM, analyzeAndConvert=True)
 
-		self.assertEqual([Path(report.DataFiles[0].CurrentWorkingDirectory)], report.ToCoverageSummary().SourceDirectories)
+		self.assertEqual([report.DataFiles[0].CurrentWorkingDirectory], report.ToCoverageSummary().SourceDirectories)
 
 	def test_Name(self) -> None:
 		self.assertEqual("Main", Document(GZIP, analyzeAndConvert=True).ToCoverageSummary().Name)
@@ -222,10 +234,10 @@ class Conversion(Testcase):
 		with TemporaryDirectory() as directory:
 			report = Document(_write(directory, dumps(document)), analyzeAndConvert=True)
 
-		line = report.DataFiles[0].Files["main.c"].Lines[1]
+		line = report.DataFiles[0].Files[Path("main.c")].Lines[1]
 		self.assertEqual([], line.BlockIDs)
 		self.assertIsNone(report.DataFiles[0].CurrentWorkingDirectory)
-		self.assertIsNone(report.DataFiles[0].Files["main.c"].Lines[2].FunctionName)
+		self.assertIsNone(report.DataFiles[0].Files[Path("main.c")].Lines[2].FunctionName)
 
 		summary = report.ToCoverageSummary()
 		self.assertEqual((3, 2), (summary.TotalLines, summary.CoveredLines))
