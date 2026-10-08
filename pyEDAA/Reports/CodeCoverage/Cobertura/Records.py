@@ -31,12 +31,15 @@
 """
 The elements of the Cobertura XML format below ``<coverage>``: its packages, classes, methods, lines and conditions.
 """
-from __future__            import annotations
+from __future__                  import annotations
 
-from typing                import Optional as Nullable
+from typing                      import Optional as Nullable
 
-from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import ExtendedType
+from pyTooling.Common            import getFullyQualifiedName
+from pyTooling.Decorators        import export, readonly
+from pyTooling.MetaClasses       import ExtendedType
+
+from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus
 
 
 @export
@@ -168,6 +171,40 @@ class Line(metaclass=ExtendedType, slots=True):
 		:returns: The conditions.
 		"""
 		return self._conditions
+
+	@classmethod
+	def FromLine(cls, line: cc_Line) -> Line:
+		"""
+		Convert a line of the common model.
+
+		A line without count has ``1`` hit, if it ran, else ``0``. A line with branches is a branching line; its condition
+		coverage counts its branches with state :attr:`~pyEDAA.Reports.CodeCoverage.LineCoverageStatus.Covered` and all its
+		branches.
+
+		:param line:        The line of the common model.
+		:returns:           The line.
+		:raises ValueError: If parameter ``line`` is ``None``.
+		:raises TypeError:  If parameter ``line`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Line`.
+		"""
+		if line is None:
+			raise ValueError(f"Parameter 'line' is None.")
+		elif not isinstance(line, cc_Line):
+			ex = TypeError(f"Parameter 'line' is not of type 'Line'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
+			raise ex
+
+		if line._coverageCount is not None:
+			hits = line._coverageCount
+		elif line._status in (LineCoverageStatus.Covered, LineCoverageStatus.PartiallyCovered):
+			hits = 1
+		else:
+			hits = 0
+
+		if len(line._branches) == 0:
+			return cls(line._lineNumber, hits)
+
+		covered = sum(1 for branch in line._branches if branch._status is LineCoverageStatus.Covered)
+		return cls(line._lineNumber, hits, True, (covered, len(line._branches)))
 
 
 @export
