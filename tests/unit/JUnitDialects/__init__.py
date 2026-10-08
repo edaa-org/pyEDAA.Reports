@@ -133,7 +133,8 @@ DIALECTS: Dict[str, Dialect] = {
 		Dialect(
 			"Ant-JUnit4", AntJUnitDocument, "Ant-JUnit4",
 			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Ant-JUnit4").glob("*.xml")) +
-			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Gradle-JUnit4").glob("*.xml"))
+			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Gradle-JUnit4").glob("*.xml")) +
+			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Gradle-JUnit5").glob("*.xml"))
 		),
 		Dialect(
 			"CTest-JUnit", CTestJUnitDocument, "CTest-JUnit",

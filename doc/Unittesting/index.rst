@@ -88,6 +88,10 @@ JUnit5 uses a new format called :ref:`UNITTEST/FileFormats/OTR` (see the followi
 isn't specific to Java (packages, classes, methods, ...), but describes a generic data model. Of cause an extension for
 Java specifics is provided too.
 
+The JUnit Platform writes this format only on request (``junit.platform.reporting.open.xml.enabled=true``). Build tools
+like Gradle write :ref:`Ant + JUnit4 XML <UNITTEST/FileFormats/AntJUnit4>` for JUnit 5 and 6 tests by default, see
+:ref:`UNITTEST/Tool/JUnit5`.
+
 
 .. _UNITTEST/FileFormats/OTR:
 
@@ -101,6 +105,21 @@ missing file format for JUnit5 as well as the problems of Ant + JUnit4.
 OTR defines a structure of test groups and tests, but no specifics of a certain programming languge. The logical
 structure of tests and test groups is decoupled from language specifics like namespaces, packages or classes hosting the
 individual tests.
+
+The JUnit Platform writes OTR's event-based format into :file:`open-test-report.xml`:
+
+* The root element ``<e:events>`` holds an ``<infrastructure>`` element (host name, user name, operating system, Java
+  version, ...) and one event element per state change.
+* ``<e:started>`` opens a container (test engine, class, nested class, parameterized test) or a test with an ``id``, a
+  ``parentId`` and a ``name`` - the display name. Its ``<metadata>`` carries tags and JUnit's unique ID, its
+  ``<sources>`` the Java class or method.
+* ``<e:reported>`` adds attachments while it runs: ``TestReporter`` entries and captured output on STDOUT and STDERR.
+* ``<e:finished>`` closes it with a ``<result>`` of status ``SUCCESSFUL``, ``FAILED``, ``ABORTED`` (a failed
+  assumption) or ``SKIPPED`` (a disabled test), with the exception or the reason.
+* Every event has a ``time`` in UTC with nanoseconds, e.g. ``2026-10-08T10:56:04.172060276Z``.
+
+OTR's command line tool converts the event-based format into its hierarchical format. *pyEDAA.Reports* doesn't read
+either format yet.
 
 
 .. _UNITTEST/FileFormats/pyTooling:
@@ -196,6 +215,28 @@ JUnit4
 
 JUnit5
 ======
+
+* https://github.com/junit-team/junit-framework
+* https://docs.junit.org/
+
+JUnit 5 and its successor JUnit 6 run tests on the JUnit Platform. The example :file:`examples/Java/Gradle-JUnit5`
+runs JUnit 5 tests by `Gradle <https://github.com/gradle/gradle>`__ in the pipeline and writes both: Gradle's Ant +
+JUnit4 XML files, read by the :ref:`Ant + JUnit4 dialect <UNITTEST/SpecificDataModel/JUnit/Dialect/AntJUnit4>`, and
+the JUnit Platform's :ref:`Open Test Reporting <UNITTEST/FileFormats/OTR>` file. Compared to JUnit 4 tests, Gradle's
+files differ:
+
+* The test suite is named by the test class' display name (``@DisplayName``), the file by the class' name.
+* A test case is named by its display name: the method name with its parameter types, e.g. ``testReturnTrue()``, or
+  ``@DisplayName``. An invocation of a parameterized test is named by its index and arguments only, e.g.
+  ``[1] 5, 5``, so the invocations of two parameterized tests of one class can have the same names.
+* A nested test class (``@Nested``) is a test suite in a file of its own, e.g.
+  :file:`TEST-my.pack.MyClassTest$Divide.xml`.
+* ``TestReporter`` entries and, if the JUnit Platform captures the output, STDOUT and STDERR are ``<property>``
+  elements of the ``<testcase>``.
+* A disabled test (``@Disabled``) is an empty ``<skipped/>``, without the reason. A failed assumption is a
+  ``<skipped>`` with ``message``, ``type`` and the stack trace.
+* The JUnit Platform removes JUnit's and Gradle's stack frames calling the test method from stack traces; the JDK's
+  frames remain.
 
 
 .. _UNITTEST/Tool/OSVVM:
