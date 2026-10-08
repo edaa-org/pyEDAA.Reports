@@ -38,7 +38,7 @@ from typing                                 import Any
 
 from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, Function, LineCoverageStatus, Method
 from pyEDAA.Reports.CodeCoverage            import Module, Package
-from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document, File, Region, Summary
+from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document, File, Region, RegionKind, Report, Summary
 from pyTooling.MetaClasses                  import AbstractClassError
 from pyTooling.Testing                      import Testcase
 from pyTooling.Versioning                   import SemanticVersion
@@ -124,11 +124,11 @@ class Construction(Testcase):
 	def test_Region(self) -> None:
 		summary = Summary(4, 3, 1, 0, 66.7, branchCount=2, coveredBranchCount=1, partialBranchCount=1)
 		region = Region(
-			"Circle", 5, summary, executedLines=[7, 9, 12], missingLines=(8, ), executedBranches=[(7, 9)],
+			"Circle", RegionKind.Class, 5, summary, executedLines=[7, 9, 12], missingLines=(8, ), executedBranches=[(7, 9)],
 			missingBranches=[(7, 8)]
 		)
 
-		self.assertEqual(("Circle", 5), (region.Name, region.StartLine))
+		self.assertEqual(("Circle", RegionKind.Class, 5, None), (region.Name, region.Kind, region.StartLine, region.Parent))
 		self.assertIs(summary, region.Summary)
 		self.assertEqual(([7, 9, 12], [8], []), (region.ExecutedLines, region.MissingLines, region.ExcludedLines))
 		self.assertEqual(([(7, 9)], [(7, 8)]), (region.ExecutedBranches, region.MissingBranches))
@@ -136,48 +136,49 @@ class Construction(Testcase):
 
 	def test_Region_EmptyName(self) -> None:
 		with self.assertRaises(ValueError) as context:
-			_ = Region("", 1, Summary(0, 0, 0, 0, 100.0))
+			_ = Region("", RegionKind.Class, 1, Summary(0, 0, 0, 0, 100.0))
 
 		self.assertEqual("Parameter 'name' is empty.", str(context.exception))
 
 	def test_Region_StartLine(self) -> None:
 		with self.assertRaises(ValueError) as context:
-			_ = Region("Circle", 0, Summary(0, 0, 0, 0, 100.0))
+			_ = Region("Circle", RegionKind.Class, 0, Summary(0, 0, 0, 0, 100.0))
 
 		self.assertEqual("Parameter 'startLine' is less than 1.", str(context.exception))
 		self.assertEqual(["Got value '0'."], context.exception.__notes__)
 
 	def test_Region_Summary(self) -> None:
 		with self.assertRaises(ValueError) as context:
-			_ = Region("Circle", 5, None)
+			_ = Region("Circle", RegionKind.Class, 5, None)
 
 		self.assertEqual("Parameter 'summary' is None.", str(context.exception))
 
 	def test_Region_Lines(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = Region("Circle", 5, Summary(1, 1, 0, 0, 100.0), excludedLines=[7, "8"])
+			_ = Region("Circle", RegionKind.Class, 5, Summary(1, 1, 0, 0, 100.0), excludedLines=[7, "8"])
 
 		self.assertEqual("An element of parameter 'excludedLines' is not of type 'int'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
 	def test_Region_Branches(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = Region("Circle", 5, Summary(1, 1, 0, 0, 100.0), missingBranches=[[7, 8]])
+			_ = Region("Circle", RegionKind.Class, 5, Summary(1, 1, 0, 0, 100.0), missingBranches=[[7, 8]])
 
 		self.assertEqual("An element of parameter 'missingBranches' is not a pair of 'int'.", str(context.exception))
 		self.assertEqual(["Got '[7, 8]' of type 'list'."], context.exception.__notes__)
 
-	def test_File(self) -> None:
-		area = Region("Circle.Area", 11, Summary(1, 1, 0, 0, 100.0), executedLines=[12])
-		circle = Region("Circle", 5, Summary(2, 2, 0, 0, 100.0), executedLines=[7, 12])
-		file = File(
-			Path("myPackage/Shapes.py"), Summary(3, 3, 0, 0, 100.0), executedLines=[5, 7, 12], functions=[area],
-			classes=(circle, )
-		)
+	def test_Region_Kind(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Region("Circle", "class", 5, Summary(0, 0, 0, 0, 100.0))
 
-		self.assertEqual(Path("myPackage/Shapes.py"), file.Path)
-		self.assertEqual({"Circle.Area": area}, file.Functions)
-		self.assertEqual({"Circle": circle}, file.Classes)
+		self.assertEqual("Parameter 'kind' is not of type 'RegionKind'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_File(self) -> None:
+		file = File(Path("myPackage/Shapes.py"), Summary(3, 3, 0, 0, 100.0), executedLines=[5, 7, 12])
+
+		self.assertEqual((Path("myPackage/Shapes.py"), None), (file.Path, file.Parent))
+		self.assertEqual(({}, {}), (file.Functions, file.Classes))
 		self.assertEqual(([5, 7, 12], [], []), (file.ExecutedLines, file.MissingLines, file.ExcludedLines))
 		self.assertEqual(([], []), (file.ExecutedBranches, file.MissingBranches))
 
@@ -187,20 +188,6 @@ class Construction(Testcase):
 
 		self.assertEqual("Parameter 'path' is not of type 'Path'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
-
-	def test_File_Regions(self) -> None:
-		with self.assertRaises(TypeError) as context:
-			_ = File(Path("Shapes.py"), Summary(0, 0, 0, 0, 100.0), functions={"Circle.Area": 11})
-
-		self.assertEqual("An element of parameter 'functions' is not of type 'Region'.", str(context.exception))
-		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
-
-	def test_File_DuplicateRegion(self) -> None:
-		circle = Region("Circle", 5, Summary(0, 0, 0, 0, 100.0))
-		with self.assertRaises(ValueError) as context:
-			_ = File(Path("Shapes.py"), Summary(0, 0, 0, 0, 100.0), classes=[circle, circle])
-
-		self.assertEqual("Parameter 'classes' contains region 'Circle' twice.", str(context.exception))
 
 
 class Parsing(Testcase):
@@ -228,17 +215,19 @@ class Parsing(Testcase):
 		self.assertEqual("Parameter 'summary' is None.", str(context.exception))
 
 	def test_Region(self) -> None:
-		region = Region.Parse("Circle", {
+		region = Region.Parse("Circle", RegionKind.Class, {
 			"executed_lines": [7, 9, 12], "summary": SUMMARY, "missing_lines": [8], "excluded_lines": [], "start_line": 5,
 			"executed_branches": [[7, 9]], "missing_branches": [[7, 8]]
 		})
 
-		self.assertEqual(("Circle", 5, 4), (region.Name, region.StartLine, region.Summary.LineCount))
+		self.assertEqual(
+			("Circle", RegionKind.Class, 5, 4), (region.Name, region.Kind, region.StartLine, region.Summary.LineCount)
+		)
 		self.assertEqual(([(7, 9)], [(7, 8)]), (region.ExecutedBranches, region.MissingBranches))
 
 	def test_Region_Type(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = Region.Parse("Circle", [])
+			_ = Region.Parse("Circle", RegionKind.Class, [])
 
 		self.assertEqual("Parameter 'region' is not of type 'dict'.", str(context.exception))
 		self.assertEqual(["Got type 'list'."], context.exception.__notes__)
@@ -253,6 +242,9 @@ class Parsing(Testcase):
 
 		self.assertEqual("myPackage/Shapes.py", file.Path.as_posix())
 		self.assertEqual((["Circle.Area"], ["Circle"]), (list(file.Functions), list(file.Classes)))
+		self.assertEqual(
+			(RegionKind.Function, RegionKind.Class), (file.Functions["Circle.Area"].Kind, file.Classes["Circle"].Kind)
+		)
 		self.assertEqual(([], []), (file.ExecutedBranches, file.MissingBranches))
 
 	def test_File_Name(self) -> None:
@@ -260,6 +252,87 @@ class Parsing(Testcase):
 			_ = File.Parse(None, {})
 
 		self.assertEqual("Parameter 'name' is None.", str(context.exception))
+
+
+class ParentRelation(Testcase):
+	"""A file names its report as parent, a region its file; each is added to its parent."""
+
+	def test_File(self) -> None:
+		report = Report()
+		file = File(Path("myPackage/Shapes.py"), Summary(0, 0, 0, 0, 100.0), parent=report)
+
+		self.assertIs(report, file.Parent)
+		self.assertEqual({Path("myPackage/Shapes.py"): file}, report.Files)
+
+	def test_Region(self) -> None:
+		"""A function is added to the file's functions, a class to its classes."""
+		file = File(Path("myPackage/Shapes.py"), Summary(0, 0, 0, 0, 100.0))
+		area = Region("Circle.Area", RegionKind.Function, 11, Summary(0, 0, 0, 0, 100.0), parent=file)
+		circle = Region("Circle", RegionKind.Class, 5, Summary(0, 0, 0, 0, 100.0), parent=file)
+
+		self.assertEqual((file, file), (area.Parent, circle.Parent))
+		self.assertEqual(({"Circle.Area": area}, {"Circle": circle}), (file.Functions, file.Classes))
+
+	def test_Region_SameNameOtherKind(self) -> None:
+		"""A function and a class may have the same name."""
+		file = File(Path("myPackage/Shapes.py"), Summary(0, 0, 0, 0, 100.0))
+		function = Region("Circle", RegionKind.Function, 5, Summary(0, 0, 0, 0, 100.0), parent=file)
+		klass = Region("Circle", RegionKind.Class, 5, Summary(0, 0, 0, 0, 100.0), parent=file)
+
+		self.assertEqual(({"Circle": function}, {"Circle": klass}), (file.Functions, file.Classes))
+
+	def test_Document(self) -> None:
+		"""Reading a report builds each relation."""
+		report = Document(REPORT, analyzeAndConvert=True)
+
+		for path, file in report.Files.items():
+			with self.subTest(path=path.as_posix()):
+				self.assertIs(report, file.Parent)
+				self.assertTrue(all(region.Parent is file for region in file.Functions.values()))
+				self.assertTrue(all(region.Parent is file for region in file.Classes.values()))
+
+	def test_File_Parent(self) -> None:
+		file = File(Path("myPackage/Shapes.py"), Summary(0, 0, 0, 0, 100.0))
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("myPackage/Units/Length.py"), Summary(0, 0, 0, 0, 100.0), parent=file)
+
+		self.assertEqual("Parameter 'parent' is not of type 'Report'.", str(context.exception))
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.CoveragePy.File'."], context.exception.__notes__)
+
+	def test_Region_Parent(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Region("Circle", RegionKind.Class, 5, Summary(0, 0, 0, 0, 100.0), parent=Report())
+
+		self.assertEqual("Parameter 'parent' is not of type 'File'.", str(context.exception))
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.CoveragePy.Report'."], context.exception.__notes__)
+
+	def test_File_Duplicate(self) -> None:
+		report = Report()
+		file = File(Path("Shapes.py"), Summary(0, 0, 0, 0, 100.0), parent=report)
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Shapes.py"), Summary(0, 0, 0, 0, 100.0), parent=report)
+
+		self.assertEqual("Parameter 'parent' contains file 'Shapes.py' already.", str(context.exception))
+		self.assertEqual({Path("Shapes.py"): file}, report.Files)
+
+	def test_Region_Duplicate(self) -> None:
+		file = File(Path("Shapes.py"), Summary(0, 0, 0, 0, 100.0))
+		circle = Region("Circle", RegionKind.Class, 5, Summary(0, 0, 0, 0, 100.0), parent=file)
+		with self.assertRaises(ValueError) as context:
+			_ = Region("Circle", RegionKind.Class, 5, Summary(0, 0, 0, 0, 100.0), parent=file)
+
+		self.assertEqual("Parameter 'parent' contains class 'Circle' already.", str(context.exception))
+		self.assertEqual({"Circle": circle}, file.Classes)
+
+	def test_Document_DuplicateFile(self) -> None:
+		"""A report naming a path twice - once with backslash separators - is rejected before the second file is created."""
+		content = loads(REPORT.read_text(encoding="utf-8"))
+		content["files"]["myPackage\\Shapes.py"] = content["files"]["myPackage/Shapes.py"]
+		with TemporaryDirectory() as directory:
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(_write(directory, content), analyzeAndConvert=True)
+
+		self.assertEqual("coverage.py report names file 'myPackage/Shapes.py' twice.", str(context.exception))
 
 
 class FormatModel(Testcase):
