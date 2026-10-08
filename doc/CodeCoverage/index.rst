@@ -709,6 +709,10 @@ Schema :ref:`LLVM-Coverage-JSON.schema.json <SCHEMAS/LLVM-Coverage-JSON>` - form
 summary, per function its call count, regions, branch regions and MC/DC records, and the totals. A region names its
 source range by line *and column*.
 
+Each class of the format's model takes typed values in its constructor, so a model can be built by hand, too. A
+classmethod ``Parse`` reads the class' JSON element and calls the constructor - e.g.
+:meth:`File.Parse() <pyEDAA.Reports.CodeCoverage.LLVM.Records.File.Parse>` reads a file's JSON object.
+
 :meth:`~pyEDAA.Reports.CodeCoverage.LLVM.Document.ToCoverageSummary` converts it to the common model:
 
 * A file's path is relative to the directory common to all files, which becomes the report's source directory.
