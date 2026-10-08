@@ -868,11 +868,13 @@ class File(BaseWithPath):
 	@readonly
 	def Lines(self) -> list[Nullable[Line]]:
 		"""
-		Read-only property to return the executable lines up to the last line the report lists (:attr:`_lines`).
+		Read-only property to access the executable lines (:attr:`_lines`).
 
-		:returns: A copy of the lines, indexed by line number; ``None`` for index 0 and for a line the report doesn't list.
+		The list ends at the last line the report lists. To iterate only the listed lines, use :meth:`IterateLines`.
+
+		:returns: The lines, indexed by line number; ``None`` for index 0 and for a line the report doesn't list.
 		"""
-		return self._lines[:self._lastLineNumber + 1]
+		return self._lines
 
 	@readonly
 	def LastLineNumber(self) -> int:
