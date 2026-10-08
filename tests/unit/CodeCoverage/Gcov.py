@@ -36,7 +36,7 @@ from tempfile                                 import TemporaryDirectory
 from typing                                   import Any
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.Gcov         import Coverage, DataFile, Document, File, FormatVersion
+from pyEDAA.Reports.CodeCoverage.Gcov         import Coverage, DataFile, Document, File, FormatVersion, SCHEMAS
 from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function as gcov_Function, Line
 from pyTooling.Testing                        import Testcase
 from pyTooling.Versioning                     import SemanticVersion
@@ -512,7 +512,11 @@ class Conversion(Testcase):
 
 
 class Schema(Testcase):
-	"""The reverse-engineered JSON Schema accepts gcov's report and rejects what it doesn't write."""
+	"""Each JSON object is validated against the JSON Schema of its format version: it rejects what gcov doesn't write."""
+
+	def test_Schemas(self) -> None:
+		self.assertEqual({FormatVersion.Version1: "Gcov-1.schema.json", FormatVersion.Version2: "Gcov-2.schema.json"},
+		                 SCHEMAS)
 
 	def test_FormatVersion(self) -> None:
 		main = _stream()[1]
@@ -523,10 +527,69 @@ class Schema(Testcase):
 			with self.assertRaises(CodeCoverageError) as context:
 				_ = Document(jsonFile, analyzeAndConvert=True)
 
+		self.assertEqual(f"gcov report file '{jsonFile}' states an unsupported format version.", str(context.exception))
 		self.assertEqual(
-			f"Validation error for '{jsonFile}' using JSON Schema 'Gcov.schema.json'.", str(context.exception)
+			["Got value '3' at '/format_version'.", "Supported format versions: 1, 2."], context.exception.__notes__
 		)
-		self.assertEqual(["/format_version: '3' is not one of ['1', '2']"], context.exception.__notes__)
+
+	def test_FormatVersion_Missing(self) -> None:
+		"""The format version is read before validating; the second object states none."""
+		statistics, main = _stream()
+		del main["format_version"]
+		with TemporaryDirectory() as directory:
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(_write(directory, f"{dumps(statistics)}\n{dumps(main)}\n"), analyzeAndConvert=True)
+
+		self.assertEqual(
+			["Got no value at '[1]/format_version'.", "Supported format versions: 1, 2."], context.exception.__notes__
+		)
+
+	def test_Format1_Strict(self) -> None:
+		"""Format 1 has no basic blocks: the schema of format 1 rejects them."""
+		main = _stream()[1]
+		main["format_version"] = "1"
+		with TemporaryDirectory() as directory:
+			jsonFile = _write(directory, dumps(main))
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(
+			f"Validation error for '{jsonFile}' using JSON Schema 'Gcov-1.schema.json'.", str(context.exception)
+		)
+		self.assertIn(
+			"/files/1/lines/0: Additional properties are not allowed ('block_ids', 'calls', 'conditions' were unexpected)",
+			context.exception.__notes__
+		)
+
+	def test_Format2_Strict(self) -> None:
+		"""gcov of GCC 14 and later writes a line's basic blocks, calls and conditions, if empty."""
+		main = _stream()[1]
+		del main["files"][1]["lines"][0]["block_ids"]
+		with TemporaryDirectory() as directory:
+			jsonFile = _write(directory, dumps(main))
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(
+			f"Validation error for '{jsonFile}' using JSON Schema 'Gcov-2.schema.json'.", str(context.exception)
+		)
+		self.assertEqual(["/files/1/lines/0: 'block_ids' is a required property"], context.exception.__notes__)
+
+	def test_Formats(self) -> None:
+		"""A file may hold objects of both format versions, each validated against its schema."""
+		document = {
+			"format_version": "1", "gcc_version": "13.2.0", "data_file": "empty.c", "files": [
+				{"file": "empty.c", "functions": [], "lines": []}
+			]
+		}
+		with TemporaryDirectory() as directory:
+			report = Document(_write(directory, f"{dumps(document)}\n{dumps(_stream()[1])}\n"), analyzeAndConvert=True)
+
+		self.assertEqual([FormatVersion.Version1, FormatVersion.Version2], [
+			dataFile.FormatVersion for dataFile in report.DataFiles
+		])
 
 	def test_UnknownField(self) -> None:
 		"""An error in the second JSON object of a file is prefixed by its index."""

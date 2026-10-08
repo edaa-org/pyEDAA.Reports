@@ -33,14 +33,14 @@ GCC's gcov JSON code coverage format: a model of the format, read from a report 
 
 gcov writes the format with ``gcov --json-format``: gzip-compressed to a :file:`*.gcov.json.gz` file per data file, or
 - with ``--stdout`` - as plain JSON, one line per data file. A report is read in either form, and each JSON object in
-it is validated against the JSON Schema :file:`Gcov.schema.json`, reverse-engineered from GCC, which accepts
-format versions 1 (GCC 9 to 13) and 2 (GCC 14 and later). The format's model keeps what the report states: a
-:class:`Document` holds :class:`DataFile` records, a data file :class:`File` records, and a file its
-:class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Function` and :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Line`
-records - a line in format 2 with the IDs of its basic blocks. The records below a file are in
-:mod:`~pyEDAA.Reports.CodeCoverage.Gcov.Records`. Each record's constructor takes typed values, so the model can be
-built by hand: a record below the report names its parent with the keyword parameter ``parent`` and is added to it.
-Its class method ``Parse`` reads the record's JSON object.
+it is validated against the JSON Schema of the format version it states (:class:`FormatVersion`), reverse-engineered
+from GCC: :file:`Gcov-1.schema.json` for format 1 (GCC 9 to 13), :file:`Gcov-2.schema.json` for format 2 (GCC 14 and
+later). The format's model keeps what the report states: a :class:`Document` holds :class:`DataFile` records, a data
+file :class:`File` records, and a file its :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Function` and
+:class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Line` records - a line in format 2 with the IDs of its basic blocks.
+The records below a file are in :mod:`~pyEDAA.Reports.CodeCoverage.Gcov.Records`. Each record's constructor takes typed
+values, so the model can be built by hand: a record below the report names its parent with the keyword parameter
+``parent`` and is added to it. Its class method ``Parse`` reads the record's JSON object.
 
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
@@ -88,9 +88,7 @@ from pyEDAA.Reports.CodeCoverage              import Line as cc_Line, LineCovera
 from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function, Line
 
 
-__all__ = ["SCHEMA"]
-
-SCHEMA = "Gcov.schema.json"  #: The JSON Schema each JSON object of a report is validated against.
+__all__ = ["SCHEMAS"]
 
 # A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
 # body's namespace, where annotations are evaluated, binds the name to the property.
@@ -137,6 +135,11 @@ class FormatVersion(IntEnum):
 
 # Like '_Path': DataFile has a property named 'FormatVersion'.
 _FormatVersion = FormatVersion
+
+SCHEMAS: dict[FormatVersion, str] = {
+	FormatVersion.Version1: "Gcov-1.schema.json",
+	FormatVersion.Version2: "Gcov-2.schema.json"
+}  #: Per format version, the JSON Schema a JSON object of that version is validated against.
 
 
 @export
@@ -472,14 +475,15 @@ class Document(Coverage, cc_Document):
 	def Analyze(self) -> None:
 		"""
 		Read the file - decompressing it, if gzip-compressed -, parse its JSON objects and validate each against the JSON
-		Schema :data:`SCHEMA`.
+		Schema of the format version it states (:data:`SCHEMAS`).
 
 		:raises CodeCoverageError: If the file doesn't exist.
 		:raises CodeCoverageError: If the file is gzip-compressed, but corrupt.
 		:raises CodeCoverageError: If the file isn't valid JSON.
 		:raises CodeCoverageError: If the file holds no JSON object.
-		:raises CodeCoverageError: If the JSON Schema can't be read.
-		:raises CodeCoverageError: If a JSON object isn't valid according to the JSON Schema.
+		:raises CodeCoverageError: If a JSON object states no supported format version.
+		:raises CodeCoverageError: If a JSON Schema can't be read.
+		:raises CodeCoverageError: If a JSON object isn't valid according to the JSON Schema of its format version.
 		"""
 		if not self._path.exists():
 			raise CodeCoverageError(f"gcov report file '{self._path}' does not exist.") \
@@ -509,24 +513,36 @@ class Document(Coverage, cc_Document):
 			if len(jsonDocuments) == 0:
 				raise CodeCoverageError(f"gcov report file '{self._path}' holds no JSON object.")
 
-			try:
-				schema = loads(readResourceFile(Resources, SCHEMA))
-			except (ToolingException, JSONDecodeError) as ex:
-				raise CodeCoverageError(f"Couldn't read JSON Schema '{SCHEMA}' from package resources.") from ex
-
-			# a note per error; prefixed by the object's index, if the file holds several
-			validator = Draft202012Validator(schema)
-			notes = []
+			# a note's path is prefixed by the object's index, if the file holds several
+			validators: dict[FormatVersion, Draft202012Validator] = {}
 			for index, jsonDocument in enumerate(jsonDocuments):
 				prefix = f"[{index}]" if len(jsonDocuments) > 1 else ""
-				for error in sorted(validator.iter_errors(jsonDocument), key=lambda error: list(error.path)):
-					notes.append(f"{prefix}/{'/'.join(str(part) for part in error.path)}: {error.message}")
 
-			if len(notes) > 0:
-				ex = CodeCoverageError(f"Validation error for '{self._path}' using JSON Schema '{SCHEMA}'.")
-				for note in notes:
-					ex.add_note(note)
-				raise ex
+				version = jsonDocument.get("format_version") if isinstance(jsonDocument, dict) else None
+				try:
+					formatVersion = FormatVersion.Parse(version)
+				except (ValueError, TypeError) as ex:
+					error = CodeCoverageError(f"gcov report file '{self._path}' states an unsupported format version.")
+					got = f"value '{version}'" if version is not None else "no value"
+					error.add_note(f"Got {got} at '{prefix}/format_version'.")
+					error.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
+					raise error from ex
+
+				schemaFile = SCHEMAS[formatVersion]
+				if (validator := validators.get(formatVersion)) is None:
+					try:
+						schema = loads(readResourceFile(Resources, schemaFile))
+					except (ToolingException, JSONDecodeError) as ex:
+						raise CodeCoverageError(f"Couldn't read JSON Schema '{schemaFile}' from package resources.") from ex
+
+					validator = validators[formatVersion] = Draft202012Validator(schema)
+
+				errors = sorted(validator.iter_errors(jsonDocument), key=lambda error: list(error.path))
+				if len(errors) > 0:
+					ex = CodeCoverageError(f"Validation error for '{self._path}' using JSON Schema '{schemaFile}'.")
+					for error in errors:
+						ex.add_note(f"{prefix}/{'/'.join(str(part) for part in error.path)}: {error.message}")
+					raise ex
 
 			self._jsonDocuments = jsonDocuments
 
