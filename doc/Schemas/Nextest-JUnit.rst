@@ -5,7 +5,8 @@ cargo-nextest JUnit
 
 JUnit XML as written by cargo-nextest (``[profile.<name>.junit]`` in :file:`.config/nextest.toml`).
 
-Read by :class:`pyEDAA.Reports.Unittesting.JUnit.NextestJUnit.Document` - see :ref:`UNITTEST/SpecificDataModel/JUnit/Dialect/nextest`.
+Read by :class:`pyEDAA.Reports.Unittesting.JUnit.NextestJUnit.Document` - see
+:ref:`UNITTEST/SpecificDataModel/JUnit/Dialect/nextest`.
 
 .. grid:: 2
 
