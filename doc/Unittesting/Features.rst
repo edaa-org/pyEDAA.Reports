@@ -149,6 +149,19 @@ Reading unittest reports
                except UnittestError as ex:
                  ...
 
+         .. tab-item:: Catch2 JUnit
+            :sync: Catch2JUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
+
+               xmlReport = Path("Catch2-JUnit-Report.xml")
+               try:
+                 doc = Document(xmlReport, parse=True)
+               except UnittestError as ex:
+                 ...
+
          .. tab-item:: CTest JUnit
             :sync: CTestJUnit
 
@@ -460,6 +473,23 @@ Writing unittest reports
             .. code-block:: Python
 
                from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document
+
+               # Convert a TestsuiteSummary back to a Document
+               newXmlReport = Path("JUnit-Report.xml")
+               newDoc = Document.FromTestsuiteSummary(newXmlReport, summary)
+
+               # Write to XML file
+               try:
+                  newDoc.Write()
+               except UnittestError as ex:
+                 ...
+
+         .. tab-item:: Catch2 JUnit
+            :sync: Catch2JUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
 
                # Convert a TestsuiteSummary back to a Document
                newXmlReport = Path("JUnit-Report.xml")

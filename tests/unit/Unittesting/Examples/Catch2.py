@@ -28,96 +28,89 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""
-Reading a report, writing it out again and reading the result: the dialects have to survive their own output.
-
-A round trip is where a writer and a reader that disagree about the format show up - the merge pipelines in CI do
-exactly this, twice.
-"""
+"""Testcase for the special cases of Catch2's JUnit reporter."""
+from pathlib  import Path
 from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
-from pyTooling.Decorators import readonly
-
-from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, collectTestcaseNames, countTestcases, readReference, writeAs
-
-
-class RoundTripMixin:
-	"""Classic mixin: a report of this dialect is read, written and read back."""
-
-	_dialectName: ClassVar[str]
-
-	@readonly
-	def Dialect(self) -> Dialect:
-		"""
-		Read-only property to return the dialect under test, looked up by :attr:`_dialectName`.
-
-		:returns: The dialect under test.
-		"""
-		return DIALECTS[self._dialectName]
-
-	def _roundTrip(self, referenceFile):
-		"""
-		Read a reference report, write it in the same dialect and read that back.
-
-		:param referenceFile: The reference report to round trip.
-		:returns:             A tuple of the summary read first, the file written, and the summary read back.
-		"""
-		dialect = self.Dialect
-		summary = readReference(dialect, referenceFile)
-		outputFile = writeAs(dialect, summary, OUTPUT_DIRECTORY / dialect.Name / referenceFile.name)
-		rereadSummary = readReference(dialect, outputFile)
-
-		return summary, outputFile, rereadSummary
-
-	def test_WrittenReportIsValid(self) -> None:
-		schema = self.Dialect.Schema()
-
-		for referenceFile in self.Dialect.ReferenceFiles:
-			with self.subTest(file=referenceFile.name):
-				_, outputFile, _ = self._roundTrip(referenceFile)
-				schema.validate(str(outputFile))
-
-	def test_TestcaseCountSurvives(self) -> None:
-		for referenceFile in self.Dialect.ReferenceFiles:
-			with self.subTest(file=referenceFile.name):
-				summary, _, rereadSummary = self._roundTrip(referenceFile)
-				self.assertEqual(countTestcases(summary), countTestcases(rereadSummary))
-
-	def test_TestcaseNamesSurvive(self) -> None:
-		for referenceFile in self.Dialect.ReferenceFiles:
-			with self.subTest(file=referenceFile.name):
-				summary, _, rereadSummary = self._roundTrip(referenceFile)
-				self.assertEqual(collectTestcaseNames(summary), collectTestcaseNames(rereadSummary))
-
-	def test_HostnameSurvives(self) -> None:
-		for referenceFile in self.Dialect.ReferenceFiles:
-			with self.subTest(file=referenceFile.name):
-				summary, _, rereadSummary = self._roundTrip(referenceFile)
-				before = {ts._name: ts._hostname for ts in summary._testsuites.values()}
-				after = {ts._name: ts._hostname for ts in rereadSummary._testsuites.values()}
-				self.assertEqual(before, after)
+from pyEDAA.Reports.Unittesting                   import TestcaseStatus
+from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document, Testcase
 
 
-class AntJUnit4(RoundTripMixin, ut_TestCase):
-	_dialectName = "Ant-JUnit4"
+class Catch2Quirks(ut_TestCase):
+	"""
+	Read a report written by Catch2 from :file:`tests/data/JUnit/Catch2/Quirks.test.cpp`.
 
+	Catch2's console counts 8 test cases: 3 passed, 4 failed, 1 failed as expected.
+	"""
 
-class Catch2JUnit(RoundTripMixin, ut_TestCase):
-	_dialectName = "Catch2-JUnit"
+	_junitFile: ClassVar[Path] = Path("tests/data/JUnit/Catch2/catch2-junit-quirks.xml")
+	_document:  ClassVar[Document]
 
+	@classmethod
+	def setUpClass(cls) -> None:
+		cls._document = Document(cls._junitFile, analyzeAndConvert=True)
 
-class CTestJUnit(RoundTripMixin, ut_TestCase):
-	_dialectName = "CTest-JUnit"
+	def _testcase(self, classname: str, name: str) -> Testcase:
+		return self._document.Testsuites["quirks"].Testclasses[classname].Testcases[name]
 
+	def test_Counts(self) -> None:
+		self.assertEqual(8, self._document.TestcaseCount)
+		self.assertEqual(4, self._document.Passed)
+		self.assertEqual(3, self._document.Failed)
+		self.assertEqual(0, self._document.Errored)
+		self.assertEqual(1, self._document.Skipped)
 
-class GoogleTestJUnit(RoundTripMixin, ut_TestCase):
-	_dialectName = "GoogleTest-JUnit"
+	def test_NoAssertions(self) -> None:
+		"""A test case without assertions and without output is missing."""
+		self.assertNotIn("NoAssertions", self._document.Testsuites["quirks"].Testclasses["quirks.global"].Testcases)
 
+	def test_Output(self) -> None:
+		"""A test case without assertions, but with output, is reported."""
+		testcase = self._testcase("quirks.global", "Output")
 
-class PyTestJUnit(RoundTripMixin, ut_TestCase):
-	_dialectName = "pyTest-JUnit"
+		self.assertIs(TestcaseStatus.Passed, testcase.Status)
+		self.assertEqual("Hello Catch2", testcase.StandardOutput.strip())
 
+	def test_MayFail(self) -> None:
+		"""A failure expected by ``[!mayfail]`` is skipped."""
+		testcase = self._testcase("quirks.global", "MayFail")
 
-class AnyJUnit(RoundTripMixin, ut_TestCase):
-	_dialectName = "Any-JUnit"
+		self.assertIs(TestcaseStatus.Skipped, testcase.Status)
+		self.assertEqual("TEST_CASE tagged with !mayfail", testcase.Message)
+		self.assertIn("CHECK( 1 == 2 )", testcase.Details)
+
+	def test_ShouldFail(self) -> None:
+		"""A ``[!shouldfail]`` test case passing unexpectedly is failed for Catch2, but passed in the report."""
+		testcase = self._testcase("quirks.global", "ShouldFail")
+
+		self.assertIs(TestcaseStatus.Passed, testcase.Status)
+
+	def test_Nested(self) -> None:
+		"""A failure in a section fails the section's testcase only."""
+		self.assertIs(TestcaseStatus.Passed, self._testcase("quirks.global", "Nested").Status)
+		self.assertIs(TestcaseStatus.Failed, self._testcase("quirks.global", "Nested/Inner").Status)
+
+	def test_ExplicitFailure(self) -> None:
+		"""``FAIL()`` has no expression, so ``<failure>`` has no message."""
+		testcase = self._testcase("quirks.global", "ExplicitFailure")
+
+		self.assertIs(TestcaseStatus.Failed, testcase.Status)
+		self.assertIsNone(testcase.Message)
+		self.assertIn("Explicit failure.", testcase.Details)
+
+	def test_TwoFailures(self) -> None:
+		"""Only the first failed assertion is reported."""
+		testcase = self._testcase("quirks.global", "TwoFailures")
+
+		self.assertIs(TestcaseStatus.Failed, testcase.Status)
+		self.assertEqual("1 == 2", testcase.Message)
+		self.assertNotIn("3 == 4", testcase.Details)
+
+	def test_NamespacedFixture(self) -> None:
+		"""The namespace of a fixture class becomes a test suite in the unified data model."""
+		summary = self._document.ToTestsuiteSummary()
+
+		testsuite = summary.Testsuites["quirks"].Testsuites["quirks"].Testsuites["Namespace"].Testsuites["Fixture"]
+
+		self.assertIn("NamespacedFixture", testsuite.Testcases)

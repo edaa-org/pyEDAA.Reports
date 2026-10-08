@@ -75,7 +75,7 @@ rather stuffed their language constructs into the concepts and limitations of th
 .. rubric:: JUnit Dialects
 
 * 🚧 Bamboo JUnit (planned)
-* 🚧 Catch2 JUnit (planned)
+* ✅ :ref:`Catch2 JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/Catch2>`
 * ✅ :ref:`CTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/CTest>`
 * ✅ :ref:`GoogleTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/GoogleTest>`
 * 🚧 Jenkins JUnit (planned)
@@ -252,12 +252,13 @@ JUnit reporter
   ``<executable>.global``, or ``<executable>.<fixture class>`` for a test case of a fixture class. ``SKIP()`` writes a
   ``<skipped>`` element, an exception escaping a test case an ``<error>`` element. Unlike Ant JUnit4, the
   ``<testsuite>``'s ``tests`` attribute counts assertions (skips included), not test cases, ``hostname`` is ``tbd``,
-  and each ``<testcase>`` carries ``status="run"``. Except for this ``status`` attribute, the report is
-  :ref:`Any JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit>`; no dialect reads it yet.
+  and each ``<testcase>`` carries ``status="run"``. The report is read by the
+  :ref:`Catch2 JUnit dialect <UNITTEST/SpecificDataModel/JUnit/Dialect/Catch2>`.
 
 XML reporter
   Catch2's own format (root ``<Catch2TestRun>``, ``xml-format-version="3"``): nested ``<TestCase>`` and ``<Section>``
-  elements with tags, source file and line, every failed expression and the result counts. It isn't JUnit XML.
+  elements with tags, source file and line, every failed expression and the result counts. It isn't JUnit XML, and
+  pyEDAA.Reports doesn't read it yet.
 
 The example in :file:`examples/Cpp/Catch2` is built and run by the pipeline job ``Cpp-Catch2``. It measures the code
 coverage of the tested library with GCC (``--coverage``) and writes it as gcov JSON (``gcov --json-format``) and as
