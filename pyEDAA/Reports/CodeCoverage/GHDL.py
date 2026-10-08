@@ -67,7 +67,7 @@ from collections.abc             import Iterable
 from datetime                    import datetime, timezone
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
-from typing                      import Any, Optional as Nullable
+from typing                      import Any, Generic, TypeVar, Optional as Nullable
 
 from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import getFullyQualifiedName, readResourceFile, StringEnum
@@ -90,6 +90,9 @@ SCHEMA = "GHDL-Coverage.schema.json"  #: The JSON Schema a coverage file is vali
 # body's namespace, where annotations are evaluated, binds the name to the property.
 _Path = Path
 
+ParentType = TypeVar("ParentType", bound="Report | MergedReport")
+"""A type variable for the report a :class:`File` belongs to: a :class:`Report` or a :class:`MergedReport`."""
+
 
 @export
 class CoverageMode(StringEnum):
@@ -104,18 +107,18 @@ class CoverageMode(StringEnum):
 
 
 @export
-class File(metaclass=ExtendedType, slots=True):
+class File(Generic[ParentType], metaclass=ExtendedType, slots=True):
 	"""
 	An entry of ``outputs``: a source file, where it was analyzed, its checksum, and its lines with coverage points.
 	"""
 
-	_parent:    Nullable[Report | MergedReport]  #: The report the file belongs to.
-	_name:      _Path                            #: The file's name, as given to the analysis.
-	_directory: _Path                            #: The directory the file was analyzed in; ``.`` if GHDL ran there.
-	_sha1:      str                              #: SHA-1 checksum of the file's content.
-	_mode:      CoverageMode                     #: Kind of coverage, e.g. statement coverage.
-	_lastLine:  int                              #: The last line with a coverage point.
-	_result:    dict[int, bool]                  #: Per line with a coverage point, whether the line ran.
+	_parent:    Nullable[ParentType]  #: The report the file belongs to.
+	_name:      _Path                 #: The file's name, as given to the analysis.
+	_directory: _Path                 #: The directory the file was analyzed in; ``.`` if GHDL ran there.
+	_sha1:      str                   #: SHA-1 checksum of the file's content.
+	_mode:      CoverageMode          #: Kind of coverage, e.g. statement coverage.
+	_lastLine:  int                   #: The last line with a coverage point.
+	_result:    dict[int, bool]       #: Per line with a coverage point, whether the line ran.
 
 	def __init__(
 		self,
@@ -126,7 +129,7 @@ class File(metaclass=ExtendedType, slots=True):
 		lastLine: int,
 		result: dict[int, bool],
 		*,
-		parent: Nullable[Report | MergedReport] = None
+		parent: Nullable[ParentType] = None
 	) -> None:
 		"""
 		Initialize the file from the fields of its JSON object, and add it to the files of its report.
@@ -158,7 +161,7 @@ class File(metaclass=ExtendedType, slots=True):
 			parent._files[self.Path] = self
 
 	@readonly
-	def Parent(self) -> Nullable[Report | MergedReport]:
+	def Parent(self) -> Nullable[ParentType]:
 		"""
 		Read-only property to access the report the file belongs to (:attr:`_parent`).
 
@@ -239,7 +242,7 @@ class Report(metaclass=ExtendedType, slots=True):
 	_version:   Nullable[SemanticVersion]  #: Version of the format.
 	_testcase:  Nullable[str]              #: Name of the testcase.
 	_timestamp: Nullable[datetime]         #: Time the file was written, UTC.
-	_files:     dict[Path, File]           #: The source files, by path.
+	_files:     dict[Path, File[Report]]   #: The source files, by path.
 
 	def __init__(self) -> None:
 		"""
@@ -280,7 +283,7 @@ class Report(metaclass=ExtendedType, slots=True):
 		return self._timestamp
 
 	@readonly
-	def Files(self) -> dict[Path, File]:
+	def Files(self) -> dict[Path, File[Report]]:
 		"""
 		Read-only property to access the source files (:attr:`_files`).
 
@@ -406,9 +409,9 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 	the line.
 	"""
 
-	_name:    str               #: Name of the merged report.
-	_reports: list[Report]      #: The merged reports, in the order they were merged.
-	_files:   dict[Path, File]  #: The merged source files, by path.
+	_name:    str                             #: Name of the merged report.
+	_reports: list[Report]                    #: The merged reports, in the order they were merged.
+	_files:   dict[Path, File[MergedReport]]  #: The merged source files, by path.
 
 	def __init__(self, name: str, reports: Nullable[Iterable[Report]] = None) -> None:
 		"""
@@ -504,7 +507,7 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 		return self._reports
 
 	@readonly
-	def Files(self) -> dict[Path, File]:
+	def Files(self) -> dict[Path, File[MergedReport]]:
 		"""
 		Read-only property to access the merged source files (:attr:`_files`).
 
