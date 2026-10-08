@@ -64,7 +64,7 @@ from typing                import ClassVar, Generator, Optional as Nullable
 
 from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import ExtendedType, abstractmethod
+from pyTooling.MetaClasses import ExtendedType, abstractclass, abstractmethod
 
 from pyEDAA.Reports        import ReportException
 
@@ -1461,30 +1461,28 @@ class Method(Unit):
 
 
 @export
-class Document(metaclass=ExtendedType, mixin=True):
+@abstractclass
+class Document(metaclass=ExtendedType, slots=True):
 	"""
-	A mixin-class representing a code coverage report file, which is read in two steps: analyzed, then converted.
+	A code coverage report file, which is read in two steps: analyzed, then converted.
+
+	A format's document derives from this class and mixes in the root of the format's model.
 	"""
 
 	_path:               Path   #: Path to the report file.
 	_analysisDuration:   float  #: Duration of :meth:`Analyze` in seconds, or ``-1.0`` before it ran.
 	_conversionDuration: float  #: Duration of :meth:`Convert` in seconds, or ``-1.0`` before it ran.
 
-	def __init__(self, reportFile: Path, analyzeAndConvert: bool = False) -> None:
+	def __init__(self, reportFile: Path) -> None:
 		"""
-		Initialize the report file, and optionally read it.
+		Initialize the report file.
 
-		:param reportFile:        Path to the report file.
-		:param analyzeAndConvert: Optional, if true, analyze the file and convert its content. Default: ``False``.
+		:param reportFile: Path to the report file.
 		"""
 		self._path = reportFile
 
 		self._analysisDuration =   -1.0
 		self._conversionDuration = -1.0
-
-		if analyzeAndConvert:
-			self.Analyze()
-			self.Convert()
 
 	@readonly
 	def ReportFile(self) -> Path:

@@ -462,7 +462,7 @@ class Package(Element):
 
 
 @export
-class Coverage(metaclass=ExtendedType, slots=True):
+class Coverage(metaclass=ExtendedType, mixin=True):
 	"""
 	The root element ``<coverage>``: the report's source directories, packages and figures, as the report states them.
 	"""
@@ -596,7 +596,7 @@ class Coverage(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Document(Coverage, cc_Document):
+class Document(cc_Document, Coverage):
 	"""
 	A Cobertura XML code coverage report: read into the format's model, and converted to the common model.
 	"""
@@ -610,11 +610,14 @@ class Document(Coverage, cc_Document):
 		:param xmlReportFile:     Path to the Cobertura XML file.
 		:param analyzeAndConvert: Optional, if true, analyze the file and convert its content. Default: ``False``.
 		"""
-		super().__init__()
+		super().__init__(xmlReportFile)
+		Coverage.__init__(self)
 
 		self._xmlDocument = None
 
-		cc_Document.__init__(self, xmlReportFile, analyzeAndConvert)
+		if analyzeAndConvert:
+			self.Analyze()
+			self.Convert()
 
 	def Analyze(self) -> None:
 		"""

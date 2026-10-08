@@ -37,7 +37,7 @@ from tempfile                         import TemporaryDirectory
 from typing                           import Any
 
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, CoverageSummary, LineCoverageStatus
-from pyEDAA.Reports.CodeCoverage.GHDL import CoverageMode, Document, File, MergedReport, Report
+from pyEDAA.Reports.CodeCoverage.GHDL import CoverageMode, Document, File, MergedReport
 from pyTooling.Testing                import Testcase
 from pyTooling.Versioning             import SemanticVersion
 
@@ -141,7 +141,7 @@ class FormatModel(Testcase):
 		file = File(Path("src/Counter.vhdl"), Path("."), "0" * 40, CoverageMode.Statement, 1, {1: True})
 		self.assertIsNone(file.Parent)
 
-		report = Report()
+		report = Document(Path("coverage.json"))
 		file = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 1, {1: True}, parent=report)
 		self.assertIs(report, file.Parent)
 		self.assertEqual({Path("src/Counter.vhdl"): file}, report.Files)
