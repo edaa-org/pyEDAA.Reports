@@ -160,6 +160,45 @@ class Hierarchy(Testcase):
 
 		self.assertEqual("Line 3 of file 'Counter.vhdl' is added twice.", str(context.exception))
 
+	def test_LineList(self) -> None:
+		"""A file's lines are a list indexed by line number; unlisted lines are None, also when added out of order."""
+		file = File("a.c", lines=(Line(5, Covered), ))
+		Line(2, Uncovered, parent=file)
+		Line(7, Excluded, parent=file)
+
+		lineNumbers = [None if line is None else line.LineNumber for line in file.Lines]
+		self.assertEqual([None, None, 2, None, None, 5, None, 7], lineNumbers)
+		self.assertEqual(7, file.LastLineNumber)
+		self.assertIs(file.Lines[5], file.GetLine(5))
+		self.assertIsNone(file.GetLine(3))
+
+		with self.assertRaises(ValueError) as context:
+			_ = file.GetLine(8)
+
+		self.assertEqual("Parameter 'lineNumber' is beyond the last line of file 'a.c'.", str(context.exception))
+		self.assertEqual(["Got value '8' for 7 lines."], context.exception.__notes__)
+		self.assertIsInstance(context.exception.__cause__, IndexError)
+
+	def test_LineList_Constructor(self) -> None:
+		"""Lines given to the constructor - also by a generator, out of order - fill a list ending at the last line."""
+		file = File("a.c", lines=(line for line in (Line(4, Covered), Line(2, Uncovered))))
+
+		self.assertEqual(4, file.LastLineNumber)
+		self.assertEqual(5, len(file.Lines))
+		self.assertEqual([2, 4], [line.LineNumber for line in file.IterateLines()])
+
+	def test_GetLine(self) -> None:
+		for lineNumber, exceptionType, message in (
+			(None, ValueError, "Parameter 'lineNumber' is None."),
+			("1",  TypeError,  "Parameter 'lineNumber' is not of type 'int'."),
+			(0,    ValueError, "Parameter 'lineNumber' is less than 1.")
+		):
+			with self.subTest(lineNumber=lineNumber):
+				with self.assertRaises(exceptionType) as context:
+					_ = File("a.c").GetLine(lineNumber)
+
+				self.assertEqual(message, str(context.exception))
+
 	def test_DuplicateLine_Parameter(self) -> None:
 		with self.assertRaises(CodeCoverageError) as context:
 			_ = File("Counter.vhdl", lines=(Line(3, Covered), Line(3, Uncovered)))

@@ -166,7 +166,7 @@ class Conversion(Testcase):
 			), analyzeAndConvert=True).ToCoverageSummary()
 
 		file = summary.Files["A.java"]
-		self.assertEqual([3, 4], sorted(file.Lines))
+		self.assertEqual([3, 4], [line.LineNumber for line in file.IterateLines()])
 		self.assertEqual(2, file.Lines[4].CoverageCount)
 		self.assertIs(LineCoverageStatus.Covered, file.Lines[4].Status)
 		self.assertIs(LineCoverageStatus.PartiallyCovered, file.Lines[3].Status)
