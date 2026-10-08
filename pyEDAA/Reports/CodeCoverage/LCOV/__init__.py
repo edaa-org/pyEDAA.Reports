@@ -321,11 +321,11 @@ class Document(cc_Document, Tracefile):
 						line._count += count
 				elif key == "BRDA":
 					taken = None if values[4] == "-" else int(values[4])
-					section._branches.append(Branch(int(values[0]), int(values[2]), values[3], taken, values[1] == "e"))
+					Branch(int(values[0]), int(values[2]), values[3], taken, values[1] == "e", parent=section)
 				elif key == "MCDC":
-					section._conditions.append(Condition(
-						int(values[0]), int(values[1]), values[2] == "t", int(values[3]), int(values[4]), values[5]
-					))
+					Condition(
+						int(values[0]), int(values[1]), values[2] == "t", int(values[3]), int(values[4]), values[5], parent=section
+					)
 				elif key == "FN":
 					if (name := values[2]) in functionsByName:
 						ex = CodeCoverageError(f"Function '{name}' is stated twice in the section of '{section._sourceFile}'.")

@@ -35,7 +35,7 @@ from tempfile                                 import TemporaryDirectory
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
 from pyEDAA.Reports.CodeCoverage.LCOV         import RECORD_SYNTAX, Document
-from pyEDAA.Reports.CodeCoverage.LCOV.Records import Function as lcov_Function, Line, Section
+from pyEDAA.Reports.CodeCoverage.LCOV.Records import Branch, Condition, Function as lcov_Function, Line, Section
 from pyTooling.Testing                        import Testcase
 
 
@@ -209,11 +209,31 @@ class Parents(Testcase):
 		self.assertEqual([first, second], tracefile.Sections)
 		self.assertIsNone(Section("", Path("a.c")).Parent)
 
+	def test_Branch(self) -> None:
+		section = Section("", Path("a.c"))
+		first = Branch(4, 0, "0", 1, False, parent=section)
+		second = Branch(4, 0, "1", None, False, parent=section)
+
+		self.assertEqual([section, section], [first.Parent, second.Parent])
+		self.assertEqual([first, second], section.Branches)
+		self.assertIsNone(Branch(4, 0, "0", 0, True).Parent)
+
+	def test_Condition(self) -> None:
+		section = Section("", Path("a.c"))
+		first = Condition(7, 2, True, 1, 0, "x", parent=section)
+		second = Condition(7, 2, False, 0, 0, "x", parent=section)
+
+		self.assertEqual([section, section], [first.Parent, second.Parent])
+		self.assertEqual([first, second], section.Conditions)
+		self.assertIsNone(Condition(7, 2, True, 0, 1, "y").Parent)
+
 	def test_WrongParent(self) -> None:
 		section = Section("", Path("a.c"))
 		for create, expected in (
 			(lambda: Line(1, 0, parent=Document(Path("coverage.info"))), "Section"),
 			(lambda: lcov_Function(1, None, parent=Document(Path("coverage.info"))), "Section"),
+			(lambda: Branch(1, 0, "0", 0, False, parent=Document(Path("coverage.info"))), "Section"),
+			(lambda: Condition(1, 1, True, 0, 0, "x", parent=Document(Path("coverage.info"))), "Section"),
 			(lambda: Section("", Path("a.c"), parent=section), "Tracefile")
 		):
 			with self.subTest(expected=expected):
@@ -224,10 +244,11 @@ class Parents(Testcase):
 				self.assertEqual(1, len(context.exception.__notes__))
 
 	def test_Document(self) -> None:
-		"""A read tracefile is the parent of its sections, a section of its functions and lines."""
+		"""A read tracefile is the parent of its sections, a section of its functions, lines, branches and conditions."""
 		with TemporaryDirectory() as directory:
 			tracefile = Document(_write(directory,
-				"SF:a.c\nFN:1,3,f\nFNDA:1,f\nDA:2,1\nend_of_record\nSF:b.c\nFNL:0,1\nFNA:0,0,g\nDA:1,0\nend_of_record\n"
+				"SF:a.c\nFN:1,3,f\nFNDA:1,f\nDA:2,1\nBRDA:2,0,0,1\nMCDC:2,1,t,1,0,x\nend_of_record\n"
+				"SF:b.c\nFNL:0,1\nFNA:0,0,g\nDA:1,0\nBRDA:1,0,0,-\nMCDC:1,1,f,0,0,y\nend_of_record\n"
 			), analyzeAndConvert=True)
 
 		self.assertEqual([tracefile, tracefile], [section.Parent for section in tracefile.Sections])
@@ -235,6 +256,8 @@ class Parents(Testcase):
 			with self.subTest(section=section.SourceFile):
 				self.assertEqual([section], [function.Parent for function in section.Functions])
 				self.assertEqual([section], [line.Parent for line in section.Lines.values()])
+				self.assertEqual([section], [branch.Parent for branch in section.Branches])
+				self.assertEqual([section], [condition.Parent for condition in section.Conditions])
 
 
 class Conversion(Testcase):

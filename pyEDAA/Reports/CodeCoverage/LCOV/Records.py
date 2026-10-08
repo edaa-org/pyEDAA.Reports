@@ -131,27 +131,58 @@ class Branch(metaclass=ExtendedType, slots=True):
 	A ``BRDA`` record: a branch of a line, and how often it was taken.
 	"""
 
-	_lineNumber:  int            #: Line number of the branch.
-	_block:       int            #: Number of the branch's block - the conditional - in its line.
-	_expression:  str            #: Index or expression identifying the branch in its block.
-	_taken:       Nullable[int]  #: How often the branch was taken; ``None``, if it was never evaluated.
-	_isException: bool           #: Whether the branch is taken by an exception.
+	_parent:      Nullable[Section]  #: The section the branch belongs to.
+	_lineNumber:  int                #: Line number of the branch.
+	_block:       int                #: Number of the branch's block - the conditional - in its line.
+	_expression:  str                #: Index or expression identifying the branch in its block.
+	_taken:       Nullable[int]      #: How often the branch was taken; ``None``, if it was never evaluated.
+	_isException: bool               #: Whether the branch is taken by an exception.
 
-	def __init__(self, lineNumber: int, block: int, expression: str, taken: Nullable[int], isException: bool) -> None:
+	def __init__(
+		self,
+		lineNumber: int,
+		block: int,
+		expression: str,
+		taken: Nullable[int],
+		isException: bool,
+		*,
+		parent: Nullable[Section] = None
+	) -> None:
 		"""
-		Initialize a branch.
+		Initialize a branch, and append it to the branches of its section.
 
 		:param lineNumber:  Line number of the branch.
 		:param block:       Number of the branch's block in its line.
 		:param expression:  Index or expression identifying the branch in its block.
 		:param taken:       How often the branch was taken; ``None``, if it was never evaluated.
 		:param isException: Whether the branch is taken by an exception.
+		:param parent:      Optional, the section the branch belongs to; the branch is appended to its branches.
+		                    Default: ``None``.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
 		"""
+		if parent is not None and not isinstance(parent, Section):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =      parent
 		self._lineNumber =  lineNumber
 		self._block =       block
 		self._expression =  expression
 		self._taken =       taken
 		self._isException = isException
+
+		if parent is not None:
+			parent._branches.append(self)
+
+	@readonly
+	def Parent(self) -> Nullable[Section]:
+		"""
+		Read-only property to access the section the branch belongs to (:attr:`_parent`).
+
+		:returns: The section; ``None`` if the branch belongs to no section.
+		"""
+		return self._parent
 
 	@readonly
 	def LineNumber(self) -> int:
@@ -205,16 +236,27 @@ class Condition(metaclass=ExtendedType, slots=True):
 	An ``MCDC`` record: whether the outcome of a line's expression changed, when one of its conditions changed.
 	"""
 
-	_lineNumber: int   #: Line number of the expression.
-	_groupSize:  int   #: Number of conditions in the expression's group.
-	_sense:      bool  #: ``True`` for a change of the condition from false to true; ``False`` for the converse.
-	_taken:      int   #: How often - or whether - the condition was sensitized.
-	_index:      int   #: Index of the condition in its group.
-	_expression: str   #: The condition's expression.
+	_parent:     Nullable[Section]  #: The section the condition belongs to.
+	_lineNumber: int                #: Line number of the expression.
+	_groupSize:  int                #: Number of conditions in the expression's group.
+	_sense:      bool               #: ``True`` for a change from false to true; ``False`` for the converse.
+	_taken:      int                #: How often - or whether - the condition was sensitized.
+	_index:      int                #: Index of the condition in its group.
+	_expression: str                #: The condition's expression.
 
-	def __init__(self, lineNumber: int, groupSize: int, sense: bool, taken: int, index: int, expression: str) -> None:
+	def __init__(
+		self,
+		lineNumber: int,
+		groupSize: int,
+		sense: bool,
+		taken: int,
+		index: int,
+		expression: str,
+		*,
+		parent: Nullable[Section] = None
+	) -> None:
 		"""
-		Initialize a condition.
+		Initialize a condition, and append it to the conditions of its section.
 
 		:param lineNumber: Line number of the expression.
 		:param groupSize:  Number of conditions in the expression's group.
@@ -222,13 +264,34 @@ class Condition(metaclass=ExtendedType, slots=True):
 		:param taken:      How often - or whether - the condition was sensitized.
 		:param index:      Index of the condition in its group.
 		:param expression: The condition's expression.
+		:param parent:     Optional, the section the condition belongs to; the condition is appended to its conditions.
+		                   Default: ``None``.
+		:raises TypeError: If parameter ``parent`` isn't of type :class:`Section`.
 		"""
+		if parent is not None and not isinstance(parent, Section):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =     parent
 		self._lineNumber = lineNumber
 		self._groupSize =  groupSize
 		self._sense =      sense
 		self._taken =      taken
 		self._index =      index
 		self._expression = expression
+
+		if parent is not None:
+			parent._conditions.append(self)
+
+	@readonly
+	def Parent(self) -> Nullable[Section]:
+		"""
+		Read-only property to access the section the condition belongs to (:attr:`_parent`).
+
+		:returns: The section; ``None`` if the condition belongs to no section.
+		"""
+		return self._parent
 
 	@readonly
 	def LineNumber(self) -> int:
