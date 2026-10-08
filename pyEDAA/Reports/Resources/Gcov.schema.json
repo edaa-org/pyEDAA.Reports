@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/Gcov-JSON.schema.json",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/Gcov.schema.json",
 	"title": "gcov JSON report",
 	"description": "The JSON report gcov writes with 'gcov --json-format' for one data file, format versions 1 (GCC 9 to 13) and 2 (GCC 14 and later). Reverse-engineered from GCC's 'gcov.cc' and its documentation: version 2 added the basic blocks of a line and a branch, the calls and the conditions; GCC 15 added the prime paths of a function. Fields a version added later are optional.",
 	"type": "object",

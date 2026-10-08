@@ -32,8 +32,8 @@ Available schemas
    * - :ref:`GHDL coverage <SCHEMAS/GHDL-Coverage>`
      - :file:`GHDL-Coverage.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.GHDL.Document`
-   * - :ref:`gcov JSON <SCHEMAS/Gcov-JSON>`
-     - :file:`Gcov-JSON.schema.json`
+   * - :ref:`gcov JSON <SCHEMAS/Gcov>`
+     - :file:`Gcov.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.Gcov.Document`
    * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
      - :file:`Any-JUnit.xsd`
@@ -86,7 +86,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    Cobertura-04
    CoveragePy-JSON
    GHDL-Coverage
-   Gcov-JSON
+   Gcov
    Any-JUnit
    Ant-JUnit4
    CTest-JUnit

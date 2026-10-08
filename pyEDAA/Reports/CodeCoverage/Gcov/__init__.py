@@ -33,7 +33,7 @@ GCC's gcov JSON code coverage format: a model of the format, read from a report 
 
 gcov writes the format with ``gcov --json-format``: gzip-compressed to a :file:`*.gcov.json.gz` file per data file, or
 - with ``--stdout`` - as plain JSON, one line per data file. A report is read in either form, and each JSON object in
-it is validated against the JSON Schema :file:`Gcov-JSON.schema.json`, reverse-engineered from GCC, which accepts
+it is validated against the JSON Schema :file:`Gcov.schema.json`, reverse-engineered from GCC, which accepts
 format versions 1 (GCC 9 to 13) and 2 (GCC 14 and later). The format's model keeps what the report states: a
 :class:`Document` holds :class:`DataFile` records, a data file :class:`File` records, and a file its
 :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Function` and :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Line`
@@ -89,7 +89,7 @@ from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function, Line
 
 __all__ = ["SCHEMA"]
 
-SCHEMA = "Gcov-JSON.schema.json"  #: The JSON Schema each JSON object of a report is validated against.
+SCHEMA = "Gcov.schema.json"  #: The JSON Schema each JSON object of a report is validated against.
 
 # A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
 # body's namespace, where annotations are evaluated, binds the name to the property.
