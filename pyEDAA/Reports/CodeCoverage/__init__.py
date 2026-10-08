@@ -586,7 +586,7 @@ class Directory(BaseWithPath):
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
-		parts = [part for part in path.parts if part not in ("", ".", "/")]
+		parts = [part for part in path.parts if part not in ("", ".", path.anchor)]
 		if len(parts) == 0:
 			ex = ValueError(f"Parameter 'path' names no file.")
 			ex.add_note(f"Got path '{path}'.")
