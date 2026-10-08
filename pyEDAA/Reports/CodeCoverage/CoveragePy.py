@@ -188,7 +188,7 @@ class Summary(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Lines(metaclass=ExtendedType, slots=True):
+class Base(metaclass=ExtendedType, slots=True):
 	"""
 	Base-class of a file and a region: its executed, missing and excluded lines, its branches, and its summary.
 	"""
@@ -278,7 +278,7 @@ class Lines(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Region(Lines):
+class Region(Base):
 	"""
 	A function or a class of a file - in format 3 -, named by its qualified name, e.g. ``Circle.Area``.
 	"""
@@ -318,7 +318,7 @@ class Region(Lines):
 
 
 @export
-class File(Lines):
+class File(Base):
 	"""
 	A measured file: its lines, branches and summary, and - in format 3 - its functions and classes.
 
