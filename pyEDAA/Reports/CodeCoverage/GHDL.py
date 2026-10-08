@@ -370,7 +370,6 @@ class Document(Report, cc_Document):
 			self._testcase =  self._jsonDocument["testcase"]
 			self._timestamp = timestamp.replace(tzinfo=timezone.utc)
 
-			self._files = {}
 			for output in self._jsonDocument["outputs"]:
 				name =      Path(output["file"].replace("\\", "/"))
 				directory = Path(output["dir"].replace("\\", "/"))
