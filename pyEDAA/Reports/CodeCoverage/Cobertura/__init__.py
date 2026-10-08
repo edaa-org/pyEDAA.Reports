@@ -52,6 +52,9 @@ from this one, validating against a strict XML schema of the dialect, and readin
    :mod:`~pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura`
       |rarr| coverage.py's dialect (``coverage xml``).
 
+   :mod:`~pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura`
+      |rarr| NVC's dialect (``nvc --cover-export --format=cobertura``).
+
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
 * A class' ``filename`` is a file's path, relative to one of the ``<source>`` directories; several classes of one file

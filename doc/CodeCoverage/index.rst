@@ -221,7 +221,7 @@ binary format of their own, which only the tool itself or its API reads.
      - —
      - UCDB (read via the UCIS API)
 
-pyEDAA.Reports reads Cobertura XML - also coverage.py's - and coverage.py's JSON.
+pyEDAA.Reports reads Cobertura XML - also coverage.py's and NVC's - and coverage.py's JSON.
 
 .. _CODECOV/Formats/Cobertura:
 
@@ -270,23 +270,32 @@ is read with chooses the dialect.
 
 .. list-table::
    :header-rows: 1
-   :widths: 25 35 40
+   :widths: 16 26 29 29
 
    * - Feature
      - Any Cobertura
      - coverage.py Cobertura
+     - NVC Cobertura
    * - Schema
      - :ref:`Any-Cobertura.xsd <SCHEMAS/Any-Cobertura>`, lenient
      - :ref:`CoveragePy-Cobertura.xsd <SCHEMAS/CoveragePy-Cobertura>`, strict
+     - :ref:`NVC-Cobertura.xsd <SCHEMAS/NVC-Cobertura>`, strict
+   * - ``condition-coverage``
+     - percentage, taken and all, e.g. ``50% (1/2)``
+     - percentage, taken and all, e.g. ``50% (1/2)``
+     - percentage only: ``0 %``, ``50 %`` or ``100 %``
    * - A line's ``hits``
      - count
      - ``0`` or ``1``: no count
+     - count of the statements starting in the line, all instances added; ``0`` without a statement
    * - Branches
      - taken and all, from ``condition-coverage``
      - also the targets of those never taken, from ``missing-branches``
+     - true and false of each ``<condition>``, taken from ``condition-coverage``
    * - Units
      - packages, classes and methods
      - packages and modules, from the file paths
+     - library, entity and architecture
 
 .. _CODECOV/Formats/Cobertura/CoveragePy:
 
@@ -313,6 +322,93 @@ common model:
 
    from pathlib import Path
    from pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura import Document
+
+   report = Document(Path("coverage.xml"), analyzeAndConvert=True)
+   summary = report.ToCoverageSummary()
+   for unit in summary.IterateUnits():
+     print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
+
+
+.. _CODECOV/Formats/Cobertura/NVC:
+
+NVC Cobertura
+-------------
+
+NVC writes Cobertura XML with ``nvc --cover-export --format=cobertura``, from the coverage database (:file:`*.ncdb`) of
+a simulation elaborated with ``--cover``, or of several merged with ``nvc --cover-merge``.
+:class:`pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura.Document` validates a report against
+:ref:`NVC-Cobertura.xsd <SCHEMAS/NVC-Cobertura>`, reverse-engineered from NVC 1.23, and reads it into the generic
+format's model; a class also keeps its entity and architecture.
+
+The beginning of a report, of the simulation in :file:`tests/data/CodeCoverage/NVC`:
+
+.. literalinclude:: ../../tests/data/CodeCoverage/NVC/Count.xml
+   :language: xml
+   :lines: 1-28
+
+.. rubric:: What NVC writes
+
+* A document type declaration naming ``coverage-04.dtd``, and every attribute the DTD requires: ``version`` is NVC's
+  name and version, e.g. ``nvc 1.23.0``, ``timestamp`` in seconds, a rate has six decimals, every ``complexity`` is
+  ``0.0``. The only ``<source>`` is ``.``; a file is named relative to the directory given by ``--relative``, or as it
+  was given to the analysis.
+* One package, named after the library of the top-level design unit, e.g. ``WORK`` - also for design units of other
+  libraries.
+* A class per design unit, named after its entity and architecture in upper case, e.g. ``COUNTER(RTL)``, with the file
+  of its first coverage item. All instances of a design unit are one class, their counts added. The classes follow in
+  the reverse order of elaboration, the lines in the order of their coverage items, not sorted; there are no methods.
+  Subprograms of a package aren't measured.
+* A line's ``hits`` adds how often each statement starting in the line ran: a line of two statements, e.g.
+  ``State <= Idle;  Count <= (others => '0');``, counts ``2`` each time it runs. A line without a statement - e.g. an
+  ``elsif``, a ``when`` of a ``case`` statement, the continuation of a conditional signal assignment - has hits ``0``,
+  even when its condition was evaluated.
+* A branching line has ``branch="true"``, a ``condition-coverage`` and one ``<condition number="0" type="jump">`` of the
+  same ``coverage``: ``0 %``, ``50 %`` or ``100 %``, whether its condition was never decided, decided one way, or both
+  ways. A choice of a ``case`` statement is always ``0 %``, taken or not: NVC counts only the true and false directions
+  of a branch.
+* ``lines-valid`` counts the lines listed, ``lines-covered`` those with hits; ``branches-valid`` counts the branching
+  lines, ``branches-covered`` those decided both ways.
+* Only statement and branch coverage reach the export. Expression, toggle, FSM state and functional coverage
+  (``--cover=expression``, ``toggle``, ``fsm-state``, ``functional``) add a line of hits ``0`` for each line with an
+  item - e.g. a signal's declaration for toggle coverage, a PSL ``cover`` directive for functional coverage -, which
+  can't be told from a statement that never ran.
+
+.. rubric:: Differences from ``coverage-04.dtd`` and the generic reader
+
+* ``condition-coverage`` is a percentage with a space before ``%``, without the taken and all branches the DTD's
+  form ``50% (1/2)`` states. :ref:`Any-Cobertura.xsd <SCHEMAS/Any-Cobertura>` and
+  :ref:`Cobertura-04.xsd <SCHEMAS/Cobertura-04>` reject it, so
+  :class:`~pyEDAA.Reports.CodeCoverage.Cobertura.Document` doesn't read an NVC report with branch coverage.
+* A class' ``name`` isn't a class, but a design unit: entity and architecture. ``branches-valid`` counts branching
+  lines, not branches.
+* A file is named per design unit, the file of its first coverage item. An entity's statements are listed in each of
+  its architectures' classes; if the entity is in another file than the architecture, the architecture's lines are
+  listed under the entity's file, with their line numbers in the architecture's file.
+
+.. rubric:: Conversion to the common model
+
+:meth:`~pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura.Document.ToCoverageSummary` converts it to the common
+model:
+
+* A line's ``hits`` is its count. Classes of one file are one file; a line listed by several of them - e.g. an
+  entity's statement - has their hits added.
+* Each ``<condition>`` becomes two branches without count - its true and its false direction -, of which
+  ``condition-coverage`` states how many were taken: ``50 %`` is one of two.
+* A line, which ran or took a branch, is covered - partially covered, if one of its branches wasn't taken -, otherwise
+  uncovered. A line without a statement, which took a branch, has no count.
+* The library becomes a package, an entity a module in it, and an architecture a module in its entity, spanning its file
+  from the first to the last line its class lists: ``WORK.COUNTER.RTL``.
+* The format has no excluded lines.
+
+So the common model counts other figures than NVC: two branches per branching line, and a line without a statement,
+which took a branch, as covered. What the format doesn't state is lost: which direction of a ``50 %`` condition was
+taken, the counts per instance - NVC's HTML report (``nvc --cover-report``) has them -, and the expression, toggle, FSM
+state and functional coverage.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura import Document
 
    report = Document(Path("coverage.xml"), analyzeAndConvert=True)
    summary = report.ToCoverageSummary()
