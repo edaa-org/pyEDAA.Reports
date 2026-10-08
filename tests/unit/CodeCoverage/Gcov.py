@@ -36,7 +36,7 @@ from tempfile                                 import TemporaryDirectory
 from typing                                   import Any
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.Gcov         import DataFile, Document, File
+from pyEDAA.Reports.CodeCoverage.Gcov         import Coverage, DataFile, Document, File
 from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function as gcov_Function, Line
 from pyTooling.Testing                        import Testcase
 from pyTooling.Versioning                     import SemanticVersion
@@ -165,25 +165,20 @@ class Construction(Testcase):
 		self.assertEqual((8, 7, 3), (pop.Blocks, pop.BlocksExecuted, pop.ExecutionCount))
 
 	def test_File(self) -> None:
-		main = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1)
-		lines = [Line(1, 1, False, "main"), Line(2, 1, False, "main")]
-		file = File(Path("main.c"), [main], lines)
+		file = File(Path("main.c"))
 
-		self.assertEqual((Path("main.c"), {"main": main}, lines), (file.Path, file.Functions, file.Lines))
-		self.assertEqual(({}, []), (File(Path("empty.c")).Functions, File(Path("empty.c")).Lines))
+		self.assertEqual((Path("main.c"), None, {}, []), (file.Path, file.Parent, file.Functions, file.Lines))
 
 	def test_DataFile(self) -> None:
-		file = File(Path("main.c"))
-		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), Path("/build"), [file])
+		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), Path("/build"))
 
 		self.assertEqual((Path("main.c"), 2, "14.2.0", Path("/build")),
 		                 (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion, dataFile.CurrentWorkingDirectory))
-		self.assertEqual({Path("main.c"): file}, dataFile.Files)
 
 	def test_DataFile_Defaults(self) -> None:
 		dataFile = DataFile(Path("main.c"), 1, SemanticVersion.Parse("13.2.0"))
 
-		self.assertEqual((None, {}), (dataFile.CurrentWorkingDirectory, dataFile.Files))
+		self.assertEqual((None, None, {}), (dataFile.CurrentWorkingDirectory, dataFile.Parent, dataFile.Files))
 
 	def test_Line_LineNumber(self) -> None:
 		with self.assertRaises(ValueError) as context:
@@ -222,12 +217,6 @@ class Construction(Testcase):
 		self.assertEqual("Parameter 'path' is not of type 'Path'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
-	def test_File_Lines(self) -> None:
-		with self.assertRaises(TypeError) as context:
-			_ = File(Path("main.c"), lines=[Line(1, 0, False), 2])
-		self.assertEqual("Parameter 'lines' contains an element not of type 'Line'.", str(context.exception))
-		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
-
 	def test_DataFile_FormatVersion(self) -> None:
 		with self.assertRaises(ValueError) as context:
 			_ = DataFile(Path("main.c"), 3, SemanticVersion.Parse("14.2.0"))
@@ -240,10 +229,99 @@ class Construction(Testcase):
 		self.assertEqual("Parameter 'gccVersion' is not of type 'SemanticVersion'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
-	def test_DataFile_Files(self) -> None:
+
+class ParentRelation(Testcase):
+	"""Each record below the report names its parent and is added to it."""
+
+	def test_DataFile(self) -> None:
+		coverage = Coverage()
+		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), parent=coverage)
+
+		self.assertIs(coverage, dataFile.Parent)
+		self.assertEqual([dataFile], coverage.DataFiles)
+
+	def test_File(self) -> None:
+		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"))
+		file = File(Path("main.c"), parent=dataFile)
+
+		self.assertIs(dataFile, file.Parent)
+		self.assertEqual({Path("main.c"): file}, dataFile.Files)
+
+	def test_Function(self) -> None:
+		file = File(Path("main.c"))
+		main = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1, parent=file)
+
+		self.assertIs(file, main.Parent)
+		self.assertEqual({"main": main}, file.Functions)
+
+	def test_Line(self) -> None:
+		"""A line several functions share is added once per function."""
+		file = File(Path("main.c"))
+		lines = [Line(1, 1, False, "main", parent=file), Line(1, 1, False, "other", parent=file)]
+
+		self.assertEqual([file, file], [line.Parent for line in lines])
+		self.assertEqual(lines, file.Lines)
+
+	def test_Defaults(self) -> None:
+		self.assertIsNone(gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1).Parent)
+		self.assertIsNone(Line(1, 1, False).Parent)
+
+	def test_Document(self) -> None:
+		"""Reading a report builds each relation."""
+		report = Document(STREAM, analyzeAndConvert=True)
+
+		for dataFile in report.DataFiles:
+			self.assertIs(report, dataFile.Parent)
+			for file in dataFile.Files.values():
+				self.assertIs(dataFile, file.Parent)
+				self.assertTrue(all(function.Parent is file for function in file.Functions.values()))
+				self.assertTrue(all(line.Parent is file for line in file.Lines))
+
+	def test_DataFile_Parent(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), files=File(Path("main.c")))
-		self.assertEqual("Parameter 'files' is not iterable.", str(context.exception))
+			_ = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), parent=[])
+		self.assertEqual("Parameter 'parent' is not of type 'Coverage'.", str(context.exception))
+		self.assertEqual(["Got type 'list'."], context.exception.__notes__)
+
+	def test_File_Parent(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("main.c"), parent=Coverage())
+		self.assertEqual("Parameter 'parent' is not of type 'DataFile'.", str(context.exception))
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.Coverage'."], context.exception.__notes__)
+
+	def test_Function_Parent(self) -> None:
+		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"))
+		with self.assertRaises(TypeError) as context:
+			_ = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1, parent=dataFile)
+		self.assertEqual("Parameter 'parent' is not of type 'File'.", str(context.exception))
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.DataFile'."], context.exception.__notes__)
+
+	def test_Line_Parent(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Line(1, 1, False, parent="main.c")
+		self.assertEqual("Parameter 'parent' is not of type 'File'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_File_Duplicate(self) -> None:
+		"""A data file naming a source file twice is rejected before the second file is created."""
+		main = _stream()[1]
+		main["files"].append(main["files"][1])
+
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = DataFile.Parse(main)
+		self.assertEqual(
+			"gcov data file 'Main.cpp' names source file 'Containers/Stack.hpp' twice.", str(context.exception)
+		)
+
+	def test_Function_Duplicate(self) -> None:
+		record = _stream()[1]["files"][0]
+		record["functions"].append(record["functions"][0])
+
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = File.Parse(record)
+		self.assertEqual(
+			f"gcov source file 'Main.cpp' names function '{record['functions'][0]['name']}' twice.", str(context.exception)
+		)
 
 
 class Parsing(Testcase):

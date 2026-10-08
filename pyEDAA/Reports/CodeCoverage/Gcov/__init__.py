@@ -39,7 +39,8 @@ format versions 1 (GCC 9 to 13) and 2 (GCC 14 and later). The format's model kee
 :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Function` and :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Line`
 records - a line in format 2 with the IDs of its basic blocks. The records below a file are in
 :mod:`~pyEDAA.Reports.CodeCoverage.Gcov.Records`. Each record's constructor takes typed values, so the model can be
-built by hand; its class method ``Parse`` reads the record's JSON object.
+built by hand: a record below the report names its parent with the keyword parameter ``parent`` and is added to it.
+Its class method ``Parse`` reads the record's JSON object.
 
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
@@ -64,7 +65,6 @@ built by hand; its class method ``Parse`` reads the record's JSON object.
 """
 from __future__                               import annotations
 
-from collections.abc                          import Iterable
 from gzip                                     import BadGzipFile, decompress
 from json                                     import JSONDecodeError, JSONDecoder, loads
 from pathlib                                  import Path
@@ -104,29 +104,23 @@ class File(metaclass=ExtendedType, slots=True):
 	A line several functions share - e.g. the instantiations of a template - is listed once per function.
 	"""
 
+	_parent:    Nullable[DataFile]   #: The data file the file belongs to.
 	_path:      _Path                #: The file's path, as the compiler named it.
 	_functions: dict[str, Function]  #: The functions, by mangled name.
 	_lines:     list[Line]           #: The executable lines, in order; a line of several functions once per function.
 
-	def __init__(
-		self,
-		path:      Path,
-		functions: Nullable[Iterable[Function]] = None,
-		lines:     Nullable[Iterable[Line]] = None
-	) -> None:
+	def __init__(self, path: Path, *, parent: Nullable[DataFile] = None) -> None:
 		"""
-		Initialize the file.
+		Initialize the file, and add it to the files of its data file.
+
+		Its functions and lines are added by creating them with this file as their parent.
 
 		:param path:        The file's path, as the compiler named it.
-		:param functions:   Optional, the functions. Default: none.
-		:param lines:       Optional, the executable lines, in order; a line of several functions once per function.
-		                    Default: none.
+		:param parent:      Optional, the data file the file belongs to; the file is added to its files by :attr:`Path`.
+		                    Default: ``None``.
 		:raises ValueError: If parameter ``path`` is ``None``.
 		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
-		:raises TypeError:  If parameter ``functions`` isn't iterable.
-		:raises TypeError:  If parameter ``functions`` contains an element not of type :class:`~.Records.Function`.
-		:raises TypeError:  If parameter ``lines`` isn't iterable.
-		:raises TypeError:  If parameter ``lines`` contains an element not of type :class:`~.Records.Line`.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`DataFile`.
 		"""
 		if path is None:
 			raise ValueError(f"Parameter 'path' is None.")
@@ -135,53 +129,52 @@ class File(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
+		if parent is not None and not isinstance(parent, DataFile):
+			ex = TypeError(f"Parameter 'parent' is not of type 'DataFile'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =    parent
 		self._path =      path
 		self._functions = {}
 		self._lines =     []
 
-		if functions is not None:
-			if not isinstance(functions, Iterable):
-				ex = TypeError(f"Parameter 'functions' is not iterable.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(functions)}'.")
-				raise ex
-
-			for function in functions:
-				if not isinstance(function, Function):
-					ex = TypeError(f"Parameter 'functions' contains an element not of type 'Function'.")
-					ex.add_note(f"Got type '{getFullyQualifiedName(function)}'.")
-					raise ex
-
-				self._functions[function._name] = function
-
-		if lines is not None:
-			if not isinstance(lines, Iterable):
-				ex = TypeError(f"Parameter 'lines' is not iterable.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
-				raise ex
-
-			for line in lines:
-				if not isinstance(line, Line):
-					ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
-					ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
-					raise ex
-
-				self._lines.append(line)
+		if parent is not None:
+			parent._files[self._path] = self
 
 	@classmethod
-	def Parse(cls, record: dict[str, Any]) -> Self:
+	def Parse(cls, record: dict[str, Any], *, parent: Nullable[DataFile] = None) -> Self:
 		"""
 		Parse a file, its functions and lines from its JSON object.
 
 		A backslash in the path - as a report written on Windows has them - separates directories.
 
-		:param record: The JSON object of the file.
-		:returns:      The file.
+		:param record:             The JSON object of the file.
+		:param parent:             Optional, the data file the file belongs to. Default: ``None``.
+		:returns:                  The file.
+		:raises CodeCoverageError: If the file names a function twice.
 		"""
-		return cls(
-			Path(record["file"].replace("\\", "/")),
-			[Function.Parse(function) for function in record["functions"]],
-			[Line.Parse(line) for line in record["lines"]]
-		)
+		file = cls(Path(record["file"].replace("\\", "/")), parent=parent)
+
+		for function in record["functions"]:
+			if (name := function["name"]) in file._functions:
+				raise CodeCoverageError(f"gcov source file '{file._path.as_posix()}' names function '{name}' twice.")
+
+			Function.Parse(function, parent=file)
+
+		for line in record["lines"]:
+			Line.Parse(line, parent=file)
+
+		return file
+
+	@readonly
+	def Parent(self) -> Nullable[DataFile]:
+		"""
+		Read-only property to access the data file the file belongs to (:attr:`_parent`).
+
+		:returns: The data file; ``None`` if the file belongs to no data file.
+		"""
+		return self._parent
 
 	@readonly
 	def Path(self) -> Path:
@@ -217,11 +210,12 @@ class DataFile(metaclass=ExtendedType, slots=True):
 	The coverage measured in a data file (GCDA): the versions of the format and of GCC, and the source files.
 	"""
 
-	_path:                    _Path              #: Path of the data file, as gcov was called with it.
-	_formatVersion:           int                #: Version of the report format.
-	_gccVersion:              SemanticVersion    #: Version of GCC.
-	_currentWorkingDirectory: Nullable[_Path]    #: The directory the compiler ran in, if the report says.
-	_files:                   dict[_Path, File]  #: The source files, by path.
+	_parent:                  Nullable[Coverage]  #: The report the data file belongs to.
+	_path:                    _Path               #: Path of the data file, as gcov was called with it.
+	_formatVersion:           int                 #: Version of the report format.
+	_gccVersion:              SemanticVersion     #: Version of GCC.
+	_currentWorkingDirectory: Nullable[_Path]     #: The directory the compiler ran in, if the report says.
+	_files:                   dict[_Path, File]   #: The source files, by path.
 
 	def __init__(
 		self,
@@ -229,16 +223,20 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		formatVersion:           int,
 		gccVersion:              SemanticVersion,
 		currentWorkingDirectory: Nullable[Path] = None,
-		files:                   Nullable[Iterable[File]] = None
+		*,
+		parent:                  Nullable[Coverage] = None
 	) -> None:
 		"""
-		Initialize the data file.
+		Initialize the data file, and add it to the data files of its report.
+
+		Its source files are added by creating them with this data file as their parent.
 
 		:param path:                    Path of the data file, as gcov was called with it.
 		:param formatVersion:           Version of the report format: ``1`` or ``2``.
 		:param gccVersion:              Version of GCC.
 		:param currentWorkingDirectory: Optional, the directory the compiler ran in. Default: ``None``.
-		:param files:                   Optional, the source files. Default: none.
+		:param parent:                  Optional, the report the data file belongs to; the data file is appended to its
+		                                data files. Default: ``None``.
 		:raises ValueError:             If parameter ``path`` is ``None``.
 		:raises TypeError:              If parameter ``path`` isn't of type :class:`~pathlib.Path`.
 		:raises ValueError:             If parameter ``formatVersion`` is ``None``.
@@ -248,8 +246,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		:raises TypeError:              If parameter ``gccVersion`` isn't of type
 		                                :class:`~pyTooling.Versioning.SemanticVersion`.
 		:raises TypeError:              If parameter ``currentWorkingDirectory`` isn't of type :class:`~pathlib.Path`.
-		:raises TypeError:              If parameter ``files`` isn't iterable.
-		:raises TypeError:              If parameter ``files`` contains an element not of type :class:`File`.
+		:raises TypeError:              If parameter ``parent`` isn't of type :class:`Coverage`.
 		"""
 		if path is None:
 			raise ValueError(f"Parameter 'path' is None.")
@@ -281,28 +278,23 @@ class DataFile(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(currentWorkingDirectory)}'.")
 			raise ex
 
+		if parent is not None and not isinstance(parent, Coverage):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Coverage'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =                  parent
 		self._path =                    path
 		self._formatVersion =           formatVersion
 		self._gccVersion =              gccVersion
 		self._currentWorkingDirectory = currentWorkingDirectory
 		self._files =                   {}
 
-		if files is not None:
-			if not isinstance(files, Iterable):
-				ex = TypeError(f"Parameter 'files' is not iterable.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(files)}'.")
-				raise ex
-
-			for file in files:
-				if not isinstance(file, File):
-					ex = TypeError(f"Parameter 'files' contains an element not of type 'File'.")
-					ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
-					raise ex
-
-				self._files[file._path] = file
+		if parent is not None:
+			parent._dataFiles.append(self)
 
 	@classmethod
-	def Parse(cls, record: dict[str, Any]) -> Self:
+	def Parse(cls, record: dict[str, Any], *, parent: Nullable[Coverage] = None) -> Self:
 		"""
 		Parse a data file and its source files from its JSON object.
 
@@ -310,18 +302,38 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		version, e.g. ``15.0.1 20250418 (experimental)``. A backslash in a path - as a report written on Windows has
 		them - separates directories.
 
-		:param record: The JSON object of the data file: a report's root object.
-		:returns:      The data file.
+		:param record:             The JSON object of the data file: a report's root object.
+		:param parent:             Optional, the report the data file belongs to. Default: ``None``.
+		:returns:                  The data file.
+		:raises CodeCoverageError: If the data file names a source file twice.
 		"""
 		directory = record.get("current_working_directory")
-
-		return cls(
+		dataFile = cls(
 			Path(record["data_file"].replace("\\", "/")),
 			int(record["format_version"]),
 			SemanticVersion.Parse(record["gcc_version"].split(" ", 1)[0]),
 			Path(directory.replace("\\", "/")) if directory is not None else None,
-			[File.Parse(file) for file in record["files"]]
+			parent=parent
 		)
+
+		for file in record["files"]:
+			if (path := Path(file["file"].replace("\\", "/"))) in dataFile._files:
+				raise CodeCoverageError(
+					f"gcov data file '{dataFile._path.as_posix()}' names source file '{path.as_posix()}' twice."
+				)
+
+			File.Parse(file, parent=dataFile)
+
+		return dataFile
+
+	@readonly
+	def Parent(self) -> Nullable[Coverage]:
+		"""
+		Read-only property to access the report the data file belongs to (:attr:`_parent`).
+
+		:returns: The report; ``None`` if the data file belongs to no report.
+		"""
+		return self._parent
 
 	@readonly
 	def Path(self) -> Path:
@@ -378,6 +390,8 @@ class DataFile(metaclass=ExtendedType, slots=True):
 class Coverage(metaclass=ExtendedType, slots=True):
 	"""
 	The content of a report file: the data files.
+
+	The root of the format's model: a data file names it as its parent.
 	"""
 
 	_dataFiles: list[DataFile]  #: The data files, in the order the report lists them.
@@ -489,6 +503,8 @@ class Document(Coverage, cc_Document):
 		:raises CodeCoverageError: If the JSON file was not analyzed before. |br|
 		                           Call 'Document.Analyze()' or create the document using
 		                           'Document(path, analyzeAndConvert=True)'.
+		:raises CodeCoverageError: If a data file names a source file twice.
+		:raises CodeCoverageError: If a source file names a function twice.
 		"""
 		if self._jsonDocuments is None:
 			ex = CodeCoverageError(f"gcov report file '{self._path}' needs to be read and analyzed by a JSON parser.")
@@ -496,7 +512,8 @@ class Document(Coverage, cc_Document):
 			raise ex
 
 		with Stopwatch() as sw:
-			self._dataFiles = [DataFile.Parse(jsonDocument) for jsonDocument in self._jsonDocuments]
+			for jsonDocument in self._jsonDocuments:
+				DataFile.Parse(jsonDocument, parent=self)
 
 		self._conversionDuration = sw.Duration
 

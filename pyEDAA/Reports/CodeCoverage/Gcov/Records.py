@@ -31,14 +31,17 @@
 """
 The records of GCC's gcov JSON format below a file: its functions and lines.
 """
-from __future__            import annotations
+from __future__                  import annotations
 
-from collections.abc       import Iterable
-from typing                import Any, Optional as Nullable, Self
+from collections.abc             import Iterable
+from typing                      import Any, Optional as Nullable, Self
 
-from pyTooling.Common      import getFullyQualifiedName
-from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import ExtendedType
+from pyTooling.Common            import getFullyQualifiedName
+from pyTooling.Decorators        import export, readonly
+from pyTooling.MetaClasses       import ExtendedType
+
+# The package, not its class 'File': the package imports this module before it defines 'File'.
+from pyEDAA.Reports.CodeCoverage import Gcov
 
 
 @export
@@ -47,11 +50,12 @@ class Line(metaclass=ExtendedType, slots=True):
 	A ``line`` of a file: how often it ran, and its basic blocks.
 	"""
 
-	_lineNumber:      int            #: Line number, counted from 1.
-	_functionName:    Nullable[str]  #: Mangled name of the function the line belongs to, if the report says.
-	_count:           int            #: Number of times the line ran.
-	_unexecutedBlock: bool           #: Whether a basic block of the line, not only reached by exceptions, never ran.
-	_blockIDs:        list[int]      #: IDs of the basic blocks ending on this line, in format 2.
+	_parent:          Nullable[Gcov.File]  #: The file the line belongs to.
+	_lineNumber:      int                  #: Line number, counted from 1.
+	_functionName:    Nullable[str]        #: Mangled name of the function the line belongs to, if the report says.
+	_count:           int                  #: Number of times the line ran.
+	_unexecutedBlock: bool                 #: Whether a basic block, not only reached by exceptions, never ran.
+	_blockIDs:        list[int]            #: IDs of the basic blocks ending on this line, in format 2.
 
 	def __init__(
 		self,
@@ -59,16 +63,20 @@ class Line(metaclass=ExtendedType, slots=True):
 		count:           int,
 		unexecutedBlock: bool,
 		functionName:    Nullable[str] = None,
-		blockIDs:        Nullable[Iterable[int]] = None
+		blockIDs:        Nullable[Iterable[int]] = None,
+		*,
+		parent:          Nullable[Gcov.File] = None
 	) -> None:
 		"""
-		Initialize the line.
+		Initialize the line, and add it to the lines of its file.
 
 		:param lineNumber:      Line number, counted from 1.
 		:param count:           Number of times the line ran.
 		:param unexecutedBlock: Whether a basic block of the line, not only reached by exceptions, never ran.
 		:param functionName:    Optional, mangled name of the function the line belongs to. Default: ``None``.
 		:param blockIDs:        Optional, IDs of the basic blocks ending on this line. Default: none.
+		:param parent:          Optional, the file the line belongs to; the line is appended to its lines.
+		                        Default: ``None``.
 		:raises ValueError:     If parameter ``lineNumber`` is ``None``.
 		:raises TypeError:      If parameter ``lineNumber`` isn't of type :class:`int`.
 		:raises ValueError:     If parameter ``lineNumber`` is less than 1.
@@ -80,6 +88,7 @@ class Line(metaclass=ExtendedType, slots=True):
 		:raises TypeError:      If parameter ``functionName`` isn't of type :class:`str`.
 		:raises TypeError:      If parameter ``blockIDs`` isn't iterable.
 		:raises TypeError:      If parameter ``blockIDs`` contains an element not of type :class:`int`.
+		:raises TypeError:      If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Gcov.File`.
 		"""
 		if lineNumber is None:
 			raise ValueError(f"Parameter 'lineNumber' is None.")
@@ -115,6 +124,12 @@ class Line(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(functionName)}'.")
 			raise ex
 
+		if parent is not None and not isinstance(parent, Gcov.File):
+			ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =          parent
 		self._lineNumber =      lineNumber
 		self._functionName =    functionName
 		self._count =           count
@@ -135,12 +150,16 @@ class Line(metaclass=ExtendedType, slots=True):
 
 				self._blockIDs.append(blockID)
 
+		if parent is not None:
+			parent._lines.append(self)
+
 	@classmethod
-	def Parse(cls, record: dict[str, Any]) -> Self:
+	def Parse(cls, record: dict[str, Any], *, parent: Nullable[Gcov.File] = None) -> Self:
 		"""
 		Parse a line from its JSON object.
 
 		:param record: The JSON object of the line.
+		:param parent: Optional, the file the line belongs to. Default: ``None``.
 		:returns:      The line.
 		"""
 		return cls(
@@ -148,8 +167,18 @@ class Line(metaclass=ExtendedType, slots=True):
 			record["count"],
 			record["unexecuted_block"],
 			record.get("function_name"),
-			record.get("block_ids")
+			record.get("block_ids"),
+			parent=parent
 		)
+
+	@readonly
+	def Parent(self) -> Nullable[Gcov.File]:
+		"""
+		Read-only property to access the file the line belongs to (:attr:`_parent`).
+
+		:returns: The file; ``None`` if the line belongs to no file.
+		"""
+		return self._parent
 
 	@readonly
 	def LineNumber(self) -> int:
@@ -205,15 +234,16 @@ class Function(metaclass=ExtendedType, slots=True):
 	A ``function`` of a file: its names, its position, its basic blocks and how often it ran.
 	"""
 
-	_name:           str  #: Name of the function, mangled.
-	_demangledName:  str  #: Name of the function, demangled.
-	_startLine:      int  #: The function's first line.
-	_startColumn:    int  #: The function's first column.
-	_endLine:        int  #: The function's last line.
-	_endColumn:      int  #: The function's last column.
-	_blocks:         int  #: Number of basic blocks.
-	_blocksExecuted: int  #: Number of executed basic blocks.
-	_executionCount: int  #: Number of times the function ran.
+	_parent:         Nullable[Gcov.File]  #: The file the function belongs to.
+	_name:           str                  #: Name of the function, mangled.
+	_demangledName:  str                  #: Name of the function, demangled.
+	_startLine:      int                  #: The function's first line.
+	_startColumn:    int                  #: The function's first column.
+	_endLine:        int                  #: The function's last line.
+	_endColumn:      int                  #: The function's last column.
+	_blocks:         int                  #: Number of basic blocks.
+	_blocksExecuted: int                  #: Number of executed basic blocks.
+	_executionCount: int                  #: Number of times the function ran.
 
 	def __init__(
 		self,
@@ -225,10 +255,12 @@ class Function(metaclass=ExtendedType, slots=True):
 		endColumn:      int,
 		blocks:         int,
 		blocksExecuted: int,
-		executionCount: int
+		executionCount: int,
+		*,
+		parent:         Nullable[Gcov.File] = None
 	) -> None:
 		"""
-		Initialize the function.
+		Initialize the function, and add it to the functions of its file.
 
 		:param name:           Name of the function, mangled.
 		:param demangledName:  Name of the function, demangled.
@@ -239,6 +271,8 @@ class Function(metaclass=ExtendedType, slots=True):
 		:param blocks:         Number of basic blocks.
 		:param blocksExecuted: Number of executed basic blocks.
 		:param executionCount: Number of times the function ran.
+		:param parent:         Optional, the file the function belongs to; the function is added to its functions by
+		                       :attr:`Name`. Default: ``None``.
 		:raises ValueError:    If parameter ``name`` is ``None``.
 		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``name`` is empty.
@@ -266,6 +300,7 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises ValueError:    If parameter ``executionCount`` is ``None``.
 		:raises TypeError:     If parameter ``executionCount`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``executionCount`` is negative.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Gcov.File`.
 		"""
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
@@ -362,6 +397,12 @@ class Function(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got value '{executionCount}'.")
 			raise ex
 
+		if parent is not None and not isinstance(parent, Gcov.File):
+			ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =         parent
 		self._name =           name
 		self._demangledName =  demangledName
 		self._startLine =      startLine
@@ -372,12 +413,16 @@ class Function(metaclass=ExtendedType, slots=True):
 		self._blocksExecuted = blocksExecuted
 		self._executionCount = executionCount
 
+		if parent is not None:
+			parent._functions[self._name] = self
+
 	@classmethod
-	def Parse(cls, record: dict[str, Any]) -> Self:
+	def Parse(cls, record: dict[str, Any], *, parent: Nullable[Gcov.File] = None) -> Self:
 		"""
 		Parse a function from its JSON object.
 
 		:param record: The JSON object of the function.
+		:param parent: Optional, the file the function belongs to. Default: ``None``.
 		:returns:      The function.
 		"""
 		return cls(
@@ -389,8 +434,18 @@ class Function(metaclass=ExtendedType, slots=True):
 			record["end_column"],
 			record["blocks"],
 			record["blocks_executed"],
-			record["execution_count"]
+			record["execution_count"],
+			parent=parent
 		)
+
+	@readonly
+	def Parent(self) -> Nullable[Gcov.File]:
+		"""
+		Read-only property to access the file the function belongs to (:attr:`_parent`).
+
+		:returns: The file; ``None`` if the function belongs to no file.
+		"""
+		return self._parent
 
 	@readonly
 	def Name(self) -> str:
