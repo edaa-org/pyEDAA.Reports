@@ -73,7 +73,7 @@ class FormatModel(Testcase):
 		report = Document(REPORT, analyzeAndConvert=True)
 
 		self.assertEqual(
-			(3, "7.16.1", True, False), (report.Format, report.Version, report.BranchCoverage, report.ShowContexts)
+			(3, "7.16.1", True, False), (report.Format, report.Version, report.BranchCoverage, report.HasContexts)
 		)
 		self.assertIsInstance(report.Version, SemanticVersion)
 		self.assertEqual(datetime(2026, 10, 7, 9, 14, 51, 108137), report.Timestamp)

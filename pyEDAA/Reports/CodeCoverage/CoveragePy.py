@@ -389,7 +389,7 @@ class Report(metaclass=ExtendedType, slots=True):
 	_version:        Nullable[SemanticVersion]  #: Version of coverage.py.
 	_timestamp:      Nullable[datetime]         #: Time the report was written, local time without time zone.
 	_branchCoverage: bool                       #: Whether branch coverage was measured.
-	_showContexts:   bool                       #: Whether the lines' contexts are listed.
+	_hasContexts:    bool                       #: Whether the report lists the contexts of the lines.
 	_files:          dict[Path, File]           #: The measured files, by path.
 	_totals:         Nullable[Summary]          #: The counters of the whole report.
 
@@ -401,7 +401,7 @@ class Report(metaclass=ExtendedType, slots=True):
 		self._version =        None
 		self._timestamp =      None
 		self._branchCoverage = False
-		self._showContexts =   False
+		self._hasContexts =    False
 		self._files =          {}
 		self._totals =         None
 
@@ -442,13 +442,16 @@ class Report(metaclass=ExtendedType, slots=True):
 		return self._branchCoverage
 
 	@readonly
-	def ShowContexts(self) -> bool:
+	def HasContexts(self) -> bool:
 		"""
-		Read-only property to access whether the lines' contexts are listed (:attr:`_showContexts`).
+		Read-only property to access whether the report lists the contexts of the lines (:attr:`_hasContexts`).
 
-		:returns: ``True``, if the contexts are listed.
+		coverage.py includes them, when configured with ``[json] show_contexts = True``; the report states it as
+		``show_contexts``.
+
+		:returns: ``True``, if the files list the contexts of their lines.
 		"""
-		return self._showContexts
+		return self._hasContexts
 
 	@readonly
 	def Files(self) -> dict[Path, File]:
@@ -544,7 +547,7 @@ class Document(Report, cc_Document):
 			self._version =        SemanticVersion.Parse(meta["version"])
 			self._timestamp =      datetime.fromisoformat(meta["timestamp"])
 			self._branchCoverage = meta["branch_coverage"]
-			self._showContexts =   meta["show_contexts"]
+			self._hasContexts =    meta["show_contexts"]
 			self._files =          {}
 			self._totals =         Summary(self._jsonDocument["totals"])
 
