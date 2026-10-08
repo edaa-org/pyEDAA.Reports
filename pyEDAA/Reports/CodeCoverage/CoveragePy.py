@@ -63,10 +63,10 @@ from __future__                  import annotations
 from datetime                    import datetime
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
-from typing                      import Any, Optional as Nullable
+from typing                      import Any, Iterable, Optional as Nullable, Self
 
 from jsonschema                  import Draft202012Validator
-from pyTooling.Common            import readResourceFile
+from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
 from pyTooling.MetaClasses       import ExtendedType, abstractclass
@@ -107,20 +107,123 @@ class Summary(metaclass=ExtendedType, slots=True):
 	_coveredBranchCount: Nullable[int]  #: Number of taken branches, if branch coverage was measured.
 	_partialBranchCount: Nullable[int]  #: Number of branches never taken from executed lines, if branches were measured.
 
-	def __init__(self, summary: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		lineCount:          int,
+		coveredLineCount:   int,
+		missingLineCount:   int,
+		excludedLineCount:  int,
+		percentCovered:     float,
+		branchCount:        Nullable[int] = None,
+		coveredBranchCount: Nullable[int] = None,
+		partialBranchCount: Nullable[int] = None
+	) -> None:
 		"""
-		Initialize the summary from its JSON object.
+		Initialize the summary from its counters.
 
-		:param summary: The JSON object ``summary``.
+		:param lineCount:          Number of executable lines, without the excluded ones.
+		:param coveredLineCount:   Number of executed lines.
+		:param missingLineCount:   Number of executable lines, which never ran.
+		:param excludedLineCount:  Number of excluded lines.
+		:param percentCovered:     Coverage of lines and branches, in percent.
+		:param branchCount:        Optional, number of branches. Default: ``None`` (branch coverage wasn't measured).
+		:param coveredBranchCount: Optional, number of taken branches. Default: ``None`` (branch coverage wasn't measured).
+		:param partialBranchCount: Optional, number of branches never taken from executed lines. |br|
+		                           Default: ``None`` (branch coverage wasn't measured).
+		:raises ValueError:        If parameter ``lineCount``, ``coveredLineCount``, ``missingLineCount`` or
+		                           ``excludedLineCount`` is ``None``.
+		:raises TypeError:         If parameter ``lineCount``, ``coveredLineCount``, ``missingLineCount`` or
+		                           ``excludedLineCount`` is not of type :class:`int`.
+		:raises ValueError:        If parameter ``lineCount``, ``coveredLineCount``, ``missingLineCount`` or
+		                           ``excludedLineCount`` is negative.
+		:raises ValueError:        If parameter ``percentCovered`` is ``None``.
+		:raises TypeError:         If parameter ``percentCovered`` is not of type :class:`float`.
+		:raises ValueError:        If parameter ``percentCovered`` is out of range 0..100.
+		:raises TypeError:         If parameter ``branchCount``, ``coveredBranchCount`` or ``partialBranchCount`` is not of
+		                           type :class:`int`.
+		:raises ValueError:        If parameter ``branchCount``, ``coveredBranchCount`` or ``partialBranchCount`` is
+		                           negative.
 		"""
-		self._lineCount =          summary["num_statements"]
-		self._coveredLineCount =   summary["covered_lines"]
-		self._missingLineCount =   summary["missing_lines"]
-		self._excludedLineCount =  summary["excluded_lines"]
-		self._percentCovered =     summary["percent_covered"]
-		self._branchCount =        summary.get("num_branches")
-		self._coveredBranchCount = summary.get("covered_branches")
-		self._partialBranchCount = summary.get("num_partial_branches")
+		for name, count in (
+			("lineCount",         lineCount),
+			("coveredLineCount",  coveredLineCount),
+			("missingLineCount",  missingLineCount),
+			("excludedLineCount", excludedLineCount)
+		):
+			if count is None:
+				raise ValueError(f"Parameter '{name}' is None.")
+			elif not isinstance(count, int):
+				ex = TypeError(f"Parameter '{name}' is not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
+				raise ex
+			elif count < 0:
+				ex = ValueError(f"Parameter '{name}' is negative.")
+				ex.add_note(f"Got value '{count}'.")
+				raise ex
+
+		if percentCovered is None:
+			raise ValueError(f"Parameter 'percentCovered' is None.")
+		elif not isinstance(percentCovered, (int, float)):
+			ex = TypeError(f"Parameter 'percentCovered' is not of type 'float'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(percentCovered)}'.")
+			raise ex
+		elif not 0 <= percentCovered <= 100:
+			ex = ValueError(f"Parameter 'percentCovered' is out of range 0..100.")
+			ex.add_note(f"Got value '{percentCovered}'.")
+			raise ex
+
+		for name, count in (
+			("branchCount",        branchCount),
+			("coveredBranchCount", coveredBranchCount),
+			("partialBranchCount", partialBranchCount)
+		):
+			if count is None:
+				continue
+			elif not isinstance(count, int):
+				ex = TypeError(f"Parameter '{name}' is not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
+				raise ex
+			elif count < 0:
+				ex = ValueError(f"Parameter '{name}' is negative.")
+				ex.add_note(f"Got value '{count}'.")
+				raise ex
+
+		self._lineCount =          lineCount
+		self._coveredLineCount =   coveredLineCount
+		self._missingLineCount =   missingLineCount
+		self._excludedLineCount =  excludedLineCount
+		self._percentCovered =     percentCovered
+		self._branchCount =        branchCount
+		self._coveredBranchCount = coveredBranchCount
+		self._partialBranchCount = partialBranchCount
+
+	@classmethod
+	def Parse(cls, summary: dict[str, Any]) -> Self:
+		"""
+		Read a summary from its JSON object.
+
+		:param summary:     The JSON object ``summary`` or ``totals``.
+		:returns:           The summary.
+		:raises ValueError: If parameter ``summary`` is ``None``.
+		:raises TypeError:  If parameter ``summary`` is not of type :class:`dict`.
+		"""
+		if summary is None:
+			raise ValueError(f"Parameter 'summary' is None.")
+		elif not isinstance(summary, dict):
+			ex = TypeError(f"Parameter 'summary' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(summary)}'.")
+			raise ex
+
+		return cls(
+			summary["num_statements"],
+			summary["covered_lines"],
+			summary["missing_lines"],
+			summary["excluded_lines"],
+			summary["percent_covered"],
+			summary.get("num_branches"),
+			summary.get("covered_branches"),
+			summary.get("num_partial_branches")
+		)
 
 	@readonly
 	def LineCount(self) -> int:
@@ -215,18 +318,88 @@ class Base(metaclass=ExtendedType, slots=True):
 	_missingBranches:  list[tuple[int, int]]  #: The branches never taken, as pairs of source and destination line.
 	_summary:          _Summary               #: The counters coverage.py computed.
 
-	def __init__(self, record: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		summary:          Summary,
+		executedLines:    Nullable[Iterable[int]] = None,
+		missingLines:     Nullable[Iterable[int]] = None,
+		excludedLines:    Nullable[Iterable[int]] = None,
+		executedBranches: Nullable[Iterable[tuple[int, int]]] = None,
+		missingBranches:  Nullable[Iterable[tuple[int, int]]] = None
+	) -> None:
 		"""
-		Initialize the lines from their JSON object.
+		Initialize the summary, the lines and the branches.
 
-		:param record: The JSON object of the file or region.
+		:param summary:          The counters coverage.py computed.
+		:param executedLines:    Optional, the executed lines. Default: ``None`` (none).
+		:param missingLines:     Optional, the lines, which never ran. Default: ``None`` (none).
+		:param excludedLines:    Optional, the excluded lines. Default: ``None`` (none).
+		:param executedBranches: Optional, the taken branches, as pairs of source and destination line. |br|
+		                         Default: ``None`` (none, or branch coverage wasn't measured).
+		:param missingBranches:  Optional, the branches never taken, as pairs of source and destination line. |br|
+		                         Default: ``None`` (none, or branch coverage wasn't measured).
+		:raises ValueError:      If parameter ``summary`` is ``None``.
+		:raises TypeError:       If parameter ``summary`` is not of type :class:`Summary`.
+		:raises TypeError:       If parameter ``executedLines``, ``missingLines`` or ``excludedLines`` is not iterable.
+		:raises TypeError:       If an element of parameter ``executedLines``, ``missingLines`` or ``excludedLines`` is
+		                         not of type :class:`int`.
+		:raises TypeError:       If parameter ``executedBranches`` or ``missingBranches`` is not iterable.
+		:raises TypeError:       If an element of parameter ``executedBranches`` or ``missingBranches`` is not a pair of
+		                         :class:`int`.
 		"""
-		self._executedLines =    record["executed_lines"]
-		self._missingLines =     record["missing_lines"]
-		self._excludedLines =    record["excluded_lines"]
-		self._executedBranches = [(source, target) for source, target in record.get("executed_branches", [])]
-		self._missingBranches =  [(source, target) for source, target in record.get("missing_branches", [])]
-		self._summary =          Summary(record["summary"])
+		if summary is None:
+			raise ValueError(f"Parameter 'summary' is None.")
+		elif not isinstance(summary, Summary):
+			ex = TypeError(f"Parameter 'summary' is not of type 'Summary'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(summary)}'.")
+			raise ex
+
+		lineLists: list[list[int]] = []
+		for name, numbers in (
+			("executedLines", executedLines),
+			("missingLines",  missingLines),
+			("excludedLines", excludedLines)
+		):
+			lineList: list[int] = []
+			if numbers is not None:
+				if not isinstance(numbers, Iterable):
+					ex = TypeError(f"Parameter '{name}' is not iterable.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(numbers)}'.")
+					raise ex
+
+				for number in numbers:
+					if not isinstance(number, int):
+						ex = TypeError(f"An element of parameter '{name}' is not of type 'int'.")
+						ex.add_note(f"Got type '{getFullyQualifiedName(number)}'.")
+						raise ex
+
+					lineList.append(number)
+			lineLists.append(lineList)
+
+		branchLists: list[list[tuple[int, int]]] = []
+		for name, branches in (
+			("executedBranches", executedBranches),
+			("missingBranches",  missingBranches)
+		):
+			branchList: list[tuple[int, int]] = []
+			if branches is not None:
+				if not isinstance(branches, Iterable):
+					ex = TypeError(f"Parameter '{name}' is not iterable.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(branches)}'.")
+					raise ex
+
+				for branch in branches:
+					if not (isinstance(branch, tuple) and len(branch) == 2 and all(isinstance(line, int) for line in branch)):
+						ex = TypeError(f"An element of parameter '{name}' is not a pair of 'int'.")
+						ex.add_note(f"Got '{branch!r}' of type '{getFullyQualifiedName(branch)}'.")
+						raise ex
+
+					branchList.append(branch)
+			branchLists.append(branchList)
+
+		self._executedLines, self._missingLines, self._excludedLines = lineLists
+		self._executedBranches, self._missingBranches =                branchLists
+		self._summary =                                                summary
 
 	@readonly
 	def ExecutedLines(self) -> list[int]:
@@ -301,17 +474,90 @@ class Region(Base):
 	_name:      str  #: Qualified name of the function or class.
 	_startLine: int  #: The region's first line.
 
-	def __init__(self, name: str, record: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		name:             str,
+		startLine:        int,
+		summary:          Summary,
+		executedLines:    Nullable[Iterable[int]] = None,
+		missingLines:     Nullable[Iterable[int]] = None,
+		excludedLines:    Nullable[Iterable[int]] = None,
+		executedBranches: Nullable[Iterable[tuple[int, int]]] = None,
+		missingBranches:  Nullable[Iterable[tuple[int, int]]] = None
+	) -> None:
 		"""
-		Initialize the region from its JSON object.
+		Initialize the region from its name, its first line, its summary, its lines and its branches.
 
-		:param name:   Qualified name of the function or class.
-		:param record: The JSON object of the region.
+		:param name:             Qualified name of the function or class, e.g. ``Circle.Area``.
+		:param startLine:        The region's first line.
+		:param summary:          The counters coverage.py computed.
+		:param executedLines:    Optional, the executed lines. Default: ``None`` (none).
+		:param missingLines:     Optional, the lines, which never ran. Default: ``None`` (none).
+		:param excludedLines:    Optional, the excluded lines. Default: ``None`` (none).
+		:param executedBranches: Optional, the taken branches, as pairs of source and destination line. |br|
+		                         Default: ``None`` (none, or branch coverage wasn't measured).
+		:param missingBranches:  Optional, the branches never taken, as pairs of source and destination line. |br|
+		                         Default: ``None`` (none, or branch coverage wasn't measured).
+		:raises ValueError:      If parameter ``name`` is ``None``.
+		:raises TypeError:       If parameter ``name`` is not of type :class:`str`.
+		:raises ValueError:      If parameter ``name`` is empty.
+		:raises ValueError:      If parameter ``startLine`` is ``None``.
+		:raises TypeError:       If parameter ``startLine`` is not of type :class:`int`.
+		:raises ValueError:      If parameter ``startLine`` is less than 1.
 		"""
-		super().__init__(record)
+		super().__init__(summary, executedLines, missingLines, excludedLines, executedBranches, missingBranches)
+
+		if name is None:
+			raise ValueError(f"Parameter 'name' is None.")
+		elif not isinstance(name, str):
+			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			raise ex
+		elif name == "":
+			raise ValueError(f"Parameter 'name' is empty.")
+
+		if startLine is None:
+			raise ValueError(f"Parameter 'startLine' is None.")
+		elif not isinstance(startLine, int):
+			ex = TypeError(f"Parameter 'startLine' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
+			raise ex
+		elif startLine < 1:
+			ex = ValueError(f"Parameter 'startLine' is less than 1.")
+			ex.add_note(f"Got value '{startLine}'.")
+			raise ex
 
 		self._name =      name
-		self._startLine = record["start_line"]
+		self._startLine = startLine
+
+	@classmethod
+	def Parse(cls, name: str, region: dict[str, Any]) -> Self:
+		"""
+		Read a region from its JSON object.
+
+		:param name:        Qualified name of the function or class: the region's key in ``functions`` or ``classes``.
+		:param region:      The JSON object of the region.
+		:returns:           The region.
+		:raises ValueError: If parameter ``region`` is ``None``.
+		:raises TypeError:  If parameter ``region`` is not of type :class:`dict`.
+		"""
+		if region is None:
+			raise ValueError(f"Parameter 'region' is None.")
+		elif not isinstance(region, dict):
+			ex = TypeError(f"Parameter 'region' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(region)}'.")
+			raise ex
+
+		return cls(
+			name,
+			region["start_line"],
+			Summary.Parse(region["summary"]),
+			region["executed_lines"],
+			region["missing_lines"],
+			region["excluded_lines"],
+			(tuple(branch) for branch in region.get("executed_branches", [])),
+			(tuple(branch) for branch in region.get("missing_branches", []))
+		)
 
 	@readonly
 	def Name(self) -> str:
@@ -337,25 +583,118 @@ class File(Base):
 	"""
 	A measured file: its lines, branches and summary, and - in format 3 - its functions and classes.
 
-	The regions named ``""`` - the lines outside of every function or class - aren't kept.
+	The regions named ``""`` - the lines outside of every function or class - aren't kept: :meth:`Parse` skips them.
 	"""
 
 	_path:      _Path              #: The file's path, relative to the directory coverage.py ran in.
 	_functions: dict[str, Region]  #: The functions, by qualified name.
 	_classes:   dict[str, Region]  #: The classes, by qualified name.
 
-	def __init__(self, path: Path, record: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		path:             Path,
+		summary:          Summary,
+		executedLines:    Nullable[Iterable[int]] = None,
+		missingLines:     Nullable[Iterable[int]] = None,
+		excludedLines:    Nullable[Iterable[int]] = None,
+		executedBranches: Nullable[Iterable[tuple[int, int]]] = None,
+		missingBranches:  Nullable[Iterable[tuple[int, int]]] = None,
+		functions:        Nullable[Iterable[Region]] = None,
+		classes:          Nullable[Iterable[Region]] = None
+	) -> None:
 		"""
-		Initialize the file from its JSON object.
+		Initialize the file from its path, its summary, its lines, its branches, its functions and its classes.
 
-		:param path:   The file's path, relative to the directory coverage.py ran in.
-		:param record: The JSON object of the file.
+		:param path:             The file's path, relative to the directory coverage.py ran in.
+		:param summary:          The counters coverage.py computed.
+		:param executedLines:    Optional, the executed lines. Default: ``None`` (none).
+		:param missingLines:     Optional, the lines, which never ran. Default: ``None`` (none).
+		:param excludedLines:    Optional, the excluded lines. Default: ``None`` (none).
+		:param executedBranches: Optional, the taken branches, as pairs of source and destination line. |br|
+		                         Default: ``None`` (none, or branch coverage wasn't measured).
+		:param missingBranches:  Optional, the branches never taken, as pairs of source and destination line. |br|
+		                         Default: ``None`` (none, or branch coverage wasn't measured).
+		:param functions:        Optional, the functions. Default: ``None`` (none, or format 2).
+		:param classes:          Optional, the classes. Default: ``None`` (none, or format 2).
+		:raises ValueError:      If parameter ``path`` is ``None``.
+		:raises TypeError:       If parameter ``path`` is not of type :class:`~pathlib.Path`.
+		:raises TypeError:       If parameter ``functions`` or ``classes`` is not iterable.
+		:raises TypeError:       If an element of parameter ``functions`` or ``classes`` is not of type :class:`Region`.
+		:raises ValueError:      If parameter ``functions`` or ``classes`` contains two regions of the same name.
 		"""
-		super().__init__(record)
+		super().__init__(summary, executedLines, missingLines, excludedLines, executedBranches, missingBranches)
 
-		self._path =      path
-		self._functions = {name: Region(name, region) for name, region in record.get("functions", {}).items() if name != ""}
-		self._classes =   {name: Region(name, region) for name, region in record.get("classes", {}).items() if name != ""}
+		if path is None:
+			raise ValueError(f"Parameter 'path' is None.")
+		elif not isinstance(path, Path):
+			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
+			raise ex
+
+		regionDicts: list[dict[str, Region]] = []
+		for name, regions in (("functions", functions), ("classes", classes)):
+			regionDict: dict[str, Region] = {}
+			if regions is not None:
+				if not isinstance(regions, Iterable):
+					ex = TypeError(f"Parameter '{name}' is not iterable.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(regions)}'.")
+					raise ex
+
+				for region in regions:
+					if not isinstance(region, Region):
+						ex = TypeError(f"An element of parameter '{name}' is not of type 'Region'.")
+						ex.add_note(f"Got type '{getFullyQualifiedName(region)}'.")
+						raise ex
+					elif region._name in regionDict:
+						raise ValueError(f"Parameter '{name}' contains region '{region._name}' twice.")
+
+					regionDict[region._name] = region
+			regionDicts.append(regionDict)
+
+		self._path =                     path
+		self._functions, self._classes = regionDicts
+
+	@classmethod
+	def Parse(cls, name: str, file: dict[str, Any]) -> Self:
+		"""
+		Read a file from its JSON object.
+
+		The regions named ``""`` - the lines outside of every function or class - are skipped.
+
+		:param name:        The file's path as the report states it - its key in ``files`` -, relative to the directory
+		                    coverage.py ran in; ``\\`` separators become ``/``.
+		:param file:        The JSON object of the file.
+		:returns:           The file.
+		:raises ValueError: If parameter ``name`` is ``None``.
+		:raises TypeError:  If parameter ``name`` is not of type :class:`str`.
+		:raises ValueError: If parameter ``file`` is ``None``.
+		:raises TypeError:  If parameter ``file`` is not of type :class:`dict`.
+		"""
+		if name is None:
+			raise ValueError(f"Parameter 'name' is None.")
+		elif not isinstance(name, str):
+			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			raise ex
+
+		if file is None:
+			raise ValueError(f"Parameter 'file' is None.")
+		elif not isinstance(file, dict):
+			ex = TypeError(f"Parameter 'file' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
+			raise ex
+
+		return cls(
+			Path(name.replace("\\", "/")),
+			Summary.Parse(file["summary"]),
+			file["executed_lines"],
+			file["missing_lines"],
+			file["excluded_lines"],
+			(tuple(branch) for branch in file.get("executed_branches", [])),
+			(tuple(branch) for branch in file.get("missing_branches", [])),
+			(Region.Parse(key, region) for key, region in file.get("functions", {}).items() if key != ""),
+			(Region.Parse(key, region) for key, region in file.get("classes", {}).items() if key != "")
+		)
 
 	@readonly
 	def Path(self) -> Path:
@@ -555,11 +894,11 @@ class Document(Report, cc_Document):
 			self._branchCoverage = meta["branch_coverage"]
 			self._hasContexts =    meta["show_contexts"]
 			self._files =          {}
-			self._totals =         Summary(self._jsonDocument["totals"])
+			self._totals =         Summary.Parse(self._jsonDocument["totals"])
 
 			for name, record in self._jsonDocument["files"].items():
-				path =              Path(name.replace("\\", "/"))
-				self._files[path] = File(path, record)
+				file =                    File.Parse(name, record)
+				self._files[file._path] = file
 
 		self._conversionDuration = sw.Duration
 

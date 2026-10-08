@@ -38,7 +38,7 @@ from typing                                 import Any
 
 from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, Function, LineCoverageStatus, Method
 from pyEDAA.Reports.CodeCoverage            import Module, Package
-from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document
+from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document, File, Region, Summary
 from pyTooling.MetaClasses                  import AbstractClassError
 from pyTooling.Testing                      import Testcase
 from pyTooling.Versioning                   import SemanticVersion
@@ -67,12 +67,203 @@ def _write(directory: str, content: dict[str, Any]) -> Path:
 	return jsonFile
 
 
-class FormatModel(Testcase):
-	"""The format's model keeps what the report states: meta data, files, regions, summaries."""
+SUMMARY = {
+	"covered_lines": 3, "num_statements": 4, "percent_covered": 66.66666666666667, "percent_covered_display": "67",
+	"missing_lines": 1, "excluded_lines": 0, "num_branches": 2, "num_partial_branches": 1, "covered_branches": 1,
+	"missing_branches": 1
+}  #: A summary as coverage.py writes it, with branch coverage.
+
+
+class Construction(Testcase):
+	"""The format's model is built by hand from typed values, and checks them."""
+
+	def test_Summary(self) -> None:
+		summary = Summary(4, 3, 1, 0, 75.0)
+
+		self.assertEqual((4, 3, 1, 0, 75.0), (
+			summary.LineCount, summary.CoveredLineCount, summary.MissingLineCount, summary.ExcludedLineCount,
+			summary.PercentCovered
+		))
+		self.assertEqual((None, None, None), (summary.BranchCount, summary.CoveredBranchCount, summary.PartialBranchCount))
+
+	def test_Summary_Branches(self) -> None:
+		summary = Summary(4, 3, 1, 0, 66.7, branchCount=2, coveredBranchCount=1, partialBranchCount=1)
+
+		self.assertEqual((2, 1, 1), (summary.BranchCount, summary.CoveredBranchCount, summary.PartialBranchCount))
+
+	def test_Summary_None(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Summary(None, 3, 1, 0, 75.0)
+
+		self.assertEqual("Parameter 'lineCount' is None.", str(context.exception))
+
+	def test_Summary_Type(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Summary(4, "3", 1, 0, 75.0)
+
+		self.assertEqual("Parameter 'coveredLineCount' is not of type 'int'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_Summary_Negative(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Summary(4, 3, 1, 0, 75.0, partialBranchCount=-1)
+
+		self.assertEqual("Parameter 'partialBranchCount' is negative.", str(context.exception))
+		self.assertEqual(["Got value '-1'."], context.exception.__notes__)
+
+	def test_Summary_PercentCovered(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Summary(4, 3, 1, 0, 100.5)
+
+		self.assertEqual("Parameter 'percentCovered' is out of range 0..100.", str(context.exception))
 
 	def test_Base(self) -> None:
 		with self.assertRaises(AbstractClassError):
-			_ = Base({})
+			_ = Base(Summary(0, 0, 0, 0, 100.0))
+
+	def test_Region(self) -> None:
+		summary = Summary(4, 3, 1, 0, 66.7, branchCount=2, coveredBranchCount=1, partialBranchCount=1)
+		region = Region(
+			"Circle", 5, summary, executedLines=[7, 9, 12], missingLines=(8, ), executedBranches=[(7, 9)],
+			missingBranches=[(7, 8)]
+		)
+
+		self.assertEqual(("Circle", 5), (region.Name, region.StartLine))
+		self.assertIs(summary, region.Summary)
+		self.assertEqual(([7, 9, 12], [8], []), (region.ExecutedLines, region.MissingLines, region.ExcludedLines))
+		self.assertEqual(([(7, 9)], [(7, 8)]), (region.ExecutedBranches, region.MissingBranches))
+		self.assertEqual([7, 8, 9, 12], region.AllLines)
+
+	def test_Region_EmptyName(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Region("", 1, Summary(0, 0, 0, 0, 100.0))
+
+		self.assertEqual("Parameter 'name' is empty.", str(context.exception))
+
+	def test_Region_StartLine(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Region("Circle", 0, Summary(0, 0, 0, 0, 100.0))
+
+		self.assertEqual("Parameter 'startLine' is less than 1.", str(context.exception))
+		self.assertEqual(["Got value '0'."], context.exception.__notes__)
+
+	def test_Region_Summary(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Region("Circle", 5, None)
+
+		self.assertEqual("Parameter 'summary' is None.", str(context.exception))
+
+	def test_Region_Lines(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Region("Circle", 5, Summary(1, 1, 0, 0, 100.0), excludedLines=[7, "8"])
+
+		self.assertEqual("An element of parameter 'excludedLines' is not of type 'int'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_Region_Branches(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Region("Circle", 5, Summary(1, 1, 0, 0, 100.0), missingBranches=[[7, 8]])
+
+		self.assertEqual("An element of parameter 'missingBranches' is not a pair of 'int'.", str(context.exception))
+		self.assertEqual(["Got '[7, 8]' of type 'list'."], context.exception.__notes__)
+
+	def test_File(self) -> None:
+		area = Region("Circle.Area", 11, Summary(1, 1, 0, 0, 100.0), executedLines=[12])
+		circle = Region("Circle", 5, Summary(2, 2, 0, 0, 100.0), executedLines=[7, 12])
+		file = File(
+			Path("myPackage/Shapes.py"), Summary(3, 3, 0, 0, 100.0), executedLines=[5, 7, 12], functions=[area],
+			classes=(circle, )
+		)
+
+		self.assertEqual(Path("myPackage/Shapes.py"), file.Path)
+		self.assertEqual({"Circle.Area": area}, file.Functions)
+		self.assertEqual({"Circle": circle}, file.Classes)
+		self.assertEqual(([5, 7, 12], [], []), (file.ExecutedLines, file.MissingLines, file.ExcludedLines))
+		self.assertEqual(([], []), (file.ExecutedBranches, file.MissingBranches))
+
+	def test_File_Path(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = File("myPackage/Shapes.py", Summary(0, 0, 0, 0, 100.0))
+
+		self.assertEqual("Parameter 'path' is not of type 'Path'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_File_Regions(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("Shapes.py"), Summary(0, 0, 0, 0, 100.0), functions={"Circle.Area": 11})
+
+		self.assertEqual("An element of parameter 'functions' is not of type 'Region'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_File_DuplicateRegion(self) -> None:
+		circle = Region("Circle", 5, Summary(0, 0, 0, 0, 100.0))
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Shapes.py"), Summary(0, 0, 0, 0, 100.0), classes=[circle, circle])
+
+		self.assertEqual("Parameter 'classes' contains region 'Circle' twice.", str(context.exception))
+
+
+class Parsing(Testcase):
+	"""Parse reads a JSON object of the report and builds the format's model from it."""
+
+	def test_Summary(self) -> None:
+		summary = Summary.Parse(SUMMARY)
+
+		self.assertEqual((4, 3, 1, 0, 66.66666666666667, 2, 1, 1), (
+			summary.LineCount, summary.CoveredLineCount, summary.MissingLineCount, summary.ExcludedLineCount,
+			summary.PercentCovered, summary.BranchCount, summary.CoveredBranchCount, summary.PartialBranchCount
+		))
+
+	def test_Summary_NoBranches(self) -> None:
+		summary = Summary.Parse({
+			"covered_lines": 1, "num_statements": 2, "percent_covered": 50.0, "missing_lines": 1, "excluded_lines": 0
+		})
+
+		self.assertEqual((None, None, None), (summary.BranchCount, summary.CoveredBranchCount, summary.PartialBranchCount))
+
+	def test_Summary_None(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Summary.Parse(None)
+
+		self.assertEqual("Parameter 'summary' is None.", str(context.exception))
+
+	def test_Region(self) -> None:
+		region = Region.Parse("Circle", {
+			"executed_lines": [7, 9, 12], "summary": SUMMARY, "missing_lines": [8], "excluded_lines": [], "start_line": 5,
+			"executed_branches": [[7, 9]], "missing_branches": [[7, 8]]
+		})
+
+		self.assertEqual(("Circle", 5, 4), (region.Name, region.StartLine, region.Summary.LineCount))
+		self.assertEqual(([(7, 9)], [(7, 8)]), (region.ExecutedBranches, region.MissingBranches))
+
+	def test_Region_Type(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Region.Parse("Circle", [])
+
+		self.assertEqual("Parameter 'region' is not of type 'dict'.", str(context.exception))
+		self.assertEqual(["Got type 'list'."], context.exception.__notes__)
+
+	def test_File(self) -> None:
+		"""The path's separators become '/'; the region named '' - the lines outside of every region - is skipped."""
+		region = {"executed_lines": [], "summary": SUMMARY, "missing_lines": [], "excluded_lines": [], "start_line": 1}
+		file = File.Parse("myPackage\\Shapes.py", {
+			"executed_lines": [7, 9, 12], "summary": SUMMARY, "missing_lines": [8], "excluded_lines": [],
+			"functions": {"": region, "Circle.Area": region}, "classes": {"": region, "Circle": region}
+		})
+
+		self.assertEqual("myPackage/Shapes.py", file.Path.as_posix())
+		self.assertEqual((["Circle.Area"], ["Circle"]), (list(file.Functions), list(file.Classes)))
+		self.assertEqual(([], []), (file.ExecutedBranches, file.MissingBranches))
+
+	def test_File_Name(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = File.Parse(None, {})
+
+		self.assertEqual("Parameter 'name' is None.", str(context.exception))
+
+
+class FormatModel(Testcase):
+	"""The format's model keeps what the report states: meta data, files, regions, summaries."""
 
 	def test_Report(self) -> None:
 		report = Document(REPORT, analyzeAndConvert=True)
