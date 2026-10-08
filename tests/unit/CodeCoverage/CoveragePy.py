@@ -38,7 +38,7 @@ from typing                                 import Any
 
 from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, Function, LineCoverageStatus, Method
 from pyEDAA.Reports.CodeCoverage            import Module, Package
-from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document, File, FormatVersion, Region, RegionKind, Report
+from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document, File, FormatVersion, Region, RegionKind
 from pyEDAA.Reports.CodeCoverage.CoveragePy import Summary
 from pyTooling.MetaClasses                  import AbstractClassError
 from pyTooling.Testing                      import Testcase
@@ -283,7 +283,7 @@ class ParentRelation(Testcase):
 	"""A file names its report as parent, a region its file; each is added to its parent."""
 
 	def test_File(self) -> None:
-		report = Report()
+		report = Document(Path("coverage.json"))
 		file = File(Path("myPackage/Shapes.py"), Summary(0, 0, 0, 0, 100.0), parent=report)
 
 		self.assertIs(report, file.Parent)
@@ -326,13 +326,13 @@ class ParentRelation(Testcase):
 
 	def test_Region_Parent(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = Region("Circle", RegionKind.Class, 5, Summary(0, 0, 0, 0, 100.0), parent=Report())
+			_ = Region("Circle", RegionKind.Class, 5, Summary(0, 0, 0, 0, 100.0), parent=Document(Path("coverage.json")))
 
 		self.assertEqual("Parameter 'parent' is not of type 'File'.", str(context.exception))
-		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.CoveragePy.Report'."], context.exception.__notes__)
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.CoveragePy.Document'."], context.exception.__notes__)
 
 	def test_File_Duplicate(self) -> None:
-		report = Report()
+		report = Document(Path("coverage.json"))
 		file = File(Path("Shapes.py"), Summary(0, 0, 0, 0, 100.0), parent=report)
 		with self.assertRaises(ValueError) as context:
 			_ = File(Path("Shapes.py"), Summary(0, 0, 0, 0, 100.0), parent=report)
