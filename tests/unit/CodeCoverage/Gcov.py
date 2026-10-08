@@ -88,7 +88,7 @@ class FormatModel(Testcase):
 		main = report.DataFiles[1]
 		self.assertEqual((FormatVersion.Version2, "14.2.0"), (main.FormatVersion, main.GCCVersion))
 		self.assertIsInstance(main.GCCVersion, SemanticVersion)
-		self.assertTrue(main.CurrentWorkingDirectory.is_absolute())
+		self.assertEqual(_stream()[1]["current_working_directory"], main.CurrentWorkingDirectory.as_posix())
 		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(main.Files))
 
 	def test_Functions(self) -> None:
