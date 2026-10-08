@@ -261,6 +261,33 @@ so it is a ``<method>`` per binary, each with the same name and an empty signatu
    for file in summary.IterateFiles():
      print(f"{file.Path}: {file.LineCoverage:.1%}")
 
+:meth:`~pyEDAA.Reports.CodeCoverage.Cobertura.Document.FromCoverageSummary` converts the common model - read from any
+format - to the format's model, and :meth:`~pyEDAA.Reports.CodeCoverage.Cobertura.Document.Write` writes it as a
+report following Cobertura's DTD, valid according to :ref:`Cobertura-04.xsd <SCHEMAS/Cobertura-04>`:
+
+* A source file, a module or a class of the logical hierarchy becomes a ``<class>`` of its file, named by its qualified
+  name below its packages, e.g. ``Shapes.Circle``. Its packages name its ``<package>``, e.g. ``myPackage``; without
+  packages, the file's directories do, e.g. ``src.Utilities`` - or ``.`` for the report's root.
+* Every line is listed once: by the innermost ``<class>`` spanning it, or - outside of every one - by a ``<class>``
+  named after the file, e.g. ``main.c``.
+* A function or a method becomes a ``<method>`` of the ``<class>`` of the unit containing it, listing its lines.
+* A line's count is its ``hits``; a line without count has ``1`` hit, if it ran, else ``0``. A branching line states
+  its taken and all branches in ``condition-coverage``, e.g. ``50% (1/2)``.
+* The rates and figures are computed from the lines; the source directories are the summary's.
+* The format has no excluded lines, no counts or targets of branches, and no calls of units: they are left out.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.Cobertura import Document
+
+   report = Document.FromCoverageSummary(Path("Cobertura.xml"), summary)
+   report.Write(regenerate=True)
+
+A report read can be written again, too: :meth:`~pyEDAA.Reports.CodeCoverage.Cobertura.Document.Generate` builds the
+XML document from the format's model, leaving out what the DTD doesn't define - e.g. coverage.py's
+``missing-branches`` -, and computes the rates and figures the report doesn't state.
+
 .. rubric:: Cobertura Dialects
 
 Each tool writes Cobertura XML in a shape of its own - a dialect -, as the frameworks writing JUnit XML do. A dialect

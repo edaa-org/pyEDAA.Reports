@@ -13,6 +13,8 @@ A report a tool writes may not follow the DTD - coverage.py adds the attribute `
 report is read with the lenient :ref:`Any-Cobertura.xsd <SCHEMAS/Any-Cobertura>`, or with the strict schema of its
 dialect, e.g. :ref:`CoveragePy-Cobertura.xsd <SCHEMAS/CoveragePy-Cobertura>`.
 
+A report :meth:`Document.Write <pyEDAA.Reports.CodeCoverage.Cobertura.Document.Write>` writes is valid according to it.
+
 .. grid:: 2
 
    .. grid-item::

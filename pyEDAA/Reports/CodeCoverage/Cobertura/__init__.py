@@ -29,7 +29,8 @@
 # ==================================================================================================================== #
 #
 """
-The Cobertura XML code coverage format: a model of the format, read from a report and converted to the common model.
+The Cobertura XML code coverage format: a model of the format, read from a report and converted to the common model, or
+converted from the common model and written to a report.
 
 Cobertura's XML format is written by many tools - e.g. coverage.py (``coverage xml``) or gcovr (``--cobertura``) - and
 read by many CI services. The format's model follows Cobertura's DTD ``coverage-04.dtd``: a :class:`Document` holds
@@ -62,6 +63,17 @@ from this one, validating against a strict XML schema of the dialect, and readin
   nested packages. A class or method spans its file from the first to the last line it lists.
 * The format has no excluded lines.
 
+:meth:`Document.FromCoverageSummary` converts the common model to the format's model, which :meth:`Document.Write`
+writes following the DTD:
+
+* Every source file, module and class of the logical hierarchy becomes a ``<class>`` of its file, named by its
+  qualified name below its packages; its packages - or the file's directories, if it has none - name its
+  ``<package>``. A file's line is listed by the innermost of them spanning it, a line outside of every one by a
+  ``<class>`` named after the file.
+* Every function and method becomes a ``<method>`` of the ``<class>`` of the unit containing it, listing its lines.
+* A line's count is its ``hits`` - ``1`` or ``0``, if the report didn't say -; a branching line states its taken and
+  all branches in ``condition-coverage``. Excluded lines are left out.
+
 .. rubric:: Example
 
 .. code-block:: Python
@@ -73,22 +85,26 @@ from this one, validating against a strict XML schema of the dialect, and readin
    summary = report.ToCoverageSummary()
    for file in summary.IterateFiles():
      print(f"{file.Path}: {file.LineCoverage:.1%}")
+
+   Document.FromCoverageSummary(Path("Cobertura.xml"), summary).Write(regenerate=True)
 """
 from __future__                                    import annotations
 
 from pathlib                                       import Path
 from re                                            import compile as re_compile
+from time                                          import time_ns
 from typing                                        import Optional as Nullable
 
-from lxml.etree                                    import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError
-from lxml.etree                                    import parse, _Element, _ElementTree
-from pyTooling.Common                              import getResourceFile
+from lxml.etree                                    import Element as XMLElement, ElementTree, SubElement, XMLParser
+from lxml.etree                                    import XMLSchema, XMLSchemaParseError, XMLSyntaxError, parse
+from lxml.etree                                    import tostring, _Element, _ElementTree
+from pyTooling.Common                              import getFullyQualifiedName, getResourceFile
 from pyTooling.Decorators                          import export, readonly
 from pyTooling.Exceptions                          import ToolingException
 from pyTooling.MetaClasses                         import ExtendedType
 from pyTooling.Stopwatch                           import Stopwatch
 
-from pyEDAA.Reports                                import Resources
+from pyEDAA.Reports                                import Resources, __version__
 from pyEDAA.Reports.CodeCoverage                   import Branch as cc_Branch, Class as cc_Class, CodeCoverageError
 from pyEDAA.Reports.CodeCoverage                   import CoverageSummary, Document as cc_Document, File as cc_File
 from pyEDAA.Reports.CodeCoverage                   import Line as cc_Line, LineCoverageStatus, Method as cc_Method
@@ -264,10 +280,11 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 @export
 class Document(cc_Document, Coverage):
 	"""
-	A Cobertura XML code coverage report: read into the format's model, and converted to the common model.
+	A Cobertura XML code coverage report: read into the format's model and converted to the common model, or converted
+	from the common model and written.
 	"""
 
-	_xmlDocument: Nullable[_ElementTree]  #: The parsed and validated XML document, after :meth:`Analyze`.
+	_xmlDocument: Nullable[_ElementTree]  #: The XML document, parsed by :meth:`Analyze` or built by :meth:`Generate`.
 
 	def __init__(self, xmlReportFile: Path, analyzeAndConvert: bool = False) -> None:
 		"""
@@ -284,6 +301,58 @@ class Document(cc_Document, Coverage):
 		if analyzeAndConvert:
 			self.Analyze()
 			self.Convert()
+
+	@classmethod
+	def FromCoverageSummary(cls, xmlReportFile: Path, coverageSummary: CoverageSummary) -> Document:
+		"""
+		Create a report from the common model, ready to be generated and written.
+
+		Every source file, module and class of the logical hierarchy becomes a
+		:class:`~pyEDAA.Reports.CodeCoverage.Cobertura.Records.Class` of its file, named by its qualified name below its
+		packages; its packages - or the file's directories, if it has none - name its
+		:class:`~pyEDAA.Reports.CodeCoverage.Cobertura.Records.Package`. A file's line is listed by the innermost of these
+		classes spanning it; a line outside of every one by a class named after the file. Every function and method becomes
+		a :class:`~pyEDAA.Reports.CodeCoverage.Cobertura.Records.Method` of the class of the unit containing it. Excluded
+		lines are left out. The rates and figures are computed from the lines; the version names pyEDAA.Reports, the
+		timestamp is the current time in milliseconds since the epoch.
+
+		:param xmlReportFile:   Path to the Cobertura XML file to write.
+		:param coverageSummary: The report's root of the common model.
+		:returns:               The report.
+		:raises ValueError:     If parameter ``xmlReportFile`` is ``None``.
+		:raises TypeError:      If parameter ``xmlReportFile`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:     If parameter ``coverageSummary`` is ``None``.
+		:raises TypeError:      If parameter ``coverageSummary`` isn't of type
+		                        :class:`~pyEDAA.Reports.CodeCoverage.CoverageSummary`.
+		"""
+		if xmlReportFile is None:
+			raise ValueError(f"Parameter 'xmlReportFile' is None.")
+		elif not isinstance(xmlReportFile, Path):
+			ex = TypeError(f"Parameter 'xmlReportFile' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(xmlReportFile)}'.")
+			raise ex
+
+		if coverageSummary is None:
+			raise ValueError(f"Parameter 'coverageSummary' is None.")
+		elif not isinstance(coverageSummary, CoverageSummary):
+			ex = TypeError(f"Parameter 'coverageSummary' is not of type 'CoverageSummary'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(coverageSummary)}'.")
+			raise ex
+
+		document = cls(xmlReportFile)
+		document._version =    f"pyEDAA.Reports {__version__}"
+		document._timestamp =  str(time_ns() // 1_000_000)
+		document._complexity = 0.0
+		document._sources =    [directory.as_posix() for directory in coverageSummary._sourceDirectories]
+		document._packages =   Package._FromFiles(coverageSummary.IterateFiles())
+
+		counts = Element._CountLines(
+			line for package in document._packages for klass in package._classes for line in klass._lines.values()
+		)
+		document._linesValid, document._linesCovered, document._branchesValid, document._branchesCovered = counts
+		document._lineRate, document._branchRate = Element._Rates(counts)
+
+		return document
 
 	def Analyze(self) -> None:
 		"""
@@ -512,3 +581,116 @@ class Document(cc_Document, Coverage):
 
 		summary.Aggregate()
 		return summary
+
+	def Generate(self, overwrite: bool = False) -> None:
+		"""
+		Generate the XML document from the format's model, following Cobertura's DTD.
+
+		A rate or figure the model doesn't state - e.g. read from a report without it - is computed from the lines; a
+		missing complexity is written as ``0``, a missing version, timestamp or signature as empty text.
+
+		:param overwrite:          Optional, if true, replace the XML document read or generated before. Default: ``False``.
+		:raises ValueError:        If parameter ``overwrite`` is ``None``.
+		:raises TypeError:         If parameter ``overwrite`` isn't of type :class:`bool`.
+		:raises CodeCoverageError: If parameter ``overwrite`` is false and the XML document was read or generated before.
+		"""
+		if overwrite is None:
+			raise ValueError(f"Parameter 'overwrite' is None.")
+		elif not isinstance(overwrite, bool):
+			ex = TypeError(f"Parameter 'overwrite' is not of type 'bool'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(overwrite)}'.")
+			raise ex
+		elif not overwrite and self._xmlDocument is not None:
+			ex = CodeCoverageError(f"XML document of Cobertura report file '{self._path}' is already populated.")
+			ex.add_note(f"Call 'Document.Generate(overwrite=True)' to replace it.")
+			raise ex
+
+		counts = Element._CountLines(
+			line for package in self._packages for klass in package._classes for line in klass._lines.values()
+		)
+		linesValid, linesCovered, branchesValid, branchesCovered = counts
+		lineRate, branchRate = Element._Rates(counts)
+
+		rootElement = XMLElement("coverage")
+		rootElement.attrib["line-rate"] =   str(round(lineRate if self._lineRate is None else self._lineRate, 4))
+		rootElement.attrib["branch-rate"] = str(round(branchRate if self._branchRate is None else self._branchRate, 4))
+		for name, stated, computed in (
+			("lines-covered",    self._linesCovered,    linesCovered),
+			("lines-valid",      self._linesValid,      linesValid),
+			("branches-covered", self._branchesCovered, branchesCovered),
+			("branches-valid",   self._branchesValid,   branchesValid)
+		):
+			rootElement.attrib[name] = str(computed if stated is None else stated)
+		rootElement.attrib["complexity"] = str(0 if self._complexity is None else self._complexity)
+		rootElement.attrib["version"] =    "" if self._version is None else self._version
+		rootElement.attrib["timestamp"] =  "" if self._timestamp is None else self._timestamp
+
+		sourcesElement = SubElement(rootElement, "sources")
+		for source in self._sources:
+			SubElement(sourcesElement, "source").text = source
+
+		packagesElement = SubElement(rootElement, "packages")
+		for package in self._packages:
+			packagesElement.append(package.Generate())
+
+		document = ElementTree(rootElement)
+		document.docinfo.system_url = "http://cobertura.sourceforge.net/xml/coverage-04.dtd"
+		self._xmlDocument = document
+
+	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
+		"""
+		Write the XML document to a file.
+
+		:param path:               Optional, path to the XML file, if not the report's path. Default: ``None``.
+		:param overwrite:          Optional, if true, overwrite an existing file. Default: ``False``.
+		:param regenerate:         Optional, if true, generate the XML document from the format's model first.
+		                           Default: ``False``.
+		:raises TypeError:         If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:        If parameter ``overwrite`` is ``None``.
+		:raises TypeError:         If parameter ``overwrite`` isn't of type :class:`bool`.
+		:raises ValueError:        If parameter ``regenerate`` is ``None``.
+		:raises TypeError:         If parameter ``regenerate`` isn't of type :class:`bool`.
+		:raises CodeCoverageError: If the file exists and parameter ``overwrite`` is false.
+		:raises CodeCoverageError: If the XML document was neither read nor generated. |br|
+		                           Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.
+		:raises CodeCoverageError: If the file can't be written.
+		"""
+		if path is None:
+			path = self._path
+		elif not isinstance(path, Path):
+			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
+			raise ex
+
+		if overwrite is None:
+			raise ValueError(f"Parameter 'overwrite' is None.")
+		elif not isinstance(overwrite, bool):
+			ex = TypeError(f"Parameter 'overwrite' is not of type 'bool'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(overwrite)}'.")
+			raise ex
+
+		if regenerate is None:
+			raise ValueError(f"Parameter 'regenerate' is None.")
+		elif not isinstance(regenerate, bool):
+			ex = TypeError(f"Parameter 'regenerate' is not of type 'bool'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(regenerate)}'.")
+			raise ex
+
+		if not overwrite and path.exists():
+			raise CodeCoverageError(f"Cobertura report file '{path}' can not be overwritten.") \
+				from FileExistsError(f"File '{path}' already exists.")
+
+		if regenerate:
+			self.Generate(overwrite=True)
+
+		if self._xmlDocument is None:
+			ex = CodeCoverageError(f"XML document of Cobertura report file '{path}' needs to be generated first.")
+			ex.add_note(f"Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.")
+			raise ex
+
+		content = tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True)
+		try:
+			with path.open("wb") as file:
+				file.write(content)
+		except OSError as ex:
+			raise CodeCoverageError(f"Cobertura report file '{path}' can not be written.") from ex
