@@ -36,7 +36,7 @@ from tempfile                                 import TemporaryDirectory
 from typing                                   import Any
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.Gcov         import Coverage, DataFile, Document, File
+from pyEDAA.Reports.CodeCoverage.Gcov         import Coverage, DataFile, Document, File, FormatVersion
 from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function as gcov_Function, Line
 from pyTooling.Testing                        import Testcase
 from pyTooling.Versioning                     import SemanticVersion
@@ -86,7 +86,7 @@ class FormatModel(Testcase):
 
 		self.assertEqual(["Statistics.c", "Main.cpp"], [dataFile.Path.as_posix() for dataFile in report.DataFiles])
 		main = report.DataFiles[1]
-		self.assertEqual((2, "14.2.0"), (main.FormatVersion, main.GCCVersion))
+		self.assertEqual((FormatVersion.Version2, "14.2.0"), (main.FormatVersion, main.GCCVersion))
 		self.assertIsInstance(main.GCCVersion, SemanticVersion)
 		self.assertTrue(main.CurrentWorkingDirectory.is_absolute())
 		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(main.Files))
@@ -170,13 +170,13 @@ class Construction(Testcase):
 		self.assertEqual((Path("main.c"), None, {}, []), (file.Path, file.Parent, file.Functions, file.Lines))
 
 	def test_DataFile(self) -> None:
-		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), Path("/build"))
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"), Path("/build"))
 
-		self.assertEqual((Path("main.c"), 2, "14.2.0", Path("/build")),
+		self.assertEqual((Path("main.c"), FormatVersion.Version2, "14.2.0", Path("/build")),
 		                 (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion, dataFile.CurrentWorkingDirectory))
 
 	def test_DataFile_Defaults(self) -> None:
-		dataFile = DataFile(Path("main.c"), 1, SemanticVersion.Parse("13.2.0"))
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version1, SemanticVersion.Parse("13.2.0"))
 
 		self.assertEqual((None, None, {}), (dataFile.CurrentWorkingDirectory, dataFile.Parent, dataFile.Files))
 
@@ -218,14 +218,19 @@ class Construction(Testcase):
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
 	def test_DataFile_FormatVersion(self) -> None:
+		"""The format version is a member of FormatVersion, not its number."""
 		with self.assertRaises(ValueError) as context:
-			_ = DataFile(Path("main.c"), 3, SemanticVersion.Parse("14.2.0"))
-		self.assertEqual("Parameter 'formatVersion' is not 1 or 2.", str(context.exception))
-		self.assertEqual(["Got value '3'."], context.exception.__notes__)
+			_ = DataFile(Path("main.c"), None, SemanticVersion.Parse("14.2.0"))
+		self.assertEqual("Parameter 'formatVersion' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"))
+		self.assertEqual("Parameter 'formatVersion' is not of type 'FormatVersion'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 	def test_DataFile_GCCVersion(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = DataFile(Path("main.c"), 2, "14.2.0")
+			_ = DataFile(Path("main.c"), FormatVersion.Version2, "14.2.0")
 		self.assertEqual("Parameter 'gccVersion' is not of type 'SemanticVersion'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
@@ -235,13 +240,13 @@ class ParentRelation(Testcase):
 
 	def test_DataFile(self) -> None:
 		coverage = Coverage()
-		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), parent=coverage)
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"), parent=coverage)
 
 		self.assertIs(coverage, dataFile.Parent)
 		self.assertEqual([dataFile], coverage.DataFiles)
 
 	def test_File(self) -> None:
-		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"))
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"))
 		file = File(Path("main.c"), parent=dataFile)
 
 		self.assertIs(dataFile, file.Parent)
@@ -279,7 +284,7 @@ class ParentRelation(Testcase):
 
 	def test_DataFile_Parent(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), parent=[])
+			_ = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"), parent=[])
 		self.assertEqual("Parameter 'parent' is not of type 'Coverage'.", str(context.exception))
 		self.assertEqual(["Got type 'list'."], context.exception.__notes__)
 
@@ -290,7 +295,7 @@ class ParentRelation(Testcase):
 		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.Coverage'."], context.exception.__notes__)
 
 	def test_Function_Parent(self) -> None:
-		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"))
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"))
 		with self.assertRaises(TypeError) as context:
 			_ = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1, parent=dataFile)
 		self.assertEqual("Parameter 'parent' is not of type 'File'.", str(context.exception))
@@ -326,6 +331,27 @@ class ParentRelation(Testcase):
 
 class Parsing(Testcase):
 	"""Each class of the format's model parses its JSON object."""
+
+	def test_FormatVersion(self) -> None:
+		"""gcov states the format version as a string."""
+		self.assertIs(FormatVersion.Version1, FormatVersion.Parse("1"))
+		self.assertIs(FormatVersion.Version2, FormatVersion.Parse("2"))
+
+	def test_FormatVersion_Unsupported(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = FormatVersion.Parse("3")
+		self.assertEqual("Parameter 'value' is not a supported gcov JSON format version.", str(context.exception))
+		self.assertEqual(["Got value '3'.", "Supported format versions: 1, 2."], context.exception.__notes__)
+
+	def test_FormatVersion_Type(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = FormatVersion.Parse(None)
+		self.assertEqual("Parameter 'value' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = FormatVersion.Parse(2)
+		self.assertEqual("Parameter 'value' is not of type 'str'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 	def test_Line(self) -> None:
 		line = Line.Parse({
@@ -365,7 +391,8 @@ class Parsing(Testcase):
 		"""The format version is a string; a development build of GCC states its date and phase behind the version."""
 		dataFile = DataFile.Parse(_stream()[1] | {"gcc_version": "15.0.1 20250418 (experimental)"})
 
-		self.assertEqual((Path("Main.cpp"), 2, "15.0.1"), (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion))
+		self.assertEqual((Path("Main.cpp"), FormatVersion.Version2, "15.0.1"),
+		                 (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion))
 		self.assertIsInstance(dataFile.GCCVersion, SemanticVersion)
 		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(dataFile.Files))
 
@@ -473,6 +500,7 @@ class Conversion(Testcase):
 		with TemporaryDirectory() as directory:
 			report = Document(_write(directory, dumps(document)), analyzeAndConvert=True)
 
+		self.assertIs(FormatVersion.Version1, report.DataFiles[0].FormatVersion)
 		line = report.DataFiles[0].Files[Path("main.c")].Lines[1]
 		self.assertEqual([], line.BlockIDs)
 		self.assertIsNone(report.DataFiles[0].CurrentWorkingDirectory)

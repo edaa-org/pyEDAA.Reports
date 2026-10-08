@@ -65,6 +65,7 @@ Its class method ``Parse`` reads the record's JSON object.
 """
 from __future__                               import annotations
 
+from enum                                     import IntEnum
 from gzip                                     import BadGzipFile, decompress
 from json                                     import JSONDecodeError, JSONDecoder, loads
 from pathlib                                  import Path
@@ -94,6 +95,48 @@ SCHEMA = "Gcov.schema.json"  #: The JSON Schema each JSON object of a report is 
 # A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
 # body's namespace, where annotations are evaluated, binds the name to the property.
 _Path = Path
+
+
+@export
+class FormatVersion(IntEnum):
+	"""
+	Version of the gcov JSON format, as a report's ``format_version`` states it.
+
+	GCC 9 to 13 write format 1. GCC 14 and later write format 2, which adds the IDs of the basic blocks of a line and of
+	a branch, and the calls and conditions of a line; GCC 15 adds the prime paths of a function to format 2.
+	"""
+
+	Version1 = 1  #: Format 1, written by GCC 9 to 13.
+	Version2 = 2  #: Format 2, written by GCC 14 and later.
+
+	@classmethod
+	def Parse(cls, value: str) -> Self:
+		"""
+		Convert the version, as gcov states it - a string, e.g. ``"2"`` -, to the member of that version.
+
+		:param value:       The version, as a report's ``format_version`` states it.
+		:returns:           The member of that version.
+		:raises ValueError: If parameter ``value`` is ``None``.
+		:raises TypeError:  If parameter ``value`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``value`` isn't a supported format version.
+		"""
+		if value is None:
+			raise ValueError(f"Parameter 'value' is None.")
+		elif not isinstance(value, str):
+			ex = TypeError(f"Parameter 'value' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+			raise ex
+		elif value not in [str(member.value) for member in cls]:
+			ex = ValueError(f"Parameter 'value' is not a supported gcov JSON format version.")
+			ex.add_note(f"Got value '{value}'.")
+			ex.add_note(f"Supported format versions: {', '.join(str(member.value) for member in cls)}.")
+			raise ex
+
+		return cls(int(value))
+
+
+# Like '_Path': DataFile has a property named 'FormatVersion'.
+_FormatVersion = FormatVersion
 
 
 @export
@@ -212,7 +255,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 
 	_parent:                  Nullable[Coverage]  #: The report the data file belongs to.
 	_path:                    _Path               #: Path of the data file, as gcov was called with it.
-	_formatVersion:           int                 #: Version of the report format.
+	_formatVersion:           _FormatVersion      #: Version of the report format.
 	_gccVersion:              SemanticVersion     #: Version of GCC.
 	_currentWorkingDirectory: Nullable[_Path]     #: The directory the compiler ran in, if the report says.
 	_files:                   dict[_Path, File]   #: The source files, by path.
@@ -220,7 +263,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 	def __init__(
 		self,
 		path:                    Path,
-		formatVersion:           int,
+		formatVersion:           FormatVersion,
 		gccVersion:              SemanticVersion,
 		currentWorkingDirectory: Nullable[Path] = None,
 		*,
@@ -232,7 +275,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		Its source files are added by creating them with this data file as their parent.
 
 		:param path:                    Path of the data file, as gcov was called with it.
-		:param formatVersion:           Version of the report format: ``1`` or ``2``.
+		:param formatVersion:           Version of the report format.
 		:param gccVersion:              Version of GCC.
 		:param currentWorkingDirectory: Optional, the directory the compiler ran in. Default: ``None``.
 		:param parent:                  Optional, the report the data file belongs to; the data file is appended to its
@@ -240,8 +283,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		:raises ValueError:             If parameter ``path`` is ``None``.
 		:raises TypeError:              If parameter ``path`` isn't of type :class:`~pathlib.Path`.
 		:raises ValueError:             If parameter ``formatVersion`` is ``None``.
-		:raises TypeError:              If parameter ``formatVersion`` isn't of type :class:`int`.
-		:raises ValueError:             If parameter ``formatVersion`` isn't ``1`` or ``2``.
+		:raises TypeError:              If parameter ``formatVersion`` isn't of type :class:`FormatVersion`.
 		:raises ValueError:             If parameter ``gccVersion`` is ``None``.
 		:raises TypeError:              If parameter ``gccVersion`` isn't of type
 		                                :class:`~pyTooling.Versioning.SemanticVersion`.
@@ -257,13 +299,9 @@ class DataFile(metaclass=ExtendedType, slots=True):
 
 		if formatVersion is None:
 			raise ValueError(f"Parameter 'formatVersion' is None.")
-		elif not isinstance(formatVersion, int):
-			ex = TypeError(f"Parameter 'formatVersion' is not of type 'int'.")
+		elif not isinstance(formatVersion, FormatVersion):
+			ex = TypeError(f"Parameter 'formatVersion' is not of type 'FormatVersion'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(formatVersion)}'.")
-			raise ex
-		elif formatVersion not in (1, 2):
-			ex = ValueError(f"Parameter 'formatVersion' is not 1 or 2.")
-			ex.add_note(f"Got value '{formatVersion}'.")
 			raise ex
 
 		if gccVersion is None:
@@ -298,9 +336,9 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a data file and its source files from its JSON object.
 
-		The format version is a string, e.g. ``"2"``; a development build of GCC states its date and phase behind its
-		version, e.g. ``15.0.1 20250418 (experimental)``. A backslash in a path - as a report written on Windows has
-		them - separates directories.
+		The format version is converted by :meth:`FormatVersion.Parse`; a development build of GCC states its date and
+		phase behind its version, e.g. ``15.0.1 20250418 (experimental)``. A backslash in a path - as a report written on
+		Windows has them - separates directories.
 
 		:param record:             The JSON object of the data file: a report's root object.
 		:param parent:             Optional, the report the data file belongs to. Default: ``None``.
@@ -310,7 +348,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		directory = record.get("current_working_directory")
 		dataFile = cls(
 			Path(record["data_file"].replace("\\", "/")),
-			int(record["format_version"]),
+			FormatVersion.Parse(record["format_version"]),
 			SemanticVersion.Parse(record["gcc_version"].split(" ", 1)[0]),
 			Path(directory.replace("\\", "/")) if directory is not None else None,
 			parent=parent
@@ -345,13 +383,11 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		return self._path
 
 	@readonly
-	def FormatVersion(self) -> int:
+	def FormatVersion(self) -> FormatVersion:
 		"""
 		Read-only property to access the version of the report format (:attr:`_formatVersion`).
 
-		gcov states it as a string, e.g. ``"2"``.
-
-		:returns: The version, ``1`` or ``2``.
+		:returns: The format version.
 		"""
 		return self._formatVersion
 
