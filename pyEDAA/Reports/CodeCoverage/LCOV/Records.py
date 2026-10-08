@@ -31,17 +31,17 @@
 """
 The records of lcov's tracefile format: a section, and its functions and lines.
 """
-from __future__                  import annotations
+from __future__                         import annotations
 
-from pathlib                     import Path
-from typing                      import Optional as Nullable
+from pathlib                            import Path
+from typing                             import TYPE_CHECKING, Optional as Nullable
 
-from pyTooling.Common            import getFullyQualifiedName
-from pyTooling.Decorators        import export, readonly
-from pyTooling.MetaClasses       import ExtendedType
+from pyTooling.Common                   import getFullyQualifiedName
+from pyTooling.Decorators               import export, readonly
+from pyTooling.MetaClasses              import ExtendedType
 
-# The package, not its class 'Tracefile': the package imports this module before it defines 'Tracefile'.
-from pyEDAA.Reports.CodeCoverage import LCOV
+if TYPE_CHECKING:
+	from pyEDAA.Reports.CodeCoverage.LCOV import Tracefile
 
 
 @export
@@ -245,18 +245,18 @@ class Section(metaclass=ExtendedType, slots=True):
 	section states.
 	"""
 
-	_parent:          Nullable[LCOV.Tracefile]  #: The tracefile the section belongs to.
-	_testName:        str                       #: Name of the test, stated by the last ``TN`` record before the section.
-	_sourceFile:      Path                      #: Path of the source file.
-	_version:         Nullable[str]             #: Version ID of the source file, if stated.
-	_functions:       list[Function]            #: The functions, in the tracefile's order.
-	_lines:           dict[int, Line]           #: The lines, by number.
-	_functionsFound:  Nullable[int]             #: Number of functions, as the section states it.
-	_functionsHit:    Nullable[int]             #: Number of functions called, as the section states it.
-	_linesFound:      Nullable[int]             #: Number of instrumented lines, as the section states it.
-	_linesHit:        Nullable[int]             #: Number of lines, which ran, as the section states it.
+	_parent:          Nullable[Tracefile]  #: The tracefile the section belongs to.
+	_testName:        str                  #: Name of the test, stated by the last ``TN`` record before the section.
+	_sourceFile:      Path                 #: Path of the source file.
+	_version:         Nullable[str]        #: Version ID of the source file, if stated.
+	_functions:       list[Function]       #: The functions, in the tracefile's order.
+	_lines:           dict[int, Line]      #: The lines, by number.
+	_functionsFound:  Nullable[int]        #: Number of functions, as the section states it.
+	_functionsHit:    Nullable[int]        #: Number of functions called, as the section states it.
+	_linesFound:      Nullable[int]        #: Number of instrumented lines, as the section states it.
+	_linesHit:        Nullable[int]        #: Number of lines, which ran, as the section states it.
 
-	def __init__(self, testName: str, sourceFile: Path, *, parent: Nullable[LCOV.Tracefile] = None) -> None:
+	def __init__(self, testName: str, sourceFile: Path, *, parent: Nullable[Tracefile] = None) -> None:
 		"""
 		Initialize an empty section, and append it to the sections of its tracefile.
 
@@ -266,7 +266,9 @@ class Section(metaclass=ExtendedType, slots=True):
 		                   Default: ``None``.
 		:raises TypeError: If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.LCOV.Tracefile`.
 		"""
-		if parent is not None and not isinstance(parent, LCOV.Tracefile):
+		from pyEDAA.Reports.CodeCoverage.LCOV import Tracefile
+
+		if parent is not None and not isinstance(parent, Tracefile):
 			ex = TypeError(f"Parameter 'parent' is not of type 'Tracefile'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
@@ -286,7 +288,7 @@ class Section(metaclass=ExtendedType, slots=True):
 			parent._sections.append(self)
 
 	@readonly
-	def Parent(self) -> Nullable[LCOV.Tracefile]:
+	def Parent(self) -> Nullable[Tracefile]:
 		"""
 		Read-only property to access the tracefile the section belongs to (:attr:`_parent`).
 
