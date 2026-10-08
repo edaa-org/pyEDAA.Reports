@@ -30,6 +30,7 @@
 #
 #
 """Unit tests of coverage.py's JSON format: its model, its JSON Schema and the conversion to the common model."""
+from datetime                               import datetime
 from json                                   import dumps, loads
 from pathlib                                import Path
 from tempfile                               import TemporaryDirectory
@@ -37,8 +38,10 @@ from typing                                 import Any
 
 from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, Function, LineCoverageStatus, Method
 from pyEDAA.Reports.CodeCoverage            import Module, Package
-from pyEDAA.Reports.CodeCoverage.CoveragePy import Document
+from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document
+from pyTooling.MetaClasses                  import AbstractClassError
 from pyTooling.Testing                      import Testcase
+from pyTooling.Versioning                   import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -67,23 +70,29 @@ def _write(directory: str, content: dict[str, Any]) -> Path:
 class FormatModel(Testcase):
 	"""The format's model keeps what the report states: meta data, files, regions, summaries."""
 
+	def test_Base(self) -> None:
+		with self.assertRaises(AbstractClassError):
+			_ = Base({})
+
 	def test_Report(self) -> None:
 		report = Document(REPORT, analyzeAndConvert=True)
 
 		self.assertEqual(
-			(3, "7.16.1", True, False), (report.Format, report.Version, report.BranchCoverage, report.ShowContexts)
+			(3, "7.16.1", True, False), (report.Format, report.Version, report.BranchCoverage, report.HasContexts)
 		)
+		self.assertIsInstance(report.Version, SemanticVersion)
+		self.assertEqual(datetime(2026, 10, 7, 9, 14, 51, 108137), report.Timestamp)
 		self.assertEqual(
 			["myPackage/Shapes.py", "myPackage/Units/Length.py", "myPackage/Units/__init__.py", "myPackage/__init__.py"],
-			sorted(report.Files)
+			sorted(path.as_posix() for path in report.Files)
 		)
 		totals = report.Totals
 		self.assertEqual((27, 22, 5, 2, 10, 5, 3), (
-			totals.NumStatements, totals.CoveredLines, totals.MissingLines, totals.ExcludedLines, totals.NumBranches,
-			totals.CoveredBranches, totals.NumPartialBranches
+			totals.StatementCount, totals.CoveredLines, totals.MissingLines, totals.ExcludedLines, totals.BranchCount,
+			totals.CoveredBranches, totals.PartialBranchCount
 		))
 
-		shapes = report.Files["myPackage/Shapes.py"]
+		shapes = report.Files[Path("myPackage/Shapes.py")]
 		self.assertEqual([8, 25], shapes.MissingLines)
 		self.assertEqual([28, 29], shapes.ExcludedLines)
 		self.assertIn((7, 8), shapes.MissingBranches)
@@ -101,12 +110,12 @@ class Conversion(Testcase):
 		summary = report.ToCoverageSummary()
 
 		pairs = [(summary, report.Totals)]
-		pairs.extend((file, report.Files[file.Path.as_posix()].Summary) for file in summary.IterateFiles())
+		pairs.extend((file, report.Files[file.Path].Summary) for file in summary.IterateFiles())
 		for entity, stated in pairs:
 			with self.subTest(entity=entity.Path.as_posix()):
 				self.assertEqual(
-					(stated.NumStatements, stated.CoveredLines, stated.ExcludedLines, stated.NumBranches,
-					 stated.CoveredBranches, stated.NumPartialBranches),
+					(stated.StatementCount, stated.CoveredLines, stated.ExcludedLines, stated.BranchCount,
+					 stated.CoveredBranches, stated.PartialBranchCount),
 					(entity.TotalLines, entity.CoveredLines, entity.ExcludedLines, entity.TotalBranches,
 					 entity.CoveredBranches, entity.PartialLines)
 				)

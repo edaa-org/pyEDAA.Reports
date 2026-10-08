@@ -60,6 +60,7 @@ format's model keeps what the report states: a :class:`Document` holds :class:`F
 """
 from __future__                  import annotations
 
+from datetime                    import datetime
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from typing                      import Any, Optional as Nullable
@@ -68,8 +69,9 @@ from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
-from pyTooling.MetaClasses       import ExtendedType
+from pyTooling.MetaClasses       import ExtendedType, abstractclass
 from pyTooling.Stopwatch         import Stopwatch
+from pyTooling.Versioning        import SemanticVersion
 
 from pyEDAA.Reports              import Resources
 from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, CoverageSummary
@@ -82,6 +84,10 @@ __all__ = ["SCHEMA"]
 
 SCHEMA = "CoveragePy-JSON.schema.json"  #: The JSON Schema a report is validated against.
 
+# A class with a property named like a class - ``Path``, ``Summary`` - can't name that class in the annotation of a
+# field: the class body's namespace, where annotations are evaluated, binds the name to the property.
+_Path = Path
+
 
 @export
 class Summary(metaclass=ExtendedType, slots=True):
@@ -89,14 +95,14 @@ class Summary(metaclass=ExtendedType, slots=True):
 	A ``summary``: the counters coverage.py computed for the whole report, a file or a region.
 	"""
 
-	_numStatements:      int            #: Number of statements, without the excluded ones.
+	_statementCount:     int            #: Number of statements, without the excluded ones.
 	_coveredLines:       int            #: Number of executed statements.
 	_missingLines:       int            #: Number of statements, which never ran.
 	_excludedLines:      int            #: Number of excluded lines.
 	_percentCovered:     float          #: Coverage of statements and branches, in percent.
-	_numBranches:        Nullable[int]  #: Number of branches, if branch coverage was measured.
+	_branchCount:        Nullable[int]  #: Number of branches, if branch coverage was measured.
 	_coveredBranches:    Nullable[int]  #: Number of taken branches, if branch coverage was measured.
-	_numPartialBranches: Nullable[int]  #: Number of partially covered lines, if branch coverage was measured.
+	_partialBranchCount: Nullable[int]  #: Number of partially covered lines, if branch coverage was measured.
 
 	def __init__(self, summary: dict[str, Any]) -> None:
 		"""
@@ -104,23 +110,23 @@ class Summary(metaclass=ExtendedType, slots=True):
 
 		:param summary: The JSON object ``summary``.
 		"""
-		self._numStatements =      summary["num_statements"]
+		self._statementCount =     summary["num_statements"]
 		self._coveredLines =       summary["covered_lines"]
 		self._missingLines =       summary["missing_lines"]
 		self._excludedLines =      summary["excluded_lines"]
 		self._percentCovered =     summary["percent_covered"]
-		self._numBranches =        summary.get("num_branches")
+		self._branchCount =        summary.get("num_branches")
 		self._coveredBranches =    summary.get("covered_branches")
-		self._numPartialBranches = summary.get("num_partial_branches")
+		self._partialBranchCount = summary.get("num_partial_branches")
 
 	@readonly
-	def NumStatements(self) -> int:
+	def StatementCount(self) -> int:
 		"""
-		Read-only property to access the number of statements, without the excluded ones (:attr:`_numStatements`).
+		Read-only property to access the number of statements, without the excluded ones (:attr:`_statementCount`).
 
 		:returns: The number of statements.
 		"""
-		return self._numStatements
+		return self._statementCount
 
 	@readonly
 	def CoveredLines(self) -> int:
@@ -159,13 +165,13 @@ class Summary(metaclass=ExtendedType, slots=True):
 		return self._percentCovered
 
 	@readonly
-	def NumBranches(self) -> Nullable[int]:
+	def BranchCount(self) -> Nullable[int]:
 		"""
-		Read-only property to access the number of branches (:attr:`_numBranches`).
+		Read-only property to access the number of branches (:attr:`_branchCount`).
 
 		:returns: The number of branches, or ``None`` if branch coverage wasn't measured.
 		"""
-		return self._numBranches
+		return self._branchCount
 
 	@readonly
 	def CoveredBranches(self) -> Nullable[int]:
@@ -177,18 +183,22 @@ class Summary(metaclass=ExtendedType, slots=True):
 		return self._coveredBranches
 
 	@readonly
-	def NumPartialBranches(self) -> Nullable[int]:
+	def PartialBranchCount(self) -> Nullable[int]:
 		"""
-		Read-only property to access the number of partially covered lines (:attr:`_numPartialBranches`).
+		Read-only property to access the number of partially covered lines (:attr:`_partialBranchCount`).
 
 		:returns: The number of lines, which ran without taking all branches, or ``None`` if branch coverage wasn't
 		          measured.
 		"""
-		return self._numPartialBranches
+		return self._partialBranchCount
+
+
+_Summary = Summary
 
 
 @export
-class Lines(metaclass=ExtendedType, slots=True):
+@abstractclass
+class Base(metaclass=ExtendedType, slots=True):
 	"""
 	Base-class of a file and a region: its executed, missing and excluded lines, its branches, and its summary.
 	"""
@@ -198,7 +208,7 @@ class Lines(metaclass=ExtendedType, slots=True):
 	_excludedLines:    list[int]              #: The excluded lines.
 	_executedBranches: list[tuple[int, int]]  #: The taken branches, as pairs of source and destination line.
 	_missingBranches:  list[tuple[int, int]]  #: The branches never taken, as pairs of source and destination line.
-	_summary:          Summary                #: The counters coverage.py computed.
+	_summary:          _Summary               #: The counters coverage.py computed.
 
 	def __init__(self, record: dict[str, Any]) -> None:
 		"""
@@ -278,7 +288,7 @@ class Lines(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Region(Lines):
+class Region(Base):
 	"""
 	A function or a class of a file - in format 3 -, named by its qualified name, e.g. ``Circle.Area``.
 	"""
@@ -318,18 +328,18 @@ class Region(Lines):
 
 
 @export
-class File(Lines):
+class File(Base):
 	"""
 	A measured file: its lines, branches and summary, and - in format 3 - its functions and classes.
 
 	The regions named ``""`` - the lines outside of every function or class - aren't kept.
 	"""
 
-	_path:      str                #: The file's path, relative to the directory coverage.py ran in.
+	_path:      _Path              #: The file's path, relative to the directory coverage.py ran in.
 	_functions: dict[str, Region]  #: The functions, by qualified name.
 	_classes:   dict[str, Region]  #: The classes, by qualified name.
 
-	def __init__(self, path: str, record: dict[str, Any]) -> None:
+	def __init__(self, path: Path, record: dict[str, Any]) -> None:
 		"""
 		Initialize the file from its JSON object.
 
@@ -343,7 +353,7 @@ class File(Lines):
 		self._classes =   {name: Region(name, region) for name, region in record.get("classes", {}).items() if name != ""}
 
 	@readonly
-	def Path(self) -> str:
+	def Path(self) -> Path:
 		"""
 		Read-only property to access the file's path (:attr:`_path`).
 
@@ -376,13 +386,13 @@ class Report(metaclass=ExtendedType, slots=True):
 	The report's root: how and when it was written, the measured files, and the totals.
 	"""
 
-	_format:         Nullable[int]      #: Version of the report format.
-	_version:        Nullable[str]      #: Version of coverage.py.
-	_timestamp:      Nullable[str]      #: Time the report was written, ISO 8601.
-	_branchCoverage: bool               #: Whether branch coverage was measured.
-	_showContexts:   bool               #: Whether the lines' contexts are listed.
-	_files:          dict[str, File]    #: The measured files, by path.
-	_totals:         Nullable[Summary]  #: The counters of the whole report.
+	_format:         Nullable[int]              #: Version of the report format.
+	_version:        Nullable[SemanticVersion]  #: Version of coverage.py.
+	_timestamp:      Nullable[datetime]         #: Time the report was written, local time without time zone.
+	_branchCoverage: bool                       #: Whether branch coverage was measured.
+	_hasContexts:    bool                       #: Whether the report lists the contexts of the lines.
+	_files:          dict[Path, File]           #: The measured files, by path.
+	_totals:         Nullable[Summary]          #: The counters of the whole report.
 
 	def __init__(self) -> None:
 		"""
@@ -392,7 +402,7 @@ class Report(metaclass=ExtendedType, slots=True):
 		self._version =        None
 		self._timestamp =      None
 		self._branchCoverage = False
-		self._showContexts =   False
+		self._hasContexts =    False
 		self._files =          {}
 		self._totals =         None
 
@@ -406,20 +416,20 @@ class Report(metaclass=ExtendedType, slots=True):
 		return self._format
 
 	@readonly
-	def Version(self) -> Nullable[str]:
+	def Version(self) -> Nullable[SemanticVersion]:
 		"""
 		Read-only property to access the version of coverage.py, which wrote the report (:attr:`_version`).
 
-		:returns: The version, e.g. ``7.16.1``.
+		:returns: The version, e.g. ``7.16.1``; ``None`` before the report was converted.
 		"""
 		return self._version
 
 	@readonly
-	def Timestamp(self) -> Nullable[str]:
+	def Timestamp(self) -> Nullable[datetime]:
 		"""
 		Read-only property to access the time the report was written (:attr:`_timestamp`).
 
-		:returns: The time, ISO 8601.
+		:returns: The time in the writer's local time, without a time zone; ``None`` before the report was converted.
 		"""
 		return self._timestamp
 
@@ -433,16 +443,19 @@ class Report(metaclass=ExtendedType, slots=True):
 		return self._branchCoverage
 
 	@readonly
-	def ShowContexts(self) -> bool:
+	def HasContexts(self) -> bool:
 		"""
-		Read-only property to access whether the lines' contexts are listed (:attr:`_showContexts`).
+		Read-only property to access whether the report lists the contexts of the lines (:attr:`_hasContexts`).
 
-		:returns: ``True``, if the contexts are listed.
+		coverage.py includes them, when configured with ``[json] show_contexts = True``; the report states it as
+		``show_contexts``.
+
+		:returns: ``True``, if the files list the contexts of their lines.
 		"""
-		return self._showContexts
+		return self._hasContexts
 
 	@readonly
-	def Files(self) -> dict[str, File]:
+	def Files(self) -> dict[Path, File]:
 		"""
 		Read-only property to access the measured files (:attr:`_files`).
 
@@ -532,12 +545,16 @@ class Document(Report, cc_Document):
 		with Stopwatch() as sw:
 			meta = self._jsonDocument["meta"]
 			self._format =         meta["format"]
-			self._version =        meta["version"]
-			self._timestamp =      meta["timestamp"]
+			self._version =        SemanticVersion.Parse(meta["version"])
+			self._timestamp =      datetime.fromisoformat(meta["timestamp"])
 			self._branchCoverage = meta["branch_coverage"]
-			self._showContexts =   meta["show_contexts"]
-			self._files =          {path: File(path, record) for path, record in self._jsonDocument["files"].items()}
+			self._hasContexts =    meta["show_contexts"]
+			self._files =          {}
 			self._totals =         Summary(self._jsonDocument["totals"])
+
+			for name, record in self._jsonDocument["files"].items():
+				path =              Path(name.replace("\\", "/"))
+				self._files[path] = File(path, record)
 
 		self._conversionDuration = sw.Duration
 
@@ -601,7 +618,7 @@ class Document(Report, cc_Document):
 		:param commonFile: The file of the common model.
 		:param summary:    The report's root of the common model.
 		"""
-		path = Path(file._path.replace("\\", "/"))
+		path = file._path
 		parent: cc_Unit | CoverageSummary = summary
 		for part in path.parent.parts:
 			parent = parent._units[part] if part in parent._units else cc_Package(part, parent=parent)
