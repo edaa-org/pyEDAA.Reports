@@ -10,7 +10,8 @@ Read by :class:`pyEDAA.Reports.CodeCoverage.Cobertura.Document` - see :ref:`CODE
 
 The schema has the structure of Cobertura's DTD ``coverage-04.dtd``, but accepts the attributes tools add - e.g.
 coverage.py's ``missing-branches`` - and requires only what a reader needs: a class' ``filename``, a line's
-``number`` and ``hits``. :ref:`Cobertura-04.xsd <SCHEMAS/Cobertura-04>` is the DTD's strict translation.
+``number`` and ``hits``. :ref:`Cobertura-04.xsd <SCHEMAS/Cobertura-04>` is the DTD's strict translation, and
+:ref:`CoveragePy-Cobertura.xsd <SCHEMAS/CoveragePy-Cobertura>` describes coverage.py's dialect strictly.
 
 .. grid:: 2
 

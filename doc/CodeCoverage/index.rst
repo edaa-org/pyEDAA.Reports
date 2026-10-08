@@ -261,6 +261,65 @@ so it is a ``<method>`` per binary, each with the same name and an empty signatu
    for file in summary.IterateFiles():
      print(f"{file.Path}: {file.LineCoverage:.1%}")
 
+.. rubric:: Cobertura Dialects
+
+Each tool writes Cobertura XML in a shape of its own - a dialect -, as the frameworks writing JUnit XML do. A dialect
+has a module of its own in :mod:`pyEDAA.Reports.CodeCoverage.Cobertura`: a ``Document`` derived from the generic one,
+which validates a report against the strict schema of the dialect and reads what the dialect adds. The class a report
+is read with chooses the dialect.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 35 40
+
+   * - Feature
+     - Any Cobertura
+     - coverage.py Cobertura
+   * - Schema
+     - :ref:`Any-Cobertura.xsd <SCHEMAS/Any-Cobertura>`, lenient
+     - :ref:`CoveragePy-Cobertura.xsd <SCHEMAS/CoveragePy-Cobertura>`, strict
+   * - A line's ``hits``
+     - count
+     - ``0`` or ``1``: no count
+   * - Branches
+     - taken and all, from ``condition-coverage``
+     - also the targets of those never taken, from ``missing-branches``
+   * - Units
+     - packages, classes and methods
+     - packages and modules, from the file paths
+
+.. _CODECOV/Formats/Cobertura/CoveragePy:
+
+coverage.py Cobertura
+---------------------
+
+coverage.py writes Cobertura XML with ``coverage xml``.
+:class:`pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura.Document` validates a report against
+:ref:`CoveragePy-Cobertura.xsd <SCHEMAS/CoveragePy-Cobertura>`, reverse-engineered from coverage.py 7.x, and reads it
+into the generic format's model; a line also keeps the targets of its branches never taken, which coverage.py states in
+``missing-branches``.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura.Document.ToCoverageSummary` converts it to the
+common model:
+
+* A line's ``hits`` - ``0`` or ``1`` - says whether it ran: a line, which ran, is covered - partially covered, if one of
+  its branches wasn't taken -, otherwise uncovered. The format has no counts.
+* A branch never taken names its target line - none for an exit of a function, which coverage.py states as ``exit`` -,
+  a taken one doesn't.
+* A file's directories become packages, the file a module spanning the whole file.
+* The format has no excluded lines.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura import Document
+
+   report = Document(Path("coverage.xml"), analyzeAndConvert=True)
+   summary = report.ToCoverageSummary()
+   for unit in summary.IterateUnits():
+     print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
+
+
 .. _CODECOV/Formats/CoveragePy:
 
 coverage.py JSON

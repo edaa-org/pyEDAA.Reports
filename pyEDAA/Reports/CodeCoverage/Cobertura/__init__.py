@@ -39,6 +39,14 @@ elements, and a line :class:`Condition` elements; each keeps the attributes the 
 A report is validated against :file:`Any-Cobertura.xsd`, which accepts the attributes tools add.
 :file:`Cobertura-04.xsd` is the DTD's strict translation to XML Schema.
 
+A dialect - the format as one tool writes it - has a module of its own in this package: a :class:`Document` derived
+from this one, validating against a strict XML schema of the dialect, and reading what the dialect adds.
+
+.. seealso::
+
+   :mod:`~pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura`
+      |rarr| coverage.py's dialect (``coverage xml``).
+
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
 * A class' ``filename`` is a file's path, relative to one of the ``<source>`` directories; several classes of one file

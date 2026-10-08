@@ -10,7 +10,8 @@ elements, attributes, their order and which are required, and allows no other at
 holds a number, the attribute has a numeric type: a rate in range 0..1, a count, a complexity.
 
 A report a tool writes may not follow the DTD - coverage.py adds the attribute ``missing-branches`` to a line -, so a
-report is read with the lenient :ref:`Any-Cobertura.xsd <SCHEMAS/Any-Cobertura>`.
+report is read with the lenient :ref:`Any-Cobertura.xsd <SCHEMAS/Any-Cobertura>`, or with the strict schema of its
+dialect, e.g. :ref:`CoveragePy-Cobertura.xsd <SCHEMAS/CoveragePy-Cobertura>`.
 
 .. grid:: 2
 
