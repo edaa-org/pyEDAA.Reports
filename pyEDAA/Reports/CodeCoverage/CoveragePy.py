@@ -582,13 +582,14 @@ class Document(Report, cc_Document):
 		for number in sorted(statuses):
 			cc_Line(number, statuses[number], parent=commonFile)
 
-		lines = commonFile._lines
+		lines =          commonFile._lines
+		lastLineNumber = commonFile._lastLineNumber
 		for status, arcs in (
 			(LineCoverageStatus.Covered,   file._executedBranches),
 			(LineCoverageStatus.Uncovered, file._missingBranches)
 		):
 			for source, target in arcs:
-				cc_Branch(status, target=lines.get(target), parent=lines[source])
+				cc_Branch(status, target=lines[target] if 0 < target <= lastLineNumber else None, parent=lines[source])
 
 	@staticmethod
 	def _ConvertUnits(file: File, commonFile: cc_File, summary: CoverageSummary) -> None:
@@ -605,13 +606,13 @@ class Document(Report, cc_Document):
 		for part in path.parent.parts:
 			parent = parent._units[part] if part in parent._units else cc_Package(part, parent=parent)
 
-		lines = commonFile._lines
-		numbers = sorted(lines)
+		lines =          commonFile._lines
+		lastLineNumber = commonFile._lastLineNumber
 		module = cc_Module(
 			path.stem,
 			file=commonFile,
-			startLine=lines[numbers[0]] if len(numbers) > 0 else None,
-			endLine=lines[numbers[-1]] if len(numbers) > 0 else None,
+			startLine=next(commonFile.IterateLines(), None),
+			endLine=lines[lastLineNumber] if lastLineNumber > 0 else None,
 			parent=parent
 		)
 
@@ -636,9 +637,10 @@ class Document(Report, cc_Document):
 				else:
 					unitClass = cc_Function
 
-				numbers = [number for number in region.AllLines if number in lines]
-				if region._startLine in lines:
-					numbers.append(region._startLine)
+				numbers = [
+					number for number in (region._startLine, *region.AllLines)
+					if number <= lastLineNumber and lines[number] is not None
+				]
 
 				unitClass(
 					ownName,
