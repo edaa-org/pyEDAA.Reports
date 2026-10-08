@@ -207,7 +207,10 @@ class Branch(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the index or expression identifying the branch in its block (:attr:`_expression`).
 
-		:returns: The identifier, e.g. ``1`` from GCC or ``jump to line 8`` from coverage.py.
+		Each tool identifies a branch its own way, e.g. GCC by an index like ``1``, coverage.py by a text like
+		``jump to line 8``.
+
+		:returns: The identifier.
 		"""
 		return self._expression
 
@@ -343,7 +346,9 @@ class Condition(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the condition's expression (:attr:`_expression`).
 
-		:returns: The expression, e.g. ``0`` from GCC.
+		The text depends on the tool, e.g. GCC states ``0``.
+
+		:returns: The expression.
 		"""
 		return self._expression
 
