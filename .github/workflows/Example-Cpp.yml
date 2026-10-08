@@ -60,3 +60,51 @@ jobs:
         with:
           name: Cpp-GoogleTest
           path: examples/Cpp/GoogleTest/*.xml
+
+  Cpp-Catch2:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: ⏬ Checkout repository
+        uses: actions/checkout@v7
+
+      - name: 🔧 Install dependencies
+        run: sudo apt-get install -y --no-install-recommends ninja-build lcov
+
+      - name: 🛠 Run CMake
+        run: |
+          cd examples/Cpp/Catch2
+          cmake -B build -G Ninja
+          cmake --build build
+
+      - name: ✅ Run unit tests
+        run: |
+          cd examples/Cpp/Catch2
+
+          exitCode=0
+          ./build/unit_tests --order decl --reporter console \
+            --reporter JUnit::out=catch2-junit.xml --reporter XML::out=catch2.xml || exitCode=$?
+          if [[ ${exitCode} -ne 42 ]]; then
+            printf -- '::error title=%s::%s\n' "Catch2" "Expected exit code 42 (failed test cases), got ${exitCode}."
+            exit 1
+          fi
+
+      - name: 📊 Collect code coverage as gcov JSON and lcov tracefile
+        run: |
+          cd examples/Cpp/Catch2
+
+          ( cd build && gcov --json-format --branch-probabilities --stdout \
+            CMakeFiles/app.dir/src/Counter.cpp.gcda ) > Counter.cpp.gcov.json
+          lcov --capture --directory build --rc branch_coverage=1 --output-file coverage.info
+
+      - name: List generated reports
+        run: |
+          ls -lAh examples/Cpp/Catch2/*.xml examples/Cpp/Catch2/*.json examples/Cpp/Catch2/*.info
+
+      - name: 📤 Upload JUnit XML, Catch2 XML and coverage files as artifact
+        uses: pyTooling/upload-artifact@v7
+        with:
+          name: Cpp-Catch2
+          path: |
+            examples/Cpp/Catch2/*.xml
+            examples/Cpp/Catch2/*.gcov.json
+            examples/Cpp/Catch2/coverage.info

@@ -34,6 +34,8 @@ from unittest         import TestCase
 
 from pyTooling.Common import zipdicts
 
+from pyEDAA.Reports.Unittesting                       import UnittestError
+from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument
 # FIXME: change to generic JUnit
 from pyEDAA.Reports.Unittesting                       import TestcaseStatus
 from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as JUnit4Document
@@ -173,6 +175,17 @@ class CppGoogleTestCTest(TestCase):
 					self.assertEqual(tc.Status, sameTC.Status)
 					self.assertEqual(tc.Duration, sameTC.Duration)
 					self.assertEqual(tc.AssertionCount, sameTC.AssertionCount)
+
+
+class CppCatch2(TestCase):
+	def test_JUnit(self) -> None:
+		"""Known gap: no dialect reads Catch2's JUnit report yet."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Cpp-Catch2/catch2-junit.xml")
+
+		for documentClass in (AnyJUnitDocument, JUnit4Document, CTestDocument, GTestDocument, PyTestDocument):
+			with self.subTest(dialect=documentClass.__module__):
+				with self.assertRaises(UnittestError):
+					documentClass(junitExampleFile, analyzeAndConvert=True)
 
 
 class JavaAntJUnit4(TestCase):

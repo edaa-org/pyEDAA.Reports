@@ -40,7 +40,7 @@ from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
 
-from . import DIALECTS, TESTSUITE_ROOTED_FILES, Dialect
+from . import DATA_DIRECTORY, DIALECTS, TESTSUITE_ROOTED_FILES, UNSUPPORTED_FILES, Dialect
 
 
 class SchemaMixin:
@@ -116,3 +116,25 @@ class AnyJUnit(SchemaMixin, ut_TestCase):
 			with self.subTest(file=referenceFile.name):
 				with self.assertRaises(Exception):
 					self.Dialect.DocumentClass(referenceFile, analyzeAndConvert=True)
+
+
+class Unsupported(ut_TestCase):
+	"""Reports of a framework no dialect reads yet: every schema rejects them."""
+
+	def test_Schemas(self) -> None:
+		"""Known gap: when this starts failing, a dialect accepts the report and it becomes a reference file."""
+		for dialect in DIALECTS.values():
+			schema = dialect.Schema()
+
+			for referenceFile in UNSUPPORTED_FILES:
+				with self.subTest(dialect=dialect.Name, file=referenceFile.name):
+					self.assertFalse(schema.is_valid(str(referenceFile)), f"{dialect.Name} accepts '{referenceFile.name}' now.")
+
+	def test_Catch2JUnit(self) -> None:
+		"""Catch2's JUnit report is Any-JUnit, except for the ``status`` attribute of each ``<testcase>``."""
+		schema = DIALECTS["Any-JUnit"].Schema()
+		referenceFile = DATA_DIRECTORY / "pyEDAA.Reports/Cpp-Catch2/catch2-junit.xml"
+
+		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(referenceFile))}
+
+		self.assertEqual({("testcase", "'status' attribute not allowed for element")}, errors)

@@ -164,6 +164,10 @@ DIALECTS: Dict[str, Dialect] = {
 #: which is why they are named here instead of sitting in its reference list.
 TESTSUITE_ROOTED_FILES: List[Path] = sorted((DATA_DIRECTORY / "VUnit").glob("*.xml"))
 
+#: Reports of a framework no dialect reads yet. Once a dialect accepts one, it becomes a reference file of that
+#: dialect.
+UNSUPPORTED_FILES: List[Path] = [DATA_DIRECTORY / "pyEDAA.Reports/Cpp-Catch2/catch2-junit.xml"]
+
 
 def readReference(dialect: Dialect, referenceFile: Path) -> TestsuiteSummary:
 	"""
