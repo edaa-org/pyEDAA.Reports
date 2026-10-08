@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Catch2TestRun name="unit_tests" rng-seed="3192952293" xml-format-version="3" catch2-version="3.16.0">
+  <TestCase name="Init" tags="[Counter]" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="7">
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="Operations" tags="[Counter]" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="14">
+    <Section name="Increment" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="17">
+      <OverallResults successes="2" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <Section name="Decrement" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="22">
+      <Section name="Underflow" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="26">
+        <OverallResults successes="1" failures="0" expectedFailures="0" skipped="false"/>
+      </Section>
+      <OverallResults successes="3" failures="0" expectedFailures="0" skipped="false"/>
+    </Section>
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="Fixture" tags="[Counter]" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="37">
+    <OverallResult success="true" skips="0"/>
+  </TestCase>
+  <TestCase name="Failing" tags="[Counter]" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="43">
+    <Expression success="false" type="CHECK" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="45">
+      <Original>
+        c.Increment() == 2
+      </Original>
+      <Expanded>
+        1 == 2
+      </Expanded>
+    </Expression>
+    <OverallResult success="false" skips="0"/>
+  </TestCase>
+  <TestCase name="Skipped" tags="[Counter]" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="49">
+    <Skip filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="50">
+      Reset isn't tested yet.
+    </Skip>
+    <OverallResult success="true" skips="1"/>
+  </TestCase>
+  <TestCase name="Exception" tags="[Counter]" filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="54">
+    <Exception filename="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Cpp/Catch2/test/Counter.test.cpp" line="54">
+      Counter underflow.
+    </Exception>
+    <OverallResult success="false" skips="0"/>
+  </TestCase>
+  <OverallResults successes="9" failures="2" expectedFailures="0" skips="1"/>
+  <OverallResultsCases successes="3" failures="2" expectedFailures="0" skips="1"/>
+</Catch2TestRun>
