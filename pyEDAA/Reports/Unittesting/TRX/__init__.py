@@ -255,9 +255,10 @@ class UnitTest(metaclass=ExtendedType, slots=True):
 	@readonly
 	def ClassName(self) -> str:
 		"""
-		Read-only property to access the fully qualified name of the test class (:attr:`_className`).
+		Read-only property to access the fully qualified name of the test class (:attr:`_className`), e.g.
+		``MyLibrary.Tests.CalculatorTests``.
 
-		:returns: The test class' name, e.g. ``MyLibrary.Tests.CalculatorTests``.
+		:returns: The test class' name.
 		"""
 		return self._className
 
