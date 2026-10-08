@@ -74,6 +74,7 @@ from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
 from pyTooling.MetaClasses       import ExtendedType
 from pyTooling.Stopwatch         import Stopwatch
+from pyTooling.Versioning        import SemanticVersion
 
 from pyEDAA.Reports              import Resources
 from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary
@@ -333,8 +334,8 @@ class DataFile(metaclass=ExtendedType, slots=True):
 	"""
 
 	_path:                    _Path              #: Path of the data file, as gcov was called with it.
-	_formatVersion:           str                #: Version of the report format.
-	_gccVersion:              str                #: Version of GCC.
+	_formatVersion:           int                #: Version of the report format.
+	_gccVersion:              SemanticVersion    #: Version of GCC.
 	_currentWorkingDirectory: Nullable[_Path]    #: The directory the compiler ran in, if the report says.
 	_files:                   dict[_Path, File]  #: The source files, by path.
 
@@ -345,8 +346,8 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		:param record: The JSON object of the data file: a report's root object.
 		"""
 		self._path =                    Path(record["data_file"].replace("\\", "/"))
-		self._formatVersion =           record["format_version"]
-		self._gccVersion =              record["gcc_version"]
+		self._formatVersion =           int(record["format_version"])
+		self._gccVersion =              SemanticVersion.Parse(record["gcc_version"].split(" ", 1)[0])
 		self._currentWorkingDirectory = None
 		self._files =                   {}
 
@@ -367,18 +368,23 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		return self._path
 
 	@readonly
-	def FormatVersion(self) -> str:
+	def FormatVersion(self) -> int:
 		"""
 		Read-only property to access the version of the report format (:attr:`_formatVersion`).
 
-		:returns: The version, ``"1"`` or ``"2"``.
+		gcov states it as a string, e.g. ``"2"``.
+
+		:returns: The version, ``1`` or ``2``.
 		"""
 		return self._formatVersion
 
 	@readonly
-	def GCCVersion(self) -> str:
+	def GCCVersion(self) -> SemanticVersion:
 		"""
 		Read-only property to access the version of GCC (:attr:`_gccVersion`).
+
+		A development build of GCC states its date and phase behind the version, e.g. ``15.0.1 20250418 (experimental)``;
+		they aren't kept.
 
 		:returns: The version, e.g. ``14.2.0``.
 		"""

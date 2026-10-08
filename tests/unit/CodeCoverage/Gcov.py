@@ -38,6 +38,7 @@ from typing                           import Any
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, Function, LineCoverageStatus, SourceFile
 from pyEDAA.Reports.CodeCoverage.Gcov import Document
 from pyTooling.Testing                import Testcase
+from pyTooling.Versioning             import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -84,7 +85,8 @@ class FormatModel(Testcase):
 
 		self.assertEqual(["Statistics.c", "Main.cpp"], [dataFile.Path.as_posix() for dataFile in report.DataFiles])
 		main = report.DataFiles[1]
-		self.assertEqual(("2", "14.2.0"), (main.FormatVersion, main.GCCVersion))
+		self.assertEqual((2, "14.2.0"), (main.FormatVersion, main.GCCVersion))
+		self.assertIsInstance(main.GCCVersion, SemanticVersion)
 		self.assertTrue(main.CurrentWorkingDirectory.is_absolute())
 		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(main.Files))
 
@@ -117,6 +119,15 @@ class FormatModel(Testcase):
 
 		self.assertEqual(Path("Main.cpp"), dataFile.Path)
 		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(dataFile.Files))
+
+	def test_GCCVersion_Development(self) -> None:
+		"""A development build of GCC states its date and phase behind the version."""
+		main = _stream()[1]
+		main["gcc_version"] = "15.0.1 20250418 (experimental)"
+		with TemporaryDirectory() as directory:
+			dataFile, = Document(_write(directory, dumps(main)), analyzeAndConvert=True).DataFiles
+
+		self.assertEqual("15.0.1", dataFile.GCCVersion)
 
 	def test_Backslashes(self) -> None:
 		"""The backslashes of a report written on Windows separate directories."""
