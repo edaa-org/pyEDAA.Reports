@@ -105,7 +105,7 @@ class Summary(metaclass=ExtendedType, slots=True):
 	_percentCovered:     float          #: Coverage of lines and branches, in percent.
 	_branchCount:        Nullable[int]  #: Number of branches, if branch coverage was measured.
 	_coveredBranchCount: Nullable[int]  #: Number of taken branches, if branch coverage was measured.
-	_partialBranchCount: Nullable[int]  #: Number of partially covered lines, if branch coverage was measured.
+	_partialBranchCount: Nullable[int]  #: Number of branches never taken from executed lines, if branches were measured.
 
 	def __init__(self, summary: dict[str, Any]) -> None:
 		"""
@@ -190,10 +190,10 @@ class Summary(metaclass=ExtendedType, slots=True):
 	@readonly
 	def PartialBranchCount(self) -> Nullable[int]:
 		"""
-		Read-only property to access the number of partially covered lines (:attr:`_partialBranchCount`).
+		Read-only property to access the number of branches never taken from executed lines (:attr:`_partialBranchCount`).
 
-		:returns: The number of lines, which ran without taking all branches, or ``None`` if branch coverage wasn't
-		          measured.
+		:returns: The number of branches, which were never taken although their line ran, or ``None`` if branch coverage
+		          wasn't measured.
 		"""
 		return self._partialBranchCount
 

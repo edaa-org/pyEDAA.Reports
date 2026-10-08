@@ -112,12 +112,17 @@ class Conversion(Testcase):
 		pairs = [(summary, report.Totals)]
 		pairs.extend((file, report.Files[file.Path].Summary) for file in summary.IterateFiles())
 		for entity, stated in pairs:
+			files = list(summary.IterateFiles()) if entity is summary else [entity]
+			partialBranches = sum(
+				1 for file in files for line in file.IterateLines() if line.Status is not LineCoverageStatus.Uncovered
+				for branch in line.Branches if branch.Status is LineCoverageStatus.Uncovered
+			)
 			with self.subTest(entity=entity.Path.as_posix()):
 				self.assertEqual(
 					(stated.LineCount, stated.CoveredLineCount, stated.ExcludedLineCount, stated.BranchCount,
 					 stated.CoveredBranchCount, stated.PartialBranchCount),
 					(entity.TotalLines, entity.CoveredLines, entity.ExcludedLines, entity.TotalBranches,
-					 entity.CoveredBranches, entity.PartialLines)
+					 entity.CoveredBranches, partialBranches)
 				)
 				self.assertAlmostEqual(stated.PercentCovered, entity.Coverage * 100)
 
