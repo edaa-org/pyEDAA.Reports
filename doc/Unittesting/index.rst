@@ -177,9 +177,8 @@ Visual Studio and ``dotnet test`` (VSTest) write a test run's results as TRX fil
   The run's outcome and ``<Counters>`` (``total``, ``executed``, ``passed``, ``failed``, ``notExecuted``, ...), the
   run's output and the attachments of data collectors, e.g. code coverage reports.
 
-The file is read by :class:`pyEDAA.Reports.Unittesting.TRX.Document`: the test run, its test lists and its summary,
-see :ref:`UNITTEST/SpecificDataModel/TRX`. The counters contradict the results. Results and test definitions aren't read
-yet.
+The file is read by :class:`pyEDAA.Reports.Unittesting.TRX.Document` and converted into the unified data model, see
+:ref:`UNITTEST/SpecificDataModel/TRX`. The counters contradict the results; the conversion counts the results.
 
 
 .. _UNITTEST/FileFormats/OSVVM:
@@ -294,7 +293,8 @@ dotnet test (VSTest)
 
 ``--logger trx``
   A :ref:`TRX file <UNITTEST/FileFormats/TRX>`, Visual Studio's own format, read by
-  :class:`pyEDAA.Reports.Unittesting.TRX.Document`. It keeps a skipped test's reason.
+  :class:`pyEDAA.Reports.Unittesting.TRX.Document`. It keeps a skipped test's reason; the test adapters name tests
+  differently, see :ref:`UNITTEST/SpecificDataModel/TRX/Quirks`.
 
 ``--logger junit`` (NuGet package ``JunitXml.TestLogger``)
   A ``<testsuites>`` root without attributes, holding one ``<testsuite>`` per test assembly, named after the
