@@ -1,0 +1,198 @@
+<?xml version="1.0" ?>
+<!DOCTYPE coverage SYSTEM "https://cobertura.sourceforge.net/xml/coverage-04.dtd">
+<coverage branch-rate="0" branches-covered="0" branches-valid="0" complexity="0" line-rate="0.8405797101449275" lines-covered="58" lines-valid="69" timestamp="1791457535" version="2.0.3">
+    <sources>
+        <source>/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Rust/Cargo</source>
+    </sources>
+    <packages>
+        <package line-rate="0.8405797101449275" branch-rate="0" name="src" complexity="0">
+            <classes>
+                <class branch-rate="0" complexity="0" filename="src/lib.rs" line-rate="0.8405797101449275" name="src.lib.rs">
+                    <methods>
+                        <method name="&lt;counter::Counter&gt;::try_decrement" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="6" number="42" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::new" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="10" number="15" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::reset" signature="" complexity="0" line-rate="0" branch-rate="0">
+                            <lines>
+                                <line hits="0" number="52" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::value" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="5" number="20" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::decrement" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="4" number="34" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::increment" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="2" number="25" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::try_decrement" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="5" number="42" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::new" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="2" number="15" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::reset" signature="" complexity="0" line-rate="0" branch-rate="0">
+                            <lines>
+                                <line hits="0" number="52" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::value" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="20" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::decrement" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="3" number="34" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::increment" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="3" number="25" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::not_panicking" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="119" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::failing_result" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="105" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::decrement_underflow" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="84" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::try_decrement_underflow" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="89" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::init" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="62" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::reset" signature="" complexity="0" line-rate="0" branch-rate="0">
+                            <lines>
+                                <line hits="0" number="126" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::failing" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="98" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::decrement" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="76" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::increment" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="69" branch="false"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::panicking" signature="" complexity="0" line-rate="1" branch-rate="1">
+                            <lines>
+                                <line hits="1" number="112" branch="false"/>
+                            </lines>
+                        </method>
+                    </methods>
+                    <lines>
+                        <line branch="false" hits="12" number="15"/>
+                        <line branch="false" hits="12" number="16"/>
+                        <line branch="false" hits="12" number="17"/>
+                        <line branch="false" hits="6" number="20"/>
+                        <line branch="false" hits="6" number="21"/>
+                        <line branch="false" hits="6" number="22"/>
+                        <line branch="false" hits="5" number="25"/>
+                        <line branch="false" hits="5" number="26"/>
+                        <line branch="false" hits="5" number="27"/>
+                        <line branch="false" hits="5" number="28"/>
+                        <line branch="false" hits="5" number="29"/>
+                        <line branch="false" hits="7" number="34"/>
+                        <line branch="false" hits="7" number="35"/>
+                        <line branch="false" hits="5" number="36"/>
+                        <line branch="false" hits="2" number="37"/>
+                        <line branch="false" hits="5" number="39"/>
+                        <line branch="false" hits="11" number="42"/>
+                        <line branch="false" hits="11" number="43"/>
+                        <line branch="false" hits="11" number="44"/>
+                        <line branch="false" hits="5" number="45"/>
+                        <line branch="false" hits="6" number="46"/>
+                        <line branch="false" hits="6" number="47"/>
+                        <line branch="false" hits="6" number="48"/>
+                        <line branch="false" hits="11" number="49"/>
+                        <line branch="false" hits="0" number="52"/>
+                        <line branch="false" hits="0" number="53"/>
+                        <line branch="false" hits="0" number="54"/>
+                        <line branch="false" hits="1" number="62"/>
+                        <line branch="false" hits="1" number="63"/>
+                        <line branch="false" hits="1" number="64"/>
+                        <line branch="false" hits="1" number="65"/>
+                        <line branch="false" hits="1" number="66"/>
+                        <line branch="false" hits="1" number="69"/>
+                        <line branch="false" hits="1" number="70"/>
+                        <line branch="false" hits="1" number="71"/>
+                        <line branch="false" hits="1" number="72"/>
+                        <line branch="false" hits="1" number="73"/>
+                        <line branch="false" hits="1" number="76"/>
+                        <line branch="false" hits="1" number="77"/>
+                        <line branch="false" hits="1" number="78"/>
+                        <line branch="false" hits="1" number="79"/>
+                        <line branch="false" hits="1" number="80"/>
+                        <line branch="false" hits="1" number="84"/>
+                        <line branch="false" hits="1" number="85"/>
+                        <line branch="false" hits="1" number="86"/>
+                        <line branch="false" hits="1" number="89"/>
+                        <line branch="false" hits="1" number="90"/>
+                        <line branch="false" hits="1" number="91"/>
+                        <line branch="false" hits="0" number="92"/>
+                        <line branch="false" hits="1" number="94"/>
+                        <line branch="false" hits="1" number="98"/>
+                        <line branch="false" hits="1" number="99"/>
+                        <line branch="false" hits="1" number="100"/>
+                        <line branch="false" hits="0" number="101"/>
+                        <line branch="false" hits="1" number="105"/>
+                        <line branch="false" hits="1" number="106"/>
+                        <line branch="false" hits="0" number="107"/>
+                        <line branch="false" hits="1" number="108"/>
+                        <line branch="false" hits="1" number="112"/>
+                        <line branch="false" hits="1" number="113"/>
+                        <line branch="false" hits="1" number="114"/>
+                        <line branch="false" hits="1" number="119"/>
+                        <line branch="false" hits="1" number="120"/>
+                        <line branch="false" hits="1" number="121"/>
+                        <line branch="false" hits="0" number="126"/>
+                        <line branch="false" hits="0" number="127"/>
+                        <line branch="false" hits="0" number="128"/>
+                        <line branch="false" hits="0" number="129"/>
+                        <line branch="false" hits="0" number="130"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+    </packages>
+</coverage>

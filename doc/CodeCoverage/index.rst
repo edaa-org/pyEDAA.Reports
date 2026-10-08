@@ -243,6 +243,12 @@ any language they measure. :class:`pyEDAA.Reports.CodeCoverage.Cobertura.Documen
 * Packages, classes and methods become units; a package's name is split at ``.`` into nested packages.
 * The format has no excluded lines.
 
+Rust's coverage tools write Cobertura XML too, as the pipeline job ``Rust-Cargo`` shows: cargo-llvm-cov
+(``cargo llvm-cov report --cobertura``) and grcov (``--output-types cobertura``). Both state ``complexity`` on a
+``<method>``, which ``coverage-04.dtd`` doesn't declare, so only :ref:`Any-Cobertura.xsd <SCHEMAS/Any-Cobertura>`
+accepts them. A library's function is compiled into the unit tests' binary and into each integration test's binary,
+so it is a ``<method>`` per binary, each with the same name and an empty signature.
+
 .. code-block:: Python
 
    from pathlib import Path

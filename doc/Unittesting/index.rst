@@ -77,6 +77,7 @@ rather stuffed their language constructs into the concepts and limitations of th
 * ✅ :ref:`CTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/CTest>`
 * ✅ :ref:`GoogleTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/GoogleTest>`
 * 🚧 Jenkins JUnit (planned)
+* 🚧 nextest JUnit (planned)
 * ✅ :ref:`pyTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/PyTest>`
 
 
@@ -162,6 +163,39 @@ The YAML files are created when OSVVM-based testbenches are executed with OSVVM'
 
 Frameworks / Tools
 ******************
+
+.. _UNITTEST/Tool/nextest:
+
+cargo-nextest
+=============
+
+* https://github.com/nextest-rs/nextest
+
+Rust's test harness (``libtest``, run by ``cargo test``) writes JUnit XML only on a nightly compiler
+(``-Z unstable-options --format junit``), one document per test binary on standard output. The test runner
+cargo-nextest writes one JUnit XML report per run, if the profile in :file:`.config/nextest.toml` names it, e.g.
+``[profile.ci.junit]`` with ``path = "junit.xml"``; ``cargo nextest run --profile ci`` writes it to
+:file:`target/nextest/ci/junit.xml`.
+
+The report has a ``<testsuites>`` root named ``nextest-run`` with a ``uuid`` attribute, and a ``<testsuite>`` per test
+binary, named after the crate - ``counter`` for the unit tests in the library, ``counter::sequence`` for the
+integration test :file:`tests/sequence.rs`. A ``<testcase>``'s name is the test's path in its crate, e.g.
+``tests::increment``, its ``classname`` the ``<testsuite>``'s name. Each ``<testcase>`` carries its start time in a
+``timestamp`` attribute, and the test's output in ``<system-out>`` and ``<system-err>``. A failed assertion, a panic,
+an ``Err`` returned by a test and a ``#[should_panic]`` test that doesn't panic are each a ``<failure>`` of type
+``test failure with exit code 101``. Its message is the first line of the test's error output, e.g.
+``thread 'tests::failing' (554412) panicked at src/lib.rs:100:9`` or ``Error: Underflow``.
+
+Unlike Ant JUnit4, a test marked ``#[ignore]`` isn't in the report at all, the ``<testsuite>`` has neither
+``timestamp``, ``time`` nor ``hostname``, and the test cases are listed in the order they finished. Doc-tests aren't
+run by cargo-nextest. Except for ``uuid`` on ``<testsuites>`` and ``timestamp`` on ``<testcase>``, the report is
+:ref:`Any JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit>`; no dialect reads it yet.
+
+The example in :file:`examples/Rust/Cargo` is run by the pipeline job ``Rust-Cargo``. It measures the code coverage by
+Rust's source-based coverage (``-C instrument-coverage``) with cargo-llvm-cov, and writes it as LLVM JSON
+(``llvm-cov export`` format), lcov tracefile and Cobertura XML by cargo-llvm-cov, and as lcov tracefile, Cobertura XML
+and covdir JSON by grcov.
+
 
 .. _UNITTEST/Tool/Catch2:
 

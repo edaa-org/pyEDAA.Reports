@@ -30,6 +30,57 @@ jobs:
   Example-Python:
     uses: ./.github/workflows/Example-Python.yml
 
+  Rust-Cargo:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: ⏬ Checkout repository
+        uses: actions/checkout@v7
+      - name: 🦀 Set up Rust 1.99.0 with LLVM tools
+        uses: dtolnay/rust-toolchain@1.99.0
+        with:
+          components: llvm-tools-preview
+      - name: 🔧 Install cargo-nextest, cargo-llvm-cov and grcov
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest@0.9.148,cargo-llvm-cov@0.9.1,grcov@0.10.7
+      - name: ✅ Run unit and integration tests by cargo-nextest, instrumented for code coverage
+        run: |
+          cd examples/Rust/Cargo
+
+          exitCode=0
+          cargo llvm-cov nextest --locked --no-report --profile ci || exitCode=$?
+          if [[ ${exitCode} -ne 100 ]]; then
+            printf -- '::error title=%s::%s\n' "cargo-nextest" "Expected exit code 100 (failed tests), got ${exitCode}."
+            exit 1
+          fi
+
+          mkdir -p reports
+          cp target/nextest/ci/junit.xml reports/nextest-junit.xml
+      - name: 📊 Write code coverage as LLVM JSON, lcov tracefile and Cobertura XML (cargo-llvm-cov)
+        run: |
+          cd examples/Rust/Cargo
+
+          cargo llvm-cov report --json      --output-path reports/llvm-cov.json
+          cargo llvm-cov report --lcov      --output-path reports/llvm-cov.info
+          cargo llvm-cov report --cobertura --output-path reports/llvm-cov-cobertura.xml
+      - name: 📊 Write code coverage as lcov tracefile, Cobertura XML and covdir JSON (grcov)
+        run: |
+          cd examples/Rust/Cargo
+
+          # grcov reads the raw profiles of the test run, not the '.profdata' file merged by cargo-llvm-cov.
+          for output in lcov:grcov.info cobertura-pretty:grcov-cobertura.xml covdir:grcov-covdir.json; do
+            grcov target/llvm-cov-target/*.profraw --binary-path target/llvm-cov-target/debug/deps --source-dir . \
+              --llvm --branch --ignore-not-existing --keep-only 'src/*' \
+              --output-types "${output%%:*}" --output-path "reports/${output#*:}"
+          done
+      - name: List generated reports
+        run: ls -lAh examples/Rust/Cargo/reports/
+      - name: 📤 Upload JUnit XML and coverage files as artifact
+        uses: pyTooling/upload-artifact@v7
+        with:
+          name: Rust-Cargo
+          path: examples/Rust/Cargo/reports/*
+
   UnitTestingParams:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@r8
     with:
@@ -105,6 +156,7 @@ jobs:
       - Example-Java
       - Example-Cpp
       - Example-Python
+      - Rust-Cargo
     with:
       jobs:                 ${{ needs.AppTestingParams.outputs.python_jobs }}
       wheel:                ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
