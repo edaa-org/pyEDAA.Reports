@@ -897,7 +897,7 @@ class Document(Report, cc_Document):
 			self._totals =         Summary.Parse(self._jsonDocument["totals"])
 
 			for name, record in self._jsonDocument["files"].items():
-				file =                   File.Parse(name, record)
+				file =                    File.Parse(name, record)
 				self._files[file._path] = file
 
 		self._conversionDuration = sw.Duration
