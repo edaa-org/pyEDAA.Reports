@@ -31,14 +31,14 @@
 """
 The records of GCC's gcov JSON format below a file: its functions and lines.
 """
-from __future__                       import annotations
+from __future__                         import annotations
 
-from collections.abc                  import Iterable
-from typing                           import TYPE_CHECKING, Any, Optional as Nullable, Self
+from collections.abc                    import Iterable
+from typing                             import TYPE_CHECKING, Any, Optional as Nullable, Self
 
-from pyTooling.Common                 import getFullyQualifiedName
-from pyTooling.Decorators             import export, readonly
-from pyTooling.MetaClasses            import ExtendedType
+from pyTooling.Common                   import getFullyQualifiedName
+from pyTooling.Decorators               import export, readonly
+from pyTooling.MetaClasses              import ExtendedType
 
 if TYPE_CHECKING:
 	from pyEDAA.Reports.CodeCoverage.Gcov import File
