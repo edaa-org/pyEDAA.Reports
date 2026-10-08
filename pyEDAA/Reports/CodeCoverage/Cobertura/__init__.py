@@ -90,7 +90,6 @@ writes following the DTD:
 """
 from __future__                                    import annotations
 
-from collections.abc                               import Iterable
 from pathlib                                       import Path
 from re                                            import compile as re_compile
 from time                                          import time_ns
@@ -108,10 +107,8 @@ from pyTooling.Stopwatch                           import Stopwatch
 from pyEDAA.Reports                                import Resources, __version__
 from pyEDAA.Reports.CodeCoverage                   import Branch as cc_Branch, Class as cc_Class, CodeCoverageError
 from pyEDAA.Reports.CodeCoverage                   import CoverageSummary, Document as cc_Document, File as cc_File
-from pyEDAA.Reports.CodeCoverage                   import Function as cc_Function, Line as cc_Line, LineCoverageStatus
-from pyEDAA.Reports.CodeCoverage                   import Method as cc_Method, Module as cc_Module
-from pyEDAA.Reports.CodeCoverage                   import Package as cc_Package, SourceFile as cc_SourceFile
-from pyEDAA.Reports.CodeCoverage                   import Unit as cc_Unit
+from pyEDAA.Reports.CodeCoverage                   import Line as cc_Line, LineCoverageStatus, Method as cc_Method
+from pyEDAA.Reports.CodeCoverage                   import Package as cc_Package, Unit as cc_Unit
 from pyEDAA.Reports.CodeCoverage.Cobertura.Records import Class, Condition, Element, Line, Method, Package
 
 
@@ -347,161 +344,15 @@ class Document(cc_Document, Coverage):
 		document._timestamp =  str(time_ns() // 1_000_000)
 		document._complexity = 0.0
 		document._sources =    [directory.as_posix() for directory in coverageSummary._sourceDirectories]
+		document._packages =   Package._FromFiles(coverageSummary.IterateFiles())
 
-		packages: dict[str, Package] = {}
-		for file in coverageSummary.IterateFiles():
-			cls._FromFile(file, packages)
-
-		document._packages = [packages[name] for name in sorted(packages)]
-		for package in document._packages:
-			package._lineRate, package._branchRate = cls._Rates(cls._CountLines(
-				line for klass in package._classes for line in klass._lines.values()
-			))
-
-		counts = cls._CountLines(
+		counts = Element._CountLines(
 			line for package in document._packages for klass in package._classes for line in klass._lines.values()
 		)
 		document._linesValid, document._linesCovered, document._branchesValid, document._branchesCovered = counts
-		document._lineRate, document._branchRate = cls._Rates(counts)
+		document._lineRate, document._branchRate = Element._Rates(counts)
 
 		return document
-
-	@classmethod
-	def _FromFile(cls, file: cc_File, packages: dict[str, Package]) -> None:
-		"""
-		Convert a file of the common model to classes, and add them to their packages.
-
-		:param file:     The file of the common model.
-		:param packages: The packages, by name; a missing package is added.
-		"""
-		filename = file.Path.as_posix()
-		directories = file.Path.parent.parts
-		directoryPackage = ".".join(directories) if len(directories) > 0 else "."
-
-		fileClasses: list[Class] = []
-
-		def addClass(packageName: str, className: str) -> Class:
-			"""
-			Nested function creating a class of this file, and adding it to its package.
-
-			:param packageName: Name of the package.
-			:param className:   Name of the class.
-			:returns:           The class.
-			"""
-			if (package := packages.get(packageName)) is None:
-				package = packages[packageName] = Package(packageName, complexity=0.0)
-
-			klass = Class(className, filename, complexity=0.0)
-			package._classes.append(klass)
-			fileClasses.append(klass)
-			return klass
-
-		classes: dict[cc_Unit, Class] = {}
-		spanned: list[cc_Unit] = []
-		for unit in file._units:
-			if not isinstance(unit, (cc_SourceFile, cc_Module, cc_Class)):
-				continue
-
-			chain: list[cc_Unit] = []
-			element: cc_Unit | CoverageSummary = unit
-			while isinstance(element, cc_Unit):
-				chain.insert(0, element)
-				element = element._parent
-
-			packageCount = 0
-			while isinstance(chain[packageCount], cc_Package):
-				packageCount += 1
-
-			classes[unit] = addClass(
-				".".join(part._name for part in chain[:packageCount]) if packageCount > 0 else directoryPackage,
-				".".join(part._name for part in chain[packageCount:])
-			)
-			if unit._startLine is not None and unit._endLine is not None:
-				spanned.append(unit)
-
-		# outer units first: an inner unit overwrites the owner of its lines
-		owners: dict[int, Class] = {}
-		for unit in sorted(spanned, key=lambda unit: (unit._startLine._lineNumber, -unit._endLine._lineNumber)):
-			for line in file.IterateLines(unit._startLine, unit._endLine):
-				owners[line._lineNumber] = classes[unit]
-
-		fallback: Nullable[Class] = None
-		lines: dict[int, Line] = {}
-		for commonLine in file.IterateLines():
-			if commonLine._status is LineCoverageStatus.Excluded:
-				continue
-
-			line = lines[commonLine._lineNumber] = Line.FromLine(commonLine)
-			if (klass := owners.get(line._number)) is None:
-				if fallback is None:
-					fallback = addClass(directoryPackage, file._name)
-				klass = fallback
-
-			klass._lines[line._number] = line
-
-		for unit in file._units:
-			if not isinstance(unit, (cc_Function, cc_Method)):
-				continue
-
-			names = [unit._name]
-			element = unit._parent
-			while isinstance(element, cc_Unit) and element not in classes:
-				if not isinstance(element, cc_Package):
-					names.insert(0, element._name)
-				element = element._parent
-
-			if isinstance(element, cc_Unit):
-				klass = classes[element]
-			else:
-				if fallback is None:
-					fallback = addClass(directoryPackage, file._name)
-				klass = fallback
-
-			method = Method(".".join(names))
-			if unit._startLine is not None and unit._endLine is not None:
-				for commonLine in file.IterateLines(unit._startLine, unit._endLine):
-					if (line := lines.get(commonLine._lineNumber)) is not None:
-						method._lines[line._number] = line
-
-			method._lineRate, method._branchRate = cls._Rates(cls._CountLines(method._lines.values()))
-			klass._methods[method._name] = method
-
-		for klass in fileClasses:
-			klass._lineRate, klass._branchRate = cls._Rates(cls._CountLines(klass._lines.values()))
-
-	@staticmethod
-	def _CountLines(lines: Iterable[Line]) -> tuple[int, int, int, int]:
-		"""
-		Count lines and their branches.
-
-		:param lines: The lines.
-		:returns:     The number of lines, of lines, which ran, of branches, and of branches, which were taken.
-		"""
-		linesValid = linesCovered = branchesValid = branchesCovered = 0
-		for line in lines:
-			linesValid += 1
-			if line._hits > 0:
-				linesCovered += 1
-
-			if line._conditionCoverage is not None:
-				branchesCovered += line._conditionCoverage[0]
-				branchesValid +=   line._conditionCoverage[1]
-
-		return linesValid, linesCovered, branchesValid, branchesCovered
-
-	@staticmethod
-	def _Rates(counts: tuple[int, int, int, int]) -> tuple[float, float]:
-		"""
-		Compute the line and branch rates from the counts of :meth:`_CountLines`.
-
-		:param counts: The number of lines, of lines, which ran, of branches, and of branches, which were taken.
-		:returns:      The line and the branch rate in range 0.0..1.0; ``1.0`` if there is no line or no branch.
-		"""
-		linesValid, linesCovered, branchesValid, branchesCovered = counts
-		return (
-			1.0 if linesValid == 0 else linesCovered / linesValid,
-			1.0 if branchesValid == 0 else branchesCovered / branchesValid
-		)
 
 	def Analyze(self) -> None:
 		"""
@@ -754,56 +605,15 @@ class Document(cc_Document, Coverage):
 			ex.add_note(f"Call 'Document.Generate(overwrite=True)' to replace it.")
 			raise ex
 
-		def addRates(xmlElement: _Element, element: Element | Coverage, lines: Iterable[Line]) -> None:
-			"""
-			Nested function adding the line and branch rate of an element: as stated, or computed from its lines.
-
-			:param xmlElement: The XML element.
-			:param element:    The element of the format's model.
-			:param lines:      The element's lines.
-			"""
-			lineRate, branchRate = element._lineRate, element._branchRate
-			if lineRate is None or branchRate is None:
-				computedLineRate, computedBranchRate = self._Rates(self._CountLines(lines))
-				lineRate =   computedLineRate if lineRate is None else lineRate
-				branchRate = computedBranchRate if branchRate is None else branchRate
-
-			xmlElement.attrib["line-rate"] =   str(round(lineRate, 4))
-			xmlElement.attrib["branch-rate"] = str(round(branchRate, 4))
-
-		def addLines(parentElement: _Element, lines: Iterable[Line]) -> None:
-			"""
-			Nested function adding a ``<lines>`` element and a ``<line>`` element per line.
-
-			:param parentElement: The XML element of the class or method.
-			:param lines:         The lines.
-			"""
-			linesElement = SubElement(parentElement, "lines")
-			for line in lines:
-				lineElement = SubElement(linesElement, "line")
-				lineElement.attrib["number"] = str(line._number)
-				lineElement.attrib["hits"] =   str(line._hits)
-				if line._branch:
-					lineElement.attrib["branch"] = "true"
-
-				if line._conditionCoverage is not None:
-					covered, total = line._conditionCoverage
-					percent = 100 if total == 0 else 100 * covered // total
-					lineElement.attrib["condition-coverage"] = f"{percent}% ({covered}/{total})"
-
-				if len(line._conditions) > 0:
-					conditionsElement = SubElement(lineElement, "conditions")
-					for condition in line._conditions:
-						conditionElement = SubElement(conditionsElement, "condition")
-						conditionElement.attrib["number"] =   str(condition._number)
-						conditionElement.attrib["type"] =     condition._type
-						conditionElement.attrib["coverage"] = condition._coverage
-
-		allLines = [line for package in self._packages for klass in package._classes for line in klass._lines.values()]
-		linesValid, linesCovered, branchesValid, branchesCovered = self._CountLines(allLines)
+		counts = Element._CountLines(
+			line for package in self._packages for klass in package._classes for line in klass._lines.values()
+		)
+		linesValid, linesCovered, branchesValid, branchesCovered = counts
+		lineRate, branchRate = Element._Rates(counts)
 
 		rootElement = XMLElement("coverage")
-		addRates(rootElement, self, allLines)
+		rootElement.attrib["line-rate"] =   str(round(lineRate if self._lineRate is None else self._lineRate, 4))
+		rootElement.attrib["branch-rate"] = str(round(branchRate if self._branchRate is None else self._branchRate, 4))
 		for name, stated, computed in (
 			("lines-covered",    self._linesCovered,    linesCovered),
 			("lines-valid",      self._linesValid,      linesValid),
@@ -821,28 +631,7 @@ class Document(cc_Document, Coverage):
 
 		packagesElement = SubElement(rootElement, "packages")
 		for package in self._packages:
-			packageElement = SubElement(packagesElement, "package")
-			packageElement.attrib["name"] = package._name
-			addRates(packageElement, package, [line for klass in package._classes for line in klass._lines.values()])
-			packageElement.attrib["complexity"] = str(0 if package._complexity is None else package._complexity)
-
-			classesElement = SubElement(packageElement, "classes")
-			for klass in package._classes:
-				classElement = SubElement(classesElement, "class")
-				classElement.attrib["name"] =     klass._name
-				classElement.attrib["filename"] = klass._filename
-				addRates(classElement, klass, klass._lines.values())
-				classElement.attrib["complexity"] = str(0 if klass._complexity is None else klass._complexity)
-
-				methodsElement = SubElement(classElement, "methods")
-				for method in klass._methods.values():
-					methodElement = SubElement(methodsElement, "method")
-					methodElement.attrib["name"] =      method._name
-					methodElement.attrib["signature"] = "" if method._signature is None else method._signature
-					addRates(methodElement, method, method._lines.values())
-					addLines(methodElement, method._lines.values())
-
-				addLines(classElement, klass._lines.values())
+			packagesElement.append(package.Generate())
 
 		document = ElementTree(rootElement)
 		document.docinfo.system_url = "http://cobertura.sourceforge.net/xml/coverage-04.dtd"

@@ -33,13 +33,17 @@ The elements of the Cobertura XML format below ``<coverage>``: its packages, cla
 """
 from __future__                  import annotations
 
+from collections.abc             import Iterable
 from typing                      import Optional as Nullable
 
+from lxml.etree                  import Element as XMLElement, SubElement, _Element
 from pyTooling.Common            import getFullyQualifiedName
 from pyTooling.Decorators        import export, readonly
 from pyTooling.MetaClasses       import ExtendedType
 
-from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus
+from pyEDAA.Reports.CodeCoverage import Class as cc_Class, CoverageSummary, File as cc_File, Function as cc_Function
+from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus, Method as cc_Method, Module as cc_Module
+from pyEDAA.Reports.CodeCoverage import Package as cc_Package, SourceFile as cc_SourceFile, Unit as cc_Unit
 
 
 @export
@@ -90,6 +94,18 @@ class Condition(metaclass=ExtendedType, slots=True):
 		:returns: The coverage, e.g. ``50%``.
 		"""
 		return self._coverage
+
+	def Generate(self) -> _Element:
+		"""
+		Generate the condition's ``<condition>`` element.
+
+		:returns: The ``<condition>`` element.
+		"""
+		conditionElement = XMLElement("condition")
+		conditionElement.attrib["number"] =   str(self._number)
+		conditionElement.attrib["type"] =     self._type
+		conditionElement.attrib["coverage"] = self._coverage
+		return conditionElement
 
 
 @export
@@ -206,6 +222,30 @@ class Line(metaclass=ExtendedType, slots=True):
 		covered = sum(1 for branch in line._branches if branch._status is LineCoverageStatus.Covered)
 		return cls(line._lineNumber, hits, True, (covered, len(line._branches)))
 
+	def Generate(self) -> _Element:
+		"""
+		Generate the line's ``<line>`` element with its conditions.
+
+		:returns: The ``<line>`` element.
+		"""
+		lineElement = XMLElement("line")
+		lineElement.attrib["number"] = str(self._number)
+		lineElement.attrib["hits"] =   str(self._hits)
+		if self._branch:
+			lineElement.attrib["branch"] = "true"
+
+		if self._conditionCoverage is not None:
+			covered, total = self._conditionCoverage
+			percent = 100 if total == 0 else 100 * covered // total
+			lineElement.attrib["condition-coverage"] = f"{percent}% ({covered}/{total})"
+
+		if len(self._conditions) > 0:
+			conditionsElement = SubElement(lineElement, "conditions")
+			for condition in self._conditions:
+				conditionsElement.append(condition.Generate())
+
+		return lineElement
+
 
 @export
 class Element(metaclass=ExtendedType, slots=True):
@@ -256,6 +296,56 @@ class Element(metaclass=ExtendedType, slots=True):
 		"""
 		return self._branchRate
 
+	@staticmethod
+	def _CountLines(lines: Iterable[Line]) -> tuple[int, int, int, int]:
+		"""
+		Count lines and their branches.
+
+		:param lines: The lines.
+		:returns:     The number of lines, of lines, which ran, of branches, and of branches, which were taken.
+		"""
+		linesValid = linesCovered = branchesValid = branchesCovered = 0
+		for line in lines:
+			linesValid += 1
+			if line._hits > 0:
+				linesCovered += 1
+
+			if line._conditionCoverage is not None:
+				branchesCovered += line._conditionCoverage[0]
+				branchesValid +=   line._conditionCoverage[1]
+
+		return linesValid, linesCovered, branchesValid, branchesCovered
+
+	@staticmethod
+	def _Rates(counts: tuple[int, int, int, int]) -> tuple[float, float]:
+		"""
+		Compute the line and branch rates from the counts of :meth:`_CountLines`.
+
+		:param counts: The number of lines, of lines, which ran, of branches, and of branches, which were taken.
+		:returns:      The line and the branch rate in range 0.0..1.0; ``1.0`` if there is no line or no branch.
+		"""
+		linesValid, linesCovered, branchesValid, branchesCovered = counts
+		return (
+			1.0 if linesValid == 0 else linesCovered / linesValid,
+			1.0 if branchesValid == 0 else branchesCovered / branchesValid
+		)
+
+	def _GenerateRates(self, xmlElement: _Element, lines: Iterable[Line]) -> None:
+		"""
+		Add the line and branch rate to the element's XML element: as stated, or computed from its lines.
+
+		:param xmlElement: The element's XML element.
+		:param lines:      The element's lines.
+		"""
+		lineRate, branchRate = self._lineRate, self._branchRate
+		if lineRate is None or branchRate is None:
+			computedLineRate, computedBranchRate = self._Rates(self._CountLines(lines))
+			lineRate =   computedLineRate if lineRate is None else lineRate
+			branchRate = computedBranchRate if branchRate is None else branchRate
+
+		xmlElement.attrib["line-rate"] =   str(round(lineRate, 4))
+		xmlElement.attrib["branch-rate"] = str(round(branchRate, 4))
+
 
 @export
 class Method(Element):
@@ -303,6 +393,25 @@ class Method(Element):
 		:returns: The lines, by number.
 		"""
 		return self._lines
+
+	def Generate(self) -> _Element:
+		"""
+		Generate the method's ``<method>`` element with its lines.
+
+		A rate the method doesn't state is computed from its lines; a missing signature is written as empty text.
+
+		:returns: The ``<method>`` element.
+		"""
+		methodElement = XMLElement("method")
+		methodElement.attrib["name"] =      self._name
+		methodElement.attrib["signature"] = "" if self._signature is None else self._signature
+		self._GenerateRates(methodElement, self._lines.values())
+
+		linesElement = SubElement(methodElement, "lines")
+		for line in self._lines.values():
+			linesElement.append(line.Generate())
+
+		return methodElement
 
 
 @export
@@ -376,6 +485,133 @@ class Class(Element):
 		"""
 		return self._lines
 
+	@classmethod
+	def _FromFile(cls, file: cc_File, packages: dict[str, Package]) -> None:
+		"""
+		Convert a file of the common model to classes, and add them to their packages.
+
+		:param file:     The file of the common model.
+		:param packages: The packages, by name; a missing package is added.
+		"""
+		filename = file.Path.as_posix()
+		directories = file.Path.parent.parts
+		directoryPackage = ".".join(directories) if len(directories) > 0 else "."
+
+		fileClasses: list[Class] = []
+
+		def addClass(packageName: str, className: str) -> Class:
+			"""
+			Nested function creating a class of this file, and adding it to its package.
+
+			:param packageName: Name of the package.
+			:param className:   Name of the class.
+			:returns:           The class.
+			"""
+			if (package := packages.get(packageName)) is None:
+				package = packages[packageName] = Package(packageName, complexity=0.0)
+
+			klass = cls(className, filename, complexity=0.0)
+			package._classes.append(klass)
+			fileClasses.append(klass)
+			return klass
+
+		classes: dict[cc_Unit, Class] = {}
+		spanned: list[cc_Unit] = []
+		for unit in file._units:
+			if not isinstance(unit, (cc_SourceFile, cc_Module, cc_Class)):
+				continue
+
+			chain: list[cc_Unit] = []
+			element: cc_Unit | CoverageSummary = unit
+			while isinstance(element, cc_Unit):
+				chain.insert(0, element)
+				element = element._parent
+
+			packageCount = 0
+			while isinstance(chain[packageCount], cc_Package):
+				packageCount += 1
+
+			classes[unit] = addClass(
+				".".join(part._name for part in chain[:packageCount]) if packageCount > 0 else directoryPackage,
+				".".join(part._name for part in chain[packageCount:])
+			)
+			if unit._startLine is not None and unit._endLine is not None:
+				spanned.append(unit)
+
+		# outer units first: an inner unit overwrites the owner of its lines
+		owners: dict[int, Class] = {}
+		for unit in sorted(spanned, key=lambda unit: (unit._startLine._lineNumber, -unit._endLine._lineNumber)):
+			for line in file.IterateLines(unit._startLine, unit._endLine):
+				owners[line._lineNumber] = classes[unit]
+
+		fallback: Nullable[Class] = None
+		lines: dict[int, Line] = {}
+		for commonLine in file.IterateLines():
+			if commonLine._status is LineCoverageStatus.Excluded:
+				continue
+
+			line = lines[commonLine._lineNumber] = Line.FromLine(commonLine)
+			if (klass := owners.get(line._number)) is None:
+				if fallback is None:
+					fallback = addClass(directoryPackage, file._name)
+				klass = fallback
+
+			klass._lines[line._number] = line
+
+		for unit in file._units:
+			if not isinstance(unit, (cc_Function, cc_Method)):
+				continue
+
+			names = [unit._name]
+			element = unit._parent
+			while isinstance(element, cc_Unit) and element not in classes:
+				if not isinstance(element, cc_Package):
+					names.insert(0, element._name)
+				element = element._parent
+
+			if isinstance(element, cc_Unit):
+				klass = classes[element]
+			else:
+				if fallback is None:
+					fallback = addClass(directoryPackage, file._name)
+				klass = fallback
+
+			method = Method(".".join(names))
+			if unit._startLine is not None and unit._endLine is not None:
+				for commonLine in file.IterateLines(unit._startLine, unit._endLine):
+					if (line := lines.get(commonLine._lineNumber)) is not None:
+						method._lines[line._number] = line
+
+			method._lineRate, method._branchRate = cls._Rates(cls._CountLines(method._lines.values()))
+			klass._methods[method._name] = method
+
+		for klass in fileClasses:
+			klass._lineRate, klass._branchRate = cls._Rates(cls._CountLines(klass._lines.values()))
+
+	def Generate(self) -> _Element:
+		"""
+		Generate the class' ``<class>`` element with its methods and lines.
+
+		A rate the class doesn't state is computed from its lines; a missing complexity is written as ``0``.
+
+		:returns: The ``<class>`` element.
+		"""
+		classElement = XMLElement("class")
+		classElement.attrib["name"] =     self._name
+		classElement.attrib["filename"] = self._filename
+		self._GenerateRates(classElement, self._lines.values())
+		classElement.attrib["complexity"] = str(0 if self._complexity is None else self._complexity)
+
+		methodsElement = SubElement(classElement, "methods")
+		for method in self._methods.values():
+			methodsElement.append(method.Generate())
+
+		linesElement = SubElement(classElement, "lines")
+		for line in self._lines.values():
+			linesElement.append(line.Generate())
+
+		return classElement
+
 
 @export
 class Package(Element):
@@ -423,3 +659,41 @@ class Package(Element):
 		:returns: The classes, in the report's order; two classes may share a name.
 		"""
 		return self._classes
+
+	@classmethod
+	def _FromFiles(cls, files: Iterable[cc_File]) -> list[Package]:
+		"""
+		Convert the files of the common model to packages of their classes.
+
+		:param files: The files of the common model.
+		:returns:     The packages, by name.
+		"""
+		packages: dict[str, Package] = {}
+		for file in files:
+			Class._FromFile(file, packages)
+
+		for package in packages.values():
+			package._lineRate, package._branchRate = cls._Rates(cls._CountLines(
+				line for klass in package._classes for line in klass._lines.values()
+			))
+
+		return [packages[name] for name in sorted(packages)]
+
+	def Generate(self) -> _Element:
+		"""
+		Generate the package's ``<package>`` element with its classes.
+
+		A rate the package doesn't state is computed from its classes' lines; a missing complexity is written as ``0``.
+
+		:returns: The ``<package>`` element.
+		"""
+		packageElement = XMLElement("package")
+		packageElement.attrib["name"] = self._name
+		self._GenerateRates(packageElement, [line for klass in self._classes for line in klass._lines.values()])
+		packageElement.attrib["complexity"] = str(0 if self._complexity is None else self._complexity)
+
+		classesElement = SubElement(packageElement, "classes")
+		for klass in self._classes:
+			classesElement.append(klass.Generate())
+
+		return packageElement

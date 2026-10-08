@@ -42,7 +42,7 @@ from pyTooling.Common                      import getResourceFile
 from pyEDAA.Reports                        import Resources
 from pyEDAA.Reports.CodeCoverage           import Branch, Class, CodeCoverageError, CoverageSummary, Function
 from pyEDAA.Reports.CodeCoverage           import Line as cc_Line, LineCoverageStatus, Method, Module, Package
-from pyEDAA.Reports.CodeCoverage.Cobertura import READ_SCHEMA, STRICT_SCHEMA, Document, Line
+from pyEDAA.Reports.CodeCoverage.Cobertura import READ_SCHEMA, STRICT_SCHEMA, Condition, Document, Line
 from pyTooling.Testing                     import Testcase
 
 
@@ -363,6 +363,60 @@ class Writer(Testcase):
 		method = root.find("packages/package/classes/class/methods/method")
 		self.assertEqual(
 			("1.0", "0.5", ""), (method.attrib["line-rate"], method.attrib["branch-rate"], method.attrib["signature"])
+		)
+
+	def test_Generate(self) -> None:
+		"""Each element generates its XML element with its children; a rate it doesn't state is computed."""
+		line = (
+			'<line number="3" hits="1" branch="true" condition-coverage="50% (1/2)"><conditions>'
+			'<condition number="0" type="jump" coverage="50%"/></conditions></line>'
+		)
+		with TemporaryDirectory() as directory:
+			report = Document(_write(directory,
+				'<coverage><packages><package name="p" line-rate="0.5"><classes>'
+				f'<class name="A" filename="A.java" complexity="2"><methods><method name="run" signature="()V"><lines>{line}'
+				f'</lines></method></methods><lines>{line}<line number="5" hits="0"/></lines></class>'
+				'</classes></package></packages></coverage>'
+			), analyzeAndConvert=True)
+
+		package = report.Packages[0]
+		packageElement = package.Generate()
+		self.assertEqual(
+			("package", {"name": "p", "line-rate": "0.5", "branch-rate": "0.5", "complexity": "0"}),
+			(packageElement.tag, dict(packageElement.attrib))
+		)
+		self.assertEqual(["A"], [element.attrib["name"] for element in packageElement.iterfind("classes/class")])
+
+		klass = package.Classes[0]
+		classElement = klass.Generate()
+		self.assertEqual(
+			{"name": "A", "filename": "A.java", "line-rate": "0.5", "branch-rate": "0.5", "complexity": "2.0"},
+			dict(classElement.attrib)
+		)
+		self.assertEqual(["run"], [element.attrib["name"] for element in classElement.iterfind("methods/method")])
+		self.assertEqual(["3", "5"], [element.attrib["number"] for element in classElement.iterfind("lines/line")])
+
+		methodElement = klass.Methods["run"].Generate()
+		self.assertEqual(
+			("method", {"name": "run", "signature": "()V", "line-rate": "1.0", "branch-rate": "0.5"}),
+			(methodElement.tag, dict(methodElement.attrib))
+		)
+		self.assertEqual(["3"], [element.attrib["number"] for element in methodElement.iterfind("lines/line")])
+
+		lineElement = klass.Lines[3].Generate()
+		self.assertEqual(
+			("line", {"number": "3", "hits": "1", "branch": "true", "condition-coverage": "50% (1/2)"}),
+			(lineElement.tag, dict(lineElement.attrib))
+		)
+		self.assertEqual(
+			[{"number": "0", "type": "jump", "coverage": "50%"}],
+			[dict(element.attrib) for element in lineElement.iterfind("conditions/condition")]
+		)
+
+		conditionElement = Condition(1, "jump", "100%").Generate()
+		self.assertEqual(
+			("condition", {"number": "1", "type": "jump", "coverage": "100%"}),
+			(conditionElement.tag, dict(conditionElement.attrib))
 		)
 
 	def test_FromCoverageSummary(self) -> None:
