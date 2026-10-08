@@ -178,6 +178,37 @@ class Conversion(Testcase):
 		self.assertEqual((file.Lines[3], file.Lines[4]), (klass.StartLine, klass.EndLine))
 		self.assertEqual(["A", "A$Inner"], list(summary.Units["p"].Units))
 
+	def test_RustLLVMCov(self) -> None:
+		"""cargo-llvm-cov: a package per directory, a class per file, a method per instantiation with its first line."""
+		report = Document(DATA / "Rust-Cargo" / "llvm-cov-cobertura.xml", analyzeAndConvert=True)
+		klass = report.Packages[0].Classes[0]
+
+		self.assertEqual(("src", "src.lib.rs", "src/lib.rs"), (report.Packages[0].Name, klass.Name, klass.Filename))
+		# Known gap: of two '<method>'s with the same name and an empty signature, the second replaces the first.
+		self.assertEqual(22, len(parse(DATA / "Rust-Cargo" / "llvm-cov-cobertura.xml").findall(".//method")))
+		self.assertEqual(16, len(klass.Methods))
+		tryDecrement = klass.Methods["<counter::Counter>::try_decrement"]
+		self.assertEqual({42: 5}, {number: line.Hits for number, line in tryDecrement.Lines.items()})
+
+		summary = report.ToCoverageSummary()
+		file = summary.Directories["src"].Files["lib.rs"]
+		self.assertEqual((69, 58, 0), (summary.TotalLines, summary.CoveredLines, summary.TotalBranches))
+		self.assertEqual(11, file.Lines[42].CoverageCount)
+		self.assertIs(LineCoverageStatus.Uncovered, file.Lines[52].Status)
+		self.assertEqual(["src", "src.src.lib.rs"], [unit.QualifiedName for unit in summary.IterateUnits()][:2])
+
+	def test_RustGrcov(self) -> None:
+		"""grcov: a package per file, named by its path - split at '.', the file extension becomes a package."""
+		summary = Document(DATA / "Rust-Cargo" / "grcov-cobertura.xml", analyzeAndConvert=True).ToCoverageSummary()
+		file = summary.Directories["src"].Files["lib.rs"]
+
+		self.assertEqual((69, 58, 0), (summary.TotalLines, summary.CoveredLines, summary.TotalBranches))
+		self.assertEqual(11, file.Lines[42].CoverageCount)
+		self.assertIs(LineCoverageStatus.Uncovered, file.Lines[52].Status)
+		self.assertEqual(
+			["src/lib", "src/lib.rs", "src/lib.rs.lib"], [unit.QualifiedName for unit in summary.IterateUnits()][:3]
+		)
+
 
 class Schemas(Testcase):
 	"""The lenient schema reads what tools write; the strict one is the official DTD's translation."""
@@ -191,6 +222,20 @@ class Schemas(Testcase):
 			with self.subTest(report=report.parent.name):
 				self.assertEqual(valid, strict.validate(parse(report)))
 				self.assertTrue(lenient.validate(parse(report)))
+
+	def test_Rust(self) -> None:
+		"""cargo-llvm-cov and grcov state 'complexity' on a '<method>', which the DTD doesn't declare."""
+		strict = XMLSchema(parse(getResourceFile(Resources, STRICT_SCHEMA)))
+		lenient = XMLSchema(parse(getResourceFile(Resources, READ_SCHEMA)))
+
+		for report in ("llvm-cov-cobertura.xml", "grcov-cobertura.xml"):
+			with self.subTest(report=report):
+				self.assertTrue(lenient.validate(parse(DATA / "Rust-Cargo" / report)))
+				self.assertFalse(strict.validate(parse(DATA / "Rust-Cargo" / report)))
+				self.assertEqual(
+					{"Element 'method', attribute 'complexity': The attribute 'complexity' is not allowed."},
+					{error.message for error in strict.error_log}
+				)
 
 	def test_RootElement(self) -> None:
 		with TemporaryDirectory() as directory:
