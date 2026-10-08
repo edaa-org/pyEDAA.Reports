@@ -26,6 +26,9 @@ Available schemas
    * - :ref:`Cobertura 04 <SCHEMAS/Cobertura-04>`
      - :file:`Cobertura-04.xsd`
      - strict translation of Cobertura's DTD ``coverage-04.dtd``
+   * - :ref:`coverage.py Cobertura <SCHEMAS/CoveragePy-Cobertura>`
+     - :file:`CoveragePy-Cobertura.xsd`
+     - :class:`pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura.Document`
    * - :ref:`coverage.py JSON <SCHEMAS/CoveragePy-JSON>`
      - :file:`CoveragePy-JSON.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.CoveragePy.Document`
@@ -87,6 +90,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
 
    Any-Cobertura
    Cobertura-04
+   CoveragePy-Cobertura
    CoveragePy-JSON
    GHDL-Coverage
    Gcov-1
