@@ -128,6 +128,14 @@ class Hierarchy(Testcase):
 		self.assertEqual(["src"], list(summary.Directories))
 		self.assertEqual(Path("."), summary.Path)
 
+	def test_GetOrAddFile_Absolute(self) -> None:
+		"""An absolute path's root - ``/`` on POSIX, ``\\`` or a drive on Windows - becomes no directory."""
+		summary = CoverageSummary("report")
+		file = summary.GetOrAddFile(Path("/home/runner/src/Counter.vhdl"))
+
+		self.assertEqual(Path("home/runner/src/Counter.vhdl"), file.Path)
+		self.assertEqual(["home"], list(summary.Directories))
+
 	def test_GetOrAddFile_Empty(self) -> None:
 		with self.assertRaises(ValueError) as context:
 			_ = CoverageSummary("report").GetOrAddFile("./")
