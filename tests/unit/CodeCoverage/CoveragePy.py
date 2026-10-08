@@ -79,8 +79,8 @@ class FormatModel(Testcase):
 		)
 		totals = report.Totals
 		self.assertEqual((27, 22, 5, 2, 10, 5, 3), (
-			totals.NumStatements, totals.CoveredLines, totals.MissingLines, totals.ExcludedLines, totals.NumBranches,
-			totals.CoveredBranches, totals.NumPartialBranches
+			totals.StatementCount, totals.CoveredLines, totals.MissingLines, totals.ExcludedLines, totals.BranchCount,
+			totals.CoveredBranches, totals.PartialBranchCount
 		))
 
 		shapes = report.Files["myPackage/Shapes.py"]
@@ -105,8 +105,8 @@ class Conversion(Testcase):
 		for entity, stated in pairs:
 			with self.subTest(entity=entity.Path.as_posix()):
 				self.assertEqual(
-					(stated.NumStatements, stated.CoveredLines, stated.ExcludedLines, stated.NumBranches,
-					 stated.CoveredBranches, stated.NumPartialBranches),
+					(stated.StatementCount, stated.CoveredLines, stated.ExcludedLines, stated.BranchCount,
+					 stated.CoveredBranches, stated.PartialBranchCount),
 					(entity.TotalLines, entity.CoveredLines, entity.ExcludedLines, entity.TotalBranches,
 					 entity.CoveredBranches, entity.PartialLines)
 				)

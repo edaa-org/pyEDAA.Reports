@@ -89,14 +89,14 @@ class Summary(metaclass=ExtendedType, slots=True):
 	A ``summary``: the counters coverage.py computed for the whole report, a file or a region.
 	"""
 
-	_numStatements:      int            #: Number of statements, without the excluded ones.
+	_statementCount:     int            #: Number of statements, without the excluded ones.
 	_coveredLines:       int            #: Number of executed statements.
 	_missingLines:       int            #: Number of statements, which never ran.
 	_excludedLines:      int            #: Number of excluded lines.
 	_percentCovered:     float          #: Coverage of statements and branches, in percent.
-	_numBranches:        Nullable[int]  #: Number of branches, if branch coverage was measured.
+	_branchCount:        Nullable[int]  #: Number of branches, if branch coverage was measured.
 	_coveredBranches:    Nullable[int]  #: Number of taken branches, if branch coverage was measured.
-	_numPartialBranches: Nullable[int]  #: Number of partially covered lines, if branch coverage was measured.
+	_partialBranchCount: Nullable[int]  #: Number of partially covered lines, if branch coverage was measured.
 
 	def __init__(self, summary: dict[str, Any]) -> None:
 		"""
@@ -104,23 +104,23 @@ class Summary(metaclass=ExtendedType, slots=True):
 
 		:param summary: The JSON object ``summary``.
 		"""
-		self._numStatements =      summary["num_statements"]
+		self._statementCount =     summary["num_statements"]
 		self._coveredLines =       summary["covered_lines"]
 		self._missingLines =       summary["missing_lines"]
 		self._excludedLines =      summary["excluded_lines"]
 		self._percentCovered =     summary["percent_covered"]
-		self._numBranches =        summary.get("num_branches")
+		self._branchCount =        summary.get("num_branches")
 		self._coveredBranches =    summary.get("covered_branches")
-		self._numPartialBranches = summary.get("num_partial_branches")
+		self._partialBranchCount = summary.get("num_partial_branches")
 
 	@readonly
-	def NumStatements(self) -> int:
+	def StatementCount(self) -> int:
 		"""
-		Read-only property to access the number of statements, without the excluded ones (:attr:`_numStatements`).
+		Read-only property to access the number of statements, without the excluded ones (:attr:`_statementCount`).
 
 		:returns: The number of statements.
 		"""
-		return self._numStatements
+		return self._statementCount
 
 	@readonly
 	def CoveredLines(self) -> int:
@@ -159,13 +159,13 @@ class Summary(metaclass=ExtendedType, slots=True):
 		return self._percentCovered
 
 	@readonly
-	def NumBranches(self) -> Nullable[int]:
+	def BranchCount(self) -> Nullable[int]:
 		"""
-		Read-only property to access the number of branches (:attr:`_numBranches`).
+		Read-only property to access the number of branches (:attr:`_branchCount`).
 
 		:returns: The number of branches, or ``None`` if branch coverage wasn't measured.
 		"""
-		return self._numBranches
+		return self._branchCount
 
 	@readonly
 	def CoveredBranches(self) -> Nullable[int]:
@@ -177,14 +177,14 @@ class Summary(metaclass=ExtendedType, slots=True):
 		return self._coveredBranches
 
 	@readonly
-	def NumPartialBranches(self) -> Nullable[int]:
+	def PartialBranchCount(self) -> Nullable[int]:
 		"""
-		Read-only property to access the number of partially covered lines (:attr:`_numPartialBranches`).
+		Read-only property to access the number of partially covered lines (:attr:`_partialBranchCount`).
 
 		:returns: The number of lines, which ran without taking all branches, or ``None`` if branch coverage wasn't
 		          measured.
 		"""
-		return self._numPartialBranches
+		return self._partialBranchCount
 
 
 @export
