@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="my.pack.MyClassTest$Divide" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-08T10:56:04.338Z" hostname="dffa20ef8728" time="0.006">
+  <properties/>
+  <testcase name="testDivide()" classname="my.pack.MyClassTest$Divide" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
