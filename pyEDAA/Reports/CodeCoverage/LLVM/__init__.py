@@ -79,6 +79,7 @@ from pyTooling.Decorators                     import export, readonly
 from pyTooling.Exceptions                     import ToolingException
 from pyTooling.MetaClasses                    import ExtendedType
 from pyTooling.Stopwatch                      import Stopwatch
+from pyTooling.Versioning                     import SemanticVersion
 
 from pyEDAA.Reports                           import Resources
 from pyEDAA.Reports.CodeCoverage              import Branch as cc_Branch, CodeCoverageError, CoverageSummary
@@ -283,10 +284,10 @@ class Report(metaclass=ExtendedType, slots=True):
 	The report's root: the format version, the files, the functions, and the totals.
 	"""
 
-	_version:   Nullable[str]      #: Version of the report format.
-	_files:     dict[Path, File]   #: The files, by path.
-	_functions: list[Function]     #: The functions.
-	_totals:    Nullable[Summary]  #: The counters of the whole report.
+	_version:   Nullable[SemanticVersion]  #: Version of the report format.
+	_files:     dict[Path, File]           #: The files, by path.
+	_functions: list[Function]             #: The functions.
+	_totals:    Nullable[Summary]          #: The counters of the whole report.
 
 	def __init__(self) -> None:
 		"""
@@ -298,7 +299,7 @@ class Report(metaclass=ExtendedType, slots=True):
 		self._totals =    None
 
 	@readonly
-	def Version(self) -> Nullable[str]:
+	def Version(self) -> Nullable[SemanticVersion]:
 		"""
 		Read-only property to access the version of the report format (:attr:`_version`).
 
@@ -407,7 +408,7 @@ class Document(Report, cc_Document):
 
 		with Stopwatch() as sw:
 			export = self._jsonDocument["data"][0]
-			self._version =   self._jsonDocument["version"]
+			self._version =   SemanticVersion.Parse(self._jsonDocument["version"])
 			self._files =     {}
 			self._functions = [Function(function) for function in export.get("functions", [])]
 			self._totals =    Summary(export["totals"])

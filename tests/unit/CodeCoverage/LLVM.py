@@ -40,6 +40,7 @@ from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function
 from pyEDAA.Reports.CodeCoverage.LLVM         import Document
 from pyEDAA.Reports.CodeCoverage.LLVM.Records import RegionKind
 from pyTooling.Testing                        import Testcase
+from pyTooling.Versioning                     import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -84,6 +85,7 @@ class FormatModel(Testcase):
 		report = Document(REPORT, analyzeAndConvert=True)
 
 		self.assertEqual("2.0.1", report.Version)
+		self.assertIsInstance(report.Version, SemanticVersion)
 		self.assertEqual(
 			["/project/include/Statistics.h", "/project/src/Shapes.cpp", "/project/src/Statistics.c"],
 			[path.as_posix() for path in report.Files]
