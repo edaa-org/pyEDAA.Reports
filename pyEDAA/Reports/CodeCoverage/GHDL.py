@@ -54,7 +54,10 @@ GHDL, which accepts format version 1.0.0. The format's model keeps what the file
    from pathlib import Path
    from pyEDAA.Reports.CodeCoverage.GHDL import Document, MergedReport
 
-   documents = [Document(path, analyzeAndConvert=True) for path in sorted(Path(".").glob("coverage-*.json"))]
+   documents = []
+   for path in sorted(Path(".").glob("coverage-*.json")):
+     documents.append(Document(path, analyzeAndConvert=True))
+
    summary = MergedReport("Counter", documents).ToCoverageSummary()
    print(f"{summary.FileCount} files: {summary.LineCoverage:.1%}")
 """

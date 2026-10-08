@@ -323,7 +323,10 @@ ran, if it ran in one of the runs. The files must agree on each source file's ch
    from pathlib import Path
    from pyEDAA.Reports.CodeCoverage.GHDL import Document, MergedReport
 
-   documents = [Document(path, analyzeAndConvert=True) for path in sorted(Path(".").glob("coverage-*.json"))]
+   documents = []
+   for path in sorted(Path(".").glob("coverage-*.json")):
+     documents.append(Document(path, analyzeAndConvert=True))
+
    summary = MergedReport("Counter", documents).ToCoverageSummary()
    for file in summary.IterateFiles():
      print(f"{file.Path}: {file.LineCoverage:.1%}")
