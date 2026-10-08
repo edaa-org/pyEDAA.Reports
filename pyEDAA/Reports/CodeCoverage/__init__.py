@@ -52,7 +52,7 @@ The report formats have models of their own, which convert to this one:
 """
 from __future__            import annotations
 
-from collections.abc       import Iterable, Sized
+from collections.abc       import Iterable
 from datetime              import timedelta
 from enum                  import Enum
 from pathlib               import Path
@@ -766,8 +766,7 @@ class File(BaseWithPath):
 	A source file: the coverage of its executable lines, and the units of the logical hierarchy it holds.
 
 	The lines are a list indexed by line number: index 0 is unused, and a line the report doesn't list - a comment, a
-	declaration - is ``None``. Lines are iterated in order, and looked up without hashing. The list may be longer than
-	the last line the report lists (:attr:`_lastLineNumber`), as it is allocated ahead.
+	declaration - is ``None``. Lines are iterated in order, and looked up without hashing.
 	"""
 
 	_PARENT_TYPE: ClassVar[tuple[type, ...]] = (Directory, )  #: A file is in a directory.
@@ -794,22 +793,19 @@ class File(BaseWithPath):
 		"""
 		super().__init__(name, parent=parent)
 
+		self._lines =          [None]
 		self._lastLineNumber = 0
 		self._units =          []
-
-		if lines is None:
-			self._lines = [None]
-		elif not isinstance(lines, Iterable):
-			ex = TypeError(f"Parameter 'lines' is not iterable.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
-			raise ex
-		else:
-			self._lines = [None] * ((len(lines) if isinstance(lines, Sized) else 100) + 1)
 
 		if parent is not None:
 			parent._AddElement(self)
 
 		if lines is not None:
+			if not isinstance(lines, Iterable):
+				ex = TypeError(f"Parameter 'lines' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
+				raise ex
+
 			for line in lines:
 				if not isinstance(line, Line):
 					ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
