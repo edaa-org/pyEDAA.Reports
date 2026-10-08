@@ -5,7 +5,8 @@ Catch2 JUnit
 
 JUnit XML as written by Catch2's JUnit reporter (``--reporter JUnit``).
 
-Read by :class:`pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit.Document` - see :ref:`UNITTEST/SpecificDataModel/JUnit/Dialect/Catch2`.
+Read by :class:`pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit.Document` - see
+:ref:`UNITTEST/SpecificDataModel/JUnit/Dialect/Catch2`.
 
 .. grid:: 2
 
