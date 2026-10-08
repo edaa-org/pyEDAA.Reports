@@ -144,3 +144,41 @@ any language they measure. :class:`pyEDAA.Reports.CodeCoverage.Cobertura.Documen
    summary = report.ToCoverageSummary()
    for file in summary.IterateFiles():
      print(f"{file.Path}: {file.LineCoverage:.1%}")
+
+.. _CODECOV/Formats/CoveragePy:
+
+coverage.py JSON
+================
+
+coverage.py writes its JSON report with ``coverage json``. :class:`pyEDAA.Reports.CodeCoverage.CoveragePy.Document`
+validates a report against the JSON Schema :ref:`CoveragePy-JSON.schema.json <SCHEMAS/CoveragePy-JSON>` - format
+versions 2 and 3 - and reads it into the format's model: the measured files, their executed, missing and excluded
+lines, the branches as pairs of source and destination line, the summaries coverage.py computed, and - in format 3 -
+the functions and classes of each file.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.CoveragePy.Document.ToCoverageSummary` converts it to the common model:
+
+* A file's path is relative to the directory coverage.py ran in.
+* Executed lines are covered - partially covered, if one of their branches wasn't taken -, missing lines uncovered,
+  excluded lines excluded. The format has no counts.
+* A branch becomes a branch of its source line, naming its target line; an exit of a function - a negative number -
+  has none.
+* A file's directories become packages, the file a module spanning the whole file; its classes and functions -
+  qualified names like ``Circle.Area`` - become classes, methods and functions, each spanning its ``class`` or ``def``
+  line to its last line. coverage.py's own summary of a function counts the ``def`` line for the enclosing scope.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.CoveragePy import Document
+
+   report = Document(Path("coverage.json"), analyzeAndConvert=True)
+   summary = report.ToCoverageSummary()
+   for unit in summary.IterateUnits():
+     print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
+
+.. hint::
+
+   coverage.py writes Cobertura XML too, from the same measurement, naming the files relative to the measured source
+   directory - e.g. ``Shapes.py`` -, while its JSON report names them relative to the directory coverage.py ran in -
+   e.g. ``myPackage/Shapes.py``.
