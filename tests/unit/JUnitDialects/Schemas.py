@@ -35,6 +35,7 @@ Each schema in :file:`pyEDAA/Reports/Resources` was reverse-engineered from real
 :file:`tests/data/JUnit` are the ground truth: a schema that rejects one of them describes the format wrongly. The
 reader has to agree with the schema too - it is the same claim about the format, written twice.
 """
+from pathlib  import Path
 from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
@@ -138,3 +139,26 @@ class Unsupported(ut_TestCase):
 		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(referenceFile))}
 
 		self.assertEqual({("testcase", "'status' attribute not allowed for element")}, errors)
+
+
+class NextestJUnit(ut_TestCase):
+	"""cargo-nextest's JUnit report: no dialect reads it yet."""
+
+	_referenceFile: ClassVar[Path] = DATA_DIRECTORY / "pyEDAA.Reports/Rust-Cargo/nextest-junit.xml"  #: The report.
+
+	def test_Schemas(self) -> None:
+		"""Known gap: when this starts failing, a dialect accepts the report and it becomes a reference file."""
+		for dialect in DIALECTS.values():
+			with self.subTest(dialect=dialect.Name):
+				self.assertFalse(dialect.Schema().is_valid(str(self._referenceFile)), f"{dialect.Name} accepts it now.")
+
+	def test_AnyJUnit(self) -> None:
+		"""The report is Any-JUnit, except for ``uuid`` on ``<testsuites>`` and ``timestamp`` on ``<testcase>``."""
+		schema = DIALECTS["Any-JUnit"].Schema()
+
+		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(self._referenceFile))}
+
+		self.assertEqual({
+			("testsuites", "'uuid' attribute not allowed for element"),
+			("testcase", "'timestamp' attribute not allowed for element"),
+		}, errors)

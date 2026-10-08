@@ -30,6 +30,9 @@ jobs:
   Example-Python:
     uses: ./.github/workflows/Example-Python.yml
 
+  Example-Rust:
+    uses: ./.github/workflows/Example-Rust.yml
+
   UnitTestingParams:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@r8
     with:
@@ -105,6 +108,7 @@ jobs:
       - Example-Java
       - Example-Cpp
       - Example-Python
+      - Example-Rust
     with:
       jobs:                 ${{ needs.AppTestingParams.outputs.python_jobs }}
       wheel:                ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
