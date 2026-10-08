@@ -36,8 +36,10 @@ from lxml.etree       import XMLSchema, parse
 from pyTooling.Common import getResourceFile, zipdicts
 
 from pyEDAA.Reports                                   import Resources
+from pyEDAA.Reports.CodeCoverage                      import CodeCoverageError
 from pyEDAA.Reports.CodeCoverage.Cobertura            import STRICT_SCHEMA, Document as CoberturaDocument
 from pyEDAA.Reports.CodeCoverage.CoveragePy           import Document as CoveragePyDocument
+from pyEDAA.Reports.CodeCoverage.GHDL                 import Document as GHDLDocument, MergedReport
 from pyEDAA.Reports.CodeCoverage.Gcov                 import Document as GcovDocument
 from pyEDAA.Reports.CodeCoverage.Gcov                 import FormatVersion as GcovFormatVersion
 from pyEDAA.Reports.Unittesting                       import TestcaseStatus, UnittestError
@@ -785,3 +787,48 @@ class RustCargo(TestCase):
 			with self.subTest(dialect=documentClass.__module__):
 				with self.assertRaises(UnittestError):
 					documentClass(junitExampleFile, analyzeAndConvert=True)
+
+
+class VHDLGHDL(TestCase):
+	"""GHDL simulates the example's testbench twice - counting, and counting with resets - with statement coverage."""
+
+	def test_Runs(self) -> None:
+		for run, expected in (
+			("Count", [("src/Counter.vhdl", 6, 5), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 13)]),
+			("Reset", [("src/Counter.vhdl", 6, 6), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 12)])
+		):
+			with self.subTest(run=run):
+				report = GHDLDocument(Path(f"tests/data/CodeCoverage/VHDL-GHDL/coverage-{run}.json"), analyzeAndConvert=True)
+				summary = report.ToCoverageSummary()
+
+				self.assertEqual(
+					expected,
+					[(file.Path.as_posix(), file.TotalLines, file.CoveredLines) for file in summary.IterateFiles()]
+				)
+
+	def test_Merged(self) -> None:
+		"""A line ran, if it ran in one of the runs: the reset run covers the counter's reset branch."""
+		runs = [
+			GHDLDocument(Path(f"tests/data/CodeCoverage/VHDL-GHDL/coverage-{run}.json"), analyzeAndConvert=True)
+			for run in ("Count", "Reset")
+		]
+		summary = MergedReport("Counter", runs).ToCoverageSummary()
+
+		self.assertEqual((27, 25), (summary.TotalLines, summary.CoveredLines))
+		self.assertEqual(
+			[("src/Counter.vhdl", 6, 6), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 14)],
+			[(file.Path.as_posix(), file.TotalLines, file.CoveredLines) for file in summary.IterateFiles()]
+		)
+
+
+class VHDLNVC(TestCase):
+	"""NVC simulates the example's testbench twice, merges both coverage databases and exports them as Cobertura XML."""
+
+	def test_Cobertura(self) -> None:
+		"""Known gap: NVC writes ``condition-coverage`` as e.g. ``100 %``, without the covered and valid conditions."""
+		with self.assertRaises(CodeCoverageError) as context:
+			CoberturaDocument(Path("tests/data/CodeCoverage/VHDL-NVC/cobertura.xml"), analyzeAndConvert=True)
+
+		notes = context.exception.__notes__
+		self.assertEqual(9, len(notes))
+		self.assertTrue(all("attribute 'condition-coverage': [facet 'pattern']" in note for note in notes))

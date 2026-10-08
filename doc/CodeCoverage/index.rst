@@ -346,6 +346,9 @@ ran, if it ran in one of the runs. The files must agree on each source file's ch
    ``ghdl coverage`` reads several coverage files too, but a line's result there is the result of the last file naming
    the line, so the merged coverage depends on the order of the files.
 
+The pipeline job ``VHDL-GHDL`` simulates the example in :file:`examples/VHDL/Counter` twice and writes both coverage
+files and an lcov tracefile of both runs; see :ref:`CODECOV/Tool/VHDL`.
+
 
 .. _CODECOV/Formats/Gcov:
 
@@ -464,6 +467,27 @@ There is no reader yet.
 
 Tools
 *****
+
+.. _CODECOV/Tool/VHDL:
+
+VHDL: GHDL and NVC
+==================
+
+* https://github.com/ghdl/ghdl
+* https://github.com/nickg/nvc
+
+The example in :file:`examples/VHDL/Counter` - a counter and its testbench, without a verification framework - is
+simulated by a Bash script per simulator, twice: counting, then counting with resets (generics ``CYCLES`` and
+``RESETS``).
+
+* :file:`GHDL.sh` (job ``VHDL-GHDL``, GHDL's mcode backend): ``ghdl -r --coverage --coverage-output=<file>`` writes a
+  :ref:`GHDL coverage file <CODECOV/Formats/GHDL>` per run (statement coverage); ``ghdl coverage --format=lcov`` writes
+  an lcov tracefile of both runs.
+* :file:`NVC.sh` (job ``VHDL-NVC``): ``nvc -e --cover=statement,branch`` writes a coverage database per run,
+  ``nvc --cover-merge`` merges them, ``nvc --cover-export --format=cobertura --relative=.`` exports Cobertura XML -
+  NVC's only export format. NVC writes ``condition-coverage`` as e.g. ``50 %``, without the numbers of covered and
+  valid conditions ``coverage-04.dtd`` writers add (``50% (1/2)``), so the Cobertura reader rejects the file.
+
 
 .. _CODECOV/Tool/DotNet:
 
