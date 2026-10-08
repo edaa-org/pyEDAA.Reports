@@ -29,8 +29,8 @@ Available schemas
    * - :ref:`coverage.py JSON <SCHEMAS/CoveragePy-JSON>`
      - :file:`CoveragePy-JSON.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.CoveragePy.Document`
-   * - :ref:`GHDL coverage JSON <SCHEMAS/GHDL-Coverage-JSON>`
-     - :file:`GHDL-Coverage-JSON.schema.json`
+   * - :ref:`GHDL coverage <SCHEMAS/GHDL-Coverage>`
+     - :file:`GHDL-Coverage.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.GHDL.Document`
    * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
      - :file:`Any-JUnit.xsd`
@@ -82,7 +82,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    Any-Cobertura
    Cobertura-04
    CoveragePy-JSON
-   GHDL-Coverage-JSON
+   GHDL-Coverage
    Any-JUnit
    Ant-JUnit4
    CTest-JUnit

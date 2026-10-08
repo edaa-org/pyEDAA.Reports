@@ -287,7 +287,7 @@ class Schema(Testcase):
 				_ = Document(jsonFile, analyzeAndConvert=True)
 
 		self.assertEqual(
-			f"Validation error for '{jsonFile}' using JSON Schema 'GHDL-Coverage-JSON.schema.json'.", str(context.exception)
+			f"Validation error for '{jsonFile}' using JSON Schema 'GHDL-Coverage.schema.json'.", str(context.exception)
 		)
 		self.assertEqual(notes, context.exception.__notes__)
 

@@ -33,7 +33,7 @@ GHDL's JSON code coverage format: a model of the format, read from coverage file
 model.
 
 GHDL writes the format when simulating with ``ghdl -r --coverage``, by default to :file:`coverage-<timestamp>.json`. A
-coverage file is validated against the JSON Schema :file:`GHDL-Coverage-JSON.schema.json`, reverse-engineered from
+coverage file is validated against the JSON Schema :file:`GHDL-Coverage.schema.json`, reverse-engineered from
 GHDL, which accepts format version 1.0.0. The format's model keeps what the file states: a :class:`Document` holds
 :class:`File` records, each with its checksum and, per line with a coverage point, whether the line ran.
 
@@ -84,7 +84,7 @@ from pyEDAA.Reports.CodeCoverage import LineCoverageStatus
 
 __all__ = ["SCHEMA"]
 
-SCHEMA = "GHDL-Coverage-JSON.schema.json"  #: The JSON Schema a coverage file is validated against.
+SCHEMA = "GHDL-Coverage.schema.json"  #: The JSON Schema a coverage file is validated against.
 
 # A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
 # body's namespace, where annotations are evaluated, binds the name to the property.

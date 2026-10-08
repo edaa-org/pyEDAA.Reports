@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/GHDL-Coverage-JSON.schema.json",
-	"title": "GHDL coverage JSON file",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/GHDL-Coverage.schema.json",
+	"title": "GHDL coverage file",
 	"description": "The coverage file GHDL writes with 'ghdl -r --coverage', version 1.0.0. Reverse-engineered from GHDL's writer 'src/ghdldrv/ghdlcovout.adb' and reader 'src/ghdldrv/ghdlcov.adb'.",
 	"type": "object",
 	"required": ["app", "version", "testcase", "timestamp", "outputs"],
