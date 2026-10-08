@@ -58,7 +58,8 @@ UnitTest
 
 A :class:`~pyEDAA.Reports.Unittesting.TRX.UnitTest` is a test definition (``<UnitTest>`` in ``<TestDefinitions>``):
 the test's name, the fully qualified name of its class, the name of its method, the path to its assembly and the test
-adapter running it. Each data row of a parameterized test is a test definition of its own.
+adapter running it. Each data row of a parameterized test is a test definition of its own. Its parent is the test
+run.
 
 .. _UNITTEST/SpecificDataModel/TRX/UnitTestResult:
 
@@ -69,7 +70,8 @@ A :class:`~pyEDAA.Reports.Unittesting.TRX.UnitTestResult` is a test's result (``
 the identifiers of the execution, the test definition and the test list, the test's name, the computer it ran on, its
 outcome, start and end time and duration. ``<ErrorInfo>``'s message and stack trace are provided as ``Message`` and
 ``Details``, ``<StdOut>`` and ``<StdErr>`` as ``StandardOutput`` and ``StandardError``. A data-driven test or an ordered
-test lists the results of its rows or tests as inner results.
+test lists the results of its rows or tests as inner results. A result's parent is the test run; an inner result's
+parent is its container.
 
 .. _UNITTEST/SpecificDataModel/TRX/Document:
 

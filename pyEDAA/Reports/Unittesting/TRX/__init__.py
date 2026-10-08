@@ -58,7 +58,7 @@ from datetime                   import datetime, timedelta
 from enum                       import Enum
 from pathlib                    import Path, PureWindowsPath
 from re                         import fullmatch
-from typing                     import Dict, Iterable, List, Mapping, Optional as Nullable
+from typing                     import Dict, Generic, List, Mapping, TypeVar, Optional as Nullable
 from uuid                       import UUID
 
 from lxml.etree                 import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError, parse
@@ -78,6 +78,9 @@ from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut
 __all__ = ["TRX_NAMESPACE", "STATUS_MAP"]
 
 TRX_NAMESPACE = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"  #: XML namespace of a TRX file.
+
+ParentType = TypeVar("ParentType", bound="TestRun | UnitTestResult")
+"""A type variable for what a :class:`UnitTestResult` belongs to: a :class:`TestRun` or a container's result."""
 
 
 @export
@@ -132,12 +135,13 @@ class UnitTest(metaclass=ExtendedType, slots=True):
 	:attr:`Id`.
 	"""
 
-	_id:              UUID  #: Identifier of the test, referred to by its results.
-	_name:            str   #: Name of the test, e.g. ``Rows (1,1)``.
-	_className:       str   #: Fully qualified name of the test class.
-	_methodName:      str   #: Name of the test method.
-	_codeBase:        Path  #: Path to the assembly containing the test.
-	_adapterTypeName: str   #: Test adapter running the test, e.g. ``executor://xunit/VsTestRunner3/netcore/``.
+	_parent:          Nullable[TestRun]  #: The test run the test definition belongs to.
+	_id:              UUID               #: Identifier of the test, referred to by its results.
+	_name:            str                #: Name of the test, e.g. ``Rows (1,1)``.
+	_className:       str                #: Fully qualified name of the test class.
+	_methodName:      str                #: Name of the test method.
+	_codeBase:        Path               #: Path to the assembly containing the test.
+	_adapterTypeName: str                #: URI of the test adapter, e.g. ``executor://xunit/VsTestRunner3/netcore/``.
 
 	def __init__(
 		self,
@@ -146,10 +150,12 @@ class UnitTest(metaclass=ExtendedType, slots=True):
 		className: str,
 		methodName: str,
 		codeBase: Path,
-		adapterTypeName: str
+		adapterTypeName: str,
+		*,
+		parent: Nullable[TestRun] = None
 	) -> None:
 		"""
-		Initializes a test definition.
+		Initializes a test definition, and adds it to the test definitions of its test run.
 
 		:param id:              Identifier of the test.
 		:param name:            Name of the test.
@@ -157,6 +163,8 @@ class UnitTest(metaclass=ExtendedType, slots=True):
 		:param methodName:      Name of the test method.
 		:param codeBase:        Path to the assembly containing the test.
 		:param adapterTypeName: Test adapter running the test.
+		:param parent:          Optional, the test run the test definition belongs to; the definition is added to its
+		                        test definitions by :attr:`Id`. Default: ``None``.
 		:raises ValueError:     If parameter 'id' is None.
 		:raises TypeError:      If parameter 'id' is not of type :class:`~uuid.UUID`.
 		:raises ValueError:     If parameter 'name' is None.
@@ -173,6 +181,7 @@ class UnitTest(metaclass=ExtendedType, slots=True):
 		:raises ValueError:     If parameter 'adapterTypeName' is empty.
 		:raises ValueError:     If parameter 'codeBase' is None.
 		:raises TypeError:      If parameter 'codeBase' is not of type :class:`~pathlib.Path`.
+		:raises TypeError:      If parameter 'parent' is not of type :class:`TestRun`.
 		"""
 		if id is None:
 			raise ValueError(f"Parameter 'id' is None.")
@@ -200,12 +209,30 @@ class UnitTest(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(codeBase)}'.")
 			raise ex
 
+		if parent is not None and not isinstance(parent, TestRun):
+			ex = TypeError(f"Parameter 'parent' is not of type 'TestRun'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =          parent
 		self._id =              id
 		self._name =            name
 		self._className =       className
 		self._methodName =      methodName
 		self._codeBase =        codeBase
 		self._adapterTypeName = adapterTypeName
+
+		if parent is not None:
+			parent._unitTests[id] = self
+
+	@readonly
+	def Parent(self) -> Nullable[TestRun]:
+		"""
+		Read-only property to access the test run the test definition belongs to (:attr:`_parent`).
+
+		:returns: The test run; ``None`` if the test definition belongs to no test run.
+		"""
+		return self._parent
 
 	@readonly
 	def Id(self) -> UUID:
@@ -263,7 +290,7 @@ class UnitTest(metaclass=ExtendedType, slots=True):
 
 
 @export
-class UnitTestResult(TestcaseOutputMixin, metaclass=ExtendedType, slots=True):
+class UnitTestResult(TestcaseOutputMixin, Generic[ParentType], metaclass=ExtendedType, slots=True):
 	"""
 	The result of a test (``<UnitTestResult>``).
 
@@ -277,16 +304,17 @@ class UnitTestResult(TestcaseOutputMixin, metaclass=ExtendedType, slots=True):
 	A data-driven test or an ordered test is a container: it lists the results of its rows or tests as inner results.
 	"""
 
-	_executionId:  UUID                  #: Identifier of this execution of the test.
-	_testId:       UUID                  #: Identifier of the test's definition.
-	_testName:     str                   #: Name of the test.
-	_computerName: str                   #: Name of the computer the test ran on.
-	_outcome:      TestOutcome           #: Outcome of the test.
-	_testListId:   UUID                  #: Identifier of the test list the result is filed in.
-	_startTime:    Nullable[datetime]    #: Time the test started.
-	_endTime:      Nullable[datetime]    #: Time the test ended.
-	_duration:     Nullable[timedelta]   #: Duration of the test.
-	_innerResults: List[UnitTestResult]  #: Results of the rows of a data-driven test or the tests of an ordered test.
+	_parent:       Nullable[ParentType]                  #: The test run or the container the result belongs to.
+	_executionId:  UUID                                  #: Identifier of this execution of the test.
+	_testId:       UUID                                  #: Identifier of the test's definition.
+	_testName:     str                                   #: Name of the test.
+	_computerName: str                                   #: Name of the computer the test ran on.
+	_outcome:      TestOutcome                           #: Outcome of the test.
+	_testListId:   UUID                                  #: Identifier of the test list the result is filed in.
+	_startTime:    Nullable[datetime]                    #: Time the test started.
+	_endTime:      Nullable[datetime]                    #: Time the test ended.
+	_duration:     Nullable[timedelta]                   #: Duration of the test.
+	_innerResults: List[UnitTestResult[UnitTestResult]]  #: Results of a data-driven test's rows or ordered tests.
 
 	def __init__(
 		self,
@@ -303,10 +331,13 @@ class UnitTestResult(TestcaseOutputMixin, metaclass=ExtendedType, slots=True):
 		details: Nullable[str] = None,
 		standardOutput: Nullable[str] = None,
 		standardError: Nullable[str] = None,
-		innerResults: Nullable[Iterable[UnitTestResult]] = None
+		*,
+		parent: Nullable[ParentType] = None
 	) -> None:
 		"""
-		Initializes a test result.
+		Initializes a test result, and adds it to the results of its test run or the inner results of its container.
+
+		The inner results of a container are added by creating them with the container as their parent.
 
 		:param executionId:    Identifier of this execution of the test.
 		:param testId:         Identifier of the test's definition.
@@ -321,7 +352,8 @@ class UnitTestResult(TestcaseOutputMixin, metaclass=ExtendedType, slots=True):
 		:param details:        Optional, stack trace of a failed test.
 		:param standardOutput: Optional, captured standard output of the test.
 		:param standardError:  Optional, captured standard error of the test.
-		:param innerResults:   Optional, results of the rows of a data-driven test or the tests of an ordered test.
+		:param parent:         Optional, the test run or the container's result the result belongs to; the result is
+		                       appended to its results or inner results. Default: ``None``.
 		:raises TypeError:     If parameter 'message' is not of type :class:`str`.
 		:raises TypeError:     If parameter 'details' is not of type :class:`str`.
 		:raises TypeError:     If parameter 'standardOutput' is not of type :class:`str`.
@@ -343,8 +375,7 @@ class UnitTestResult(TestcaseOutputMixin, metaclass=ExtendedType, slots=True):
 		:raises TypeError:     If parameter 'startTime' is not of type :class:`~datetime.datetime`.
 		:raises TypeError:     If parameter 'endTime' is not of type :class:`~datetime.datetime`.
 		:raises TypeError:     If parameter 'duration' is not of type :class:`~datetime.timedelta`.
-		:raises TypeError:     If parameter 'innerResults' is not iterable.
-		:raises TypeError:     If an element of parameter 'innerResults' is not of type :class:`UnitTestResult`.
+		:raises TypeError:     If parameter 'parent' is not of type :class:`TestRun` or :class:`UnitTestResult`.
 		"""
 		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
@@ -384,6 +415,12 @@ class UnitTestResult(TestcaseOutputMixin, metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(duration)}'.")
 			raise ex
 
+		if parent is not None and not isinstance(parent, (TestRun, UnitTestResult)):
+			ex = TypeError(f"Parameter 'parent' is not of type 'TestRun' or 'UnitTestResult'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =       parent
 		self._executionId =  executionId
 		self._testId =       testId
 		self._testName =     testName
@@ -393,21 +430,22 @@ class UnitTestResult(TestcaseOutputMixin, metaclass=ExtendedType, slots=True):
 		self._startTime =    startTime
 		self._endTime =      endTime
 		self._duration =     duration
-
 		self._innerResults = []
-		if innerResults is not None:
-			if not isinstance(innerResults, Iterable):
-				ex = TypeError(f"Parameter 'innerResults' is not iterable.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(innerResults)}'.")
-				raise ex
 
-			for innerResult in innerResults:
-				if not isinstance(innerResult, UnitTestResult):
-					ex = TypeError(f"Element of parameter 'innerResults' is not of type 'UnitTestResult'.")
-					ex.add_note(f"Got type '{getFullyQualifiedName(innerResult)}'.")
-					raise ex
+		if isinstance(parent, TestRun):
+			parent._results.append(self)
+		elif parent is not None:
+			parent._innerResults.append(self)
 
-				self._innerResults.append(innerResult)
+	@readonly
+	def Parent(self) -> Nullable[ParentType]:
+		"""
+		Read-only property to access the test run or the container the result belongs to (:attr:`_parent`).
+
+		:returns: The :class:`TestRun`, or the container's :class:`UnitTestResult` for an inner result; ``None`` if the
+		          result belongs to neither.
+		"""
+		return self._parent
 
 	@readonly
 	def ExecutionId(self) -> UUID:
@@ -497,7 +535,7 @@ class UnitTestResult(TestcaseOutputMixin, metaclass=ExtendedType, slots=True):
 		return self._duration
 
 	@readonly
-	def InnerResults(self) -> List[UnitTestResult]:
+	def InnerResults(self) -> List[UnitTestResult[UnitTestResult]]:
 		"""
 		Read-only property to access the results of the rows of a data-driven test or the tests of an ordered test
 		(:attr:`_innerResults`).
@@ -516,16 +554,16 @@ class TestRun(metaclass=ExtendedType, slots=True):
 	test only in ``total``. :meth:`ToTestsuiteSummary` counts the results instead.
 	"""
 
-	_id:             Nullable[UUID]         #: Identifier of the test run.
-	_name:           str                    #: Name of the test run, e.g. ``user@host 2026-10-08 11:09:27``.
-	_startTime:      Nullable[datetime]     #: Time the test run started.
-	_finishTime:     Nullable[datetime]     #: Time the test run finished.
-	_outcome:        Nullable[TestOutcome]  #: Outcome of the test run.
-	_counters:       Dict[str, int]         #: Counters of the run's summary, by attribute name (e.g. ``total``).
-	_standardOutput: Nullable[str]          #: Messages of the test framework and the test adapter for the whole run.
-	_testLists:      Dict[UUID, str]        #: Names of the test lists, by identifier.
-	_unitTests:      Dict[UUID, UnitTest]   #: Test definitions, by identifier.
-	_results:        List[UnitTestResult]   #: Test results, in the order of the file.
+	_id:             Nullable[UUID]                 #: Identifier of the test run.
+	_name:           str                            #: Name of the test run, e.g. ``user@host 2026-10-08 11:09:27``.
+	_startTime:      Nullable[datetime]             #: Time the test run started.
+	_finishTime:     Nullable[datetime]             #: Time the test run finished.
+	_outcome:        Nullable[TestOutcome]          #: Outcome of the test run.
+	_counters:       Dict[str, int]                 #: Counters of the run's summary, by attribute name (e.g. ``total``).
+	_standardOutput: Nullable[str]                  #: Messages of the test framework and the test adapter for the run.
+	_testLists:      Dict[UUID, str]                #: Names of the test lists, by identifier.
+	_unitTests:      Dict[UUID, UnitTest]           #: Test definitions, by identifier.
+	_results:        List[UnitTestResult[TestRun]]  #: Test results, in the order of the file.
 
 	def __init__(
 		self,
@@ -536,12 +574,12 @@ class TestRun(metaclass=ExtendedType, slots=True):
 		outcome: Nullable[TestOutcome] = None,
 		counters: Nullable[Mapping[str, int]] = None,
 		standardOutput: Nullable[str] = None,
-		testLists: Nullable[Mapping[UUID, str]] = None,
-		unitTests: Nullable[Iterable[UnitTest]] = None,
-		results: Nullable[Iterable[UnitTestResult]] = None
+		testLists: Nullable[Mapping[UUID, str]] = None
 	) -> None:
 		"""
 		Initializes a test run.
+
+		Its test definitions and results are added by creating them with this test run as their parent.
 
 		:param name:           Name of the test run.
 		:param id:             Optional, identifier of the test run.
@@ -551,8 +589,6 @@ class TestRun(metaclass=ExtendedType, slots=True):
 		:param counters:       Optional, counters of the run's summary, by attribute name.
 		:param standardOutput: Optional, messages of the test framework and the test adapter for the whole run.
 		:param testLists:      Optional, names of the test lists, by identifier.
-		:param unitTests:      Optional, test definitions.
-		:param results:        Optional, test results.
 		:raises ValueError:    If parameter 'name' is None.
 		:raises TypeError:     If parameter 'name' is not of type :class:`str`.
 		:raises ValueError:    If parameter 'name' is empty.
@@ -567,10 +603,6 @@ class TestRun(metaclass=ExtendedType, slots=True):
 		:raises TypeError:     If parameter 'testLists' is not a mapping.
 		:raises TypeError:     If a key of parameter 'testLists' is not of type :class:`~uuid.UUID`.
 		:raises TypeError:     If a value of parameter 'testLists' is not of type :class:`str`.
-		:raises TypeError:     If parameter 'unitTests' is not iterable.
-		:raises TypeError:     If an element of parameter 'unitTests' is not of type :class:`UnitTest`.
-		:raises TypeError:     If parameter 'results' is not iterable.
-		:raises TypeError:     If an element of parameter 'results' is not of type :class:`UnitTestResult`.
 		"""
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
@@ -626,34 +658,7 @@ class TestRun(metaclass=ExtendedType, slots=True):
 				target[key] = value
 
 		self._unitTests = {}
-		if unitTests is not None:
-			if not isinstance(unitTests, Iterable):
-				ex = TypeError(f"Parameter 'unitTests' is not iterable.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(unitTests)}'.")
-				raise ex
-
-			for unitTest in unitTests:
-				if not isinstance(unitTest, UnitTest):
-					ex = TypeError(f"Element of parameter 'unitTests' is not of type 'UnitTest'.")
-					ex.add_note(f"Got type '{getFullyQualifiedName(unitTest)}'.")
-					raise ex
-
-				self._unitTests[unitTest._id] = unitTest
-
-		self._results = []
-		if results is not None:
-			if not isinstance(results, Iterable):
-				ex = TypeError(f"Parameter 'results' is not iterable.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(results)}'.")
-				raise ex
-
-			for result in results:
-				if not isinstance(result, UnitTestResult):
-					ex = TypeError(f"Element of parameter 'results' is not of type 'UnitTestResult'.")
-					ex.add_note(f"Got type '{getFullyQualifiedName(result)}'.")
-					raise ex
-
-				self._results.append(result)
+		self._results =   []
 
 	@readonly
 	def Id(self) -> Nullable[UUID]:
@@ -749,7 +754,7 @@ class TestRun(metaclass=ExtendedType, slots=True):
 		return self._unitTests
 
 	@readonly
-	def Results(self) -> List[UnitTestResult]:
+	def Results(self) -> List[UnitTestResult[TestRun]]:
 		"""
 		Read-only property to access the test results (:attr:`_results`).
 
@@ -940,26 +945,27 @@ class Document(TestRun, ut_Document):
 
 			for element in rootElement.iterfind("trx:TestDefinitions/trx:UnitTest", namespaces):  # type: _Element
 				methodElement = element.find("trx:TestMethod", namespaces)
-				unitTest = UnitTest(
+				UnitTest(
 					UUID(element.attrib["id"]),
 					element.attrib["name"],
 					methodElement.attrib["className"],
 					methodElement.attrib["name"],
 					Path(PureWindowsPath(methodElement.attrib["codeBase"]).as_posix()),
-					methodElement.attrib["adapterTypeName"]
+					methodElement.attrib["adapterTypeName"],
+					parent=self
 				)
-				self._unitTests[unitTest._id] = unitTest
 
 			for element in rootElement.iterfind("trx:Results/*", namespaces):  # type: _Element
-				self._results.append(self._ConvertResult(element))
+				self._ConvertResult(element, self)
 
 		self._modelConversion = sw.Duration
 
-	def _ConvertResult(self, resultElement: _Element) -> UnitTestResult:
+	def _ConvertResult(self, resultElement: _Element, parent: TestRun | UnitTestResult) -> UnitTestResult:
 		"""
 		Convert a ``<UnitTestResult>`` or ``<TestResultAggregation>`` element and its inner results to a test result.
 
 		:param resultElement: The XML element node representing a test result.
+		:param parent:        The test run or the container's result the test result belongs to.
 		:returns:             The test result.
 		"""
 		namespaces = {"trx": TRX_NAMESPACE}
@@ -973,7 +979,7 @@ class Document(TestRun, ut_Document):
 				days=int(days), hours=int(hours), minutes=int(minutes), seconds=int(seconds), microseconds=int(ticks) // 10
 			)
 
-		return UnitTestResult(
+		result = UnitTestResult(
 			UUID(attributes["executionId"]),
 			UUID(attributes["testId"]),
 			attributes["testName"],
@@ -987,7 +993,10 @@ class Document(TestRun, ut_Document):
 			details=resultElement.findtext("trx:Output/trx:ErrorInfo/trx:StackTrace", namespaces=namespaces),
 			standardOutput=resultElement.findtext("trx:Output/trx:StdOut", namespaces=namespaces),
 			standardError=resultElement.findtext("trx:Output/trx:StdErr", namespaces=namespaces),
-			innerResults=(
-				self._ConvertResult(element) for element in resultElement.iterfind("trx:InnerResults/*", namespaces)
-			)
+			parent=parent
 		)
+
+		for element in resultElement.iterfind("trx:InnerResults/*", namespaces):  # type: _Element
+			self._ConvertResult(element, result)
+
+		return result

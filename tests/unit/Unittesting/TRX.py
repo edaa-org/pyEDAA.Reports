@@ -36,7 +36,7 @@ The reports in :file:`tests/data/TRX` are written by VSTest's TRX logger: :file:
 """
 from datetime                         import datetime, timedelta, timezone
 from pathlib                          import Path
-from typing                           import Dict, Iterable, Optional as Nullable
+from typing                           import Dict, Optional as Nullable
 from uuid                             import UUID
 
 from pyEDAA.Reports.Unittesting       import UnittestError, DuplicateTestcaseError, TestcaseStatus, TestsuiteKind
@@ -352,47 +352,53 @@ class Conversion(Testcase):
 	def setUpClass(cls) -> None:
 		OUTPUT.mkdir(parents=True, exist_ok=True)
 
-	def _testRun(self, *results: TRX.UnitTestResult) -> TRX.TestRun:
+	def _testRun(self) -> TRX.TestRun:
 		"""
 		Create a test run with one test definition.
 
-		:param results: The test run's results.
-		:returns:       The test run.
+		:returns: The test run.
 		"""
-		unitTest = TRX.UnitTest(
-			UUID(int=1), "Rows", "Sample.Tests.CalculatorTests", "Rows", Path("/bin/Sample.Tests.dll"), "executor://mstest"
+		testRun = TRX.TestRun("run")
+		_ = TRX.UnitTest(
+			UUID(int=1),
+			"Rows",
+			"Sample.Tests.CalculatorTests",
+			"Rows",
+			Path("/bin/Sample.Tests.dll"),
+			"executor://mstest",
+			parent=testRun
 		)
-		return TRX.TestRun("run", unitTests=(unitTest, ), results=results)
+		return testRun
 
 	def _result(
 		self,
+		parent: TRX.TestRun | TRX.UnitTestResult,
 		number: int,
 		name: str,
 		outcome: TRX.TestOutcome,
-		testId: int = 1,
-		innerResults: Nullable[Iterable[TRX.UnitTestResult]] = None
+		testId: int = 1
 	) -> TRX.UnitTestResult:
 		"""
 		Create a test result.
 
-		:param number:       Number of the execution.
-		:param name:         Name of the test.
-		:param outcome:      Outcome of the test.
-		:param testId:       Optional, number of the test definition.
-		:param innerResults: Optional, inner results.
-		:returns:            The test result.
+		:param parent:  The test run or the container's result the result belongs to.
+		:param number:  Number of the execution.
+		:param name:    Name of the test.
+		:param outcome: Outcome of the test.
+		:param testId:  Optional, number of the test definition.
+		:returns:       The test result.
 		"""
 		return TRX.UnitTestResult(
-			UUID(int=100 + number), UUID(int=testId), name, "host", outcome, UUID(int=2), innerResults=innerResults
+			UUID(int=100 + number), UUID(int=testId), name, "host", outcome, UUID(int=2), parent=parent
 		)
 
 	def test_InnerResults(self) -> None:
 		"""The rows of a data-driven test become test cases, the container doesn't."""
-		container = self._result(0, "Rows", TRX.TestOutcome.Failed, innerResults=(
-			self._result(1, "Rows (1,1)", TRX.TestOutcome.Passed),
-			self._result(2, "Rows (2,3)", TRX.TestOutcome.Failed)
-		))
-		summary = self._testRun(container).ToTestsuiteSummary()
+		testRun = self._testRun()
+		container = self._result(testRun, 0, "Rows", TRX.TestOutcome.Failed)
+		_ = self._result(container, 1, "Rows (1,1)", TRX.TestOutcome.Passed)
+		_ = self._result(container, 2, "Rows (2,3)", TRX.TestOutcome.Failed)
+		summary = testRun.ToTestsuiteSummary()
 
 		self.assertEqual(
 			{"CalculatorTests.Rows (1,1)": TestcaseStatus.Passed, "CalculatorTests.Rows (2,3)": TestcaseStatus.Failed},
@@ -401,9 +407,9 @@ class Conversion(Testcase):
 
 	def test_Outcomes(self) -> None:
 		"""Each outcome maps to a status a test suite counts."""
-		testRun = self._testRun(*(
-			self._result(number, outcome.name, outcome) for number, outcome in enumerate(TRX.TestOutcome)
-		))
+		testRun = self._testRun()
+		for number, outcome in enumerate(TRX.TestOutcome):
+			_ = self._result(testRun, number, outcome.name, outcome)
 		summary = testRun.ToTestsuiteSummary()
 
 		self.assertEqual(len(TRX.TestOutcome), summary.Tests)
@@ -413,18 +419,20 @@ class Conversion(Testcase):
 		)
 
 	def test_UnknownTestId(self) -> None:
+		testRun = self._testRun()
+		_ = self._result(testRun, 1, "Other", TRX.TestOutcome.Passed, testId=3)
 		with self.assertRaises(UnittestError) as context:
-			_ = self._testRun(self._result(1, "Other", TRX.TestOutcome.Passed, testId=3)).ToTestsuiteSummary()
+			_ = testRun.ToTestsuiteSummary()
 
 		self.assertEqual("Test result 'Other' refers to no test definition.", str(context.exception))
 		self.assertEqual([f"Got test ID '{UUID(int=3)}'."], context.exception.__notes__)
 
 	def test_DuplicateName(self) -> None:
+		testRun = self._testRun()
+		_ = self._result(testRun, 1, "Rows (1,1)", TRX.TestOutcome.Passed)
+		_ = self._result(testRun, 2, "Rows (1,1)", TRX.TestOutcome.Passed)
 		with self.assertRaises(DuplicateTestcaseError):
-			_ = self._testRun(
-				self._result(1, "Rows (1,1)", TRX.TestOutcome.Passed),
-				self._result(2, "Rows (1,1)", TRX.TestOutcome.Passed)
-			).ToTestsuiteSummary()
+			_ = testRun.ToTestsuiteSummary()
 
 	def test_WindowsPaths(self) -> None:
 		"""A TRX file written on Windows names the assembly with backslashes; a duration can exceed a day."""
@@ -445,6 +453,34 @@ class Conversion(Testcase):
 			{result.TestName: result for result in document.Results}["MyLibrary.Tests.CalculatorTests.Add"].Duration
 		)
 
+	def test_InnerResultsOfFile(self) -> None:
+		"""A result's inner results are read with the result as their parent."""
+		path = OUTPUT / "InnerResults.trx"
+		executionId = "238807ca-9aa5-4535-ade0-092c4f073339"
+		innerResult = (
+			f'<UnitTestResult executionId="{UUID(int=1)}" parentExecutionId="{executionId}" '
+			f'testId="e4c2dc91-3fbe-de13-40ed-9b9620c92fa9" testName="MyLibrary.Tests.CalculatorTests.Add (row)" '
+			f'computerName="dffa20ef8728" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" '
+			f'testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="{UUID(int=1)}" />'
+		)
+		path.write_text(
+			XUNIT_FILE.read_text(encoding="utf-8-sig").replace(
+				f'relativeResultsDirectory="{executionId}" />',
+				f'relativeResultsDirectory="{executionId}"><InnerResults>{innerResult}</InnerResults></UnitTestResult>'
+			),
+			encoding="utf-8"
+		)
+		document = TRX.Document(path, analyzeAndConvert=True)
+		container = {result.TestName: result for result in document.Results}["MyLibrary.Tests.CalculatorTests.Add"]
+
+		self.assertEqual(11, len(document.Results))
+		self.assertIs(document, container.Parent)
+		self.assertEqual(
+			["MyLibrary.Tests.CalculatorTests.Add (row)"], [innerResult.TestName for innerResult in container.InnerResults]
+		)
+		self.assertIs(container, container.InnerResults[0].Parent)
+		self.assertIs(TestcaseStatus.Passed, statuses(document.ToTestsuiteSummary())["CalculatorTests.Add (row)"])
+
 
 class DataModel(Testcase):
 	"""Parameter checks of the TRX data model."""
@@ -463,6 +499,11 @@ class DataModel(Testcase):
 			_ = TRX.UnitTest(UUID(int=1), "Name", "Class", "Method", None, "executor://a")
 		self.assertEqual("Parameter 'codeBase' is None.", str(context.exception))
 
+		with self.assertRaises(TypeError) as context:
+			_ = TRX.UnitTest(UUID(int=1), "Name", "Class", "Method", Path("a.dll"), "executor://a", parent="run")
+		self.assertEqual("Parameter 'parent' is not of type 'TestRun'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
 	def test_UnitTestResult(self) -> None:
 		with self.assertRaises(ValueError) as context:
 			_ = TRX.UnitTestResult(UUID(int=1), None, "Name", "host", TRX.TestOutcome.Passed, UUID(int=2))
@@ -474,9 +515,10 @@ class DataModel(Testcase):
 
 		with self.assertRaises(TypeError) as context:
 			_ = TRX.UnitTestResult(
-				UUID(int=1), UUID(int=1), "Name", "host", TRX.TestOutcome.Passed, UUID(int=2), innerResults=(1, )
+				UUID(int=1), UUID(int=1), "Name", "host", TRX.TestOutcome.Passed, UUID(int=2), parent="run"
 			)
-		self.assertEqual("Element of parameter 'innerResults' is not of type 'UnitTestResult'.", str(context.exception))
+		self.assertEqual("Parameter 'parent' is not of type 'TestRun' or 'UnitTestResult'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
 	def test_TestRun(self) -> None:
 		with self.assertRaises(ValueError) as context:
@@ -491,3 +533,47 @@ class DataModel(Testcase):
 		with self.assertRaises(TypeError) as context:
 			_ = TRX.TestRun("run", outcome="Failed")
 		self.assertEqual("Parameter 'outcome' is not of type 'TestOutcome'.", str(context.exception))
+
+
+class Parent(Testcase):
+	"""Parent relations of the TRX data model."""
+
+	def _result(self, number: int, parent: Nullable[TRX.TestRun | TRX.UnitTestResult] = None) -> TRX.UnitTestResult:
+		"""
+		Create a test result.
+
+		:param number: Number of the execution.
+		:param parent: Optional, the test run or the container's result the result belongs to.
+		:returns:      The test result.
+		"""
+		return TRX.UnitTestResult(
+			UUID(int=number), UUID(int=1), "Name", "host", TRX.TestOutcome.Passed, UUID(int=2), parent=parent
+		)
+
+	def test_UnitTest(self) -> None:
+		testRun = TRX.TestRun("run")
+		unitTest = TRX.UnitTest(UUID(int=1), "Name", "Class", "Method", Path("a.dll"), "executor://a", parent=testRun)
+		orphan = TRX.UnitTest(UUID(int=2), "Name", "Class", "Method", Path("a.dll"), "executor://a")
+
+		self.assertIs(testRun, unitTest.Parent)
+		self.assertEqual({UUID(int=1): unitTest}, testRun.UnitTests)
+		self.assertIsNone(orphan.Parent)
+
+	def test_UnitTestResult(self) -> None:
+		testRun = TRX.TestRun("run")
+		container = self._result(1, testRun)
+		innerResult = self._result(2, container)
+		orphan = self._result(3)
+
+		self.assertIs(testRun, container.Parent)
+		self.assertIs(container, innerResult.Parent)
+		self.assertEqual([container], testRun.Results)
+		self.assertEqual([innerResult], container.InnerResults)
+		self.assertIsNone(orphan.Parent)
+
+	def test_Document(self) -> None:
+		"""A document is the parent of its test definitions and results."""
+		document = TRX.Document(MSTEST_FILE, analyzeAndConvert=True)
+
+		self.assertTrue(all(unitTest.Parent is document for unitTest in document.UnitTests.values()))
+		self.assertTrue(all(result.Parent is document for result in document.Results))
