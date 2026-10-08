@@ -85,6 +85,10 @@ __all__ = ["SCHEMA"]
 
 SCHEMA = "Gcov-JSON.schema.json"  #: The JSON Schema each JSON object of a report is validated against.
 
+# A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
+# body's namespace, where annotations are evaluated, binds the name to the property.
+_Path = Path
+
 
 @export
 class Line(metaclass=ExtendedType, slots=True):
@@ -280,7 +284,7 @@ class File(metaclass=ExtendedType, slots=True):
 	A line several functions share - e.g. the instantiations of a template - is listed once per function.
 	"""
 
-	_path:      str                  #: The file's path, as the compiler named it.
+	_path:      _Path                #: The file's path, as the compiler named it.
 	_functions: dict[str, Function]  #: The functions, by mangled name.
 	_lines:     list[Line]           #: The executable lines, in order; a line of several functions once per function.
 
@@ -290,12 +294,12 @@ class File(metaclass=ExtendedType, slots=True):
 
 		:param record: The JSON object of the file.
 		"""
-		self._path =      record["file"]
+		self._path =      Path(record["file"].replace("\\", "/"))
 		self._functions = {function["name"]: Function(function) for function in record["functions"]}
 		self._lines =     [Line(line) for line in record["lines"]]
 
 	@readonly
-	def Path(self) -> str:
+	def Path(self) -> Path:
 		"""
 		Read-only property to access the file's path (:attr:`_path`).
 
@@ -328,11 +332,11 @@ class DataFile(metaclass=ExtendedType, slots=True):
 	The coverage measured in a data file (GCDA): the versions of the format and of GCC, and the source files.
 	"""
 
-	_name:                    str              #: Name of the data file, as gcov was called with it.
-	_formatVersion:           str              #: Version of the report format.
-	_gccVersion:              str              #: Version of GCC.
-	_currentWorkingDirectory: Nullable[str]    #: The directory the compiler ran in, if the report says.
-	_files:                   dict[str, File]  #: The source files, by path.
+	_path:                    _Path              #: Path of the data file, as gcov was called with it.
+	_formatVersion:           str                #: Version of the report format.
+	_gccVersion:              str                #: Version of GCC.
+	_currentWorkingDirectory: Nullable[_Path]    #: The directory the compiler ran in, if the report says.
+	_files:                   dict[_Path, File]  #: The source files, by path.
 
 	def __init__(self, record: dict[str, Any]) -> None:
 		"""
@@ -340,20 +344,27 @@ class DataFile(metaclass=ExtendedType, slots=True):
 
 		:param record: The JSON object of the data file: a report's root object.
 		"""
-		self._name =                    record["data_file"]
+		self._path =                    Path(record["data_file"].replace("\\", "/"))
 		self._formatVersion =           record["format_version"]
 		self._gccVersion =              record["gcc_version"]
-		self._currentWorkingDirectory = record.get("current_working_directory")
-		self._files =                   {file["file"]: File(file) for file in record["files"]}
+		self._currentWorkingDirectory = None
+		self._files =                   {}
+
+		if (directory := record.get("current_working_directory")) is not None:
+			self._currentWorkingDirectory = Path(directory.replace("\\", "/"))
+
+		for fileRecord in record["files"]:
+			file =                    File(fileRecord)
+			self._files[file._path] = file
 
 	@readonly
-	def Name(self) -> str:
+	def Path(self) -> Path:
 		"""
-		Read-only property to access the name of the data file (:attr:`_name`).
+		Read-only property to access the path of the data file (:attr:`_path`).
 
-		:returns: The name, as gcov was called with it, e.g. ``main.c``.
+		:returns: The path, as gcov was called with it, e.g. ``main.c``.
 		"""
-		return self._name
+		return self._path
 
 	@readonly
 	def FormatVersion(self) -> str:
@@ -374,7 +385,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		return self._gccVersion
 
 	@readonly
-	def CurrentWorkingDirectory(self) -> Nullable[str]:
+	def CurrentWorkingDirectory(self) -> Nullable[Path]:
 		"""
 		Read-only property to access the directory the compiler ran in (:attr:`_currentWorkingDirectory`).
 
@@ -383,7 +394,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		return self._currentWorkingDirectory
 
 	@readonly
-	def Files(self) -> dict[str, File]:
+	def Files(self) -> dict[Path, File]:
 		"""
 		Read-only property to access the source files (:attr:`_files`).
 
@@ -531,8 +542,7 @@ class Document(Coverage, cc_Document):
 		"""
 		name = self._path.name.removesuffix(".gz").removesuffix(".json").removesuffix(".gcov")
 		directories = {
-			Path(dataFile._currentWorkingDirectory) for dataFile in self._dataFiles
-			if dataFile._currentWorkingDirectory is not None
+			dataFile._currentWorkingDirectory for dataFile in self._dataFiles if dataFile._currentWorkingDirectory is not None
 		}
 		summary = CoverageSummary(name if name != "" else self._path.name, sourceDirectories=sorted(directories))
 
