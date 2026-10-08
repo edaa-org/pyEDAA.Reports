@@ -113,7 +113,7 @@ class File(metaclass=ExtendedType, slots=True):
 	_directory: _Path            #: The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
 	_sha1:      str              #: SHA-1 checksum of the file's content.
 	_mode:      CoverageMode     #: Kind of coverage, e.g. statement coverage.
-	_maxLine:   int              #: The last line with a coverage point.
+	_lastLine:  int              #: The last line with a coverage point.
 	_result:    dict[int, bool]  #: Per line with a coverage point, whether the line ran.
 
 	def __init__(
@@ -122,7 +122,7 @@ class File(metaclass=ExtendedType, slots=True):
 		directory: Path,
 		sha1: str,
 		mode: CoverageMode,
-		maxLine: int,
+		lastLine: int,
 		result: dict[int, bool]
 	) -> None:
 		"""
@@ -132,14 +132,14 @@ class File(metaclass=ExtendedType, slots=True):
 		:param directory: The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
 		:param sha1:      SHA-1 checksum of the file's content.
 		:param mode:      Kind of coverage, e.g. statement coverage.
-		:param maxLine:   The last line with a coverage point.
+		:param lastLine:  The last line with a coverage point.
 		:param result:    Per line with a coverage point, whether the line ran.
 		"""
 		self._name =      name
 		self._directory = directory
 		self._sha1 =      sha1
 		self._mode =      mode
-		self._maxLine =   maxLine
+		self._lastLine =  lastLine
 		self._result =    result
 
 	@readonly
@@ -188,13 +188,13 @@ class File(metaclass=ExtendedType, slots=True):
 		return self._mode
 
 	@readonly
-	def MaxLine(self) -> int:
+	def LastLine(self) -> int:
 		"""
-		Read-only property to access the last line with a coverage point (:attr:`_maxLine`).
+		Read-only property to access the last line with a coverage point (:attr:`_lastLine`).
 
 		:returns: The line number.
 		"""
-		return self._maxLine
+		return self._lastLine
 
 	@readonly
 	def Result(self) -> dict[int, bool]:
@@ -356,9 +356,9 @@ class Document(Report, cc_Document):
 
 				if (path := file.Path) in files:
 					raise CodeCoverageError(f"GHDL coverage file '{self._path}' names source file '{path}' twice.")
-				elif (lastLine := max(file._result)) > file._maxLine:
+				elif (line := max(file._result)) > file._lastLine:
 					ex = CodeCoverageError(f"GHDL coverage file '{self._path}' names a line of '{path}' beyond 'max-line'.")
-					ex.add_note(f"Got line {lastLine} for 'max-line' {file._maxLine}.")
+					ex.add_note(f"Got line {line} for 'max-line' {file._lastLine}.")
 					raise ex
 
 				files[path] = file
@@ -434,7 +434,7 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 		"""
 		Merge a report: add its source files, or merge them into the files of the same path.
 
-		A merged line ran, if it ran in one of the reports; a merged file's :attr:`File.MaxLine` is the largest.
+		A merged line ran, if it ran in one of the reports; a merged file's :attr:`File.LastLine` is the largest.
 
 		:param report:             The report to merge.
 		:raises ValueError:        If parameter ``report`` is ``None``.
@@ -451,14 +451,14 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 		for path, file in report._files.items():
 			if (merged := self._files.get(path)) is None:
 				self._files[path] = File(
-					file._name, file._directory, file._sha1, file._mode, file._maxLine, dict(file._result)
+					file._name, file._directory, file._sha1, file._mode, file._lastLine, dict(file._result)
 				)
 			elif merged._sha1 != file._sha1:
 				ex = CodeCoverageError(f"Content of source file '{path}' differs from the reports merged before.")
 				ex.add_note(f"Got SHA-1 checksum '{file._sha1}' instead of '{merged._sha1}'.")
 				raise ex
 			else:
-				merged._maxLine = max(merged._maxLine, file._maxLine)
+				merged._lastLine = max(merged._lastLine, file._lastLine)
 				result = merged._result
 				for number, ran in file._result.items():
 					result[number] = ran or result.get(number, False)

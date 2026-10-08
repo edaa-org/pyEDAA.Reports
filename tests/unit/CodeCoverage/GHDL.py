@@ -114,7 +114,7 @@ class FormatModel(Testcase):
 		counter = report.Files[Path("src/Counter.vhdl")]
 		self.assertEqual(
 			(Path("src/Counter.vhdl"), Path("."), "1a6afa99b014932646ce6591101aa1ac3695349a", CoverageMode.Statement, 35),
-			(counter.Name, counter.Directory, counter.SHA1, counter.Mode, counter.MaxLine)
+			(counter.Name, counter.Directory, counter.SHA1, counter.Mode, counter.LastLine)
 		)
 		self.assertEqual({25: True, 26: True, 27: False, 29: True, 34: True, 35: True}, counter.Result)
 
@@ -192,7 +192,7 @@ class Merge(Testcase):
 
 		self.assertEqual("Counter", merged.Name)
 		self.assertEqual([count, reset], merged.Reports)
-		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].MaxLine)
+		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].LastLine)
 
 		summary = merged.ToCoverageSummary()
 		self.assertEqual("Counter", summary.Name)
@@ -224,7 +224,7 @@ class Merge(Testcase):
 		merged.Merge(Document(RESET, analyzeAndConvert=True))
 		self.assertEqual(25, merged.ToCoverageSummary().CoveredLines)
 
-	def test_Merge_MaxLine(self) -> None:
+	def test_Merge_LastLine(self) -> None:
 		"""A merged file's last line with a coverage point is the largest of the merged files."""
 		content = loads(COUNT.read_text(encoding="utf-8"))
 		del content["outputs"][0]["result"]["66"]
@@ -233,7 +233,7 @@ class Merge(Testcase):
 			shorter = Document(_write(directory, content), analyzeAndConvert=True)
 
 		merged = MergedReport("Counter", (shorter, Document(COUNT, analyzeAndConvert=True)))
-		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].MaxLine)
+		self.assertEqual(66, merged.Files[Path("tb/Counter_tb.vhdl")].LastLine)
 
 	def test_Merge_Checksum(self) -> None:
 		"""A source file changed between two runs can't be merged."""
@@ -357,7 +357,7 @@ class Consistency(Testcase):
 			f"GHDL coverage file '{jsonFile}' names source file 'tb/Counter_tb.vhdl' twice.", str(context.exception)
 		)
 
-	def test_BeyondMaxLine(self) -> None:
+	def test_BeyondLastLine(self) -> None:
 		content = loads(COUNT.read_text(encoding="utf-8"))
 		content["outputs"][0]["max-line"] = 60
 		with TemporaryDirectory() as directory:
