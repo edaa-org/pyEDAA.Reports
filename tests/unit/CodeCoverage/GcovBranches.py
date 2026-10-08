@@ -30,9 +30,13 @@
 #
 #
 """Unit tests of the records of a line of GCC's gcov JSON format: its branches, calls and conditions."""
+from json                                      import dumps
 from pathlib                                   import Path
+from tempfile                                  import TemporaryDirectory
+from typing                                    import Any
 
-from pyEDAA.Reports.CodeCoverage.Gcov          import File
+from pyEDAA.Reports.CodeCoverage               import CodeCoverageError
+from pyEDAA.Reports.CodeCoverage.Gcov          import Document, File
 from pyEDAA.Reports.CodeCoverage.Gcov.Branches import Branch, Call, Condition
 from pyEDAA.Reports.CodeCoverage.Gcov.Records  import Line
 from pyTooling.Testing                         import Testcase
@@ -182,3 +186,69 @@ class Parsing(Testcase):
 
 		self.assertEqual((6, 5, [2], []),
 		                 (condition.Count, condition.Covered, condition.NotCoveredTrue, condition.NotCoveredFalse))
+
+
+class Schema(Testcase):
+	"""The JSON Schema of each format version checks the records of a line."""
+
+	def _Analyze(self, formatVersion: str, line: dict[str, Any]) -> CodeCoverageError:
+		"""
+		Read a report of one line, which its JSON Schema rejects.
+
+		:param formatVersion: The format version the report states.
+		:param line:          The JSON object of the line.
+		:returns:             The validation error.
+		"""
+		document = {
+			"format_version": formatVersion, "gcc_version": "14.2.0", "data_file": "main.c", "files": [
+				{"file": "main.c", "functions": [], "lines": [line]}
+			]
+		}
+		with TemporaryDirectory() as directory:
+			jsonFile = Path(directory) / "test.gcov.json"
+			jsonFile.write_text(dumps(document), encoding="utf-8")
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(
+			f"Validation error for '{jsonFile}' using JSON Schema 'Gcov-{formatVersion}.schema.json'.",
+			str(context.exception)
+		)
+		return context.exception
+
+	def test_Format1_Branch(self) -> None:
+		"""The schema of format 1 rejects the basic blocks of a branch."""
+		error = self._Analyze("1", {"line_number": 1, "count": 1, "unexecuted_block": False, "branches": [
+			{"count": 1, "throw": False, "fallthrough": True, "source_block_id": 2, "destination_block_id": 3}
+		]})
+
+		self.assertEqual([
+			"/files/0/lines/0/branches/0: Additional properties are not allowed ('destination_block_id', 'source_block_id' "
+			"were unexpected)"
+		], error.__notes__)
+
+	def test_Format2_Branch(self) -> None:
+		"""gcov of GCC 14 and later writes the basic blocks of a branch."""
+		error = self._Analyze("2", {
+			"line_number": 1, "count": 1, "unexecuted_block": False, "block_ids": [2], "calls": [], "conditions": [],
+			"branches": [{"count": 1, "throw": False, "fallthrough": True}]
+		})
+
+		self.assertEqual([
+			"/files/0/lines/0/branches/0: 'source_block_id' is a required property",
+			"/files/0/lines/0/branches/0: 'destination_block_id' is a required property"
+		], error.__notes__)
+
+	def test_Format2_Records(self) -> None:
+		"""The schema of format 2 checks the fields of a call and a condition."""
+		error = self._Analyze("2", {
+			"line_number": 1, "count": 1, "unexecuted_block": False, "block_ids": [2], "branches": [],
+			"calls": [{"source_block_id": 2, "destination_block_id": 3}],
+			"conditions": [{"count": 4, "covered": 2, "not_covered_true": [], "not_covered_false": [0, 1], "terms": 2}]
+		})
+
+		self.assertEqual([
+			"/files/0/lines/0/calls/0: 'returned' is a required property",
+			"/files/0/lines/0/conditions/0: Additional properties are not allowed ('terms' was unexpected)"
+		], error.__notes__)
