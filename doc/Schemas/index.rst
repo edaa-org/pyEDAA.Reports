@@ -61,7 +61,8 @@ Available schemas
      - :class:`pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit.Document`
    * - :ref:`Open Test Reporting 0.2.0 <SCHEMAS/OpenTestReporting>`
      - :file:`OpenTestReporting/OpenTestReporting-0.2.0.xsd`
-     - :class:`pyEDAA.Reports.Unittesting.OpenTestReporting.Events.Document`
+     - :class:`pyEDAA.Reports.Unittesting.OpenTestReporting.Events.Document`,
+       :class:`pyEDAA.Reports.Unittesting.OpenTestReporting.Hierarchy.Document`
    * - :ref:`pyTooling TestReport v0.1 <SCHEMAS/TestReport-v0.1>`
      - :file:`TestReport-v0.1.xsd`
      - :class:`pyEDAA.Reports.Unittesting.pyTooling.Document`
