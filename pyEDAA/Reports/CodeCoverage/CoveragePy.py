@@ -93,15 +93,18 @@ _Path = Path
 class Summary(metaclass=ExtendedType, slots=True):
 	"""
 	A ``summary``: the counters coverage.py computed for the whole report, a file or a region.
+
+	coverage.py measures lines. What it calls a statement (``num_statements``) is a line number: a statement spanning
+	several lines counts by its first line, several statements on one line count once.
 	"""
 
-	_statementCount:     int            #: Number of statements, without the excluded ones.
-	_coveredLines:       int            #: Number of executed statements.
-	_missingLines:       int            #: Number of statements, which never ran.
-	_excludedLines:      int            #: Number of excluded lines.
-	_percentCovered:     float          #: Coverage of statements and branches, in percent.
+	_lineCount:          int            #: Number of executable lines, without the excluded ones.
+	_coveredLineCount:   int            #: Number of executed lines.
+	_missingLineCount:   int            #: Number of executable lines, which never ran.
+	_excludedLineCount:  int            #: Number of excluded lines.
+	_percentCovered:     float          #: Coverage of lines and branches, in percent.
 	_branchCount:        Nullable[int]  #: Number of branches, if branch coverage was measured.
-	_coveredBranches:    Nullable[int]  #: Number of taken branches, if branch coverage was measured.
+	_coveredBranchCount: Nullable[int]  #: Number of taken branches, if branch coverage was measured.
 	_partialBranchCount: Nullable[int]  #: Number of partially covered lines, if branch coverage was measured.
 
 	def __init__(self, summary: dict[str, Any]) -> None:
@@ -110,55 +113,57 @@ class Summary(metaclass=ExtendedType, slots=True):
 
 		:param summary: The JSON object ``summary``.
 		"""
-		self._statementCount =     summary["num_statements"]
-		self._coveredLines =       summary["covered_lines"]
-		self._missingLines =       summary["missing_lines"]
-		self._excludedLines =      summary["excluded_lines"]
+		self._lineCount =          summary["num_statements"]
+		self._coveredLineCount =   summary["covered_lines"]
+		self._missingLineCount =   summary["missing_lines"]
+		self._excludedLineCount =  summary["excluded_lines"]
 		self._percentCovered =     summary["percent_covered"]
 		self._branchCount =        summary.get("num_branches")
-		self._coveredBranches =    summary.get("covered_branches")
+		self._coveredBranchCount = summary.get("covered_branches")
 		self._partialBranchCount = summary.get("num_partial_branches")
 
 	@readonly
-	def StatementCount(self) -> int:
+	def LineCount(self) -> int:
 		"""
-		Read-only property to access the number of statements, without the excluded ones (:attr:`_statementCount`).
+		Read-only property to access the number of executable lines, without the excluded ones (:attr:`_lineCount`).
 
-		:returns: The number of statements.
-		"""
-		return self._statementCount
+		coverage.py states it as ``num_statements``.
 
-	@readonly
-	def CoveredLines(self) -> int:
+		:returns: The number of executable lines.
 		"""
-		Read-only property to access the number of executed statements (:attr:`_coveredLines`).
-
-		:returns: The number of executed statements.
-		"""
-		return self._coveredLines
+		return self._lineCount
 
 	@readonly
-	def MissingLines(self) -> int:
+	def CoveredLineCount(self) -> int:
 		"""
-		Read-only property to access the number of statements, which never ran (:attr:`_missingLines`).
+		Read-only property to access the number of executed lines (:attr:`_coveredLineCount`).
 
-		:returns: The number of missing statements.
+		:returns: The number of executed lines.
 		"""
-		return self._missingLines
+		return self._coveredLineCount
 
 	@readonly
-	def ExcludedLines(self) -> int:
+	def MissingLineCount(self) -> int:
 		"""
-		Read-only property to access the number of excluded lines (:attr:`_excludedLines`).
+		Read-only property to access the number of executable lines, which never ran (:attr:`_missingLineCount`).
+
+		:returns: The number of missing lines.
+		"""
+		return self._missingLineCount
+
+	@readonly
+	def ExcludedLineCount(self) -> int:
+		"""
+		Read-only property to access the number of excluded lines (:attr:`_excludedLineCount`).
 
 		:returns: The number of excluded lines.
 		"""
-		return self._excludedLines
+		return self._excludedLineCount
 
 	@readonly
 	def PercentCovered(self) -> float:
 		"""
-		Read-only property to access the coverage of statements and branches (:attr:`_percentCovered`).
+		Read-only property to access the coverage of lines and branches (:attr:`_percentCovered`).
 
 		:returns: The coverage in percent.
 		"""
@@ -174,13 +179,13 @@ class Summary(metaclass=ExtendedType, slots=True):
 		return self._branchCount
 
 	@readonly
-	def CoveredBranches(self) -> Nullable[int]:
+	def CoveredBranchCount(self) -> Nullable[int]:
 		"""
-		Read-only property to access the number of taken branches (:attr:`_coveredBranches`).
+		Read-only property to access the number of taken branches (:attr:`_coveredBranchCount`).
 
 		:returns: The number of taken branches, or ``None`` if branch coverage wasn't measured.
 		"""
-		return self._coveredBranches
+		return self._coveredBranchCount
 
 	@readonly
 	def PartialBranchCount(self) -> Nullable[int]:
