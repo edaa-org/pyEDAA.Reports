@@ -452,7 +452,9 @@ class Function(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the mangled name of the function (:attr:`_name`).
 
-		:returns: The name, e.g. ``_ZN10Containers5Stack3PopEv``.
+		The method ``Containers::Stack::Pop()`` is mangled to ``_ZN10Containers5Stack3PopEv``, a C function keeps its name.
+
+		:returns: The mangled name.
 		"""
 		return self._name
 
@@ -461,7 +463,9 @@ class Function(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the demangled name of the function (:attr:`_demangledName`).
 
-		:returns: The name, e.g. ``Containers::Stack::Pop()``.
+		The demangled name of ``_ZN10Containers5Stack3PopEv`` is ``Containers::Stack::Pop()``.
+
+		:returns: The demangled name.
 		"""
 		return self._demangledName
 

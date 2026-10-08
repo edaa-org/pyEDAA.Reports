@@ -381,7 +381,9 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the path of the data file (:attr:`_path`).
 
-		:returns: The path, as gcov was called with it, e.g. ``main.c``.
+		It is the path gcov was called with, e.g. ``main.c`` for ``gcov --json-format main.c``.
+
+		:returns: The path, as gcov was called with it.
 		"""
 		return self._path
 
@@ -402,7 +404,7 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		A development build of GCC states its date and phase behind the version, e.g. ``15.0.1 20250418 (experimental)``;
 		they aren't kept.
 
-		:returns: The version, e.g. ``14.2.0``.
+		:returns: The version.
 		"""
 		return self._gccVersion
 
