@@ -134,7 +134,9 @@ class Tracefile(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the comments (:attr:`_comments`).
 
-		:returns: The comments, e.g. from ``lcov --comment``, without the leading ``#``.
+		A tool writes them on request, e.g. ``lcov --comment``.
+
+		:returns: The comments, without the leading ``#``.
 		"""
 		return self._comments
 

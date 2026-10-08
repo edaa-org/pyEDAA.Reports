@@ -118,7 +118,9 @@ class Line(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the checksum of the line's source text (:attr:`_checksum`).
 
-		:returns: The checksum - lcov writes an MD5 hash in base64 -, or ``None`` if not stated.
+		lcov writes an MD5 hash in base64.
+
+		:returns: The checksum, or ``None`` if not stated.
 		"""
 		return self._checksum
 
@@ -201,7 +203,9 @@ class Function(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the function's last line (:attr:`_endLine`).
 
-		:returns: The line number, or ``None`` if not stated - e.g. by llvm-cov.
+		Not every tool states it, e.g. llvm-cov doesn't.
+
+		:returns: The line number, or ``None`` if not stated.
 		"""
 		return self._endLine
 
