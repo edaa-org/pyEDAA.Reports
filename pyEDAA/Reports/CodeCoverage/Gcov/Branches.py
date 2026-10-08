@@ -31,14 +31,17 @@
 """
 The records of a line of GCC's gcov JSON format: its branches, calls and conditions.
 """
-from __future__            import annotations
+from __future__                       import annotations
 
-from collections.abc       import Iterable
-from typing                import Any, Optional as Nullable, Self
+from collections.abc                  import Iterable
+from typing                           import Any, Optional as Nullable, Self
 
-from pyTooling.Common      import getFullyQualifiedName
-from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import ExtendedType
+from pyTooling.Common                 import getFullyQualifiedName
+from pyTooling.Decorators             import export, readonly
+from pyTooling.MetaClasses            import ExtendedType
+
+# The module, not its class 'Line': the module imports this module before it defines 'Line'.
+from pyEDAA.Reports.CodeCoverage.Gcov import Records
 
 
 @export
@@ -47,11 +50,12 @@ class Branch(metaclass=ExtendedType, slots=True):
 	A ``branch`` of a line: an edge from a basic block to another, and how often it was taken.
 	"""
 
-	_count:              int            #: Number of times the branch was taken.
-	_throw:              bool           #: Whether the branch is taken by an exception.
-	_fallthrough:        bool           #: Whether the branch falls through.
-	_sourceBlockID:      Nullable[int]  #: ID of the basic block the branch starts at, in format 2.
-	_destinationBlockID: Nullable[int]  #: ID of the basic block the branch leads to, in format 2.
+	_parent:             Nullable[Records.Line]  #: The line the branch belongs to.
+	_count:              int                     #: Number of times the branch was taken.
+	_throw:              bool                    #: Whether the branch is taken by an exception.
+	_fallthrough:        bool                    #: Whether the branch falls through.
+	_sourceBlockID:      Nullable[int]           #: ID of the basic block the branch starts at, in format 2.
+	_destinationBlockID: Nullable[int]           #: ID of the basic block the branch leads to, in format 2.
 
 	def __init__(
 		self,
@@ -59,16 +63,20 @@ class Branch(metaclass=ExtendedType, slots=True):
 		throw:              bool,
 		fallthrough:        bool,
 		sourceBlockID:      Nullable[int] = None,
-		destinationBlockID: Nullable[int] = None
+		destinationBlockID: Nullable[int] = None,
+		*,
+		parent:             Nullable[Records.Line] = None
 	) -> None:
 		"""
-		Initialize the branch.
+		Initialize the branch, and add it to the branches of its line.
 
 		:param count:              Number of times the branch was taken.
 		:param throw:              Whether the branch is taken by an exception.
 		:param fallthrough:        Whether the branch falls through.
 		:param sourceBlockID:      Optional, ID of the basic block the branch starts at. Default: ``None``.
 		:param destinationBlockID: Optional, ID of the basic block the branch leads to. Default: ``None``.
+		:param parent:             Optional, the line the branch belongs to; the branch is appended to its branches.
+		                           Default: ``None``.
 		:raises ValueError:        If parameter ``count`` is ``None``.
 		:raises TypeError:         If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError:        If parameter ``count`` is negative.
@@ -80,6 +88,8 @@ class Branch(metaclass=ExtendedType, slots=True):
 		:raises ValueError:        If parameter ``sourceBlockID`` is negative.
 		:raises TypeError:         If parameter ``destinationBlockID`` isn't of type :class:`int`.
 		:raises ValueError:        If parameter ``destinationBlockID`` is negative.
+		:raises TypeError:         If parameter ``parent`` isn't of type
+		                           :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Line`.
 		"""
 		if count is None:
 			raise ValueError(f"Parameter 'count' is None.")
@@ -126,18 +136,28 @@ class Branch(metaclass=ExtendedType, slots=True):
 				ex.add_note(f"Got value '{destinationBlockID}'.")
 				raise ex
 
+		if parent is not None and not isinstance(parent, Records.Line):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =             parent
 		self._count =              count
 		self._throw =              throw
 		self._fallthrough =        fallthrough
 		self._sourceBlockID =      sourceBlockID
 		self._destinationBlockID = destinationBlockID
 
+		if parent is not None:
+			parent._branches.append(self)
+
 	@classmethod
-	def Parse(cls, record: dict[str, Any]) -> Self:
+	def Parse(cls, record: dict[str, Any], *, parent: Nullable[Records.Line] = None) -> Self:
 		"""
 		Parse a branch from its JSON object.
 
 		:param record: The JSON object of the branch.
+		:param parent: Optional, the line the branch belongs to. Default: ``None``.
 		:returns:      The branch.
 		"""
 		return cls(
@@ -145,8 +165,18 @@ class Branch(metaclass=ExtendedType, slots=True):
 			record["throw"],
 			record["fallthrough"],
 			record.get("source_block_id"),
-			record.get("destination_block_id")
+			record.get("destination_block_id"),
+			parent=parent
 		)
+
+	@readonly
+	def Parent(self) -> Nullable[Records.Line]:
+		"""
+		Read-only property to access the line the branch belongs to (:attr:`_parent`).
+
+		:returns: The line; ``None`` if the branch belongs to no line.
+		"""
+		return self._parent
 
 	@readonly
 	def Count(self) -> int:
@@ -200,17 +230,27 @@ class Call(metaclass=ExtendedType, slots=True):
 	A ``call`` of a line - in format 2 -: from a basic block to the block continuing after the return.
 	"""
 
-	_sourceBlockID:      int  #: ID of the basic block the call is in.
-	_destinationBlockID: int  #: ID of the basic block continuing after the return.
-	_returned:           int  #: Number of times the call returned.
+	_parent:             Nullable[Records.Line]  #: The line the call belongs to.
+	_sourceBlockID:      int                     #: ID of the basic block the call is in.
+	_destinationBlockID: int                     #: ID of the basic block continuing after the return.
+	_returned:           int                     #: Number of times the call returned.
 
-	def __init__(self, sourceBlockID: int, destinationBlockID: int, returned: int) -> None:
+	def __init__(
+		self,
+		sourceBlockID:      int,
+		destinationBlockID: int,
+		returned:           int,
+		*,
+		parent:             Nullable[Records.Line] = None
+	) -> None:
 		"""
-		Initialize the call.
+		Initialize the call, and add it to the calls of its line.
 
 		:param sourceBlockID:      ID of the basic block the call is in.
 		:param destinationBlockID: ID of the basic block continuing after the return.
 		:param returned:           Number of times the call returned.
+		:param parent:             Optional, the line the call belongs to; the call is appended to its calls.
+		                           Default: ``None``.
 		:raises ValueError:        If parameter ``sourceBlockID`` is ``None``.
 		:raises TypeError:         If parameter ``sourceBlockID`` isn't of type :class:`int`.
 		:raises ValueError:        If parameter ``sourceBlockID`` is negative.
@@ -220,6 +260,8 @@ class Call(metaclass=ExtendedType, slots=True):
 		:raises ValueError:        If parameter ``returned`` is ``None``.
 		:raises TypeError:         If parameter ``returned`` isn't of type :class:`int`.
 		:raises ValueError:        If parameter ``returned`` is negative.
+		:raises TypeError:         If parameter ``parent`` isn't of type
+		                           :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Line`.
 		"""
 		if sourceBlockID is None:
 			raise ValueError(f"Parameter 'sourceBlockID' is None.")
@@ -254,19 +296,38 @@ class Call(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got value '{returned}'.")
 			raise ex
 
+		if parent is not None and not isinstance(parent, Records.Line):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =             parent
 		self._sourceBlockID =      sourceBlockID
 		self._destinationBlockID = destinationBlockID
 		self._returned =           returned
 
+		if parent is not None:
+			parent._calls.append(self)
+
 	@classmethod
-	def Parse(cls, record: dict[str, Any]) -> Self:
+	def Parse(cls, record: dict[str, Any], *, parent: Nullable[Records.Line] = None) -> Self:
 		"""
 		Parse a call from its JSON object.
 
 		:param record: The JSON object of the call.
+		:param parent: Optional, the line the call belongs to. Default: ``None``.
 		:returns:      The call.
 		"""
-		return cls(record["source_block_id"], record["destination_block_id"], record["returned"])
+		return cls(record["source_block_id"], record["destination_block_id"], record["returned"], parent=parent)
+
+	@readonly
+	def Parent(self) -> Nullable[Records.Line]:
+		"""
+		Read-only property to access the line the call belongs to (:attr:`_parent`).
+
+		:returns: The line; ``None`` if the call belongs to no line.
+		"""
+		return self._parent
 
 	@readonly
 	def SourceBlockID(self) -> int:
@@ -303,25 +364,30 @@ class Condition(metaclass=ExtendedType, slots=True):
 	expression (MC/DC).
 	"""
 
-	_count:           int        #: Number of condition outcomes: twice the number of terms.
-	_covered:         int        #: Number of covered condition outcomes.
-	_notCoveredTrue:  list[int]  #: The terms, by index, never seen as true.
-	_notCoveredFalse: list[int]  #: The terms, by index, never seen as false.
+	_parent:          Nullable[Records.Line]  #: The line the condition belongs to.
+	_count:           int                     #: Number of condition outcomes: twice the number of terms.
+	_covered:         int                     #: Number of covered condition outcomes.
+	_notCoveredTrue:  list[int]               #: The terms, by index, never seen as true.
+	_notCoveredFalse: list[int]               #: The terms, by index, never seen as false.
 
 	def __init__(
 		self,
 		count:           int,
 		covered:         int,
 		notCoveredTrue:  Nullable[Iterable[int]] = None,
-		notCoveredFalse: Nullable[Iterable[int]] = None
+		notCoveredFalse: Nullable[Iterable[int]] = None,
+		*,
+		parent:          Nullable[Records.Line] = None
 	) -> None:
 		"""
-		Initialize the condition.
+		Initialize the condition, and add it to the conditions of its line.
 
 		:param count:           Number of condition outcomes: twice the number of terms.
 		:param covered:         Number of covered condition outcomes.
 		:param notCoveredTrue:  Optional, the terms, by index, never seen as true. Default: none.
 		:param notCoveredFalse: Optional, the terms, by index, never seen as false. Default: none.
+		:param parent:          Optional, the line the condition belongs to; the condition is appended to its conditions.
+		                        Default: ``None``.
 		:raises ValueError:     If parameter ``count`` is ``None``.
 		:raises TypeError:      If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError:     If parameter ``count`` is negative.
@@ -332,6 +398,8 @@ class Condition(metaclass=ExtendedType, slots=True):
 		:raises TypeError:      If parameter ``notCoveredTrue`` contains an element not of type :class:`int`.
 		:raises TypeError:      If parameter ``notCoveredFalse`` isn't iterable.
 		:raises TypeError:      If parameter ``notCoveredFalse`` contains an element not of type :class:`int`.
+		:raises TypeError:      If parameter ``parent`` isn't of type
+		                        :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Line`.
 		"""
 		if count is None:
 			raise ValueError(f"Parameter 'count' is None.")
@@ -355,6 +423,12 @@ class Condition(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got value '{covered}'.")
 			raise ex
 
+		if parent is not None and not isinstance(parent, Records.Line):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =          parent
 		self._count =           count
 		self._covered =         covered
 		self._notCoveredTrue =  []
@@ -388,15 +462,30 @@ class Condition(metaclass=ExtendedType, slots=True):
 
 				self._notCoveredFalse.append(term)
 
+		if parent is not None:
+			parent._conditions.append(self)
+
 	@classmethod
-	def Parse(cls, record: dict[str, Any]) -> Self:
+	def Parse(cls, record: dict[str, Any], *, parent: Nullable[Records.Line] = None) -> Self:
 		"""
 		Parse a condition from its JSON object.
 
 		:param record: The JSON object of the condition.
+		:param parent: Optional, the line the condition belongs to. Default: ``None``.
 		:returns:      The condition.
 		"""
-		return cls(record["count"], record["covered"], record["not_covered_true"], record["not_covered_false"])
+		return cls(
+			record["count"], record["covered"], record["not_covered_true"], record["not_covered_false"], parent=parent
+		)
+
+	@readonly
+	def Parent(self) -> Nullable[Records.Line]:
+		"""
+		Read-only property to access the line the condition belongs to (:attr:`_parent`).
+
+		:returns: The line; ``None`` if the condition belongs to no line.
+		"""
+		return self._parent
 
 	@readonly
 	def Count(self) -> int:

@@ -296,6 +296,9 @@ class ParentRelation(Testcase):
 				self.assertIs(dataFile, file.Parent)
 				self.assertTrue(all(function.Parent is file for function in file.Functions.values()))
 				self.assertTrue(all(line.Parent is file for line in file.Lines))
+				self.assertTrue(all(
+					record.Parent is line for line in file.Lines for record in (*line.Branches, *line.Calls, *line.Conditions)
+				))
 
 	def test_DataFile_Parent(self) -> None:
 		with self.assertRaises(TypeError) as context:
