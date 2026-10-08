@@ -113,6 +113,116 @@ computes it) are ``1.0`` where there is nothing to cover.
 Report Formats
 **************
 
+Code coverage tools write their results in XML, JSON or text formats, and many keep the raw data in a database or
+binary format of their own, which only the tool itself or its API reads.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 21 21 21 21
+
+   * - Tool / Framework
+     - XML
+     - JSON
+     - Text
+     - Proprietary
+   * - `Cobertura <https://cobertura.github.io/cobertura/>`__ (Java)
+     - Cobertura XML (``coverage-04.dtd``)
+     - —
+     - —
+     - :file:`cobertura.ser`
+   * - `JaCoCo <https://www.jacoco.org/jacoco/>`__ (Java)
+     - JaCoCo XML (``report.dtd``)
+     - —
+     - CSV
+     - :file:`*.exec`
+   * - `coverage.py <https://coverage.readthedocs.io/>`__ (Python)
+     - Cobertura dialect (``coverage xml``)
+     - ``coverage json``
+     - lcov (``coverage lcov``), ``coverage report``
+     - :file:`.coverage` (SQLite)
+   * - `GCC <https://gcc.gnu.org/onlinedocs/gcc/Gcov.html>`__ (``gcov``)
+     - —
+     - gcov JSON (``gcov --json-format``)
+     - :file:`*.gcov`
+     - :file:`*.gcno`, :file:`*.gcda`
+   * - `gcovr <https://gcovr.com/>`__
+     - Cobertura (``--cobertura``), JaCoCo (``--jacoco``), SonarQube (``--sonarqube``), Clover (``--clover``)
+     - gcovr JSON (``--json``), Coveralls (``--coveralls``)
+     - lcov (``--lcov``), ``--txt``
+     - — (reads GCC's data)
+   * - `lcov <https://github.com/linux-test-project/lcov>`__
+     - —
+     - —
+     - lcov tracefile (:file:`*.info`)
+     - — (reads GCC's data)
+   * - `LLVM <https://llvm.org/docs/CommandGuide/llvm-cov.html>`__ (``llvm-cov``)
+     - —
+     - ``llvm-cov export -format=text``
+     - lcov (``llvm-cov export -format=lcov``), :file:`*.gcov` (``llvm-cov gcov``), ``llvm-cov report``
+     - :file:`*.profraw`, :file:`*.profdata`
+   * - `cargo-llvm-cov <https://github.com/taiki-e/cargo-llvm-cov>`__ (Rust)
+     - Cobertura (``--cobertura``)
+     - LLVM's export format (``--json``)
+     - lcov (``--lcov``), ``--text``
+     - — (reads LLVM's data)
+   * - `grcov <https://github.com/mozilla/grcov>`__ (Rust)
+     - Cobertura (``-t cobertura``)
+     - covdir (``-t covdir``), Coveralls (``-t coveralls``)
+     - lcov (``-t lcov``)
+     - — (reads LLVM's or GCC's data)
+   * - `Go <https://pkg.go.dev/cmd/cover>`__ (``go test``)
+     - —
+     - —
+     - cover profile (``go test -coverprofile``)
+     - :file:`covmeta.*`, :file:`covcounters.*` (``GOCOVERDIR``)
+   * - `gocover-cobertura <https://github.com/boumenot/gocover-cobertura>`__ (Go)
+     - Cobertura
+     - —
+     - —
+     - — (reads a cover profile)
+   * - `gcov2lcov <https://github.com/jandelgado/gcov2lcov>`__ (Go)
+     - —
+     - —
+     - lcov
+     - — (reads a cover profile)
+   * - `coverlet <https://github.com/coverlet-coverage/coverlet>`__ (.NET)
+     - Cobertura, OpenCover
+     - coverlet JSON
+     - lcov
+     - —
+   * - `Microsoft Code Coverage <https://learn.microsoft.com/dotnet/core/additional-tools/dotnet-coverage>`__ (.NET)
+     - Cobertura
+     - —
+     - —
+     - :file:`*.coverage`
+   * - `ReportGenerator <https://reportgenerator.io/>`__ (.NET)
+     - Cobertura, among others
+     - —
+     - lcov, among others
+     - — (reads other reports)
+   * - `GHDL <https://github.com/ghdl/ghdl>`__ (VHDL)
+     - —
+     - :file:`coverage-*.json` (``ghdl -r --coverage``), gcovr JSON (``ghdl coverage --format=gcovr``)
+     - lcov, :file:`*.gcov` (``ghdl coverage --format=lcov|gcov``)
+     - — (GCC backend: GCC's data)
+   * - `NVC <https://www.nickg.me.uk/nvc/>`__ (VHDL)
+     - Cobertura (``nvc --cover-export --format=cobertura``); an undocumented internal dump (``--format=xml``)
+     - —
+     - —
+     - :file:`*.ncdb`
+   * - Aldec Active-HDL, Riviera-PRO
+     - UCIS XML (``acdb2xml``)
+     - —
+     - —
+     - ACDB
+   * - Siemens QuestaSim
+     - UCIS XML (`Accellera UCIS <https://www.accellera.org/downloads/standards/ucis>`__)
+     - —
+     - —
+     - UCDB (read via the UCIS API)
+
+pyEDAA.Reports reads Cobertura XML - also coverage.py's - and coverage.py's JSON.
+
 .. _CODECOV/Formats/Cobertura:
 
 Cobertura XML
