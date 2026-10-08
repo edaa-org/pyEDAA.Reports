@@ -852,7 +852,9 @@ class Report(metaclass=ExtendedType, mixin=True):
 		"""
 		Read-only property to access the version of coverage.py, which wrote the report (:attr:`_version`).
 
-		:returns: The version, e.g. ``7.16.1``; ``None`` before the report was converted.
+		The report states it as ``meta.version``, e.g. ``7.16.1``.
+
+		:returns: The version; ``None`` before the report was converted.
 		"""
 		return self._version
 
