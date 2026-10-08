@@ -32,7 +32,7 @@
 coverage.py's JSON code coverage format: a model of the format, read from a report and converted to the common model.
 
 coverage.py writes the format with ``coverage json``. A report is validated against the JSON Schema
-:file:`CoveragePy-JSON.schema.json`, reverse-engineered from coverage.py, which accepts format versions 2 and 3. The
+:file:`CoveragePy.schema.json`, reverse-engineered from coverage.py, which accepts format versions 2 and 3. The
 format's model keeps what the report states: a :class:`Document` holds :class:`File` records, a file - in format 3 -
 :class:`Region` records of its functions and classes, and each its lines, branches and :class:`Summary`. Each
 record's constructor takes typed values, so the model can be built by hand: a file or a region names its parent with
@@ -84,7 +84,7 @@ from pyEDAA.Reports.CodeCoverage import Package as cc_Package, Unit as cc_Unit
 
 __all__ = ["SCHEMA"]
 
-SCHEMA = "CoveragePy-JSON.schema.json"  #: The JSON Schema a report is validated against.
+SCHEMA = "CoveragePy.schema.json"  #: The JSON Schema a report is validated against.
 
 # A class with a property named like a class - ``Path``, ``Summary`` - can't name that class in the annotation of a
 # field: the class body's namespace, where annotations are evaluated, binds the name to the property.

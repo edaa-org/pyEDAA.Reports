@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/CoveragePy-JSON.schema.json",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/CoveragePy.schema.json",
 	"title": "coverage.py JSON report",
 	"description": "The JSON report coverage.py writes with 'coverage json', format versions 2 and 3. Reverse-engineered from coverage.py's 'coverage/jsonreport.py' (7.16): version 2 added 'meta.format', version 3 the regions 'functions' and 'classes'. Fields a version added later - e.g. 'percent_statements_covered' - are optional.",
 	"type": "object",

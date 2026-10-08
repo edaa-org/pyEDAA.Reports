@@ -1,4 +1,4 @@
-.. _SCHEMAS/CoveragePy-JSON:
+.. _SCHEMAS/CoveragePy:
 
 coverage.py JSON
 ################
@@ -19,7 +19,7 @@ is rejected.
 
       .. admonition:: Download
 
-         :download:`CoveragePy-JSON.schema.json <../../pyEDAA/Reports/Resources/CoveragePy-JSON.schema.json>`
+         :download:`CoveragePy.schema.json <../../pyEDAA/Reports/Resources/CoveragePy.schema.json>`
 
    .. grid-item::
       :columns: 6
@@ -28,13 +28,13 @@ is rejected.
 
          .. code-block:: bash
 
-            check-jsonschema --schemafile CoveragePy-JSON.schema.json coverage.json
+            check-jsonschema --schemafile CoveragePy.schema.json coverage.json
 
-.. _SCHEMAS/CoveragePy-JSON/Source:
+.. _SCHEMAS/CoveragePy/Source:
 
 Source
 ******
 
-.. literalinclude:: ../../pyEDAA/Reports/Resources/CoveragePy-JSON.schema.json
+.. literalinclude:: ../../pyEDAA/Reports/Resources/CoveragePy.schema.json
    :language: json
    :linenos:

@@ -455,7 +455,7 @@ class Schema(Testcase):
 				_ = Document(jsonFile, analyzeAndConvert=True)
 
 		self.assertEqual(
-			f"Validation error for '{jsonFile}' using JSON Schema 'CoveragePy-JSON.schema.json'.", str(context.exception)
+			f"Validation error for '{jsonFile}' using JSON Schema 'CoveragePy.schema.json'.", str(context.exception)
 		)
 		self.assertEqual(["/meta: 'format' is a required property"], context.exception.__notes__)
 
