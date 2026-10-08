@@ -459,10 +459,12 @@ coverage.py JSON
 ================
 
 coverage.py writes its JSON report with ``coverage json``. :class:`pyEDAA.Reports.CodeCoverage.CoveragePy.Document`
-validates a report against the JSON Schema :ref:`CoveragePy.schema.json <SCHEMAS/CoveragePy>` - format
-versions 2 and 3 - and reads it into the format's model: the measured files, their executed, missing and excluded
-lines, the branches as pairs of source and destination line, the summaries coverage.py computed, and - in format 3 -
-the functions and classes of each file.
+reads the format version a report states - :class:`~pyEDAA.Reports.CodeCoverage.CoveragePy.FormatVersion` - and
+validates the report against the JSON Schema of that version: :ref:`CoveragePy-2.schema.json <SCHEMAS/CoveragePy-2>`
+for format 2 (coverage.py 7.4.1 to 7.5), :ref:`CoveragePy-3.schema.json <SCHEMAS/CoveragePy-3>` for format 3
+(coverage.py 7.6 and later). It reads the report into the format's model: the measured files, their executed, missing
+and excluded lines, the branches as pairs of source and destination line, the summaries coverage.py computed, and - in
+format 3 - the functions and classes of each file.
 
 :meth:`~pyEDAA.Reports.CodeCoverage.CoveragePy.Document.ToCoverageSummary` converts it to the common model:
 

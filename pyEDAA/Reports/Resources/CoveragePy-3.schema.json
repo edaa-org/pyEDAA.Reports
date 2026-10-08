@@ -1,8 +1,8 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/CoveragePy.schema.json",
-	"title": "coverage.py JSON report",
-	"description": "The JSON report coverage.py writes with 'coverage json', format versions 2 and 3. Reverse-engineered from coverage.py's 'coverage/jsonreport.py' (7.16): version 2 added 'meta.format', version 3 the regions 'functions' and 'classes'. Fields a version added later - e.g. 'percent_statements_covered' - are optional.",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/CoveragePy-3.schema.json",
+	"title": "coverage.py JSON report, format 3",
+	"description": "The JSON report coverage.py 7.6 and later write with 'coverage json', format version 3. Reverse-engineered from coverage.py's 'coverage/jsonreport.py' (7.16): format 3 adds the regions 'functions' and 'classes' to a file. Fields a later coverage.py added - e.g. 'percent_statements_covered' - are optional.",
 	"type": "object",
 	"required": ["meta", "files", "totals"],
 	"properties": {
@@ -11,7 +11,7 @@
 			"type": "object",
 			"required": ["format", "version", "timestamp", "branch_coverage", "show_contexts"],
 			"properties": {
-				"format":          {"description": "Version of the report format.", "enum": [2, 3]},
+				"format":          {"description": "Version of the report format.", "const": 3},
 				"version":         {"description": "Version of coverage.py.", "type": "string"},
 				"timestamp":       {"description": "Time the report was written, ISO 8601.", "type": "string"},
 				"branch_coverage": {"description": "Whether branch coverage was measured.", "type": "boolean"},
@@ -98,7 +98,7 @@
 			"additionalProperties": false
 		},
 		"File": {
-			"description": "A measured file: its lines and branches, and - in format 3 - its functions and classes.",
+			"description": "A measured file: its lines and branches, and its functions and classes.",
 			"allOf": [{"$ref": "#/$defs/Lines"}],
 			"properties": {
 				"executed_lines":    true,

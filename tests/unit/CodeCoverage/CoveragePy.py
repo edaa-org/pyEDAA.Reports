@@ -38,7 +38,8 @@ from typing                                 import Any
 
 from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, Function, LineCoverageStatus, Method
 from pyEDAA.Reports.CodeCoverage            import Module, Package
-from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document, File, Region, RegionKind, Report, Summary
+from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document, File, FormatVersion, Region, RegionKind, Report
+from pyEDAA.Reports.CodeCoverage.CoveragePy import Summary
 from pyTooling.MetaClasses                  import AbstractClassError
 from pyTooling.Testing                      import Testcase
 from pyTooling.Versioning                   import SemanticVersion
@@ -72,6 +73,30 @@ SUMMARY = {
 	"missing_lines": 1, "excluded_lines": 0, "num_branches": 2, "num_partial_branches": 1, "covered_branches": 1,
 	"missing_branches": 1
 }  #: A summary as coverage.py writes it, with branch coverage.
+
+
+def _format2(file: dict[str, Any]) -> dict[str, Any]:
+	"""
+	Build a report of format 2 with one file, ``pkg\\mod.py``.
+
+	:param file: The JSON object of the file.
+	:returns:    The report's JSON object.
+	"""
+	return {
+		"meta":   {
+			"format": 2, "version": "7.5.4", "timestamp": "2024-06-24T12:00:00", "branch_coverage": False,
+			"show_contexts": False
+		},
+		"files":  {"pkg\\mod.py": file},
+		"totals": file["summary"]
+	}
+
+
+FORMAT2_FILE = {
+	"executed_lines": [1], "missing_lines": [2], "excluded_lines": [], "summary": {
+		"covered_lines": 1, "num_statements": 2, "percent_covered": 50.0, "missing_lines": 1, "excluded_lines": 0
+	}
+}  #: A file of format 2: no regions, no separate percentages of statements and branches.
 
 
 class Construction(Testcase):
@@ -344,6 +369,7 @@ class FormatModel(Testcase):
 		self.assertEqual(
 			(3, "7.16.1", True, False), (report.Format, report.Version, report.BranchCoverage, report.HasContexts)
 		)
+		self.assertIs(FormatVersion.Version3, report.Format)
 		self.assertIsInstance(report.Version, SemanticVersion)
 		self.assertEqual(datetime(2026, 10, 7, 9, 14, 51, 108137), report.Timestamp)
 		self.assertEqual(
@@ -422,27 +448,44 @@ class Conversion(Testcase):
 
 	def test_Format2(self) -> None:
 		"""Format 2 has no regions: a file becomes a module only."""
-		summary = {
-			"covered_lines": 1, "num_statements": 2, "percent_covered": 50.0, "missing_lines": 1, "excluded_lines": 0
-		}
 		with TemporaryDirectory() as directory:
-			report = Document(_write(directory, {
-				"meta": {"format": 2, "version": "6.5.0", "timestamp": "2022-10-01T12:00:00", "branch_coverage": False,
-				         "show_contexts": False},
-				"files": {
-					"pkg\\mod.py": {"executed_lines": [1], "missing_lines": [2], "excluded_lines": [], "summary": summary}
-				},
-				"totals": summary
-			}), analyzeAndConvert=True)
+			report = Document(_write(directory, _format2(FORMAT2_FILE)), analyzeAndConvert=True)
 
+		self.assertIs(FormatVersion.Version2, report.Format)
 		common = report.ToCoverageSummary()
 		self.assertEqual(["pkg.mod"], [unit.QualifiedName for unit in common.IterateUnits()][1:])
 		self.assertEqual((2, 1, 0), (common.TotalLines, common.CoveredLines, common.TotalBranches))
 		self.assertEqual("pkg/mod.py", next(common.IterateFiles()).Path.as_posix())
 
 
-class Schema(Testcase):
-	"""The reverse-engineered JSON Schema accepts coverage.py's report and rejects what it doesn't write."""
+class Versions(Testcase):
+	"""The format version a report states chooses the JSON Schema; an unsupported version is rejected."""
+
+	def test_Parse(self) -> None:
+		self.assertEqual(
+			[FormatVersion.Version2, FormatVersion.Version3], [FormatVersion.Parse(2), FormatVersion.Parse(3)]
+		)
+
+	def test_Parse_None(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = FormatVersion.Parse(None)
+
+		self.assertEqual("Parameter 'value' is None.", str(context.exception))
+
+	def test_Parse_Type(self) -> None:
+		for value in ("3", True):
+			with self.subTest(value=value):
+				with self.assertRaises(TypeError) as context:
+					_ = FormatVersion.Parse(value)
+
+				self.assertEqual("Parameter 'value' is not of type 'int'.", str(context.exception))
+
+	def test_Parse_Unknown(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = FormatVersion.Parse(4)
+
+		self.assertEqual("Parameter 'value' is not a supported coverage.py JSON format version.", str(context.exception))
+		self.assertEqual(["Got value '4'.", "Supported format versions: 2, 3."], context.exception.__notes__)
 
 	def test_Format1(self) -> None:
 		"""Format 1 had no 'meta.format'."""
@@ -455,9 +498,57 @@ class Schema(Testcase):
 				_ = Document(jsonFile, analyzeAndConvert=True)
 
 		self.assertEqual(
-			f"Validation error for '{jsonFile}' using JSON Schema 'CoveragePy.schema.json'.", str(context.exception)
+			f"coverage.py report file '{jsonFile}' states an unsupported format version.", str(context.exception)
 		)
-		self.assertEqual(["/meta: 'format' is a required property"], context.exception.__notes__)
+		self.assertEqual(
+			["Got no value at '/meta/format'.", "Supported format versions: 2, 3."], context.exception.__notes__
+		)
+
+	def test_UnknownFormat(self) -> None:
+		content = loads(REPORT.read_text(encoding="utf-8"))
+		content["meta"]["format"] = 4
+		with TemporaryDirectory() as directory:
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(_write(directory, content), analyzeAndConvert=True)
+
+		self.assertEqual(
+			["Got value '4' at '/meta/format'.", "Supported format versions: 2, 3."], context.exception.__notes__
+		)
+		self.assertIsInstance(context.exception.__cause__, ValueError)
+
+	def test_Format2_Regions(self) -> None:
+		"""The schema of format 2 rejects the regions format 3 added."""
+		region = {"executed_lines": [], "summary": FORMAT2_FILE["summary"], "missing_lines": [], "excluded_lines": [],
+		          "start_line": 1}
+		with TemporaryDirectory() as directory:
+			jsonFile = _write(directory, _format2(FORMAT2_FILE | {"functions": {"": region}}))
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(
+			f"Validation error for '{jsonFile}' using JSON Schema 'CoveragePy-2.schema.json'.", str(context.exception)
+		)
+		self.assertEqual(
+			["/files/pkg\\mod.py: Additional properties are not allowed ('functions' was unexpected)"],
+			context.exception.__notes__
+		)
+
+	def test_Format2_Percentages(self) -> None:
+		"""The schema of format 2 rejects the separate percentages coverage.py 7.12 added to format 3."""
+		summary = FORMAT2_FILE["summary"] | {"percent_statements_covered": 50.0}
+		with TemporaryDirectory() as directory:
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(_write(directory, _format2(FORMAT2_FILE | {"summary": summary})), analyzeAndConvert=True)
+
+		self.assertEqual([
+			"/files/pkg\\mod.py/summary: Additional properties are not allowed ('percent_statements_covered' was unexpected)",
+			"/totals: Additional properties are not allowed ('percent_statements_covered' was unexpected)"
+		], context.exception.__notes__)
+
+
+class Schema(Testcase):
+	"""The reverse-engineered JSON Schemas accept coverage.py's report and reject what it doesn't write."""
 
 	def test_UnknownField(self) -> None:
 		content = loads(REPORT.read_text(encoding="utf-8"))

@@ -31,8 +31,9 @@
 """
 coverage.py's JSON code coverage format: a model of the format, read from a report and converted to the common model.
 
-coverage.py writes the format with ``coverage json``. A report is validated against the JSON Schema
-:file:`CoveragePy.schema.json`, reverse-engineered from coverage.py, which accepts format versions 2 and 3. The
+coverage.py writes the format with ``coverage json``. A report is validated against the JSON Schema of the format
+version it states (:class:`FormatVersion`), reverse-engineered from coverage.py: :file:`CoveragePy-2.schema.json` for
+format 2 (coverage.py 7.4.1 to 7.5), :file:`CoveragePy-3.schema.json` for format 3 (coverage.py 7.6 and later). The
 format's model keeps what the report states: a :class:`Document` holds :class:`File` records, a file - in format 3 -
 :class:`Region` records of its functions and classes, and each its lines, branches and :class:`Summary`. Each
 record's constructor takes typed values, so the model can be built by hand: a file or a region names its parent with
@@ -63,6 +64,7 @@ the keyword parameter ``parent`` and is added to it. Its class method ``Parse`` 
 from __future__                  import annotations
 
 from datetime                    import datetime
+from enum                        import IntEnum
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from typing                      import Any, Iterable, Optional as Nullable, Self
@@ -82,13 +84,55 @@ from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus, Met
 from pyEDAA.Reports.CodeCoverage import Package as cc_Package, Unit as cc_Unit
 
 
-__all__ = ["SCHEMA"]
-
-SCHEMA = "CoveragePy.schema.json"  #: The JSON Schema a report is validated against.
+__all__ = ["SCHEMAS"]
 
 # A class with a property named like a class - ``Path``, ``Summary`` - can't name that class in the annotation of a
 # field: the class body's namespace, where annotations are evaluated, binds the name to the property.
 _Path = Path
+
+
+@export
+class FormatVersion(IntEnum):
+	"""
+	Version of coverage.py's JSON report format, as a report's ``meta.format`` states it.
+
+	coverage.py 7.4.1 added ``meta.format`` with format 2. coverage.py 7.6 and later write format 3, which adds the
+	functions and classes of a file. A report of an earlier coverage.py states no format version and isn't supported.
+	"""
+
+	Version2 = 2  #: Format 2, written by coverage.py 7.4.1 to 7.5.
+	Version3 = 3  #: Format 3, written by coverage.py 7.6 and later.
+
+	@classmethod
+	def Parse(cls, value: int) -> Self:
+		"""
+		Convert the version, as a report's ``meta.format`` states it, to the member of that version.
+
+		:param value:       The version.
+		:returns:           The member of that version.
+		:raises ValueError: If parameter ``value`` is ``None``.
+		:raises TypeError:  If parameter ``value`` is not of type :class:`int`.
+		:raises ValueError: If parameter ``value`` is not a supported format version.
+		"""
+		if value is None:
+			raise ValueError(f"Parameter 'value' is None.")
+		elif not isinstance(value, int) or isinstance(value, bool):
+			ex = TypeError(f"Parameter 'value' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+			raise ex
+		elif value not in [member.value for member in cls]:
+			ex = ValueError(f"Parameter 'value' is not a supported coverage.py JSON format version.")
+			ex.add_note(f"Got value '{value}'.")
+			ex.add_note(f"Supported format versions: {', '.join(str(member.value) for member in cls)}.")
+			raise ex
+
+		return cls(value)
+
+
+SCHEMAS: dict[FormatVersion, str] = {
+	FormatVersion.Version2: "CoveragePy-2.schema.json",
+	FormatVersion.Version3: "CoveragePy-3.schema.json"
+}  #: Per format version, the JSON Schema a report of that version is validated against.
 
 
 @export
@@ -818,7 +862,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 	The report's root: how and when it was written, the measured files, and the totals.
 	"""
 
-	_format:         Nullable[int]              #: Version of the report format.
+	_format:         Nullable[FormatVersion]    #: Version of the report format.
 	_version:        Nullable[SemanticVersion]  #: Version of coverage.py.
 	_timestamp:      Nullable[datetime]         #: Time the report was written, local time without time zone.
 	_branchCoverage: bool                       #: Whether branch coverage was measured.
@@ -839,11 +883,11 @@ class Report(metaclass=ExtendedType, mixin=True):
 		self._totals =         None
 
 	@readonly
-	def Format(self) -> Nullable[int]:
+	def Format(self) -> Nullable[FormatVersion]:
 		"""
 		Read-only property to access the version of the report format (:attr:`_format`).
 
-		:returns: The version, ``2`` or ``3``; ``None`` before the report was converted.
+		:returns: The version; ``None`` before the report was converted.
 		"""
 		return self._format
 
@@ -933,12 +977,15 @@ class Document(cc_Document, Report):
 
 	def Analyze(self) -> None:
 		"""
-		Parse the JSON file and validate it against the JSON Schema :data:`SCHEMA`.
+		Parse the JSON file, read the format version it states, and validate it against the JSON Schema of that version
+		(:data:`SCHEMAS`).
 
 		:raises CodeCoverageError: If the file doesn't exist.
 		:raises CodeCoverageError: If the file isn't valid JSON.
+		:raises CodeCoverageError: If the file states no supported format version. |br|
+		                           The note lists the supported format versions.
 		:raises CodeCoverageError: If the JSON Schema can't be read.
-		:raises CodeCoverageError: If the file isn't valid according to the JSON Schema.
+		:raises CodeCoverageError: If the file isn't valid according to the JSON Schema of its format version.
 		"""
 		if not self._path.exists():
 			raise CodeCoverageError(f"coverage.py report file '{self._path}' does not exist.") \
@@ -950,14 +997,26 @@ class Document(cc_Document, Report):
 			except JSONDecodeError as ex:
 				raise CodeCoverageError(f"JSON syntax error in coverage.py report file '{self._path}'.") from ex
 
+			meta =    jsonDocument.get("meta") if isinstance(jsonDocument, dict) else None
+			version = meta.get("format") if isinstance(meta, dict) else None
 			try:
-				schema = loads(readResourceFile(Resources, SCHEMA))
+				formatVersion = FormatVersion.Parse(version)
+			except (ValueError, TypeError) as ex:
+				error = CodeCoverageError(f"coverage.py report file '{self._path}' states an unsupported format version.")
+				got =   f"value '{version}'" if version is not None else "no value"
+				error.add_note(f"Got {got} at '/meta/format'.")
+				error.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
+				raise error from ex
+
+			schemaFile = SCHEMAS[formatVersion]
+			try:
+				schema = loads(readResourceFile(Resources, schemaFile))
 			except (ToolingException, JSONDecodeError) as ex:
-				raise CodeCoverageError(f"Couldn't read JSON Schema '{SCHEMA}' from package resources.") from ex
+				raise CodeCoverageError(f"Couldn't read JSON Schema '{schemaFile}' from package resources.") from ex
 
 			errors = sorted(Draft202012Validator(schema).iter_errors(jsonDocument), key=lambda error: list(error.path))
 			if len(errors) > 0:
-				ex = CodeCoverageError(f"Validation error for '{self._path}' using JSON Schema '{SCHEMA}'.")
+				ex = CodeCoverageError(f"Validation error for '{self._path}' using JSON Schema '{schemaFile}'.")
 				for error in errors:
 					ex.add_note(f"/{'/'.join(str(part) for part in error.path)}: {error.message}")
 				raise ex
@@ -982,7 +1041,7 @@ class Document(cc_Document, Report):
 
 		with Stopwatch() as sw:
 			meta = self._jsonDocument["meta"]
-			self._format =         meta["format"]
+			self._format =         FormatVersion(meta["format"])
 			self._version =        SemanticVersion.Parse(meta["version"])
 			self._timestamp =      datetime.fromisoformat(meta["timestamp"])
 			self._branchCoverage = meta["branch_coverage"]
