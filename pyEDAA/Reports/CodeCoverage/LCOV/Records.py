@@ -31,13 +31,17 @@
 """
 The records of lcov's tracefile format: a section, and its functions and lines.
 """
-from __future__            import annotations
+from __future__                  import annotations
 
-from pathlib               import Path
-from typing                import Optional as Nullable
+from pathlib                     import Path
+from typing                      import Optional as Nullable
 
-from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import ExtendedType
+from pyTooling.Common            import getFullyQualifiedName
+from pyTooling.Decorators        import export, readonly
+from pyTooling.MetaClasses       import ExtendedType
+
+# The package, not its class 'Tracefile': the package imports this module before it defines 'Tracefile'.
+from pyEDAA.Reports.CodeCoverage import LCOV
 
 
 @export
@@ -46,21 +50,50 @@ class Line(metaclass=ExtendedType, slots=True):
 	A ``DA`` record: how often a line ran, and the line's checksum.
 	"""
 
-	_number:   int            #: Line number.
-	_count:    int            #: How often the line ran; the sum, if the section lists the line twice.
-	_checksum: Nullable[str]  #: Checksum of the line's source text, if stated.
+	_parent:   Nullable[Section]  #: The section the line belongs to.
+	_number:   int                #: Line number.
+	_count:    int                #: How often the line ran; the sum, if the section lists the line twice.
+	_checksum: Nullable[str]      #: Checksum of the line's source text, if stated.
 
-	def __init__(self, number: int, count: int, checksum: Nullable[str] = None) -> None:
+	def __init__(
+		self,
+		number: int,
+		count: int,
+		checksum: Nullable[str] = None,
+		*,
+		parent: Nullable[Section] = None
+	) -> None:
 		"""
-		Initialize a line.
+		Initialize a line, and add it to the lines of its section.
 
-		:param number:   Line number.
-		:param count:    How often the line ran.
-		:param checksum: Optional, checksum of the line's source text. Default: ``None``.
+		:param number:     Line number.
+		:param count:      How often the line ran.
+		:param checksum:   Optional, checksum of the line's source text. Default: ``None``.
+		:param parent:     Optional, the section the line belongs to; the line is added to its lines by :attr:`Number`.
+		                   Default: ``None``.
+		:raises TypeError: If parameter ``parent`` isn't of type :class:`Section`.
 		"""
+		if parent is not None and not isinstance(parent, Section):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =   parent
 		self._number =   number
 		self._count =    count
 		self._checksum = checksum
+
+		if parent is not None:
+			parent._lines[number] = self
+
+	@readonly
+	def Parent(self) -> Nullable[Section]:
+		"""
+		Read-only property to access the section the line belongs to (:attr:`_parent`).
+
+		:returns: The section; ``None`` if the line belongs to no section.
+		"""
+		return self._parent
 
 	@readonly
 	def Number(self) -> int:
@@ -98,23 +131,52 @@ class Function(metaclass=ExtendedType, slots=True):
 	The aliases of a function - e.g. instances of a C++ template - share its lines.
 	"""
 
+	_parent:    Nullable[Section]         #: The section the function belongs to.
 	_index:     Nullable[int]             #: Index of the ``FNL`` record; ``None`` for an ``FN`` record.
 	_startLine: int                       #: The function's first line.
 	_endLine:   Nullable[int]             #: The function's last line, if stated.
 	_aliases:   dict[str, Nullable[int]]  #: The function's names, and how often each was called, if stated.
 
-	def __init__(self, startLine: int, endLine: Nullable[int], index: Nullable[int] = None) -> None:
+	def __init__(
+		self,
+		startLine: int,
+		endLine: Nullable[int],
+		index: Nullable[int] = None,
+		*,
+		parent: Nullable[Section] = None
+	) -> None:
 		"""
-		Initialize a function without aliases.
+		Initialize a function without aliases, and append it to the functions of its section.
 
-		:param startLine: The function's first line.
-		:param endLine:   The function's last line, or ``None`` if not stated.
-		:param index:     Optional, index of the ``FNL`` record. Default: ``None``, for an ``FN`` record.
+		:param startLine:  The function's first line.
+		:param endLine:    The function's last line, or ``None`` if not stated.
+		:param index:      Optional, index of the ``FNL`` record. Default: ``None``, for an ``FN`` record.
+		:param parent:     Optional, the section the function belongs to; the function is appended to its functions.
+		                   Default: ``None``.
+		:raises TypeError: If parameter ``parent`` isn't of type :class:`Section`.
 		"""
+		if parent is not None and not isinstance(parent, Section):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =    parent
 		self._index =     index
 		self._startLine = startLine
 		self._endLine =   endLine
 		self._aliases =   {}
+
+		if parent is not None:
+			parent._functions.append(self)
+
+	@readonly
+	def Parent(self) -> Nullable[Section]:
+		"""
+		Read-only property to access the section the function belongs to (:attr:`_parent`).
+
+		:returns: The section; ``None`` if the function belongs to no section.
+		"""
+		return self._parent
 
 	@readonly
 	def Index(self) -> Nullable[int]:
@@ -179,23 +241,33 @@ class Section(metaclass=ExtendedType, slots=True):
 	section states.
 	"""
 
-	_testName:        str              #: Name of the test, stated by the last ``TN`` record before the section.
-	_sourceFile:      Path             #: Path of the source file.
-	_version:         Nullable[str]    #: Version ID of the source file, if stated.
-	_functions:       list[Function]   #: The functions, in the tracefile's order.
-	_lines:           dict[int, Line]  #: The lines, by number.
-	_functionsFound:  Nullable[int]    #: Number of functions, as the section states it.
-	_functionsHit:    Nullable[int]    #: Number of functions called, as the section states it.
-	_linesFound:      Nullable[int]    #: Number of instrumented lines, as the section states it.
-	_linesHit:        Nullable[int]    #: Number of lines, which ran, as the section states it.
+	_parent:          Nullable[LCOV.Tracefile]  #: The tracefile the section belongs to.
+	_testName:        str                       #: Name of the test, stated by the last ``TN`` record before the section.
+	_sourceFile:      Path                      #: Path of the source file.
+	_version:         Nullable[str]             #: Version ID of the source file, if stated.
+	_functions:       list[Function]            #: The functions, in the tracefile's order.
+	_lines:           dict[int, Line]           #: The lines, by number.
+	_functionsFound:  Nullable[int]             #: Number of functions, as the section states it.
+	_functionsHit:    Nullable[int]             #: Number of functions called, as the section states it.
+	_linesFound:      Nullable[int]             #: Number of instrumented lines, as the section states it.
+	_linesHit:        Nullable[int]             #: Number of lines, which ran, as the section states it.
 
-	def __init__(self, testName: str, sourceFile: Path) -> None:
+	def __init__(self, testName: str, sourceFile: Path, *, parent: Nullable[LCOV.Tracefile] = None) -> None:
 		"""
-		Initialize an empty section.
+		Initialize an empty section, and append it to the sections of its tracefile.
 
 		:param testName:   Name of the test; empty, if not stated.
 		:param sourceFile: Path of the source file.
+		:param parent:     Optional, the tracefile the section belongs to; the section is appended to its sections.
+		                   Default: ``None``.
+		:raises TypeError: If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.LCOV.Tracefile`.
 		"""
+		if parent is not None and not isinstance(parent, LCOV.Tracefile):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Tracefile'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =          parent
 		self._testName =        testName
 		self._sourceFile =      sourceFile
 		self._version =         None
@@ -205,6 +277,18 @@ class Section(metaclass=ExtendedType, slots=True):
 		self._functionsHit =    None
 		self._linesFound =      None
 		self._linesHit =        None
+
+		if parent is not None:
+			parent._sections.append(self)
+
+	@readonly
+	def Parent(self) -> Nullable[LCOV.Tracefile]:
+		"""
+		Read-only property to access the tracefile the section belongs to (:attr:`_parent`).
+
+		:returns: The tracefile; ``None`` if the section belongs to no tracefile.
+		"""
+		return self._parent
 
 	@readonly
 	def TestName(self) -> str:

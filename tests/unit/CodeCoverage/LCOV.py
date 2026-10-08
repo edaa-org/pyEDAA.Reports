@@ -30,12 +30,13 @@
 #
 #
 """Unit tests of lcov's tracefile format: its model, its line parser and the conversion to the common model."""
-from pathlib                          import Path
-from tempfile                         import TemporaryDirectory
+from pathlib                                  import Path
+from tempfile                                 import TemporaryDirectory
 
-from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.LCOV import RECORD_SYNTAX, Document
-from pyTooling.Testing                import Testcase
+from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
+from pyEDAA.Reports.CodeCoverage.LCOV         import RECORD_SYNTAX, Document, Tracefile
+from pyEDAA.Reports.CodeCoverage.LCOV.Records import Function as lcov_Function, Line, Section
+from pyTooling.Testing                        import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -101,6 +102,63 @@ class FormatModel(Testcase):
 		))
 		self.assertEqual((1, 11, None, {"Box<int>::Box": 0}), (box.Index, box.StartLine, box.EndLine, box.Aliases))
 		self.assertEqual((5, None), (section.Lines[4].Count, section.Lines[4].Checksum))
+
+
+class Parents(Testcase):
+	"""Every record below the tracefile has a parent, and is registered in its parent's collection."""
+
+	def test_Line(self) -> None:
+		section = Section("", Path("a.c"))
+		line = Line(4, 2, parent=section)
+
+		self.assertIs(section, line.Parent)
+		self.assertEqual({4: line}, section.Lines)
+		self.assertIsNone(Line(5, 0).Parent)
+
+	def test_Function(self) -> None:
+		section = Section("", Path("a.c"))
+		first = lcov_Function(1, 3, parent=section)
+		second = lcov_Function(5, None, 0, parent=section)
+
+		self.assertEqual([section, section], [first.Parent, second.Parent])
+		self.assertEqual([first, second], section.Functions)
+		self.assertIsNone(lcov_Function(1, None).Parent)
+
+	def test_Section(self) -> None:
+		tracefile = Tracefile()
+		first = Section("", Path("a.c"), parent=tracefile)
+		second = Section("t", Path("b.c"), parent=tracefile)
+
+		self.assertEqual([tracefile, tracefile], [first.Parent, second.Parent])
+		self.assertEqual([first, second], tracefile.Sections)
+		self.assertIsNone(Section("", Path("a.c")).Parent)
+
+	def test_WrongParent(self) -> None:
+		section = Section("", Path("a.c"))
+		for create, expected in (
+			(lambda: Line(1, 0, parent=Tracefile()), "Section"),
+			(lambda: lcov_Function(1, None, parent=Tracefile()), "Section"),
+			(lambda: Section("", Path("a.c"), parent=section), "Tracefile")
+		):
+			with self.subTest(expected=expected):
+				with self.assertRaises(TypeError) as context:
+					create()
+
+				self.assertEqual(f"Parameter 'parent' is not of type '{expected}'.", str(context.exception))
+				self.assertEqual(1, len(context.exception.__notes__))
+
+	def test_Document(self) -> None:
+		"""A read tracefile is the parent of its sections, a section of its functions and lines."""
+		with TemporaryDirectory() as directory:
+			tracefile = Document(_write(directory,
+				"SF:a.c\nFN:1,3,f\nFNDA:1,f\nDA:2,1\nend_of_record\nSF:b.c\nFNL:0,1\nFNA:0,0,g\nDA:1,0\nend_of_record\n"
+			), analyzeAndConvert=True)
+
+		self.assertEqual([tracefile, tracefile], [section.Parent for section in tracefile.Sections])
+		for section in tracefile.Sections:
+			with self.subTest(section=section.SourceFile):
+				self.assertEqual([section], [function.Parent for function in section.Functions])
+				self.assertEqual([section], [line.Parent for line in section.Lines.values()])
 
 
 class Conversion(Testcase):

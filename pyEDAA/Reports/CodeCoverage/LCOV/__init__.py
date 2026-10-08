@@ -268,7 +268,7 @@ class Document(Tracefile, cc_Document):
 						ex.add_note(f"End the section of line {sectionLineNumber} with 'end_of_record'.")
 						raise ex
 
-					section = Section(testName, Path(values[0].replace("\\", "/")))
+					section = Section(testName, Path(values[0].replace("\\", "/")), parent=self)
 					sectionLineNumber = lineNumber
 					functionsByName = {}
 					functionsByIndex = {}
@@ -292,12 +292,11 @@ class Document(Tracefile, cc_Document):
 							ex.add_note(f"Name the function by '{RECORD_SYNTAX['FNA']}'.")
 							raise ex
 
-					self._sections.append(section)
 					section = None
 				elif key == "DA":
 					number, count = int(values[0]), int(values[1])
 					if (line := section._lines.get(number)) is None:
-						section._lines[number] = Line(number, count, values[2])
+						Line(number, count, values[2], parent=section)
 					else:
 						line._count += count
 				elif key == "FN":
@@ -306,19 +305,17 @@ class Document(Tracefile, cc_Document):
 						ex.add_note(f"Line {lineNumber}: '{text}'")
 						raise ex
 
-					function = Function(int(values[0]), None if values[1] is None else int(values[1]))
+					function = Function(int(values[0]), None if values[1] is None else int(values[1]), parent=section)
 					function._aliases[name] = None
 					functionsByName[name] = function
-					section._functions.append(function)
 				elif key == "FNL":
 					if (index := int(values[0])) in functionsByIndex:
 						ex = CodeCoverageError(f"Function index {index} is stated twice in the section of '{section._sourceFile}'.")
 						ex.add_note(f"Line {lineNumber}: '{text}'")
 						raise ex
 
-					function = Function(int(values[1]), None if values[2] is None else int(values[2]), index)
+					function = Function(int(values[1]), None if values[2] is None else int(values[2]), index, parent=section)
 					functionsByIndex[index] = function
-					section._functions.append(function)
 				elif key == "FNDA" or key == "FNA":
 					if key == "FNDA":
 						count, name = int(values[0]), values[1]
