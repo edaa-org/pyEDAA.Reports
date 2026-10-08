@@ -33,58 +33,8 @@ jobs:
   Example-Rust:
     uses: ./.github/workflows/Example-Rust.yml
 
-  Go-Test:
-    runs-on: ubuntu-26.04
-    steps:
-      - name: ⏬ Checkout repository
-        uses: actions/checkout@v7
-      - name: 🐹 Set up Go 1.26
-        uses: actions/setup-go@v7
-        with:
-          go-version: '1.26'
-          cache:      false
-      - name: 🔧 Install gotestsum, go-junit-report, gocover-cobertura and gcov2lcov
-        run: |
-          go install gotest.tools/gotestsum@v1.13.0
-          go install github.com/jstemmer/go-junit-report/v2@v2.1.0
-          go install github.com/boumenot/gocover-cobertura@v1.5.0
-          go install github.com/jandelgado/gcov2lcov@v1.1.1
-      - name: 🛠 Build packages and tests
-        run: |
-          cd examples/Go/testing
-          go vet ./...
-      - name: ✅ Run unit tests
-        run: |
-          cd examples/Go/testing
-
-          exitCode=0
-          gotestsum --format testname --junitfile gotestsum.xml --jsonfile go-test.json \
-            -- -coverprofile=coverage.out -covermode=count ./... || exitCode=$?
-          if [[ ${exitCode} -ne 1 ]]; then
-            printf -- '::error title=%s::%s\n' "gotestsum" "Expected exit code 1 (failed tests), got ${exitCode}."
-            exit 1
-          fi
-      - name: 📋 Convert test2json output to JUnit XML by go-junit-report
-        run: |
-          cd examples/Go/testing
-          go-junit-report -parser gojson -in go-test.json -out go-junit-report.xml
-      - name: 📊 Convert cover profile to Cobertura XML and lcov tracefile
-        run: |
-          cd examples/Go/testing
-          gocover-cobertura < coverage.out > cobertura.xml
-          gcov2lcov -infile coverage.out -outfile coverage.info
-      - name: List generated reports
-        run: |
-          ls -lAh examples/Go/testing/*.xml examples/Go/testing/*.json examples/Go/testing/coverage.*
-      - name: 📤 Upload JUnit XML, test2json and coverage files as artifact
-        uses: pyTooling/upload-artifact@v7
-        with:
-          name: Go-Test
-          path: |
-            examples/Go/testing/*.xml
-            examples/Go/testing/go-test.json
-            examples/Go/testing/coverage.out
-            examples/Go/testing/coverage.info
+  Example-Go:
+    uses: ./.github/workflows/Example-Go.yml
 
   UnitTestingParams:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@r8
@@ -162,7 +112,7 @@ jobs:
       - Example-Cpp
       - Example-Python
       - Example-Rust
-      - Go-Test
+      - Example-Go
     with:
       jobs:                 ${{ needs.AppTestingParams.outputs.python_jobs }}
       wheel:                ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
