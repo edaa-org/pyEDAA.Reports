@@ -37,7 +37,7 @@ by Microsoft's code coverage collector (Cobertura) and by ReportGenerator (Cober
 Cobertura report) for the example :file:`examples/CSharp/xUnit`.
 """
 from json                                  import loads
-from pathlib                               import Path
+from pathlib                               import Path, PurePosixPath
 
 from lxml.etree                            import XMLSchema, parse
 from pyTooling.Common                      import getResourceFile
@@ -172,7 +172,7 @@ class MicrosoftCobertura(Testcase):
 		self.assertEqual(
 			{"MyLibrary", "MyLibrary.Tests"}, {package.get("name") for package in root.iterfind("packages/package")}
 		)
-		self.assertTrue(all(Path(klass.get("filename")).is_absolute() for klass in root.iter("class")))
+		self.assertTrue(all(PurePosixPath(klass.get("filename")).is_absolute() for klass in root.iter("class")))
 		self.assertEqual(
 			[
 				"MyLibrary.Calculator",
