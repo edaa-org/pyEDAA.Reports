@@ -1,12 +1,12 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/Gcov-JSON.schema.json",
-	"title": "gcov JSON report",
-	"description": "The JSON report gcov writes with 'gcov --json-format' for one data file, format versions 1 (GCC 9 to 13) and 2 (GCC 14 and later). Reverse-engineered from GCC's 'gcov.cc' and its documentation: version 2 added the basic blocks of a line and a branch, the calls and the conditions; GCC 15 added the prime paths of a function. Fields a version added later are optional.",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/Gcov-2.schema.json",
+	"title": "gcov JSON report, format 2",
+	"description": "The JSON report gcov writes with 'gcov --json-format' for one data file, format version 2 (GCC 14 and later). Reverse-engineered from GCC's 'gcov.cc' (GCC 14 and 15) and its documentation: format 2 added the basic blocks of a line and a branch, the calls and the conditions to format 1; GCC 15 added the prime paths of a function, written with 'gcov --prime-paths' only.",
 	"type": "object",
 	"required": ["format_version", "gcc_version", "data_file", "files"],
 	"properties": {
-		"format_version":            {"description": "Version of the report format.", "enum": ["1", "2"]},
+		"format_version":            {"description": "Version of the report format.", "const": "2"},
 		"gcc_version":               {"description": "Version of GCC.", "type": "string"},
 		"current_working_directory": {"description": "Directory the compilation unit was compiled in.", "type": "string"},
 		"data_file":                 {"description": "Name of the data file (GCDA), as gcov was called with it.", "type": "string"},
@@ -60,7 +60,7 @@
 		"Line": {
 			"description": "An executable line. A line of several functions - e.g. template instantiations - is listed once per function.",
 			"type": "object",
-			"required": ["line_number", "count", "unexecuted_block", "branches"],
+			"required": ["line_number", "count", "unexecuted_block", "block_ids", "branches", "calls", "conditions"],
 			"properties": {
 				"line_number":      {"type": "integer", "minimum": 1},
 				"function_name":    {"description": "Mangled name of the function; missing for a line of inlined statements.", "type": "string"},
@@ -76,7 +76,7 @@
 		"Branch": {
 			"description": "A branch: an edge from a basic block to another.",
 			"type": "object",
-			"required": ["count", "throw", "fallthrough"],
+			"required": ["count", "throw", "fallthrough", "source_block_id", "destination_block_id"],
 			"properties": {
 				"count":                {"description": "Number of times the branch was taken.", "$ref": "#/$defs/Count"},
 				"throw":                {"description": "Whether the branch is taken by an exception.", "type": "boolean"},

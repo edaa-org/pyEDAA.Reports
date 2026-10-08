@@ -36,7 +36,7 @@ from tempfile                                 import TemporaryDirectory
 from typing                                   import Any
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.Gcov         import DataFile, Document, File
+from pyEDAA.Reports.CodeCoverage.Gcov         import Coverage, DataFile, Document, File, FormatVersion, SCHEMAS
 from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function as gcov_Function, Line
 from pyTooling.Testing                        import Testcase
 from pyTooling.Versioning                     import SemanticVersion
@@ -86,9 +86,9 @@ class FormatModel(Testcase):
 
 		self.assertEqual(["Statistics.c", "Main.cpp"], [dataFile.Path.as_posix() for dataFile in report.DataFiles])
 		main = report.DataFiles[1]
-		self.assertEqual((2, "14.2.0"), (main.FormatVersion, main.GCCVersion))
+		self.assertEqual((FormatVersion.Version2, "14.2.0"), (main.FormatVersion, main.GCCVersion))
 		self.assertIsInstance(main.GCCVersion, SemanticVersion)
-		self.assertTrue(main.CurrentWorkingDirectory.is_absolute())
+		self.assertEqual(_stream()[1]["current_working_directory"], main.CurrentWorkingDirectory.as_posix())
 		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(main.Files))
 
 	def test_Functions(self) -> None:
@@ -165,25 +165,20 @@ class Construction(Testcase):
 		self.assertEqual((8, 7, 3), (pop.Blocks, pop.BlocksExecuted, pop.ExecutionCount))
 
 	def test_File(self) -> None:
-		main = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1)
-		lines = [Line(1, 1, False, "main"), Line(2, 1, False, "main")]
-		file = File(Path("main.c"), [main], lines)
+		file = File(Path("main.c"))
 
-		self.assertEqual((Path("main.c"), {"main": main}, lines), (file.Path, file.Functions, file.Lines))
-		self.assertEqual(({}, []), (File(Path("empty.c")).Functions, File(Path("empty.c")).Lines))
+		self.assertEqual((Path("main.c"), None, {}, []), (file.Path, file.Parent, file.Functions, file.Lines))
 
 	def test_DataFile(self) -> None:
-		file = File(Path("main.c"))
-		dataFile = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), Path("/build"), [file])
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"), Path("/build"))
 
-		self.assertEqual((Path("main.c"), 2, "14.2.0", Path("/build")),
+		self.assertEqual((Path("main.c"), FormatVersion.Version2, "14.2.0", Path("/build")),
 		                 (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion, dataFile.CurrentWorkingDirectory))
-		self.assertEqual({Path("main.c"): file}, dataFile.Files)
 
 	def test_DataFile_Defaults(self) -> None:
-		dataFile = DataFile(Path("main.c"), 1, SemanticVersion.Parse("13.2.0"))
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version1, SemanticVersion.Parse("13.2.0"))
 
-		self.assertEqual((None, {}), (dataFile.CurrentWorkingDirectory, dataFile.Files))
+		self.assertEqual((None, None, {}), (dataFile.CurrentWorkingDirectory, dataFile.Parent, dataFile.Files))
 
 	def test_Line_LineNumber(self) -> None:
 		with self.assertRaises(ValueError) as context:
@@ -222,32 +217,141 @@ class Construction(Testcase):
 		self.assertEqual("Parameter 'path' is not of type 'Path'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
-	def test_File_Lines(self) -> None:
-		with self.assertRaises(TypeError) as context:
-			_ = File(Path("main.c"), lines=[Line(1, 0, False), 2])
-		self.assertEqual("Parameter 'lines' contains an element not of type 'Line'.", str(context.exception))
-		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
-
 	def test_DataFile_FormatVersion(self) -> None:
+		"""The format version is a member of FormatVersion, not its number."""
 		with self.assertRaises(ValueError) as context:
-			_ = DataFile(Path("main.c"), 3, SemanticVersion.Parse("14.2.0"))
-		self.assertEqual("Parameter 'formatVersion' is not 1 or 2.", str(context.exception))
-		self.assertEqual(["Got value '3'."], context.exception.__notes__)
+			_ = DataFile(Path("main.c"), None, SemanticVersion.Parse("14.2.0"))
+		self.assertEqual("Parameter 'formatVersion' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"))
+		self.assertEqual("Parameter 'formatVersion' is not of type 'FormatVersion'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 	def test_DataFile_GCCVersion(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = DataFile(Path("main.c"), 2, "14.2.0")
+			_ = DataFile(Path("main.c"), FormatVersion.Version2, "14.2.0")
 		self.assertEqual("Parameter 'gccVersion' is not of type 'SemanticVersion'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
-	def test_DataFile_Files(self) -> None:
+
+class ParentRelation(Testcase):
+	"""Each record below the report names its parent and is added to it."""
+
+	def test_DataFile(self) -> None:
+		coverage = Coverage()
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"), parent=coverage)
+
+		self.assertIs(coverage, dataFile.Parent)
+		self.assertEqual([dataFile], coverage.DataFiles)
+
+	def test_File(self) -> None:
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"))
+		file = File(Path("main.c"), parent=dataFile)
+
+		self.assertIs(dataFile, file.Parent)
+		self.assertEqual({Path("main.c"): file}, dataFile.Files)
+
+	def test_Function(self) -> None:
+		file = File(Path("main.c"))
+		main = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1, parent=file)
+
+		self.assertIs(file, main.Parent)
+		self.assertEqual({"main": main}, file.Functions)
+
+	def test_Line(self) -> None:
+		"""A line several functions share is added once per function."""
+		file = File(Path("main.c"))
+		lines = [Line(1, 1, False, "main", parent=file), Line(1, 1, False, "other", parent=file)]
+
+		self.assertEqual([file, file], [line.Parent for line in lines])
+		self.assertEqual(lines, file.Lines)
+
+	def test_Defaults(self) -> None:
+		self.assertIsNone(gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1).Parent)
+		self.assertIsNone(Line(1, 1, False).Parent)
+
+	def test_Document(self) -> None:
+		"""Reading a report builds each relation."""
+		report = Document(STREAM, analyzeAndConvert=True)
+
+		for dataFile in report.DataFiles:
+			self.assertIs(report, dataFile.Parent)
+			for file in dataFile.Files.values():
+				self.assertIs(dataFile, file.Parent)
+				self.assertTrue(all(function.Parent is file for function in file.Functions.values()))
+				self.assertTrue(all(line.Parent is file for line in file.Lines))
+
+	def test_DataFile_Parent(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = DataFile(Path("main.c"), 2, SemanticVersion.Parse("14.2.0"), files=File(Path("main.c")))
-		self.assertEqual("Parameter 'files' is not iterable.", str(context.exception))
+			_ = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"), parent=[])
+		self.assertEqual("Parameter 'parent' is not of type 'Coverage'.", str(context.exception))
+		self.assertEqual(["Got type 'list'."], context.exception.__notes__)
+
+	def test_File_Parent(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("main.c"), parent=Coverage())
+		self.assertEqual("Parameter 'parent' is not of type 'DataFile'.", str(context.exception))
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.Coverage'."], context.exception.__notes__)
+
+	def test_Function_Parent(self) -> None:
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"))
+		with self.assertRaises(TypeError) as context:
+			_ = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1, parent=dataFile)
+		self.assertEqual("Parameter 'parent' is not of type 'File'.", str(context.exception))
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.DataFile'."], context.exception.__notes__)
+
+	def test_Line_Parent(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Line(1, 1, False, parent="main.c")
+		self.assertEqual("Parameter 'parent' is not of type 'File'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_File_Duplicate(self) -> None:
+		"""A data file naming a source file twice is rejected before the second file is created."""
+		main = _stream()[1]
+		main["files"].append(main["files"][1])
+
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = DataFile.Parse(main)
+		self.assertEqual(
+			"gcov data file 'Main.cpp' names source file 'Containers/Stack.hpp' twice.", str(context.exception)
+		)
+
+	def test_Function_Duplicate(self) -> None:
+		record = _stream()[1]["files"][0]
+		record["functions"].append(record["functions"][0])
+
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = File.Parse(record)
+		self.assertEqual(
+			f"gcov source file 'Main.cpp' names function '{record['functions'][0]['name']}' twice.", str(context.exception)
+		)
 
 
 class Parsing(Testcase):
 	"""Each class of the format's model parses its JSON object."""
+
+	def test_FormatVersion(self) -> None:
+		"""gcov states the format version as a string."""
+		self.assertIs(FormatVersion.Version1, FormatVersion.Parse("1"))
+		self.assertIs(FormatVersion.Version2, FormatVersion.Parse("2"))
+
+	def test_FormatVersion_Unsupported(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = FormatVersion.Parse("3")
+		self.assertEqual("Parameter 'value' is not a supported gcov JSON format version.", str(context.exception))
+		self.assertEqual(["Got value '3'.", "Supported format versions: 1, 2."], context.exception.__notes__)
+
+	def test_FormatVersion_Type(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = FormatVersion.Parse(None)
+		self.assertEqual("Parameter 'value' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = FormatVersion.Parse(2)
+		self.assertEqual("Parameter 'value' is not of type 'str'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 	def test_Line(self) -> None:
 		line = Line.Parse({
@@ -287,7 +391,8 @@ class Parsing(Testcase):
 		"""The format version is a string; a development build of GCC states its date and phase behind the version."""
 		dataFile = DataFile.Parse(_stream()[1] | {"gcc_version": "15.0.1 20250418 (experimental)"})
 
-		self.assertEqual((Path("Main.cpp"), 2, "15.0.1"), (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion))
+		self.assertEqual((Path("Main.cpp"), FormatVersion.Version2, "15.0.1"),
+		                 (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion))
 		self.assertIsInstance(dataFile.GCCVersion, SemanticVersion)
 		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(dataFile.Files))
 
@@ -395,6 +500,7 @@ class Conversion(Testcase):
 		with TemporaryDirectory() as directory:
 			report = Document(_write(directory, dumps(document)), analyzeAndConvert=True)
 
+		self.assertIs(FormatVersion.Version1, report.DataFiles[0].FormatVersion)
 		line = report.DataFiles[0].Files[Path("main.c")].Lines[1]
 		self.assertEqual([], line.BlockIDs)
 		self.assertIsNone(report.DataFiles[0].CurrentWorkingDirectory)
@@ -406,7 +512,11 @@ class Conversion(Testcase):
 
 
 class Schema(Testcase):
-	"""The reverse-engineered JSON Schema accepts gcov's report and rejects what it doesn't write."""
+	"""Each JSON object is validated against the JSON Schema of its format version: it rejects what gcov doesn't write."""
+
+	def test_Schemas(self) -> None:
+		self.assertEqual({FormatVersion.Version1: "Gcov-1.schema.json", FormatVersion.Version2: "Gcov-2.schema.json"},
+		                 SCHEMAS)
 
 	def test_FormatVersion(self) -> None:
 		main = _stream()[1]
@@ -417,10 +527,69 @@ class Schema(Testcase):
 			with self.assertRaises(CodeCoverageError) as context:
 				_ = Document(jsonFile, analyzeAndConvert=True)
 
+		self.assertEqual(f"gcov report file '{jsonFile}' states an unsupported format version.", str(context.exception))
 		self.assertEqual(
-			f"Validation error for '{jsonFile}' using JSON Schema 'Gcov-JSON.schema.json'.", str(context.exception)
+			["Got value '3' at '/format_version'.", "Supported format versions: 1, 2."], context.exception.__notes__
 		)
-		self.assertEqual(["/format_version: '3' is not one of ['1', '2']"], context.exception.__notes__)
+
+	def test_FormatVersion_Missing(self) -> None:
+		"""The format version is read before validating; the second object states none."""
+		statistics, main = _stream()
+		del main["format_version"]
+		with TemporaryDirectory() as directory:
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(_write(directory, f"{dumps(statistics)}\n{dumps(main)}\n"), analyzeAndConvert=True)
+
+		self.assertEqual(
+			["Got no value at '[1]/format_version'.", "Supported format versions: 1, 2."], context.exception.__notes__
+		)
+
+	def test_Format1_Strict(self) -> None:
+		"""Format 1 has no basic blocks: the schema of format 1 rejects them."""
+		main = _stream()[1]
+		main["format_version"] = "1"
+		with TemporaryDirectory() as directory:
+			jsonFile = _write(directory, dumps(main))
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(
+			f"Validation error for '{jsonFile}' using JSON Schema 'Gcov-1.schema.json'.", str(context.exception)
+		)
+		self.assertIn(
+			"/files/1/lines/0: Additional properties are not allowed ('block_ids', 'calls', 'conditions' were unexpected)",
+			context.exception.__notes__
+		)
+
+	def test_Format2_Strict(self) -> None:
+		"""gcov of GCC 14 and later writes a line's basic blocks, calls and conditions, if empty."""
+		main = _stream()[1]
+		del main["files"][1]["lines"][0]["block_ids"]
+		with TemporaryDirectory() as directory:
+			jsonFile = _write(directory, dumps(main))
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(
+			f"Validation error for '{jsonFile}' using JSON Schema 'Gcov-2.schema.json'.", str(context.exception)
+		)
+		self.assertEqual(["/files/1/lines/0: 'block_ids' is a required property"], context.exception.__notes__)
+
+	def test_Formats(self) -> None:
+		"""A file may hold objects of both format versions, each validated against its schema."""
+		document = {
+			"format_version": "1", "gcc_version": "13.2.0", "data_file": "empty.c", "files": [
+				{"file": "empty.c", "functions": [], "lines": []}
+			]
+		}
+		with TemporaryDirectory() as directory:
+			report = Document(_write(directory, f"{dumps(document)}\n{dumps(_stream()[1])}\n"), analyzeAndConvert=True)
+
+		self.assertEqual([FormatVersion.Version1, FormatVersion.Version2], [
+			dataFile.FormatVersion for dataFile in report.DataFiles
+		])
 
 	def test_UnknownField(self) -> None:
 		"""An error in the second JSON object of a file is prefixed by its index."""

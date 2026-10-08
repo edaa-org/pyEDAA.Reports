@@ -1,0 +1,77 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/Gcov-1.schema.json",
+	"title": "gcov JSON report, format 1",
+	"description": "The JSON report gcov writes with 'gcov --json-format' for one data file, format version 1 (GCC 9 to 13). Reverse-engineered from GCC's 'gcov.cc' (GCC 9 to 13) and its documentation.",
+	"type": "object",
+	"required": ["format_version", "gcc_version", "data_file", "files"],
+	"properties": {
+		"format_version":            {"description": "Version of the report format.", "const": "1"},
+		"gcc_version":               {"description": "Version of GCC.", "type": "string"},
+		"current_working_directory": {"description": "Directory the compilation unit was compiled in.", "type": "string"},
+		"data_file":                 {"description": "Name of the data file (GCDA), as gcov was called with it.", "type": "string"},
+		"files":                     {"type": "array", "items": {"$ref": "#/$defs/File"}}
+	},
+	"additionalProperties": false,
+	"$defs": {
+		"Count": {
+			"type": "integer",
+			"minimum": 0
+		},
+		"File": {
+			"description": "A source file: its functions and lines.",
+			"type": "object",
+			"required": ["file", "functions", "lines"],
+			"properties": {
+				"file":      {"description": "Path of the source file, as the compiler named it.", "type": "string"},
+				"functions": {"type": "array", "items": {"$ref": "#/$defs/Function"}},
+				"lines":     {"type": "array", "items": {"$ref": "#/$defs/Line"}}
+			},
+			"additionalProperties": false
+		},
+		"Function": {
+			"description": "A function: its position, basic blocks and how often it ran.",
+			"type": "object",
+			"required": [
+				"name", "demangled_name", "start_line", "start_column", "end_line", "end_column", "blocks", "blocks_executed",
+				"execution_count"
+			],
+			"properties": {
+				"name":            {"description": "Name of the function, mangled.", "type": "string"},
+				"demangled_name":  {"description": "Name of the function, demangled.", "type": "string"},
+				"start_line":      {"type": "integer", "minimum": 0},
+				"start_column":    {"type": "integer", "minimum": 0},
+				"end_line":        {"type": "integer", "minimum": 0},
+				"end_column":      {"type": "integer", "minimum": 0},
+				"blocks":          {"description": "Number of basic blocks.", "$ref": "#/$defs/Count"},
+				"blocks_executed": {"description": "Number of executed basic blocks.", "$ref": "#/$defs/Count"},
+				"execution_count": {"description": "Number of executions.", "$ref": "#/$defs/Count"}
+			},
+			"additionalProperties": false
+		},
+		"Line": {
+			"description": "An executable line. A line of several functions - e.g. template instantiations - is listed once per function.",
+			"type": "object",
+			"required": ["line_number", "count", "unexecuted_block", "branches"],
+			"properties": {
+				"line_number":      {"type": "integer", "minimum": 1},
+				"function_name":    {"description": "Mangled name of the function; missing for a line of inlined statements.", "type": "string"},
+				"count":            {"description": "Number of executions.", "$ref": "#/$defs/Count"},
+				"unexecuted_block": {"description": "Whether a basic block of the line, not only reached by exceptions, never ran.", "type": "boolean"},
+				"branches":         {"description": "Listed with 'gcov --branch-probabilities' only.", "type": "array", "items": {"$ref": "#/$defs/Branch"}}
+			},
+			"additionalProperties": false
+		},
+		"Branch": {
+			"description": "A branch: an edge from a basic block to another.",
+			"type": "object",
+			"required": ["count", "throw", "fallthrough"],
+			"properties": {
+				"count":       {"description": "Number of times the branch was taken.", "$ref": "#/$defs/Count"},
+				"throw":       {"description": "Whether the branch is taken by an exception.", "type": "boolean"},
+				"fallthrough": {"description": "Whether the branch falls through.", "type": "boolean"}
+			},
+			"additionalProperties": false
+		}
+	}
+}
