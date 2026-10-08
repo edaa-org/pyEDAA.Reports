@@ -629,6 +629,21 @@ class Document(cc_Document, Coverage):
 		:raises CodeCoverageError: If the XML schema can't be located or parsed.
 		:raises CodeCoverageError: If the file isn't valid according to the XML schema.
 		"""
+		self._Analyze(READ_SCHEMA)
+
+	def _Analyze(self, xmlSchemaFile: str) -> None:
+		"""
+		Parse the XML file and validate it against an XML schema of the package resources.
+
+		A dialect's :meth:`Analyze` calls it with the dialect's XML schema.
+
+		:param xmlSchemaFile:      File name of the XML schema in :mod:`pyEDAA.Reports.Resources`.
+		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file isn't well-formed XML.
+		:raises CodeCoverageError: If the root element isn't ``<coverage>``.
+		:raises CodeCoverageError: If the XML schema can't be located or parsed.
+		:raises CodeCoverageError: If the file isn't valid according to the XML schema.
+		"""
 		if not self._path.exists():
 			raise CodeCoverageError(f"Cobertura report file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
@@ -646,17 +661,17 @@ class Document(cc_Document, Coverage):
 				raise ex
 
 			try:
-				schemaResourceFile = getResourceFile(Resources, READ_SCHEMA)
+				schemaResourceFile = getResourceFile(Resources, xmlSchemaFile)
 			except ToolingException as ex:
-				raise CodeCoverageError(f"Couldn't locate XML Schema '{READ_SCHEMA}' in package resources.") from ex
+				raise CodeCoverageError(f"Couldn't locate XML Schema '{xmlSchemaFile}' in package resources.") from ex
 
 			try:
 				xmlSchema = XMLSchema(parse(schemaResourceFile, XMLParser(ns_clean=True)))
 			except (XMLSyntaxError, XMLSchemaParseError) as ex:
-				raise CodeCoverageError(f"Error while parsing XML Schema '{READ_SCHEMA}'.") from ex
+				raise CodeCoverageError(f"Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
 
 			if not xmlSchema.validate(xmlDocument):
-				ex = CodeCoverageError(f"Validation error for '{self._path}' using XSD schema '{READ_SCHEMA}'.")
+				ex = CodeCoverageError(f"Validation error for '{self._path}' using XSD schema '{xmlSchemaFile}'.")
 				for logEntry in xmlSchema.error_log:
 					ex.add_note(str(logEntry))
 				raise ex
