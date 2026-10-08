@@ -50,6 +50,7 @@ from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntJUni
 from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit     import Document as Catch2JUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestJUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GoogleTestJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit    import Document as NextestJUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestJUnitDocument
 
 
@@ -152,6 +153,13 @@ DIALECTS: Dict[str, Dialect] = {
 		Dialect(
 			"GoogleTest-JUnit", GoogleTestJUnitDocument, "GoogleTest-JUnit",
 			[DATA_DIRECTORY / "pyEDAA.Reports/Cpp-GoogleTest/gtest.xml"]
+		),
+		Dialect(
+			"nextest-JUnit", NextestJUnitDocument, "Nextest-JUnit",
+			[
+				DATA_DIRECTORY / "pyEDAA.Reports/Rust-Cargo/nextest-junit.xml",
+				DATA_DIRECTORY / "pyEDAA.Reports/Rust-Cargo-Retries/nextest-junit-retries.xml",
+			]
 		),
 		Dialect(
 			"pyTest-JUnit", PyTestJUnitDocument, "PyTest-JUnit",

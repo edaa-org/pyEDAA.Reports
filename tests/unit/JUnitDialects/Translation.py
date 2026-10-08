@@ -61,6 +61,20 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"no start time to carry over.",
 	("Catch2-JUnit", "GoogleTest-JUnit"):
 		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which Catch2 does not write.",
+	("Catch2-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which Catch2 does not write.",
+	("pyTest-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which pytest does not write.",
+	("nextest-JUnit", "Ant-JUnit4"):
+		"Ant + JUnit4 holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "CTest-JUnit"):
+		"CTest-JUnit holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuite>, which nextest does not write.",
+	("nextest-JUnit", "pyTest-JUnit"):
+		"pyTest-JUnit requires 'hostname' and 'timestamp' on <testsuite>, which nextest does not write.",
 	("Any-JUnit", "Ant-JUnit4"):
 		"Ant + JUnit4 holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "Catch2-JUnit"):
@@ -127,6 +141,9 @@ class TranslationMixin:
 	def test_ToGoogleTestJUnit(self) -> None:
 		self._translate("GoogleTest-JUnit")
 
+	def test_ToNextestJUnit(self) -> None:
+		self._translate("nextest-JUnit")
+
 	def test_ToPyTestJUnit(self) -> None:
 		self._translate("pyTest-JUnit")
 
@@ -148,6 +165,10 @@ class FromCTestJUnit(TranslationMixin, ut_TestCase):
 
 class FromGoogleTestJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "GoogleTest-JUnit"
+
+
+class FromNextestJUnit(TranslationMixin, ut_TestCase):
+	_dialectName = "nextest-JUnit"
 
 
 class FromPyTestJUnit(TranslationMixin, ut_TestCase):

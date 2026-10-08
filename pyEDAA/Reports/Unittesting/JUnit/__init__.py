@@ -1724,7 +1724,8 @@ class Document(TestsuiteSummary, ut_Document):
 
 		A ``<skipped>``, ``<failure>`` or ``<error>`` element sets the status. Its ``message`` attribute becomes the test
 		case's message, its text becomes the test case's details. The texts of ``<system-out>`` and ``<system-err>``
-		become the captured standard output and standard error; multiple such elements are concatenated.
+		become the captured standard output and standard error; multiple such elements are concatenated. The reruns of a
+		test case (``<flakyFailure>``, ``<flakyError>``, ``<rerunFailure>`` and ``<rerunError>``) don't change its status.
 
 		:param testcaseNode:   The current XML element node representing a test case.
 		:param newTestcase:    The test case to update.
@@ -1757,7 +1758,7 @@ class Document(TestsuiteSummary, ut_Document):
 						newTestcase._standardError = node.text
 					else:
 						newTestcase._standardError += node.text
-				elif node.tag == "properties":
+				elif node.tag in ("properties", "flakyFailure", "flakyError", "rerunFailure", "rerunError"):
 					pass
 				else:
 					raise UnittestError(f"Unknown element '{node.tag}' in junit file.")

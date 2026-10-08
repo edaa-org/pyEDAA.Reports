@@ -65,6 +65,9 @@ Available schemas
    * - :ref:`GoogleTest JUnit <SCHEMAS/GoogleTest-JUnit>`
      - :file:`GoogleTest-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document`
+   * - :ref:`cargo-nextest JUnit <SCHEMAS/Nextest-JUnit>`
+     - :file:`Nextest-JUnit.xsd`
+     - :class:`pyEDAA.Reports.Unittesting.JUnit.NextestJUnit.Document`
    * - :ref:`pytest JUnit <SCHEMAS/PyTest-JUnit>`
      - :file:`PyTest-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit.Document`
@@ -119,6 +122,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    Catch2-JUnit
    CTest-JUnit
    GoogleTest-JUnit
+   Nextest-JUnit
    PyTest-JUnit
    OpenTestReporting
    TestReport-v0.1

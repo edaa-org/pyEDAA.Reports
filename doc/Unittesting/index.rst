@@ -80,7 +80,7 @@ rather stuffed their language constructs into the concepts and limitations of th
 * ✅ :ref:`GoogleTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/GoogleTest>`
 * 🚧 Jenkins JUnit (planned)
 * 🚧 :ref:`JunitXml.TestLogger <UNITTEST/Tool/DotNetTest>` for ``dotnet test`` (planned)
-* 🚧 nextest JUnit (planned)
+* ✅ :ref:`cargo-nextest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/nextest>`
 * ✅ :ref:`pyTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/PyTest>`
 
 
@@ -225,10 +225,11 @@ an ``Err`` returned by a test and a ``#[should_panic]`` test that doesn't panic 
 ``test failure with exit code 101``. Its message is the first line of the test's error output, e.g.
 ``thread 'tests::failing' (554412) panicked at src/lib.rs:100:9`` or ``Error: Underflow``.
 
-Unlike Ant JUnit4, a test marked ``#[ignore]`` isn't in the report at all, the ``<testsuite>`` has neither
+Unlike Ant JUnit4, a test marked ``#[ignore]`` isn't in the report by default, the ``<testsuite>`` has neither
 ``timestamp``, ``time`` nor ``hostname``, and the test cases are listed in the order they finished. Doc-tests aren't
 run by cargo-nextest. Except for ``uuid`` on ``<testsuites>`` and ``timestamp`` on ``<testcase>``, the report is
-:ref:`Any JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit>`; no dialect reads it yet.
+:ref:`Any JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit>`. It is read by the
+:ref:`cargo-nextest JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/nextest>` dialect.
 
 The example in :file:`examples/Rust/Cargo` is run by the pipeline job ``Rust-Cargo``. It measures the code coverage by
 Rust's source-based coverage (``-C instrument-coverage``) with cargo-llvm-cov, and writes it as LLVM JSON

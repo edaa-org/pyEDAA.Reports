@@ -51,6 +51,7 @@ from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4         import Document as JUnit
 from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit       import Document as Catch2Document
 from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit        import Document as CTestDocument
 from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit   import Document as GTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit      import Document as NextestDocument
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit       import Document as PyTestDocument
 from pyTooling.Testing                                  import Testcase
 
@@ -852,14 +853,79 @@ class PythonPyTestCoverage(TestCase):
 
 
 class RustCargo(TestCase):
-	def test_JUnit(self) -> None:
-		"""Known gap: no dialect reads cargo-nextest's JUnit report yet."""
-		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Rust-Cargo/nextest-junit.xml")
+	def test_nextest(self) -> None:
+		"""Console: '12 tests run: 8 passed, 4 failed, 1 skipped' - the ignored test is missing from the report."""
+		print()
 
-		for documentClass in (AnyJUnitDocument, JUnit4Document, CTestDocument, GTestDocument, PyTestDocument):
-			with self.subTest(dialect=documentClass.__module__):
-				with self.assertRaises(UnittestError):
-					documentClass(junitExampleFile, analyzeAndConvert=True)
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Rust-Cargo/nextest-junit.xml")
+		doc = NextestDocument(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(2, doc.TestsuiteCount)
+		self.assertEqual(12, doc.TestcaseCount)
+		self.assertEqual(0, doc.Errored)
+		self.assertEqual(0, doc.Skipped)
+		self.assertEqual(4, doc.Failed)
+		self.assertEqual(8, doc.Passed)
+		self.assertEqual(12, doc.Tests)
+
+		print(f"JUnit file:")
+		print(f"  Testsuites: {doc.TestsuiteCount}")
+		print(f"  Testcases:  {doc.TestcaseCount}")
+
+		print()
+		print(f"Statistics:")
+		print(
+			f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   "
+			f"convert: {doc.ModelConversionDuration.total_seconds():.3f}s"
+		)
+
+	def test_ReadWrite(self) -> None:
+		print()
+
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Rust-Cargo/nextest-junit.xml")
+		doc = NextestDocument(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Rust-Cargo/nextest-junit.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = NextestDocument(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.RunID, sameDoc.RunID)
+		self.assertEqual(doc.StartTime, sameDoc.StartTime)
+		self.assertEqual(doc.Duration, sameDoc.Duration)
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.AssertionCount, sameTS.AssertionCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+				self.assertEqual(tcls.AssertionCount, sameTCls.AssertionCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.StartTime, sameTC.StartTime)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+					self.assertEqual(tc.AssertionCount, sameTC.AssertionCount)
 
 
 class VHDLGHDL(TestCase):

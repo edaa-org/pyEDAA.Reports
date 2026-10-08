@@ -139,15 +139,15 @@ dialects (and simplifications) were created by the various frameworks emitting J
 
 .. rubric:: JUnit Dialect Comparison
 
-+------------------------+--------------+--------------+--------------+--------------------+------------------+--------------+
-| Feature                | Any JUnit    | Ant + JUnit4 | Catch2 JUnit | CTest JUnit        | GoogleTest JUnit | pyTest JUnit |
-+========================+==============+==============+==============+====================+==================+==============+
-| Root element           | testsuites   | testsuite    | testsuites   | testsuite          | testsuites       | testsuites   |
-+------------------------+--------------+--------------+--------------+--------------------+------------------+--------------+
-| Supports properties    |     ☑        |     ☑        |     ☑        |                    |       ⸺          |              |
-+------------------------+--------------+--------------+--------------+--------------------+------------------+--------------+
-| Testcase status        | ...          | ...          | always run   | more status values |                  |              |
-+------------------------+--------------+--------------+--------------+--------------------+------------------+--------------+
++------------------------+--------------+--------------+--------------+--------------------+------------------+---------------------+--------------+
+| Feature                | Any JUnit    | Ant + JUnit4 | Catch2 JUnit | CTest JUnit        | GoogleTest JUnit | cargo-nextest JUnit | pyTest JUnit |
++========================+==============+==============+==============+====================+==================+=====================+==============+
+| Root element           | testsuites   | testsuite    | testsuites   | testsuite          | testsuites       | testsuites          | testsuites   |
++------------------------+--------------+--------------+--------------+--------------------+------------------+---------------------+--------------+
+| Supports properties    |     ☑        |     ☑        |     ☑        |                    |       ⸺          |                     |              |
++------------------------+--------------+--------------+--------------+--------------------+------------------+---------------------+--------------+
+| Testcase status        | ...          | ...          | always run   | more status values |                  | reruns              |              |
++------------------------+--------------+--------------+--------------+--------------------+------------------+---------------------+--------------+
 
 .. _UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit:
 
@@ -463,6 +463,104 @@ GoogleTest JUnit
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
                xmlReport = Path("AnyJUnit-Report.xml")
+               try:
+                 newDoc.Write(xmlReport)
+               except UnittestError as ex:
+                 ...
+
+
+.. _UNITTEST/SpecificDataModel/JUnit/Dialect/nextest:
+
+cargo-nextest JUnit
+-------------------
+
+.. grid:: 2
+
+   .. grid-item::
+      :columns: 6
+
+      The JUnit format written by `cargo-nextest <https://github.com/nextest-rs/nextest>`__, the test runner for Rust,
+      uses ``<testsuites>`` as a root element. nextest serializes it with the crate
+      `quick-junit <https://github.com/nextest-rs/quick-junit>`__.
+
+      .. rubric:: Mapping to the data model
+
+      * ``<testsuites>``: its ``name`` is the profile's report name (``nextest-run`` by default), its ``uuid`` the run
+        ID (:attr:`~pyEDAA.Reports.Unittesting.JUnit.NextestJUnit.Document.RunID`), ``timestamp`` and ``time`` the
+        run's start time and duration.
+      * ``<testsuite>``: one per test binary, named by its binary ID, e.g. ``counter`` for the unit tests of a library
+        and ``counter::sequence`` for its integration test :file:`tests/sequence.rs`. A setup script gets a test suite
+        ``@setup-script:<name>`` with one test case, and its command as ``<property>``. A ``<testsuite>`` has neither
+        ``hostname``, nor ``timestamp``, nor ``time``.
+      * ``<testcase>``: its ``name`` is the test's path in the binary, e.g. ``tests::failing``, its ``classname`` the
+        binary ID again. In the unified data model, the test cases are therefore in a test suite (class) of the same
+        name as the binary's test suite. The ``timestamp`` is kept as the test case's start time
+        (:attr:`~pyEDAA.Reports.Unittesting.JUnit.NextestJUnit.Testcase.StartTime`).
+      * Status: ``<failure>`` is *failed*, ``<error>`` is *errored* (e.g. the test process didn't start, or leaked
+        handles), ``<skipped>`` is *skipped*, a test case without one of these *passed*.
+      * Retries: a test which passed in a retry (*flaky*) has a ``<flakyFailure>`` (or ``<flakyError>``) per failed
+        attempt, a test failing in every attempt a ``<rerunFailure>`` (or ``<rerunError>``) per retry. Their number is
+        :attr:`~pyEDAA.Reports.Unittesting.JUnit.NextestJUnit.Testcase.RerunCount`; their output is not read. A
+        failed test case carries the start time, duration and message of its first attempt, a flaky one those of its
+        last attempt.
+
+      .. rubric:: Known issues
+
+      * A test marked ``#[ignore]`` is missing from the report, unless the profile sets ``junit.report-skipped`` to
+        ``"ignored"`` or ``"all"``. The console reports ``12 tests run: 8 passed, 4 failed, 1 skipped``, the report
+        ``tests="12" skipped="0"``. A reported skipped test has no ``timestamp`` and a ``time`` of zero.
+      * Every failure of a Rust test is a ``<failure type="test failure with exit code 101">``: a failed assertion, a
+        panic, an ``Err`` returned by the test and a ``#[should_panic]`` test which doesn't panic. Only the message (the
+        first line of the error output) and the text tell them apart. The ``type`` is not kept in the data model.
+      * A flaky test configured with ``flaky-result = "fail"`` is a ``<failure type="flaky failure">`` with the
+        message ``test passed on attempt 2/2 but is configured to fail when flaky``.
+      * A setup script counts as a test: ``tests="6"`` in a report, whose console summary is
+        ``4 tests run: 2 passed (1 flaky), 2 failed, 1 skipped``.
+      * The test cases are listed in the order they finished; reported skipped tests come first.
+      * Writing: the run ID is written only for a document read from a nextest report, as the unified data model has no
+        field for it. Reruns and the ``type`` of a ``<failure>`` are not written. The test suite summary needs a start
+        time and a duration; the ``hostname``, start time and duration of a test suite are not written.
+
+   .. grid-item::
+      :columns: 6
+
+      .. tab-set::
+
+         .. tab-item:: Reading cargo-nextest JUnit
+            :sync: ReadJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
+
+               xmlReport = Path("target/nextest/ci/junit.xml")
+               try:
+                 doc = Document(xmlReport, analyzeAndConvert=True)
+               except UnittestError as ex:
+                 ...
+
+         .. tab-item:: Convert to and from Unified Data Model
+            :sync: ConvertToFrom
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
+
+               # Convert to unified test data model
+               summary = doc.ToTestsuiteSummary()
+
+               # Convert back to a document
+               newXmlReport = Path("New JUnit-Report.xml")
+               newDoc = Document.FromTestsuiteSummary(newXmlReport, summary)
+
+         .. tab-item:: Writing cargo-nextest JUnit
+            :sync: WriteJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
+
+               xmlReport = Path("Nextest-JUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
