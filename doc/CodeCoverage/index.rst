@@ -113,6 +113,71 @@ computes it) are ``1.0`` where there is nothing to cover.
 Report Formats
 **************
 
+Code coverage tools write their results in XML, JSON or text formats, and many keep the raw data in a database or
+binary format of their own, which only the tool itself or its API reads.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 21 21 21 21
+
+   * - Tool / Framework
+     - XML
+     - JSON
+     - Text
+     - Proprietary
+   * - `Cobertura <https://cobertura.github.io/cobertura/>`__ (Java)
+     - Cobertura XML (``coverage-04.dtd``)
+     - —
+     - —
+     - :file:`cobertura.ser`
+   * - `coverage.py <https://coverage.readthedocs.io/>`__ (Python)
+     - Cobertura dialect (``coverage xml``)
+     - ``coverage json``
+     - lcov (``coverage lcov``), ``coverage report``
+     - :file:`.coverage` (SQLite)
+   * - `GCC <https://gcc.gnu.org/onlinedocs/gcc/Gcov.html>`__ (``gcov``)
+     - —
+     - gcov JSON (``gcov --json-format``)
+     - :file:`*.gcov`
+     - :file:`*.gcno`, :file:`*.gcda`
+   * - `gcovr <https://gcovr.com/>`__
+     - Cobertura (``--cobertura``), JaCoCo (``--jacoco``), SonarQube (``--sonarqube``), Clover (``--clover``)
+     - gcovr JSON (``--json``), Coveralls (``--coveralls``)
+     - lcov (``--lcov``), ``--txt``
+     - — (reads GCC's data)
+   * - `lcov <https://github.com/linux-test-project/lcov>`__
+     - —
+     - —
+     - lcov tracefile (:file:`*.info`)
+     - — (reads GCC's data)
+   * - `LLVM <https://llvm.org/docs/CommandGuide/llvm-cov.html>`__ (``llvm-cov``)
+     - —
+     - ``llvm-cov export -format=text``
+     - lcov (``llvm-cov export -format=lcov``), :file:`*.gcov` (``llvm-cov gcov``), ``llvm-cov report``
+     - :file:`*.profraw`, :file:`*.profdata`
+   * - `GHDL <https://github.com/ghdl/ghdl>`__ (VHDL)
+     - —
+     - :file:`coverage-*.json` (``ghdl -r --coverage``), gcovr JSON (``ghdl coverage --format=gcovr``)
+     - lcov, :file:`*.gcov` (``ghdl coverage --format=lcov|gcov``)
+     - — (GCC backend: GCC's data)
+   * - `NVC <https://www.nickg.me.uk/nvc/>`__ (VHDL)
+     - Cobertura (``nvc --cover-export --format=cobertura``), NVC XML (``--format=xml``)
+     - —
+     - —
+     - :file:`*.ncdb`
+   * - Aldec Active-HDL, Riviera-PRO
+     - UCIS XML (``acdb2xml``)
+     - —
+     - —
+     - ACDB
+   * - Siemens QuestaSim
+     - ?
+     - —
+     - —
+     - UCDB (read via the UCIS API)
+
+A ``?`` is not verified yet. pyEDAA.Reports reads Cobertura XML, including coverage.py's dialect.
+
 .. _CODECOV/Formats/Cobertura:
 
 Cobertura XML
