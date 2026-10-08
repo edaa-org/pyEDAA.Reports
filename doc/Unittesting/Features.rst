@@ -140,6 +140,10 @@ Reading unittest reports
       :class:`pyEDAA.Reports.Unittesting.pyTooling.Document`. Its format version is taken from the report's
       ``xsi:noNamespaceSchemaLocation`` attribute.
 
+      A TRX file written by ``dotnet test --logger trx`` is read by :class:`pyEDAA.Reports.Unittesting.TRX.Document`
+      into a test run; :meth:`~pyEDAA.Reports.Unittesting.TRX.TestRun.ToTestsuiteSummary` converts it to the unified
+      data model.
+
    .. grid-item::
       :columns: 6
 
@@ -290,6 +294,21 @@ Reading unittest reports
                  doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
+
+         .. tab-item:: TRX
+            :sync: TRX
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.TRX import Document
+
+               trxReport = Path("TestResults/MyLibrary.Tests.trx")
+               try:
+                 doc = Document(trxReport, analyzeAndConvert=True)
+               except UnittestError as ex:
+                 ...
+
+               summary = doc.ToTestsuiteSummary()
 
 
 
