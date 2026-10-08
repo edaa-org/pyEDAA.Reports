@@ -1,0 +1,289 @@
+# ==================================================================================================================== #
+#              _____ ____    _        _      ____                       _                                              #
+#  _ __  _   _| ____|  _ \  / \      / \    |  _ \ ___ _ __   ___  _ __| |_ ___                                        #
+# | '_ \| | | |  _| | | | |/ _ \    / _ \   | |_) / _ \ '_ \ / _ \| '__| __/ __|                                       #
+# | |_) | |_| | |___| |_| / ___ \  / ___ \ _|  _ <  __/ |_) | (_) | |  | |_\__ \                                       #
+# | .__/ \__, |_____|____/_/   \_\/_/   \_(_)_| \_\___| .__/ \___/|_|   \__|___/                                       #
+# |_|    |___/                                        |_|                                                              #
+# ==================================================================================================================== #
+# Authors:                                                                                                             #
+#   Patrick Lehmann                                                                                                    #
+#                                                                                                                      #
+# License:                                                                                                             #
+# ==================================================================================================================== #
+# Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
+#                                                                                                                      #
+# Licensed under the Apache License, Version 2.0 (the "License");                                                      #
+# you may not use this file except in compliance with the License.                                                     #
+# You may obtain a copy of the License at                                                                              #
+#                                                                                                                      #
+#   http://www.apache.org/licenses/LICENSE-2.0                                                                         #
+#                                                                                                                      #
+# Unless required by applicable law or agreed to in writing, software                                                  #
+# distributed under the License is distributed on an "AS IS" BASIS,                                                    #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                             #
+# See the License for the specific language governing permissions and                                                  #
+# limitations under the License.                                                                                       #
+#                                                                                                                      #
+# SPDX-License-Identifier: Apache-2.0                                                                                  #
+# ==================================================================================================================== #
+#
+"""
+The records of lcov's tracefile format: a section, and its functions and lines.
+"""
+from __future__            import annotations
+
+from pathlib               import Path
+from typing                import Optional as Nullable
+
+from pyTooling.Decorators  import export, readonly
+from pyTooling.MetaClasses import ExtendedType
+
+
+@export
+class Line(metaclass=ExtendedType, slots=True):
+	"""
+	A ``DA`` record: how often a line ran, and the line's checksum.
+	"""
+
+	_number:   int            #: Line number.
+	_count:    int            #: How often the line ran; the sum, if the section lists the line twice.
+	_checksum: Nullable[str]  #: Checksum of the line's source text, if stated.
+
+	def __init__(self, number: int, count: int, checksum: Nullable[str] = None) -> None:
+		"""
+		Initialize a line.
+
+		:param number:   Line number.
+		:param count:    How often the line ran.
+		:param checksum: Optional, checksum of the line's source text. Default: ``None``.
+		"""
+		self._number =   number
+		self._count =    count
+		self._checksum = checksum
+
+	@readonly
+	def Number(self) -> int:
+		"""
+		Read-only property to access the line number (:attr:`_number`).
+
+		:returns: The line number.
+		"""
+		return self._number
+
+	@readonly
+	def Count(self) -> int:
+		"""
+		Read-only property to access how often the line ran (:attr:`_count`).
+
+		:returns: The execution count.
+		"""
+		return self._count
+
+	@readonly
+	def Checksum(self) -> Nullable[str]:
+		"""
+		Read-only property to access the checksum of the line's source text (:attr:`_checksum`).
+
+		:returns: The checksum - lcov writes an MD5 hash in base64 -, or ``None`` if not stated.
+		"""
+		return self._checksum
+
+
+@export
+class Function(metaclass=ExtendedType, slots=True):
+	"""
+	A function: an ``FN`` record with the count of its ``FNDA`` record, or an ``FNL`` record with its ``FNA`` aliases.
+
+	The aliases of a function - e.g. instances of a C++ template - share its lines.
+	"""
+
+	_index:     Nullable[int]             #: Index of the ``FNL`` record; ``None`` for an ``FN`` record.
+	_startLine: int                       #: The function's first line.
+	_endLine:   Nullable[int]             #: The function's last line, if stated.
+	_aliases:   dict[str, Nullable[int]]  #: The function's names, and how often each was called, if stated.
+
+	def __init__(self, startLine: int, endLine: Nullable[int], index: Nullable[int] = None) -> None:
+		"""
+		Initialize a function without aliases.
+
+		:param startLine: The function's first line.
+		:param endLine:   The function's last line, or ``None`` if not stated.
+		:param index:     Optional, index of the ``FNL`` record. Default: ``None``, for an ``FN`` record.
+		"""
+		self._index =     index
+		self._startLine = startLine
+		self._endLine =   endLine
+		self._aliases =   {}
+
+	@readonly
+	def Index(self) -> Nullable[int]:
+		"""
+		Read-only property to access the index of the ``FNL`` record (:attr:`_index`).
+
+		:returns: The index, or ``None`` for an ``FN`` record.
+		"""
+		return self._index
+
+	@readonly
+	def StartLine(self) -> int:
+		"""
+		Read-only property to access the function's first line (:attr:`_startLine`).
+
+		:returns: The line number.
+		"""
+		return self._startLine
+
+	@readonly
+	def EndLine(self) -> Nullable[int]:
+		"""
+		Read-only property to access the function's last line (:attr:`_endLine`).
+
+		:returns: The line number, or ``None`` if not stated - e.g. by llvm-cov.
+		"""
+		return self._endLine
+
+	@readonly
+	def Aliases(self) -> dict[str, Nullable[int]]:
+		"""
+		Read-only property to access the function's names, and how often each was called (:attr:`_aliases`).
+
+		:returns: The counts by name, in the tracefile's order; a count is ``None``, if no ``FNDA`` record states it.
+		"""
+		return self._aliases
+
+	@readonly
+	def Name(self) -> str:
+		"""
+		Read-only property to return the function's name: its first alias.
+
+		:returns: The name.
+		"""
+		return next(iter(self._aliases))
+
+	@readonly
+	def Count(self) -> Nullable[int]:
+		"""
+		Read-only property to return how often the function was called: the sum over its aliases.
+
+		:returns: The count, or ``None`` if no alias' count is stated.
+		"""
+		counts = [count for count in self._aliases.values() if count is not None]
+		return sum(counts) if len(counts) > 0 else None
+
+
+@export
+class Section(metaclass=ExtendedType, slots=True):
+	"""
+	A section from ``SF`` to ``end_of_record``: a source file's coverage, as a test measured it, and the summaries the
+	section states.
+	"""
+
+	_testName:        str              #: Name of the test, stated by the last ``TN`` record before the section.
+	_sourceFile:      Path             #: Path of the source file.
+	_version:         Nullable[str]    #: Version ID of the source file, if stated.
+	_functions:       list[Function]   #: The functions, in the tracefile's order.
+	_lines:           dict[int, Line]  #: The lines, by number.
+	_functionsFound:  Nullable[int]    #: Number of functions, as the section states it.
+	_functionsHit:    Nullable[int]    #: Number of functions called, as the section states it.
+	_linesFound:      Nullable[int]    #: Number of instrumented lines, as the section states it.
+	_linesHit:        Nullable[int]    #: Number of lines, which ran, as the section states it.
+
+	def __init__(self, testName: str, sourceFile: Path) -> None:
+		"""
+		Initialize an empty section.
+
+		:param testName:   Name of the test; empty, if not stated.
+		:param sourceFile: Path of the source file.
+		"""
+		self._testName =        testName
+		self._sourceFile =      sourceFile
+		self._version =         None
+		self._functions =       []
+		self._lines =           {}
+		self._functionsFound =  None
+		self._functionsHit =    None
+		self._linesFound =      None
+		self._linesHit =        None
+
+	@readonly
+	def TestName(self) -> str:
+		"""
+		Read-only property to access the name of the test (:attr:`_testName`).
+
+		:returns: The name; empty, if no ``TN`` record states it.
+		"""
+		return self._testName
+
+	@readonly
+	def SourceFile(self) -> Path:
+		"""
+		Read-only property to access the path of the source file (:attr:`_sourceFile`).
+
+		:returns: The path, as the tracefile states it: absolute, or relative to the directory the tool ran in; a
+		          backslash of a tracefile written on Windows is a separator.
+		"""
+		return self._sourceFile
+
+	@readonly
+	def Version(self) -> Nullable[str]:
+		"""
+		Read-only property to access the version ID of the source file (:attr:`_version`).
+
+		:returns: The version ID, or ``None`` if not stated.
+		"""
+		return self._version
+
+	@readonly
+	def Functions(self) -> list[Function]:
+		"""
+		Read-only property to access the functions (:attr:`_functions`).
+
+		:returns: The functions, in the tracefile's order.
+		"""
+		return self._functions
+
+	@readonly
+	def Lines(self) -> dict[int, Line]:
+		"""
+		Read-only property to access the lines (:attr:`_lines`).
+
+		:returns: The lines, by number.
+		"""
+		return self._lines
+
+	@readonly
+	def FunctionsFound(self) -> Nullable[int]:
+		"""
+		Read-only property to access the number of functions, as the section states it (:attr:`_functionsFound`).
+
+		:returns: The number from record ``FNF``, or ``None`` if not stated.
+		"""
+		return self._functionsFound
+
+	@readonly
+	def FunctionsHit(self) -> Nullable[int]:
+		"""
+		Read-only property to access the number of functions called, as the section states it (:attr:`_functionsHit`).
+
+		:returns: The number from record ``FNH``, or ``None`` if not stated.
+		"""
+		return self._functionsHit
+
+	@readonly
+	def LinesFound(self) -> Nullable[int]:
+		"""
+		Read-only property to access the number of instrumented lines, as the section states it (:attr:`_linesFound`).
+
+		:returns: The number from record ``LF``, or ``None`` if not stated.
+		"""
+		return self._linesFound
+
+	@readonly
+	def LinesHit(self) -> Nullable[int]:
+		"""
+		Read-only property to access the number of lines, which ran, as the section states it (:attr:`_linesHit`).
+
+		:returns: The number from record ``LH``, or ``None`` if not stated.
+		"""
+		return self._linesHit
