@@ -221,6 +221,8 @@ Ant + JUnit4
       The original JUnit format created by `Ant <https://github.com/apache/ant>`__ for `JUnit4 <https://github.com/junit-team/junit4>`__
       uses ``<testsuite>`` as a root element.
 
+      :ref:`Gradle <UNITTEST/Tool/Gradle>` writes this format too, when it runs JUnit4 tests.
+
    .. grid-item::
       :columns: 6
 
