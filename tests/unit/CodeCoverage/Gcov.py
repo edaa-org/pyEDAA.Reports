@@ -30,16 +30,17 @@
 #
 #
 """Unit tests of GCC's gcov JSON format: its model, its JSON Schema and the conversion to the common model."""
-from json                                     import dumps, loads
-from pathlib                                  import Path
-from tempfile                                 import TemporaryDirectory
-from typing                                   import Any
+from json                                      import dumps, loads
+from pathlib                                   import Path
+from tempfile                                  import TemporaryDirectory
+from typing                                    import Any
 
-from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.Gcov         import DataFile, Document, File, FormatVersion, SCHEMAS
-from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function as gcov_Function, Line
-from pyTooling.Testing                        import Testcase
-from pyTooling.Versioning                     import SemanticVersion
+from pyEDAA.Reports.CodeCoverage               import CodeCoverageError, Function, LineCoverageStatus, SourceFile
+from pyEDAA.Reports.CodeCoverage.Gcov          import DataFile, Document, File, FormatVersion, SCHEMAS
+from pyEDAA.Reports.CodeCoverage.Gcov.Branches import Branch, Call, Condition
+from pyEDAA.Reports.CodeCoverage.Gcov.Records  import Function as gcov_Function, Line
+from pyTooling.Testing                         import Testcase
+from pyTooling.Versioning                      import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -169,7 +170,36 @@ class Construction(Testcase):
 	def test_Line_Defaults(self) -> None:
 		line = Line(3, 0, True)
 
-		self.assertEqual((None, []), (line.FunctionName, line.BlockIDs))
+		self.assertEqual((None, [], [], [], []),
+		                 (line.FunctionName, line.BlockIDs, line.Branches, line.Calls, line.Conditions))
+
+	def test_Line_Records(self) -> None:
+		branches =   [Branch(1, False, True, 4, 5), Branch(0, True, False, 4, 8)]
+		calls =      [Call(3, 1, 1)]
+		conditions = [Condition(4, 2, (), (0, 1))]
+		line = Line(21, 1, False, "_ZN10Containers5Stack3PopEv", (3, 4, 5, 8), branches, calls, conditions)
+
+		self.assertEqual((branches, calls, conditions), (line.Branches, line.Calls, line.Conditions))
+
+	def test_Branch(self) -> None:
+		branch = Branch(0, True, False, 4, 8)
+
+		self.assertEqual((0, True, False, 4, 8), (
+			branch.Count, branch.Throw, branch.Fallthrough, branch.SourceBlockID, branch.DestinationBlockID
+		))
+		self.assertEqual((None, None), (Branch(1, False, True).SourceBlockID, Branch(1, False, True).DestinationBlockID))
+
+	def test_Call(self) -> None:
+		call = Call(5, 1, 0)
+
+		self.assertEqual((5, 1, 0), (call.SourceBlockID, call.DestinationBlockID, call.Returned))
+
+	def test_Condition(self) -> None:
+		condition = Condition(4, 2, (), (0, 1))
+
+		self.assertEqual((4, 2, [], [0, 1]),
+		                 (condition.Count, condition.Covered, condition.NotCoveredTrue, condition.NotCoveredFalse))
+		self.assertEqual(([], []), (Condition(2, 2).NotCoveredTrue, Condition(2, 2).NotCoveredFalse))
 
 	def test_Function(self) -> None:
 		pop = gcov_Function("_ZN10Containers5Stack3PopEv", "Containers::Stack::Pop()", 19, 8, 23, 4, 8, 7, 3)
@@ -213,6 +243,39 @@ class Construction(Testcase):
 		with self.assertRaises(TypeError) as context:
 			_ = Line(1, 0, False, blockIDs=[3, "4"])
 		self.assertEqual("Parameter 'blockIDs' contains an element not of type 'int'.", str(context.exception))
+
+	def test_Line_Branches(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Line(1, 0, False, branches=[Call(3, 1, 1)])
+		self.assertEqual("Parameter 'branches' contains an element not of type 'Branch'.", str(context.exception))
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.Branches.Call'."], context.exception.__notes__)
+
+	def test_Branch_Throw(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Branch(1, None, False)
+		self.assertEqual("Parameter 'throw' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = Branch(1, 0, False)
+		self.assertEqual("Parameter 'throw' is not of type 'bool'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
+
+	def test_Branch_SourceBlockID(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Branch(1, False, True, -1)
+		self.assertEqual("Parameter 'sourceBlockID' is negative.", str(context.exception))
+		self.assertEqual(["Got value '-1'."], context.exception.__notes__)
+
+	def test_Call_Returned(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Call(3, 1, None)
+		self.assertEqual("Parameter 'returned' is None.", str(context.exception))
+
+	def test_Condition_NotCoveredFalse(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Condition(4, 2, notCoveredFalse=5)
+		self.assertEqual("Parameter 'notCoveredFalse' is not iterable.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 	def test_Function_Name(self) -> None:
 		with self.assertRaises(ValueError) as context:
@@ -377,10 +440,55 @@ class Parsing(Testcase):
 		                 (line.LineNumber, line.Count, line.UnexecutedBlock, line.FunctionName, line.BlockIDs))
 
 	def test_Line_Format1(self) -> None:
-		"""A line of format 1 has no basic blocks; a line of inlined statements has no function."""
-		line = Line.Parse({"line_number": 3, "count": 0, "unexecuted_block": True, "branches": []})
+		"""A line of format 1 has no basic blocks, calls and conditions; a line of inlined statements has no function."""
+		line = Line.Parse({
+			"line_number": 3, "count": 0, "unexecuted_block": True, "branches": [
+				{"count": 0, "throw": False, "fallthrough": True}
+			]
+		})
 
-		self.assertEqual((None, []), (line.FunctionName, line.BlockIDs))
+		self.assertEqual((None, [], [], []), (line.FunctionName, line.BlockIDs, line.Calls, line.Conditions))
+		self.assertEqual([(0, None, None)], [
+			(branch.Count, branch.SourceBlockID, branch.DestinationBlockID) for branch in line.Branches
+		])
+
+	def test_Line_Records(self) -> None:
+		line = Line.Parse({
+			"line_number": 20, "function_name": "Clamp", "count": 4, "unexecuted_block": False, "block_ids": [2],
+			"branches": [{"count": 3, "throw": False, "fallthrough": True, "source_block_id": 2, "destination_block_id": 3}],
+			"calls": [{"source_block_id": 2, "destination_block_id": 3, "returned": 4}],
+			"conditions": [{"count": 4, "covered": 2, "not_covered_true": [], "not_covered_false": [0, 1]}]
+		})
+
+		branch, = line.Branches
+		call, = line.Calls
+		condition, = line.Conditions
+		self.assertEqual((3, False, True, 2, 3), (
+			branch.Count, branch.Throw, branch.Fallthrough, branch.SourceBlockID, branch.DestinationBlockID
+		))
+		self.assertEqual((2, 3, 4), (call.SourceBlockID, call.DestinationBlockID, call.Returned))
+		self.assertEqual((4, 2, [], [0, 1]),
+		                 (condition.Count, condition.Covered, condition.NotCoveredTrue, condition.NotCoveredFalse))
+
+	def test_Branch(self) -> None:
+		branch = Branch.Parse({
+			"count": 0, "throw": True, "fallthrough": False, "source_block_id": 4, "destination_block_id": 8
+		})
+
+		self.assertEqual((0, True, False, 4, 8), (
+			branch.Count, branch.Throw, branch.Fallthrough, branch.SourceBlockID, branch.DestinationBlockID
+		))
+
+	def test_Call(self) -> None:
+		call = Call.Parse({"source_block_id": 5, "destination_block_id": 1, "returned": 0})
+
+		self.assertEqual((5, 1, 0), (call.SourceBlockID, call.DestinationBlockID, call.Returned))
+
+	def test_Condition(self) -> None:
+		condition = Condition.Parse({"count": 6, "covered": 5, "not_covered_true": [2], "not_covered_false": []})
+
+		self.assertEqual((6, 5, [2], []),
+		                 (condition.Count, condition.Covered, condition.NotCoveredTrue, condition.NotCoveredFalse))
 
 	def test_Function(self) -> None:
 		pop = gcov_Function.Parse({

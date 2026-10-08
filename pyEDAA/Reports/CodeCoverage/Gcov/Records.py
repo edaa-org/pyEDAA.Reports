@@ -71,6 +71,9 @@ class Line(metaclass=ExtendedType, slots=True):
 		unexecutedBlock: bool,
 		functionName:    Nullable[str] = None,
 		blockIDs:        Nullable[Iterable[int]] = None,
+		branches:        Nullable[Iterable[Branch]] = None,
+		calls:           Nullable[Iterable[Call]] = None,
+		conditions:      Nullable[Iterable[Condition]] = None,
 		*,
 		parent:          Nullable[File] = None
 	) -> None:
@@ -82,6 +85,9 @@ class Line(metaclass=ExtendedType, slots=True):
 		:param unexecutedBlock: Whether a basic block of the line, not only reached by exceptions, never ran.
 		:param functionName:    Optional, mangled name of the function the line belongs to. Default: ``None``.
 		:param blockIDs:        Optional, IDs of the basic blocks ending on this line. Default: none.
+		:param branches:        Optional, the branches. Default: none.
+		:param calls:           Optional, the calls. Default: none.
+		:param conditions:      Optional, the conditions. Default: none.
 		:param parent:          Optional, the file the line belongs to; the line is appended to its lines.
 		                        Default: ``None``.
 		:raises ValueError:     If parameter ``lineNumber`` is ``None``.
@@ -95,6 +101,12 @@ class Line(metaclass=ExtendedType, slots=True):
 		:raises TypeError:      If parameter ``functionName`` isn't of type :class:`str`.
 		:raises TypeError:      If parameter ``blockIDs`` isn't iterable.
 		:raises TypeError:      If parameter ``blockIDs`` contains an element not of type :class:`int`.
+		:raises TypeError:      If parameter ``branches`` isn't iterable.
+		:raises TypeError:      If parameter ``branches`` contains an element not of type :class:`Branch`.
+		:raises TypeError:      If parameter ``calls`` isn't iterable.
+		:raises TypeError:      If parameter ``calls`` contains an element not of type :class:`Call`.
+		:raises TypeError:      If parameter ``conditions`` isn't iterable.
+		:raises TypeError:      If parameter ``conditions`` contains an element not of type :class:`Condition`.
 		:raises TypeError:      If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Gcov.File`.
 		"""
 		from pyEDAA.Reports.CodeCoverage.Gcov import File
@@ -162,31 +174,71 @@ class Line(metaclass=ExtendedType, slots=True):
 
 				self._blockIDs.append(blockID)
 
+		if branches is not None:
+			if not isinstance(branches, Iterable):
+				ex = TypeError(f"Parameter 'branches' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(branches)}'.")
+				raise ex
+
+			for branch in branches:
+				if not isinstance(branch, Branch):
+					ex = TypeError(f"Parameter 'branches' contains an element not of type 'Branch'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(branch)}'.")
+					raise ex
+
+				self._branches.append(branch)
+
+		if calls is not None:
+			if not isinstance(calls, Iterable):
+				ex = TypeError(f"Parameter 'calls' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(calls)}'.")
+				raise ex
+
+			for call in calls:
+				if not isinstance(call, Call):
+					ex = TypeError(f"Parameter 'calls' contains an element not of type 'Call'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(call)}'.")
+					raise ex
+
+				self._calls.append(call)
+
+		if conditions is not None:
+			if not isinstance(conditions, Iterable):
+				ex = TypeError(f"Parameter 'conditions' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(conditions)}'.")
+				raise ex
+
+			for condition in conditions:
+				if not isinstance(condition, Condition):
+					ex = TypeError(f"Parameter 'conditions' contains an element not of type 'Condition'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(condition)}'.")
+					raise ex
+
+				self._conditions.append(condition)
+
 		if parent is not None:
 			parent._lines.append(self)
 
 	@classmethod
 	def Parse(cls, record: dict[str, Any], *, parent: Nullable[File] = None) -> Self:
 		"""
-		Parse a line from its JSON object.
+		Parse a line, its branches, calls and conditions from its JSON object.
 
 		:param record: The JSON object of the line.
 		:param parent: Optional, the file the line belongs to. Default: ``None``.
 		:returns:      The line.
 		"""
-		line = cls(
+		return cls(
 			record["line_number"],
 			record["count"],
 			record["unexecuted_block"],
 			record.get("function_name"),
 			record.get("block_ids"),
+			[Branch.Parse(branch) for branch in record["branches"]],
+			[Call.Parse(call) for call in record.get("calls", [])],
+			[Condition.Parse(condition) for condition in record.get("conditions", [])],
 			parent=parent
 		)
-		line._branches =   [Branch(branch) for branch in record["branches"]]
-		line._calls =      [Call(call) for call in record.get("calls", [])]
-		line._conditions = [Condition(condition) for condition in record.get("conditions", [])]
-
-		return line
 
 	@readonly
 	def Parent(self) -> Nullable[File]:
