@@ -74,6 +74,9 @@ Available schemas
    * - :ref:`pytest JUnit <SCHEMAS/PyTest-JUnit>`
      - :file:`PyTest-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit.Document`
+   * - :ref:`JunitXml.TestLogger JUnit <SCHEMAS/TestLogger-JUnit>`
+     - :file:`TestLogger-JUnit.xsd`
+     - :class:`pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit.Document`
    * - :ref:`Open Test Reporting 0.2.0 <SCHEMAS/OpenTestReporting>`
      - :file:`OpenTestReporting/OpenTestReporting-0.2.0.xsd`
      - :class:`pyEDAA.Reports.Unittesting.OpenTestReporting.Events.Document`,
@@ -128,5 +131,6 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    GoogleTest-JUnit
    Nextest-JUnit
    PyTest-JUnit
+   TestLogger-JUnit
    OpenTestReporting
    TestReport-v0.1

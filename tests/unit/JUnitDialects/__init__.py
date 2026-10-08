@@ -53,6 +53,7 @@ from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport   import Document as GoJUnit
 from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GoogleTestJUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit    import Document as NextestJUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document as JunitXmlTestLoggerDocument
 
 
 DATA_DIRECTORY = Path("tests/data/JUnit")
@@ -173,6 +174,10 @@ DIALECTS: Dict[str, Dialect] = {
 				DATA_DIRECTORY / "pyAttributes/pytest.pyAttributes.xml",
 				DATA_DIRECTORY / "pyVersioning/unittests.xml",
 			]
+		),
+		Dialect(
+			"TestLogger-JUnit", JunitXmlTestLoggerDocument, "TestLogger-JUnit",
+			[DATA_DIRECTORY / "pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml"]
 		),
 		Dialect(
 			"Any-JUnit", AnyJUnitDocument, "Any-JUnit",

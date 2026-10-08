@@ -159,5 +159,9 @@ class PyTestJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "pyTest-JUnit"
 
 
+class TestLoggerJUnit(RoundTripMixin, ut_TestCase):
+	_dialectName = "TestLogger-JUnit"
+
+
 class AnyJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "Any-JUnit"

@@ -139,15 +139,15 @@ dialects (and simplifications) were created by the various frameworks emitting J
 
 .. rubric:: JUnit Dialect Comparison
 
-+------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+
-| Feature                | Any JUnit    | Ant + JUnit4 | Catch2 JUnit | CTest JUnit        | go-junit-report | GoogleTest JUnit | cargo-nextest JUnit | pyTest JUnit |
-+========================+==============+==============+==============+====================+=================+==================+=====================+==============+
-| Root element           | testsuites   | testsuite    | testsuites   | testsuite          | testsuites      | testsuites       | testsuites          | testsuites   |
-+------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+
-| Supports properties    |     ☑        |     ☑        |     ☑        |                    |     ☑           |       ⸺          |                     |              |
-+------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+
-| Testcase status        | ...          | ...          | always run   | more status values |                 |                  | reruns              |              |
-+------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+
++------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+------------------+
+| Feature                | Any JUnit    | Ant + JUnit4 | Catch2 JUnit | CTest JUnit        | go-junit-report | GoogleTest JUnit | cargo-nextest JUnit | pyTest JUnit | TestLogger JUnit |
++========================+==============+==============+==============+====================+=================+==================+=====================+==============+==================+
+| Root element           | testsuites   | testsuite    | testsuites   | testsuite          | testsuites      | testsuites       | testsuites          | testsuites   | testsuites       |
++------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+------------------+
+| Supports properties    |     ☑        |     ☑        |     ☑        |                    |     ☑           |       ⸺          |                     |              |     ☑            |
++------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+------------------+
+| Testcase status        | ...          | ...          | always run   | more status values |                 |                  | reruns              |              | no errors        |
++------------------------+--------------+--------------+--------------+--------------------+-----------------+------------------+---------------------+--------------+------------------+
 
 .. _UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit:
 
@@ -716,3 +716,100 @@ pyTest JUnit
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
                  ...
+
+
+.. _UNITTEST/SpecificDataModel/JUnit/Dialect/TestLogger:
+
+JunitXml.TestLogger JUnit
+-------------------------
+
+.. grid:: 2
+
+   .. grid-item::
+      :columns: 6
+
+      The JUnit format written by the .NET test logger `JunitXml.TestLogger <https://github.com/spekt/testlogger>`__
+      (``dotnet test --logger junit``, see :ref:`UNITTEST/Tool/DotNetTest`) uses ``<testsuites>`` as a root element.
+
+   .. grid-item::
+      :columns: 6
+
+      .. tab-set::
+
+         .. tab-item:: Reading JunitXml.TestLogger JUnit
+            :sync: ReadJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document
+
+               xmlReport = Path("TestLoggerJUnit-Report.xml")
+               try:
+                 doc = Document(xmlReport, analyzeAndConvert=True)
+               except UnittestError as ex:
+                 ...
+
+         .. tab-item:: Convert to and from Unified Data Model
+            :sync: ConvertToFrom
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document
+
+               # Convert to unified test data model
+               summary = doc.ToTestsuiteSummary()
+
+               # Convert back to a document
+               newXmlReport = Path("New JUnit-Report.xml")
+               newDoc = Document.FromTestsuiteSummary(newXmlReport, summary)
+
+         .. tab-item:: Writing JunitXml.TestLogger JUnit
+            :sync: WriteJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document
+
+               xmlReport = Path("TestLoggerJUnit-Report.xml")
+               try:
+                 newDoc.Write(xmlReport)
+               except UnittestError as ex:
+                 ...
+
+.. rubric:: Reading
+
+* ``<testsuites>`` has no attributes. Each ``<testsuite>`` holds the results of one test assembly and names it by its
+  file (``name`` and ``package``). Its ``timestamp`` is the start of the test run in UTC, written without a time zone,
+  and is read as UTC. The test suite summary takes its start time from the first test suite. ``id`` (always ``0``) and
+  ``package`` are not read.
+* A test case's ``classname`` is the namespace and class of the test, its ``name`` the method with the arguments of a
+  parameterized test. In the unified data model, each part of the namespace becomes a test suite of kind
+  :attr:`~pyEDAA.Reports.Unittesting.TestsuiteKind.Namespace`, the class a test suite of kind
+  :attr:`~pyEDAA.Reports.Unittesting.TestsuiteKind.Class`. A nested class (``Outer+Inner``) and a parameterized test
+  class (``Fixture("a",1)``) keep their names.
+* ``<failure>`` is a failed test case, ``<skipped/>`` a skipped one, a test case without either passed.
+* ``<system-out>`` and ``<system-err>`` of a test case are its captured output; the logger appends the test's
+  attachments to ``<system-out>`` as ``[[ATTACHMENT|path]]``. The test framework's messages of the whole run in
+  ``<system-out>`` and ``<system-err>`` of the test suite, and a test case's traits in ``<properties>``, are not read.
+
+.. rubric:: Writing
+
+* An errored test case is written as ``<failure type="failure">`` and counted in ``failures``; ``errors`` is always
+  ``0``.
+* A skipped test case is written as an empty ``<skipped/>``, without its message and details.
+* The start time is written in UTC. A test suite needs a start time, a duration, a host name and at least one test case;
+  a test case needs a duration, written as at least ``0.0000001`` seconds.
+
+.. rubric:: Known issues of the logger
+
+* VSTest knows failed tests only: an exception escaping a test, a time-out or a cancellation is a ``<failure>`` as well.
+  The exception's type is only part of the message, e.g. ``System.DivideByZeroException : Attempted to divide by
+  zero.``
+* The reason of a skipped test is lost; the :ref:`TRX file <UNITTEST/FileFormats/TRX>` keeps it.
+* A test whose outcome is neither passed, failed nor skipped (e.g. an inconclusive NUnit test) gets no child element: it
+  is read as passed. The logger counts it in ``tests`` only.
+* A test suite's ``time`` is the sum of its test cases' durations, not the duration of the run.
+* With the option ``MethodFormat=Class`` or ``MethodFormat=Full``, ``name`` repeats the class or the namespace and
+  class. It's read as written, so the class shows up in the test case's name too.
+* A test name the logger can't split into namespace, class and method is written with ``classname``
+  ``UnknownNamespace.UnknownType`` and the whole name as ``name``.

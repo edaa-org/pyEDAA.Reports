@@ -227,6 +227,19 @@ Reading unittest reports
                except UnittestError as ex:
                  ...
 
+         .. tab-item:: JunitXml.TestLogger JUnit
+            :sync: TestLoggerJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document
+
+               xmlReport = Path("TestLogger-JUnit-Report.xml")
+               try:
+                 doc = Document(xmlReport, analyzeAndConvert=True)
+               except UnittestError as ex:
+                 ...
+
          .. tab-item:: pyTooling
             :sync: pyTooling
 
@@ -601,6 +614,23 @@ Writing unittest reports
             .. code-block:: Python
 
                from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
+
+               # Convert a TestsuiteSummary back to a Document
+               newXmlReport = Path("JUnit-Report.xml")
+               newDoc = Document.FromTestsuiteSummary(newXmlReport, summary)
+
+               # Write to XML file
+               try:
+                  newDoc.Write()
+               except UnittestError as ex:
+                 ...
+
+         .. tab-item:: JunitXml.TestLogger JUnit
+            :sync: TestLoggerJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document
 
                # Convert a TestsuiteSummary back to a Document
                newXmlReport = Path("JUnit-Report.xml")

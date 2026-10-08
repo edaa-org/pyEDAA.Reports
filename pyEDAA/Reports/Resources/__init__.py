@@ -15,6 +15,7 @@ pyTooling ships in :mod:`pyTooling.Resources`.
 * :file:`GoogleTest-JUnit.xsd` - JUnit XML as written by GoogleTest.
 * :file:`Nextest-JUnit.xsd` - JUnit XML as written by cargo-nextest.
 * :file:`PyTest-JUnit.xsd` - JUnit XML as written by pytest.
+* :file:`TestLogger-JUnit.xsd` - JUnit XML as written by the .NET test logger ``JunitXml.TestLogger``.
 
 The schemas of Open Test Reporting are in the resource package :mod:`pyEDAA.Reports.Resources.OpenTestReporting`.
 
