@@ -162,3 +162,23 @@ class NextestJUnit(ut_TestCase):
 			("testsuites", "'uuid' attribute not allowed for element"),
 			("testcase", "'timestamp' attribute not allowed for element"),
 		}, errors)
+
+
+class GoJUnitReport(ut_TestCase):
+	"""go-junit-report's report is Any-JUnit, except for the ``id`` attribute of ``<testsuite>``: no dialect reads it."""
+
+	_referenceFile: ClassVar[Path] = DATA_DIRECTORY / "pyEDAA.Reports/Go-Test/go-junit-report.xml"
+
+	def test_Schemas(self) -> None:
+		"""Known gap: when this starts failing, a dialect accepts the report and it becomes a reference file."""
+		for dialect in DIALECTS.values():
+			with self.subTest(dialect=dialect.Name):
+				schema = dialect.Schema()
+				self.assertFalse(schema.is_valid(str(self._referenceFile)), f"{dialect.Name} accepts the report now.")
+
+	def test_AnyJUnit(self) -> None:
+		schema = DIALECTS["Any-JUnit"].Schema()
+
+		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(self._referenceFile))}
+
+		self.assertEqual({("testsuite", "'id' attribute not allowed for element")}, errors)

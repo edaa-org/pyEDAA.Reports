@@ -378,3 +378,48 @@ lines - in format 2 with the IDs of the basic blocks of a line. An object statin
    summary = report.ToCoverageSummary()
    for unit in summary.IterateUnits():
      print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
+
+
+.. _CODECOV/Formats/GoCoverProfile:
+
+Go Cover Profile
+================
+
+``go test -coverprofile=coverage.out -covermode=count`` writes Go's cover profile: a text format, whose first line
+names the mode and every further line a block of a source file. pyEDAA.Reports doesn't read it yet.
+
+.. code-block:: text
+
+   mode: count
+   github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter/counter.go:34.44,35.18 1 2
+   github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter/counter.go:35.18,37.3 1 1
+
+* The mode is ``set`` - whether a block ran: ``0`` or ``1`` -, ``count`` - how often - or ``atomic`` - how often,
+  counted thread-safe.
+* A block is ``<file>:<start line>.<start column>,<end line>.<end column> <statements> <count>``: the file named by its
+  package's import path, the block's start and end - columns in bytes, starting at 1, the end exclusive -, the number of
+  its statements and its count.
+* A block is a sequence of statements, not a line: it starts and ends inside a line, two blocks share the line, where a
+  branch starts. The format has no branches, functions or excluded lines.
+* Each package's test binary adds the blocks of its package. A package without tests is listed with count ``0``; a
+  package, whose test binary panicked, is missing.
+
+Converters write it in the formats other tools read:
+
+gocover-cobertura
+  ``gocover-cobertura < coverage.out > cobertura.xml`` writes :ref:`Cobertura XML <CODECOV/Formats/Cobertura>` after
+  ``coverage-04.dtd``. A package is named by its import path, a class by its receiver type - ``-`` for the package's
+  functions -, a method by its function; so several classes name the same file, relative to the module's directory in
+  ``<source>``. Every line from a block's start to its end line gets the block's count - also a blank line or a comment
+  line -, a line shared by two blocks the sum of their counts. ``version`` is empty, ``timestamp`` in milliseconds and
+  the branch figures are ``0``. ``-ignore-non-code-lines`` leaves out lines without code, ``-by-files`` writes a class
+  per file.
+
+gcov2lcov
+  ``gcov2lcov -infile coverage.out -outfile coverage.info`` writes an lcov tracefile: per file a record of ``TN:``
+  (empty), ``SF:``, ``DA:``, ``LF:`` and ``LH:``, but no function or branch records. A line's count is figured as by
+  gocover-cobertura. ``SF:`` is relative to the repository, if a ``.git`` directory is found above the file, otherwise
+  absolute. The order of the records changes from run to run.
+
+The pipeline job ``Go-Test`` writes all three for the example in :file:`examples/Go/testing`, see
+:ref:`UNITTEST/Tool/Go`.
