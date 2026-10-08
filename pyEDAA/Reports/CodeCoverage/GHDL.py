@@ -375,9 +375,11 @@ class Document(Report, cc_Document):
 				result =    {int(number): ran == 1 for number, ran in output["result"].items()}
 
 				if (path := directory / name) in self._files:
-					raise CodeCoverageError(f"GHDL coverage file '{self._path}' names source file '{path}' twice.")
+					raise CodeCoverageError(f"GHDL coverage file '{self._path}' names source file '{path.as_posix()}' twice.")
 				elif (line := max(result)) > lastLine:
-					ex = CodeCoverageError(f"GHDL coverage file '{self._path}' names a line of '{path}' beyond 'max-line'.")
+					ex = CodeCoverageError(
+						f"GHDL coverage file '{self._path}' names a line of '{path.as_posix()}' beyond 'max-line'."
+					)
 					ex.add_note(f"Got line {line} for 'max-line' {lastLine}.")
 					raise ex
 
@@ -472,7 +474,7 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 					file._name, file._directory, file._sha1, file._mode, file._lastLine, dict(file._result), parent=self
 				)
 			elif merged._sha1 != file._sha1:
-				ex = CodeCoverageError(f"Content of source file '{path}' differs from the reports merged before.")
+				ex = CodeCoverageError(f"Content of source file '{path.as_posix()}' differs from the reports merged before.")
 				ex.add_note(f"Got SHA-1 checksum '{file._sha1}' instead of '{merged._sha1}'.")
 				raise ex
 			else:
