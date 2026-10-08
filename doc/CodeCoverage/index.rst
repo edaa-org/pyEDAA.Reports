@@ -349,19 +349,22 @@ Ada, or VHDL with GHDL's GCC backend: gzip-compressed to a :file:`*.gcov.json.gz
 validates each JSON object against the JSON Schema of the format version it states -
 :ref:`Gcov-1.schema.json <SCHEMAS/Gcov-1>` for format 1 (GCC 9 to 13), :ref:`Gcov-2.schema.json <SCHEMAS/Gcov-2>` for
 format 2 (GCC 14 and later) - and reads it into the format's model: the data files, their source files, functions and
-lines - in format 2 with the IDs of the basic blocks of a line. An object stating another format version is rejected.
+lines, and each line's branches, calls and conditions (MC/DC, ``gcc -fcondition-coverage``), in format 2 with the IDs
+of the basic blocks they belong to. An object stating another format version is rejected.
 
 :meth:`~pyEDAA.Reports.CodeCoverage.Gcov.Document.ToCoverageSummary` converts it to the common model:
 
 * A file's path is relative to the directory the compiler ran in, which becomes a source directory.
-* A line's ``count`` is its count. A line several functions share - e.g. the instantiations of a template - or
-  several data files state - e.g. a header - becomes one line, its counts added. gcov's own summary counts the lines
-  of a template once per instantiation.
+* A line's ``count`` is its count; a line, which ran without taking all of its branches, is partially covered. A line
+  several functions share - e.g. the instantiations of a template - or several data files state - e.g. a header -
+  becomes one line, its counts added. So gcov's own summary counts the lines of a template once per instantiation.
+* A branch becomes a branch of its line, with its count; exceptional branches (``throw``) are branches too, as gcov
+  counts them. A branch leads to a basic block, not to a line, so it has no target.
 * A file becomes a :class:`~pyEDAA.Reports.CodeCoverage.SourceFile`, its functions - by demangled name, e.g.
   ``Containers::Stack::Pop()`` - become functions, each spanning its first to its last line, with its execution count.
   A demangled name doesn't tell a class from a namespace, so there are no classes and methods.
-* Basic blocks have no counterpart in the common model; the format's model keeps them. The format has no excluded
-  lines.
+* Calls, conditions and basic blocks have no counterpart in the common model; the format's model keeps them. The
+  format has no excluded lines.
 
 .. code-block:: Python
 
