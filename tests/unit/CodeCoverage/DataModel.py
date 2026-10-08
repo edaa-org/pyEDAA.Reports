@@ -179,6 +179,14 @@ class Hierarchy(Testcase):
 		self.assertEqual(["Got value '8' for 7 lines."], context.exception.__notes__)
 		self.assertIsInstance(context.exception.__cause__, IndexError)
 
+	def test_LineList_Constructor(self) -> None:
+		"""Lines given to the constructor - also by a generator, out of order - fill a list ending at the last line."""
+		file = File("a.c", lines=(line for line in (Line(4, Covered), Line(2, Uncovered))))
+
+		self.assertEqual(4, file.LastLineNumber)
+		self.assertEqual(5, len(file.Lines))
+		self.assertEqual([2, 4], [line.LineNumber for line in file.IterateLines()])
+
 	def test_GetLine(self) -> None:
 		for lineNumber, exceptionType, message in (
 			(None, ValueError, "Parameter 'lineNumber' is None."),

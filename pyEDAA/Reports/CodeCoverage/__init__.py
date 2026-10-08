@@ -806,30 +806,33 @@ class File(BaseWithPath):
 				ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
 				raise ex
 
+			# check the lines and find the last line number, then allocate the list once at its final size
+			lineList = []
+			lastLineNumber = 0
 			for line in lines:
 				if not isinstance(line, Line):
 					ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
 					raise ex
 
-				lineNumber = line._lineNumber
-				if (gap := lineNumber - len(self._lines)) >= 0:
-					if gap > 0:
-						self._lines.extend([None] * gap)
+				lineList.append(line)
+				if line._lineNumber > lastLineNumber:
+					lastLineNumber = line._lineNumber
 
-					self._lines.append(line)
-				elif self._lines[lineNumber] is None:
-					self._lines[lineNumber] = line
-				else:
+			fileLines = [None] * (lastLineNumber + 1)
+			for line in lineList:
+				lineNumber = line._lineNumber
+				if fileLines[lineNumber] is not None:
 					raise CodeCoverageError(f"Line {lineNumber} of file '{self.Path.as_posix()}' is added twice.")
 
-				if lineNumber > self._lastLineNumber:
-					self._lastLineNumber = lineNumber
-
+				fileLines[lineNumber] = line
 				line._parent = self
 				line._root =   self._root
 				for branch in line._branches:
 					branch._root = self._root
+
+			self._lines =          fileLines
+			self._lastLineNumber = lastLineNumber
 
 	def _AddElement(self, line: Line) -> None:
 		"""
