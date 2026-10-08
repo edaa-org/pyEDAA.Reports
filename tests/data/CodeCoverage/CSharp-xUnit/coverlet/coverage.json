@@ -1,0 +1,139 @@
+{
+  "MyLibrary.dll": {
+    "/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Calculator.cs": {
+      "MyLibrary.Calculator": {
+        "System.Int32 MyLibrary.Calculator::Add(System.Int32,System.Int32)": {
+          "Lines": {
+            "5": 1
+          },
+          "Branches": []
+        },
+        "System.Int32 MyLibrary.Calculator::Divide(System.Int32,System.Int32)": {
+          "Lines": {
+            "7": 1
+          },
+          "Branches": []
+        },
+        "System.Int32 MyLibrary.Calculator::Absolute(System.Int32)": {
+          "Lines": {
+            "10": 3,
+            "11": 3,
+            "12": 2,
+            "13": 2,
+            "16": 1,
+            "17": 3
+          },
+          "Branches": [
+            {
+              "Line": 11,
+              "Offset": 7,
+              "EndOffset": 9,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 2
+            },
+            {
+              "Line": 11,
+              "Offset": 7,
+              "EndOffset": 15,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 1
+            }
+          ]
+        },
+        "System.Boolean MyLibrary.Calculator::IsEven(System.Int32)": {
+          "Lines": {
+            "20": 1
+          },
+          "Branches": []
+        },
+        "System.Int32 MyLibrary.Calculator::SumOfPositives(System.Collections.Generic.IEnumerable`1<System.Int32>)": {
+          "Lines": {
+            "22": 4
+          },
+          "Branches": []
+        }
+      }
+    },
+    "/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Counter.cs": {
+      "MyLibrary.Counter": {
+        "System.Int32 MyLibrary.Counter::get_Value()": {
+          "Lines": {
+            "5": 13
+          },
+          "Branches": []
+        },
+        "System.Void MyLibrary.Counter::Increment()": {
+          "Lines": {
+            "7": 3
+          },
+          "Branches": []
+        },
+        "System.Void MyLibrary.Counter::Decrement()": {
+          "Lines": {
+            "10": 1,
+            "11": 1,
+            "12": 0,
+            "13": 0,
+            "16": 1,
+            "17": 1
+          },
+          "Branches": [
+            {
+              "Line": 11,
+              "Offset": 12,
+              "EndOffset": 14,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 0
+            },
+            {
+              "Line": 11,
+              "Offset": 12,
+              "EndOffset": 26,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 1
+            }
+          ]
+        },
+        "System.Void MyLibrary.Counter::Reset()": {
+          "Lines": {
+            "26": 0
+          },
+          "Branches": []
+        }
+      },
+      "MyLibrary.Counter/<IncrementAsync>d__6": {
+        "System.Void MyLibrary.Counter/<IncrementAsync>d__6::MoveNext()": {
+          "Lines": {
+            "20": 1,
+            "21": 1,
+            "22": 1,
+            "23": 1,
+            "24": 1
+          },
+          "Branches": [
+            {
+              "Line": 21,
+              "Offset": 36,
+              "EndOffset": 38,
+              "Path": 0,
+              "Ordinal": 0,
+              "Hits": 1
+            },
+            {
+              "Line": 21,
+              "Offset": 36,
+              "EndOffset": 103,
+              "Path": 1,
+              "Ordinal": 1,
+              "Hits": 1
+            }
+          ]
+        }
+      }
+    }
+  }
+}

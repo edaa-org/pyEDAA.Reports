@@ -1,0 +1,66 @@
+SF:/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Calculator.cs
+FN:4,System.Int32 MyLibrary.Calculator::Add(System.Int32,System.Int32)
+FNDA:1,System.Int32 MyLibrary.Calculator::Add(System.Int32,System.Int32)
+DA:5,1
+FN:6,System.Int32 MyLibrary.Calculator::Divide(System.Int32,System.Int32)
+FNDA:1,System.Int32 MyLibrary.Calculator::Divide(System.Int32,System.Int32)
+DA:7,1
+FN:9,System.Int32 MyLibrary.Calculator::Absolute(System.Int32)
+FNDA:3,System.Int32 MyLibrary.Calculator::Absolute(System.Int32)
+DA:10,3
+DA:11,3
+DA:12,2
+DA:13,2
+DA:16,1
+DA:17,3
+BRDA:11,7,0,2
+BRDA:11,7,1,1
+FN:19,System.Boolean MyLibrary.Calculator::IsEven(System.Int32)
+FNDA:1,System.Boolean MyLibrary.Calculator::IsEven(System.Int32)
+DA:20,1
+FN:21,System.Int32 MyLibrary.Calculator::SumOfPositives(System.Collections.Generic.IEnumerable`1<System.Int32>)
+FNDA:4,System.Int32 MyLibrary.Calculator::SumOfPositives(System.Collections.Generic.IEnumerable`1<System.Int32>)
+DA:22,4
+LF:10
+LH:10
+BRF:2
+BRH:2
+FNF:5
+FNH:5
+end_of_record
+SF:/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Counter.cs
+FN:4,System.Int32 MyLibrary.Counter::get_Value()
+FNDA:13,System.Int32 MyLibrary.Counter::get_Value()
+DA:5,13
+FN:6,System.Void MyLibrary.Counter::Increment()
+FNDA:3,System.Void MyLibrary.Counter::Increment()
+DA:7,3
+FN:9,System.Void MyLibrary.Counter::Decrement()
+FNDA:1,System.Void MyLibrary.Counter::Decrement()
+DA:10,1
+DA:11,1
+DA:12,0
+DA:13,0
+DA:16,1
+DA:17,1
+BRDA:11,12,0,0
+BRDA:11,12,1,1
+FN:25,System.Void MyLibrary.Counter::Reset()
+FNDA:0,System.Void MyLibrary.Counter::Reset()
+DA:26,0
+FN:19,System.Void MyLibrary.Counter/<IncrementAsync>d__6::MoveNext()
+FNDA:1,System.Void MyLibrary.Counter/<IncrementAsync>d__6::MoveNext()
+DA:20,1
+DA:21,1
+DA:22,1
+DA:23,1
+DA:24,1
+BRDA:21,36,0,1
+BRDA:21,36,1,1
+LF:14
+LH:11
+BRF:4
+BRH:3
+FNF:5
+FNH:4
+end_of_record

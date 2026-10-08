@@ -423,3 +423,141 @@ gcov2lcov
 
 The pipeline job ``Go-Test`` writes all three for the example in :file:`examples/Go/testing`, see
 :ref:`UNITTEST/Tool/Go`.
+
+
+.. _CODECOV/Formats/OpenCover:
+
+OpenCover XML
+=============
+
+OpenCover's XML format - written e.g. by coverlet (``opencover``) for .NET - has a root ``<CoverageSession>`` and a
+``<Summary>`` on each level: the numbers of sequence and branch points and of the visited ones, the coverage ratios and
+the cyclomatic complexity. A ``<Module>`` (assembly) lists its source files (``<File uid="..." fullPath="..."/>``) and
+classes, a class its methods. A method states its ``<SequencePoints>`` - visit count ``vc``, the source range from
+``sl``/``sc`` to ``el``/``ec``, branch exits ``bec`` and visited ones ``bev`` - and its ``<BranchPoints>`` - visit
+count, IL offsets of the branch and its target, and the line. coverlet writes no real columns.
+
+There is no reader yet.
+
+
+.. _CODECOV/Formats/CoverletJSON:
+
+coverlet JSON
+=============
+
+coverlet's own JSON report nests objects by assembly (e.g. ``MyLibrary.dll``), absolute source file path, class and
+method (IL signature, e.g. ``System.Void MyLibrary.Counter::Decrement()``). A method has ``Lines`` - the count of
+each line - and ``Branches`` - a list of ``Line``, IL ``Offset`` and ``EndOffset``, ``Path``, ``Ordinal`` and ``Hits``.
+The report states no figures and no ratios.
+
+There is no reader yet.
+
+
+.. _CODECOV/Tools:
+
+Tools
+*****
+
+.. _CODECOV/Tool/DotNet:
+
+.NET: coverlet, Microsoft's code coverage collector, ReportGenerator
+====================================================================
+
+* https://github.com/coverlet-coverage/coverlet
+* https://github.com/microsoft/codecoverage
+* https://github.com/danielpalme/ReportGenerator
+
+The example in :file:`examples/CSharp/xUnit` is built and run by the pipeline job ``CSharp-xUnit`` (see
+:ref:`UNITTEST/Tool/DotNetTest`). Its tests run twice:
+
+* with coverlet (``coverlet.collector``, ``dotnet test --collect "XPlat Code Coverage"``), writing Cobertura XML, an
+  lcov tracefile, OpenCover XML and coverlet's JSON. ``coverlet.msbuild`` writes the same reports.
+* with Microsoft's code coverage collector (part of ``Microsoft.NET.Test.Sdk``,
+  ``dotnet test --collect "Code Coverage;Format=cobertura"``), writing Cobertura XML.
+
+ReportGenerator converts coverlet's Cobertura report to Cobertura XML and an lcov tracefile of its own.
+
+The three Cobertura reports differ:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 26 26 26
+
+   * - Feature
+     - coverlet
+     - Microsoft
+     - ReportGenerator
+   * - A line's ``branch``
+     - ``True``, ``False``
+     - ``True``, ``False``
+     - ``true``, ``false``
+   * - Read by :class:`~pyEDAA.Reports.CodeCoverage.Cobertura.Document`
+     - no: ``True`` isn't an XML Schema boolean
+     - no: ``True`` isn't an XML Schema boolean
+     - yes
+   * - ``version`` of ``<coverage>``
+     - ``1.9``
+     - ``1.9``
+     - ``0``, with a DOCTYPE naming ``coverage-04.dtd``
+   * - ``filename`` of ``<class>``
+     - relative to the only ``<source>``
+     - absolute, no ``<sources>``
+     - absolute, and a ``<source>``
+   * - A line's ``hits``
+     - count
+     - ``0`` or ``1``
+     - count
+   * - ``<conditions>``
+     - one per branching line, ``number`` is the IL offset
+     - one per branching line, ``number`` is ``0``
+     - none
+   * - Compiler-generated classes, e.g. of an ``async`` method
+     - own class, nested by ``/``: ``Counter/<IncrementAsync>d__6``
+     - own class, nested by ``.``: ``Counter.<IncrementAsync>d__6``; also a lambda's class ``<>c``
+     - merged into the declaring class and method
+   * - Test assembly
+     - excluded
+     - included
+     - excluded
+   * - ``signature`` of ``<method>``
+     - ``(System.Int32,System.Int32)``
+     - ``(int, int)``
+     - ``(System.Int32,System.Int32)``
+
+All three name a class with its namespace, e.g. ``MyLibrary.Calculator`` in package ``MyLibrary``, and state
+``complexity`` on ``<method>``, which ``coverage-04.dtd`` doesn't declare; coverlet's ``<coverage>`` lacks the
+``complexity`` the DTD requires.
+
+The two lcov tracefiles differ too:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 39 39
+
+   * - Feature
+     - coverlet
+     - ReportGenerator
+   * - ``TN:``
+     - none
+     - an empty one at the start
+   * - ``FN:`` line number
+     - the line before the function's first line
+     - the function's first line
+   * - ``FN:`` function name
+     - IL signature with commas, e.g. ``System.Int32 MyLibrary.Calculator::Add(System.Int32,System.Int32)``
+     - method name and parameter types, e.g. ``Add(System.Int32,System.Int32)``
+   * - ``BRDA:`` block
+     - IL offset of the branch, e.g. ``BRDA:11,7,0,2``
+     - line number, e.g. ``BRDA:11,11,0,1``
+   * - ``BRDA:`` branch
+     - ``0`` and ``1`` per block
+     - numbered through the file
+   * - ``BRDA:`` taken
+     - count
+     - ``1``, or ``-`` for a branch not taken
+   * - ``DA:`` order
+     - by function; a state machine's lines follow the lines of its class
+     - ascending
+
+Both use the function records of lcov before version 2.2 (``FN``, ``FNDA``); coverlet's tracefile doesn't end with a
+newline.

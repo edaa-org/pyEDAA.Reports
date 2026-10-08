@@ -36,6 +36,9 @@ jobs:
   Example-Go:
     uses: ./.github/workflows/Example-Go.yml
 
+  Example-DotNet:
+    uses: ./.github/workflows/Example-DotNet.yml
+
   UnitTestingParams:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@r8
     with:
@@ -113,6 +116,7 @@ jobs:
       - Example-Python
       - Example-Rust
       - Example-Go
+      - Example-DotNet
     with:
       jobs:                 ${{ needs.AppTestingParams.outputs.python_jobs }}
       wheel:                ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}

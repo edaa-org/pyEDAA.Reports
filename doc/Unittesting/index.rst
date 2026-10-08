@@ -77,6 +77,7 @@ rather stuffed their language constructs into the concepts and limitations of th
 * ✅ :ref:`CTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/CTest>`
 * ✅ :ref:`GoogleTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/GoogleTest>`
 * 🚧 Jenkins JUnit (planned)
+* 🚧 :ref:`JunitXml.TestLogger <UNITTEST/Tool/DotNetTest>` for ``dotnet test`` (planned)
 * 🚧 nextest JUnit (planned)
 * ✅ :ref:`pyTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/PyTest>`
 
@@ -136,6 +137,36 @@ part of the schema's file name (e.g. ``TestReport-v0.1.xsd``), which every repor
 ``xsi:noNamespaceSchemaLocation`` attribute.
 
 The report is read by :class:`pyEDAA.Reports.Unittesting.pyTooling.Document` into the unified data model.
+
+
+.. _UNITTEST/FileFormats/TRX:
+
+Visual Studio Test Results (TRX)
+================================
+
+Visual Studio and ``dotnet test`` (VSTest) write a test run's results as TRX file (``--logger trx``): XML in namespace
+``http://microsoft.com/schemas/VisualStudio/TeamTest/2010`` with root ``<TestRun>``. Its children are:
+
+``<Times>``
+  Creation, start and finish of the test run.
+
+``<Results>``
+  A ``<UnitTestResult>`` per test: name, duration, start and end time, and its ``outcome`` (e.g. ``Passed``,
+  ``Failed``, ``NotExecuted``). ``<Output>`` holds the test's standard output and, in ``<ErrorInfo>``, the message and
+  stack trace of a failed test or the reason of a skipped one.
+
+``<TestDefinitions>``
+  A ``<UnitTest>`` per test, naming the assembly, the class and the method of a test in ``<TestMethod>``. Each data
+  row of a parameterized test is a test of its own.
+
+``<TestEntries>``, ``<TestLists>``
+  Link results and definitions by GUIDs.
+
+``<ResultSummary>``
+  The run's outcome and ``<Counters>`` (``total``, ``executed``, ``passed``, ``failed``, ``notExecuted``, ...), the
+  run's output and the attachments of data collectors, e.g. code coverage reports.
+
+There is no reader yet.
 
 
 .. _UNITTEST/FileFormats/OSVVM:
@@ -231,6 +262,40 @@ CTest
 =====
 
 * https://github.com/bvdberg/ctest
+
+
+.. _UNITTEST/Tool/DotNetTest:
+
+dotnet test (VSTest)
+====================
+
+* https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test
+* https://github.com/spekt/junit.testlogger
+* https://xunit.net/
+
+``dotnet test`` runs the tests of a .NET test project with VSTest, whatever test framework the tests are written in
+(e.g. xUnit.net, NUnit, MSTest). Each logger given on its command line writes a report:
+
+``--logger trx``
+  A :ref:`TRX file <UNITTEST/FileFormats/TRX>`, Visual Studio's own format.
+
+``--logger junit`` (NuGet package ``JunitXml.TestLogger``)
+  A ``<testsuites>`` root without attributes, holding one ``<testsuite>`` per test assembly, named after the
+  assembly's file (e.g. ``MyLibrary.Tests.dll``). Each test is a ``<testcase>``; its ``classname`` is the test class,
+  its ``name`` the method, followed by the arguments of a parameterized test, e.g. ``Absolute(value: -4, expected: 5)``.
+  The test cases follow in the order they finished, not grouped by class. Compared to Ant + JUnit4, the logger writes:
+
+  * the additional attributes ``id`` and ``package`` on ``<testsuite>``. Only these keep the
+    :ref:`Any JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit>` and
+    :ref:`pyTest JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/pyTest>` dialects from reading the report.
+  * an exception escaping a test as ``<failure>``, never as ``<error>``: VSTest knows failed tests only. The
+    exception's type and message are in the ``message`` attribute, the stack trace is the element's text.
+  * a skipped test as an empty ``<skipped/>``, without its reason. The TRX file keeps the reason.
+  * the test framework's messages of the whole run into ``<system-out>`` and ``<system-err>`` of the ``<testsuite>``.
+
+The example in :file:`examples/CSharp/xUnit` - a class library and its xUnit.net test project - is built and run by
+the pipeline job ``CSharp-xUnit``. It writes both reports and measures the code coverage with coverlet and with
+Microsoft's code coverage collector (see :ref:`CODECOV/Tool/DotNet`).
 
 
 .. _UNITTEST/Tool/Go:

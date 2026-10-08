@@ -1,0 +1,69 @@
+<testsuites>
+  <testsuite name="MyLibrary.Tests.dll" tests="11" skipped="1" failures="3" errors="0" time="0.052000000000000005" timestamp="2026-10-08T11:09:26" hostname="dffa20ef8728" id="0" package="MyLibrary.Tests.dll">
+    <properties />
+    <testcase classname="MyLibrary.Tests.CalculatorTests" name="Add" time="0.0180000" />
+    <testcase classname="MyLibrary.Tests.CounterTests" name="Decrement" time="0.0180000" />
+    <testcase classname="MyLibrary.Tests.CounterTests" name="IncrementAsync" time="0.0050000" />
+    <testcase classname="MyLibrary.Tests.CounterTests" name="Increment" time="0.0010000">
+      <system-out>Counter value: 1
+
+</system-out>
+    </testcase>
+    <testcase classname="MyLibrary.Tests.CalculatorTests" name="Absolute(value: -4, expected: 5)" time="0.0040000">
+      <failure type="failure" message="Assert.Equal() Failure: Values differ&#xA;Expected: 5&#xA;Actual:   4">at MyLibrary.Tests.CalculatorTests.Absolute(Int32 value, Int32 expected) in /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs:line 25
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)</failure>
+    </testcase>
+    <testcase classname="MyLibrary.Tests.CalculatorTests" name="Absolute(value: 3, expected: 3)" time="0.0010000" />
+    <testcase classname="MyLibrary.Tests.CalculatorTests" name="Absolute(value: -3, expected: 3)" time="0.0010000" />
+    <testcase classname="MyLibrary.Tests.CalculatorTests" name="SumOfPositives" time="0.0010000" />
+    <testcase classname="MyLibrary.Tests.CalculatorTests" name="DivideByZero" time="0.0010000">
+      <failure type="failure" message="System.DivideByZeroException : Attempted to divide by zero.">at MyLibrary.Calculator.Divide(Int32 dividend, Int32 divisor) in /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Calculator.cs:line 7
+   at MyLibrary.Tests.CalculatorTests.DivideByZero() in /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs:line 16
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</failure>
+    </testcase>
+    <testcase classname="MyLibrary.Tests.CalculatorTests" name="Multiply" time="0.0010000">
+      <skipped />
+    </testcase>
+    <testcase classname="MyLibrary.Tests.CalculatorTests" name="IsEven" time="0.0010000">
+      <failure type="failure" message="Assert.True() Failure&#xA;Expected: True&#xA;Actual:   False">at MyLibrary.Tests.CalculatorTests.IsEven() in /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs:line 13
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</failure>
+    </testcase>
+    <system-out>
+Test Framework Informational Messages:
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0+05679a7ab5 (64-bit .NET 10.0.12)
+[xUnit.net 00:00:00.16]   Discovering: MyLibrary.Tests
+[xUnit.net 00:00:00.35]   Discovered:  MyLibrary.Tests
+[xUnit.net 00:00:00.50]   Starting:    MyLibrary.Tests
+[xUnit.net 00:00:00.67]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:00:00.67]       Expected: 5
+[xUnit.net 00:00:00.67]       Actual:   4
+[xUnit.net 00:00:00.67]       Stack Trace:
+[xUnit.net 00:00:00.67]         /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs(25,0): at MyLibrary.Tests.CalculatorTests.Absolute(Int32 value, Int32 expected)
+[xUnit.net 00:00:00.67]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.67]            at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.67]       System.DivideByZeroException : Attempted to divide by zero.
+[xUnit.net 00:00:00.67]       Stack Trace:
+[xUnit.net 00:00:00.67]         /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Calculator.cs(7,0): at MyLibrary.Calculator.Divide(Int32 dividend, Int32 divisor)
+[xUnit.net 00:00:00.67]         /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs(16,0): at MyLibrary.Tests.CalculatorTests.DivideByZero()
+[xUnit.net 00:00:00.67]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.67]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.68]       Multiplication isn't implemented yet.
+[xUnit.net 00:00:00.68]       Assert.True() Failure
+[xUnit.net 00:00:00.68]       Expected: True
+[xUnit.net 00:00:00.68]       Actual:   False
+[xUnit.net 00:00:00.68]       Stack Trace:
+[xUnit.net 00:00:00.68]         /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs(13,0): at MyLibrary.Tests.CalculatorTests.IsEven()
+[xUnit.net 00:00:00.68]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.68]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.69]   Finished:    MyLibrary.Tests (ID = '1c041eee642c55a0eccc6aef877d6c7952a02f17a98c4bd0e3792528545a69dc')
+</system-out>
+    <system-err>Error - [xUnit.net 00:00:00.67]     MyLibrary.Tests.CalculatorTests.Absolute(value: -4, expected: 5) [FAIL]
+Error - [xUnit.net 00:00:00.67]     MyLibrary.Tests.CalculatorTests.DivideByZero [FAIL]
+Warning - [xUnit.net 00:00:00.68]     MyLibrary.Tests.CalculatorTests.Multiply [SKIP]
+Error - [xUnit.net 00:00:00.68]     MyLibrary.Tests.CalculatorTests.IsEven [FAIL]
+</system-err>
+  </testsuite>
+</testsuites>

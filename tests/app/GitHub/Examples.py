@@ -190,6 +190,17 @@ class CppCatch2(TestCase):
 					documentClass(junitExampleFile, analyzeAndConvert=True)
 
 
+class CSharpXUnit(Testcase):
+	def test_JUnit(self) -> None:
+		"""Known gap: no dialect reads the report of the .NET test logger ``JunitXml.TestLogger`` yet."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml")
+
+		for documentClass in (AnyJUnitDocument, JUnit4Document, CTestDocument, GTestDocument, PyTestDocument):
+			with self.subTest(dialect=documentClass.__module__):
+				with self.assertRaises(UnittestError):
+					documentClass(junitExampleFile, analyzeAndConvert=True)
+
+
 class GoTest(TestCase):
 	def test_gotestsum(self) -> None:
 		"""gotestsum's report is Any-JUnit: a test suite per package, a test case per test, subtest and example."""

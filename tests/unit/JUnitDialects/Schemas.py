@@ -40,6 +40,7 @@ from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
+from pyTooling.Testing    import Testcase
 
 from . import DATA_DIRECTORY, DIALECTS, TESTSUITE_ROOTED_FILES, UNSUPPORTED_FILES, Dialect
 
@@ -182,3 +183,22 @@ class GoJUnitReport(ut_TestCase):
 		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(self._referenceFile))}
 
 		self.assertEqual({("testsuite", "'id' attribute not allowed for element")}, errors)
+
+
+class JunitXmlTestLogger(Testcase):
+	"""The .NET test logger ``JunitXml.TestLogger`` writes Any-JUnit, except for two attributes of ``<testsuite>``."""
+
+	def test_Schemas(self) -> None:
+		"""Known gap: ``id`` and ``package`` keep Any-JUnit and pyTest-JUnit from reading the report."""
+		referenceFile = DATA_DIRECTORY / "pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml"
+
+		for dialectName in ("Any-JUnit", "pyTest-JUnit"):
+			with self.subTest(dialect=dialectName):
+				schema = DIALECTS[dialectName].Schema()
+				self.assertEqual(
+					{
+						("testsuite", "'id' attribute not allowed for element"),
+						("testsuite", "'package' attribute not allowed for element"),
+					},
+					{(error.elem.tag, error.reason) for error in schema.iter_errors(str(referenceFile))}
+				)
