@@ -52,7 +52,7 @@ The report formats have models of their own, which convert to this one:
 """
 from __future__            import annotations
 
-from collections.abc       import Iterable
+from collections.abc       import Iterable, Sized
 from datetime              import timedelta
 from enum                  import Enum
 from pathlib               import Path
@@ -766,13 +766,15 @@ class File(BaseWithPath):
 	A source file: the coverage of its executable lines, and the units of the logical hierarchy it holds.
 
 	The lines are a list indexed by line number: index 0 is unused, and a line the report doesn't list - a comment, a
-	declaration - is ``None``. Lines are iterated in order, and looked up without hashing.
+	declaration - is ``None``. Lines are iterated in order, and looked up without hashing. The list may be longer than
+	the last line the report lists (:attr:`_lastLineNumber`), as it is allocated ahead.
 	"""
 
 	_PARENT_TYPE: ClassVar[tuple[type, ...]] = (Directory, )  #: A file is in a directory.
 
-	_lines: list[Nullable[Line]]  #: The executable lines by line number; ``None`` at index 0 and for unlisted lines.
-	_units: list[Unit]            #: The units naming this file, in the order they were added.
+	_lines:          list[Nullable[Line]]  #: The executable lines by line number; ``None`` at index 0 and for gaps.
+	_lastLineNumber: int                   #: The last line number the report lists; ``0``, if it lists none.
+	_units:          list[Unit]            #: The units naming this file, in the order they were added.
 
 	def __init__(self, name: str, *, lines: Nullable[Iterable[Line]] = None, parent: Nullable[Directory] = None) -> None:
 		"""
@@ -792,18 +794,22 @@ class File(BaseWithPath):
 		"""
 		super().__init__(name, parent=parent)
 
-		self._lines = [None]
-		self._units = []
+		self._lastLineNumber = 0
+		self._units =          []
+
+		if lines is None:
+			self._lines = [None]
+		elif not isinstance(lines, Iterable):
+			ex = TypeError(f"Parameter 'lines' is not iterable.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
+			raise ex
+		else:
+			self._lines = [None] * ((len(lines) if isinstance(lines, Sized) else 100) + 1)
 
 		if parent is not None:
 			parent._AddElement(self)
 
 		if lines is not None:
-			if not isinstance(lines, Iterable):
-				ex = TypeError(f"Parameter 'lines' is not iterable.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
-				raise ex
-
 			for line in lines:
 				if not isinstance(line, Line):
 					ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
@@ -821,6 +827,9 @@ class File(BaseWithPath):
 				else:
 					raise CodeCoverageError(f"Line {lineNumber} of file '{self.Path.as_posix()}' is added twice.")
 
+				if lineNumber > self._lastLineNumber:
+					self._lastLineNumber = lineNumber
+
 				line._parent = self
 				line._root =   self._root
 				for branch in line._branches:
@@ -833,17 +842,19 @@ class File(BaseWithPath):
 		:param line:               The line.
 		:raises CodeCoverageError: If the file already has a line of this number.
 		"""
-		lines =      self._lines
 		lineNumber = line._lineNumber
-		if (gap := lineNumber - len(lines)) >= 0:
+		if (gap := lineNumber - len(self._lines)) >= 0:
 			if gap > 0:
-				lines.extend([None] * gap)
+				self._lines.extend([None] * gap)
 
-			lines.append(line)
-		elif lines[lineNumber] is None:
-			lines[lineNumber] = line
+			self._lines.append(line)
+		elif self._lines[lineNumber] is None:
+			self._lines[lineNumber] = line
 		else:
 			raise CodeCoverageError(f"Line {lineNumber} of file '{self.Path.as_posix()}' is added twice.")
+
+		if lineNumber > self._lastLineNumber:
+			self._lastLineNumber = lineNumber
 
 	def IterateElements(self) -> Generator[Base, None, None]:
 		"""
@@ -851,40 +862,38 @@ class File(BaseWithPath):
 
 		:returns: A generator of the elements below this file.
 		"""
-		for line in self._lines:
-			if line is not None:
-				yield line
-				yield from line.IterateElements()
+		for line in self.IterateLines():
+			yield line
+			yield from line.IterateElements()
 
 	@readonly
 	def Lines(self) -> list[Nullable[Line]]:
 		"""
-		Read-only property to access the executable lines (:attr:`_lines`).
+		Read-only property to return the executable lines up to the last line the report lists (:attr:`_lines`).
 
-		:returns: The lines, indexed by line number; ``None`` for index 0 and for a line the report doesn't list.
+		:returns: A copy of the lines, indexed by line number; ``None`` for index 0 and for a line the report doesn't list.
 		"""
-		return self._lines
+		return self._lines[:self._lastLineNumber + 1]
 
 	@readonly
 	def LastLineNumber(self) -> int:
 		"""
-		Read-only property to return the number of the last line the report lists.
+		Read-only property to access the number of the last line the report lists (:attr:`_lastLineNumber`).
 
 		:returns: The line number; ``0``, if the report lists no line.
 		"""
-		return len(self._lines) - 1
+		return self._lastLineNumber
 
 	def GetLine(self, lineNumber: int) -> Nullable[Line]:
 		"""
 		Return the line of a line number.
-
-		A line beyond the last line the report lists is as unknown as an unlisted line before it.
 
 		:param lineNumber:  The line number, counted from 1.
 		:returns:           The line, or ``None`` if the report doesn't list it.
 		:raises ValueError: If parameter ``lineNumber`` is ``None``.
 		:raises TypeError:  If parameter ``lineNumber`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``lineNumber`` is less than 1.
+		:raises ValueError: If parameter ``lineNumber`` is beyond the last line the report lists (:attr:`LastLineNumber`).
 		"""
 		if lineNumber is None:
 			raise ValueError(f"Parameter 'lineNumber' is None.")
@@ -896,8 +905,10 @@ class File(BaseWithPath):
 			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
-		elif lineNumber >= len(self._lines):
-			return None
+		elif lineNumber > self._lastLineNumber:
+			ex = ValueError(f"Parameter 'lineNumber' is beyond the last line of file '{self.Path.as_posix()}'.")
+			ex.add_note(f"Got value '{lineNumber}' for {self._lastLineNumber} lines.")
+			raise ex from IndexError(f"Index {lineNumber} is out of range 1..{self._lastLineNumber}.")
 
 		return self._lines[lineNumber]
 
@@ -938,7 +949,7 @@ class File(BaseWithPath):
 			first = startLine._lineNumber
 
 		if endLine is None:
-			last = len(self._lines) - 1
+			last = self._lastLineNumber
 		elif not isinstance(endLine, Line):
 			ex = TypeError(f"Parameter 'endLine' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
@@ -956,7 +967,7 @@ class File(BaseWithPath):
 		"""
 		Aggregate the file's lines, then compute the counters from them.
 		"""
-		lines = [line for line in self._lines if line is not None]
+		lines = list(self.IterateLines())
 		for line in lines:
 			line.Aggregate()
 

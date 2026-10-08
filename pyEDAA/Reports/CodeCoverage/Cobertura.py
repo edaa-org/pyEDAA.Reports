@@ -804,7 +804,7 @@ class Document(Coverage, cc_Document):
 			for klass in package._classes:
 				file = summary.GetOrAddFile(klass._filename)
 				if (classUnit := parent._units.get(klass._name)) is None:
-					numbers = [number for number in klass._lines if file.GetLine(number) is not None]
+					numbers = list(klass._lines)
 					classUnit = cc_Class(
 						klass._name,
 						file=file,
@@ -815,7 +815,9 @@ class Document(Coverage, cc_Document):
 
 				for key, method in klass._methods.items():
 					if key not in classUnit._units:
-						numbers = [number for number in method._lines if file.GetLine(number) is not None]
+						numbers = [
+							number for number in method._lines if number <= file._lastLineNumber and file._lines[number] is not None
+						]
 						cc_Method(
 							key,
 							file=file,

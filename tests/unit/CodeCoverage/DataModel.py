@@ -171,7 +171,23 @@ class Hierarchy(Testcase):
 		self.assertEqual(7, file.LastLineNumber)
 		self.assertIs(file.Lines[5], file.GetLine(5))
 		self.assertIsNone(file.GetLine(3))
-		self.assertIsNone(file.GetLine(8))
+
+		with self.assertRaises(ValueError) as context:
+			_ = file.GetLine(8)
+
+		self.assertEqual("Parameter 'lineNumber' is beyond the last line of file 'a.c'.", str(context.exception))
+		self.assertEqual(["Got value '8' for 7 lines."], context.exception.__notes__)
+		self.assertIsInstance(context.exception.__cause__, IndexError)
+
+	def test_LineList_Allocated(self) -> None:
+		"""The list is allocated ahead - by the number of lines given, else for 100 lines -, but ends at the last line."""
+		for lines in ((Line(3, Covered), ), (line for line in (Line(3, Covered), ))):
+			with self.subTest(lines=type(lines).__name__):
+				file = File("a.c", lines=lines)
+
+				self.assertEqual(3, file.LastLineNumber)
+				self.assertEqual(4, len(file.Lines))
+				self.assertEqual([3], [line.LineNumber for line in file.IterateLines()])
 
 	def test_GetLine(self) -> None:
 		for lineNumber, exceptionType, message in (
