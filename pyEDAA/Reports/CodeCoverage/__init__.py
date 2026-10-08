@@ -66,6 +66,8 @@ The report formats have models of their own, which convert to this one:
       |rarr| Aldec's UCDB XML format, as exported by ``acdb2xml`` of Riviera-PRO or Active-HDL.
    :mod:`pyEDAA.Reports.CodeCoverage.QuestaSim`
       |rarr| QuestaSim's code coverage report XML (``vcover report -xml -details``).
+   :mod:`pyEDAA.Reports.CodeCoverage.LLVM`
+      |rarr| LLVM's JSON code coverage export (``llvm-cov export``), e.g. of Clang's source-based code coverage.
 """
 from __future__            import annotations
 

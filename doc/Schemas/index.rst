@@ -62,6 +62,9 @@ Available schemas
    * - :ref:`QuestaSim Coverage <SCHEMAS/QuestaSim-Coverage>`
      - :file:`QuestaSim-Coverage.xsd`
      - :class:`pyEDAA.Reports.CodeCoverage.QuestaSim.Document`
+   * - :ref:`LLVM coverage JSON <SCHEMAS/LLVM-Coverage-JSON>`
+     - :file:`LLVM-Coverage-JSON.schema.json`
+     - :class:`pyEDAA.Reports.CodeCoverage.LLVM.Document`
    * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
      - :file:`Any-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.Document`
@@ -139,6 +142,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    JaCoCo-1.1
    Aldec-UCDB
    QuestaSim-Coverage
+   LLVM-Coverage-JSON
    Any-JUnit
    Ant-JUnit4
    Catch2-JUnit
