@@ -292,3 +292,43 @@ the functions and classes of each file.
    coverage.py writes Cobertura XML too, from the same measurement, naming the files relative to the measured source
    directory - e.g. ``Shapes.py`` -, while its JSON report names them relative to the directory coverage.py ran in -
    e.g. ``myPackage/Shapes.py``.
+
+.. _CODECOV/Formats/GHDL:
+
+GHDL coverage JSON
+==================
+
+GHDL writes a coverage file when simulating with ``ghdl -r --coverage``, by default to
+:file:`coverage-<timestamp>.json`, or to the file named by ``--coverage-output=<file>``.
+:class:`pyEDAA.Reports.CodeCoverage.GHDL.Document` validates it against the JSON Schema
+:ref:`GHDL-Coverage-JSON.schema.json <SCHEMAS/GHDL-Coverage-JSON>` - format version 1.0.0 - and reads it into the
+format's model: the source files, each with the directory it was analyzed in, its SHA-1 checksum and the kind of
+coverage - ``stmt``, statement coverage -, and per line with a coverage point, whether a statement of the line ran.
+GHDL instruments the design's sources, not the libraries ``ieee`` and ``std``.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.GHDL.Document.ToCoverageSummary` converts it to the common model, as
+``ghdl coverage --format=lcov`` converts it to an lcov tracefile:
+
+* A file's path is the name it was analyzed by, relative to the directory GHDL ran in. A file analyzed in another
+  directory is prefixed by that directory.
+* A line that ran is covered, a line that didn't uncovered. The format states a flag per line, not a count: lcov's
+  count ``1`` means the line ran, at least once.
+* The format has no branches and no excluded lines, and names no units: no design units, processes or subprograms.
+
+:class:`~pyEDAA.Reports.CodeCoverage.GHDL.MergedReport` merges the coverage files of several simulation runs: a line
+ran, if it ran in one of the runs. The files must agree on each source file's checksum.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.GHDL import Document, MergedReport
+
+   documents = [Document(path, analyzeAndConvert=True) for path in sorted(Path(".").glob("coverage-*.json"))]
+   summary = MergedReport("Counter", documents).ToCoverageSummary()
+   for file in summary.IterateFiles():
+     print(f"{file.Path}: {file.LineCoverage:.1%}")
+
+.. hint::
+
+   ``ghdl coverage`` reads several coverage files too, but a line's result there is the result of the last file naming
+   the line, so the merged coverage depends on the order of the files.

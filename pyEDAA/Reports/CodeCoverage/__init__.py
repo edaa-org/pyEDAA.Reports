@@ -51,6 +51,8 @@ The report formats have models of their own, which convert to this one:
       |rarr| The Cobertura XML format, as written e.g. by coverage.py (``coverage xml``) or gcovr (``--cobertura``).
    :mod:`pyEDAA.Reports.CodeCoverage.CoveragePy`
       |rarr| coverage.py's JSON format (``coverage json``).
+   :mod:`pyEDAA.Reports.CodeCoverage.GHDL`
+      |rarr| GHDL's JSON coverage file (``ghdl -r --coverage``).
 """
 from __future__            import annotations
 

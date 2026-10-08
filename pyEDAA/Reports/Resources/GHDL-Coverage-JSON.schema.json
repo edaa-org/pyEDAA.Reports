@@ -1,0 +1,42 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/GHDL-Coverage-JSON.schema.json",
+	"title": "GHDL coverage JSON file",
+	"description": "The coverage file GHDL writes with 'ghdl -r --coverage', version 1.0.0. Reverse-engineered from GHDL's writer 'src/ghdldrv/ghdlcovout.adb' and reader 'src/ghdldrv/ghdlcov.adb'.",
+	"type": "object",
+	"required": ["app", "version", "testcase", "timestamp", "outputs"],
+	"properties": {
+		"app":       {"description": "Kind of the file.", "const": "GHDL coverage output file"},
+		"version":   {"description": "Version of the format.", "enum": ["1.0.0"]},
+		"testcase":  {"description": "Name of the testcase; GHDL writes 'unknown'.", "type": "string"},
+		"timestamp": {"description": "Time the file was written, UTC, as YYYYMMDDhhmmss.mmm.", "type": "string", "pattern": "^[0-9]{14}\\.[0-9]{3}$"},
+		"outputs": {
+			"description": "The source files with coverage points.",
+			"type": "array",
+			"items": {"$ref": "#/$defs/Output"}
+		}
+	},
+	"additionalProperties": false,
+	"$defs": {
+		"Output": {
+			"description": "A source file: its name, where it was analyzed, its checksum, and the result per line.",
+			"type": "object",
+			"required": ["file", "dir", "sha1", "mode", "max-line", "result"],
+			"properties": {
+				"file":     {"description": "The file's name, as given to the analysis.", "type": "string", "minLength": 1},
+				"dir":      {"description": "The directory the file was analyzed in: '.' for the directory GHDL ran in, '' for an absolute file name.", "type": "string"},
+				"sha1":     {"description": "SHA-1 checksum of the file's content.", "type": "string", "pattern": "^[0-9a-f]{40}$"},
+				"mode":     {"description": "Kind of coverage: statement coverage.", "enum": ["stmt"]},
+				"max-line": {"description": "The last line with a coverage point.", "type": "integer", "minimum": 1},
+				"result": {
+					"description": "Per line with a coverage point: 1, if a statement of the line ran, else 0.",
+					"type": "object",
+					"minProperties": 1,
+					"propertyNames": {"pattern": "^[1-9][0-9]*$"},
+					"additionalProperties": {"enum": [0, 1]}
+				}
+			},
+			"additionalProperties": false
+		}
+	}
+}
