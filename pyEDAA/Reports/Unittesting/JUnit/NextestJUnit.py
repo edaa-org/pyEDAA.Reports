@@ -51,7 +51,8 @@ from pyTooling.Stopwatch              import Stopwatch
 from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus
 from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
 from pyEDAA.Reports.Unittesting       import Testcase as ut_Testcase
-from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, Testsuite as ju_Testsuite
+from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass
+from pyEDAA.Reports.Unittesting.JUnit import Testsuite as ju_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit import TestsuiteSummary as ju_TestsuiteSummary, Document as ju_Document
 from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode
 

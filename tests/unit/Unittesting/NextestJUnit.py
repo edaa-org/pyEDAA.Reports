@@ -173,7 +173,9 @@ class RustCargo(Testcase):
 		testcases = doc.Testsuites["counter"].Testclasses["counter"].Testcases
 
 		self.assertEqual("Error: Underflow", testcases["tests::failing_result"].Message)
-		self.assertEqual("note: test did not panic as expected at src/lib.rs:119:5", testcases["tests::not_panicking"].Message)
+		self.assertEqual(
+			"note: test did not panic as expected at src/lib.rs:119:5", testcases["tests::not_panicking"].Message
+		)
 		self.assertEqual(
 			"thread 'tests::panicking' (554411) panicked at src/lib.rs:37:31", testcases["tests::panicking"].Message
 		)
