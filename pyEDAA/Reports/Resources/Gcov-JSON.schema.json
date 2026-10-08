@@ -1,0 +1,113 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/Gcov-JSON.schema.json",
+	"title": "gcov JSON report",
+	"description": "The JSON report gcov writes with 'gcov --json-format' for one data file, format versions 1 (GCC 9 to 13) and 2 (GCC 14 and later). Reverse-engineered from GCC's 'gcov.cc' and its documentation: version 2 added the basic blocks of a line and a branch, the calls and the conditions; GCC 15 added the prime paths of a function. Fields a version added later are optional.",
+	"type": "object",
+	"required": ["format_version", "gcc_version", "data_file", "files"],
+	"properties": {
+		"format_version":            {"description": "Version of the report format.", "enum": ["1", "2"]},
+		"gcc_version":               {"description": "Version of GCC.", "type": "string"},
+		"current_working_directory": {"description": "Directory the compilation unit was compiled in.", "type": "string"},
+		"data_file":                 {"description": "Name of the data file (GCDA), as gcov was called with it.", "type": "string"},
+		"files":                     {"type": "array", "items": {"$ref": "#/$defs/File"}}
+	},
+	"additionalProperties": false,
+	"$defs": {
+		"Count": {
+			"type": "integer",
+			"minimum": 0
+		},
+		"BlockID": {
+			"description": "ID of a basic block, unique within its function.",
+			"type": "integer",
+			"minimum": 0
+		},
+		"File": {
+			"description": "A source file: its functions and lines.",
+			"type": "object",
+			"required": ["file", "functions", "lines"],
+			"properties": {
+				"file":      {"description": "Path of the source file, as the compiler named it.", "type": "string"},
+				"functions": {"type": "array", "items": {"$ref": "#/$defs/Function"}},
+				"lines":     {"type": "array", "items": {"$ref": "#/$defs/Line"}}
+			},
+			"additionalProperties": false
+		},
+		"Function": {
+			"description": "A function: its position, basic blocks and how often it ran.",
+			"type": "object",
+			"required": [
+				"name", "demangled_name", "start_line", "start_column", "end_line", "end_column", "blocks", "blocks_executed",
+				"execution_count"
+			],
+			"properties": {
+				"name":                {"description": "Name of the function, mangled.", "type": "string"},
+				"demangled_name":      {"description": "Name of the function, demangled.", "type": "string"},
+				"start_line":          {"type": "integer", "minimum": 0},
+				"start_column":        {"type": "integer", "minimum": 0},
+				"end_line":            {"type": "integer", "minimum": 0},
+				"end_column":          {"type": "integer", "minimum": 0},
+				"blocks":              {"description": "Number of basic blocks.", "$ref": "#/$defs/Count"},
+				"blocks_executed":     {"description": "Number of executed basic blocks.", "$ref": "#/$defs/Count"},
+				"execution_count":     {"description": "Number of executions.", "$ref": "#/$defs/Count"},
+				"total_prime_paths":   {"description": "Number of prime paths (GCC 15).", "$ref": "#/$defs/Count"},
+				"covered_prime_paths": {"description": "Number of covered prime paths (GCC 15).", "$ref": "#/$defs/Count"},
+				"prime_path_coverage": {"description": "The prime paths not covered (GCC 15).", "type": "array"}
+			},
+			"additionalProperties": false
+		},
+		"Line": {
+			"description": "An executable line. A line of several functions - e.g. template instantiations - is listed once per function.",
+			"type": "object",
+			"required": ["line_number", "count", "unexecuted_block", "branches"],
+			"properties": {
+				"line_number":      {"type": "integer", "minimum": 1},
+				"function_name":    {"description": "Mangled name of the function; missing for a line of inlined statements.", "type": "string"},
+				"count":            {"description": "Number of executions.", "$ref": "#/$defs/Count"},
+				"unexecuted_block": {"description": "Whether a basic block of the line, not only reached by exceptions, never ran.", "type": "boolean"},
+				"block_ids":        {"description": "The basic blocks ending on this line.", "type": "array", "items": {"$ref": "#/$defs/BlockID"}},
+				"branches":         {"description": "Listed with 'gcov --branch-probabilities' only.", "type": "array", "items": {"$ref": "#/$defs/Branch"}},
+				"calls":            {"description": "Listed with 'gcov --branch-probabilities' only.", "type": "array", "items": {"$ref": "#/$defs/Call"}},
+				"conditions":       {"description": "Listed with 'gcov --conditions' only.", "type": "array", "items": {"$ref": "#/$defs/Condition"}}
+			},
+			"additionalProperties": false
+		},
+		"Branch": {
+			"description": "A branch: an edge from a basic block to another.",
+			"type": "object",
+			"required": ["count", "throw", "fallthrough"],
+			"properties": {
+				"count":                {"description": "Number of times the branch was taken.", "$ref": "#/$defs/Count"},
+				"throw":                {"description": "Whether the branch is taken by an exception.", "type": "boolean"},
+				"fallthrough":          {"description": "Whether the branch falls through.", "type": "boolean"},
+				"source_block_id":      {"$ref": "#/$defs/BlockID"},
+				"destination_block_id": {"$ref": "#/$defs/BlockID"}
+			},
+			"additionalProperties": false
+		},
+		"Call": {
+			"description": "A call: from a basic block to the block continuing after the return.",
+			"type": "object",
+			"required": ["source_block_id", "destination_block_id", "returned"],
+			"properties": {
+				"source_block_id":      {"$ref": "#/$defs/BlockID"},
+				"destination_block_id": {"$ref": "#/$defs/BlockID"},
+				"returned":             {"description": "Number of times the call returned.", "$ref": "#/$defs/Count"}
+			},
+			"additionalProperties": false
+		},
+		"Condition": {
+			"description": "The conditions of a boolean expression (MC/DC, 'gcc -fcondition-coverage').",
+			"type": "object",
+			"required": ["count", "covered", "not_covered_true", "not_covered_false"],
+			"properties": {
+				"count":             {"description": "Number of condition outcomes: twice the number of terms.", "$ref": "#/$defs/Count"},
+				"covered":           {"description": "Number of covered condition outcomes.", "$ref": "#/$defs/Count"},
+				"not_covered_true":  {"description": "The terms, by index, never seen as true.", "type": "array", "items": {"$ref": "#/$defs/Count"}},
+				"not_covered_false": {"description": "The terms, by index, never seen as false.", "type": "array", "items": {"$ref": "#/$defs/Count"}}
+			},
+			"additionalProperties": false
+		}
+	}
+}

@@ -336,3 +336,38 @@ ran, if it ran in one of the runs. The files must agree on each source file's ch
 
    ``ghdl coverage`` reads several coverage files too, but a line's result there is the result of the last file naming
    the line, so the merged coverage depends on the order of the files.
+
+
+.. _CODECOV/Formats/Gcov:
+
+gcov JSON
+=========
+
+GCC's gcov writes its JSON report with ``gcov --json-format``, for any language GCC compiles - e.g. C, C++, Fortran,
+Ada, or VHDL with GHDL's GCC backend: gzip-compressed to a :file:`*.gcov.json.gz` file per data file, or - with
+``--stdout`` - as plain JSON, one line per data file. :class:`pyEDAA.Reports.CodeCoverage.Gcov.Document` reads either,
+validates each JSON object against the JSON Schema :ref:`Gcov-JSON.schema.json <SCHEMAS/Gcov-JSON>` - format versions
+1 and 2 - and reads it into the format's model: the data files, their source files, functions and lines - in format 2
+with the IDs of the basic blocks of a line.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.Gcov.Document.ToCoverageSummary` converts it to the common model:
+
+* A file's path is relative to the directory the compiler ran in, which becomes a source directory.
+* A line's ``count`` is its count. A line several functions share - e.g. the instantiations of a template - or
+  several data files state - e.g. a header - becomes one line, its counts added. gcov's own summary counts the lines
+  of a template once per instantiation.
+* A file becomes a :class:`~pyEDAA.Reports.CodeCoverage.SourceFile`, its functions - by demangled name, e.g.
+  ``Containers::Stack::Pop()`` - become functions, each spanning its first to its last line, with its execution count.
+  A demangled name doesn't tell a class from a namespace, so there are no classes and methods.
+* Basic blocks have no counterpart in the common model; the format's model keeps them. The format has no excluded
+  lines.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.Gcov import Document
+
+   report = Document(Path("main.gcov.json.gz"), analyzeAndConvert=True)
+   summary = report.ToCoverageSummary()
+   for unit in summary.IterateUnits():
+     print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
