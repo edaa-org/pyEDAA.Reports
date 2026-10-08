@@ -38,7 +38,8 @@ from typing                                 import Any
 
 from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, Function, LineCoverageStatus, Method
 from pyEDAA.Reports.CodeCoverage            import Module, Package
-from pyEDAA.Reports.CodeCoverage.CoveragePy import Document
+from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document
+from pyTooling.MetaClasses                  import AbstractClassError
 from pyTooling.Testing                      import Testcase
 from pyTooling.Versioning                   import SemanticVersion
 
@@ -68,6 +69,10 @@ def _write(directory: str, content: dict[str, Any]) -> Path:
 
 class FormatModel(Testcase):
 	"""The format's model keeps what the report states: meta data, files, regions, summaries."""
+
+	def test_Base(self) -> None:
+		with self.assertRaises(AbstractClassError):
+			_ = Base({})
 
 	def test_Report(self) -> None:
 		report = Document(REPORT, analyzeAndConvert=True)

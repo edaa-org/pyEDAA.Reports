@@ -69,7 +69,7 @@ from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
-from pyTooling.MetaClasses       import ExtendedType
+from pyTooling.MetaClasses       import ExtendedType, abstractclass
 from pyTooling.Stopwatch         import Stopwatch
 from pyTooling.Versioning        import SemanticVersion
 
@@ -197,6 +197,7 @@ _Summary = Summary
 
 
 @export
+@abstractclass
 class Base(metaclass=ExtendedType, slots=True):
 	"""
 	Base-class of a file and a region: its executed, missing and excluded lines, its branches, and its summary.
