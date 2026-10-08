@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="18" failures="4" errors="0" time="0.336014">
+	<testsuite tests="12" failures="1" skipped="1" time="0.004000" name="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" timestamp="2026-10-08T11:05:11Z">
+		<properties>
+			<property name="go.version" value="go1.26.8 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestFailing" time="0.000000">
+			<failure message="Failed" type="">=== RUN   TestFailing&#xA;    counter_test.go:64: Increment() = 1, want 2&#xA;--- FAIL: TestFailing (0.00s)&#xA;</failure>
+		</testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestSkipped" time="0.000000">
+			<skipped message="=== RUN   TestSkipped&#xA;    counter_test.go:70: Reset isn&#39;t tested yet.&#xA;--- SKIP: TestSkipped (0.00s)&#xA;"></skipped>
+		</testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestNew" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestOperations/Increment" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestOperations/Decrement/Underflow" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestOperations/Decrement" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestOperations" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestIncrementFrom/start=0" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestIncrementFrom/start=1" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestIncrementFrom/start=41" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="TestIncrementFrom" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" name="ExampleCounter" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="6" failures="3" time="0.005000" name="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/stack" timestamp="2026-10-08T11:05:11Z">
+		<properties>
+			<property name="go.version" value="go1.26.8 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/stack" name="TestPushPop/sorted" time="0.000000">
+			<failure message="Failed" type="">=== RUN   TestPushPop/sorted&#xA;    stack_test.go:23: Pop() = 2, want 3&#xA;--- FAIL: TestPushPop/sorted (0.00s)&#xA;</failure>
+		</testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/stack" name="TestPushPop" time="0.000000">
+			<failure message="Failed" type="">=== RUN   TestPushPop&#xA;--- FAIL: TestPushPop (0.00s)&#xA;</failure>
+		</testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/stack" name="TestPopEmpty" time="0.000000">
+			<failure message="Failed" type="">=== RUN   TestPopEmpty&#xA;--- FAIL: TestPopEmpty (0.00s)&#xA;panic: runtime error: index out of range [-1] [recovered, repanicked]&#xA;&#xA;goroutine 11 [running]:&#xA;testing.tRunner.func1.2({0x5caca0, 0x3de355306168})&#xA;&#x9;/opt/hostedtoolcache/go/1.26.8/x64/src/testing/testing.go:1974 +0x232&#xA;testing.tRunner.func1()&#xA;&#x9;/opt/hostedtoolcache/go/1.26.8/x64/src/testing/testing.go:1977 +0x349&#xA;panic({0x5caca0?, 0x3de355306168?})&#xA;&#x9;/opt/hostedtoolcache/go/1.26.8/x64/src/runtime/panic.go:860 +0x13a&#xA;github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/stack.(*Stack).Pop(...)&#xA;&#x9;/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Go/testing/stack/stack.go:17&#xA;github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/stack.TestPopEmpty(0x3de3553c8d88?)&#xA;&#x9;/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Go/testing/stack/stack_test.go:41 +0x5b&#xA;testing.tRunner(0x3de3553c8d88, 0x5ed288)&#xA;&#x9;/opt/hostedtoolcache/go/1.26.8/x64/src/testing/testing.go:2036 +0xea&#xA;created by testing.(*T).Run in goroutine 1&#xA;&#x9;/opt/hostedtoolcache/go/1.26.8/x64/src/testing/testing.go:2101 +0x4c5&#xA;</failure>
+		</testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/stack" name="TestPushPop/one_item" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/stack" name="TestPushPop/two_items" time="0.000000"></testcase>
+		<testcase classname="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/stack" name="TestLen" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.336000" name="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/version" timestamp="2026-10-08T11:05:11Z">
+		<properties>
+			<property name="go.version" value="go1.26.8 linux/amd64"></property>
+		</properties>
+	</testsuite>
+</testsuites>

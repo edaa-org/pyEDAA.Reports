@@ -233,6 +233,44 @@ CTest
 * https://github.com/bvdberg/ctest
 
 
+.. _UNITTEST/Tool/Go:
+
+Go (go test)
+============
+
+* https://pkg.go.dev/testing
+* https://github.com/gotestyourself/gotestsum
+* https://github.com/jstemmer/go-junit-report
+
+``go test`` writes no JUnit XML: it prints text, or with ``-json`` a stream of JSON events (``test2json``), one object
+per line. Converters translate it to JUnit XML:
+
+gotestsum
+  ``gotestsum --junitfile gotestsum.xml --jsonfile go-test.json -- ./...`` runs ``go test -json`` and writes a
+  ``<testsuites>`` root with a ``<testsuite>`` per package - also for a package without tests -, each with the property
+  ``go.version``. Each test, subtest (``TestName/Subtest``) and example is a ``<testcase>``; a parent test is a test
+  case of its own beside its subtests. ``classname`` is the package's import path. A failure and a panic write a
+  ``<failure>`` with the test's output, ``t.Skip`` a ``<skipped>`` with the test's output in its ``message`` attribute.
+  Unlike Ant JUnit4, a ``<testsuite>`` has no ``hostname`` and ``errors``, and ``skipped`` only if a test was skipped.
+  ``--junitfile-testsuite-name`` and ``--junitfile-testcase-classname`` shorten the import path to its last element
+  (``short``) or to the path relative to the module (``relative``), ``--junitfile-project-name`` names the
+  ``<testsuites>``. The report is :ref:`Any JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit>`.
+
+go-junit-report
+  ``go-junit-report -parser gojson -in go-test.json -out go-junit-report.xml`` converts the JSON events - by default
+  ``go test -v``'s text output. It writes the same tree, but a test's log in the test case's ``<system-out>``, a panic's
+  stack trace in the package's ``<system-out>``, and ``id``, ``hostname`` and ``timestamp`` - of the conversion - on
+  each ``<testsuite>``; a package without tests is a ``<testsuite>`` with an empty name. Except for the ``id``
+  attribute, the report is :ref:`Any JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit>`; no dialect reads it
+  yet.
+
+A panic ends the package's test binary: the package's later tests don't run, and its code coverage is lost.
+
+The example in :file:`examples/Go/testing` is built and run by the pipeline job ``Go-Test``. It measures the code
+coverage as Go cover profile and converts it to Cobertura XML and lcov tracefile, see
+:ref:`CODECOV/Formats/GoCoverProfile`.
+
+
 .. _UNITTEST/Tool/GoogleTest:
 
 GoogleTest (gtest)

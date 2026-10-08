@@ -155,7 +155,10 @@ DIALECTS: Dict[str, Dialect] = {
 		),
 		Dialect(
 			"Any-JUnit", AnyJUnitDocument, "Any-JUnit",
-			[DATA_DIRECTORY / "OsvvmLibraries/OSVVMLibraries_RunAllTests.xml"]
+			[
+				DATA_DIRECTORY / "OsvvmLibraries/OSVVMLibraries_RunAllTests.xml",
+				DATA_DIRECTORY / "pyEDAA.Reports/Go-Test/gotestsum.xml",
+			]
 		),
 	)
 }

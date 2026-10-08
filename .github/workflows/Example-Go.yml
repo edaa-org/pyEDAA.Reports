@@ -1,0 +1,88 @@
+# ==================================================================================================================== #
+# Authors:                                                                                                             #
+#   Patrick Lehmann                                                                                                    #
+#                                                                                                                      #
+# License:                                                                                                             #
+# ==================================================================================================================== #
+# Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
+#                                                                                                                      #
+# Licensed under the Apache License, Version 2.0 (the "License");                                                      #
+# you may not use this file except in compliance with the License.                                                     #
+# You may obtain a copy of the License at                                                                              #
+#                                                                                                                      #
+#   http://www.apache.org/licenses/LICENSE-2.0                                                                         #
+#                                                                                                                      #
+# Unless required by applicable law or agreed to in writing, software                                                  #
+# distributed under the License is distributed on an "AS IS" BASIS,                                                    #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                             #
+# See the License for the specific language governing permissions and                                                  #
+# limitations under the License.                                                                                       #
+#                                                                                                                      #
+# SPDX-License-Identifier: Apache-2.0                                                                                  #
+# ==================================================================================================================== #
+name: Example Go
+
+on:
+  workflow_call:
+
+jobs:
+  Go-Test:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: ⏬ Checkout repository
+        uses: actions/checkout@v7
+
+      - name: 🐹 Set up Go 1.26
+        uses: actions/setup-go@v7
+        with:
+          go-version: '1.26'
+          cache:      false
+
+      - name: 🔧 Install gotestsum, go-junit-report, gocover-cobertura and gcov2lcov
+        run: |
+          go install gotest.tools/gotestsum@v1.13.0
+          go install github.com/jstemmer/go-junit-report/v2@v2.1.0
+          go install github.com/boumenot/gocover-cobertura@v1.5.0
+          go install github.com/jandelgado/gcov2lcov@v1.1.1
+
+      - name: 🛠 Build packages and tests
+        run: |
+          cd examples/Go/testing
+          go vet ./...
+
+      - name: ✅ Run unit tests
+        run: |
+          cd examples/Go/testing
+
+          exitCode=0
+          gotestsum --format testname --junitfile gotestsum.xml --jsonfile go-test.json \
+            -- -coverprofile=coverage.out -covermode=count ./... || exitCode=$?
+          if [[ ${exitCode} -ne 1 ]]; then
+            printf -- '::error title=%s::%s\n' "gotestsum" "Expected exit code 1 (failed tests), got ${exitCode}."
+            exit 1
+          fi
+
+      - name: 📋 Convert test2json output to JUnit XML by go-junit-report
+        run: |
+          cd examples/Go/testing
+          go-junit-report -parser gojson -in go-test.json -out go-junit-report.xml
+
+      - name: 📊 Convert cover profile to Cobertura XML and lcov tracefile
+        run: |
+          cd examples/Go/testing
+          gocover-cobertura < coverage.out > cobertura.xml
+          gcov2lcov -infile coverage.out -outfile coverage.info
+
+      - name: List generated reports
+        run: |
+          ls -lAh examples/Go/testing/*.xml examples/Go/testing/*.json examples/Go/testing/coverage.*
+
+      - name: 📤 Upload JUnit XML, test2json and coverage files as artifact
+        uses: pyTooling/upload-artifact@v7
+        with:
+          name: Go-Test
+          path: |
+            examples/Go/testing/*.xml
+            examples/Go/testing/go-test.json
+            examples/Go/testing/coverage.out
+            examples/Go/testing/coverage.info
