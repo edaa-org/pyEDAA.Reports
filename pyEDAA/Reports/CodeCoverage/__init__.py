@@ -470,9 +470,10 @@ class BaseWithPath(Base, CoverageCountersMixin):
 	@readonly
 	def Path(self) -> Path:
 		"""
-		Read-only property to return the path below the root: the names of the parent directories and the own name.
+		Read-only property to return the path below the root: the names of the parent directories and the own name, e.g.
+		``src/Counter.vhdl``.
 
-		:returns: The path, e.g. ``src/Counter.vhdl``; the name, if there is no parent.
+		:returns: The path; the name, if there is no parent.
 		"""
 		if self._parent is None:
 			return Path(self._name)
@@ -634,9 +635,9 @@ class Directory(BaseWithPath):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the directory for debugging.
+		Return a representation of the directory for debugging, e.g. ``<Directory src: 3 files, 75.0%>``.
 
-		:returns: The directory's path, its number of files and its line coverage, e.g. ``<Directory src: 3 files, 75.0%>``.
+		:returns: The directory's path, its number of files and its line coverage.
 		"""
 		return f"<Directory {self.Path.as_posix()}: {self.FileCount} files, {self.LineCoverage:.1%}>"
 
@@ -926,9 +927,9 @@ class File(BaseWithPath):
 	@readonly
 	def Units(self) -> list[Unit]:
 		"""
-		Read-only property to access the units naming this file (:attr:`_units`).
+		Read-only property to access the units naming this file (:attr:`_units`), e.g. a module, its classes and functions.
 
-		:returns: The units, e.g. a module, its classes and functions.
+		:returns: The units.
 		"""
 		return self._units
 
@@ -986,9 +987,9 @@ class File(BaseWithPath):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the file for debugging.
+		Return a representation of the file for debugging, e.g. ``<File src/Counter.vhdl: 80.0%>``.
 
-		:returns: The file's path and line coverage, e.g. ``<File src/Counter.vhdl: 80.0%>``.
+		:returns: The file's path and line coverage.
 		"""
 		return f"<File {self.Path.as_posix()}: {self.LineCoverage:.1%}>"
 
@@ -1126,9 +1127,9 @@ class Line(BaseWithStatus):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the line's coverage for debugging.
+		Return a representation of the line's coverage for debugging, e.g. ``<Line 12: PartiallyCovered (1/2 branches)>``.
 
-		:returns: The line number, the state and the branches, e.g. ``<Line 12: PartiallyCovered (1/2 branches)>``.
+		:returns: The line number, the state and the branches.
 		"""
 		branches = f" ({self.CoveredBranches}/{len(self._branches)} branches)" if len(self._branches) > 0 else ""
 		return f"<Line {self._lineNumber}: {self._status.name}{branches}>"
@@ -1341,9 +1342,10 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 	@readonly
 	def QualifiedName(self) -> str:
 		"""
-		Read-only property to return the names of the units from the top down to this one, joined by ``.``.
+		Read-only property to return the names of the units from the top down to this one, joined by ``.``, e.g.
+		``myPackage.Shapes.Circle.Area``.
 
-		:returns: The qualified name, e.g. ``myPackage.Shapes.Circle.Area``.
+		:returns: The qualified name.
 		"""
 		if isinstance(self._parent, Unit):
 			return f"{self._parent.QualifiedName}.{self._name}"
@@ -1426,9 +1428,9 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the unit for debugging.
+		Return a representation of the unit for debugging, e.g. ``<Function Shapes.Circle.Area: 100.0%>``.
 
-		:returns: The unit's kind, qualified name and line coverage, e.g. ``<Function Shapes.Circle.Area: 100.0%>``.
+		:returns: The unit's kind, qualified name and line coverage.
 		"""
 		return f"<{self.__class__.__name__} {self.QualifiedName}: {self.LineCoverage:.1%}>"
 

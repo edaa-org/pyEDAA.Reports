@@ -122,9 +122,10 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Read-only property to access the report format's version (:attr:`_schemaVersion`).
 
-		The version is named by the schema the report points at, so it is known once the file was analyzed.
+		The version is named by the schema the report points at - e.g. ``0.1`` by :file:`TestReport-v0.1.xsd` -, so it is
+		known once the file was analyzed.
 
-		:returns:              The format version, e.g. ``0.1``.
+		:returns:              The format version.
 		:raises UnittestError: If the file wasn't analyzed yet.
 		"""
 		if self._schemaVersion is None:

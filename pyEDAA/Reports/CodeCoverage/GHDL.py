@@ -172,9 +172,9 @@ class File(Generic[ParentType], metaclass=ExtendedType, slots=True):
 	@readonly
 	def Name(self) -> Path:
 		"""
-		Read-only property to access the file's name, as given to the analysis (:attr:`_name`).
+		Read-only property to access the file's name, as given to the analysis (:attr:`_name`), e.g. ``src/Counter.vhdl``.
 
-		:returns: The name, e.g. ``src/Counter.vhdl``.
+		:returns: The name.
 		"""
 		return self._name
 
@@ -208,9 +208,9 @@ class File(Generic[ParentType], metaclass=ExtendedType, slots=True):
 	@readonly
 	def Mode(self) -> CoverageMode:
 		"""
-		Read-only property to access the kind of coverage (:attr:`_mode`).
+		Read-only property to access the kind of coverage (:attr:`_mode`), e.g. :attr:`CoverageMode.Statement`.
 
-		:returns: The kind of coverage, e.g. :attr:`CoverageMode.Statement`.
+		:returns: The kind of coverage.
 		"""
 		return self._mode
 
@@ -256,18 +256,18 @@ class Report(metaclass=ExtendedType, mixin=True):
 	@readonly
 	def Version(self) -> Nullable[SemanticVersion]:
 		"""
-		Read-only property to access the version of the format (:attr:`_version`).
+		Read-only property to access the version of the format (:attr:`_version`). GHDL writes version ``1.0.0``.
 
-		:returns: The version, ``1.0.0``; ``None`` before the coverage file was converted.
+		:returns: The version; ``None`` before the coverage file was converted.
 		"""
 		return self._version
 
 	@readonly
 	def Testcase(self) -> Nullable[str]:
 		"""
-		Read-only property to access the name of the testcase (:attr:`_testcase`).
+		Read-only property to access the name of the testcase (:attr:`_testcase`). GHDL writes ``unknown``.
 
-		:returns: The name; GHDL writes ``unknown``.
+		:returns: The name; ``None`` before the coverage file was converted.
 		"""
 		return self._testcase
 
