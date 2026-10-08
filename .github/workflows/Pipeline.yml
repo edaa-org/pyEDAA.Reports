@@ -21,81 +21,14 @@ jobs:
   ConfigParams:
     uses: pyTooling/Actions/.github/workflows/ExtractConfiguration.yml@r8
 
-  Java-Ant-JUnit4:
-    runs-on: ubuntu-26.04
-    continue-on-error: true
-    steps:
-      - name: ⏬ Checkout repository
-        uses: actions/checkout@v7
-      - name: ☕ Set up JDK 21 for x64
-        uses: actions/setup-java@v6
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          architecture: x64
-      - name: ✅ Run the Ant 'junit' target
-        run: |
-          cd examples/Java/JUnit
-          ant -noinput -buildfile build-github.xml junit
-      - name: List generated XML reports
-        run: ls -lAh examples/Java/JUnit/build/*.xml
-      - name: 📤 Upload JUnit XML files as artifact
-        uses: pyTooling/upload-artifact@v7
-        with:
-          name: Java-Ant-JUnit4
-          path: examples/Java/JUnit/build/*.xml
+  Example-Java:
+    uses: ./.github/workflows/Example-Java.yml
 
-  Cpp-GoogleTest:
-    runs-on: ubuntu-26.04
-    steps:
-      - name: ⏬ Checkout repository
-        uses: actions/checkout@v7
-      - name: 🔧 Install dependencies
-        run: sudo apt-get install -y --no-install-recommends ninja-build
-      - name: 🛠 Run CMake
-        run: |
-          cd examples/Cpp/GoogleTest
-          cmake -B build -G Ninja
-          cmake --build build
-      - name: ✅ Run unit tests (directly)
-        run: |
-          cd examples/Cpp/GoogleTest
-          ./build/unit_tests --gtest_output=xml:gtest.xml
-      - name: ✅ Run unit tests (by ctest)
-        run: |
-          cd examples/Cpp/GoogleTest
-          ctest --test-dir build/ --output-junit ../ctest.xml
-      - name: List generated XML reports
-        run: |
-          ls -lAh examples/Cpp/GoogleTest/*.xml
-      - name: 📤 Upload JUnit XML files as artifact
-        uses: pyTooling/upload-artifact@v7
-        with:
-          name: Cpp-GoogleTest
-          path: examples/Cpp/GoogleTest/*.xml
+  Example-Cpp:
+    uses: ./.github/workflows/Example-Cpp.yml
 
-  Python-pytest:
-    runs-on: ubuntu-26.04
-    steps:
-      - name: ⏬ Checkout repository
-        uses: actions/checkout@v7
-      - name: 🐍 Setup Python 3.12
-        uses: actions/setup-python@v7
-        with:
-          python-version: 3.14
-      - name: 🔧 Install pytest and other dependencies
-        run: python -m pip install --disable-pip-version-check -U pytest
-      - name: ✅ Run pytest
-        run: |
-          cd examples/Python/pytest
-          python3 -m pytest -rAP --color=yes --junitxml=TestReportSummary.xml .
-      - name: List generated XML reports
-        run: ls -lAh examples/Python/pytest/*.xml
-      - name: 📤 Upload JUnit XML files as artifact
-        uses: pyTooling/upload-artifact@v7
-        with:
-          name: Python-pytest
-          path: examples/Python/pytest/*.xml
+  Example-Python:
+    uses: ./.github/workflows/Example-Python.yml
 
   UnitTestingParams:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@r8
@@ -169,9 +102,9 @@ jobs:
       - AppTestingParams
       - UnitTestingParams
       - Package
-      - Java-Ant-JUnit4
-      - Cpp-GoogleTest
-      - Python-pytest
+      - Example-Java
+      - Example-Cpp
+      - Example-Python
     with:
       jobs:                 ${{ needs.AppTestingParams.outputs.python_jobs }}
       wheel:                ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
