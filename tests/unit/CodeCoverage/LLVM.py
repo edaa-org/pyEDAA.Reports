@@ -85,7 +85,8 @@ class FormatModel(Testcase):
 
 		self.assertEqual("2.0.1", report.Version)
 		self.assertEqual(
-			["/project/include/Statistics.h", "/project/src/Shapes.cpp", "/project/src/Statistics.c"], list(report.Files)
+			["/project/include/Statistics.h", "/project/src/Shapes.cpp", "/project/src/Statistics.c"],
+			[path.as_posix() for path in report.Files]
 		)
 		self.assertEqual(13, len(report.Functions))
 		self.assertIn("_ZN8Geometry3MaxIiEET_S1_S1_", [function.Name for function in report.Functions])
@@ -100,7 +101,7 @@ class FormatModel(Testcase):
 		self.assertEqual(9, totals.Branches.NotCovered)
 
 	def test_File(self) -> None:
-		statistics = Document(REPORT, analyzeAndConvert=True).Files["/project/src/Statistics.c"]
+		statistics = Document(REPORT, analyzeAndConvert=True).Files[Path("/project/src/Statistics.c")]
 
 		segment = statistics.Segments[0]
 		self.assertEqual((3, 33, 2, True, True, False), (
@@ -120,7 +121,7 @@ class FormatModel(Testcase):
 		))
 		self.assertEqual(9, len(expansion.TargetRegions))
 		self.assertEqual([(3, 1), (3, 1)], [(branch.LineStart, branch.FileID) for branch in expansion.Branches])
-		self.assertEqual(2, len(expansion.Filenames))
+		self.assertEqual(2, len(expansion.FilePaths))
 
 		self.assertEqual((22, 18), (statistics.Summary.Lines.Count, statistics.Summary.Lines.Covered))
 
@@ -128,7 +129,7 @@ class FormatModel(Testcase):
 		functions = {function.Name: function for function in Document(REPORT, analyzeAndConvert=True).Functions}
 
 		square = functions["Statistics.c:Square"]
-		self.assertEqual((3, ["/project/src/Statistics.c"], 0), (square.Count, square.Filenames, square.MainFileID))
+		self.assertEqual((3, [Path("/project/src/Statistics.c")], 0), (square.Count, square.FilePaths, square.MainFileID))
 		self.assertEqual([(6, 30, 8, 2, RegionKind.Code)], [
 			(region.LineStart, region.ColumnStart, region.LineEnd, region.ColumnEnd, region.Kind) for region in square.Regions
 		])
@@ -138,7 +139,7 @@ class FormatModel(Testcase):
 
 	def test_MCDCRecord(self) -> None:
 		"""An MC/DC record grows with the format: 3.0.0 adds the decisions, 3.0.1 the file ID, 3.1.0 the test vectors."""
-		record = Document(REPORT, analyzeAndConvert=True).Files["/project/src/Statistics.c"].MCDCRecords[0]
+		record = Document(REPORT, analyzeAndConvert=True).Files[Path("/project/src/Statistics.c")].MCDCRecords[0]
 
 		self.assertEqual((24, 6, 24, 85, None, 0, RegionKind.MCDCDecision), (
 			record.LineStart, record.ColumnStart, record.LineEnd, record.ColumnEnd, record.FileID, record.ExpandedFileID,
@@ -148,7 +149,7 @@ class FormatModel(Testcase):
 			record.TrueDecisions, record.FalseDecisions, record.Conditions, record.TestVectors
 		))
 
-		record = Document(REPORT_3_1_0, analyzeAndConvert=True).Files["/project/src/Statistics.c"].MCDCRecords[0]
+		record = Document(REPORT_3_1_0, analyzeAndConvert=True).Files[Path("/project/src/Statistics.c")].MCDCRecords[0]
 		self.assertEqual((24, 85, 0, 0, RegionKind.MCDCDecision, 2, 0, [False] * 5), (
 			record.LineStart, record.ColumnEnd, record.FileID, record.ExpandedFileID, record.Kind, record.TrueDecisions,
 			record.FalseDecisions, record.Conditions
@@ -206,7 +207,7 @@ class Conversion(Testcase):
 		differences = {"include/Statistics.h": (0, 0, 0), "src/Shapes.cpp": (0, 0, 1), "src/Statistics.c": (1, 1, 0)}
 		for file in summary.IterateFiles():
 			path = file.Path.as_posix()
-			stated = report.Files[f"/project/{path}"].Summary
+			stated = report.Files[Path("/project") / file.Path].Summary
 			lines, coveredLines, coveredBranches = differences[path]
 			with self.subTest(file=path):
 				self.assertEqual((
@@ -264,7 +265,7 @@ class Conversion(Testcase):
 
 		report = _read(content)
 		self.assertIsNone(report.Totals.Branches)
-		self.assertFalse(report.Files["/project/src/Statistics.c"].Segments[0].IsGapRegion)
+		self.assertFalse(report.Files[Path("/project/src/Statistics.c")].Segments[0].IsGapRegion)
 		summary = report.ToCoverageSummary()
 		self.assertEqual((0, 16), (summary.TotalBranches, len(list(summary.IterateUnits()))))
 
@@ -299,7 +300,7 @@ class Schema(Testcase):
 		record = content["data"][0]["files"][2]["mcdc_records"][0]
 		record[4:4] = [2, 0]
 
-		record = _read(deepcopy(content)).Files["/project/src/Statistics.c"].MCDCRecords[0]
+		record = _read(deepcopy(content)).Files[Path("/project/src/Statistics.c")].MCDCRecords[0]
 		self.assertEqual((2, 0, None, 0, [False] * 5), (
 			record.TrueDecisions, record.FalseDecisions, record.FileID, record.ExpandedFileID, record.Conditions
 		))
