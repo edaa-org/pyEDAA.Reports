@@ -7,9 +7,10 @@ Unittesting
 testcases grouped in testsuites. Testsuites can be nested in other testsuites. The data model's root element is a
 special testsuite called testsuite summary. It contains only testsuites, but no testcases.
 
-The data model can be filled from various sources like **Ant JUnit test reports**, **pyTooling test reports** or
-**OSVVM testsuite summaries** (more to be added). Many programming languages and/or unit testing frameworks support
-exporting results in the Ant JUnit format. See below for supported formats and their variations (dialects).
+The data model can be filled from various sources like **Ant JUnit test reports**, **Open Test Reporting files**,
+**pyTooling test reports** or **OSVVM testsuite summaries** (more to be added). Many programming languages and/or unit
+testing frameworks support exporting results in the Ant JUnit format. See below for supported formats and their
+variations (dialects).
 
 .. attention::
 
@@ -29,6 +30,7 @@ Specific Data Models
 ********************
 
 .. include:: JUnitDataModel.rst
+.. include:: OpenTestReportingDataModel.rst
 .. include:: OSVVMDataModel.rst
 
 
@@ -121,8 +123,12 @@ The JUnit Platform writes OTR's event-based format into :file:`open-test-report.
   assumption) or ``SKIPPED`` (a disabled test), with the exception or the reason.
 * Every event has a ``time`` in UTC with nanoseconds, e.g. ``2026-10-08T10:56:04.172060276Z``.
 
-OTR's command line tool converts the event-based format into its hierarchical format. *pyEDAA.Reports* doesn't read
-either format yet.
+The event-based format is read by :class:`pyEDAA.Reports.Unittesting.OpenTestReporting.Events.Document` and converted
+into the unified data model, see :ref:`UNITTEST/SpecificDataModel/OTR`. The file is validated against the
+:ref:`schemas <SCHEMAS/OpenTestReporting>`, which Open Test Reporting publishes for each namespace.
+
+OTR's command line tool converts the event-based format into its hierarchical format. *pyEDAA.Reports* doesn't read the
+hierarchical format yet.
 
 
 .. _UNITTEST/FileFormats/pyTooling:
@@ -389,7 +395,9 @@ JUnit 5 and its successor JUnit 6 run tests on the JUnit Platform. The examples 
 and :file:`examples/Java/Gradle-JUnit6` run JUnit 5 and JUnit 6 tests by `Gradle <https://github.com/gradle/gradle>`__
 in the pipeline and write both: Gradle's Ant + JUnit4 XML files, read by the
 :ref:`Ant + JUnit4 dialect <UNITTEST/SpecificDataModel/JUnit/Dialect/AntJUnit4>`, and the JUnit Platform's
-:ref:`Open Test Reporting <UNITTEST/FileFormats/OTR>` file. Compared to JUnit 4 tests, Gradle's files differ:
+:ref:`Open Test Reporting <UNITTEST/FileFormats/OTR>` file, read by
+:class:`~pyEDAA.Reports.Unittesting.OpenTestReporting.Events.Document`. Compared to JUnit 4 tests, Gradle's files
+differ:
 
 * The test suite is named by the test class' display name (``@DisplayName``), the file by the class' name.
 * A test case is named by its display name: the method name with its parameter types, e.g. ``testReturnTrue()``, or

@@ -14,6 +14,8 @@ pyTooling ships in :mod:`pyTooling.Resources`.
 * :file:`GoogleTest-JUnit.xsd` - JUnit XML as written by GoogleTest.
 * :file:`PyTest-JUnit.xsd` - JUnit XML as written by pytest.
 
+The schemas of Open Test Reporting are in the resource package :mod:`pyEDAA.Reports.Resources.OpenTestReporting`.
+
 .. rubric:: Usage
 
 :func:`~pyTooling.Common.getResourceFile` returns a resource file's **path**, for handing the file to another tool, and
