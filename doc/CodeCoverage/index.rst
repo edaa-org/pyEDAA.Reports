@@ -439,6 +439,53 @@ lines - in format 2 with the IDs of the basic blocks of a line. An object statin
      print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
 
 
+.. _CODECOV/Formats/LCOV:
+
+lcov Tracefile
+==============
+
+lcov writes its tracefile with ``lcov --capture``; many tools write the format too - e.g. llvm-cov
+(``llvm-cov export -format=lcov``), coverage.py (``coverage lcov``) or GHDL (``ghdl coverage --format=lcov``). The
+format is specified by lcov's manual page
+`geninfo(1) <https://github.com/linux-test-project/lcov/blob/v2.3.1/man/geninfo.1>`__, section *TRACEFILE FORMAT*: a
+text file of records, one per line, e.g. ``DA:<line number>,<execution count>``.
+:class:`pyEDAA.Reports.CodeCoverage.LCOV.Document` reads it with a strict line parser - an unknown, malformed or
+misplaced record raises an exception noting its line - into the format's model: a section per source file and test,
+with its functions and their aliases, its lines with counts and checksums, and the summaries it states.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.LCOV.Document.ToCoverageSummary` converts it to the common model:
+
+* A section names its source file in ``SF``. The sections of one file - one per test, named by ``TN`` - become one file,
+  their counts added.
+* A line's ``DA`` count is its count.
+* A file becomes a :class:`~pyEDAA.Reports.CodeCoverage.SourceFile` unit, its functions - ``FN``, or ``FNL`` with its
+  aliases ``FNA`` - :class:`~pyEDAA.Reports.CodeCoverage.Function` units, each spanning its start to its end line. A
+  function without end line names its start line only.
+* The format has no excluded lines - lcov leaves them out - and no units but functions.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.LCOV import Document
+
+   tracefile = Document(Path("coverage.info"), analyzeAndConvert=True)
+   summary = tracefile.ToCoverageSummary()
+   for unit in summary.IterateUnits():
+     print(f"{unit.QualifiedName}: {unit.Status.name}, {unit.LineCoverage:.1%}")
+
+The tools write different parts of the format:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Tool
+     - Tracefile
+   * - GHDL 7.0
+     - ``TN`` only before the first section. Each file as one function ``file`` at line 1. No summaries. Lines of a
+       subprogram, which was never called, aren't listed.
+
+
 .. _CODECOV/Formats/GoCoverProfile:
 
 Go Cover Profile
