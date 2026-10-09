@@ -1,3 +1,5 @@
+.. _CLI:
+
 Command Line Interfaces
 #######################
 
@@ -9,8 +11,6 @@ The program is self-describing. Use :program:`pyedaa-reports` without parameters
 available common options and commands. Each command has then it's own help page for command specific options, which can
 be listed by calling ``pyedaa-reports <cmd> -h`` or ``pyedaa-reports help <cmd>``. The version and
 license information of :program:`pyedaa-reports` is shown by calling ``pyedaa-reports version``.
-
-.. _References/cli:
 
 .. autoprogram:: pyEDAA.Reports.CLI:Application().MainParser
   :prog: pyedaa-reports

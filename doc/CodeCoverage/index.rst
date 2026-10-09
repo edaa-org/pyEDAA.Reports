@@ -777,7 +777,7 @@ Command Line
 
 The command ``coverage`` of :program:`pyedaa-reports` reads a report of any format above, which a reader exists for,
 shows its line and branch figures and, with ``--output``, writes it as Cobertura XML - so any format becomes the format
-most tools read (see :ref:`References/cli`):
+most tools read (see :ref:`CLI`):
 
 .. code-block:: console
 
