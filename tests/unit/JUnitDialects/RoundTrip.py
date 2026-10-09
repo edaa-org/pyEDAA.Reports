@@ -92,6 +92,18 @@ class RoundTripMixin:
 					(document._tests, document.Skipped, document.Errored, document.Failed, document.Passed)
 				)
 
+	def test_TestsuiteSummary(self) -> None:
+		"""A test suite summary of the unified model converts to the dialect's test suite summary and test suites."""
+		for referenceFile in self.Dialect.ReferenceFiles:
+			with self.subTest(file=referenceFile.name):
+				summary = readReference(self.Dialect, referenceFile)
+				juSummary = self.Dialect.TestsuiteSummaryClass.FromTestsuiteSummary(summary)
+
+				self.assertIsInstance(juSummary, self.Dialect.TestsuiteSummaryClass)
+				self.assertEqual(list(summary._testsuites), list(juSummary._testsuites))
+				for testsuite in juSummary._testsuites.values():
+					self.assertIsInstance(testsuite, self.Dialect.TestsuiteClass)
+
 	def test_Aggregate(self) -> None:
 		"""Aggregating a document read from a file counts its test cases - the root's ``tests`` attribute when written."""
 		for referenceFile in self.Dialect.ReferenceFiles:

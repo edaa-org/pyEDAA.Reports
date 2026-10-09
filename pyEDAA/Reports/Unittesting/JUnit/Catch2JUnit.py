@@ -145,7 +145,7 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 			startTime=testsuiteSummary._startTime,
 			duration=testsuiteSummary._totalDuration,
 			status=testsuiteSummary._status,
-			testsuites=(ut_Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+			testsuites=(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
 		)
 
 

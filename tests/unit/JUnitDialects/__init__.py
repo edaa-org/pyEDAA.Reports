@@ -38,6 +38,7 @@ that rejects a reference file is wrong about the format, and a report this packa
 rejects is wrong about the format too.
 """
 from pathlib import Path
+from sys     import modules
 from typing  import Dict, List, Tuple, Type
 
 from pyTooling.Decorators import export, readonly
@@ -101,6 +102,24 @@ class Dialect(metaclass=ExtendedType, slots=True):
 		:returns: The ``Document`` class of the dialect.
 		"""
 		return self._documentClass
+
+	@readonly
+	def TestsuiteSummaryClass(self) -> Type:
+		"""
+		Read-only property to return the dialect's test suite summary class, from the module of :attr:`_documentClass`.
+
+		:returns: The ``TestsuiteSummary`` class of the dialect.
+		"""
+		return modules[self._documentClass.__module__].TestsuiteSummary
+
+	@readonly
+	def TestsuiteClass(self) -> Type:
+		"""
+		Read-only property to return the dialect's test suite class, from the module of :attr:`_documentClass`.
+
+		:returns: The ``Testsuite`` class of the dialect.
+		"""
+		return modules[self._documentClass.__module__].Testsuite
 
 	@readonly
 	def SchemaFile(self) -> Path:
