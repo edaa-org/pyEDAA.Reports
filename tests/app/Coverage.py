@@ -61,6 +61,7 @@ class CoverageCommand(ApplicationTestcase):
 			("CoveragePy-JSON",      DATA_DIRECTORY / "Python/coverage.json",       "Lines:    22 of 27 covered (81.5%)"),
 			("Gcov-JSON",            DATA_DIRECTORY / "GCC/Main.gcov.json.gz",      "Lines:    26 of 27 covered (96.3%)"),
 			("GHDL-JSON",            DATA_DIRECTORY / "VHDL/coverage-Count.json",   "Lines:    23 of 27 covered (85.2%)"),
+			("JaCoCo-XML",           DATA_DIRECTORY / "Java/jacocoTestReport.xml",  "Lines:    6 of 8 covered (75.0%)"),
 			("LCOV",                 DATA_DIRECTORY / "lcov/VHDL/GHDL.info",        "Lines:    9 of 11 covered (81.8%)"),
 			("NVC-Cobertura",        DATA_DIRECTORY / "NVC/Count.xml",              "Lines:    24 of 32 covered (75.0%)")
 		):
@@ -88,6 +89,25 @@ class CoverageCommand(ApplicationTestcase):
 		summary = CoberturaDocument(outputFile, analyzeAndConvert=True).ToCoverageSummary()
 		self.assertEqual((27, 22), (summary.TotalLines, summary.CoveredLines))
 		self.assertEqual((10, 5), (summary.TotalBranches, summary.CoveredBranches))
+
+	def test_JaCoCoToCobertura(self) -> None:
+		"""Gradle's JaCoCo XML report written as Cobertura XML: valid by the strict schema, the same figures read back."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		outputFile = OUTPUT_DIRECTORY / "jacoco.xml"
+		outputFile.unlink(missing_ok=True)
+
+		inputFile = DATA_DIRECTORY / "Java/jacocoTestReport.xml"
+		result = self.RunEntrypoint(
+			"coverage", f"--input=JaCoCo-XML:{inputFile}", f"--output=Cobertura:{outputFile}", timeout=60.0
+		)
+
+		self.assertExitCode(result)
+		strict = XMLSchema(parse(getResourceFile(Resources, STRICT_SCHEMA)))
+		self.assertTrue(strict.validate(parse(outputFile)), msg=str(strict.error_log))
+
+		summary = CoberturaDocument(outputFile, analyzeAndConvert=True).ToCoverageSummary()
+		self.assertEqual((8, 6), (summary.TotalLines, summary.CoveredLines))
+		self.assertEqual((2, 1), (summary.TotalBranches, summary.CoveredBranches))
 
 	def test_MissingInput(self) -> None:
 		result = self.RunEntrypoint("coverage", timeout=60.0)

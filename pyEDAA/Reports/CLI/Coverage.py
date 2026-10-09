@@ -52,6 +52,7 @@ from pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura          import Document
 from pyEDAA.Reports.CodeCoverage.CoveragePy                      import Document as CoveragePyDocument
 from pyEDAA.Reports.CodeCoverage.Gcov                            import Document as GcovDocument
 from pyEDAA.Reports.CodeCoverage.GHDL                            import Document as GHDLDocument
+from pyEDAA.Reports.CodeCoverage.JaCoCo                          import Document as JaCoCoDocument
 from pyEDAA.Reports.CodeCoverage.LCOV                            import Document as LCOVDocument
 
 
@@ -67,6 +68,7 @@ class InputFormat(StringEnum):
 	CoveragePyJSON =      "CoveragePy-JSON"       #: coverage.py's JSON report.
 	GcovJSON =            "Gcov-JSON"             #: GCC's gcov JSON report.
 	GHDLJSON =            "GHDL-JSON"             #: GHDL's coverage file.
+	JaCoCoXML =           "JaCoCo-XML"            #: JaCoCo's XML report.
 	LCOV =                "LCOV"                  #: lcov's tracefile.
 	NVCCobertura =        "NVC-Cobertura"         #: Cobertura XML as NVC writes it.
 
@@ -89,6 +91,7 @@ INPUT_FORMATS: Dict[InputFormat, Type[cc_Document]] = {
 	InputFormat.CoveragePyJSON:      CoveragePyDocument,
 	InputFormat.GcovJSON:            GcovDocument,
 	InputFormat.GHDLJSON:            GHDLDocument,
+	InputFormat.JaCoCoXML:           JaCoCoDocument,
 	InputFormat.LCOV:                LCOVDocument,
 	InputFormat.NVCCobertura:        NVCCoberturaDocument
 }
