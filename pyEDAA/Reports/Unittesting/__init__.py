@@ -1635,7 +1635,12 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, expectedWarningCount, expectedErrorCount, expectedFatalCount, totalDuration = super().Aggregate()
+		(
+			tests, inconsistent, excluded, skipped, errored, weak, failed, passed,
+			warningCount, errorCount, fatalCount,
+			expectedWarningCount, expectedErrorCount, expectedFatalCount,
+			totalDuration
+		) = super().Aggregate(strict)
 
 		for testcase in self._testcases.values():
 			wc, ec, fc, ewc, eec, efc, td = testcase.Aggregate(strict)
@@ -1883,7 +1888,12 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
+		return (
+			tests, inconsistent, excluded, skipped, errored, weak, failed, passed,
+			warningCount, errorCount, fatalCount,
+			expectedWarningCount, expectedErrorCount, expectedFatalCount,
+			totalDuration
+		)
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:

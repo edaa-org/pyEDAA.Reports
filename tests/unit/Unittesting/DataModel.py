@@ -359,6 +359,47 @@ class StringRepresentation(py_Testcase):
 		)
 
 
+class StrictSpyTestcase(Testcase):
+	"""A test case recording the parameter 'strict' of its last aggregation."""
+
+	_strict: bool
+
+	def Aggregate(self, strict: bool = True):
+		self._strict = strict
+		return super().Aggregate(strict)
+
+
+class Aggregation(py_Testcase):
+	def test_Strict(self) -> None:
+		summary = TestsuiteSummary("summary")
+		ts1 =     Testsuite("ts1", parent=summary)
+		ts11 =    Testsuite("ts11", parent=ts1)
+		tc1 =     StrictSpyTestcase("tc1", status=TestcaseStatus.Passed, parent=ts1)
+		tc11 =    StrictSpyTestcase("tc11", status=TestcaseStatus.Passed, parent=ts11)
+
+		summary.Aggregate(strict=False)
+
+		self.assertFalse(tc1._strict)
+		self.assertFalse(tc11._strict)
+
+	def test_TestsuiteSummary_ReturnValue(self) -> None:
+		summary = TestsuiteSummary("summary")
+		ts1 =     Testsuite("ts1", parent=summary)
+		_ =       Testcase(
+			"tc1",
+			testDuration=timedelta(seconds=1),
+			status=TestcaseStatus.Passed,
+			warningCount=2,
+			expectedWarningCount=1,
+			parent=ts1
+		)
+
+		result = summary.Aggregate()
+
+		self.assertEqual(15, len(result))
+		self.assertTupleEqual(ts1.Aggregate(), result)
+
+
 def CreateTestsuiteStructure(rootIsSummary: bool = True, empty: bool = False) -> Testsuite:
 	if rootIsSummary:
 		root = TestsuiteSummary("summary")
