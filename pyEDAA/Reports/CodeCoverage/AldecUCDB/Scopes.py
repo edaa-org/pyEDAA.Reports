@@ -31,8 +31,10 @@
 # ==================================================================================================================== #
 #
 """
-The scopes of Aldec's UCDB XML format and their bins: the design units and their instances, the coverage items - e.g.
-statements and branches - with their counts, and where they are in the sources.
+The scopes of Aldec's UCDB XML format and their bins.
+
+The scopes are the design units and their instances; the bins are the coverage items - e.g. statements and branches -
+with their counts, and where they are in the sources.
 """
 from __future__                                      import annotations
 
@@ -216,8 +218,9 @@ class SourceLocation(metaclass=ExtendedType, slots=True):
 @export
 class Bin(Base, AttributesMixin):
 	"""
-	A ``<ux:bin>`` of a scope: a coverage item - e.g. a statement or a branch -, how often it was hit, its flags, and
-	where it is in the sources.
+	A ``<ux:bin>`` of a scope: a coverage item, how often it was hit, its flags, and where it is in the sources.
+
+	Statements and branches are coverage items.
 	"""
 
 	_parent: Nullable[Scope]  #: The scope the bin belongs to.
@@ -393,8 +396,9 @@ class Bin(Base, AttributesMixin):
 @export
 class Scope(Base, AttributesMixin, Generic[ScopeParentType]):
 	"""
-	A ``<ux:scope>`` of the report or of a scope: e.g. a design unit, an instance of one, a process or a branching
-	statement, its bins and the scopes below it.
+	A ``<ux:scope>`` of the report or of a scope: its bins and the scopes below it.
+
+	Design units, their instances, processes and branching statements are scopes.
 	"""
 
 	_parent:     Nullable[ScopeParentType]  #: The report or scope the scope belongs to.
