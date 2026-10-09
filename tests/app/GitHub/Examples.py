@@ -29,27 +29,28 @@
 # ==================================================================================================================== #
 #
 """Testcase for application testing report files generated on GitHub."""
-from pathlib          import Path
-from unittest         import TestCase
+from pathlib                                            import Path
+from unittest                                           import TestCase
 
-from lxml.etree       import XMLSchema, parse
-from pyTooling.Common import getResourceFile, zipdicts
+from lxml.etree                                         import XMLSchema, parse
+from pyTooling.Common                                   import getResourceFile, zipdicts
 
-from pyEDAA.Reports                                   import Resources
-from pyEDAA.Reports.CodeCoverage                      import CodeCoverageError
-from pyEDAA.Reports.CodeCoverage.Cobertura            import STRICT_SCHEMA, Document as CoberturaDocument
-from pyEDAA.Reports.CodeCoverage.CoveragePy           import Document as CoveragePyDocument
-from pyEDAA.Reports.CodeCoverage.GHDL                 import Document as GHDLDocument, MergedReport
-from pyEDAA.Reports.CodeCoverage.Gcov                 import Document as GcovDocument
-from pyEDAA.Reports.CodeCoverage.Gcov                 import FormatVersion as GcovFormatVersion
-from pyEDAA.Reports.Unittesting                       import TestcaseStatus, UnittestError
-from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument
+from pyEDAA.Reports                                     import Resources
+from pyEDAA.Reports.CodeCoverage                        import CodeCoverageError
+from pyEDAA.Reports.CodeCoverage.Cobertura              import STRICT_SCHEMA, Document as CoberturaDocument
+from pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura import Document as NVCCoberturaDocument
+from pyEDAA.Reports.CodeCoverage.CoveragePy             import Document as CoveragePyDocument
+from pyEDAA.Reports.CodeCoverage.GHDL                   import Document as GHDLDocument, MergedReport
+from pyEDAA.Reports.CodeCoverage.Gcov                   import Document as GcovDocument
+from pyEDAA.Reports.CodeCoverage.Gcov                   import FormatVersion as GcovFormatVersion
+from pyEDAA.Reports.Unittesting                         import TestcaseStatus, UnittestError
+from pyEDAA.Reports.Unittesting.JUnit                   import Document as AnyJUnitDocument
 # FIXME: change to generic JUnit
-from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as JUnit4Document
-from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestDocument
-from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GTestDocument
-from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestDocument
-from pyTooling.Testing                                import Testcase
+from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4         import Document as JUnit4Document
+from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit        import Document as CTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit   import Document as GTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit       import Document as PyTestDocument
+from pyTooling.Testing                                  import Testcase
 
 
 if __name__ == "__main__": # pragma: no cover
@@ -824,8 +825,20 @@ class VHDLGHDL(TestCase):
 class VHDLNVC(TestCase):
 	"""NVC simulates the example's testbench twice, merges both coverage databases and exports them as Cobertura XML."""
 
-	def test_Cobertura(self) -> None:
-		"""Known gap: NVC writes ``condition-coverage`` as e.g. ``100 %``, without the covered and valid conditions."""
+	def test_NVCCobertura(self) -> None:
+		"""NVC's dialect reads the merged report: the reset run covers the counter's reset branch."""
+		report = NVCCoberturaDocument(Path("tests/data/CodeCoverage/VHDL-NVC/cobertura.xml"), analyzeAndConvert=True)
+		summary = report.ToCoverageSummary()
+
+		self.assertEqual((24, 20), (summary.TotalLines, summary.CoveredLines))
+		self.assertEqual((18, 10), (summary.TotalBranches, summary.CoveredBranches))
+		self.assertEqual(
+			[("src/Counter.vhdl", 7, 7), ("tb/Counter_tb.vhdl", 17, 13)],
+			[(file.Path.as_posix(), file.TotalLines, file.CoveredLines) for file in summary.IterateFiles()]
+		)
+
+	def test_AnyCobertura(self) -> None:
+		"""The generic reader rejects it: NVC writes ``condition-coverage`` as e.g. ``100 %``, without the conditions."""
 		with self.assertRaises(CodeCoverageError) as context:
 			CoberturaDocument(Path("tests/data/CodeCoverage/VHDL-NVC/cobertura.xml"), analyzeAndConvert=True)
 
