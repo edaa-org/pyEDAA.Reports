@@ -1028,11 +1028,21 @@ class Testcase(Base, TestcaseOutputMixin):
 
 		:returns: Human-readable summary of a test case object.
 		"""
+		def formatDuration(duration: Nullable[timedelta]) -> str:
+			"""
+			Nested function formatting a duration in seconds.
+
+			:param duration: Duration to format.
+			:returns:        Duration in seconds with three decimal places, or ``None``.
+			"""
+			return "None" if duration is None else f"{duration.total_seconds():.3f}"
+
 		return (
 			f"<Testcase {self._name}: {self._status.name} -"
 			f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
 			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount} -"
-			f" setup/test/teardown:{self._setupDuration:.3f}/{self._testDuration:.3f}/{self._teardownDuration:.3f}>"
+			f" setup/test/teardown:{formatDuration(self._setupDuration)}/{formatDuration(self._testDuration)}/"
+			f"{formatDuration(self._teardownDuration)}>"
 		)
 
 

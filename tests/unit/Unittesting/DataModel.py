@@ -333,6 +333,32 @@ class Durations(py_Testcase):
 		)
 
 
+class StringRepresentation(py_Testcase):
+	def test_Testcase(self) -> None:
+		tc = Testcase("tc")
+
+		self.assertEqual(
+			"<Testcase tc: Unknown - assert/pass/fail:None/None/None - warn/error/fatal:0/0/0 -"
+			" setup/test/teardown:None/None/None>",
+			str(tc)
+		)
+
+	def test_Testcase_WithDurations(self) -> None:
+		tc = Testcase(
+			"tc",
+			setupDuration=timedelta(seconds=1),
+			testDuration=timedelta(milliseconds=2500),
+			status=TestcaseStatus.Passed,
+			assertionCount=3,
+			failedAssertionCount=0
+		)
+
+		self.assertEqual(
+			"<Testcase tc: Passed - assert/pass/fail:3/3/0 - warn/error/fatal:0/0/0 - setup/test/teardown:1.000/2.500/None>",
+			str(tc)
+		)
+
+
 def CreateTestsuiteStructure(rootIsSummary: bool = True, empty: bool = False) -> Testsuite:
 	if rootIsSummary:
 		root = TestsuiteSummary("summary")
