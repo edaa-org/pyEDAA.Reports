@@ -19,9 +19,10 @@
 	SPDX-License-Identifier: Apache-2.0
 
 	Modified by EDA²: derived from 'ucis/UCIS.xsd' of https://github.com/accellera-official/fc4sc, commit 31b9339a. The
-	four changes made there in 2020 are reverted to the schema of the UCIS 1.0 standard (section 9.14), and the target
-	namespace is removed. The definitions are reformatted and grouped by coverage kind, the comments are replaced, the
-	documentation is added.
+	four changes made there in 2020 are reverted to the schema of the UCIS 1.0 standard (section 9.14), the target
+	namespace is removed, and the covergroup bins and instances changed as pyucis' own schema 'ucis.xsd' changes them.
+	The definitions are reformatted and grouped by coverage kind, the comments are replaced, the documentation is
+	added.
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            elementFormDefault="qualified" attributeFormDefault="unqualified">
@@ -31,8 +32,10 @@
 			pyucis' 'XmlWriter' (checked: pyucis 0.2.0, commit 11c39fd0).
 
 			The elements are in no namespace; the root binds the prefix 'ucis' to the XML Schema instance namespace, but
-			uses it for no element. Otherwise it is the schema of the UCIS 1.0 standard (section 9.14), see 'UCIS-1.0.xsd':
-			the same complex types, elements, attributes, their order, occurrences, types and defaults.
+			uses it for no element. A coverpoint bin and a cross bin state a 'name' and a 'key'; a coverpoint bin's 'type'
+			is 'bins', 'default', 'ignore' or 'illegal'; a covergroup instance may have no coverpoint - as pyucis' own
+			schema 'ucis.xsd' has them. Otherwise it is the schema of the UCIS 1.0 standard (section 9.14), see
+			'UCIS-1.0.xsd': the same complex types, elements, attributes, their order, occurrences, types and defaults.
 		</xs:documentation>
 	</xs:annotation>
 
@@ -388,7 +391,18 @@
 			<xs:element name="userAttr" type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="alias" type="xs:string"/>
-		<xs:attribute name="type"  type="xs:string" use="required"/>
+		<xs:attribute name="type"                   use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="bins"/>
+					<xs:enumeration value="default"/>
+					<xs:enumeration value="ignore"/>
+					<xs:enumeration value="illegal"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="name"  type="xs:string" use="required"/>
+		<xs:attribute name="key"   type="xs:string" use="required"/>
 	</xs:complexType>
 
 	<xs:complexType name="CROSS_BIN">
@@ -399,6 +413,8 @@
 		</xs:sequence>
 		<xs:attribute name="type"  type="xs:string" default="default"/>
 		<xs:attribute name="alias" type="xs:string"/>
+		<xs:attribute name="name"  type="xs:string" use="required"/>
+		<xs:attribute name="key"   type="xs:string" use="required"/>
 	</xs:complexType>
 
 	<xs:complexType name="CROSS_OPTIONS">
@@ -468,7 +484,7 @@
 			<xs:element name="options"    type="CGINST_OPTIONS"/>
 			<xs:element name="cgId"       type="CG_ID"/>
 			<xs:element name="cgParms"    type="NAME_VALUE"     minOccurs="0" maxOccurs="unbounded"/>
-			<xs:element name="coverpoint" type="COVERPOINT"     minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="coverpoint" type="COVERPOINT"     minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="cross"      type="CROSS"          minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="userAttr"   type="USER_ATTR"      minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>

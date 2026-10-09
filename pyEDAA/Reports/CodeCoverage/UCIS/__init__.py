@@ -43,10 +43,15 @@ The format's model keeps what the report states: a :class:`Document` holds
 :class:`~pyEDAA.Reports.CodeCoverage.UCIS.HistoryNodes.HistoryNode` elements - the tests and merges, by their ID - and
 :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Instances.InstanceCoverage` elements. An instance holds its coverage of each
 kind, once per metric mode: :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Blocks.BlockCoverage` - statements, blocks,
-processes - and :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Branches.BranchCoverage` - branching statements and their
-branches. A coverage item states its count in a :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`, and where it is
-in a :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`: the source file's ID, the line and the index of
-the statement in the line. Each element's constructor takes typed values, so the model can be built by hand: an element
+processes -, :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Branches.BranchCoverage` - branching statements and their
+branches -, :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Toggles.ToggleCoverage`,
+:class:`~pyEDAA.Reports.CodeCoverage.UCIS.Conditions.ConditionCoverage`,
+:class:`~pyEDAA.Reports.CodeCoverage.UCIS.FSMs.FSMCoverage`,
+:class:`~pyEDAA.Reports.CodeCoverage.UCIS.Assertions.AssertionCoverage` and
+:class:`~pyEDAA.Reports.CodeCoverage.UCIS.Covergroups.CovergroupCoverage`. A coverage item states its count in a
+:class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`, and where it is in a
+:class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`: the source file's ID, the line and the index of the
+statement in the line. Each element's constructor takes typed values, so the model can be built by hand: an element
 below the report names its parent with the keyword parameter ``parent`` and is added to it. Its class method ``Parse``
 reads the element's XML element.
 
@@ -64,7 +69,7 @@ reads the element's XML element.
   statement. An excluded branch or branching statement isn't converted.
 * A design unit, whose instances name it, becomes a :class:`~pyEDAA.Reports.CodeCoverage.Module`, spanning the lines
   of its statements, if they are in one file.
-* The toggle, condition, expression, FSM, assertion and covergroup coverage isn't read yet.
+* The toggle, condition, expression, FSM, assertion and covergroup coverage stays in the format's model.
 
 .. rubric:: Example
 
