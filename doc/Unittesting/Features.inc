@@ -32,7 +32,7 @@ Create test entities
                # Top-down
                ts1 = Testsuite("ts1")
 
-               tc = Testcase("tc", parent=ts)
+               tc = Testcase("tc", parent=ts1)
 
                # Bottom-up
                tc1 = Testcase("tc1")
@@ -65,7 +65,7 @@ Create test entities
                # Top-down
                ts = Testsuite("ts")
 
-               ts1 = Testsuite("ts1", parent=tss)
+               ts1 = Testsuite("ts1", parent=ts)
 
                # Bottom-up
                ts2 = Testsuite("ts2")
@@ -74,16 +74,16 @@ Create test entities
                ts4 = Testsuite("ts4", testsuites=(ts2, ts3))
 
                # ts.AddTestsuite(...)
-               ts5 = Testcase("ts5")
-               ts6 = Testcase("ts6")
+               ts5 = Testsuite("ts5")
+               ts6 = Testsuite("ts6")
 
                ts7 = Testsuite("ts7")
                ts7.AddTestsuite(ts5)
                ts7.AddTestsuite(ts6)
 
                # ts.AddTestsuites(...)
-               ts8 = Testcase("ts8")
-               ts9 = Testcase("ts9")
+               ts8 = Testsuite("ts8")
+               ts9 = Testsuite("ts9")
 
                ts10 = Testsuite("ts10")
                ts10.AddTestsuites((ts8, ts9))
@@ -96,8 +96,30 @@ Create test entities
                from pyEDAA.Reports.Unittesting import Testsuite, TestsuiteSummary
 
                # Top-down
+               tss1 = TestsuiteSummary("tss1")
+
+               ts1 = Testsuite("ts1", parent=tss1)
 
                # Bottom-up
+               ts2 = Testsuite("ts2")
+               ts3 = Testsuite("ts3")
+
+               tss2 = TestsuiteSummary("tss2", testsuites=(ts2, ts3))
+
+               # tss.AddTestsuite(...)
+               ts4 = Testsuite("ts4")
+               ts5 = Testsuite("ts5")
+
+               tss3 = TestsuiteSummary("tss3")
+               tss3.AddTestsuite(ts4)
+               tss3.AddTestsuite(ts5)
+
+               # tss.AddTestsuites(...)
+               ts6 = Testsuite("ts6")
+               ts7 = Testsuite("ts7")
+
+               tss4 = TestsuiteSummary("tss4")
+               tss4.AddTestsuites((ts6, ts7))
 
 
 .. _UNITTEST/Feature/Read:
@@ -128,11 +150,13 @@ Reading unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit import Document
 
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -141,11 +165,13 @@ Reading unittest reports
 
             .. code-block:: Python
 
-               from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
+               from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 
                xmlReport = Path("AntJUnit4-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -154,11 +180,13 @@ Reading unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
 
                xmlReport = Path("Catch2-JUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -167,11 +195,13 @@ Reading unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
                xmlReport = Path("CTest-JUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -193,11 +223,13 @@ Reading unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
                xmlReport = Path("GoogleTest-JUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -206,6 +238,8 @@ Reading unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
 
                xmlReport = Path("Nextest-JUnit-Report.xml")
@@ -219,11 +253,13 @@ Reading unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
                xmlReport = Path("pyTest-JUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -245,6 +281,8 @@ Reading unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.pyTooling import Document
 
                xmlReport = Path("TestReport.xml")
@@ -282,12 +320,14 @@ Converting unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit import Document
 
                # Read from XML file
                xmlReport = Path("JUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -494,6 +534,8 @@ Writing unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit import Document
 
                # Convert a TestsuiteSummary back to a Document
@@ -511,7 +553,9 @@ Writing unittest reports
 
             .. code-block:: Python
 
-               from pyEDAA.Reports.Unittesting.JUnit.AntJUnit import Document
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
+               from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 
                # Convert a TestsuiteSummary back to a Document
                newXmlReport = Path("JUnit-Report.xml")
@@ -528,6 +572,8 @@ Writing unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
 
                # Convert a TestsuiteSummary back to a Document
@@ -545,6 +591,8 @@ Writing unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
                # Convert a TestsuiteSummary back to a Document
@@ -579,6 +627,8 @@ Writing unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
                # Convert a TestsuiteSummary back to a Document
@@ -596,6 +646,8 @@ Writing unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
 
                # Convert a TestsuiteSummary back to a Document
@@ -613,6 +665,8 @@ Writing unittest reports
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
                # Convert a TestsuiteSummary back to a Document

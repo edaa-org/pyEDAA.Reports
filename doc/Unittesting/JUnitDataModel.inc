@@ -174,11 +174,13 @@ Any JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit import Document
 
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -187,6 +189,7 @@ Any JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit import Document
 
                # Convert to unified test data model
@@ -201,6 +204,8 @@ Any JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit import Document
 
                xmlReport = Path("AnyJUnit-Report.xml")
@@ -237,11 +242,13 @@ Ant + JUnit4
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 
                xmlReport = Path("AntJUnit4-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -250,6 +257,7 @@ Ant + JUnit4
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 
                # Convert to unified test data model
@@ -264,9 +272,11 @@ Ant + JUnit4
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("AntJUnit4-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
@@ -321,11 +331,13 @@ Catch2 JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
 
                xmlReport = Path("Catch2JUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -334,6 +346,7 @@ Catch2 JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
 
                # Convert to unified test data model
@@ -348,9 +361,11 @@ Catch2 JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("Catch2JUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
@@ -382,11 +397,13 @@ CTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
                xmlReport = Path("CTestJUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -395,6 +412,7 @@ CTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
                # Convert to unified test data model
@@ -409,9 +427,11 @@ CTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("CTestJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
@@ -535,11 +555,13 @@ GoogleTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
                xmlReport = Path("GoogleTestJUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -548,6 +570,7 @@ GoogleTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
                # Convert to unified test data model
@@ -562,9 +585,11 @@ GoogleTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("GoogleTestJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
@@ -635,6 +660,8 @@ cargo-nextest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
 
                xmlReport = Path("target/nextest/ci/junit.xml")
@@ -648,6 +675,7 @@ cargo-nextest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
 
                # Convert to unified test data model
@@ -662,6 +690,8 @@ cargo-nextest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
 
                xmlReport = Path("Nextest-JUnit-Report.xml")
@@ -696,11 +726,13 @@ pyTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
                xmlReport = Path("PyTestJUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -709,6 +741,7 @@ pyTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
                # Convert to unified test data model
@@ -723,9 +756,11 @@ pyTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("PyTestJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
