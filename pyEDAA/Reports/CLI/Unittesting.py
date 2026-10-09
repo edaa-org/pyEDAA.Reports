@@ -104,6 +104,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					from pyEDAA.Reports.Unittesting.JUnit import Document
 
 					documentClass = Document
+				elif dialect == "catch2":
+					from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
+
+					documentClass = Document
 				elif dialect == "ctest":
 					from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
@@ -148,6 +152,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					from pyEDAA.Reports.Unittesting.JUnit import Document
 
 					self._mergeJUnit(testsuiteSummary, Document, foundFiles, "Any-JUnit")
+				elif dialect == "catch2":
+					from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
+
+					self._mergeJUnit(testsuiteSummary, Document, foundFiles, "Catch2-JUnit")
 				elif dialect == "ctest":
 					from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
@@ -309,6 +317,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document, UnittestError
 
 					self._outputJUnit(testsuiteSummary, Document, outputFile, "Ant+JUnit4")
+				elif dialect == "catch2":
+					from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document, UnittestError
+
+					self._outputJUnit(testsuiteSummary, Document, outputFile, "Catch2-JUnit")
 				elif dialect == "ctest":
 					from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document, UnittestError
 

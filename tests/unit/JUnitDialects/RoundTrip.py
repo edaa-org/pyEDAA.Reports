@@ -78,6 +78,29 @@ class RoundTripMixin:
 				_, outputFile, _ = self._roundTrip(referenceFile)
 				schema.validate(str(outputFile))
 
+	def test_Counters(self) -> None:
+		"""A document converted from a test suite summary computes its counters: they equal the summary's."""
+		for referenceFile in self.Dialect.ReferenceFiles:
+			with self.subTest(file=referenceFile.name):
+				summary = readReference(self.Dialect, referenceFile)
+				document = self.Dialect.DocumentClass.FromTestsuiteSummary(
+					OUTPUT_DIRECTORY / self.Dialect.Name / referenceFile.name, summary
+				)
+
+				self.assertEqual(
+					(summary.Tests, summary.Skipped, summary.Errored, summary.Failed, summary.Passed),
+					(document._tests, document.Skipped, document.Errored, document.Failed, document.Passed)
+				)
+
+	def test_Aggregate(self) -> None:
+		"""Aggregating a document read from a file counts its test cases - the root's ``tests`` attribute when written."""
+		for referenceFile in self.Dialect.ReferenceFiles:
+			with self.subTest(file=referenceFile.name):
+				document = self.Dialect.DocumentClass(referenceFile, analyzeAndConvert=True)
+				document.Aggregate()
+
+				self.assertEqual(document.TestcaseCount, document._tests)
+
 	def test_TestcaseCountSurvives(self) -> None:
 		for referenceFile in self.Dialect.ReferenceFiles:
 			with self.subTest(file=referenceFile.name):
@@ -101,6 +124,10 @@ class RoundTripMixin:
 
 class AntJUnit4(RoundTripMixin, ut_TestCase):
 	_dialectName = "Ant-JUnit4"
+
+
+class Catch2JUnit(RoundTripMixin, ut_TestCase):
+	_dialectName = "Catch2-JUnit"
 
 
 class CTestJUnit(RoundTripMixin, ut_TestCase):

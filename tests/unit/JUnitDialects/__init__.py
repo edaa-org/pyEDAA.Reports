@@ -44,12 +44,13 @@ from pyTooling.Decorators import export, readonly
 from pyTooling.MetaClasses import ExtendedType
 from xmlschema             import XMLSchema
 
-from pyEDAA.Reports.Unittesting                      import TestsuiteSummary
-from pyEDAA.Reports.Unittesting.JUnit                import Document as AnyJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4      import Document as AntJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit     import Document as CTestJUnitDocument
+from pyEDAA.Reports.Unittesting                       import TestsuiteSummary
+from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit     import Document as Catch2JUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestJUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GoogleTestJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit    import Document as PyTestJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestJUnitDocument
 
 
 DATA_DIRECTORY = Path("tests/data/JUnit")
@@ -138,6 +139,13 @@ DIALECTS: Dict[str, Dialect] = {
 			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Gradle-JUnit6").glob("*.xml"))
 		),
 		Dialect(
+			"Catch2-JUnit", Catch2JUnitDocument, "Catch2-JUnit",
+			[
+				DATA_DIRECTORY / "pyEDAA.Reports/Cpp-Catch2/catch2-junit.xml",
+				DATA_DIRECTORY / "Catch2/catch2-junit-quirks.xml",
+			]
+		),
+		Dialect(
 			"CTest-JUnit", CTestJUnitDocument, "CTest-JUnit",
 			[DATA_DIRECTORY / "pyEDAA.Reports/Cpp-GoogleTest/ctest.xml"]
 		),
@@ -166,10 +174,6 @@ DIALECTS: Dict[str, Dialect] = {
 #: Reports rooted at ``<testsuite>`` rather than ``<testsuites>``. ``Any-JUnit`` should accept them and does not,
 #: which is why they are named here instead of sitting in its reference list.
 TESTSUITE_ROOTED_FILES: List[Path] = sorted((DATA_DIRECTORY / "VUnit").glob("*.xml"))
-
-#: Reports of a framework no dialect reads yet. Once a dialect accepts one, it becomes a reference file of that
-#: dialect.
-UNSUPPORTED_FILES: List[Path] = [DATA_DIRECTORY / "pyEDAA.Reports/Cpp-Catch2/catch2-junit.xml"]
 
 
 def readReference(dialect: Dialect, referenceFile: Path) -> TestsuiteSummary:

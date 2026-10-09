@@ -11,8 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2024-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
-# Copyright 2023-2023 Patrick Lehmann - Bötzingen, Germany                                                             #
+# Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -30,34 +29,38 @@
 # ==================================================================================================================== #
 #
 """
-Reader for JUnit unit testing summary files in XML format.
+Reader and writer for the JUnit XML report written by Catch2's JUnit reporter.
+
+.. seealso::
+
+   :ref:`UNITTEST/SpecificDataModel/JUnit/Dialect/Catch2`
+      |rarr| Differences of the Catch2 JUnit dialect.
+   :ref:`SCHEMAS/Catch2-JUnit`
+      |rarr| XML schema of the Catch2 JUnit dialect.
 """
-from __future__           import annotations
+from __future__                       import annotations
 
-from pathlib              import Path
-from typing               import Optional as Nullable, Generator, Tuple, Union, TypeVar, Type, ClassVar
+from datetime                         import timezone
+from pathlib                          import Path
+from typing                           import Optional as Nullable, Type, ClassVar
 
-from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
-from pyTooling.Common     import firstValue
-from pyTooling.Decorators import export, InheritDocString, DocStringMergeStrategy
-from pyTooling.Stopwatch  import Stopwatch
+from lxml.etree                       import ElementTree, Element, SubElement, tostring, _Element
+from pyTooling.Common                 import firstValue
+from pyTooling.Decorators             import export, InheritDocString, DocStringMergeStrategy
+from pyTooling.Stopwatch              import Stopwatch
 
-from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind
-from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
+from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus
 from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
-from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, Testsuite as ju_Testsuite
-from pyEDAA.Reports.Unittesting.JUnit import TestsuiteSummary as ju_TestsuiteSummary, Document as ju_Document
-
-TestsuiteType = TypeVar("TestsuiteType", bound="Testsuite")
-TestcaseAggregateReturnType = Tuple[int, int, int]
-TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
+from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass
+from pyEDAA.Reports.Unittesting.JUnit import Testsuite as ju_Testsuite, TestsuiteSummary as ju_TestsuiteSummary
+from pyEDAA.Reports.Unittesting.JUnit import Document as ju_Document
 
 
 @export
 @InheritDocString(ju_Testcase, DocStringMergeStrategy.BaseLast)
 class Testcase(ju_Testcase):
 	"""
-	This is a derived implementation for the Ant + JUnit4 dialect.
+	This is a derived implementation for the Catch2 JUnit dialect.
 	"""
 
 
@@ -65,7 +68,7 @@ class Testcase(ju_Testcase):
 @InheritDocString(ju_Testclass, DocStringMergeStrategy.BaseLast)
 class Testclass(ju_Testclass):
 	"""
-	This is a derived implementation for the Ant + JUnit4 dialect.
+	This is a derived implementation for the Catch2 JUnit dialect.
 	"""
 
 
@@ -73,17 +76,18 @@ class Testclass(ju_Testclass):
 @InheritDocString(ju_Testsuite, DocStringMergeStrategy.BaseLast)
 class Testsuite(ju_Testsuite):
 	"""
-	This is a derived implementation for the Ant + JUnit4 dialect.
+	This is a derived implementation for the Catch2 JUnit dialect.
 	"""
 
 	@classmethod
 	def FromTestsuite(cls, testsuite: ut_Testsuite) -> Testsuite:
 		"""
 		Convert a test suite of the unified test entity data model to the JUnit specific data model's test suite object
-		adhering to the Ant + JUnit4 dialect.
+		adhering to the Catch2 JUnit dialect.
 
-		:param testsuite: Test suite from unified data model.
-		:returns:         Test suite from JUnit specific data model (Ant + JUnit4 dialect).
+		:param testsuite:      Test suite from unified data model.
+		:returns:              Test suite from JUnit specific data model (Catch2 JUnit dialect).
+		:raises UnittestError: If a test case is not part of a test suite hierarchy.
 		"""
 		juTestsuite = cls(
 			testsuite._name,
@@ -124,17 +128,17 @@ class Testsuite(ju_Testsuite):
 @InheritDocString(ju_TestsuiteSummary, DocStringMergeStrategy.BaseLast)
 class TestsuiteSummary(ju_TestsuiteSummary):
 	"""
-	This is a derived implementation for the Ant + JUnit4 dialect.
+	This is a derived implementation for the Catch2 JUnit dialect.
 	"""
 
 	@classmethod
 	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> TestsuiteSummary:
 		"""
 		Convert a test suite summary of the unified test entity data model to the JUnit specific data model's test suite
-		summary object adhering to the Ant + JUnit4 dialect.
+		summary object adhering to the Catch2 JUnit dialect.
 
 		:param testsuiteSummary: Test suite summary from unified data model.
-		:returns:                Test suite summary from JUnit specific data model (Ant + JUnit4 dialect).
+		:returns:                Test suite summary from JUnit specific data model (Catch2 JUnit dialect).
 		"""
 		return cls(
 			testsuiteSummary._name,
@@ -148,18 +152,19 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 @export
 class Document(ju_Document):
 	"""
-	A document reader and writer for the Ant + JUnit4 XML file format.
+	A document reader and writer for the Catch2 JUnit XML file format.
 
-	This class reads, validates and transforms an XML file in the Ant + JUnit4 format into a JUnit data model. It can then
+	This class reads, validates and transforms an XML file in the Catch2 JUnit format into a JUnit data model. It can then
 	be converted into a unified test entity data model.
 
-	In reverse, a JUnit data model instance with the specific Ant + JUnit4 file format can be created from a unified test
+	In reverse, a JUnit data model instance with the specific Catch2 JUnit file format can be created from a unified test
 	entity data model. This data model can be written as XML into a file.
 	"""
 
-	_TESTCASE:  ClassVar[Type[Testcase]] =  Testcase
-	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass
-	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite
+	_DIALECT:   ClassVar[str] =             "Catch2 + JUnit"  #: Name of the dialect in messages.
+	_TESTCASE:  ClassVar[Type[Testcase]] =  Testcase          #: Class of test cases read by this dialect.
+	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass         #: Class of test classes read by this dialect.
+	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite         #: Class of test suites read by this dialect.
 
 	def Analyze(self) -> None:
 		"""
@@ -168,16 +173,16 @@ class Document(ju_Document):
 
 		.. hint::
 
-		   The time spend for analysis will be made available via property :data:`AnalysisDuration`..
+		   The time spend for analysis will be made available via property :data:`AnalysisDuration`.
 
-		The used XML schema definition is specific to the Ant JUnit4 dialect.
+		The used XML schema definition is specific to the Catch2 JUnit dialect.
 		"""
-		xmlSchemaFile = "Ant-JUnit4.xsd"
+		xmlSchemaFile = "Catch2-JUnit.xsd"
 		self._Analyze(xmlSchemaFile)
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
 		"""
-		Write the data model as XML into a file adhering to the Ant + JUnit4 dialect.
+		Write the data model as XML into a file adhering to the Catch2 dialect.
 
 		:param path:           Optional, path to the XML file, if internal path shouldn't be used.
 		:param overwrite:      Optional, if true, overwrite an existing file.
@@ -229,18 +234,9 @@ class Document(ju_Document):
 			rootElement: _Element = self._xmlDocument.getroot()
 
 			self._name = self._ConvertName(rootElement, optional=True)
-			self._startTime =self._ConvertTimestamp(rootElement, optional=True)
-			self._duration = self._ConvertTime(rootElement, optional=True)
 
-			# tests = rootElement.getAttribute("tests")
-			# skipped = rootElement.getAttribute("skipped")
-			# errors = rootElement.getAttribute("errors")
-			# failures = rootElement.getAttribute("failures")
-			# assertions = rootElement.getAttribute("assertions")
-
-			hostname = self._ConvertHostname(rootElement, optional=True, default=None)
-			ts = Testsuite(self._name, hostname, startTime=self._startTime, duration=self._duration, parent=self)
-			self._ConvertTestsuiteChildren(rootElement, ts)
+			for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
+				self._ConvertTestsuite(self, rootNode)
 
 			self.Aggregate()
 
@@ -259,51 +255,88 @@ class Document(ju_Document):
 			self._ConvertName(testsuitesNode, optional=False),
 			self._ConvertHostname(testsuitesNode, optional=False),
 			self._ConvertTimestamp(testsuitesNode, optional=False),
-			self._ConvertTime(testsuitesNode, optional=False),
+			self._ConvertTime(testsuitesNode, optional=True),
 			parent=parent
 		)
 
 		self._ConvertTestsuiteChildren(testsuitesNode, newTestsuite)
 
+	def _ConvertTestcaseChildren(self, testcaseNode: _Element, newTestcase: Testcase) -> None:
+		"""
+		Convert the child elements of a ``<testcase>`` to the test case's status, message, details and captured output.
+
+		A test case tagged with ``[!mayfail]`` or ``[!shouldfail]`` failing as expected has a ``<skipped>`` element in front
+		of its ``<failure>`` or ``<error>`` element. Its status is skipped, its message is the ``<skipped>`` element's
+		message, its details are the text of the ``<failure>`` or ``<error>`` element.
+
+		:param testcaseNode:   The current XML element node representing a test case.
+		:param newTestcase:    The test case to update.
+		:raises UnittestError: If an unknown element is found.
+		"""
+		super()._ConvertTestcaseChildren(testcaseNode, newTestcase)
+
+		statusNodes = list(testcaseNode.iterchildren("skipped", "failure", "error"))
+		if len(statusNodes) == 2:
+			newTestcase._status = TestcaseStatus.Skipped
+			newTestcase._message = statusNodes[0].attrib["message"]
+
 	def Generate(self, overwrite: bool = False) -> None:
 		"""
 		Generate the internal XML data structure from test suites and test cases.
 
-		This method generates the XML root element (``<testsuite>``) and recursively calls other generated methods.
+		This method generates the XML root element (``<testsuites>``) without attributes and recursively calls other
+		generated methods.
 
 		:param overwrite:      Optional, overwrite the internal XML data structure.
 		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
+		:raises UnittestError: If the document has not exactly one test suite.
 		"""
 		if not overwrite and self._xmlDocument is not None:
 			raise UnittestError(f"Internal XML document is populated with data.")
 
 		if self.TestsuiteCount != 1:
-			ex = UnittestError(f"The Ant + JUnit4 format requires exactly one test suite.")
+			ex = UnittestError(f"The {self._DIALECT} format requires exactly one test suite.")
 			ex.add_note(f"Found {self.TestsuiteCount} test suites.")
 			raise ex
 
-		testsuite = firstValue(self._testsuites)
-
-		rootElement = Element("testsuite")
-		rootElement.attrib["name"] = self._name
-		if self._startTime is not None:
-			rootElement.attrib["timestamp"] = f"{self._startTime.isoformat()}"
-		if self._duration is not None:
-			rootElement.attrib["time"] = f"{self._duration.total_seconds():.6f}"
-		rootElement.attrib["tests"] = str(self._tests)
-		rootElement.attrib["failures"] = str(self._failed)
-		rootElement.attrib["errors"] = str(self._errored)
-		rootElement.attrib["skipped"] = str(self._skipped)
-		# if self._assertionCount is not None:
-		# 	rootElement.attrib["assertions"] = f"{self._assertionCount}"
-		if testsuite._hostname is not None:
-			rootElement.attrib["hostname"] = testsuite._hostname
+		rootElement = Element("testsuites")
 
 		self._xmlDocument = ElementTree(rootElement)
 
+		self._GenerateTestsuite(firstValue(self._testsuites), rootElement)
+
+	def _GenerateTestsuite(self, testsuite: Testsuite, parentElement: _Element) -> None:
+		"""
+		Generate the internal XML data structure for a test suite.
+
+		This method generates the XML element (``<testsuite>``) and recursively calls other generated methods. The
+		``tests``, ``failures``, ``errors`` and ``skipped`` attributes count test cases, an unrecorded hostname is written
+		as ``tbd``.
+
+		:param testsuite:      The test suite to convert to an XML data structures.
+		:param parentElement:  The parent XML data structure element, this data structure part will be added to.
+		:raises UnittestError: If the test suite has no start time.
+		"""
+		if testsuite._startTime is None:
+			raise UnittestError(f"The {self._DIALECT} format requires a timestamp on <testsuite>, but the report has none.")
+
+		testsuiteElement = SubElement(parentElement, "testsuite")
+		testsuiteElement.attrib["name"] = testsuite._name
+		testsuiteElement.attrib["errors"] = str(testsuite._errored)
+		testsuiteElement.attrib["failures"] = str(testsuite._failed)
+		testsuiteElement.attrib["skipped"] = str(testsuite._skipped)
+		testsuiteElement.attrib["tests"] = str(testsuite._tests)
+		testsuiteElement.attrib["hostname"] = "tbd" if testsuite._hostname is None else testsuite._hostname
+		if testsuite._duration is not None:
+			testsuiteElement.attrib["time"] = f"{testsuite._duration.total_seconds():.3f}"
+		testsuiteElement.attrib["timestamp"] = testsuite._startTime.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():
-				self._GenerateTestcase(tc, rootElement)
+				self._GenerateTestcase(tc, testsuiteElement)
+
+		SubElement(testsuiteElement, "system-out")
+		SubElement(testsuiteElement, "system-err")
 
 	def _GenerateTestcase(self, testcase: Testcase, parentElement: _Element) -> None:
 		"""
@@ -311,16 +344,17 @@ class Document(ju_Document):
 
 		This method generates the XML element (``<testcase>``) and recursively calls other generated methods.
 
-		:param testcase:      The test case to convert to an XML data structures.
-		:param parentElement: The parent XML data structure element, this data structure part will be added to.
+		:param testcase:       The test case to convert to an XML data structures.
+		:param parentElement:  The parent XML data structure element, this data structure part will be added to.
+		:raises UnittestError: If the test case has no duration.
 		"""
+		if testcase._duration is None:
+			raise UnittestError(f"The {self._DIALECT} format requires a time on <testcase>, but the report has none.")
+
 		testcaseElement = SubElement(parentElement, "testcase")
-		if testcase.Classname is not None:
-			testcaseElement.attrib["classname"] = testcase.Classname
+		testcaseElement.attrib["classname"] = testcase.Classname
 		testcaseElement.attrib["name"] = testcase._name
-		if testcase._duration is not None:
-			testcaseElement.attrib["time"] = f"{testcase._duration.total_seconds():.6f}"
-		if testcase._assertionCount is not None:
-			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
+		testcaseElement.attrib["time"] = f"{testcase._duration.total_seconds():.3f}"
+		testcaseElement.attrib["status"] = "run"
 
 		self._GenerateTestcaseChildren(testcase, testcaseElement)

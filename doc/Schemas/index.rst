@@ -56,6 +56,9 @@ Available schemas
    * - :ref:`Ant + JUnit4 <SCHEMAS/Ant-JUnit4>`
      - :file:`Ant-JUnit4.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.AntJUnit4.Document`
+   * - :ref:`Catch2 JUnit <SCHEMAS/Catch2-JUnit>`
+     - :file:`Catch2-JUnit.xsd`
+     - :class:`pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit.Document`
    * - :ref:`CTest JUnit <SCHEMAS/CTest-JUnit>`
      - :file:`CTest-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.CTestJUnit.Document`
@@ -113,6 +116,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    JaCoCo-1.1
    Any-JUnit
    Ant-JUnit4
+   Catch2-JUnit
    CTest-JUnit
    GoogleTest-JUnit
    PyTest-JUnit

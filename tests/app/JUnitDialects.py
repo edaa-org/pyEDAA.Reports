@@ -52,13 +52,14 @@ OUTPUT_DIRECTORY = Path("tests/output/AppJUnitDialects")
 COMMANDLINE_NAMES: Dict[str, str] = {
 	"Ant-JUnit4":       "Ant-JUnit",
 	"Any-JUnit":        "Any-JUnit",
+	"Catch2-JUnit":     "Catch2-JUnit",
 	"CTest-JUnit":      "CTest-JUnit",
 	"GoogleTest-JUnit": "gtest-JUnit",
 	"pyTest-JUnit":     "pyTest-JUnit",
 }
 
 #: Dialects the command line can write. ``Any-JUnit`` is readable but has no branch in ``_output``.
-WRITABLE = ("Ant-JUnit4", "CTest-JUnit", "GoogleTest-JUnit", "pyTest-JUnit")
+WRITABLE = ("Ant-JUnit4", "Catch2-JUnit", "CTest-JUnit", "GoogleTest-JUnit", "pyTest-JUnit")
 
 #: (source, target) -> why the conversion cannot work, mirroring the unit-level table.
 FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
@@ -66,8 +67,14 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"CTest-JUnit requires 'timestamp' on <testsuite>, which pytest does not write on <testsuites>.",
 	("pyTest-JUnit", "GoogleTest-JUnit"):
 		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which pytest does not write.",
+	("Catch2-JUnit", "CTest-JUnit"):
+		"CTest-JUnit requires 'timestamp' on its <testsuite> root, which Catch2 does not write on <testsuites>.",
+	("Catch2-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which Catch2 does not write.",
 	("Any-JUnit", "Ant-JUnit4"):
 		"Ant + JUnit4 holds exactly one test suite; the OSVVM report has many.",
+	("Any-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "CTest-JUnit"):
 		"CTest-JUnit holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "GoogleTest-JUnit"):
@@ -167,6 +174,9 @@ class ConversionMixin:
 	def test_ToAntJUnit4(self) -> None:
 		self._roundTripThroughTheCommandLine("Ant-JUnit4")
 
+	def test_ToCatch2JUnit(self) -> None:
+		self._roundTripThroughTheCommandLine("Catch2-JUnit")
+
 	def test_ToCTestJUnit(self) -> None:
 		self._roundTripThroughTheCommandLine("CTest-JUnit")
 
@@ -179,6 +189,10 @@ class ConversionMixin:
 
 class FromAntJUnit4(ConversionMixin, ApplicationTestcase):
 	_dialectName = "Ant-JUnit4"
+
+
+class FromCatch2JUnit(ConversionMixin, ApplicationTestcase):
+	_dialectName = "Catch2-JUnit"
 
 
 class FromCTestJUnit(ConversionMixin, ApplicationTestcase):

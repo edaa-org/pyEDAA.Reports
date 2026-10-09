@@ -139,15 +139,15 @@ dialects (and simplifications) were created by the various frameworks emitting J
 
 .. rubric:: JUnit Dialect Comparison
 
-+------------------------+--------------+--------------+--------------------+------------------+--------------+
-| Feature                | Any JUnit    | Ant + JUnit4 | CTest JUnit        | GoogleTest JUnit | pyTest JUnit |
-+========================+==============+==============+====================+==================+==============+
-| Root element           | testsuites   | testsuite    | testsuite          | testsuites       | testsuites   |
-+------------------------+--------------+--------------+--------------------+------------------+--------------+
-| Supports properties    |     ☑        |     ☑        |                    |       ⸺          |              |
-+------------------------+--------------+--------------+--------------------+------------------+--------------+
-| Testcase status        | ...          | ...          | more status values |                  |              |
-+------------------------+--------------+--------------+--------------------+------------------+--------------+
++------------------------+--------------+--------------+--------------+--------------------+------------------+--------------+
+| Feature                | Any JUnit    | Ant + JUnit4 | Catch2 JUnit | CTest JUnit        | GoogleTest JUnit | pyTest JUnit |
++========================+==============+==============+==============+====================+==================+==============+
+| Root element           | testsuites   | testsuite    | testsuites   | testsuite          | testsuites       | testsuites   |
++------------------------+--------------+--------------+--------------+--------------------+------------------+--------------+
+| Supports properties    |     ☑        |     ☑        |     ☑        |                    |       ⸺          |              |
++------------------------+--------------+--------------+--------------+--------------------+------------------+--------------+
+| Testcase status        | ...          | ...          | always run   | more status values |                  |              |
++------------------------+--------------+--------------+--------------+--------------------+------------------+--------------+
 
 .. _UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit:
 
@@ -268,6 +268,87 @@ Ant + JUnit4
                except UnittestError as ex:
                  ...
 
+
+
+.. _UNITTEST/SpecificDataModel/JUnit/Dialect/Catch2:
+
+Catch2 JUnit
+------------
+
+.. grid:: 2
+
+   .. grid-item::
+      :columns: 6
+
+      The Catch2 JUnit format written by the JUnit reporter of `Catch2 <https://github.com/catchorg/Catch2>`__
+      (version 3) uses ``<testsuites>`` as a root element. It holds exactly one ``<testsuite>``, named after the test
+      executable.
+
+      * Each test case and each path of nested sections is a ``<testcase>``, named by its section path
+        (``TestCase/Section/Subsection``). A test case or section containing sections is a ``<testcase>`` of its own.
+      * The ``classname`` is ``<executable>.global``, or ``<executable>.<fixture class>`` for a test case of a fixture
+        class (``::`` becomes ``.``).
+      * ``SKIP()`` writes a ``<skipped>`` element, a failed assertion a ``<failure>`` element, an unexpected exception
+        an ``<error>`` element. Only the first of them per ``<testcase>`` is written.
+      * Each ``<testcase>`` carries ``status="run"``.
+
+      .. rubric:: Known issues
+
+      * The ``tests``, ``failures``, ``errors`` and ``skipped`` attributes of ``<testsuite>`` count assertions, not test
+        cases. Written by pyEDAA.Reports, they count test cases.
+      * The ``hostname`` attribute is always ``tbd``.
+      * A test case without assertions and without output is missing.
+      * A failure in a section is reported on the section's ``<testcase>`` only; the ``<testcase>`` of the enclosing
+        test case passes.
+      * A failure expected by ``[!mayfail]`` or ``[!shouldfail]`` writes a ``<skipped>`` element followed by a
+        ``<failure>`` element. Its test case is read as skipped.
+      * A ``[!shouldfail]`` test case passing unexpectedly fails for Catch2, but passes in the report.
+      * The properties ``random-seed`` and ``filters`` aren't read.
+
+   .. grid-item::
+      :columns: 6
+
+      .. tab-set::
+
+         .. tab-item:: Reading Catch2 JUnit
+            :sync: ReadJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
+
+               xmlReport = Path("Catch2JUnit-Report.xml")
+               try:
+                 doc = Document(xmlReport, parse=True)
+               except UnittestError as ex:
+                 ...
+
+         .. tab-item:: Convert to and from Unified Data Model
+            :sync: ConvertToFrom
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
+
+               # Convert to unified test data model
+               summary = doc.ToTestsuiteSummary()
+
+               # Convert back to a document
+               newXmlReport = Path("New JUnit-Report.xml")
+               newDoc = Document.FromTestsuiteSummary(newXmlReport, summary)
+
+         .. tab-item:: Writing Catch2 JUnit
+            :sync: WriteJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
+
+               xmlReport = Path("AnyJUnit-Report.xml")
+               try:
+                 newDoc.Write(xmlReport)
+               except UnittestError as ex:
+                 ...
 
 
 .. _UNITTEST/SpecificDataModel/JUnit/Dialect/CTest:
