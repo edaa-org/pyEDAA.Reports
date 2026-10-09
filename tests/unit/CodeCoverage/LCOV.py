@@ -32,6 +32,7 @@
 """Unit tests of lcov's tracefile format: its model, its line parser and the conversion to the common model."""
 from pathlib                                  import Path
 from tempfile                                 import TemporaryDirectory
+from typing                                   import Callable
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
 from pyEDAA.Reports.CodeCoverage.LCOV         import RECORD_SYNTAX, Document
@@ -193,12 +194,12 @@ class Parents(Testcase):
 
 	def test_Function(self) -> None:
 		section = Section("", Path("a.c"))
-		first = lcov_Function(1, 3, parent=section)
-		second = lcov_Function(5, None, 0, parent=section)
+		first = lcov_Function(1, 3, {"f": 1}, parent=section)
+		second = lcov_Function(5, None, {"g": None}, 0, parent=section)
 
 		self.assertEqual([section, section], [first.Parent, second.Parent])
 		self.assertEqual([first, second], section.Functions)
-		self.assertIsNone(lcov_Function(1, None).Parent)
+		self.assertIsNone(lcov_Function(1, None, {"f": 1}).Parent)
 
 	def test_Section(self) -> None:
 		tracefile = Document(Path("coverage.info"))
@@ -231,7 +232,7 @@ class Parents(Testcase):
 		section = Section("", Path("a.c"))
 		for create, expected in (
 			(lambda: Line(1, 0, parent=Document(Path("coverage.info"))), "Section"),
-			(lambda: lcov_Function(1, None, parent=Document(Path("coverage.info"))), "Section"),
+			(lambda: lcov_Function(1, None, {"f": 1}, parent=Document(Path("coverage.info"))), "Section"),
 			(lambda: Branch(1, 0, "0", 0, False, parent=Document(Path("coverage.info"))), "Section"),
 			(lambda: Condition(1, 1, True, 0, 0, "x", parent=Document(Path("coverage.info"))), "Section"),
 			(lambda: Section("", Path("a.c"), parent=section), "Tracefile")
@@ -259,9 +260,196 @@ class Parents(Testcase):
 				self.assertEqual([section], [branch.Parent for branch in section.Branches])
 				self.assertEqual([section], [condition.Parent for condition in section.Conditions])
 
+	def test_Line_Duplicate(self) -> None:
+		"""A section has one line per number: the first stays, the second is rejected."""
+		section = Section("", Path("src/a.c"))
+		first = Line(3, 1, parent=section)
+
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = Line(3, 7, parent=section)
+
+		self.assertEqual("Line 3 of the section of 'src/a.c' is added twice.", str(context.exception))
+		self.assertEqual({3: first}, section.Lines)
+		self.assertEqual(1, section.Lines[3].Count)
+
+
+class Construction(Testcase):
+	"""The format's model is built by hand: each constructor takes typed values and checks them."""
+
+	def _AssertChecks(self, cases: tuple[tuple[Callable[[], object], type[Exception], str, list[str]], ...]) -> None:
+		"""
+		Assert that each constructor call raises the exception of its case.
+
+		:param cases: The cases: a constructor call, the exception's type, its message and its notes.
+		"""
+		for create, exceptionType, message, notes in cases:
+			with self.subTest(message=message):
+				with self.assertRaises(exceptionType) as context:
+					_ = create()
+
+				self.assertEqual(message, str(context.exception))
+				self.assertEqual(notes, getattr(context.exception, "__notes__", []))
+
+	def test_Line(self) -> None:
+		line = Line(13, 3, "i6lS0TI+70N3scXJXzSuRg")
+
+		self.assertEqual((13, 3, "i6lS0TI+70N3scXJXzSuRg", None), (line.Number, line.Count, line.Checksum, line.Parent))
+		self.assertIsNone(Line(1, 0).Checksum)
+
+	def test_Branch(self) -> None:
+		branch = Branch(4, 0, "jump to line 8", None, True)
+
+		self.assertEqual((4, 0, "jump to line 8", None, True, None), (
+			branch.LineNumber, branch.Block, branch.Expression, branch.Taken, branch.IsException, branch.Parent
+		))
+
+	def test_Condition(self) -> None:
+		condition = Condition(14, 2, False, 0, 1, "1")
+
+		self.assertEqual((14, 2, False, 0, 1, "1", None), (
+			condition.LineNumber, condition.GroupSize, condition.Sense, condition.Taken, condition.Index,
+			condition.Expression, condition.Parent
+		))
+
+	def test_Function(self) -> None:
+		"""The first alias names the function; the function keeps its own copy of the aliases."""
+		aliases = {"Box<int>::Size": 2, "Box<float>::Size": None}
+		function = lcov_Function(3, 9, aliases, 0)
+		aliases["Box<char>::Size"] = 1
+
+		self.assertEqual((3, 9, 0, "Box<int>::Size", {"Box<int>::Size": 2, "Box<float>::Size": None}, 2, None), (
+			function.StartLine, function.EndLine, function.Index, function.Name, function.Aliases, function.Count,
+			function.Parent
+		))
+		self.assertEqual((None, None, None), (
+			lcov_Function(1, None, {"f": None}).EndLine, lcov_Function(1, None, {"f": None}).Index,
+			lcov_Function(1, None, {"f": None}).Count
+		))
+
+	def test_Section(self) -> None:
+		section = Section("", Path("a.c"))
+
+		self.assertEqual(("", Path("a.c"), None, [], {}, [], [], None), (
+			section.TestName, section.SourceFile, section.Version, section.Functions, section.Lines, section.Branches,
+			section.Conditions, section.Parent
+		))
+
+	def test_Line_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: Line(None, 1), ValueError, "Parameter 'number' is None.", []),
+			(lambda: Line("3", 1), TypeError, "Parameter 'number' is not of type 'int'.", ["Got type 'str'."]),
+			(lambda: Line(0, 1), ValueError, "Parameter 'number' is less than 1.", ["Got value '0'."]),
+			(lambda: Line(3, None), ValueError, "Parameter 'count' is None.", []),
+			(lambda: Line(3, 1.0), TypeError, "Parameter 'count' is not of type 'int'.", ["Got type 'float'."]),
+			(lambda: Line(3, -1), ValueError, "Parameter 'count' is negative.", ["Got value '-1'."]),
+			(lambda: Line(3, 1, 5), TypeError, "Parameter 'checksum' is not of type 'str'.", ["Got type 'int'."]),
+			(lambda: Line(3, 1, ""), ValueError, "Parameter 'checksum' is empty.", [])
+		))
+
+	def test_Branch_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: Branch(None, 0, "0", 1, False), ValueError, "Parameter 'lineNumber' is None.", []),
+			(lambda: Branch("4", 0, "0", 1, False), TypeError, "Parameter 'lineNumber' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Branch(0, 0, "0", 1, False), ValueError, "Parameter 'lineNumber' is less than 1.", ["Got value '0'."]),
+			(lambda: Branch(4, None, "0", 1, False), ValueError, "Parameter 'block' is None.", []),
+			(lambda: Branch(4, "e0", "0", 1, False), TypeError, "Parameter 'block' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Branch(4, -1, "0", 1, False), ValueError, "Parameter 'block' is negative.", ["Got value '-1'."]),
+			(lambda: Branch(4, 0, None, 1, False), ValueError, "Parameter 'expression' is None.", []),
+			(lambda: Branch(4, 0, 0, 1, False), TypeError, "Parameter 'expression' is not of type 'str'.",
+			 ["Got type 'int'."]),
+			(lambda: Branch(4, 0, "", 1, False), ValueError, "Parameter 'expression' is empty.", []),
+			(lambda: Branch(4, 0, "0", "-", False), TypeError, "Parameter 'taken' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Branch(4, 0, "0", -1, False), ValueError, "Parameter 'taken' is negative.", ["Got value '-1'."]),
+			(lambda: Branch(4, 0, "0", 1, None), ValueError, "Parameter 'isException' is None.", []),
+			(lambda: Branch(4, 0, "0", 1, "e"), TypeError, "Parameter 'isException' is not of type 'bool'.",
+			 ["Got type 'str'."])
+		))
+
+	def test_Condition_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: Condition(None, 2, True, 1, 0, "x"), ValueError, "Parameter 'lineNumber' is None.", []),
+			(lambda: Condition("7", 2, True, 1, 0, "x"), TypeError, "Parameter 'lineNumber' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(0, 2, True, 1, 0, "x"), ValueError, "Parameter 'lineNumber' is less than 1.",
+			 ["Got value '0'."]),
+			(lambda: Condition(7, None, True, 1, 0, "x"), ValueError, "Parameter 'groupSize' is None.", []),
+			(lambda: Condition(7, "2", True, 1, 0, "x"), TypeError, "Parameter 'groupSize' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(7, -2, True, 1, 0, "x"), ValueError, "Parameter 'groupSize' is negative.",
+			 ["Got value '-2'."]),
+			(lambda: Condition(7, 2, None, 1, 0, "x"), ValueError, "Parameter 'sense' is None.", []),
+			(lambda: Condition(7, 2, "t", 1, 0, "x"), TypeError, "Parameter 'sense' is not of type 'bool'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(7, 2, True, None, 0, "x"), ValueError, "Parameter 'taken' is None.", []),
+			(lambda: Condition(7, 2, True, "1", 0, "x"), TypeError, "Parameter 'taken' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(7, 2, True, -1, 0, "x"), ValueError, "Parameter 'taken' is negative.", ["Got value '-1'."]),
+			(lambda: Condition(7, 2, True, 1, None, "x"), ValueError, "Parameter 'index' is None.", []),
+			(lambda: Condition(7, 2, True, 1, "0", "x"), TypeError, "Parameter 'index' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(7, 2, True, 1, -1, "x"), ValueError, "Parameter 'index' is negative.", ["Got value '-1'."]),
+			(lambda: Condition(7, 2, True, 1, 0, None), ValueError, "Parameter 'expression' is None.", []),
+			(lambda: Condition(7, 2, True, 1, 0, 0), TypeError, "Parameter 'expression' is not of type 'str'.",
+			 ["Got type 'int'."]),
+			(lambda: Condition(7, 2, True, 1, 0, ""), ValueError, "Parameter 'expression' is empty.", [])
+		))
+
+	def test_Function_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: lcov_Function(None, 3, {"f": 1}), ValueError, "Parameter 'startLine' is None.", []),
+			(lambda: lcov_Function("1", 3, {"f": 1}), TypeError, "Parameter 'startLine' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: lcov_Function(0, 3, {"f": 1}), ValueError, "Parameter 'startLine' is less than 1.", ["Got value '0'."]),
+			(lambda: lcov_Function(1, "3", {"f": 1}), TypeError, "Parameter 'endLine' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: lcov_Function(1, 0, {"f": 1}), ValueError, "Parameter 'endLine' is less than 1.", ["Got value '0'."]),
+			(lambda: lcov_Function(1, 3, {"f": 1}, "0"), TypeError, "Parameter 'index' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: lcov_Function(1, 3, {"f": 1}, -1), ValueError, "Parameter 'index' is negative.", ["Got value '-1'."])
+		))
+
+	def test_Function_Aliases(self) -> None:
+		"""A function has a name: the aliases are required and not empty."""
+		self._AssertChecks((
+			(lambda: lcov_Function(1, 3, None), ValueError, "Parameter 'aliases' is None.", []),
+			(lambda: lcov_Function(1, 3, ["f"]), TypeError, "Parameter 'aliases' is not a mapping.", ["Got type 'list'."]),
+			(lambda: lcov_Function(1, 3, {}), ValueError, "Parameter 'aliases' is empty.", []),
+			(lambda: lcov_Function(1, 3, {1: 1}), TypeError, "Parameter 'aliases' contains a name not of type 'str'.",
+			 ["Got type 'int'."]),
+			(lambda: lcov_Function(1, 3, {"": 1}), ValueError, "Parameter 'aliases' contains an empty name.", []),
+			(lambda: lcov_Function(1, 3, {"f": "1"}), TypeError, "Parameter 'aliases' contains a count not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: lcov_Function(1, 3, {"f": -1}), ValueError, "Parameter 'aliases' contains a negative count.",
+			 ["Got value '-1'."])
+		))
+
+	def test_Section_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: Section(None, Path("a.c")), ValueError, "Parameter 'testName' is None.", []),
+			(lambda: Section(1, Path("a.c")), TypeError, "Parameter 'testName' is not of type 'str'.", ["Got type 'int'."]),
+			(lambda: Section("", None), ValueError, "Parameter 'sourceFile' is None.", []),
+			(lambda: Section("", "a.c"), TypeError, "Parameter 'sourceFile' is not of type 'Path'.", ["Got type 'str'."])
+		))
+
 
 class Conversion(Testcase):
 	"""The conversion to the common model: files, lines and branches, and source files and functions as units."""
+
+	def test_HandBuilt(self) -> None:
+		"""A model built by hand converts like a read one: a function is named by its first alias."""
+		tracefile = Document(Path("coverage.info"))
+		section = Section("", Path("a.c"), parent=tracefile)
+		lcov_Function(1, 3, {"f": 2, "g": 1}, parent=section)
+		Line(2, 3, parent=section)
+
+		summary = tracefile.ToCoverageSummary()
+
+		function = summary.Units["a.c"].Units["f"]
+		self.assertEqual((LineCoverageStatus.Covered, 3), (function.Status, function.CoverageCount))
+		self.assertEqual((1, 1), (summary.TotalLines, summary.CoveredLines))
 
 	def test_GHDL(self) -> None:
 		"""GHDL's function 'file' at line 1 spans no listed line."""
