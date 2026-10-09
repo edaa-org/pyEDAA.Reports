@@ -30,9 +30,9 @@
 #
 #
 """Unit tests of lcov's tracefile format: its model, its line parser and the conversion to the common model."""
-from collections.abc                          import Callable
 from pathlib                                  import Path
 from tempfile                                 import TemporaryDirectory
+from typing                                   import Callable
 
 from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
 from pyEDAA.Reports.CodeCoverage.LCOV         import RECORD_SYNTAX, Document

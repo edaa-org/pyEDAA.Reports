@@ -33,9 +33,8 @@ The records of lcov's tracefile format: a section, and its functions, lines, bra
 """
 from __future__                         import annotations
 
-from collections.abc                    import Mapping
 from pathlib                            import Path
-from typing                             import TYPE_CHECKING, Optional as Nullable
+from typing                             import TYPE_CHECKING, Mapping, Optional as Nullable
 
 from pyTooling.Common                   import getFullyQualifiedName
 from pyTooling.Decorators               import export, readonly
