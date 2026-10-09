@@ -564,6 +564,10 @@ lines - in format 2 with the IDs of the basic blocks of a line. An object statin
    for unit in summary.IterateUnits():
      print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
 
+The pipeline jobs ``Cpp-GoogleTest`` and ``Cpp-Catch2`` write gcov JSON for the examples in
+:file:`examples/Cpp/GoogleTest` and :file:`examples/Cpp/Catch2`, see :ref:`UNITTEST/Tool/GoogleTest`. A source file
+outside the directory the compiler ran in keeps its absolute path.
+
 
 .. _CODECOV/Formats/LCOV:
 

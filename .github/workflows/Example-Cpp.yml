@@ -46,20 +46,33 @@ jobs:
           cd examples/Cpp/GoogleTest
           ./build/unit_tests --gtest_output=xml:gtest.xml
 
+      - name: 📊 Collect code coverage of the direct run as gcov JSON
+        run: |
+          cd examples/Cpp/GoogleTest
+
+          ( cd build && gcov --json-format --branch-probabilities --stdout \
+            CMakeFiles/app.dir/src/Counter.cpp.gcda ) > Counter.cpp.gcov.json
+
       - name: ✅ Run unit tests (by ctest)
         run: |
           cd examples/Cpp/GoogleTest
           ctest --test-dir build/ --output-junit ../ctest.xml
 
-      - name: List generated XML reports
+      - name: List generated reports
         run: |
-          ls -lAh examples/Cpp/GoogleTest/*.xml
+          ls -lAh examples/Cpp/GoogleTest/*.xml examples/Cpp/GoogleTest/*.gcov.json
 
       - name: 📤 Upload JUnit XML files as artifact
         uses: pyTooling/upload-artifact@v7
         with:
           name: Cpp-GoogleTest
           path: examples/Cpp/GoogleTest/*.xml
+
+      - name: 📤 Upload code coverage file as artifact
+        uses: pyTooling/upload-artifact@v7
+        with:
+          name: Cpp-GoogleTest-Coverage
+          path: examples/Cpp/GoogleTest/Counter.cpp.gcov.json
 
   Cpp-Catch2:
     runs-on: ubuntu-26.04

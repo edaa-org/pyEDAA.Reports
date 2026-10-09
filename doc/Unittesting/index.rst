@@ -349,6 +349,10 @@ GoogleTest (gtest)
 
 * https://github.com/google/googletest
 
+The pipeline job ``Cpp-GoogleTest`` runs the tests in :file:`examples/Cpp/GoogleTest` directly and by CTest, writing
+GoogleTest's and CTest's JUnit XML reports. The library is compiled with ``--coverage``; gcov writes the
+:ref:`gcov JSON <CODECOV/Formats/Gcov>` report of the direct run.
+
 
 .. _UNITTEST/Tool/Gradle:
 
