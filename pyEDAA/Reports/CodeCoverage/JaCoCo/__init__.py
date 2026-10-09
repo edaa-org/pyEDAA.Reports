@@ -309,19 +309,20 @@ class Package(Base, CountersMixin, Generic[ParentType]):
 	@readonly
 	def Classes(self) -> dict[str, Class]:
 		"""
-		Read-only property to access the classes (:attr:`_classes`).
+		Read-only property to access the classes (:attr:`_classes`). A class is keyed by its name, e.g.
+		``my/pack/MyClass``, a nested class by its binary name, e.g. ``my/pack/MyClass$Inner``.
 
-		:returns: The classes, by name, e.g. ``my/pack/MyClass``; a nested class by its binary name, e.g.
-		          ``my/pack/MyClass$Inner``.
+		:returns: The classes, by name.
 		"""
 		return self._classes
 
 	@readonly
 	def SourceFiles(self) -> dict[str, SourceFile]:
 		"""
-		Read-only property to access the source files (:attr:`_sourceFiles`).
+		Read-only property to access the source files (:attr:`_sourceFiles`). A source file is keyed by its name, e.g.
+		``MyClass.java``.
 
-		:returns: The source files, by name, e.g. ``MyClass.java``.
+		:returns: The source files, by name.
 		"""
 		return self._sourceFiles
 
@@ -355,9 +356,9 @@ class Report(CountersMixin, mixin=True):
 	@readonly
 	def Name(self) -> Nullable[str]:
 		"""
-		Read-only property to access the name of the report (:attr:`_name`).
+		Read-only property to access the name of the report (:attr:`_name`), e.g. of the project measured.
 
-		:returns: The name, e.g. of the project measured; ``None`` before the report was converted.
+		:returns: The name; ``None`` before the report was converted.
 		"""
 		return self._name
 

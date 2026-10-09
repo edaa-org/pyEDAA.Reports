@@ -148,9 +148,10 @@ class Class(Base, CountersMixin):
 	@readonly
 	def Methods(self) -> dict[str, Method]:
 		"""
-		Read-only property to access the methods (:attr:`_methods`).
+		Read-only property to access the methods (:attr:`_methods`). A method is keyed by its name and descriptor, e.g.
+		``absolute(I)I``.
 
-		:returns: The methods, by name and descriptor, e.g. ``absolute(I)I``.
+		:returns: The methods, by name and descriptor.
 		"""
 		return self._methods
 

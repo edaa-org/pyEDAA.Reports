@@ -183,18 +183,20 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 	@readonly
 	def Version(self) -> Nullable[str]:
 		"""
-		Read-only property to access the version of the tool, which wrote the report (:attr:`_version`).
+		Read-only property to access the version of the tool, which wrote the report (:attr:`_version`), e.g.
+		``gcovr 8.4``.
 
-		:returns: The version, e.g. ``gcovr 8.4``, or ``None`` if the report doesn't state it.
+		:returns: The version, or ``None`` if the report doesn't state it.
 		"""
 		return self._version
 
 	@readonly
 	def Timestamp(self) -> Nullable[str]:
 		"""
-		Read-only property to access the time the report was written, as the report states it (:attr:`_timestamp`).
+		Read-only property to access the time the report was written, as the report states it (:attr:`_timestamp`), e.g.
+		in milliseconds or seconds since the epoch, depending on the tool.
 
-		:returns: The timestamp - e.g. milliseconds or seconds since the epoch, depending on the tool -, or ``None``.
+		:returns: The timestamp, or ``None``.
 		"""
 		return self._timestamp
 
