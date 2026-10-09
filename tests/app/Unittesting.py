@@ -85,8 +85,8 @@ class UnittestCommand(ApplicationTestcase):
 				self.assertExitCode(result)
 				self.assertTrue(outputFile.exists())
 
-	def test_FormatWithoutDialect(self) -> None:
-		"""A format token without '-': the message lists the formats the option accepts."""
+	def test_UnsupportedFormat(self) -> None:
+		"""A format the option doesn't accept: the message names the option's value and lists the formats it accepts."""
 		readFormats =  (
 			"Ant-JUnit, Any-JUnit, Catch2-JUnit, CTest-JUnit, GoJUnitReport-JUnit, gtest-JUnit, nextest-JUnit, pyTest-JUnit, "
 			"TestLogger-JUnit"
@@ -96,16 +96,19 @@ class UnittestCommand(ApplicationTestcase):
 			"TestLogger-JUnit"
 		)
 		outputFile =   OUTPUT_DIRECTORY / "dialect.xml"
-		for options, formats in (
-			((f"--input=pyTest:{REFERENCE_FILE}", ),                                      readFormats),
-			((f"--merge=pyTest:{REFERENCE_FILE}", ),                                      readFormats),
-			((f"--merge=pyTest-JUnit:{REFERENCE_FILE}", f"--output=pyTest:{outputFile}"), writeFormats)
+		merge = f"--merge=pyTest-JUnit:{REFERENCE_FILE}"
+		for options, message, formats in (
+			((f"--input=pyTest:{REFERENCE_FILE}", ),                f"input: 'pyTest:{REFERENCE_FILE}'",     readFormats),
+			((f"--merge=pyTest:{REFERENCE_FILE}", ),                f"input: 'pyTest:{REFERENCE_FILE}'",     readFormats),
+			((f"--merge={REFERENCE_FILE}", ),                       f"input: '{REFERENCE_FILE}'",            readFormats),
+			((merge, f"--output=pyTest:{outputFile}"),              f"output: 'pyTest:{outputFile}'",        writeFormats),
+			((merge, f"--output=Any-JUnit:{outputFile}"),           f"output: 'Any-JUnit:{outputFile}'",     writeFormats)
 		):
 			with self.subTest(options=options):
 				result = self.RunEntrypoint("unittest", *options, timeout=60.0)
 
 				self.assertNotIn(result.returncode, (0, 241))
-				self.assertIn("Unsupported unit testing report format: 'pyTest'", result.stdout)
+				self.assertIn(f"Unsupported unit testing report format for {message}.", result.stdout)
 				self.assertIn(f"Supported formats: {formats}.", result.stdout)
 
 	def test_UnwritableOutput(self) -> None:
