@@ -91,7 +91,7 @@ JUnit 5 XML
 ===========
 
 JUnit5 uses a new format called :ref:`UNITTEST/FileFormats/OTR` (see the following section for details). This format
-isn't specific to Java (packages, classes, methods, ...), but describes a generic data model. Of cause an extension for
+isn't specific to Java (packages, classes, methods, ...), but describes a generic data model. Of course an extension for
 Java specifics is provided too.
 
 The JUnit Platform writes this format only on request (``junit.platform.reporting.open.xml.enabled=true``). Build tools
@@ -105,10 +105,10 @@ Open Test Reporting
 ===================
 
 The `Open Test Alliance <https://github.com/ota4j-team>`__ created a new format called
-`Open Test Reporting <https://github.com/ota4j-team/open-test-reporting>`__ (OTR) to overcome the shortcommings of a
+`Open Test Reporting <https://github.com/ota4j-team/open-test-reporting>`__ (OTR) to overcome the shortcomings of a
 missing file format for JUnit5 as well as the problems of Ant + JUnit4.
 
-OTR defines a structure of test groups and tests, but no specifics of a certain programming languge. The logical
+OTR defines a structure of test groups and tests, but no specifics of a certain programming language. The logical
 structure of tests and test groups is decoupled from language specifics like namespaces, packages or classes hosting the
 individual tests.
 
