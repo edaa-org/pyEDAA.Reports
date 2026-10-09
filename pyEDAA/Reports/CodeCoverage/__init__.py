@@ -53,6 +53,8 @@ The report formats have models of their own, which convert to this one:
       |rarr| coverage.py's JSON format (``coverage json``).
    :mod:`pyEDAA.Reports.CodeCoverage.GHDL`
       |rarr| GHDL's JSON coverage file (``ghdl -r --coverage``).
+   :mod:`pyEDAA.Reports.CodeCoverage.UCIS`
+      |rarr| The XML interchange format of the Accellera UCIS standard, as written e.g. by pyucis (``pyucis convert``).
    :mod:`pyEDAA.Reports.CodeCoverage.Gcov`
       |rarr| GCC's gcov JSON format (``gcov --json-format``).
    :mod:`pyEDAA.Reports.CodeCoverage.LCOV`
