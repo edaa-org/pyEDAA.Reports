@@ -12,6 +12,8 @@ The schema has the structure of Cobertura's DTD ``coverage-04.dtd``, but accepts
 coverage.py's ``missing-branches`` - and requires only what a reader needs: a class' ``filename``, a line's
 ``number`` and ``hits``. :ref:`Cobertura-04.xsd <SCHEMAS/Cobertura-04>` is the DTD's strict translation, and
 :ref:`CoveragePy-Cobertura.xsd <SCHEMAS/CoveragePy-Cobertura>` describes coverage.py's dialect strictly.
+:ref:`NVC-Cobertura.xsd <SCHEMAS/NVC-Cobertura>` describes NVC's dialect, whose ``condition-coverage`` - e.g.
+``50 %`` - this schema rejects.
 
 .. grid:: 2
 

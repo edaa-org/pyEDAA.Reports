@@ -41,6 +41,9 @@ Available schemas
    * - :ref:`gcov JSON 2 <SCHEMAS/Gcov-2>`
      - :file:`Gcov-2.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.Gcov.Document`, format version 2
+   * - :ref:`NVC Cobertura <SCHEMAS/NVC-Cobertura>`
+     - :file:`NVC-Cobertura.xsd`
+     - :class:`pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura.Document`
    * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
      - :file:`Any-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.Document`
@@ -98,6 +101,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    GHDL-Coverage
    Gcov-1
    Gcov-2
+   NVC-Cobertura
    Any-JUnit
    Ant-JUnit4
    CTest-JUnit
