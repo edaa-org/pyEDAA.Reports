@@ -227,6 +227,15 @@ class Reader(Testcase):
 		with self.assertRaises(UnittestError):
 			_ = Document(Path("tests/data/pyTooling/missing.xml"), analyzeAndConvert=True)
 
+	def test_Unreadable(self) -> None:
+		"""A directory can't be read as a file."""
+		directory = Path("tests/data")
+		with self.assertRaises(UnittestError) as context:
+			_ = Document(directory, analyzeAndConvert=True)
+
+		self.assertEqual(f"Couldn't read pyTooling test report file '{directory}'.", str(context.exception))
+		self.assertIsInstance(context.exception.__cause__, OSError)
+
 	def test_SchemaVersionNotAnalyzed(self) -> None:
 		document = Document(self._reportFile)
 

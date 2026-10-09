@@ -452,6 +452,15 @@ class Document(py_TestCase):
 		self.assertGreater(doc.AnalysisDuration, zeroTime)
 		self.assertGreater(doc.ModelConversionDuration, zeroTime)
 
+	def test_Unreadable(self) -> None:
+		"""A directory can't be read as a file."""
+		directory = Path("tests/data")
+		with self.assertRaises(UnittestError) as context:
+			_ = JUnitDocument(directory, analyzeAndConvert=True)
+
+		self.assertEqual(f"Couldn't read JUnit XML file '{directory}'.", str(context.exception))
+		self.assertIsInstance(context.exception.__cause__, OSError)
+
 	def test_ReadWrite(self) -> None:
 		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
 		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)

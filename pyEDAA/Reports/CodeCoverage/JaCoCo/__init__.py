@@ -429,6 +429,7 @@ class Document(cc_Document, Report):
 		XML schema of that version (:data:`SCHEMAS`).
 
 		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file can't be read.
 		:raises CodeCoverageError: If the file isn't well-formed XML.
 		:raises CodeCoverageError: If the root element isn't ``<report>``.
 		:raises CodeCoverageError: If the file states no public identifier of a supported format version.
@@ -442,6 +443,8 @@ class Document(cc_Document, Report):
 		with Stopwatch() as sw:
 			try:
 				xmlDocument = parse(self._path, XMLParser(ns_clean=True))
+			except OSError as ex:
+				raise CodeCoverageError(f"Couldn't read JaCoCo report file '{self._path}'.") from ex
 			except XMLSyntaxError as ex:
 				raise CodeCoverageError(f"XML syntax error in JaCoCo report file '{self._path}'.") from ex
 

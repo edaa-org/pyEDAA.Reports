@@ -981,6 +981,8 @@ class Document(cc_Document, Report):
 		(:data:`SCHEMAS`).
 
 		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file can't be read.
+		:raises CodeCoverageError: If the file isn't UTF-8 encoded.
 		:raises CodeCoverageError: If the file isn't valid JSON.
 		:raises CodeCoverageError: If the file states no supported format version. |br|
 		                           The note lists the supported format versions.
@@ -993,7 +995,14 @@ class Document(cc_Document, Report):
 
 		with Stopwatch() as sw:
 			try:
-				jsonDocument = loads(self._path.read_text(encoding="utf-8"))
+				content = self._path.read_text(encoding="utf-8")
+			except OSError as ex:
+				raise CodeCoverageError(f"Couldn't read coverage.py report file '{self._path}'.") from ex
+			except UnicodeDecodeError as ex:
+				raise CodeCoverageError(f"coverage.py report file '{self._path}' is not UTF-8 encoded.") from ex
+
+			try:
+				jsonDocument = loads(content)
 			except JSONDecodeError as ex:
 				raise CodeCoverageError(f"JSON syntax error in coverage.py report file '{self._path}'.") from ex
 
@@ -1032,6 +1041,8 @@ class Document(cc_Document, Report):
 		:raises CodeCoverageError: If the JSON file was not analyzed before. |br|
 		                           Call 'Document.Analyze()' or create the document using
 		                           'Document(path, analyzeAndConvert=True)'.
+		:raises CodeCoverageError: If the coverage.py version isn't a semantic version.
+		:raises CodeCoverageError: If the timestamp isn't in ISO 8601 format.
 		:raises CodeCoverageError: If the report names a file's path twice.
 		"""
 		if self._jsonDocument is None:
@@ -1041,9 +1052,23 @@ class Document(cc_Document, Report):
 
 		with Stopwatch() as sw:
 			meta = self._jsonDocument["meta"]
+			try:
+				version = SemanticVersion.Parse(meta["version"])
+			except ValueError as cause:
+				ex = CodeCoverageError(f"coverage.py report file '{self._path}' states a malformed coverage.py version.")
+				ex.add_note(f"Got value '{meta['version']}' at '/meta/version'.")
+				raise ex from cause
+
+			try:
+				timestamp = datetime.fromisoformat(meta["timestamp"])
+			except ValueError as cause:
+				ex = CodeCoverageError(f"coverage.py report file '{self._path}' states a malformed timestamp.")
+				ex.add_note(f"Got value '{meta['timestamp']}' at '/meta/timestamp'.")
+				raise ex from cause
+
 			self._format =         FormatVersion(meta["format"])
-			self._version =        SemanticVersion.Parse(meta["version"])
-			self._timestamp =      datetime.fromisoformat(meta["timestamp"])
+			self._version =        version
+			self._timestamp =      timestamp
 			self._branchCoverage = meta["branch_coverage"]
 			self._hasContexts =    meta["show_contexts"]
 			self._totals =         Summary.Parse(self._jsonDocument["totals"])

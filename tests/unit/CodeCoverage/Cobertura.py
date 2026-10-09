@@ -271,6 +271,14 @@ class Schemas(Testcase):
 
 		self.assertEqual(f"Cobertura report file '{DATA / 'missing.xml'}' does not exist.", str(context.exception))
 
+	def test_Unreadable(self) -> None:
+		"""A directory can't be read as a file."""
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = Document(DATA, analyzeAndConvert=True)
+
+		self.assertEqual(f"Couldn't read Cobertura report file '{DATA}'.", str(context.exception))
+		self.assertIsInstance(context.exception.__cause__, OSError)
+
 	def test_NotAnalyzed(self) -> None:
 		with self.assertRaises(CodeCoverageError):
 			Document(DATA / "VHDL" / "Cobertura.xml").Convert()

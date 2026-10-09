@@ -172,6 +172,7 @@ class Document(cob_Document):
 		Parse the XML file and validate it against the strict XML schema :data:`READ_SCHEMA`.
 
 		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file can't be read.
 		:raises CodeCoverageError: If the file isn't well-formed XML.
 		:raises CodeCoverageError: If the root element isn't ``<coverage>``.
 		:raises CodeCoverageError: If the XML schema can't be located or parsed.

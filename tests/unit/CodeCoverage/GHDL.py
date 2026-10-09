@@ -402,6 +402,24 @@ class Schema(Testcase):
 
 		self.assertEqual(f"GHDL coverage file '{DATA / 'missing.json'}' does not exist.", str(context.exception))
 
+	def test_Unreadable(self) -> None:
+		"""A directory can't be read as a file."""
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = Document(DATA, analyzeAndConvert=True)
+
+		self.assertEqual(f"Couldn't read GHDL coverage file '{DATA}'.", str(context.exception))
+		self.assertIsInstance(context.exception.__cause__, OSError)
+
+	def test_Encoding(self) -> None:
+		with TemporaryDirectory() as directory:
+			jsonFile = Path(directory) / "coverage.json"
+			jsonFile.write_bytes(b'{"\xff": 1}')
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(f"GHDL coverage file '{jsonFile}' is not UTF-8 encoded.", str(context.exception))
+
 	def test_NotAnalyzed(self) -> None:
 		with self.assertRaises(CodeCoverageError):
 			Document(COUNT).Convert()
@@ -436,3 +454,15 @@ class Consistency(Testcase):
 			f"GHDL coverage file '{jsonFile}' names a line of 'tb/Counter_tb.vhdl' beyond 'max-line'.", str(context.exception)
 		)
 		self.assertEqual(["Got line 66 for 'max-line' 60."], context.exception.__notes__)
+
+	def test_Timestamp(self) -> None:
+		content = loads(COUNT.read_text(encoding="utf-8"))
+		content["timestamp"] = "20261399999999.000"
+		with TemporaryDirectory() as directory:
+			jsonFile = _write(directory, content)
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(f"GHDL coverage file '{jsonFile}' states a malformed timestamp.", str(context.exception))
+		self.assertEqual(["Got value '20261399999999.000' at '/timestamp'."], context.exception.__notes__)

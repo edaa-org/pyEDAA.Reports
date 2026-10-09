@@ -335,6 +335,8 @@ class Document(cc_Document, Report):
 		Parse the JSON file, read its format version and validate it against the version's JSON Schema in :data:`SCHEMAS`.
 
 		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file can't be read.
+		:raises CodeCoverageError: If the file isn't UTF-8 encoded.
 		:raises CodeCoverageError: If the file isn't valid JSON.
 		:raises CodeCoverageError: If the file states no format version. |br|
 		                           The note lists the supported format versions.
@@ -349,7 +351,14 @@ class Document(cc_Document, Report):
 
 		with Stopwatch() as sw:
 			try:
-				jsonDocument = loads(self._path.read_text(encoding="utf-8"))
+				content = self._path.read_text(encoding="utf-8")
+			except OSError as ex:
+				raise CodeCoverageError(f"Couldn't read GHDL coverage file '{self._path}'.") from ex
+			except UnicodeDecodeError as ex:
+				raise CodeCoverageError(f"GHDL coverage file '{self._path}' is not UTF-8 encoded.") from ex
+
+			try:
+				jsonDocument = loads(content)
 			except JSONDecodeError as ex:
 				raise CodeCoverageError(f"JSON syntax error in GHDL coverage file '{self._path}'.") from ex
 
@@ -390,6 +399,7 @@ class Document(cc_Document, Report):
 		:raises CodeCoverageError: If the JSON file was not analyzed before. |br|
 		                           Call 'Document.Analyze()' or create the document using
 		                           'Document(path, analyzeAndConvert=True)'.
+		:raises CodeCoverageError: If the timestamp isn't a valid date and time.
 		:raises CodeCoverageError: If the JSON file names a source file twice.
 		:raises CodeCoverageError: If a source file's result names a line beyond its ``max-line``.
 		"""
@@ -399,7 +409,12 @@ class Document(cc_Document, Report):
 			raise ex
 
 		with Stopwatch() as sw:
-			timestamp = datetime.strptime(self._jsonDocument["timestamp"], "%Y%m%d%H%M%S.%f")
+			try:
+				timestamp = datetime.strptime(self._jsonDocument["timestamp"], "%Y%m%d%H%M%S.%f")
+			except ValueError as cause:
+				ex = CodeCoverageError(f"GHDL coverage file '{self._path}' states a malformed timestamp.")
+				ex.add_note(f"Got value '{self._jsonDocument['timestamp']}' at '/timestamp'.")
+				raise ex from cause
 
 			self._version =   FormatVersion.Parse(self._jsonDocument["version"])
 			self._testcase =  self._jsonDocument["testcase"]
