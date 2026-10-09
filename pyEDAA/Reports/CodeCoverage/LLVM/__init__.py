@@ -279,7 +279,7 @@ class Function(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Report(metaclass=ExtendedType, slots=True):
+class Report(metaclass=ExtendedType, mixin=True):
 	"""
 	The report's root: the format version, the files, the functions, and the totals.
 	"""
@@ -336,7 +336,7 @@ class Report(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Document(Report, cc_Document):
+class Document(cc_Document, Report):
 	"""
 	An LLVM JSON code coverage export: read into the format's model, and converted to the common model.
 	"""
@@ -350,11 +350,14 @@ class Document(Report, cc_Document):
 		:param jsonReportFile:    Path to the JSON file.
 		:param analyzeAndConvert: Optional, if true, analyze the file and convert its content. Default: ``False``.
 		"""
-		super().__init__()
+		super().__init__(jsonReportFile)
+		Report.__init__(self)
 
 		self._jsonDocument = None
 
-		cc_Document.__init__(self, jsonReportFile, analyzeAndConvert)
+		if analyzeAndConvert:
+			self.Analyze()
+			self.Convert()
 
 	def Analyze(self) -> None:
 		"""
