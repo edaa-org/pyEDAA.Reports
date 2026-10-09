@@ -372,10 +372,9 @@ class ObjectAttributesMixin(metaclass=ExtendedType, mixin=True):
 @export
 class StatementID(metaclass=ExtendedType, slots=True):
 	"""
-	A source statement identifier, e.g. an ``<id>``: the source file, the line and the index of the statement in the
-	line.
+	A source statement identifier: the source file, the line and the index of the statement in the line.
 
-	It is a value, as a path is: it names no parent.
+	It is stated e.g. by an ``<id>`` element. It is a value, as a path is: it names no parent.
 	"""
 
 	_fileID:      int  #: ID of the source file.
@@ -422,7 +421,9 @@ class StatementID(metaclass=ExtendedType, slots=True):
 	@classmethod
 	def Parse(cls, element: _Element) -> Self:
 		"""
-		Parse a source statement identifier from its element, e.g. ``<id>``.
+		Parse a source statement identifier from its element.
+
+		The element is e.g. an ``<id>``.
 
 		:param element: The identifier's element.
 		:returns:       The source statement identifier.
@@ -458,7 +459,9 @@ class StatementID(metaclass=ExtendedType, slots=True):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the identifier for debugging, e.g. ``<StatementID 1:12:1>``.
+		Return a representation of the identifier for debugging.
+
+		The first statement in line 12 of file 1 reads ``<StatementID 1:12:1>``.
 
 		:returns: The file ID, the line number and the index in the line.
 		"""
@@ -469,9 +472,9 @@ class StatementID(metaclass=ExtendedType, slots=True):
 @abstractclass
 class MetricCoverage(Base):
 	"""
-	Base-class of the coverage of one kind of an instance, e.g. a ``<blockCoverage>``: its metric mode and weight.
+	Base-class of the coverage of one kind of an instance: its metric mode and weight.
 
-	An instance states a kind's coverage once per metric mode.
+	A ``<blockCoverage>`` is such a coverage. An instance states a kind's coverage once per metric mode.
 	"""
 
 	_parent:     Nullable[InstanceCoverage]  #: The instance the coverage belongs to.
