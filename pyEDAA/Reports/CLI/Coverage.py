@@ -54,6 +54,9 @@ from pyEDAA.Reports.CodeCoverage.GHDL                            import Document
 from pyEDAA.Reports.CodeCoverage.LCOV                            import Document as LCOVDocument
 
 
+__all__ = ["INPUT_FORMATS"]
+
+
 @export
 class InputFormat(StringEnum):
 	"""The code coverage formats ``--input`` reads, by their name on the command line."""
