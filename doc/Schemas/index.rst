@@ -41,6 +41,12 @@ Available schemas
    * - :ref:`GHDL coverage 1.0.0 <SCHEMAS/GHDL-Coverage-1.0.0>`
      - :file:`GHDL-Coverage-1.0.0.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.GHDL.Document`
+   * - :ref:`UCIS 1.0 <SCHEMAS/UCIS-1.0>`
+     - :file:`UCIS-1.0.xsd`
+     - :class:`pyEDAA.Reports.CodeCoverage.UCIS.Document`, UCIS version 1.0
+   * - :ref:`pyucis UCIS 1.0 <SCHEMAS/PyUCIS-1.0>`
+     - :file:`PyUCIS-1.0.xsd`
+     - :class:`pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS.Document`, UCIS version 1.0
    * - :ref:`gcov JSON 1 <SCHEMAS/Gcov-1>`
      - :file:`Gcov-1.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.Gcov.Document`, format version 1
@@ -120,6 +126,8 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    CoveragePy-2
    CoveragePy-3
    GHDL-Coverage-1.0.0
+   UCIS-1.0
+   PyUCIS-1.0
    Gcov-1
    Gcov-2
    JaCoCo-1.1

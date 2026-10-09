@@ -215,11 +215,21 @@ binary format of their own, which only the tool itself or its API reads.
      - —
      - —
      - ACDB
-   * - Siemens QuestaSim
-     - UCIS XML (`Accellera UCIS <https://www.accellera.org/downloads/standards/ucis>`__)
+   * - `Siemens <https://eda.sw.siemens.com/>`__ QuestaSim (VHDL, Verilog, SystemVerilog)
+     - an XML report of its own (``vcover report -xml``)
+     - —
+     - ``vcover report``
+     - UCDB (read via the UCDB or UCIS C API)
+   * - `pyucis <https://github.com/fvutils/pyucis>`__, PyVSC (Python)
+     - UCIS XML without namespace (``pyucis convert``)
      - —
      - —
-     - UCDB (read via the UCIS API)
+     - — (reads UCIS XML, UCDB via a tool's UCIS library)
+   * - `FC4SC <https://github.com/accellera-official/fc4sc>`__ (SystemC)
+     - UCIS XML
+     - —
+     - —
+     - —
 
 pyEDAA.Reports reads these formats:
 
@@ -229,6 +239,7 @@ pyEDAA.Reports reads these formats:
 * :ref:`GHDL's coverage JSON <CODECOV/Formats/GHDL>`
 * :ref:`gcov's JSON <CODECOV/Formats/Gcov>`
 * :ref:`lcov's tracefile <CODECOV/Formats/LCOV>`
+* :ref:`UCIS XML <CODECOV/Formats/UCIS>`, and the dialect of :ref:`pyucis <CODECOV/Formats/UCIS/PyUCIS>`
 * :ref:`JaCoCo XML <CODECOV/Formats/JaCoCo>`
 
 The Go cover profile, OpenCover XML and coverlet's JSON are described below, but not read yet.
@@ -647,6 +658,102 @@ The tools write different parts of the format:
    * - GHDL 7.0
      - ``TN`` only before the first section. Each file as one function ``file`` at line 1. No summaries. Lines of a
        subprogram, which was never called, aren't listed.
+
+
+.. _CODECOV/Formats/UCIS:
+
+UCIS XML
+========
+
+The `Unified Coverage Interoperability Standard (UCIS) <https://www.accellera.org/downloads/standards/ucis>`__ 1.0 of
+Accellera (June 2012) specifies the data model of a coverage database, a C API to it, and an XML interchange format.
+An XML report names the namespace ``UCIS`` and its root ``<UCIS>``, which states the UCIS version - ``ucisVersion`` -,
+the tool, which wrote it, and when. :class:`pyEDAA.Reports.CodeCoverage.UCIS.Document` checks the root element,
+validates the report against the XML schema of its UCIS version - :ref:`UCIS-1.0.xsd <SCHEMAS/UCIS-1.0>`, the schema
+the standard specifies - and reads it into the format's model:
+
+* the source files, by the ID statement identifiers name them by,
+* the history nodes - the tests and merges -, by their ID, with the tool, the date and how the test ran,
+* the instances, where they are instantiated, their design unit, the instance they are instantiated in, their design
+  parameters,
+* each instance's statement and block coverage - statements, blocks, nested blocks, processes - and branch coverage -
+  branching statements, their branches, the branching statements nested in a branch -, once per metric mode,
+* each coverage item's bin: how often it was covered, the tests, which covered it, whether it is excluded, its goal,
+* and every element's user-defined attributes.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.UCIS.Document.ToCoverageSummary` converts the statement and branch coverage to the
+common model:
+
+* The statements are the statements of the block coverages, and the statements of their blocks, which ran as often as
+  their block - a block without statements counts for its own line. A statement is identified by its file, its line and
+  its index in the line. With ``mergeInstances=True``, the statements of all instances are merged: a statement ran as
+  often as in all instances together. Otherwise each instance's statement counts on its own.
+* A file's path is the one its source file states; a source file without coverage becomes no file. The directories
+  the tests ran in are the summary's source directories. The summary is named after the report file.
+* A line ran as often as its least often run statement: it is covered, if all its statements ran, otherwise uncovered.
+  A line, whose statements are all excluded, is excluded; an excluded statement doesn't count for its line.
+* A branching statement's branches become branches of its line - with ``mergeInstances=True`` summed per branch over
+  the instances. A line, which ran without taking all its branches, is partially covered. A branch goes to the line of
+  its first statement, if the report lists that line. A line with a branching statement, but no statement, ran as often
+  as its branches were taken.
+* A design unit - an instance's ``moduleName`` - becomes a :class:`~pyEDAA.Reports.CodeCoverage.Module`, spanning
+  the lines of its instances' statements and branching statements from the first to the last one, if they are in one
+  file.
+
+What the conversion leaves out: the instance hierarchy, the history nodes, the bins' goals and weights, the metric modes
+and the user-defined attributes. An excluded branch or branching statement isn't converted. The toggle, condition,
+expression, FSM, assertion and covergroup coverage is validated, but not read yet.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.UCIS import Document
+
+   report = Document(Path("coverage.xml"), analyzeAndConvert=True)
+   summary = report.ToCoverageSummary(mergeInstances=True)
+   for file in summary.IterateFiles():
+     print(f"{file.Path}: {file.LineCoverage:.1%}")
+
+   for instance in report.Instances:
+     print(f"{instance.Name}: {instance.ModuleName}")
+
+.. hint::
+
+   Which tools write the UCIS XML interchange format:
+
+   * Siemens QuestaSim documents no command writing it - neither in the command reference of Questa SIM 2024.2 nor of
+     2025.2. Questa supports the UCIS by a C library implementing its API; its XML report (``vcover report -xml``) is a
+     format of its own.
+   * Aldec's ``acdb2xml`` writes a dump of the UCIS data model in a format of its own (namespace ``www.aldec.com``,
+     root ``<ux:ucdb>``), not the interchange format.
+   * pyucis - and PyVSC, which writes its coverage with pyucis - write the interchange format with the elements in no
+     namespace: :ref:`CODECOV/Formats/UCIS/PyUCIS`.
+   * FC4SC writes covergroups in the interchange format, in namespace ``UCIS`` since 2020; before, in the XML Schema
+     instance namespace.
+
+   The standard's chapter on the XML format contradicts its own schema in several examples - e.g. ``branchStatement``
+   for ``statement``, ``exprBin`` for ``bin``, a ``coverpointBin`` with ``name`` and ``key`` -, which look like
+   leftovers of a draft. The reader follows the schema.
+
+.. _CODECOV/Formats/UCIS/PyUCIS:
+
+pyucis UCIS XML
+---------------
+
+`pyucis <https://github.com/fvutils/pyucis>`__ writes UCIS XML - e.g. with ``pyucis convert``, or for PyVSC's
+``vsc.write_coverage_db("coverage.xml")`` -, whose root binds the prefix ``ucis`` to the XML Schema instance
+namespace, but whose elements are in no namespace. :class:`pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS.Document` validates
+a report against :ref:`PyUCIS-1.0.xsd <SCHEMAS/PyUCIS-1.0>` - the standard's schema without a target namespace - and
+reads and converts it as the standard's format. pyucis names a source file ``__null__file__`` with ID ``1`` for the
+statement identifiers, which name no file; it has no coverage, so it becomes no file.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS import Document
+
+   report = Document(Path("coverage.xml"), analyzeAndConvert=True)
+   summary = report.ToCoverageSummary()
 
 
 .. _CODECOV/Formats/JaCoCo:
