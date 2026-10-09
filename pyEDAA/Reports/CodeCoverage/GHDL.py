@@ -275,7 +275,9 @@ class File(Generic[ParentType], metaclass=ExtendedType, slots=True):
 	@readonly
 	def Name(self) -> Path:
 		"""
-		Read-only property to access the file's name, as given to the analysis (:attr:`_name`), e.g. ``src/Counter.vhdl``.
+		Read-only property to access the file's name, as given to the analysis (:attr:`_name`).
+
+		A file analyzed as ``ghdl -a src/Counter.vhdl`` is named ``src/Counter.vhdl``.
 
 		:returns: The name.
 		"""
@@ -311,7 +313,9 @@ class File(Generic[ParentType], metaclass=ExtendedType, slots=True):
 	@readonly
 	def Mode(self) -> CoverageMode:
 		"""
-		Read-only property to access the kind of coverage (:attr:`_mode`), e.g. :attr:`CoverageMode.Statement`.
+		Read-only property to access the kind of coverage (:attr:`_mode`).
+
+		GHDL writes only statement coverage (:attr:`CoverageMode.Statement`).
 
 		:returns: The kind of coverage.
 		"""

@@ -79,7 +79,9 @@ class Condition(metaclass=ExtendedType, slots=True):
 	@readonly
 	def Type(self) -> str:
 		"""
-		Read-only property to access the kind of condition (:attr:`_type`), e.g. ``jump``.
+		Read-only property to access the kind of condition (:attr:`_type`).
+
+		The kind is stated as the report states it, e.g. ``jump``.
 
 		:returns: The kind.
 		"""
@@ -88,7 +90,9 @@ class Condition(metaclass=ExtendedType, slots=True):
 	@readonly
 	def Coverage(self) -> str:
 		"""
-		Read-only property to access the coverage of the condition (:attr:`_coverage`), e.g. ``50%``.
+		Read-only property to access the coverage of the condition (:attr:`_coverage`).
+
+		The coverage is stated as the report states it, e.g. ``50%``.
 
 		:returns: The coverage.
 		"""
@@ -172,7 +176,9 @@ class Line(metaclass=ExtendedType, slots=True):
 	@readonly
 	def ConditionCoverage(self) -> Nullable[tuple[int, int]]:
 		"""
-		Read-only property to access the line's taken and all branches (:attr:`_conditionCoverage`), e.g. ``(1, 2)``.
+		Read-only property to access the line's taken and all branches (:attr:`_conditionCoverage`).
+
+		A line with one of two branches taken has ``(1, 2)``.
 
 		:returns: The taken and all branches; ``None`` if the line doesn't state them.
 		"""

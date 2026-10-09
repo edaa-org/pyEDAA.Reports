@@ -470,8 +470,9 @@ class BaseWithPath(Base, CoverageCountersMixin):
 	@readonly
 	def Path(self) -> Path:
 		"""
-		Read-only property to return the path below the root: the names of the parent directories and the own name, e.g.
-		``src/Counter.vhdl``.
+		Read-only property to return the path below the root: the names of the parent directories and the own name.
+
+		A file ``Counter.vhdl`` in a directory ``src`` has the path ``src/Counter.vhdl``.
 
 		:returns: The path; the name, if there is no parent.
 		"""
@@ -927,7 +928,9 @@ class File(BaseWithPath):
 	@readonly
 	def Units(self) -> list[Unit]:
 		"""
-		Read-only property to access the units naming this file (:attr:`_units`), e.g. a module, its classes and functions.
+		Read-only property to access the units naming this file (:attr:`_units`).
+
+		A Python file is named by its module, its classes and its functions.
 
 		:returns: The units.
 		"""
@@ -1342,7 +1345,9 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 	@readonly
 	def QualifiedName(self) -> str:
 		"""
-		Read-only property to return the names of the units from the top down to this one, joined by ``.``, e.g.
+		Read-only property to return the names of the units from the top down to this one, joined by ``.``.
+
+		A method ``Area`` of a class ``Circle`` in a module ``myPackage.Shapes`` has the qualified name
 		``myPackage.Shapes.Circle.Area``.
 
 		:returns: The qualified name.

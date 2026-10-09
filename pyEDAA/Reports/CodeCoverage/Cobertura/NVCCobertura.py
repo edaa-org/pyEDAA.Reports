@@ -145,7 +145,9 @@ class Class(cob_Class):
 	@readonly
 	def Entity(self) -> str:
 		"""
-		Read-only property to access the name of the design unit's entity (:attr:`_entity`), e.g. ``COUNTER``.
+		Read-only property to access the name of the design unit's entity (:attr:`_entity`).
+
+		NVC writes it in upper case, e.g. ``COUNTER``.
 
 		:returns: The entity's name.
 		"""
@@ -154,7 +156,9 @@ class Class(cob_Class):
 	@readonly
 	def Architecture(self) -> str:
 		"""
-		Read-only property to access the name of the design unit's architecture (:attr:`_architecture`), e.g. ``RTL``.
+		Read-only property to access the name of the design unit's architecture (:attr:`_architecture`).
+
+		NVC writes it in upper case, e.g. ``RTL``.
 
 		:returns: The architecture's name.
 		"""
