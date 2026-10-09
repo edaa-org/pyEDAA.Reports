@@ -598,7 +598,7 @@ class DocStrCoverage(metaclass=ExtendedType):
 
 		self._searchDirectory = directory
 		self._packageName = packageName
-		self._moduleFiles = [file for file in directory.glob("**/*.py")]
+		self._moduleFiles = list(directory.glob("**/*.py"))
 
 	@readonly
 	def SearchDirectories(self) -> Path:
