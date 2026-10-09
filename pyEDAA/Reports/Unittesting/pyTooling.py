@@ -167,7 +167,8 @@ class Document(TestsuiteSummary, ut_Document):
 
 		with Stopwatch() as sw:
 			try:
-				xmlDocument = parse(self._path, XMLParser(ns_clean=True))
+				with self._path.open("rb") as file:
+					xmlDocument = parse(file, XMLParser(ns_clean=True))
 			except OSError as ex:
 				raise UnittestError(f"Couldn't read pyTooling test report file '{self._path}'.") from ex
 			except XMLSyntaxError as ex:
