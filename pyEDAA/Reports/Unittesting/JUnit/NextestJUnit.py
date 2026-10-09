@@ -390,10 +390,11 @@ class Document(ju_Document):
 			ex.add_note(f"Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.")
 			raise ex
 
+		content = tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True)
 		try:
 			with path.open("wb") as file:
-				file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
-		except Exception as ex:
+				file.write(content)
+		except OSError as ex:
 			raise UnittestError(f"JUnit XML file '{path}' can not be written.") from ex
 
 	def Convert(self) -> None:
