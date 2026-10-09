@@ -46,6 +46,18 @@ class Analyze(TestCase):
 		self.assertEqual(CoverageState.Unknown, coverage.Status)
 		self.assertGreaterEqual(coverage.AggregatedCoverage, 0.10)
 
+	def test_PackageCode_Aggregation(self) -> None:
+		docStrCov = DocStrCoverage("pyEDAA.Reports", Path("pyEDAA/Reports"))
+		docStrCov.Analyze()
+		coverage = docStrCov.Convert()
+		coverage.Aggregate()
+
+		fileCounts = [result.count_aggregate() for _, result in docStrCov.CoverageReport.files()]
+
+		self.assertEqual(sum(fileCount.needed for fileCount in fileCounts), coverage.AggregatedExpected)
+		self.assertEqual(sum(fileCount.found for fileCount in fileCounts), coverage.AggregatedCovered)
+		self.assertEqual(sum(fileCount.missing for fileCount in fileCounts), coverage.AggregatedUncovered)
+
 	def test_Undocumented(self) -> None:
 		packageName = "MyPackage"
 		packageDirectory = Path(f"tests/packages/undocumented")
