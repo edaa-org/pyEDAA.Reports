@@ -555,21 +555,21 @@ class PackageCoverage(Package, AggregatedCoverage):
 		for pkg in self._packages.values():
 			pkg.Aggregate()
 			self._fileCount +=           pkg._fileCount
-			self._aggregatedTotal +=     pkg._total
-			self._aggregatedExcluded +=  pkg._excluded
-			self._aggregatedIgnored +=   pkg._ignored
-			self._aggregatedExpected +=  pkg._expected
-			self._aggregatedCovered +=   pkg._covered
-			self._aggregatedUncovered += pkg._uncovered
+			self._aggregatedTotal +=     pkg._aggregatedTotal
+			self._aggregatedExcluded +=  pkg._aggregatedExcluded
+			self._aggregatedIgnored +=   pkg._aggregatedIgnored
+			self._aggregatedExpected +=  pkg._aggregatedExpected
+			self._aggregatedCovered +=   pkg._aggregatedCovered
+			self._aggregatedUncovered += pkg._aggregatedUncovered
 
 		for mod in self._modules.values():
 			mod.Aggregate()
-			self._aggregatedTotal +=     mod._total
-			self._aggregatedExcluded +=  mod._excluded
-			self._aggregatedIgnored +=   mod._ignored
-			self._aggregatedExpected +=  mod._expected
-			self._aggregatedCovered +=   mod._covered
-			self._aggregatedUncovered += mod._uncovered
+			self._aggregatedTotal +=     mod._aggregatedTotal
+			self._aggregatedExcluded +=  mod._aggregatedExcluded
+			self._aggregatedIgnored +=   mod._aggregatedIgnored
+			self._aggregatedExpected +=  mod._aggregatedExpected
+			self._aggregatedCovered +=   mod._aggregatedCovered
+			self._aggregatedUncovered += mod._aggregatedUncovered
 
 		super().Aggregate()
 

@@ -146,3 +146,33 @@ class Counting(Testcase):
 			cc.CalculateCoverage()
 
 		self.assertEqual("Element has coverage state 'Unknown', so it can't be counted.", str(context.exception))
+
+
+class Aggregation(Testcase):
+	def test_PackageCoverage_ThreeLevels(self) -> None:
+		root =   PackageCoverage("root", Path("root/__init__.py"))
+		sub =    PackageCoverage("sub", Path("root/sub/__init__.py"), parent=root)
+		subsub = PackageCoverage("subsub", Path("root/sub/subsub/__init__.py"), parent=sub)
+		mc =     ModuleCoverage("module", Path("root/sub/subsub/module.py"), parent=subsub)
+		cc =     ClassCoverage("class", parent=mc)
+		root.Variables["variable1"] = CoverageState.Covered
+		mc.Functions["function1"] =   CoverageState.Covered
+		mc.Functions["function2"] =   CoverageState.Undocumented
+		cc.Methods["method1"] =       CoverageState.Covered
+		cc.Methods["method2"] =       CoverageState.Excluded
+
+		root.CalculateCoverage()
+		root.Aggregate()
+
+		self.assertEqual(4, sub.AggregatedTotal)
+		self.assertEqual(1, sub.AggregatedExcluded)
+		self.assertEqual(3, sub.AggregatedExpected)
+
+		self.assertEqual(4, root.FileCount)
+		self.assertEqual(5, root.AggregatedTotal)
+		self.assertEqual(1, root.AggregatedExcluded)
+		self.assertEqual(0, root.AggregatedIgnored)
+		self.assertEqual(4, root.AggregatedExpected)
+		self.assertEqual(3, root.AggregatedCovered)
+		self.assertEqual(1, root.AggregatedUncovered)
+		self.assertEqual(0.75, root.AggregatedCoverage)
