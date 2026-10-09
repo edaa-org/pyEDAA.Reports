@@ -367,8 +367,8 @@ CTest JUnit
    .. grid-item::
       :columns: 6
 
-      The CTest JUnit format written by `CTest <https://github.com/bvdberg/ctest>`__ uses ``<testsuite>`` as a root
-      element.
+      The CTest JUnit format written by CMake's `CTest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`__
+      (``ctest --output-junit``) uses ``<testsuite>`` as a root element.
 
       A report is validated against :ref:`CTest-JUnit.xsd <SCHEMAS/CTest-JUnit>`.
 

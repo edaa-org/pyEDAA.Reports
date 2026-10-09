@@ -273,7 +273,7 @@ lcov tracefile (``lcov --capture``).
 CTest
 =====
 
-* https://github.com/bvdberg/ctest
+* https://cmake.org/cmake/help/latest/manual/ctest.1.html
 
 
 .. _UNITTEST/Tool/DotNetTest:
