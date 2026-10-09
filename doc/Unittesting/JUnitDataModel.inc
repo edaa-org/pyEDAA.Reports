@@ -162,6 +162,8 @@ Any JUnit
       The Any JUnit format uses a relaxed XML schema definition aiming to parse many JUnit XML dialects, which use a
       ``<testsuites>`` root element.
 
+      A report is validated against :ref:`Any-JUnit.xsd <SCHEMAS/Any-JUnit>`.
+
    .. grid-item::
       :columns: 6
 
@@ -220,6 +222,8 @@ Ant + JUnit4
 
       The original JUnit format created by `Ant <https://github.com/apache/ant>`__ for `JUnit4 <https://github.com/junit-team/junit4>`__
       uses ``<testsuite>`` as a root element.
+
+      A report is validated against :ref:`Ant-JUnit4.xsd <SCHEMAS/Ant-JUnit4>`.
 
       :ref:`Gradle <UNITTEST/Tool/Gradle>` writes this format too, when it runs JUnit4 tests.
 
@@ -283,6 +287,8 @@ Catch2 JUnit
       The Catch2 JUnit format written by the JUnit reporter of `Catch2 <https://github.com/catchorg/Catch2>`__
       (version 3) uses ``<testsuites>`` as a root element. It holds exactly one ``<testsuite>``, named after the test
       executable.
+
+      A report is validated against :ref:`Catch2-JUnit.xsd <SCHEMAS/Catch2-JUnit>`.
 
       * Each test case and each path of nested sections is a ``<testcase>``, named by its section path
         (``TestCase/Section/Subsection``). A test case or section containing sections is a ``<testcase>`` of its own.
@@ -363,6 +369,8 @@ CTest JUnit
 
       The CTest JUnit format written by `CTest <https://github.com/bvdberg/ctest>`__ uses ``<testsuite>`` as a root
       element.
+
+      A report is validated against :ref:`CTest-JUnit.xsd <SCHEMAS/CTest-JUnit>`.
 
    .. grid-item::
       :columns: 6
@@ -515,6 +523,8 @@ GoogleTest JUnit
       The GoogleTest JUnit format written by `GoogleTest <https://github.com/google/googletest>`__ (sometimes GTest)
       uses ``<testsuites>`` as a root element.
 
+      A report is validated against :ref:`GoogleTest-JUnit.xsd <SCHEMAS/GoogleTest-JUnit>`.
+
    .. grid-item::
       :columns: 6
 
@@ -574,6 +584,8 @@ cargo-nextest JUnit
       The JUnit format written by `cargo-nextest <https://github.com/nextest-rs/nextest>`__, the test runner for Rust,
       uses ``<testsuites>`` as a root element. nextest serializes it with the crate
       `quick-junit <https://github.com/nextest-rs/quick-junit>`__.
+
+      A report is validated against :ref:`Nextest-JUnit.xsd <SCHEMAS/Nextest-JUnit>`.
 
       .. rubric:: Mapping to the data model
 
@@ -671,6 +683,8 @@ pyTest JUnit
 
       The pyTest JUnit format written by `pyTest <https://github.com/pytest-dev/pytest>`__ uses ``<testsuites>`` as a
       root element.
+
+      A report is validated against :ref:`PyTest-JUnit.xsd <SCHEMAS/PyTest-JUnit>`.
 
    .. grid-item::
       :columns: 6

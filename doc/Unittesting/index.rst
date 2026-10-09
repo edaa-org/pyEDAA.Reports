@@ -145,7 +145,8 @@ can carry a title, a summary and a description besides its name. The format is d
 part of the schema's file name (e.g. ``TestReport-v0.1.xsd``), which every report names in its
 ``xsi:noNamespaceSchemaLocation`` attribute.
 
-The report is read by :class:`pyEDAA.Reports.Unittesting.pyTooling.Document` into the unified data model.
+The report is read by :class:`pyEDAA.Reports.Unittesting.pyTooling.Document` into the unified data model. It's
+validated against the schema it names, e.g. :ref:`TestReport-v0.1.xsd <SCHEMAS/TestReport-v0.1>`.
 
 
 .. _UNITTEST/FileFormats/TRX:
