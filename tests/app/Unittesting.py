@@ -89,7 +89,7 @@ class UnittestCommand(ApplicationTestcase):
 		"""A format the option doesn't accept: the message names the option's value and lists the formats it accepts."""
 		readFormats =  (
 			"Ant-JUnit, Any-JUnit, Catch2-JUnit, CTest-JUnit, GoJUnitReport-JUnit, gtest-JUnit, nextest-JUnit, pyTest-JUnit, "
-			"TestLogger-JUnit"
+			"TestLogger-JUnit; without format: Any-JUnit"
 		)
 		writeFormats = (
 			"Ant-JUnit, Catch2-JUnit, CTest-JUnit, GoJUnitReport-JUnit, gtest-JUnit, nextest-JUnit, pyTest-JUnit, "
@@ -100,7 +100,7 @@ class UnittestCommand(ApplicationTestcase):
 		for options, message, formats in (
 			((f"--input=pyTest:{REFERENCE_FILE}", ),                f"input: 'pyTest:{REFERENCE_FILE}'",     readFormats),
 			((f"--merge=pyTest:{REFERENCE_FILE}", ),                f"input: 'pyTest:{REFERENCE_FILE}'",     readFormats),
-			((f"--merge={REFERENCE_FILE}", ),                       f"input: '{REFERENCE_FILE}'",            readFormats),
+			((merge, f"--output={outputFile}"),                     f"output: '{outputFile}'",               writeFormats),
 			((merge, f"--output=pyTest:{outputFile}"),              f"output: 'pyTest:{outputFile}'",        writeFormats),
 			((merge, f"--output=Any-JUnit:{outputFile}"),           f"output: 'Any-JUnit:{outputFile}'",     writeFormats)
 		):
@@ -110,6 +110,15 @@ class UnittestCommand(ApplicationTestcase):
 				self.assertNotIn(result.returncode, (0, 241))
 				self.assertIn(f"Unsupported unit testing report format for {message}.", result.stdout)
 				self.assertIn(f"Supported formats: {formats}.", result.stdout)
+
+	def test_InputWithoutFormat(self) -> None:
+		"""A file without format is read as ``Any-JUnit``, by ``--input`` and by ``--merge``."""
+		for option in (f"--input={REFERENCE_FILE}", f"--merge={REFERENCE_FILE}"):
+			with self.subTest(option=option):
+				result = self.RunEntrypoint("unittest", option, timeout=60.0)
+
+				self.assertExitCode(result, 0)
+				self.assertNotIn("Unsupported", result.stdout)
 
 	def test_UnwritableOutput(self) -> None:
 		"""A file that can't be written: the error, and no claim it was written."""

@@ -41,6 +41,8 @@ class InputFormat(StringEnum):
 	PyTestJUnit =        "pyTest-JUnit"         #: JUnit XML as pytest writes it.
 	TestLoggerJUnit =    "TestLogger-JUnit"     #: JUnit XML as the .NET test logger JunitXml.TestLogger writes it.
 
+	DEFAULT = AnyJUnit                          #: A file without format is read as JUnit XML of any tool.
+
 
 @export
 class OutputFormat(StringEnum):
@@ -87,8 +89,14 @@ Format = TypeVar("Format", InputFormat, OutputFormat)
 class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 	@CommandHandler("unittest", help="Transform unit testing results.", description="Merge and/or transform unit testing results.")
 	@LongValuedFlag("--name", dest="name", metaName='Name', optional=True, help="Top-level unit testing summary name.")
-	@LongValuedFlag("--input", dest="input", metaName='format:JUnit File', optional=True, help="Unit testing summary file (XML).")
-	@LongValuedFlag("--merge", dest="merge", metaName='format:JUnit File', optional=True, help="Unit testing summary file (XML).")
+	@LongValuedFlag(
+		"--input", dest="input", metaName="[Format:]File", optional=True,
+		help="Unit testing summary file (XML), e.g. 'pyTest-JUnit:report.xml'; without format: Any-JUnit."
+	)
+	@LongValuedFlag(
+		"--merge", dest="merge", metaName="[Format:]FilePattern", optional=True,
+		help="Unit testing summary files (XML) to merge, e.g. 'pyTest-JUnit:report/*.xml'; without format: Any-JUnit."
+	)
 	@LongValuedFlag("--pytest", dest="pytest", metaName='cleanup;cleanup', optional=True, help="Remove pytest overhead.")
 	@LongValuedFlag("--render", dest="render", metaName='format', optional=True, help="Render unit testing results to <format>.")
 	@LongValuedFlag("--output", dest="output", metaName='format:JUnit File', optional=True, help="Processed unit testing summary file (XML).")
@@ -98,7 +106,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 		returnCode = 0
 		if (args.input is None) and (args.merge is None):
-			self.WriteError(f"Either option '--input=<Format>:<JUnitFilePattern>' or '--merge=<Format>:<JUnitFilePattern>' is missing.")
+			self.WriteError(f"Either option '--input=[<Format>:]<File>' or '--merge=[<Format>:]<FilePattern>' is missing.")
 			returnCode = 3
 
 		if returnCode != 0:
@@ -165,14 +173,17 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		:param formats:        The formats the option accepts.
 		:param direction:      ``input`` or ``output``, for the error message.
 		:returns:              The format and the file pattern.
-		:raises UnittestError: If the value names no format, or one the option doesn't accept. |br|
-		                       The exception notes the supported formats.
+		:raises UnittestError: If the value names a format the option doesn't accept, or none and the option has no default
+		                       format. |br|
+		                       The exception notes the supported formats, and the default format.
 		"""
 		try:
 			fileFormat, globPattern = splitFormat(task, formats)
 		except ValueError as ex:
 			error = UnittestError(f"Unsupported unit testing report format for {direction}: '{task}'.")
-			error.add_note(f"Supported formats: {', '.join(formats)}.")
+			default = formats.Parse(None)
+			without = f"; without format: {default}" if default is not None else ""
+			error.add_note(f"Supported formats: {', '.join(formats)}{without}.")
 			raise error from ex
 
 		return fileFormat, str(globPattern)
