@@ -60,6 +60,8 @@ The report formats have models of their own, which convert to this one:
       (``llvm-cov export -format=lcov``).
    :mod:`pyEDAA.Reports.CodeCoverage.JaCoCo`
       |rarr| JaCoCo's XML format, as written e.g. by Gradle's task ``jacocoTestReport``.
+   :mod:`pyEDAA.Reports.CodeCoverage.AldecUCDB`
+      |rarr| Aldec's UCDB XML format, as exported by ``acdb2xml`` of Riviera-PRO or Active-HDL.
 """
 from __future__            import annotations
 

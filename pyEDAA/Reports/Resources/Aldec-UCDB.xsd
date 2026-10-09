@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ux="www.aldec.com" targetNamespace="www.aldec.com"
+           elementFormDefault="qualified">
+	<xs:annotation>
+		<xs:documentation>
+			Aldec UCDB XML code coverage report, as Aldec's tool 'acdb2xml' exports a coverage database (ACDB) of Riviera-PRO
+			or Active-HDL.
+
+			Aldec publishes no schema. This one was reverse-engineered from reports of Riviera-PRO 2021.10 and 2022.04: every
+			element and attribute these reports state is required, in their order, and no other is allowed. The kinds of
+			scopes and bins and the source languages are the names the UCIS standard defines in its C API, without the
+			prefix 'UCIS_'; a kind of bin without a name is stated by its value in hexadecimal: '1000000' is
+			'UCIS_BLOCKBIN'. Flags of scopes and bins are eight hexadecimal digits. An element states an attribute key once.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:simpleType name="NonEmptyString">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ToolVersion">
+		<xs:annotation>
+			<xs:documentation>The tool's name and version, e.g. 'Riviera-PRO 2022.04'.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\S+ [0-9]+(\.[0-9]+)+"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Flags">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9A-Fa-f]{8}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="AttributeType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="str"/>
+			<xs:enumeration value="int"/>
+			<xs:enumeration value="double"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="HistoryNodeKind">
+		<xs:annotation>
+			<xs:documentation>1: a test, 2: a merge of coverage databases.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:enumeration value="1"/>
+			<xs:enumeration value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ScopeType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="TOGGLE"/>
+			<xs:enumeration value="BRANCH"/>
+			<xs:enumeration value="EXPR"/>
+			<xs:enumeration value="COND"/>
+			<xs:enumeration value="INSTANCE"/>
+			<xs:enumeration value="PROCESS"/>
+			<xs:enumeration value="BLOCK"/>
+			<xs:enumeration value="FUNCTION"/>
+			<xs:enumeration value="FORKJOIN"/>
+			<xs:enumeration value="GENERATE"/>
+			<xs:enumeration value="GENERIC"/>
+			<xs:enumeration value="CLASS"/>
+			<xs:enumeration value="COVERGROUP"/>
+			<xs:enumeration value="COVERINSTANCE"/>
+			<xs:enumeration value="COVERPOINT"/>
+			<xs:enumeration value="CROSS"/>
+			<xs:enumeration value="COVER"/>
+			<xs:enumeration value="ASSERT"/>
+			<xs:enumeration value="PROGRAM"/>
+			<xs:enumeration value="PACKAGE"/>
+			<xs:enumeration value="TASK"/>
+			<xs:enumeration value="INTERFACE"/>
+			<xs:enumeration value="FSM"/>
+			<xs:enumeration value="DU_MODULE"/>
+			<xs:enumeration value="DU_ARCH"/>
+			<xs:enumeration value="DU_PACKAGE"/>
+			<xs:enumeration value="DU_PROGRAM"/>
+			<xs:enumeration value="DU_INTERFACE"/>
+			<xs:enumeration value="FSM_STATES"/>
+			<xs:enumeration value="FSM_TRANS"/>
+			<xs:enumeration value="COVBLOCK"/>
+			<xs:enumeration value="CVGBINSCOPE"/>
+			<xs:enumeration value="ILLEGALBINSCOPE"/>
+			<xs:enumeration value="IGNOREBINSCOPE"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="CoverType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CVGBIN"/>
+			<xs:enumeration value="COVERBIN"/>
+			<xs:enumeration value="ASSERTBIN"/>
+			<xs:enumeration value="STMTBIN"/>
+			<xs:enumeration value="BRANCHBIN"/>
+			<xs:enumeration value="EXPRBIN"/>
+			<xs:enumeration value="CONDBIN"/>
+			<xs:enumeration value="TOGGLEBIN"/>
+			<xs:enumeration value="PASSBIN"/>
+			<xs:enumeration value="FSMBIN"/>
+			<xs:enumeration value="USERBIN"/>
+			<xs:enumeration value="COUNT"/>
+			<xs:enumeration value="FAILBIN"/>
+			<xs:enumeration value="VACUOUSBIN"/>
+			<xs:enumeration value="DISABLEDBIN"/>
+			<xs:enumeration value="ATTEMPTBIN"/>
+			<xs:enumeration value="ACTIVEBIN"/>
+			<xs:enumeration value="IGNOREBIN"/>
+			<xs:enumeration value="ILLEGALBIN"/>
+			<xs:enumeration value="DEFAULTBIN"/>
+			<xs:enumeration value="PEAKACTIVEBIN"/>
+			<xs:enumeration value="1000000"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Language">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="VHDL"/>
+			<xs:enumeration value="VLOG"/>
+			<xs:enumeration value="SV"/>
+			<xs:enumeration value="SYSTEMC"/>
+			<xs:enumeration value="PSL_VHDL"/>
+			<xs:enumeration value="PSL_VLOG"/>
+			<xs:enumeration value="PSL_SV"/>
+			<xs:enumeration value="PSL_SYSTEMC"/>
+			<xs:enumeration value="E"/>
+			<xs:enumeration value="VERA"/>
+			<xs:enumeration value="NONE"/>
+			<xs:enumeration value="OTHER"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="Attribute">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="key"  type="ux:NonEmptyString" use="required"/>
+				<xs:attribute name="type" type="ux:AttributeType"  use="required"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="SourceLocation">
+		<xs:attribute name="file"    type="ux:NonEmptyString"     use="required"/>
+		<xs:attribute name="workdir" type="xs:string"             use="required"/>
+		<xs:attribute name="line"    type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="token"   type="xs:nonNegativeInteger" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="Count">
+		<xs:simpleContent>
+			<xs:extension base="xs:nonNegativeInteger">
+				<xs:attribute name="type" use="required">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="int"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="HistoryNode">
+		<xs:sequence>
+			<xs:element name="attr"  type="ux:Attribute"   minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="hnode" type="ux:HistoryNode" minOccurs="0" maxOccurs="unbounded">
+				<xs:unique name="HistoryNodeAttributeKey">
+					<xs:selector xpath="ux:attr"/>
+					<xs:field xpath="@key"/>
+				</xs:unique>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="logical_name"  type="ux:NonEmptyString"  use="required"/>
+		<xs:attribute name="physical_name" type="xs:string"          use="required"/>
+		<xs:attribute name="type"          type="ux:HistoryNodeKind" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="Bin">
+		<xs:sequence>
+			<xs:element name="attr"  type="ux:Attribute"      minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="count" type="ux:Count"/>
+			<xs:element name="src"   type="ux:SourceLocation"/>
+		</xs:sequence>
+		<xs:attribute name="name"  type="xs:string"    use="required"/>
+		<xs:attribute name="type"  type="ux:CoverType" use="required"/>
+		<xs:attribute name="flags" type="ux:Flags"     use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="Scope">
+		<xs:sequence>
+			<xs:element name="src"   type="ux:SourceLocation"/>
+			<xs:element name="attr"  type="ux:Attribute" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="bin"   type="ux:Bin"       minOccurs="0" maxOccurs="unbounded">
+				<xs:unique name="BinAttributeKey">
+					<xs:selector xpath="ux:attr"/>
+					<xs:field xpath="@key"/>
+				</xs:unique>
+			</xs:element>
+			<xs:element name="scope" type="ux:Scope"     minOccurs="0" maxOccurs="unbounded">
+				<xs:unique name="ScopeAttributeKey">
+					<xs:selector xpath="ux:attr"/>
+					<xs:field xpath="@key"/>
+				</xs:unique>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="name"   type="ux:NonEmptyString"     use="required"/>
+		<xs:attribute name="type"   type="ux:ScopeType"          use="required"/>
+		<xs:attribute name="weight" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="lang"   type="ux:Language"           use="required"/>
+		<xs:attribute name="flags"  type="ux:Flags"              use="required"/>
+		<xs:attribute name="du"     type="ux:NonEmptyString"     use="optional"/>
+	</xs:complexType>
+
+	<xs:complexType name="Command">
+		<xs:attribute name="type"  type="xs:int"                use="required"/>
+		<xs:attribute name="flags" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="data"  type="xs:string"             use="required"/>
+		<xs:attribute name="index" type="xs:nonNegativeInteger" use="required"/>
+	</xs:complexType>
+
+	<xs:element name="ucdb">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="attr"    type="ux:Attribute"   minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="hnode"   type="ux:HistoryNode" minOccurs="0" maxOccurs="unbounded">
+					<xs:unique name="TopHistoryNodeAttributeKey">
+						<xs:selector xpath="ux:attr"/>
+						<xs:field xpath="@key"/>
+					</xs:unique>
+				</xs:element>
+				<xs:element name="scope"   type="ux:Scope"       minOccurs="0" maxOccurs="unbounded">
+					<xs:unique name="TopScopeAttributeKey">
+						<xs:selector xpath="ux:attr"/>
+						<xs:field xpath="@key"/>
+					</xs:unique>
+				</xs:element>
+				<xs:element name="command" type="ux:Command"     minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="version" type="ux:ToolVersion" use="required"/>
+		</xs:complexType>
+		<xs:unique name="ReportAttributeKey">
+			<xs:selector xpath="ux:attr"/>
+			<xs:field xpath="@key"/>
+		</xs:unique>
+	</xs:element>
+</xs:schema>
