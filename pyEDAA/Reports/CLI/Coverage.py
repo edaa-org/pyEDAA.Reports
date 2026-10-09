@@ -38,8 +38,9 @@ from argparse import Namespace
 from pathlib  import Path
 from typing   import Dict, Type
 
-from pyTooling.Attributes.ArgParse            import CommandHandler
+from pyTooling.Attributes.ArgParse            import CommandHandler, splitFormat
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
+from pyTooling.Common                         import StringEnum
 from pyTooling.Decorators                     import export
 from pyTooling.MetaClasses                    import ExtendedType
 
@@ -53,14 +54,37 @@ from pyEDAA.Reports.CodeCoverage.GHDL                            import Document
 from pyEDAA.Reports.CodeCoverage.LCOV                            import Document as LCOVDocument
 
 
-#: The formats ``--input`` reads, by their lower-case name on the command line.
-INPUT_FORMATS: Dict[str, Type[cc_Document]] = {
-	"any-cobertura":        CoberturaDocument,
-	"coveragepy-cobertura": CoveragePyCoberturaDocument,
-	"coveragepy-json":      CoveragePyDocument,
-	"gcov-json":            GcovDocument,
-	"ghdl-json":            GHDLDocument,
-	"lcov":                 LCOVDocument
+@export
+class InputFormat(StringEnum):
+	"""The code coverage formats ``--input`` reads, by their name on the command line."""
+
+	AnyCobertura =        "Any-Cobertura"         #: Cobertura XML of any tool, read leniently.
+	CoveragePyCobertura = "CoveragePy-Cobertura"  #: Cobertura XML as coverage.py writes it.
+	CoveragePyJSON =      "CoveragePy-JSON"       #: coverage.py's JSON report.
+	GcovJSON =            "Gcov-JSON"             #: GCC's gcov JSON report.
+	GHDLJSON =            "GHDL-JSON"             #: GHDL's coverage file.
+	LCOV =                "LCOV"                  #: lcov's tracefile.
+
+	DEFAULT = AnyCobertura                        #: A file without format is read as Cobertura XML.
+
+
+@export
+class OutputFormat(StringEnum):
+	"""The code coverage formats ``--output`` writes, by their name on the command line."""
+
+	Cobertura = "Cobertura"  #: Cobertura XML, after Cobertura's DTD ``coverage-04.dtd``.
+
+	DEFAULT = Cobertura      #: A file without format is written as Cobertura XML.
+
+
+#: The document class reading each input format.
+INPUT_FORMATS: Dict[InputFormat, Type[cc_Document]] = {
+	InputFormat.AnyCobertura:        CoberturaDocument,
+	InputFormat.CoveragePyCobertura: CoveragePyCoberturaDocument,
+	InputFormat.CoveragePyJSON:      CoveragePyDocument,
+	InputFormat.GcovJSON:            GcovDocument,
+	InputFormat.GHDLJSON:            GHDLDocument,
+	InputFormat.LCOV:                LCOVDocument
 }
 
 
@@ -74,19 +98,19 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 		description="Read a code coverage report and convert it to Cobertura XML."
 	)
 	@LongValuedFlag(
-		"--input", dest="input", metaName="Format:File", optional=True,
-		help="Code coverage report to read, e.g. 'Gcov-JSON:main.gcov.json.gz'."
+		"--input", dest="input", metaName="[Format:]File", optional=True,
+		help="Code coverage report to read, e.g. 'Gcov-JSON:main.gcov.json.gz'; without format: Any-Cobertura."
 	)
 	@LongValuedFlag(
-		"--output", dest="output", metaName="Format:File", optional=True,
-		help="Code coverage report to write, e.g. 'Cobertura:coverage.xml'."
+		"--output", dest="output", metaName="[Format:]File", optional=True,
+		help="Code coverage report to write, e.g. 'Cobertura:coverage.xml'; without format: Cobertura."
 	)
 	def HandleCoverage(self, args: Namespace) -> None:
 		"""Handle program calls with command ``coverage``."""
 		self._PrintHeadline()
 
 		if args.input is None:
-			self.WriteError(f"Option '--input=<Format>:<File>' is missing.")
+			self.WriteError(f"Option '--input=[<Format>:]<File>' is missing.")
 			self.Exit(3)
 
 		try:
@@ -116,24 +140,21 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 		"""
 		Read a code coverage report and convert it to the common model.
 
-		:param task:               The option's value: ``<Format>:<File>``, e.g. ``Gcov-JSON:main.gcov.json.gz``.
+		:param task:               The option's value: ``[<Format>:]<File>``, e.g. ``Gcov-JSON:main.gcov.json.gz``.
 		:returns:                  The report's summary in the common model.
-		:raises CodeCoverageError: If the value isn't ``<Format>:<File>``.
 		:raises CodeCoverageError: If the format isn't supported. |br|
 		                           The exception notes the supported formats.
 		:raises CodeCoverageError: If the report can't be read.
 		"""
-		if ":" not in task:
-			raise CodeCoverageError(f"Syntax error in '--input={task}': expected '<Format>:<File>'.")
+		try:
+			inputFormat, file = splitFormat(task, InputFormat)
+		except ValueError as ex:
+			error = CodeCoverageError(f"Unsupported code coverage format for input: '{task}'.")
+			error.add_note(f"Supported formats: {', '.join(InputFormat)}; without format: {InputFormat.DEFAULT}.")
+			raise error from ex
 
-		formatName, fileName = task.split(":", maxsplit=1)
-		if (documentClass := INPUT_FORMATS.get(formatName.lower())) is None:
-			ex = CodeCoverageError(f"Unsupported code coverage format for input: '{formatName}'.")
-			ex.add_note(f"Supported formats: {', '.join(INPUT_FORMATS)} (case-insensitive).")
-			raise ex
-
-		self.WriteNormal(f"Reading code coverage report '{fileName}' ({formatName}) ...")
-		document = documentClass(Path(fileName), analyzeAndConvert=True)
+		self.WriteNormal(f"Reading code coverage report '{file}' ({inputFormat}) ...")
+		document = INPUT_FORMATS[inputFormat](file, analyzeAndConvert=True)
 		return document.ToCoverageSummary()
 
 	def _WriteCoverage(self, summary: CoverageSummary, task: str) -> None:
@@ -141,19 +162,18 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 		Write the common model as a code coverage report.
 
 		:param summary: The summary to write.
-		:param task:    The option's value: ``<Format>:<File>``, e.g. ``Cobertura:coverage.xml``.
+		:param task:    The option's value: ``[<Format>:]<File>``, e.g. ``Cobertura:coverage.xml``.
 		"""
-		if ":" not in task:
-			self.WriteError(f"Syntax error in '--output={task}': expected '<Format>:<File>'.")
-			return
-
-		formatName, fileName = task.split(":", maxsplit=1)
-		if formatName.lower() != "cobertura":
-			self.WriteError(f"Unsupported code coverage format for output: '{formatName}'. Supported format: cobertura.")
-			return
-
-		self.WriteNormal(f"Writing Cobertura XML report '{fileName}' ...")
 		try:
-			CoberturaDocument.FromCoverageSummary(Path(fileName), summary).Write(overwrite=True, regenerate=True)
+			_, file = splitFormat(task, OutputFormat)
+		except ValueError:
+			self.WriteError(f"Unsupported code coverage format for output: '{task}'.")
+			formats = ", ".join(OutputFormat)
+			self.WriteNormal(f"           Supported formats: {formats}; without format: {OutputFormat.DEFAULT}.")
+			return
+
+		self.WriteNormal(f"Writing Cobertura XML report '{file}' ...")
+		try:
+			CoberturaDocument.FromCoverageSummary(file, summary).Write(overwrite=True, regenerate=True)
 		except CodeCoverageError as ex:
 			self.WriteError(str(ex))
