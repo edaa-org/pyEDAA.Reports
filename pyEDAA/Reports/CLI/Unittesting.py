@@ -44,11 +44,15 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			try:
 				document = self._open(openTask)
 			except UnittestError as ex:
-				self.WriteFatal(ex, immediateExit=False)
+				self.WriteFatal(str(ex), immediateExit=False)
+				for note in getattr(ex, "__notes__", []):
+					self.WriteNormal(f"           {note}")
+
 				if (innerEx := ex.__cause__) is not None and isinstance(innerEx, XMLSyntaxError):
-					for note in innerEx.__notes__:
+					for note in getattr(innerEx, "__notes__", []):
 						self.WriteNormal(f"           {note}")
-				self.Exit()
+
+				self.Exit(1)
 
 			merged.Merge(document.ToTestsuiteSummary())
 
@@ -208,7 +212,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			try:
 				junitDocuments.append(documentClass(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestError as ex:
-				self.WriteError(ex)
+				self.WriteError(str(ex))
 
 		if len(junitDocuments) == 0:
 			self.WriteCritical(f"None of the {dialect} files were successfully read.")
