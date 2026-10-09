@@ -22,19 +22,19 @@ variations (dialects).
    description and XML schemas, but unfortunately many are not even compatible to each other.
 
 
-.. include:: DataModel.rst
+.. include:: DataModel.inc
 
 .. _UNITTEST/SpecificDataModels:
 
 Specific Data Models
 ********************
 
-.. include:: JUnitDataModel.rst
-.. include:: OpenTestReportingDataModel.rst
-.. include:: OSVVMDataModel.rst
+.. include:: JUnitDataModel.inc
+.. include:: OpenTestReportingDataModel.inc
+.. include:: OSVVMDataModel.inc
 
 
-.. include:: Features.rst
+.. include:: Features.inc
 
 
 
