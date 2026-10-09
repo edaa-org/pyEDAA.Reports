@@ -60,13 +60,13 @@ from pyTooling.TerminalUI                     import TerminalApplication
 
 from pyEDAA.Reports                           import ReportException, __issue_tracker_url__
 from pyEDAA.Reports.Unittesting               import UnittestError
-# from pyEDAA.Reports.CLI.Coverage              import CoverageHandlers
+from pyEDAA.Reports.CLI.Coverage              import CoverageHandlers
 # from pyEDAA.Reports.CLI.Dependency            import DependencyHandlers
 from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
 
 
 @export
-class Application(TerminalApplication, UnittestingHandlers, ArgParseHelperMixin):
+class Application(TerminalApplication, UnittestingHandlers, CoverageHandlers, ArgParseHelperMixin):
 	"""Program class to implement the command line interface (CLI) using commands and options."""
 
 	HeadLine: ClassVar[str] =          "Report Service Program"
