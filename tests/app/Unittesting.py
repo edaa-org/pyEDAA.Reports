@@ -69,6 +69,45 @@ class UnittestCommand(ApplicationTestcase):
 		self.assertExitCode(result, 1)
 		self.assertIn("[FATAL]     Found 0 files for pattern", result.stdout)
 
+	def test_AbsolutePath(self) -> None:
+		"""An absolute file pattern is searched from its root; on Windows, its drive letter is a second ':' in the value."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		for option in ("--input", "--merge"):
+			with self.subTest(option=option):
+				outputFile = (OUTPUT_DIRECTORY / f"absolute{option[1:]}.xml").absolute()
+				outputFile.unlink(missing_ok=True)
+
+				result = self.RunEntrypoint(
+					"unittest", f"{option}=pyTest-JUnit:{REFERENCE_FILE.absolute()}", f"--output=pyTest-JUnit:{outputFile}",
+					timeout=60.0
+				)
+
+				self.assertExitCode(result)
+				self.assertTrue(outputFile.exists())
+
+	def test_FormatWithoutDialect(self) -> None:
+		"""A format token without '-': the message lists the formats the option accepts."""
+		readFormats =  (
+			"Ant-JUnit, Any-JUnit, Catch2-JUnit, CTest-JUnit, GoJUnitReport-JUnit, gtest-JUnit, nextest-JUnit, pyTest-JUnit, "
+			"TestLogger-JUnit"
+		)
+		writeFormats = (
+			"Ant-JUnit, Catch2-JUnit, CTest-JUnit, GoJUnitReport-JUnit, gtest-JUnit, nextest-JUnit, pyTest-JUnit, "
+			"TestLogger-JUnit"
+		)
+		outputFile =   OUTPUT_DIRECTORY / "dialect.xml"
+		for options, formats in (
+			((f"--input=pyTest:{REFERENCE_FILE}", ),                                      readFormats),
+			((f"--merge=pyTest:{REFERENCE_FILE}", ),                                      readFormats),
+			((f"--merge=pyTest-JUnit:{REFERENCE_FILE}", f"--output=pyTest:{outputFile}"), writeFormats)
+		):
+			with self.subTest(options=options):
+				result = self.RunEntrypoint("unittest", *options, timeout=60.0)
+
+				self.assertNotIn(result.returncode, (0, 241))
+				self.assertIn("Unsupported unit testing report format: 'pyTest'", result.stdout)
+				self.assertIn(f"Supported formats: {formats}.", result.stdout)
+
 	def test_UnwritableOutput(self) -> None:
 		"""A file that can't be written: the error, and no claim it was written."""
 		outputFile = OUTPUT_DIRECTORY / "missing" / "unwritable.xml"
