@@ -29,8 +29,9 @@
 # ==================================================================================================================== #
 #
 """
-The assertion coverage of the UCIS XML interchange format: an instance's ``<assertionCoverage>`` and its assertions -
-e.g. ``assert``, ``assume`` or ``cover`` directives - with a bin per outcome.
+The assertion coverage of the UCIS XML interchange format: an instance's ``<assertionCoverage>`` and its assertions.
+
+An assertion - e.g. an ``assert``, ``assume`` or ``cover`` directive - has a bin per outcome.
 """
 from __future__                                   import annotations
 
