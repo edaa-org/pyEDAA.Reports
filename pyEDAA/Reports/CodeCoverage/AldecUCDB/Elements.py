@@ -254,7 +254,9 @@ class AttributesMixin(metaclass=ExtendedType, mixin=True):
 @abstractclass
 class Base(metaclass=ExtendedType, slots=True):
 	"""
-	Base-class of the named elements below the report, e.g. scopes and bins.
+	Base-class of the named elements below the report.
+
+	Scopes and bins are named elements.
 	"""
 
 	_name: str  #: Name of the element.
@@ -289,8 +291,10 @@ class Base(metaclass=ExtendedType, slots=True):
 @export
 class HistoryNode(Base, AttributesMixin, Generic[HistoryNodeParentType]):
 	"""
-	A ``<ux:hnode>`` of the report or of a merge: a test, which wrote a coverage database, or a merge of databases, its
-	attributes - e.g. the tool, the date and the command line - and the history nodes it merged.
+	A ``<ux:hnode>`` of the report or of a merge: a test or a merge of databases, its attributes and merged nodes.
+
+	A test wrote a coverage database, a merge merged databases. The attributes state e.g. the tool, the date and the
+	command line.
 	"""
 
 	_parent:       Nullable[HistoryNodeParentType]   #: The report or merge the history node belongs to.
@@ -432,9 +436,9 @@ class HistoryNode(Base, AttributesMixin, Generic[HistoryNodeParentType]):
 @export
 class Command(metaclass=ExtendedType, slots=True):
 	"""
-	A ``<ux:command>`` of the report: a record of a command applied to the coverage database, e.g. an exclusion.
+	A ``<ux:command>`` of the report: a record of a command applied to the coverage database.
 
-	Its fields are kept as stated, not interpreted.
+	An exclusion is such a command. Its fields are kept as stated, not interpreted.
 	"""
 
 	_parent: Nullable[Report]  #: The report the command belongs to.
