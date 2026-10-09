@@ -215,6 +215,12 @@ class Construction(Testcase):
 			_ = Line(1, 0, False, blockIDs=[3, "4"])
 		self.assertEqual("Parameter 'blockIDs' contains an element not of type 'int'.", str(context.exception))
 
+	def test_Line_CheckOrder(self) -> None:
+		"""The parameters are checked in their order: 'blockIDs' before 'parent'."""
+		with self.assertRaises(TypeError) as context:
+			_ = Line(1, 0, False, blockIDs=5, parent="main.c")
+		self.assertEqual("Parameter 'blockIDs' is not iterable.", str(context.exception))
+
 	def test_Function_Name(self) -> None:
 		with self.assertRaises(ValueError) as context:
 			_ = gcov_Function("", "main", 1, 5, 3, 1, 4, 4, 1)

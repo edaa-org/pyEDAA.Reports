@@ -135,21 +135,7 @@ class Line(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(functionName)}'.")
 			raise ex
 
-		if parent is not None and not isinstance(parent, File):
-			ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
-			raise ex
-
-		self._parent =          parent
-		self._lineNumber =      lineNumber
-		self._functionName =    functionName
-		self._count =           count
-		self._unexecutedBlock = unexecutedBlock
-		self._blockIDs =        []
-		self._branches =        []
-		self._calls =           []
-		self._conditions =      []
-
+		blockIDList: list[int] = []
 		if blockIDs is not None:
 			if not isinstance(blockIDs, Iterable):
 				ex = TypeError(f"Parameter 'blockIDs' is not iterable.")
@@ -162,7 +148,22 @@ class Line(metaclass=ExtendedType, slots=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(blockID)}'.")
 					raise ex
 
-				self._blockIDs.append(blockID)
+				blockIDList.append(blockID)
+
+		if parent is not None and not isinstance(parent, File):
+			ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =          parent
+		self._lineNumber =      lineNumber
+		self._functionName =    functionName
+		self._count =           count
+		self._unexecutedBlock = unexecutedBlock
+		self._blockIDs =        blockIDList
+		self._branches =        []
+		self._calls =           []
+		self._conditions =      []
 
 		if parent is not None:
 			parent._lines.append(self)

@@ -99,6 +99,16 @@ class Construction(Testcase):
 		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 
+	def test_Condition_CheckOrder(self) -> None:
+		"""The parameters are checked in their order: 'notCoveredTrue' and 'notCoveredFalse' before 'parent'."""
+		with self.assertRaises(TypeError) as context:
+			_ = Condition(4, 2, notCoveredTrue=5, parent=21)
+		self.assertEqual("Parameter 'notCoveredTrue' is not iterable.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = Condition(4, 2, notCoveredFalse=["0"], parent=21)
+		self.assertEqual("Parameter 'notCoveredFalse' contains an element not of type 'int'.", str(context.exception))
+
 class ParentRelation(Testcase):
 	"""Each record of a line names its line as its parent and is added to it."""
 

@@ -447,17 +447,7 @@ class Condition(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got value '{covered}'.")
 			raise ex
 
-		if parent is not None and not isinstance(parent, Line):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
-			raise ex
-
-		self._parent =          parent
-		self._count =           count
-		self._covered =         covered
-		self._notCoveredTrue =  []
-		self._notCoveredFalse = []
-
+		notCoveredTrueList: list[int] = []
 		if notCoveredTrue is not None:
 			if not isinstance(notCoveredTrue, Iterable):
 				ex = TypeError(f"Parameter 'notCoveredTrue' is not iterable.")
@@ -470,8 +460,9 @@ class Condition(metaclass=ExtendedType, slots=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(term)}'.")
 					raise ex
 
-				self._notCoveredTrue.append(term)
+				notCoveredTrueList.append(term)
 
+		notCoveredFalseList: list[int] = []
 		if notCoveredFalse is not None:
 			if not isinstance(notCoveredFalse, Iterable):
 				ex = TypeError(f"Parameter 'notCoveredFalse' is not iterable.")
@@ -484,7 +475,18 @@ class Condition(metaclass=ExtendedType, slots=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(term)}'.")
 					raise ex
 
-				self._notCoveredFalse.append(term)
+				notCoveredFalseList.append(term)
+
+		if parent is not None and not isinstance(parent, Line):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =          parent
+		self._count =           count
+		self._covered =         covered
+		self._notCoveredTrue =  notCoveredTrueList
+		self._notCoveredFalse = notCoveredFalseList
 
 		if parent is not None:
 			parent._conditions.append(self)
