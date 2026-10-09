@@ -210,8 +210,8 @@ binary format of their own, which only the tool itself or its API reads.
      - —
      - —
      - :file:`*.ncdb`
-   * - Aldec Active-HDL, Riviera-PRO
-     - UCIS XML (``acdb2xml``)
+   * - `Aldec <https://www.aldec.com/>`__ Active-HDL, Riviera-PRO (VHDL, Verilog, SystemVerilog)
+     - UCDB XML (``acdb2xml``)
      - —
      - —
      - ACDB
@@ -230,6 +230,7 @@ pyEDAA.Reports reads these formats:
 * :ref:`gcov's JSON <CODECOV/Formats/Gcov>`
 * :ref:`lcov's tracefile <CODECOV/Formats/LCOV>`
 * :ref:`JaCoCo XML <CODECOV/Formats/JaCoCo>`
+* :ref:`Aldec's UCDB XML <CODECOV/Formats/AldecUCDB>`
 
 The Go cover profile, OpenCover XML and coverlet's JSON are described below, but not read yet.
 
@@ -695,6 +696,73 @@ loses or approximates:
    summary = report.ToCoverageSummary()
    for unit in summary.IterateUnits():
      print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
+
+
+.. _CODECOV/Formats/AldecUCDB:
+
+Aldec UCDB XML
+==============
+
+Aldec's simulators Riviera-PRO and Active-HDL keep code coverage in a coverage database (ACDB), which the tool
+``acdb2xml`` exports as XML:
+
+.. code-block:: bash
+
+   acdb2xml -i aggregate.acdb -o ucdb.xml
+
+The XML names its namespace ``www.aldec.com`` and its root ``<ux:ucdb>``: it is a dump of the database's UCIS data
+model - history nodes, scopes and their coverage items (bins) -, not the XML interchange format of the
+`Accellera UCIS standard <https://www.accellera.org/downloads/standards/ucis>`__, whose root is ``<UCIS>``.
+:class:`pyEDAA.Reports.CodeCoverage.AldecUCDB.Document` checks the root element, validates the report against
+:ref:`Aldec-UCDB.xsd <SCHEMAS/Aldec-UCDB>` - reverse-engineered, the format states no version, only the tool's, e.g.
+``Riviera-PRO 2022.04`` - and reads it into the format's model:
+
+* the report's attributes, e.g. the path separator,
+* the history nodes: the tests, which wrote a coverage database, and the merges of databases, each with its attributes,
+  e.g. the tool, the date and the command line,
+* the scopes - design units, their instances, packages, classes, processes, branching statements, ... - with their
+  kind, language, flags and source location, nested as in the design,
+* each scope's bins: the coverage items, e.g. statements, branches or blocks, with their count, flags - e.g. whether
+  excluded - and source location,
+* the commands, e.g. of an exclusion, kept as stated.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Document.ToCoverageSummary` converts the statement coverage to the common
+model, as pyEDAA.UCIS converted it to Cobertura XML:
+
+* The statements are the statement bins (``STMTBIN``) of the instances: the bins of the scopes below each top-level
+  scope, which isn't a design unit; a design unit's scope holds the coverage of all its instances, which the instances
+  state already. A statement is identified by its file, line and index in the line (attribute ``#SINDEX#``).
+* With ``mergeInstances=True``, the statements of all instances of a design unit are merged: a statement ran as often
+  as in all instances together. Otherwise each instance's statement counts on its own.
+* A file's path is the one the statement bins state, relative to the directory the tool ran in; these directories are
+  the summary's source directories. The summary is named after the report file.
+* A line ran as often as its least often run statement: it is covered, if all its statements ran, otherwise uncovered.
+  A line, whose statements are all excluded, is excluded; an excluded statement doesn't count for its line.
+
+What the conversion leaves out: the branches, blocks and other kinds of coverage, the design units and instances - the
+common model has no units for them -, and the history nodes.
+:meth:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Report.IterateStatements` yields the statements themselves, e.g. to count
+them.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.AldecUCDB import Document
+
+   report = Document(Path("ucdb.xml"), analyzeAndConvert=True)
+   summary = report.ToCoverageSummary(mergeInstances=True)
+   for file in summary.IterateFiles():
+     print(f"{file.Path}: {file.LineCoverage:.1%}")
+
+   statements = [statement for statement in report.IterateStatements() if not statement.IsExcluded]
+   covered = sum(1 for statement in statements if statement.Count > 0)
+   print(f"Statements: {covered} of {len(statements)}")
+
+.. hint::
+
+   The reader was transferred from `pyEDAA.UCIS <https://github.com/edaa-org/pyEDAA.UCIS>`__, contributed by Aldec Inc.
+   The option ``--merge-instances`` of its command ``pyedaa-ucis export`` corresponds to the parameter
+   ``mergeInstances`` of :meth:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Document.ToCoverageSummary`.
 
 
 .. _CODECOV/Formats/GoCoverProfile:
