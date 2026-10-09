@@ -127,8 +127,10 @@ The event-based format is read by :class:`pyEDAA.Reports.Unittesting.OpenTestRep
 into the unified data model, see :ref:`UNITTEST/SpecificDataModel/OTR`. The file is validated against the
 :ref:`schemas <SCHEMAS/OpenTestReporting>`, which Open Test Reporting publishes for each namespace.
 
-OTR's command line tool converts the event-based format into its hierarchical format. *pyEDAA.Reports* doesn't read the
-hierarchical format yet.
+OTR's command line tool converts the event-based format into its hierarchical format (``convert`` command):
+``<h:execution>`` holds the ``<infrastructure>`` and a ``<h:root>`` per test engine, which nests the containers and
+tests as ``<h:child>`` elements, each with a ``start`` time and a ``duration``. It's read by
+:class:`pyEDAA.Reports.Unittesting.OpenTestReporting.Hierarchy.Document` into the same data model.
 
 
 .. _UNITTEST/FileFormats/pyTooling:
