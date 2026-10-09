@@ -390,7 +390,8 @@ class Document(cc_Document, Coverage):
 
 		with Stopwatch() as sw:
 			try:
-				xmlDocument = parse(self._path, XMLParser(ns_clean=True))
+				with self._path.open("rb") as file:
+					xmlDocument = parse(file, XMLParser(ns_clean=True))
 			except OSError as ex:
 				raise CodeCoverageError(f"Couldn't read Cobertura report file '{self._path}'.") from ex
 			except XMLSyntaxError as ex:

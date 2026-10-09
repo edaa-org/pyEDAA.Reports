@@ -1405,7 +1405,8 @@ class Document(TestsuiteSummary, ut_Document):
 
 			try:
 				junitParser = XMLParser(schema=junitSchema, ns_clean=True)
-				junitDocument = parse(self._path, parser=junitParser)
+				with self._path.open("rb") as file:
+					junitDocument = parse(file, parser=junitParser)
 
 				self._xmlDocument = junitDocument
 			except XMLSyntaxError as ex:
