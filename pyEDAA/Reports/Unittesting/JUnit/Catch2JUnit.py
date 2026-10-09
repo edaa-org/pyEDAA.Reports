@@ -145,7 +145,7 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 			startTime=testsuiteSummary._startTime,
 			duration=testsuiteSummary._totalDuration,
 			status=testsuiteSummary._status,
-			testsuites=(ut_Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+			testsuites=(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
 		)
 
 
@@ -278,7 +278,7 @@ class Document(ju_Document):
 		statusNodes = list(testcaseNode.iterchildren("skipped", "failure", "error"))
 		if len(statusNodes) == 2:
 			newTestcase._status = TestcaseStatus.Skipped
-			newTestcase._message = statusNodes[0].attrib["message"]
+			newTestcase._message = statusNodes[0].attrib.get("message", None)
 
 	def Generate(self, overwrite: bool = False) -> None:
 		"""

@@ -1265,7 +1265,7 @@ class TestsuiteSummary(TestsuiteBase):
 			startTime=testsuiteSummary._startTime,
 			duration=testsuiteSummary._totalDuration,
 			status=testsuiteSummary._status,
-			testsuites=(ut_Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+			testsuites=(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
 		)
 
 	def ToTestsuiteSummary(self) -> ut_TestsuiteSummary:
@@ -1401,7 +1401,7 @@ class Document(TestsuiteSummary, ut_Document):
 			try:
 				junitSchema = XMLSchema(schemaRoot)
 			except XMLSchemaParseError as ex:
-				raise UnittestError(f"Error while parsing XML Schema '{xmlSchemaFile}'.")
+				raise UnittestError(f"Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
 
 			try:
 				junitParser = XMLParser(schema=junitSchema, ns_clean=True)
@@ -1705,7 +1705,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		newTestcase = self._TESTCASE(
 			self._ConvertName(testcaseNode, optional=False),
-			self._ConvertTime(testcaseNode, optional=False),
+			self._ConvertTime(testcaseNode, optional=True),
 			assertionCount=self._ConvertAssertions(testcaseNode),
 			parent=testclass
 		)

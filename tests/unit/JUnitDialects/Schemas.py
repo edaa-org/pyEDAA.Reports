@@ -35,12 +35,18 @@ Each schema in :file:`pyEDAA/Reports/Resources` was reverse-engineered from real
 :file:`tests/data/JUnit` are the ground truth: a schema that rejects one of them describes the format wrongly. The
 reader has to agree with the schema too - it is the same claim about the format, written twice.
 """
+from pathlib  import Path
 from re       import sub
+from tempfile import TemporaryDirectory
+from textwrap import dedent
 from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
 from pyTooling.Decorators import readonly
 from pyTooling.Testing    import Testcase
+
+from pyEDAA.Reports.Unittesting       import TestcaseStatus
+from pyEDAA.Reports.Unittesting.JUnit import Document
 
 from . import DATA_DIRECTORY, DIALECTS, OUTPUT_DIRECTORY, TESTSUITE_ROOTED_FILES, Dialect
 
@@ -58,6 +64,20 @@ class SchemaMixin:
 		:returns: The dialect under test.
 		"""
 		return DIALECTS[self._dialectName]
+
+	def _read(self, report: str) -> Document:
+		"""
+		Validate a report against the dialect's schema, then read it with the dialect's reader.
+
+		:param report: The report's XML text.
+		:returns:      The document read from the report.
+		"""
+		with TemporaryDirectory() as directory:
+			reportFile = Path(directory) / "report.xml"
+			reportFile.write_text(report, encoding="utf-8")
+			self.Dialect.Schema().validate(str(reportFile))
+
+			return self.Dialect.DocumentClass(reportFile, analyzeAndConvert=True)
 
 	def test_ReferenceOutputIsValid(self) -> None:
 		dialect = self.Dialect
@@ -79,6 +99,21 @@ class SchemaMixin:
 class AntJUnit4(SchemaMixin, ut_TestCase):
 	_dialectName = "Ant-JUnit4"
 
+	def test_TestcaseWithoutTime(self) -> None:
+		"""The schema declares ``time`` of ``<testcase>`` optional: the reader accepts a test case without it."""
+		document = self._read(dedent("""\
+			<?xml version="1.0" encoding="utf-8"?>
+			<testsuite name="s" tests="1" failures="0" errors="0" skipped="0" time="0.1" timestamp="2026-10-08T10:00:00"
+			           hostname="h">
+			  <properties/>
+			  <testcase classname="C" name="t"/>
+			  <system-out/>
+			  <system-err/>
+			</testsuite>
+			"""))
+
+		self.assertIsNone(document.Testsuites["s"].Testclasses["C"].Testcases["t"].Duration)
+
 
 class Catch2JUnit(SchemaMixin, ut_TestCase):
 	_dialectName = "Catch2-JUnit"
@@ -91,6 +126,28 @@ class Catch2JUnit(SchemaMixin, ut_TestCase):
 		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(referenceFile))}
 
 		self.assertEqual({("testcase", "'status' attribute not allowed for element")}, errors)
+
+	def test_SkippedWithoutMessage(self) -> None:
+		"""The schema declares ``message`` of ``<skipped>`` optional: a failure expected by Catch2 has no message then."""
+		document = self._read(dedent("""\
+			<?xml version="1.0" encoding="UTF-8"?>
+			<testsuites>
+			  <testsuite name="t" errors="0" failures="1" skipped="1" tests="2" hostname="tbd" time="0.001"
+			             timestamp="2026-10-08T10:00:00Z">
+			    <testcase classname="t.global" name="x" time="0.000" status="run">
+			      <skipped/>
+			      <failure message="a == b" type="REQUIRE">boom</failure>
+			    </testcase>
+			    <system-out/>
+			    <system-err/>
+			  </testsuite>
+			</testsuites>
+			"""))
+		testcase = document.Testsuites["t"].Testclasses["t.global"].Testcases["x"]
+
+		self.assertIs(TestcaseStatus.Skipped, testcase.Status)
+		self.assertIsNone(testcase.Message)
+		self.assertEqual("boom", testcase.Details)
 
 	def test_OtherSchemas(self) -> None:
 		"""No other dialect's schema accepts Catch2's JUnit report."""
@@ -114,6 +171,20 @@ class GoogleTestJUnit(SchemaMixin, ut_TestCase):
 
 class PyTestJUnit(SchemaMixin, ut_TestCase):
 	_dialectName = "pyTest-JUnit"
+
+	def test_TestcaseWithoutTime(self) -> None:
+		"""The schema declares ``time`` of ``<testcase>`` optional: the reader accepts a test case without it."""
+		document = self._read(dedent("""\
+			<?xml version="1.0" encoding="utf-8"?>
+			<testsuites name="r">
+			  <testsuite name="s" tests="1" failures="0" errors="0" skipped="0" time="0.1" timestamp="2026-10-08T10:00:00"
+			             hostname="h">
+			    <testcase classname="C" name="t"/>
+			  </testsuite>
+			</testsuites>
+			"""))
+
+		self.assertIsNone(document.Testsuites["s"].Testclasses["C"].Testcases["t"].Duration)
 
 
 class TestLoggerJUnit(SchemaMixin, ut_TestCase):
@@ -146,6 +217,19 @@ class AnyJUnit(SchemaMixin, ut_TestCase):
 			with self.subTest(file=referenceFile.name):
 				with self.assertRaises(Exception):
 					self.Dialect.DocumentClass(referenceFile, analyzeAndConvert=True)
+
+	def test_TestcaseWithoutTime(self) -> None:
+		"""The schema declares ``time`` of ``<testcase>`` optional: the reader accepts a test case without it."""
+		document = self._read(dedent("""\
+			<?xml version="1.0" encoding="utf-8"?>
+			<testsuites name="r">
+			  <testsuite name="s" tests="1">
+			    <testcase classname="C" name="t"/>
+			  </testsuite>
+			</testsuites>
+			"""))
+
+		self.assertIsNone(document.Testsuites["s"].Testclasses["C"].Testcases["t"].Duration)
 
 
 class NextestJUnit(SchemaMixin, ut_TestCase):
