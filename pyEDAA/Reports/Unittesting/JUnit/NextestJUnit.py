@@ -40,7 +40,7 @@ from __future__                       import annotations
 
 from datetime                         import datetime, timedelta
 from pathlib                          import Path
-from typing                           import Optional as Nullable, Type, ClassVar
+from typing                           import Optional as Nullable, Iterable, Type, ClassVar
 from uuid                             import UUID
 
 from lxml.etree                       import ElementTree, Element, SubElement, tostring, _Element
@@ -48,7 +48,7 @@ from pyTooling.Common                 import getFullyQualifiedName
 from pyTooling.Decorators             import export, readonly, InheritDocString, DocStringMergeStrategy
 from pyTooling.Stopwatch              import Stopwatch
 
-from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus
+from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus, TestsuiteStatus
 from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
 from pyEDAA.Reports.Unittesting       import Testcase as ut_Testcase
 from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass
@@ -297,7 +297,14 @@ class Document(ju_Document):
 		self,
 		xmlReportFile: Path,
 		analyzeAndConvert: bool = False,
-		readerMode: JUnitReaderMode = JUnitReaderMode.Default
+		readerMode: JUnitReaderMode = JUnitReaderMode.Default,
+		*,
+		name: str = "Unprocessed JUnit XML file",
+		startTime: Nullable[datetime] = None,
+		duration:  Nullable[timedelta] = None,
+		status: TestsuiteStatus = TestsuiteStatus.Unknown,
+		testsuites: Nullable[Iterable[Testsuite]] = None,
+		runID: Nullable[UUID] = None
 	) -> None:
 		"""
 		Initializes a cargo-nextest JUnit document.
@@ -305,10 +312,25 @@ class Document(ju_Document):
 		:param xmlReportFile:     Path to the XML file.
 		:param analyzeAndConvert: Optional, if true, read, validate and convert the file.
 		:param readerMode:        Optional, mode of the JUnit reader.
+		:param name:              Optional, name of the test suite summary.
+		:param startTime:         Optional, time when the test run was started.
+		:param duration:          Optional, duration of the test run.
+		:param status:            Optional, overall status of the test run.
+		:param testsuites:        Optional, test suites of the summary.
+		:param runID:             Optional, run ID of the test run, which wrote the report.
 		"""
-		super().__init__(xmlReportFile, False, readerMode)
+		super().__init__(
+			xmlReportFile,
+			False,
+			readerMode,
+			name=name,
+			startTime=startTime,
+			duration=duration,
+			status=status,
+			testsuites=testsuites
+		)
 
-		self._runID = None
+		self._runID = runID
 
 		if analyzeAndConvert:
 			self.Analyze()
@@ -322,32 +344,6 @@ class Document(ju_Document):
 		:returns: The run ID, or ``None`` if the report has none.
 		"""
 		return self._runID
-
-	@classmethod
-	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary) -> Document:
-		"""
-		Convert a test suite summary of the unified test entity data model to a cargo-nextest JUnit document.
-
-		The unified data model has no run ID, so the document has none.
-
-		:param xmlReportFile:    Path to the XML file the document will be written to.
-		:param testsuiteSummary: Test suite summary from unified data model.
-		:returns:                A cargo-nextest JUnit document.
-		"""
-		doc = cls(xmlReportFile)
-		doc._name = testsuiteSummary._name
-		doc._startTime = testsuiteSummary._startTime
-		doc._duration = testsuiteSummary._totalDuration
-		doc._status = testsuiteSummary._status
-		doc._tests = testsuiteSummary._tests
-		doc._skipped = testsuiteSummary._skipped
-		doc._errored = testsuiteSummary._errored
-		doc._failed = testsuiteSummary._failed
-		doc._passed = testsuiteSummary._passed
-
-		doc.AddTestsuites(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
-
-		return doc
 
 	def Analyze(self) -> None:
 		"""
