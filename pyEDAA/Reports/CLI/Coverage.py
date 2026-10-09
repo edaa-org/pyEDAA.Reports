@@ -54,6 +54,8 @@ from pyEDAA.Reports.CodeCoverage.Gcov                            import Document
 from pyEDAA.Reports.CodeCoverage.GHDL                            import Document as GHDLDocument
 from pyEDAA.Reports.CodeCoverage.JaCoCo                          import Document as JaCoCoDocument
 from pyEDAA.Reports.CodeCoverage.LCOV                            import Document as LCOVDocument
+from pyEDAA.Reports.CodeCoverage.UCIS                            import Document as UCISDocument
+from pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS                     import Document as PyUCISDocument
 
 
 __all__ = ["INPUT_FORMATS"]
@@ -71,6 +73,8 @@ class InputFormat(StringEnum):
 	JaCoCoXML =           "JaCoCo-XML"            #: JaCoCo's XML report.
 	LCOV =                "LCOV"                  #: lcov's tracefile.
 	NVCCobertura =        "NVC-Cobertura"         #: Cobertura XML as NVC writes it.
+	PyUCISXML =           "PyUCIS-XML"            #: UCIS XML as pyucis writes it: the elements in no namespace.
+	UCISXML =             "UCIS-XML"              #: The XML interchange format of the Accellera UCIS standard.
 
 	DEFAULT = AnyCobertura                        #: A file without format is read as Cobertura XML.
 
@@ -93,7 +97,9 @@ INPUT_FORMATS: Dict[InputFormat, Type[cc_Document]] = {
 	InputFormat.GHDLJSON:            GHDLDocument,
 	InputFormat.JaCoCoXML:           JaCoCoDocument,
 	InputFormat.LCOV:                LCOVDocument,
-	InputFormat.NVCCobertura:        NVCCoberturaDocument
+	InputFormat.NVCCobertura:        NVCCoberturaDocument,
+	InputFormat.PyUCISXML:           PyUCISDocument,
+	InputFormat.UCISXML:             UCISDocument
 }
 
 

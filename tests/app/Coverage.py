@@ -63,13 +63,22 @@ class CoverageCommand(ApplicationTestcase):
 			("GHDL-JSON",            DATA_DIRECTORY / "VHDL/coverage-Count.json",   "Lines:    23 of 27 covered (85.2%)"),
 			("JaCoCo-XML",           DATA_DIRECTORY / "Java/jacocoTestReport.xml",  "Lines:    6 of 8 covered (75.0%)"),
 			("LCOV",                 DATA_DIRECTORY / "lcov/VHDL/GHDL.info",        "Lines:    9 of 11 covered (81.8%)"),
-			("NVC-Cobertura",        DATA_DIRECTORY / "NVC/Count.xml",              "Lines:    24 of 32 covered (75.0%)")
+			("NVC-Cobertura",        DATA_DIRECTORY / "NVC/Count.xml",              "Lines:    24 of 32 covered (75.0%)"),
+			("UCIS-XML",             DATA_DIRECTORY / "UCIS/synthetic-1.0.xml",     "Lines:    4 of 5 covered (80.0%)")
 		):
 			with self.subTest(format=formatName):
 				result = self.RunEntrypoint("coverage", f"--input={formatName}:{file}", timeout=60.0)
 
 				self.assertExitCode(result)
 				self.assertIn(expected, result.stdout)
+
+	def test_ReadPyUCIS(self) -> None:
+		"""pyucis' dialect of UCIS XML shows the line figures of its fixture."""
+		inputFile = DATA_DIRECTORY / "UCIS/PyUCIS/block_statement.xml"
+		result = self.RunEntrypoint("coverage", f"--input=PyUCIS-XML:{inputFile}", timeout=60.0)
+
+		self.assertExitCode(result)
+		self.assertIn("Lines:    1 of 1 covered (100.0%)", result.stdout)
 
 	def test_ToCobertura(self) -> None:
 		"""coverage.py's JSON report written as Cobertura XML: valid by the strict schema, the same figures read back."""
@@ -89,6 +98,25 @@ class CoverageCommand(ApplicationTestcase):
 		summary = CoberturaDocument(outputFile, analyzeAndConvert=True).ToCoverageSummary()
 		self.assertEqual((27, 22), (summary.TotalLines, summary.CoveredLines))
 		self.assertEqual((10, 5), (summary.TotalBranches, summary.CoveredBranches))
+
+	def test_UCISToCobertura(self) -> None:
+		"""UCIS XML written as Cobertura XML: valid by the strict schema, the same figures read back."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		outputFile = OUTPUT_DIRECTORY / "ucis.xml"
+		outputFile.unlink(missing_ok=True)
+
+		inputFile = DATA_DIRECTORY / "UCIS/synthetic-1.0.xml"
+		result = self.RunEntrypoint(
+			"coverage", f"--input=UCIS-XML:{inputFile}", f"--output=Cobertura:{outputFile}", timeout=60.0
+		)
+
+		self.assertExitCode(result)
+		strict = XMLSchema(parse(getResourceFile(Resources, STRICT_SCHEMA)))
+		self.assertTrue(strict.validate(parse(outputFile)), msg=str(strict.error_log))
+
+		summary = CoberturaDocument(outputFile, analyzeAndConvert=True).ToCoverageSummary()
+		self.assertEqual((5, 4), (summary.TotalLines, summary.CoveredLines))
+		self.assertEqual((4, 3), (summary.TotalBranches, summary.CoveredBranches))
 
 	def test_JaCoCoToCobertura(self) -> None:
 		"""Gradle's JaCoCo XML report written as Cobertura XML: valid by the strict schema, the same figures read back."""
