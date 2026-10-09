@@ -69,6 +69,17 @@ class UnittestCommand(ApplicationTestcase):
 		self.assertExitCode(result, 1)
 		self.assertIn("[FATAL]     Found 0 files for pattern", result.stdout)
 
+	def test_UnwritableOutput(self) -> None:
+		"""A file that can't be written: the error, and no claim it was written."""
+		outputFile = OUTPUT_DIRECTORY / "missing" / "unwritable.xml"
+		result = self.RunEntrypoint(
+			"unittest", f"--merge=pyTest-JUnit:{REFERENCE_FILE}", f"--output=pyTest-JUnit:{outputFile}", timeout=60.0
+		)
+
+		self.assertNotEqual(0, result.returncode)
+		self.assertIn("can not be written.", result.stdout)
+		self.assertNotIn("Output written to", result.stdout)
+
 	def test_RewriteDunderInit_Duplicate(self) -> None:
 		"""A test class in a package's ``__init__`` and beside it: the rewrite raises, the program exits with code 1."""
 		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)

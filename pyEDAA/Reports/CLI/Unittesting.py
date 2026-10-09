@@ -392,4 +392,6 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			if ex.__cause__ is not None:
 				self.WriteError(f"  {ex.__cause__}")
 
+			return
+
 		self.WriteNormal(f"Output written to '{file}' in {dialect} format.")
