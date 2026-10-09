@@ -31,26 +31,32 @@
 """
 GCC's gcov JSON code coverage format: a model of the format, read from a report and converted to the common model.
 
-gcov writes the format with ``gcov --json-format``: gzip-compressed to a :file:`*.gcov.json.gz` file per data file, or
-- with ``--stdout`` - as plain JSON, one line per data file. A report is read in either form, and each JSON object in
+gcov writes the format with ``gcov --json-format``: gzip-compressed to a :file:`*.gcov.json.gz` file per data file, or,
+with ``--stdout``, as plain JSON, one line per data file. A report is read in either form, and each JSON object in
 it is validated against the JSON Schema of the format version it states (:class:`FormatVersion`), reverse-engineered
 from GCC: :file:`Gcov-1.schema.json` for format 1 (GCC 9 to 13), :file:`Gcov-2.schema.json` for format 2 (GCC 14 and
 later). The format's model keeps what the report states: a :class:`Document` holds :class:`DataFile` records, a data
-file :class:`File` records, and a file its :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Function` and
-:class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Line` records - a line in format 2 with the IDs of its basic blocks.
-The records below a file are in :mod:`~pyEDAA.Reports.CodeCoverage.Gcov.Records`. Each record's constructor takes typed
-values, so the model can be built by hand: a record below the report names its parent with the keyword parameter
-``parent`` and is added to it. Its class method ``Parse`` reads the record's JSON object.
+file :class:`File` records, a file its :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Function` and
+:class:`~pyEDAA.Reports.CodeCoverage.Gcov.Records.Line` records, and a line its
+:class:`~pyEDAA.Reports.CodeCoverage.Gcov.Branches.Branch`, :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Branches.Call`
+and :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Branches.Condition` records - in format 2 with the IDs of the basic blocks
+they belong to. The records below a file are in :mod:`~pyEDAA.Reports.CodeCoverage.Gcov.Records`, the records of a
+line in :mod:`~pyEDAA.Reports.CodeCoverage.Gcov.Branches`. Each record's constructor takes typed values, so the model
+can be built by hand: a record below the report names its parent with the keyword parameter ``parent`` and is added to
+it. Its class method ``Parse`` reads the record's JSON object.
 
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
 * A file's path is relative to the directory the compiler ran in - a data file's ``current_working_directory`` -,
   unless it is absolute.
-* A line's ``count`` is its count. A line several functions share - e.g. the instantiations of a template - or
-  several data files state - e.g. a header - becomes one line, its counts added.
+* A line's ``count`` is its count; a line, which ran without taking all of its branches, is partially covered. A line
+  several functions share - e.g. the instantiations of a template - or several data files state - e.g. a header -
+  becomes one line, its counts added.
+* A branch becomes a branch of its line, with its count; exceptional branches (``throw``) are branches too. A branch
+  leads to a basic block, not to a line, so it has no target.
 * A file becomes a source file unit, its functions - by demangled name, e.g. ``Containers::Stack::Pop()`` - become
   functions, each spanning its first to its last line, with its execution count.
-* Basic blocks have no counterpart in the common model. The format has no excluded lines.
+* Calls, conditions and basic blocks have no counterpart in the common model. The format has no excluded lines.
 
 .. rubric:: Example
 
@@ -82,7 +88,7 @@ from pyTooling.Stopwatch                      import Stopwatch
 from pyTooling.Versioning                     import SemanticVersion
 
 from pyEDAA.Reports                           import Resources
-from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, CoverageSummary
+from pyEDAA.Reports.CodeCoverage              import Branch as cc_Branch, CodeCoverageError, CoverageSummary
 from pyEDAA.Reports.CodeCoverage              import Document as cc_Document, File as cc_File, Function as cc_Function
 from pyEDAA.Reports.CodeCoverage              import Line as cc_Line, LineCoverageStatus, SourceFile as cc_SourceFile
 from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function, Line
@@ -578,8 +584,8 @@ class Document(cc_Document, Coverage):
 		"""
 		Convert the format's model to the common model, and aggregate it.
 
-		A source file several data files state - e.g. a header - becomes one file: the counts of its lines and of its
-		functions are added. The directories the compiler ran in become the source directories.
+		A source file several data files state - e.g. a header - becomes one file: the counts of its lines and branches,
+		and of its functions, are added. The directories the compiler ran in become the source directories.
 
 		:returns:                  The report's root of the common model, named after the report file without the
 		                           extensions ``.gcov``, ``.json`` and ``.gz``.
@@ -591,17 +597,23 @@ class Document(cc_Document, Coverage):
 		}
 		summary = CoverageSummary(name if name != "" else self._path.name, sourceDirectories=sorted(directories))
 
-		# per file of the common model: the counts of its lines, and of its functions
+		# per file of the common model: the counts of its lines, of its lines' branches, and of its functions
 		lineCounts:     dict[cc_File, dict[int, int]] = {}
+		branchCounts:   dict[cc_File, dict[int, dict[tuple[Nullable[str], int, Nullable[int], Nullable[int]], int]]] = {}
 		functionCounts: dict[cc_File, dict[str, tuple[int, int, int]]] = {}
 		for dataFile in self._dataFiles:
 			for file in dataFile._files.values():
 				commonFile = summary.GetOrAddFile(file._path)
 				counts =     lineCounts.setdefault(commonFile, {})
+				branches =   branchCounts.setdefault(commonFile, {})
 				functions =  functionCounts.setdefault(commonFile, {})
 
 				for line in file._lines:
 					counts[line._lineNumber] = counts.get(line._lineNumber, 0) + line._count
+					lineBranches = branches.setdefault(line._lineNumber, {})
+					for index, branch in enumerate(line._branches):
+						key = (line._functionName, index, branch._sourceBlockID, branch._destinationBlockID)
+						lineBranches[key] = lineBranches.get(key, 0) + branch._count
 
 				for function in file._functions.values():
 					startLine, endLine, count = functions.get(
@@ -611,8 +623,17 @@ class Document(cc_Document, Coverage):
 
 		for commonFile, counts in lineCounts.items():
 			for number in sorted(counts):
-				status = LineCoverageStatus.Covered if counts[number] > 0 else LineCoverageStatus.Uncovered
-				cc_Line(number, status, counts[number], parent=commonFile)
+				lineBranches = branchCounts[commonFile][number]
+				if counts[number] == 0:
+					status = LineCoverageStatus.Uncovered
+				elif 0 in lineBranches.values():
+					status = LineCoverageStatus.PartiallyCovered
+				else:
+					status = LineCoverageStatus.Covered
+
+				commonLine = cc_Line(number, status, counts[number], parent=commonFile)
+				for count in lineBranches.values():
+					cc_Branch(LineCoverageStatus.Covered if count > 0 else LineCoverageStatus.Uncovered, count, parent=commonLine)
 
 			lines =          commonFile._lines
 			lastLineNumber = commonFile._lastLineNumber

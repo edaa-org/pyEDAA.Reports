@@ -79,7 +79,7 @@ def _stream() -> list[dict[str, Any]]:
 
 
 class FormatModel(Testcase):
-	"""The format's model keeps what the report states: data files, files, functions and lines."""
+	"""The format's model keeps what the report states: data files, files, functions, lines and their records."""
 
 	def test_DataFiles(self) -> None:
 		report = Document(STREAM, analyzeAndConvert=True)
@@ -105,6 +105,20 @@ class FormatModel(Testcase):
 		line = next(line for line in stack.Lines if line.LineNumber == 21)
 		self.assertEqual(("_ZN10Containers5Stack3PopEv", 1, False, [3, 4, 5, 8]),
 		                 (line.FunctionName, line.Count, line.UnexecutedBlock, line.BlockIDs))
+		self.assertEqual([(1, False, True, 4, 5), (0, True, False, 4, 8)], [
+			(branch.Count, branch.Throw, branch.Fallthrough, branch.SourceBlockID, branch.DestinationBlockID)
+			for branch in line.Branches
+		])
+		self.assertEqual([(3, 1, 1), (4, 1, 1), (5, 1, 0), (8, 1, 0)], [
+			(call.SourceBlockID, call.DestinationBlockID, call.Returned) for call in line.Calls
+		])
+
+	def test_Conditions(self) -> None:
+		statistics = Document(STREAM, analyzeAndConvert=True).DataFiles[0].Files[Path("Statistics.c")]
+
+		condition, = next(line for line in statistics.Lines if line.LineNumber == 20).Conditions
+		self.assertEqual((4, 2, [], [0, 1]),
+		                 (condition.Count, condition.Covered, condition.NotCoveredTrue, condition.NotCoveredFalse))
 
 	def test_Template(self) -> None:
 		"""A line of a template is listed once per instantiation."""
@@ -155,7 +169,8 @@ class Construction(Testcase):
 	def test_Line_Defaults(self) -> None:
 		line = Line(3, 0, True)
 
-		self.assertEqual((None, []), (line.FunctionName, line.BlockIDs))
+		self.assertEqual((None, [], [], [], []),
+		                 (line.FunctionName, line.BlockIDs, line.Branches, line.Calls, line.Conditions))
 
 	def test_Function(self) -> None:
 		pop = gcov_Function("_ZN10Containers5Stack3PopEv", "Containers::Stack::Pop()", 19, 8, 23, 4, 8, 7, 3)
@@ -281,6 +296,9 @@ class ParentRelation(Testcase):
 				self.assertIs(dataFile, file.Parent)
 				self.assertTrue(all(function.Parent is file for function in file.Functions.values()))
 				self.assertTrue(all(line.Parent is file for line in file.Lines))
+				self.assertTrue(all(
+					record.Parent is line for line in file.Lines for record in (*line.Branches, *line.Calls, *line.Conditions)
+				))
 
 	def test_DataFile_Parent(self) -> None:
 		with self.assertRaises(TypeError) as context:
@@ -363,10 +381,17 @@ class Parsing(Testcase):
 		                 (line.LineNumber, line.Count, line.UnexecutedBlock, line.FunctionName, line.BlockIDs))
 
 	def test_Line_Format1(self) -> None:
-		"""A line of format 1 has no basic blocks; a line of inlined statements has no function."""
-		line = Line.Parse({"line_number": 3, "count": 0, "unexecuted_block": True, "branches": []})
+		"""A line of format 1 has no basic blocks, calls and conditions; a line of inlined statements has no function."""
+		line = Line.Parse({
+			"line_number": 3, "count": 0, "unexecuted_block": True, "branches": [
+				{"count": 0, "throw": False, "fallthrough": True}
+			]
+		})
 
-		self.assertEqual((None, []), (line.FunctionName, line.BlockIDs))
+		self.assertEqual((None, [], [], []), (line.FunctionName, line.BlockIDs, line.Calls, line.Conditions))
+		self.assertEqual([(0, None, None)], [
+			(branch.Count, branch.SourceBlockID, branch.DestinationBlockID) for branch in line.Branches
+		])
 
 	def test_Function(self) -> None:
 		pop = gcov_Function.Parse({
@@ -398,7 +423,7 @@ class Parsing(Testcase):
 
 
 class Conversion(Testcase):
-	"""The conversion to the common model: files, lines, source files and functions."""
+	"""The conversion to the common model: files, lines with branches, source files and functions."""
 
 	def test_Counts(self) -> None:
 		"""The computed counters agree with gcov's own summary, except for the lines of a template."""
@@ -409,13 +434,13 @@ class Conversion(Testcase):
 		])
 		# gcov: 'Lines executed:100.00% of 20' - it counts the 2 lines of the template once per instantiation
 		for path, counters in (
-			("Statistics.c",         (21, 17)),
-			("Containers/Stack.hpp", (11, 10)),
-			("Main.cpp",             (16, 16))
+			("Statistics.c",         (21, 17, 10, 6)),
+			("Containers/Stack.hpp", (11, 10,  8, 4)),
+			("Main.cpp",             (16, 16, 32, 17))
 		):
 			with self.subTest(path=path):
 				file = summary.GetOrAddFile(path)
-				self.assertEqual(counters, (file.TotalLines, file.CoveredLines))
+				self.assertEqual(counters, (file.TotalLines, file.CoveredLines, file.TotalBranches, file.CoveredBranches))
 
 		self.assertEqual((48, 43, 0), (summary.TotalLines, summary.CoveredLines, summary.ExcludedLines))
 
@@ -423,16 +448,25 @@ class Conversion(Testcase):
 		summary = Document(STREAM, analyzeAndConvert=True).ToCoverageSummary()
 		statistics = summary.Files["Statistics.c"]
 
-		line = statistics.Lines[14]
-		self.assertEqual((LineCoverageStatus.Covered, 4), (line.Status, line.CoverageCount))
+		line = statistics.Lines[5]
+		self.assertEqual((LineCoverageStatus.PartiallyCovered, 1), (line.Status, line.CoverageCount))
+		self.assertEqual([(LineCoverageStatus.Uncovered, 0, None), (LineCoverageStatus.Covered, 1, None)], [
+			(branch.Status, branch.CoverageCount, branch.Target) for branch in line.Branches
+		])
 		self.assertEqual((LineCoverageStatus.Uncovered, 0), (statistics.Lines[6].Status, statistics.Lines[6].CoverageCount))
 		self.assertIsNone(statistics.Lines[10])
 
+		# the exceptional branch of the 'throw' line was never taken
+		throwLine = summary.Directories["Containers"].Files["Stack.hpp"].Lines[21]
+		self.assertEqual((LineCoverageStatus.PartiallyCovered, 1, 2),
+		                 (throwLine.Status, throwLine.CoverageCount, len(throwLine.Branches)))
+
 	def test_Template(self) -> None:
-		"""A line of a template becomes one line, its counts added."""
+		"""A line of a template becomes one line: its counts added, the branches of every instantiation kept."""
 		line = Document(STREAM, analyzeAndConvert=True).ToCoverageSummary().Files["Main.cpp"].Lines[9]
 
-		self.assertEqual((LineCoverageStatus.Covered, 2), (line.Status, line.CoverageCount))
+		self.assertEqual((LineCoverageStatus.PartiallyCovered, 2), (line.Status, line.CoverageCount))
+		self.assertEqual([1, 0, 0, 1], [branch.CoverageCount for branch in line.Branches])
 
 	def test_Units(self) -> None:
 		summary = Document(STREAM, analyzeAndConvert=True).ToCoverageSummary()
@@ -448,7 +482,7 @@ class Conversion(Testcase):
 
 		pop = units["Containers/Stack.hpp.Containers::Stack::Pop()"]
 		self.assertEqual((19, 22, 3), (pop.StartLine.LineNumber, pop.EndLine.LineNumber, pop.CoverageCount))
-		self.assertEqual((4, 4), (pop.TotalLines, pop.CoveredLines))
+		self.assertEqual((4, 4, 4, 3), (pop.TotalLines, pop.CoveredLines, pop.TotalBranches, pop.CoveredBranches))
 
 		twice = units["Statistics.c.Twice"]
 		self.assertEqual((LineCoverageStatus.Uncovered, 0, 2, 0),
@@ -475,12 +509,15 @@ class Conversion(Testcase):
 
 		summary = report.ToCoverageSummary()
 		stack = summary.Directories["Containers"].Files["Stack.hpp"]
-		self.assertEqual((2, 6), (stack.Lines[21].CoverageCount, stack.Lines[20].CoverageCount))
-		self.assertEqual(11, stack.TotalLines)
+		self.assertEqual((2, 6, [2, 0]), (
+			stack.Lines[21].CoverageCount, stack.Lines[20].CoverageCount,
+			[branch.CoverageCount for branch in stack.Lines[21].Branches]
+		))
+		self.assertEqual((11, 8), (stack.TotalLines, stack.TotalBranches))
 		self.assertEqual(6, summary.Units["Containers/Stack.hpp"].Units["Containers::Stack::Pop()"].CoverageCount)
 
 	def test_Format1(self) -> None:
-		"""Format 1 has no basic blocks."""
+		"""Format 1 has no basic blocks, calls and conditions."""
 		document = {
 			"format_version": "1", "gcc_version": "13.2.0", "data_file": "main.c", "files": [{
 				"file": "main.c",
@@ -502,12 +539,14 @@ class Conversion(Testcase):
 
 		self.assertIs(FormatVersion.Version1, report.DataFiles[0].FormatVersion)
 		line = report.DataFiles[0].Files[Path("main.c")].Lines[1]
-		self.assertEqual([], line.BlockIDs)
+		self.assertEqual(([], [], [], None), (line.BlockIDs, line.Calls, line.Conditions, line.Branches[0].SourceBlockID))
 		self.assertIsNone(report.DataFiles[0].CurrentWorkingDirectory)
 		self.assertIsNone(report.DataFiles[0].Files[Path("main.c")].Lines[2].FunctionName)
 
 		summary = report.ToCoverageSummary()
-		self.assertEqual((3, 2), (summary.TotalLines, summary.CoveredLines))
+		self.assertEqual((3, 2, 2, 1, 1), (
+			summary.TotalLines, summary.CoveredLines, summary.TotalBranches, summary.CoveredBranches, summary.PartialLines
+		))
 		self.assertEqual([], summary.SourceDirectories)
 
 

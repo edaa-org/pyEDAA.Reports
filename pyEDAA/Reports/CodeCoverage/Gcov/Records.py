@@ -30,32 +30,39 @@
 #
 """
 The records of GCC's gcov JSON format below a file: its functions and lines.
+
+The records of a line - its branches, calls and conditions - are in :mod:`~pyEDAA.Reports.CodeCoverage.Gcov.Branches`.
 """
-from __future__                         import annotations
+from __future__                                import annotations
 
-from collections.abc                    import Iterable
-from typing                             import TYPE_CHECKING, Any, Optional as Nullable, Self
+from collections.abc                           import Iterable
+from typing                                    import TYPE_CHECKING, Any, Optional as Nullable, Self
 
-from pyTooling.Common                   import getFullyQualifiedName
-from pyTooling.Decorators               import export, readonly
-from pyTooling.MetaClasses              import ExtendedType
+from pyTooling.Common                          import getFullyQualifiedName
+from pyTooling.Decorators                      import export, readonly
+from pyTooling.MetaClasses                     import ExtendedType
+
+from pyEDAA.Reports.CodeCoverage.Gcov.Branches import Branch, Call, Condition
 
 if TYPE_CHECKING:
-	from pyEDAA.Reports.CodeCoverage.Gcov import File
+	from pyEDAA.Reports.CodeCoverage.Gcov        import File
 
 
 @export
 class Line(metaclass=ExtendedType, slots=True):
 	"""
-	A ``line`` of a file: how often it ran, and its basic blocks.
+	A ``line`` of a file: how often it ran, its basic blocks, branches, calls and conditions.
 	"""
 
-	_parent:          Nullable[File]  #: The file the line belongs to.
-	_lineNumber:      int             #: Line number, counted from 1.
-	_functionName:    Nullable[str]   #: Mangled name of the function the line belongs to, if the report says.
-	_count:           int             #: Number of times the line ran.
-	_unexecutedBlock: bool            #: Whether a basic block, not only reached by exceptions, never ran.
-	_blockIDs:        list[int]       #: IDs of the basic blocks ending on this line, in format 2.
+	_parent:          Nullable[File]   #: The file the line belongs to.
+	_lineNumber:      int              #: Line number, counted from 1.
+	_functionName:    Nullable[str]    #: Mangled name of the function the line belongs to, if the report says.
+	_count:           int              #: Number of times the line ran.
+	_unexecutedBlock: bool             #: Whether a basic block, not only reached by exceptions, never ran.
+	_blockIDs:        list[int]        #: IDs of the basic blocks ending on this line, in format 2.
+	_branches:        list[Branch]     #: The branches.
+	_calls:           list[Call]       #: The calls, in format 2.
+	_conditions:      list[Condition]  #: The conditions, in format 2.
 
 	def __init__(
 		self,
@@ -69,6 +76,8 @@ class Line(metaclass=ExtendedType, slots=True):
 	) -> None:
 		"""
 		Initialize the line, and add it to the lines of its file.
+
+		Its branches, calls and conditions are added by creating them with this line as their parent.
 
 		:param lineNumber:      Line number, counted from 1.
 		:param count:           Number of times the line ran.
@@ -137,6 +146,9 @@ class Line(metaclass=ExtendedType, slots=True):
 		self._count =           count
 		self._unexecutedBlock = unexecutedBlock
 		self._blockIDs =        []
+		self._branches =        []
+		self._calls =           []
+		self._conditions =      []
 
 		if blockIDs is not None:
 			if not isinstance(blockIDs, Iterable):
@@ -158,13 +170,13 @@ class Line(metaclass=ExtendedType, slots=True):
 	@classmethod
 	def Parse(cls, record: dict[str, Any], *, parent: Nullable[File] = None) -> Self:
 		"""
-		Parse a line from its JSON object.
+		Parse a line, its branches, calls and conditions from its JSON object.
 
 		:param record: The JSON object of the line.
 		:param parent: Optional, the file the line belongs to. Default: ``None``.
 		:returns:      The line.
 		"""
-		return cls(
+		line = cls(
 			record["line_number"],
 			record["count"],
 			record["unexecuted_block"],
@@ -172,6 +184,17 @@ class Line(metaclass=ExtendedType, slots=True):
 			record.get("block_ids"),
 			parent=parent
 		)
+
+		for branch in record["branches"]:
+			Branch.Parse(branch, parent=line)
+
+		for call in record.get("calls", []):
+			Call.Parse(call, parent=line)
+
+		for condition in record.get("conditions", []):
+			Condition.Parse(condition, parent=line)
+
+		return line
 
 	@readonly
 	def Parent(self) -> Nullable[File]:
@@ -228,6 +251,33 @@ class Line(metaclass=ExtendedType, slots=True):
 		:returns: The blocks' IDs, unique within the function; empty in format 1.
 		"""
 		return self._blockIDs
+
+	@readonly
+	def Branches(self) -> list[Branch]:
+		"""
+		Read-only property to access the branches (:attr:`_branches`).
+
+		:returns: The branches; empty, if gcov ran without ``--branch-probabilities``.
+		"""
+		return self._branches
+
+	@readonly
+	def Calls(self) -> list[Call]:
+		"""
+		Read-only property to access the calls (:attr:`_calls`).
+
+		:returns: The calls; empty in format 1, or if gcov ran without ``--branch-probabilities``.
+		"""
+		return self._calls
+
+	@readonly
+	def Conditions(self) -> list[Condition]:
+		"""
+		Read-only property to access the conditions (:attr:`_conditions`).
+
+		:returns: The conditions; empty in format 1, or if gcov ran without ``--conditions``.
+		"""
+		return self._conditions
 
 
 @export
