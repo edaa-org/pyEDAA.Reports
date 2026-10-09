@@ -182,31 +182,6 @@ class Document(ju_Document):
 	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass          #: Test class class of the dialect.
 	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite          #: Test suite class of the dialect.
 
-	@classmethod
-	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary) -> Document:
-		"""
-		Convert a test suite summary of the unified test entity data model to a document of the go-junit-report JUnit
-		dialect.
-
-		:param xmlReportFile:    Path to the XML file the document is written to.
-		:param testsuiteSummary: Test suite summary from unified data model.
-		:returns:                Document of the go-junit-report JUnit dialect.
-		"""
-		doc = cls(xmlReportFile)
-		doc._name = testsuiteSummary._name
-		doc._startTime = testsuiteSummary._startTime
-		doc._duration = testsuiteSummary._totalDuration
-		doc._status = testsuiteSummary._status
-		doc._tests = testsuiteSummary._tests
-		doc._skipped = testsuiteSummary._skipped
-		doc._errored = testsuiteSummary._errored
-		doc._failed = testsuiteSummary._failed
-		doc._passed = testsuiteSummary._passed
-
-		doc.AddTestsuites(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
-
-		return doc
-
 	def Analyze(self) -> None:
 		"""
 		Analyze the XML file, parse the content into an XML data structure and validate the data structure using an XML
