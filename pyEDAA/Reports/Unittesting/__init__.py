@@ -416,8 +416,12 @@ class Base(metaclass=ExtendedType, slots=True):
 			testDuration = totalDuration
 			if setupDuration is not None:
 				testDuration -= setupDuration
+
 			if teardownDuration is not None:
 				testDuration -= teardownDuration
+
+			if testDuration < timedelta():
+				raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of setup and teardown durations.")
 
 		self._startTime = startTime
 		self._setupDuration = setupDuration

@@ -28,6 +28,7 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
+from datetime                   import timedelta
 from unittest                   import TestCase as ut_TestCase
 
 from pyEDAA.Reports.Unittesting import DuplicateTestsuiteError, DuplicateTestcaseError, TestsuiteStatus
@@ -309,6 +310,27 @@ class KeyValuePairs(py_Testcase):
 	def test_NotAMapping(self) -> None:
 		with self.assertRaises(TypeError):
 			_ = Testcase("tc", keyValuePairs=[("key", 1)])
+
+
+class Durations(py_Testcase):
+	def test_DerivedTestDuration(self) -> None:
+		tc = Testcase(
+			"tc",
+			setupDuration=timedelta(seconds=1),
+			teardownDuration=timedelta(seconds=2),
+			totalDuration=timedelta(seconds=10)
+		)
+
+		self.assertEqual(timedelta(seconds=7), tc.TestDuration)
+
+	def test_DerivedTestDuration_Negative(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Testcase("tc", setupDuration=timedelta(seconds=5), totalDuration=timedelta(seconds=1))
+
+		self.assertEqual(
+			"Parameter 'totalDuration' can not be less than the sum of setup and teardown durations.",
+			str(context.exception)
+		)
 
 
 def CreateTestsuiteStructure(rootIsSummary: bool = True, empty: bool = False) -> Testsuite:
