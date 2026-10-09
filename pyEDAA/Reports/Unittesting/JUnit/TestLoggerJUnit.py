@@ -97,12 +97,6 @@ class Testsuite(ju_Testsuite):
 			status=testsuite._status,
 		)
 
-		juTestsuite._tests = testsuite._tests
-		juTestsuite._skipped = testsuite._skipped
-		juTestsuite._errored = testsuite._errored
-		juTestsuite._failed = testsuite._failed
-		juTestsuite._passed = testsuite._passed
-
 		for tc in testsuite.IterateTestcases():
 			ts = tc._parent
 			if ts is None:
@@ -230,7 +224,7 @@ class Document(ju_Document):
 		:param regenerate:     Optional, if true, regenerate the XML structure from data model.
 		:raises UnittestError: If the file cannot be overwritten.
 		:raises UnittestError: If the internal XML data structure wasn't generated. |br|
-		                       Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.
+		                       Call ``Document.Generate()`` or ``Document.Write(..., regenerate=True)``.
 		:raises UnittestError: If the file cannot be opened or written.
 		"""
 		if path is None:
@@ -267,8 +261,8 @@ class Document(ju_Document):
 		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
 
 		:raises UnittestError: If XML was not read and parsed before. |br|
-		                       Call 'Document.Analyze()' or create the document using
-		                       'Document(path, analyzeAndConvert=True)'.
+		                       Call ``Document.Analyze()`` or create the document using
+		                       ``Document(path, analyzeAndConvert=True)``.
 		"""
 		if self._xmlDocument is None:
 			ex = UnittestError(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
