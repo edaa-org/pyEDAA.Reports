@@ -73,12 +73,11 @@ report's files, functions and totals with it.
 """
 from __future__                                 import annotations
 
-from collections.abc                            import Iterable
 from json                                       import JSONDecodeError, loads
 from os.path                                    import commonprefix
 from pathlib                                    import Path
 from re                                         import match
-from typing                                     import Any, Optional as Nullable
+from typing                                     import Any, Iterable, Optional as Nullable
 
 from jsonschema                                 import Draft202012Validator
 from pyTooling.Common                           import getFullyQualifiedName, readResourceFile

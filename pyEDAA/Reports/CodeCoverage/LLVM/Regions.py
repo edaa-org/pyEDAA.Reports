@@ -38,9 +38,8 @@ classmethod ``Parse`` reads the region's JSON array.
 """
 from __future__            import annotations
 
-from collections.abc       import Iterable
 from enum                  import Enum
-from typing                import Any, Optional as Nullable, Self
+from typing                import Any, Iterable, Optional as Nullable, Self
 
 from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly

@@ -39,9 +39,8 @@ object. The source regions are in :mod:`~pyEDAA.Reports.CodeCoverage.LLVM.Region
 """
 from __future__                                 import annotations
 
-from collections.abc                            import Iterable
 from pathlib                                    import Path
-from typing                                     import Any, Optional as Nullable, Self
+from typing                                     import Any, Iterable, Optional as Nullable, Self
 
 from pyTooling.Common                           import getFullyQualifiedName
 from pyTooling.Decorators                       import export, readonly
