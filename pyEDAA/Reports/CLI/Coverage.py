@@ -50,6 +50,7 @@ from pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura   import Document
 from pyEDAA.Reports.CodeCoverage.CoveragePy                      import Document as CoveragePyDocument
 from pyEDAA.Reports.CodeCoverage.Gcov                            import Document as GcovDocument
 from pyEDAA.Reports.CodeCoverage.GHDL                            import Document as GHDLDocument
+from pyEDAA.Reports.CodeCoverage.LCOV                            import Document as LCOVDocument
 
 
 #: The formats ``--input`` reads, by their lower-case name on the command line.
@@ -58,7 +59,8 @@ INPUT_FORMATS: Dict[str, Type[cc_Document]] = {
 	"coveragepy-cobertura": CoveragePyCoberturaDocument,
 	"coveragepy-json":      CoveragePyDocument,
 	"gcov-json":            GcovDocument,
-	"ghdl-json":            GHDLDocument
+	"ghdl-json":            GHDLDocument,
+	"lcov":                 LCOVDocument
 }
 
 

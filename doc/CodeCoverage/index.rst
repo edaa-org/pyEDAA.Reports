@@ -602,9 +602,9 @@ most tools read (see :ref:`References/cli`):
    Lines:    26 of 27 covered (96.3%)
    Writing Cobertura XML report 'coverage.xml' ...
 
-``--input`` names the format - ``Any-Cobertura``, ``CoveragePy-Cobertura``, ``CoveragePy-JSON``, ``Gcov-JSON`` or
-``GHDL-JSON`` (case-insensitive) - and the file, ``--output`` the format ``Cobertura`` and the file. ``-v`` adds the
-figures of each file.
+``--input`` names the format - ``Any-Cobertura``, ``CoveragePy-Cobertura``, ``CoveragePy-JSON``, ``Gcov-JSON``,
+``GHDL-JSON`` or ``LCOV`` (case-insensitive) - and the file, ``--output`` the format ``Cobertura`` and the file. ``-v``
+adds the figures of each file.
 
 
 .. _CODECOV/Tools:
