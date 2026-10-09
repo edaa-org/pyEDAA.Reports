@@ -676,8 +676,13 @@ the standard specifies - and reads it into the format's model:
 * the history nodes - the tests and merges -, by their ID, with the tool, the date and how the test ran,
 * the instances, where they are instantiated, their design unit, the instance they are instantiated in, their design
   parameters,
-* each instance's statement and block coverage - statements, blocks, nested blocks, processes - and branch coverage -
-  branching statements, their branches, the branching statements nested in a branch -, once per metric mode,
+* each instance's coverage of each kind, once per metric mode: statement and block coverage - statements, blocks,
+  nested blocks, processes -, branch coverage - branching statements, their branches, the branching statements nested
+  in a branch -, toggle coverage - signals, their dimensions, bits and transitions -, condition and expression
+  coverage - expressions, nested by their sub-expressions, a bin per combination of values -, FSM coverage - state
+  machines, their states and transitions -, assertion coverage - a bin per outcome, e.g. pass, fail or vacuous pass -
+  and covergroup coverage - covergroup instances, their options, coverpoints with bins of value ranges or sequences,
+  crosses with bins of combined coverpoint bins -,
 * each coverage item's bin: how often it was covered, the tests, which covered it, whether it is excluded, its goal,
 * and every element's user-defined attributes.
 
@@ -702,7 +707,7 @@ common model:
 
 What the conversion leaves out: the instance hierarchy, the history nodes, the bins' goals and weights, the metric modes
 and the user-defined attributes. An excluded branch or branching statement isn't converted. The toggle, condition,
-expression, FSM, assertion and covergroup coverage is validated, but not read yet.
+expression, FSM, assertion and covergroup coverage stays in the format's model: the common model has no counterpart.
 
 .. code-block:: Python
 
@@ -743,9 +748,11 @@ pyucis UCIS XML
 `pyucis <https://github.com/fvutils/pyucis>`__ writes UCIS XML - e.g. with ``pyucis convert``, or for PyVSC's
 ``vsc.write_coverage_db("coverage.xml")`` -, whose root binds the prefix ``ucis`` to the XML Schema instance
 namespace, but whose elements are in no namespace. :class:`pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS.Document` validates
-a report against :ref:`PyUCIS-1.0.xsd <SCHEMAS/PyUCIS-1.0>` - the standard's schema without a target namespace - and
-reads and converts it as the standard's format. pyucis names a source file ``__null__file__`` with ID ``1`` for the
-statement identifiers, which name no file; it has no coverage, so it becomes no file.
+a report against :ref:`PyUCIS-1.0.xsd <SCHEMAS/PyUCIS-1.0>` - the standard's schema without a target namespace; as
+pyucis' own schema has it, a coverpoint's and a cross' bin state a ``name`` and a ``key``, and a covergroup instance
+may have no coverpoint - and reads and converts it as the standard's format. pyucis names a source file
+``__null__file__`` with ID ``1`` for the statement identifiers, which name no file; it has no coverage, so it becomes
+no file.
 
 .. code-block:: Python
 
