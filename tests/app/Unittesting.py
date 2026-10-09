@@ -33,6 +33,7 @@ The command ``unittest``, driven through the command line: a defective option or
 non-zero exit code.
 """
 from pathlib   import Path
+from textwrap  import dedent
 from typing    import ClassVar
 
 from pyTooling.Testing import ApplicationTestcase
@@ -67,3 +68,26 @@ class UnittestCommand(ApplicationTestcase):
 
 		self.assertExitCode(result, 1)
 		self.assertIn("[FATAL]     Found 0 files for pattern", result.stdout)
+
+	def test_RewriteDunderInit_Duplicate(self) -> None:
+		"""A test class in a package's ``__init__`` and beside it: the rewrite raises, the program exits with code 1."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		inputFile = OUTPUT_DIRECTORY / "duplicate.xml"
+		with inputFile.open("w", encoding="utf-8") as file:
+			file.write(dedent("""\
+				<?xml version="1.0" encoding="utf-8"?>
+				<testsuites>
+				  <testsuite name="pytest" errors="0" failures="0" skipped="0" tests="2" time="0.002"
+				             timestamp="2024-10-06T11:28:52.276577+00:00" hostname="localhost">
+				    <testcase classname="tests.unit.__init__.Cls" name="test_A" time="0.001"/>
+				    <testcase classname="tests.unit.Cls" name="test_A" time="0.001"/>
+				  </testsuite>
+				</testsuites>
+				"""))
+
+		result = self.RunEntrypoint(
+			"unittest", f"--merge=pyTest-JUnit:{inputFile}", "--pytest=rewrite-dunder-init", timeout=60.0
+		)
+
+		self.assertExitCode(result, 1)
+		self.assertIn("[ERROR] Testsuite already contains a testsuite with same name 'Cls'.", result.stderr)
