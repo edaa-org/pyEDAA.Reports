@@ -221,7 +221,17 @@ binary format of their own, which only the tool itself or its API reads.
      - —
      - UCDB (read via the UCIS API)
 
-pyEDAA.Reports reads Cobertura XML - also coverage.py's and NVC's - and coverage.py's JSON.
+pyEDAA.Reports reads these formats:
+
+* :ref:`Cobertura XML <CODECOV/Formats/Cobertura>` of any tool, and the dialects of
+  :ref:`coverage.py <CODECOV/Formats/Cobertura/CoveragePy>` and :ref:`NVC <CODECOV/Formats/Cobertura/NVC>`
+* :ref:`coverage.py's JSON <CODECOV/Formats/CoveragePy>`
+* :ref:`GHDL's coverage JSON <CODECOV/Formats/GHDL>`
+* :ref:`gcov's JSON <CODECOV/Formats/Gcov>`
+* :ref:`lcov's tracefile <CODECOV/Formats/LCOV>`
+* :ref:`JaCoCo XML <CODECOV/Formats/JaCoCo>`
+
+The Go cover profile, OpenCover XML and coverlet's JSON are described below, but not read yet.
 
 .. _CODECOV/Formats/Cobertura:
 
