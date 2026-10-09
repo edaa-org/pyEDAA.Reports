@@ -135,6 +135,7 @@ Report Formats
       * :ref:`cargo-nextest <UNITTEST/Tool/nextest>`
       * :ref:`Catch2 <UNITTEST/Tool/Catch2>`
       * :ref:`CTest <UNITTEST/Tool/CTest>`
+      * :ref:`Go <UNITTEST/Tool/Go>`
       * :ref:`GoogleTest <UNITTEST/Tool/GoogleTest>`
       * :ref:`Ant + JUnit4 <UNITTEST/Tool/JUnit4>`
       * :ref:`JUnit5 <UNITTEST/Tool/JUnit5>`

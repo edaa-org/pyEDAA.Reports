@@ -11,6 +11,7 @@ pyTooling ships in :mod:`pyTooling.Resources`.
   :class:`pyEDAA.Reports.Unittesting.JUnit.Document`.
 * :file:`Ant-JUnit4.xsd` - JUnit XML as written by Ant's JUnit 4 runner.
 * :file:`CTest-JUnit.xsd` - JUnit XML as written by CTest.
+* :file:`GoJUnitReport-JUnit.xsd` - JUnit XML as written by go-junit-report.
 * :file:`GoogleTest-JUnit.xsd` - JUnit XML as written by GoogleTest.
 * :file:`Nextest-JUnit.xsd` - JUnit XML as written by cargo-nextest.
 * :file:`PyTest-JUnit.xsd` - JUnit XML as written by pytest.
