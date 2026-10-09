@@ -5,8 +5,8 @@ Schemas
 
 pyEDAA.Reports validates every file it reads against the schema of its format before converting it: an **XML schema**
 or a **JSON Schema**. It ships the schemas of the code coverage formats - e.g. Cobertura's XML or coverage.py's JSON
-report - and of the JUnit dialects; the schema of pyTooling's test report comes with pyTooling. Each schema is listed
-here, the shipped ones with their full source, ready to read, to copy, or to download.
+report -, of the JUnit dialects and of Open Test Reporting; the schema of pyTooling's test report comes with pyTooling.
+Each schema is listed here, the shipped ones with their full source, ready to read, to copy, or to download.
 
 .. _SCHEMAS/Files:
 
@@ -56,6 +56,9 @@ Available schemas
    * - :ref:`pytest JUnit <SCHEMAS/PyTest-JUnit>`
      - :file:`PyTest-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit.Document`
+   * - :ref:`Open Test Reporting 0.2.0 <SCHEMAS/OpenTestReporting>`
+     - :file:`OpenTestReporting/OpenTestReporting-0.2.0.xsd`
+     - :class:`pyEDAA.Reports.Unittesting.OpenTestReporting.Events.Document`
    * - :ref:`pyTooling TestReport v0.1 <SCHEMAS/TestReport-v0.1>`
      - :file:`TestReport-v0.1.xsd`
      - :class:`pyEDAA.Reports.Unittesting.pyTooling.Document`
@@ -100,4 +103,5 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    CTest-JUnit
    GoogleTest-JUnit
    PyTest-JUnit
+   OpenTestReporting
    TestReport-v0.1
