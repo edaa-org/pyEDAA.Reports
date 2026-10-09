@@ -113,8 +113,8 @@ class FormatVersion(StringEnum):
 	Version1_1 = "1.1"  #: Format 1.1, public identifier ``-//JACOCO//DTD Report 1.1//EN``.
 
 
-# A class with a property named like a class - ``FormatVersion`` - can't name that class in the annotation of a field: the
-# class body's namespace, where annotations are evaluated, binds the name to the property.
+# A class with a property named like a class - ``FormatVersion`` - can't name that class in the annotation of a field:
+# the class body's namespace, where annotations are evaluated, binds the name to the property.
 _FormatVersion = FormatVersion
 
 SCHEMAS: dict[FormatVersion, str] = {
@@ -554,8 +554,8 @@ class Document(cc_Document, Report):
 
 			:param element:     The class or method.
 			:param counterType: The counter's kind.
-			:returns:           Covered, if the counter counts a covered item, otherwise uncovered; unknown, if the element has
-			                    no such counter.
+			:returns:           Covered, if the counter counts a covered item, otherwise uncovered; unknown, if the element
+			                    has no such counter.
 			"""
 			if (counter := element._counters.get(counterType)) is None:
 				return LineCoverageStatus.Unknown
