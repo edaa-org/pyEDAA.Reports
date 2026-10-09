@@ -1415,7 +1415,7 @@ class Document(TestsuiteSummary, ut_Document):
 					f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'."
 				) from ex
 			except Exception as ex:
-				raise UnittestError(f"Couldn't open '{self._path}'.") from ex
+				raise UnittestError(f"Couldn't read JUnit XML file '{self._path}'.") from ex
 
 		self._analysisDuration = sw.Duration
 

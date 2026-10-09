@@ -153,6 +153,7 @@ class Document(TestsuiteSummary, ut_Document):
 		   The time spend for analysis will be made available via property :data:`AnalysisDuration`.
 
 		:raises UnittestError: If the file doesn't exist.
+		:raises UnittestError: If the file can't be read.
 		:raises UnittestError: If the file isn't well-formed XML.
 		:raises UnittestError: If the root element isn't ``<TestReport>``.
 		:raises UnittestError: If the root element has no ``xsi:noNamespaceSchemaLocation`` attribute.
@@ -167,6 +168,8 @@ class Document(TestsuiteSummary, ut_Document):
 		with Stopwatch() as sw:
 			try:
 				xmlDocument = parse(self._path, XMLParser(ns_clean=True))
+			except OSError as ex:
+				raise UnittestError(f"Couldn't read pyTooling test report file '{self._path}'.") from ex
 			except XMLSyntaxError as ex:
 				raise UnittestError(f"XML syntax error in pyTooling test report file '{self._path}'.") from ex
 
