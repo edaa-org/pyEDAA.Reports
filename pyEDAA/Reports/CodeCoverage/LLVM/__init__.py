@@ -35,10 +35,16 @@ LLVM's JSON code coverage export: a model of the format, read from a report and 
 ``llvm-cov export -format=text`` writes the format - type ``llvm.coverage.json.export`` - from the source-based code
 coverage of Clang, and of other compilers based on LLVM, e.g. rustc or Swift. A report is validated against the JSON
 Schema :file:`LLVM-Coverage-JSON.schema.json`, reverse-engineered from llvm-cov, which accepts the format versions
-2.0.0 to 3.1.0. The format's model keeps what the report states: a :class:`Document` holds :class:`File` records - each
-with its segments, branch regions, MC/DC records, expansions and summary -, and :class:`Function` records - each with
-its regions, branch regions and MC/DC records. The records below a file or a function are in
-:mod:`~pyEDAA.Reports.CodeCoverage.LLVM.Records`.
+2.0.0 to 3.1.0. The format's model keeps what the report states: a :class:`Document` holds
+:class:`~pyEDAA.Reports.CodeCoverage.LLVM.Records.File` records - each with its segments, branch regions, MC/DC records,
+expansions and summary -, and :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Records.Function` records - each with its
+regions, branch regions and MC/DC records. The records are in :mod:`~pyEDAA.Reports.CodeCoverage.LLVM.Records`, the
+source regions in :mod:`~pyEDAA.Reports.CodeCoverage.LLVM.Regions`, the summaries in
+:mod:`~pyEDAA.Reports.CodeCoverage.LLVM.Summaries`.
+
+Each class of the format's model takes typed values in its constructor, so a model can be built by hand, too. A
+classmethod ``Parse`` reads the class' JSON element and calls the constructor; :meth:`Document.Convert` parses a
+report's files, functions and totals with it.
 
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
@@ -65,218 +71,34 @@ its regions, branch regions and MC/DC records. The records below a file or a fun
    summary = report.ToCoverageSummary()
    print(f"{summary.FileCount} files: {summary.LineCoverage:.1%} of lines, {summary.BranchCoverage:.1%} of branches")
 """
-from __future__                               import annotations
+from __future__                                 import annotations
 
-from json                                     import JSONDecodeError, loads
-from os.path                                  import commonprefix
-from pathlib                                  import Path
-from re                                       import match
-from typing                                   import Any, Optional as Nullable
+from json                                       import JSONDecodeError, loads
+from os.path                                    import commonprefix
+from pathlib                                    import Path
+from re                                         import match
+from typing                                     import Any, Iterable, Optional as Nullable
 
-from jsonschema                               import Draft202012Validator
-from pyTooling.Common                         import readResourceFile
-from pyTooling.Decorators                     import export, readonly
-from pyTooling.Exceptions                     import ToolingException
-from pyTooling.MetaClasses                    import ExtendedType
-from pyTooling.Stopwatch                      import Stopwatch
-from pyTooling.Versioning                     import SemanticVersion
+from jsonschema                                 import Draft202012Validator
+from pyTooling.Common                           import getFullyQualifiedName, readResourceFile
+from pyTooling.Decorators                       import export, readonly
+from pyTooling.Exceptions                       import ToolingException
+from pyTooling.MetaClasses                      import ExtendedType
+from pyTooling.Stopwatch                        import Stopwatch
+from pyTooling.Versioning                       import SemanticVersion
 
-from pyEDAA.Reports                           import Resources
-from pyEDAA.Reports.CodeCoverage              import Branch as cc_Branch, CodeCoverageError, CoverageSummary
-from pyEDAA.Reports.CodeCoverage              import Document as cc_Document, File as cc_File, Function as cc_Function
-from pyEDAA.Reports.CodeCoverage              import Line as cc_Line, LineCoverageStatus, SourceFile as cc_SourceFile
-from pyEDAA.Reports.CodeCoverage.LLVM.Records import BranchRegion, Expansion, MCDCRecord, Region, RegionKind
-from pyEDAA.Reports.CodeCoverage.LLVM.Records import Segment, Summary
+from pyEDAA.Reports                             import Resources
+from pyEDAA.Reports.CodeCoverage                import Branch as cc_Branch, CodeCoverageError, CoverageSummary
+from pyEDAA.Reports.CodeCoverage                import Document as cc_Document, File as cc_File, Function as cc_Function
+from pyEDAA.Reports.CodeCoverage                import Line as cc_Line, LineCoverageStatus, SourceFile as cc_SourceFile
+from pyEDAA.Reports.CodeCoverage.LLVM.Regions   import RegionKind
+from pyEDAA.Reports.CodeCoverage.LLVM.Records   import File, Function, Segment
+from pyEDAA.Reports.CodeCoverage.LLVM.Summaries import Summary
 
 
 __all__ = ["SCHEMA"]
 
 SCHEMA = "LLVM-Coverage-JSON.schema.json"  #: The JSON Schema a report is validated against.
-
-# A class with a property named like a class - ``Path``, ``Summary`` - can't name that class in the annotation of a
-# field: the class body's namespace, where annotations are evaluated, binds the name to the property.
-_Path =    Path
-_Summary = Summary
-
-
-@export
-class File(metaclass=ExtendedType, slots=True):
-	"""
-	A file: its segments, branch regions, MC/DC records and expansions, and its summary.
-
-	A report written with ``-summary-only`` has only the summary, one written with ``-skip-expansions`` no expansions.
-	"""
-
-	_path:        _Path               #: The file's path, as the compiler named it.
-	_segments:    list[Segment]       #: The segments, by position.
-	_branches:    list[BranchRegion]  #: The branch regions of the file's functions.
-	_mcdcRecords: list[MCDCRecord]    #: The MC/DC records of the file's functions.
-	_expansions:  list[Expansion]     #: The macro expansions in the file.
-	_summary:     _Summary            #: The counters llvm-cov computed.
-
-	def __init__(self, file: dict[str, Any]) -> None:
-		"""
-		Initialize the file from its JSON object.
-
-		:param file: The JSON object of the file.
-		"""
-		self._path =        Path(file["filename"].replace("\\", "/"))
-		self._segments =    [Segment(segment) for segment in file.get("segments", [])]
-		self._branches =    [BranchRegion(branch) for branch in file.get("branches", [])]
-		self._mcdcRecords = [MCDCRecord(record) for record in file.get("mcdc_records", [])]
-		self._expansions =  [Expansion(expansion) for expansion in file.get("expansions", [])]
-		self._summary =     Summary(file["summary"])
-
-	@readonly
-	def Path(self) -> Path:
-		"""
-		Read-only property to access the file's path (:attr:`_path`).
-
-		:returns: The path, as the compiler named it - usually absolute.
-		"""
-		return self._path
-
-	@readonly
-	def Segments(self) -> list[Segment]:
-		"""
-		Read-only property to access the segments (:attr:`_segments`).
-
-		:returns: The segments, by position; empty in a summary-only report.
-		"""
-		return self._segments
-
-	@readonly
-	def Branches(self) -> list[BranchRegion]:
-		"""
-		Read-only property to access the branch regions of the file's functions (:attr:`_branches`).
-
-		Which branch regions of a macro expansion are listed here, depends on the LLVM version.
-
-		:returns: The branch regions.
-		"""
-		return self._branches
-
-	@readonly
-	def MCDCRecords(self) -> list[MCDCRecord]:
-		"""
-		Read-only property to access the MC/DC records of the file's functions (:attr:`_mcdcRecords`).
-
-		:returns: The MC/DC records.
-		"""
-		return self._mcdcRecords
-
-	@readonly
-	def Expansions(self) -> list[Expansion]:
-		"""
-		Read-only property to access the macro expansions in the file (:attr:`_expansions`).
-
-		:returns: The expansions.
-		"""
-		return self._expansions
-
-	@readonly
-	def Summary(self) -> Summary:
-		"""
-		Read-only property to access the counters llvm-cov computed (:attr:`_summary`).
-
-		:returns: The summary.
-		"""
-		return self._summary
-
-
-@export
-class Function(metaclass=ExtendedType, slots=True):
-	"""
-	A function - an instantiation of a template is a function of its own -: how often it was called, its regions, branch
-	regions and MC/DC records, and the files they are in.
-	"""
-
-	_name:        str                 #: The function's name, as the profile names it - e.g. mangled.
-	_count:       int                 #: How often the function was called.
-	_regions:     list[Region]        #: The regions.
-	_branches:    list[BranchRegion]  #: The branch regions.
-	_mcdcRecords: list[MCDCRecord]    #: The MC/DC records.
-	_filePaths:   list[Path]          #: The paths of the files, which the file IDs of the regions index.
-
-	def __init__(self, function: dict[str, Any]) -> None:
-		"""
-		Initialize the function from its JSON object.
-
-		:param function: The JSON object of the function.
-		"""
-		self._name =        function["name"]
-		self._count =       function["count"]
-		self._regions =     [Region(region) for region in function["regions"]]
-		self._branches =    [BranchRegion(branch) for branch in function.get("branches", [])]
-		self._mcdcRecords = [MCDCRecord(record) for record in function.get("mcdc_records", [])]
-		self._filePaths =   [Path(filename.replace("\\", "/")) for filename in function["filenames"]]
-
-	@readonly
-	def Name(self) -> str:
-		"""
-		Read-only property to access the function's name (:attr:`_name`).
-
-		:returns: The name, as the profile names it: mangled, and prefixed by the file name of its translation unit, if
-		          local to it - e.g. ``Statistics.c:Square``.
-		"""
-		return self._name
-
-	@readonly
-	def Count(self) -> int:
-		"""
-		Read-only property to access how often the function was called (:attr:`_count`).
-
-		:returns: The count.
-		"""
-		return self._count
-
-	@readonly
-	def Regions(self) -> list[Region]:
-		"""
-		Read-only property to access the regions (:attr:`_regions`).
-
-		:returns: The regions.
-		"""
-		return self._regions
-
-	@readonly
-	def Branches(self) -> list[BranchRegion]:
-		"""
-		Read-only property to access the branch regions (:attr:`_branches`).
-
-		:returns: The branch regions, also those in macro expansions.
-		"""
-		return self._branches
-
-	@readonly
-	def MCDCRecords(self) -> list[MCDCRecord]:
-		"""
-		Read-only property to access the MC/DC records (:attr:`_mcdcRecords`).
-
-		:returns: The MC/DC records.
-		"""
-		return self._mcdcRecords
-
-	@readonly
-	def FilePaths(self) -> list[Path]:
-		"""
-		Read-only property to access the paths of the files, which the file IDs of the regions index (:attr:`_filePaths`).
-
-		:returns: The paths, as the compiler named them.
-		"""
-		return self._filePaths
-
-	@readonly
-	def MainFileID(self) -> Nullable[int]:
-		"""
-		Read-only property to return the file ID of the file the function is in: the first file no expansion region
-		expands to.
-
-		:returns: The index into :attr:`FilePaths`, or ``None`` if every file is expanded to.
-		"""
-		expanded = {region._expandedFileID for region in self._regions if region._kind is RegionKind.Expansion}
-		return next((fileID for fileID in range(len(self._filePaths)) if fileID not in expanded), None)
-
 
 @export
 class Report(metaclass=ExtendedType, mixin=True):
@@ -289,14 +111,71 @@ class Report(metaclass=ExtendedType, mixin=True):
 	_functions: list[Function]             #: The functions.
 	_totals:    Nullable[Summary]          #: The counters of the whole report.
 
-	def __init__(self) -> None:
+	def __init__(
+		self,
+		version: Nullable[SemanticVersion] = None,
+		files: Nullable[Iterable[File]] = None,
+		functions: Nullable[Iterable[Function]] = None,
+		totals: Nullable[Summary] = None
+	) -> None:
 		"""
-		Initialize an empty report.
+		Initialize a report; empty, without parameters.
+
+		:param version:     Optional, version of the report format. Default: ``None``.
+		:param files:       Optional, the files. Default: none.
+		:param functions:   Optional, the functions. Default: none.
+		:param totals:      Optional, the counters of the whole report. Default: ``None``.
+		:raises TypeError:  If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
+		:raises TypeError:  If parameter ``files`` or ``functions`` isn't iterable.
+		:raises TypeError:  If parameter ``files`` contains an element not of type
+		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Records.File`.
+		:raises TypeError:  If parameter ``functions`` contains an element not of type
+		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Records.Function`.
+		:raises TypeError:  If parameter ``totals`` isn't of type
+		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Summaries.Summary`.
 		"""
-		self._version =   None
+		if version is not None and not isinstance(version, SemanticVersion):
+			ex = TypeError(f"Parameter 'version' is not of type 'SemanticVersion'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(version)}'.")
+			raise ex
+
+		if totals is not None and not isinstance(totals, Summary):
+			ex = TypeError(f"Parameter 'totals' is not of type 'Summary'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(totals)}'.")
+			raise ex
+
+		self._version =   version
 		self._files =     {}
 		self._functions = []
-		self._totals =    None
+		self._totals =    totals
+
+		if files is not None:
+			if not isinstance(files, Iterable):
+				ex = TypeError(f"Parameter 'files' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(files)}'.")
+				raise ex
+
+			for file in files:
+				if not isinstance(file, File):
+					ex = TypeError(f"Parameter 'files' contains an element not of type 'File'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
+					raise ex
+
+				self._files[file._path] = file
+
+		if functions is not None:
+			if not isinstance(functions, Iterable):
+				ex = TypeError(f"Parameter 'functions' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(functions)}'.")
+				raise ex
+
+			for function in functions:
+				if not isinstance(function, Function):
+					ex = TypeError(f"Parameter 'functions' contains an element not of type 'Function'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(function)}'.")
+					raise ex
+
+				self._functions.append(function)
 
 	@readonly
 	def Version(self) -> Nullable[SemanticVersion]:
@@ -343,15 +222,36 @@ class Document(cc_Document, Report):
 
 	_jsonDocument: Nullable[dict[str, Any]]  #: The parsed and validated JSON document, after :meth:`Analyze`.
 
-	def __init__(self, jsonReportFile: Path, analyzeAndConvert: bool = False) -> None:
+	def __init__(
+		self,
+		jsonReportFile: Path,
+		analyzeAndConvert: bool = False,
+		*,
+		version: Nullable[SemanticVersion] = None,
+		files: Nullable[Iterable[File]] = None,
+		functions: Nullable[Iterable[Function]] = None,
+		totals: Nullable[Summary] = None
+	) -> None:
 		"""
-		Initialize the report, and optionally read it.
+		Initialize the report, and optionally read it; or build it from typed values.
 
 		:param jsonReportFile:    Path to the JSON file.
 		:param analyzeAndConvert: Optional, if true, analyze the file and convert its content. Default: ``False``.
+		:param version:           Optional, version of the report format. Default: ``None``.
+		:param files:             Optional, the files. Default: none.
+		:param functions:         Optional, the functions. Default: none.
+		:param totals:            Optional, the counters of the whole report. Default: ``None``.
+		:raises TypeError:        If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
+		:raises TypeError:        If parameter ``files`` or ``functions`` isn't iterable.
+		:raises TypeError:        If parameter ``files`` contains an element not of type
+		                          :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Records.File`.
+		:raises TypeError:        If parameter ``functions`` contains an element not of type
+		                          :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Records.Function`.
+		:raises TypeError:        If parameter ``totals`` isn't of type
+		                          :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Summaries.Summary`.
 		"""
 		super().__init__(jsonReportFile)
-		Report.__init__(self)
+		Report.__init__(self, version, files, functions, totals)
 
 		self._jsonDocument = None
 
@@ -410,14 +310,14 @@ class Document(cc_Document, Report):
 			raise ex
 
 		with Stopwatch() as sw:
-			export = self._jsonDocument["data"][0]
+			data =            self._jsonDocument["data"][0]
 			self._version =   SemanticVersion.Parse(self._jsonDocument["version"])
 			self._files =     {}
-			self._functions = [Function(function) for function in export.get("functions", [])]
-			self._totals =    Summary(export["totals"])
+			self._functions = [Function.Parse(function) for function in data.get("functions", [])]
+			self._totals =    Summary.Parse(data["totals"])
 
-			for record in export["files"]:
-				file =                    File(record)
+			for record in data["files"]:
+				file =                    File.Parse(record)
 				self._files[file._path] = file
 
 		self._conversionDuration = sw.Duration

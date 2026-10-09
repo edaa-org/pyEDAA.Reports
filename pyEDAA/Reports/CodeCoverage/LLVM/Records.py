@@ -30,33 +30,30 @@
 #
 #
 """
-The records of LLVM's code coverage export below a file or a function: segments, regions, branch regions, MC/DC
-records, expansions, and the summaries' counters.
+The records of LLVM's code coverage export: files and functions, and below them segments and macro expansions.
 
-A report states a segment or a region as a JSON array - a tuple of numbers and flags. A region names its source range by
-line and column, and the file by an index into the file paths of its function or expansion.
+A report states a segment as a JSON array - a tuple of numbers and flags -, a file, a function or an expansion as a
+JSON object. A record's constructor takes typed values; its classmethod ``Parse`` reads the record's JSON array or
+object. The source regions are in :mod:`~pyEDAA.Reports.CodeCoverage.LLVM.Regions`, the summaries in
+:mod:`~pyEDAA.Reports.CodeCoverage.LLVM.Summaries`.
 """
-from __future__            import annotations
+from __future__                                 import annotations
 
-from enum                  import Enum
-from pathlib               import Path
-from typing                import Any, Optional as Nullable
+from pathlib                                    import Path
+from typing                                     import Any, Iterable, Optional as Nullable, Self
 
-from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import ExtendedType
+from pyTooling.Common                           import getFullyQualifiedName
+from pyTooling.Decorators                       import export, readonly
+from pyTooling.MetaClasses                      import ExtendedType
+
+from pyEDAA.Reports.CodeCoverage.LLVM.Regions   import BranchRegion, MCDCRecord, Region, RegionKind
+from pyEDAA.Reports.CodeCoverage.LLVM.Summaries import Summary
 
 
-@export
-class RegionKind(Enum):
-	"""The kind of a source region, as LLVM's coverage mapping numbers it."""
-
-	Code =         0  #: Code associated with a counter.
-	Expansion =    1  #: The source range of a macro expansion, which maps to a file of its own.
-	Skipped =      2  #: Code skipped by the preprocessor - e.g. by ``#if 0`` -, empty lines and comments.
-	Gap =          3  #: Code between two regions, whose count is a line's count only, if no other region starts on it.
-	Branch =       4  #: A condition with the counts of its true and false outcome.
-	MCDCDecision = 5  #: A decision of conditions, measured for MC/DC.
-	MCDCBranch =   6  #: A condition of a decision measured for MC/DC, with the counts of its true and false outcome.
+# A class with a property named like a class - ``Path``, ``Summary`` - can't name that class in the annotation of a
+# field: the class body's namespace, where annotations are evaluated, binds the name to the property.
+_Path =    Path
+_Summary = Summary
 
 
 @export
@@ -75,18 +72,80 @@ class Segment(metaclass=ExtendedType, slots=True):
 	_isRegionEntry: bool  #: Whether a region starts here; false, where a region continues after a nested one.
 	_isGapRegion:   bool  #: Whether a gap region starts here.
 
-	def __init__(self, segment: list[Any]) -> None:
+	def __init__(
+		self,
+		line: int,
+		column: int,
+		count: int,
+		hasCount: bool,
+		isRegionEntry: bool,
+		isGapRegion: bool = False
+	) -> None:
 		"""
-		Initialize the segment from its JSON array.
+		Initialize a segment.
+
+		:param line:          Line the segment starts at.
+		:param column:        Column the segment starts at.
+		:param count:         The count of the code from here on.
+		:param hasCount:      Whether the code from here on has a count.
+		:param isRegionEntry: Whether a region starts here.
+		:param isGapRegion:   Optional, whether a gap region starts here. Default: ``False``.
+		:raises ValueError:   If parameter ``line`` or ``column`` is ``None``.
+		:raises TypeError:    If parameter ``line`` or ``column`` isn't of type :class:`int`.
+		:raises ValueError:   If parameter ``line`` or ``column`` is less than 1.
+		:raises ValueError:   If parameter ``count`` is ``None``.
+		:raises TypeError:    If parameter ``count`` isn't of type :class:`int`.
+		:raises ValueError:   If parameter ``count`` is negative.
+		:raises ValueError:   If parameter ``hasCount``, ``isRegionEntry`` or ``isGapRegion`` is ``None``.
+		:raises TypeError:    If parameter ``hasCount``, ``isRegionEntry`` or ``isGapRegion`` isn't of type :class:`bool`.
+		"""
+		for name, position in (("line", line), ("column", column)):
+			if position is None:
+				raise ValueError(f"Parameter '{name}' is None.")
+			elif not isinstance(position, int):
+				ex = TypeError(f"Parameter '{name}' is not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(position)}'.")
+				raise ex
+			elif position < 1:
+				ex = ValueError(f"Parameter '{name}' is less than 1.")
+				ex.add_note(f"Got value '{position}'.")
+				raise ex
+
+		if count is None:
+			raise ValueError(f"Parameter 'count' is None.")
+		elif not isinstance(count, int):
+			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
+			raise ex
+		elif count < 0:
+			ex = ValueError(f"Parameter 'count' is negative.")
+			ex.add_note(f"Got value '{count}'.")
+			raise ex
+
+		for name, flag in (("hasCount", hasCount), ("isRegionEntry", isRegionEntry), ("isGapRegion", isGapRegion)):
+			if flag is None:
+				raise ValueError(f"Parameter '{name}' is None.")
+			elif not isinstance(flag, bool):
+				ex = TypeError(f"Parameter '{name}' is not of type 'bool'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(flag)}'.")
+				raise ex
+
+		self._line =          line
+		self._column =        column
+		self._count =         count
+		self._hasCount =      hasCount
+		self._isRegionEntry = isRegionEntry
+		self._isGapRegion =   isGapRegion
+
+	@classmethod
+	def Parse(cls, segment: list[Any]) -> Self:
+		"""
+		Parse a segment from its JSON array.
 
 		:param segment: The JSON array of the segment.
+		:returns:       The segment.
 		"""
-		self._line =          segment[0]
-		self._column =        segment[1]
-		self._count =         segment[2]
-		self._hasCount =      segment[3]
-		self._isRegionEntry = segment[4]
-		self._isGapRegion =   segment[5] if len(segment) > 5 else False
+		return cls(*segment[:5], segment[5] if len(segment) > 5 else False)
 
 	@readonly
 	def Line(self) -> int:
@@ -144,295 +203,6 @@ class Segment(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Base(metaclass=ExtendedType, slots=True):
-	"""
-	Base-class of the source regions: a source range, the file it is in, the file it expands to, and its kind.
-	"""
-
-	_lineStart:      int            #: Line the region starts at.
-	_columnStart:    int            #: Column the region starts at.
-	_lineEnd:        int            #: Line the region ends at.
-	_columnEnd:      int            #: Column the region ends at.
-	_fileID:         Nullable[int]  #: Index of the region's file in the file paths of its function or expansion.
-	_expandedFileID: int            #: Index of the file an expansion region expands to.
-	_kind:           RegionKind     #: The kind of the region.
-
-	def __init__(self, record: list[Any], fileID: Nullable[int], expandedFileID: int, kind: int) -> None:
-		"""
-		Initialize the source range from the first four elements of a region's JSON array, and the region's files and kind.
-
-		:param record:         The JSON array of the region.
-		:param fileID:         Index of the region's file in the file paths of its function or expansion, if stated.
-		:param expandedFileID: Index of the file an expansion region expands to.
-		:param kind:           The number of the region's kind.
-		"""
-		self._lineStart =      record[0]
-		self._columnStart =    record[1]
-		self._lineEnd =        record[2]
-		self._columnEnd =      record[3]
-		self._fileID =         fileID
-		self._expandedFileID = expandedFileID
-		self._kind =           RegionKind(kind)
-
-	@readonly
-	def LineStart(self) -> int:
-		"""
-		Read-only property to access the line the region starts at (:attr:`_lineStart`).
-
-		:returns: The line number, counted from 1.
-		"""
-		return self._lineStart
-
-	@readonly
-	def ColumnStart(self) -> int:
-		"""
-		Read-only property to access the column the region starts at (:attr:`_columnStart`).
-
-		:returns: The column number, counted from 1.
-		"""
-		return self._columnStart
-
-	@readonly
-	def LineEnd(self) -> int:
-		"""
-		Read-only property to access the line the region ends at (:attr:`_lineEnd`).
-
-		:returns: The line number, counted from 1.
-		"""
-		return self._lineEnd
-
-	@readonly
-	def ColumnEnd(self) -> int:
-		"""
-		Read-only property to access the column the region ends at (:attr:`_columnEnd`).
-
-		:returns: The column number, counted from 1.
-		"""
-		return self._columnEnd
-
-	@readonly
-	def FileID(self) -> Nullable[int]:
-		"""
-		Read-only property to access the index of the region's file (:attr:`_fileID`).
-
-		:returns: The index into the file paths of the region's function or expansion; ``None`` for an MC/DC record before
-		          format version 3.0.1.
-		"""
-		return self._fileID
-
-	@readonly
-	def ExpandedFileID(self) -> int:
-		"""
-		Read-only property to access the index of the file an expansion region expands to (:attr:`_expandedFileID`).
-
-		:returns: The index into the file paths of the region's function or expansion; ``0`` for other kinds of regions.
-		"""
-		return self._expandedFileID
-
-	@readonly
-	def Kind(self) -> RegionKind:
-		"""
-		Read-only property to access the kind of the region (:attr:`_kind`).
-
-		:returns: The kind.
-		"""
-		return self._kind
-
-
-@export
-class Region(Base):
-	"""
-	A region of a function or an expansion: a source range with a count.
-
-	A region is ``[lineStart, columnStart, lineEnd, columnEnd, count, fileID, expandedFileID, kind]``.
-	"""
-
-	_count: int  #: How often the region's code ran.
-
-	def __init__(self, region: list[Any]) -> None:
-		"""
-		Initialize the region from its JSON array.
-
-		:param region: The JSON array of the region.
-		"""
-		super().__init__(region, region[5], region[6], region[7])
-
-		self._count = region[4]
-
-	@readonly
-	def Count(self) -> int:
-		"""
-		Read-only property to access how often the region's code ran (:attr:`_count`).
-
-		:returns: The count.
-		"""
-		return self._count
-
-
-@export
-class BranchRegion(Base):
-	"""
-	A branch region: a condition with the counts of its true and false outcome.
-
-	A branch region is ``[lineStart, columnStart, lineEnd, columnEnd, trueCount, falseCount, fileID, expandedFileID,
-	kind]``.
-	"""
-
-	_trueCount:  int  #: How often the condition was true.
-	_falseCount: int  #: How often the condition was false.
-
-	def __init__(self, branch: list[Any]) -> None:
-		"""
-		Initialize the branch region from its JSON array.
-
-		:param branch: The JSON array of the branch region.
-		"""
-		super().__init__(branch, branch[6], branch[7], branch[8])
-
-		self._trueCount =  branch[4]
-		self._falseCount = branch[5]
-
-	@readonly
-	def TrueCount(self) -> int:
-		"""
-		Read-only property to access how often the condition was true (:attr:`_trueCount`).
-
-		:returns: The count.
-		"""
-		return self._trueCount
-
-	@readonly
-	def FalseCount(self) -> int:
-		"""
-		Read-only property to access how often the condition was false (:attr:`_falseCount`).
-
-		:returns: The count.
-		"""
-		return self._falseCount
-
-
-@export
-class TestVector(metaclass=ExtendedType, slots=True):
-	"""
-	A test vector of an MC/DC decision - in format version 3.1.0 -: the values of its conditions, and the outcome.
-	"""
-
-	_conditions: list[Nullable[bool]]  #: The values of the conditions; ``None`` for a condition not evaluated.
-	_executed:   bool                  #: Whether the test vector was executed.
-	_result:     Nullable[bool]        #: The outcome of the decision.
-
-	def __init__(self, testVector: dict[str, Any]) -> None:
-		"""
-		Initialize the test vector from its JSON object.
-
-		:param testVector: The JSON object of the test vector.
-		"""
-		self._conditions = testVector["conditions"]
-		self._executed =   testVector["executed"]
-		self._result =     testVector["result"]
-
-	@readonly
-	def Conditions(self) -> list[Nullable[bool]]:
-		"""
-		Read-only property to access the values of the conditions (:attr:`_conditions`).
-
-		:returns: The values, by condition; ``None`` for a condition not evaluated.
-		"""
-		return self._conditions
-
-	@readonly
-	def Executed(self) -> bool:
-		"""
-		Read-only property to access whether the test vector was executed (:attr:`_executed`).
-
-		:returns: ``True`` for an executed test vector; ``False`` for a missing one, listed by
-		          ``-show-mcdc-non-executed-vectors``.
-		"""
-		return self._executed
-
-	@readonly
-	def Result(self) -> Nullable[bool]:
-		"""
-		Read-only property to access the outcome of the decision (:attr:`_result`).
-
-		:returns: The outcome.
-		"""
-		return self._result
-
-
-@export
-class MCDCRecord(Base):
-	"""
-	An MC/DC record: a decision of conditions, and for each condition, whether a pair of test vectors showed its
-	independent effect on the outcome.
-
-	The record's array grew with the format version: ``[lineStart, columnStart, lineEnd, columnEnd, expandedFileID, kind,
-	conditions]`` in 2.0.1; version 3.0.0 added the numbers of true and false decisions after the source range, version
-	3.0.1 the ``fileID`` before ``expandedFileID``, and version 3.1.0 the test vectors at the end.
-	"""
-
-	_trueDecisions:  Nullable[int]     #: Number of executed test vectors with the outcome true, if stated.
-	_falseDecisions: Nullable[int]     #: Number of executed test vectors with the outcome false, if stated.
-	_conditions:     list[bool]        #: Whether a pair of test vectors showed the independent effect, by condition.
-	_testVectors:    list[TestVector]  #: The test vectors; empty before format version 3.1.0.
-
-	def __init__(self, record: list[Any]) -> None:
-		"""
-		Initialize the MC/DC record from its JSON array, in the shape of its format version.
-
-		:param record: The JSON array of the MC/DC record.
-		"""
-		if len(record) == 7:
-			super().__init__(record, None, record[4], record[5])
-		elif len(record) == 9:
-			super().__init__(record, None, record[6], record[7])
-		else:
-			super().__init__(record, record[6], record[7], record[8])
-
-		self._trueDecisions =  record[4] if len(record) > 7 else None
-		self._falseDecisions = record[5] if len(record) > 7 else None
-		self._conditions =     record[9] if len(record) > 9 else record[-1]
-		self._testVectors =    [TestVector(testVector) for testVector in record[10]] if len(record) > 10 else []
-
-	@readonly
-	def TrueDecisions(self) -> Nullable[int]:
-		"""
-		Read-only property to access the number of executed test vectors with the outcome true (:attr:`_trueDecisions`).
-
-		:returns: The number; ``None`` before format version 3.0.0.
-		"""
-		return self._trueDecisions
-
-	@readonly
-	def FalseDecisions(self) -> Nullable[int]:
-		"""
-		Read-only property to access the number of executed test vectors with the outcome false (:attr:`_falseDecisions`).
-
-		:returns: The number; ``None`` before format version 3.0.0.
-		"""
-		return self._falseDecisions
-
-	@readonly
-	def Conditions(self) -> list[bool]:
-		"""
-		Read-only property to access, by condition, whether a pair of test vectors showed its independent effect
-		(:attr:`_conditions`).
-
-		:returns: ``True`` for each condition shown to affect the outcome on its own.
-		"""
-		return self._conditions
-
-	@readonly
-	def TestVectors(self) -> list[TestVector]:
-		"""
-		Read-only property to access the test vectors (:attr:`_testVectors`).
-
-		:returns: The test vectors; empty before format version 3.1.0.
-		"""
-		return self._testVectors
-
-
-@export
 class Expansion(metaclass=ExtendedType, slots=True):
 	"""
 	A macro expansion in a file: the region it is expanded at, the regions of the function it is in, and its branches.
@@ -443,16 +213,82 @@ class Expansion(metaclass=ExtendedType, slots=True):
 	_targetRegions: list[Region]        #: The regions of the function the expansion is in.
 	_branches:      list[BranchRegion]  #: The branch regions in the expansion, and in the expansions nested in it.
 
-	def __init__(self, expansion: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		filePaths: Iterable[Path],
+		sourceRegion: Region,
+		targetRegions: Iterable[Region],
+		branches: Nullable[Iterable[BranchRegion]] = None
+	) -> None:
 		"""
-		Initialize the expansion from its JSON object.
+		Initialize an expansion.
+
+		:param filePaths:     The paths of the files, which the file IDs of the regions index.
+		:param sourceRegion:  The region the macro is expanded at.
+		:param targetRegions: The regions of the function the expansion is in.
+		:param branches:      Optional, the branch regions in the expansion, and in the expansions nested in it. Default:
+		                      none.
+		:raises ValueError:   If parameter ``filePaths`` or ``targetRegions`` is ``None``.
+		:raises TypeError:    If parameter ``filePaths``, ``targetRegions`` or ``branches`` isn't iterable.
+		:raises TypeError:    If parameter ``filePaths`` contains an element not of type :class:`~pathlib.Path`.
+		:raises ValueError:   If parameter ``sourceRegion`` is ``None``.
+		:raises TypeError:    If parameter ``sourceRegion`` isn't of type
+		                      :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Regions.Region`.
+		:raises TypeError:    If parameter ``targetRegions`` contains an element not of type
+		                      :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Regions.Region`.
+		:raises TypeError:    If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
+		"""
+		if filePaths is None:
+			raise ValueError(f"Parameter 'filePaths' is None.")
+
+		if sourceRegion is None:
+			raise ValueError(f"Parameter 'sourceRegion' is None.")
+		elif not isinstance(sourceRegion, Region):
+			ex = TypeError(f"Parameter 'sourceRegion' is not of type 'Region'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(sourceRegion)}'.")
+			raise ex
+
+		if targetRegions is None:
+			raise ValueError(f"Parameter 'targetRegions' is None.")
+
+		self._filePaths =     []
+		self._sourceRegion =  sourceRegion
+		self._targetRegions = []
+		self._branches =      []
+
+		for name, elements, elementType, target in (
+			("filePaths", filePaths, Path, self._filePaths), ("targetRegions", targetRegions, Region, self._targetRegions),
+			("branches", branches, BranchRegion, self._branches)
+		):
+			if elements is None:
+				continue
+			elif not isinstance(elements, Iterable):
+				ex = TypeError(f"Parameter '{name}' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(elements)}'.")
+				raise ex
+
+			for element in elements:
+				if not isinstance(element, elementType):
+					ex = TypeError(f"Parameter '{name}' contains an element not of type '{elementType.__name__}'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(element)}'.")
+					raise ex
+
+				target.append(element)
+
+	@classmethod
+	def Parse(cls, expansion: dict[str, Any]) -> Self:
+		"""
+		Parse an expansion from its JSON object.
 
 		:param expansion: The JSON object of the expansion.
+		:returns:         The expansion.
 		"""
-		self._filePaths =     [Path(filename.replace("\\", "/")) for filename in expansion["filenames"]]
-		self._sourceRegion =  Region(expansion["source_region"])
-		self._targetRegions = [Region(region) for region in expansion["target_regions"]]
-		self._branches =      [BranchRegion(branch) for branch in expansion.get("branches", [])]
+		return cls(
+			[Path(filename.replace("\\", "/")) for filename in expansion["filenames"]],
+			Region.Parse(expansion["source_region"]),
+			[Region.Parse(region) for region in expansion["target_regions"]],
+			[BranchRegion.Parse(branch) for branch in expansion.get("branches", [])]
+		)
 
 	@readonly
 	def FilePaths(self) -> list[Path]:
@@ -493,146 +329,342 @@ class Expansion(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Counters(metaclass=ExtendedType, slots=True):
+class File(metaclass=ExtendedType, slots=True):
 	"""
-	The counters of one kind of a summary: how many there are, and how many are covered.
+	A file: its segments, branch regions, MC/DC records and expansions, and its summary.
 
-	A summary counts lines, functions, regions, branches and MC/DC conditions.
-	"""
-
-	_count:      int            #: Number of lines, functions, regions, branches or MC/DC conditions.
-	_covered:    int            #: Number of the covered ones.
-	_notCovered: Nullable[int]  #: Number of the uncovered ones, if stated.
-	_percent:    float          #: The coverage in percent.
-
-	def __init__(self, counters: dict[str, Any]) -> None:
-		"""
-		Initialize the counters from their JSON object.
-
-		:param counters: The JSON object of the counters.
-		"""
-		self._count =      counters["count"]
-		self._covered =    counters["covered"]
-		self._notCovered = counters.get("notcovered")
-		self._percent =    counters["percent"]
-
-	@readonly
-	def Count(self) -> int:
-		"""
-		Read-only property to access the number of lines, functions, regions, branches or MC/DC conditions (:attr:`_count`).
-
-		:returns: The number.
-		"""
-		return self._count
-
-	@readonly
-	def Covered(self) -> int:
-		"""
-		Read-only property to access the number of covered ones (:attr:`_covered`).
-
-		:returns: The number.
-		"""
-		return self._covered
-
-	@readonly
-	def NotCovered(self) -> Nullable[int]:
-		"""
-		Read-only property to access the number of uncovered ones (:attr:`_notCovered`).
-
-		:returns: The number, or ``None`` for lines, functions and instantiations, which don't state it.
-		"""
-		return self._notCovered
-
-	@readonly
-	def Percent(self) -> float:
-		"""
-		Read-only property to access the coverage (:attr:`_percent`).
-
-		:returns: The coverage in percent.
-		"""
-		return self._percent
-
-
-@export
-class Summary(metaclass=ExtendedType, slots=True):
-	"""
-	A ``summary``: the counters llvm-cov computed for a file or the whole report.
-
-	llvm-cov counts a file's lines, regions and branches per function, and merges a function's instantiations by taking
-	the best one.
+	A report written with ``-summary-only`` has only the summary, one written with ``-skip-expansions`` no expansions.
 	"""
 
-	_lines:          Counters            #: The counters of lines.
-	_functions:      Counters            #: The counters of functions, a function's instantiations counted once.
-	_instantiations: Counters            #: The counters of function instantiations.
-	_regions:        Counters            #: The counters of code regions.
-	_branches:       Nullable[Counters]  #: The counters of branch outcomes, if stated.
-	_mcdc:           Nullable[Counters]  #: The counters of MC/DC conditions, if stated.
+	_path:        _Path               #: The file's path, as the compiler named it.
+	_segments:    list[Segment]       #: The segments, by position.
+	_branches:    list[BranchRegion]  #: The branch regions of the file's functions.
+	_mcdcRecords: list[MCDCRecord]    #: The MC/DC records of the file's functions.
+	_expansions:  list[Expansion]     #: The macro expansions in the file.
+	_summary:     _Summary            #: The counters llvm-cov computed.
 
-	def __init__(self, summary: dict[str, Any]) -> None:
+	def __init__(
+		self,
+		path: Path,
+		summary: Summary,
+		segments: Nullable[Iterable[Segment]] = None,
+		branches: Nullable[Iterable[BranchRegion]] = None,
+		mcdcRecords: Nullable[Iterable[MCDCRecord]] = None,
+		expansions: Nullable[Iterable[Expansion]] = None
+	) -> None:
 		"""
-		Initialize the summary from its JSON object.
+		Initialize a file.
 
-		:param summary: The JSON object ``summary`` or ``totals``.
+		:param path:        The file's path, as the compiler named it.
+		:param summary:     The counters llvm-cov computed.
+		:param segments:    Optional, the segments, by position. Default: none.
+		:param branches:    Optional, the branch regions of the file's functions. Default: none.
+		:param mcdcRecords: Optional, the MC/DC records of the file's functions. Default: none.
+		:param expansions:  Optional, the macro expansions in the file. Default: none.
+		:raises ValueError: If parameter ``path`` is ``None``.
+		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError: If parameter ``summary`` is ``None``.
+		:raises TypeError:  If parameter ``summary`` isn't of type
+		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Summaries.Summary`.
+		:raises TypeError:  If parameter ``segments``, ``branches``, ``mcdcRecords`` or ``expansions`` isn't iterable.
+		:raises TypeError:  If parameter ``segments`` contains an element not of type :class:`Segment`.
+		:raises TypeError:  If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
+		:raises TypeError:  If parameter ``mcdcRecords`` contains an element not of type :class:`MCDCRecord`.
+		:raises TypeError:  If parameter ``expansions`` contains an element not of type :class:`Expansion`.
 		"""
-		self._lines =          Counters(summary["lines"])
-		self._functions =      Counters(summary["functions"])
-		self._instantiations = Counters(summary["instantiations"])
-		self._regions =        Counters(summary["regions"])
-		self._branches =       Counters(summary["branches"]) if "branches" in summary else None
-		self._mcdc =           Counters(summary["mcdc"]) if "mcdc" in summary else None
+		if path is None:
+			raise ValueError(f"Parameter 'path' is None.")
+		elif not isinstance(path, Path):
+			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
+			raise ex
+
+		if summary is None:
+			raise ValueError(f"Parameter 'summary' is None.")
+		elif not isinstance(summary, Summary):
+			ex = TypeError(f"Parameter 'summary' is not of type 'Summary'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(summary)}'.")
+			raise ex
+
+		self._path =        path
+		self._segments =    []
+		self._branches =    []
+		self._mcdcRecords = []
+		self._expansions =  []
+		self._summary =     summary
+
+		for name, elements, elementType, target in (
+			("segments", segments, Segment, self._segments), ("branches", branches, BranchRegion, self._branches),
+			("mcdcRecords", mcdcRecords, MCDCRecord, self._mcdcRecords),
+			("expansions", expansions, Expansion, self._expansions)
+		):
+			if elements is None:
+				continue
+			elif not isinstance(elements, Iterable):
+				ex = TypeError(f"Parameter '{name}' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(elements)}'.")
+				raise ex
+
+			for element in elements:
+				if not isinstance(element, elementType):
+					ex = TypeError(f"Parameter '{name}' contains an element not of type '{elementType.__name__}'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(element)}'.")
+					raise ex
+
+				target.append(element)
+
+	@classmethod
+	def Parse(cls, file: dict[str, Any]) -> Self:
+		"""
+		Parse a file from its JSON object.
+
+		:param file: The JSON object of the file.
+		:returns:    The file.
+		"""
+		return cls(
+			Path(file["filename"].replace("\\", "/")),
+			Summary.Parse(file["summary"]),
+			[Segment.Parse(segment) for segment in file.get("segments", [])],
+			[BranchRegion.Parse(branch) for branch in file.get("branches", [])],
+			[MCDCRecord.Parse(record) for record in file.get("mcdc_records", [])],
+			[Expansion.Parse(expansion) for expansion in file.get("expansions", [])]
+		)
 
 	@readonly
-	def Lines(self) -> Counters:
+	def Path(self) -> Path:
 		"""
-		Read-only property to access the counters of lines (:attr:`_lines`).
+		Read-only property to access the file's path (:attr:`_path`).
 
-		:returns: The counters.
+		:returns: The path, as the compiler named it - usually absolute.
 		"""
-		return self._lines
-
-	@readonly
-	def Functions(self) -> Counters:
-		"""
-		Read-only property to access the counters of functions, a function's instantiations counted once
-		(:attr:`_functions`).
-
-		:returns: The counters.
-		"""
-		return self._functions
+		return self._path
 
 	@readonly
-	def Instantiations(self) -> Counters:
+	def Segments(self) -> list[Segment]:
 		"""
-		Read-only property to access the counters of function instantiations (:attr:`_instantiations`).
+		Read-only property to access the segments (:attr:`_segments`).
 
-		:returns: The counters.
+		:returns: The segments, by position; empty in a summary-only report.
 		"""
-		return self._instantiations
-
-	@readonly
-	def Regions(self) -> Counters:
-		"""
-		Read-only property to access the counters of code regions (:attr:`_regions`).
-
-		:returns: The counters.
-		"""
-		return self._regions
+		return self._segments
 
 	@readonly
-	def Branches(self) -> Nullable[Counters]:
+	def Branches(self) -> list[BranchRegion]:
 		"""
-		Read-only property to access the counters of branch outcomes - two per branch region - (:attr:`_branches`).
+		Read-only property to access the branch regions of the file's functions (:attr:`_branches`).
 
-		:returns: The counters, or ``None`` before LLVM 12.
+		Which branch regions of a macro expansion are listed here, depends on the LLVM version.
+
+		:returns: The branch regions.
 		"""
 		return self._branches
 
 	@readonly
-	def MCDC(self) -> Nullable[Counters]:
+	def MCDCRecords(self) -> list[MCDCRecord]:
 		"""
-		Read-only property to access the counters of MC/DC conditions (:attr:`_mcdc`).
+		Read-only property to access the MC/DC records of the file's functions (:attr:`_mcdcRecords`).
 
-		:returns: The counters, or ``None`` before LLVM 18.
+		:returns: The MC/DC records.
 		"""
-		return self._mcdc
+		return self._mcdcRecords
+
+	@readonly
+	def Expansions(self) -> list[Expansion]:
+		"""
+		Read-only property to access the macro expansions in the file (:attr:`_expansions`).
+
+		:returns: The expansions.
+		"""
+		return self._expansions
+
+	@readonly
+	def Summary(self) -> Summary:
+		"""
+		Read-only property to access the counters llvm-cov computed (:attr:`_summary`).
+
+		:returns: The summary.
+		"""
+		return self._summary
+
+
+@export
+class Function(metaclass=ExtendedType, slots=True):
+	"""
+	A function - an instantiation of a template is a function of its own -: how often it was called, its regions, branch
+	regions and MC/DC records, and the files they are in.
+	"""
+
+	_name:        str                 #: The function's name, as the profile names it - e.g. mangled.
+	_count:       int                 #: How often the function was called.
+	_regions:     list[Region]        #: The regions.
+	_branches:    list[BranchRegion]  #: The branch regions.
+	_mcdcRecords: list[MCDCRecord]    #: The MC/DC records.
+	_filePaths:   list[Path]          #: The paths of the files, which the file IDs of the regions index.
+
+	def __init__(
+		self,
+		name: str,
+		count: int,
+		regions: Iterable[Region],
+		filePaths: Iterable[Path],
+		branches: Nullable[Iterable[BranchRegion]] = None,
+		mcdcRecords: Nullable[Iterable[MCDCRecord]] = None
+	) -> None:
+		"""
+		Initialize a function.
+
+		:param name:        The function's name, as the profile names it - e.g. mangled.
+		:param count:       How often the function was called.
+		:param regions:     The regions.
+		:param filePaths:   The paths of the files, which the file IDs of the regions index.
+		:param branches:    Optional, the branch regions. Default: none.
+		:param mcdcRecords: Optional, the MC/DC records. Default: none.
+		:raises ValueError: If parameter ``name`` is ``None``.
+		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``name`` is empty.
+		:raises ValueError: If parameter ``count`` is ``None``.
+		:raises TypeError:  If parameter ``count`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``count`` is negative.
+		:raises ValueError: If parameter ``regions`` or ``filePaths`` is ``None``.
+		:raises TypeError:  If parameter ``regions``, ``filePaths``, ``branches`` or ``mcdcRecords`` isn't iterable.
+		:raises TypeError:  If parameter ``regions`` contains an element not of type
+		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Regions.Region`.
+		:raises TypeError:  If parameter ``filePaths`` contains an element not of type :class:`~pathlib.Path`.
+		:raises TypeError:  If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
+		:raises TypeError:  If parameter ``mcdcRecords`` contains an element not of type :class:`MCDCRecord`.
+		"""
+		if name is None:
+			raise ValueError(f"Parameter 'name' is None.")
+		elif not isinstance(name, str):
+			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+			raise ex
+		elif name == "":
+			raise ValueError(f"Parameter 'name' is empty.")
+
+		if count is None:
+			raise ValueError(f"Parameter 'count' is None.")
+		elif not isinstance(count, int):
+			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
+			raise ex
+		elif count < 0:
+			ex = ValueError(f"Parameter 'count' is negative.")
+			ex.add_note(f"Got value '{count}'.")
+			raise ex
+
+		if regions is None:
+			raise ValueError(f"Parameter 'regions' is None.")
+
+		if filePaths is None:
+			raise ValueError(f"Parameter 'filePaths' is None.")
+
+		self._name =        name
+		self._count =       count
+		self._regions =     []
+		self._branches =    []
+		self._mcdcRecords = []
+		self._filePaths =   []
+
+		for parameterName, elements, elementType, target in (
+			("regions", regions, Region, self._regions), ("filePaths", filePaths, Path, self._filePaths),
+			("branches", branches, BranchRegion, self._branches),
+			("mcdcRecords", mcdcRecords, MCDCRecord, self._mcdcRecords)
+		):
+			if elements is None:
+				continue
+			elif not isinstance(elements, Iterable):
+				ex = TypeError(f"Parameter '{parameterName}' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(elements)}'.")
+				raise ex
+
+			for element in elements:
+				if not isinstance(element, elementType):
+					ex = TypeError(f"Parameter '{parameterName}' contains an element not of type '{elementType.__name__}'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(element)}'.")
+					raise ex
+
+				target.append(element)
+
+	@classmethod
+	def Parse(cls, function: dict[str, Any]) -> Self:
+		"""
+		Parse a function from its JSON object.
+
+		:param function: The JSON object of the function.
+		:returns:        The function.
+		"""
+		return cls(
+			function["name"],
+			function["count"],
+			[Region.Parse(region) for region in function["regions"]],
+			[Path(filename.replace("\\", "/")) for filename in function["filenames"]],
+			[BranchRegion.Parse(branch) for branch in function.get("branches", [])],
+			[MCDCRecord.Parse(record) for record in function.get("mcdc_records", [])]
+		)
+
+	@readonly
+	def Name(self) -> str:
+		"""
+		Read-only property to access the function's name (:attr:`_name`).
+
+		:returns: The name, as the profile names it: mangled, and prefixed by the file name of its translation unit, if
+		          local to it - e.g. ``Statistics.c:Square``.
+		"""
+		return self._name
+
+	@readonly
+	def Count(self) -> int:
+		"""
+		Read-only property to access how often the function was called (:attr:`_count`).
+
+		:returns: The count.
+		"""
+		return self._count
+
+	@readonly
+	def Regions(self) -> list[Region]:
+		"""
+		Read-only property to access the regions (:attr:`_regions`).
+
+		:returns: The regions.
+		"""
+		return self._regions
+
+	@readonly
+	def Branches(self) -> list[BranchRegion]:
+		"""
+		Read-only property to access the branch regions (:attr:`_branches`).
+
+		:returns: The branch regions, also those in macro expansions.
+		"""
+		return self._branches
+
+	@readonly
+	def MCDCRecords(self) -> list[MCDCRecord]:
+		"""
+		Read-only property to access the MC/DC records (:attr:`_mcdcRecords`).
+
+		:returns: The MC/DC records.
+		"""
+		return self._mcdcRecords
+
+	@readonly
+	def FilePaths(self) -> list[Path]:
+		"""
+		Read-only property to access the paths of the files, which the file IDs of the regions index (:attr:`_filePaths`).
+
+		:returns: The paths, as the compiler named them.
+		"""
+		return self._filePaths
+
+	@readonly
+	def MainFileID(self) -> Nullable[int]:
+		"""
+		Read-only property to return the file ID of the file the function is in: the first file no expansion region
+		expands to.
+
+		:returns: The index into :attr:`FilePaths`, or ``None`` if every file is expanded to.
+		"""
+		expanded = {region._expandedFileID for region in self._regions if region._kind is RegionKind.Expansion}
+		return next((fileID for fileID in range(len(self._filePaths)) if fileID not in expanded), None)
