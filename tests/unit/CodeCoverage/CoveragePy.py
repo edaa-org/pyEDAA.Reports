@@ -596,6 +596,34 @@ class Schema(Testcase):
 
 		self.assertEqual(f"coverage.py report file '{jsonFile}' is not UTF-8 encoded.", str(context.exception))
 
+	def test_Version(self) -> None:
+		"""The JSON Schema accepts any string as coverage.py's version."""
+		content = loads(REPORT.read_text(encoding="utf-8"))
+		content["meta"]["version"] = "unknown"
+		with TemporaryDirectory() as directory:
+			jsonFile = _write(directory, content)
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(
+			f"coverage.py report file '{jsonFile}' states a malformed coverage.py version.", str(context.exception)
+		)
+		self.assertEqual(["Got value 'unknown' at '/meta/version'."], context.exception.__notes__)
+
+	def test_Timestamp(self) -> None:
+		"""The JSON Schema accepts any string as timestamp."""
+		content = loads(REPORT.read_text(encoding="utf-8"))
+		content["meta"]["timestamp"] = "yesterday"
+		with TemporaryDirectory() as directory:
+			jsonFile = _write(directory, content)
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(f"coverage.py report file '{jsonFile}' states a malformed timestamp.", str(context.exception))
+		self.assertEqual(["Got value 'yesterday' at '/meta/timestamp'."], context.exception.__notes__)
+
 	def test_NotAnalyzed(self) -> None:
 		with self.assertRaises(CodeCoverageError):
 			Document(REPORT).Convert()

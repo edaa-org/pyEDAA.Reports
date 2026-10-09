@@ -399,6 +399,7 @@ class Document(cc_Document, Report):
 		:raises CodeCoverageError: If the JSON file was not analyzed before. |br|
 		                           Call 'Document.Analyze()' or create the document using
 		                           'Document(path, analyzeAndConvert=True)'.
+		:raises CodeCoverageError: If the timestamp isn't a valid date and time.
 		:raises CodeCoverageError: If the JSON file names a source file twice.
 		:raises CodeCoverageError: If a source file's result names a line beyond its ``max-line``.
 		"""
@@ -408,7 +409,12 @@ class Document(cc_Document, Report):
 			raise ex
 
 		with Stopwatch() as sw:
-			timestamp = datetime.strptime(self._jsonDocument["timestamp"], "%Y%m%d%H%M%S.%f")
+			try:
+				timestamp = datetime.strptime(self._jsonDocument["timestamp"], "%Y%m%d%H%M%S.%f")
+			except ValueError as cause:
+				ex = CodeCoverageError(f"GHDL coverage file '{self._path}' states a malformed timestamp.")
+				ex.add_note(f"Got value '{self._jsonDocument['timestamp']}' at '/timestamp'.")
+				raise ex from cause
 
 			self._version =   FormatVersion.Parse(self._jsonDocument["version"])
 			self._testcase =  self._jsonDocument["testcase"]
