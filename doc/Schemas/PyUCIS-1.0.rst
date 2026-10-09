@@ -10,8 +10,10 @@ Read by :class:`pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS.Document` - see :ref:`CO
 report, whose root ``<UCIS>`` of no namespace states ``ucisVersion="1.0"``.
 
 pyucis' ``XmlWriter`` binds the prefix ``ucis`` to the XML Schema instance namespace, but uses it for no element. This
-schema is :ref:`UCIS-1.0.xsd <SCHEMAS/UCIS-1.0>` without a target namespace: the same complex types, elements,
-attributes, their order, occurrences, types and defaults.
+schema is :ref:`UCIS-1.0.xsd <SCHEMAS/UCIS-1.0>` without a target namespace, with the changes of pyucis' own schema
+``ucis.xsd``: a coverpoint's and a cross' bin state a ``name`` and a ``key``, a coverpoint's bin's ``type`` is
+``bins``, ``default``, ``ignore`` or ``illegal``, and a covergroup instance may have no coverpoint. Otherwise it has
+the standard's complex types, elements, attributes, their order, occurrences, types and defaults.
 
 .. grid:: 2
 
