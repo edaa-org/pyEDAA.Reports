@@ -144,22 +144,14 @@ class AnyJUnit(SchemaMixin, ut_TestCase):
 					self.Dialect.DocumentClass(referenceFile, analyzeAndConvert=True)
 
 
-class NextestJUnit(ut_TestCase):
-	"""cargo-nextest's JUnit report: no dialect reads it yet."""
-
-	_referenceFile: ClassVar[Path] = DATA_DIRECTORY / "pyEDAA.Reports/Rust-Cargo/nextest-junit.xml"  #: The report.
-
-	def test_Schemas(self) -> None:
-		"""Known gap: when this starts failing, a dialect accepts the report and it becomes a reference file."""
-		for dialect in DIALECTS.values():
-			with self.subTest(dialect=dialect.Name):
-				self.assertFalse(dialect.Schema().is_valid(str(self._referenceFile)), f"{dialect.Name} accepts it now.")
+class NextestJUnit(SchemaMixin, ut_TestCase):
+	_dialectName = "nextest-JUnit"
 
 	def test_AnyJUnit(self) -> None:
 		"""The report is Any-JUnit, except for ``uuid`` on ``<testsuites>`` and ``timestamp`` on ``<testcase>``."""
 		schema = DIALECTS["Any-JUnit"].Schema()
 
-		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(self._referenceFile))}
+		errors = {(error.elem.tag, error.reason) for error in schema.iter_errors(str(self.Dialect.ReferenceFiles[0]))}
 
 		self.assertEqual({
 			("testsuites", "'uuid' attribute not allowed for element"),

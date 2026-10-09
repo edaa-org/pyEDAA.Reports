@@ -138,6 +138,19 @@ class GoogleTestJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "GoogleTest-JUnit"
 
 
+class NextestJUnit(RoundTripMixin, ut_TestCase):
+	_dialectName = "nextest-JUnit"
+
+	def test_StartTimesSurvive(self) -> None:
+		"""The start time of each test case, which only this dialect carries, is written and read back."""
+		for referenceFile in self.Dialect.ReferenceFiles:
+			with self.subTest(file=referenceFile.name):
+				summary, _, rereadSummary = self._roundTrip(referenceFile)
+				before = {tc._name: tc._startTime for tc in summary.IterateTestcases()}
+				after = {tc._name: tc._startTime for tc in rereadSummary.IterateTestcases()}
+				self.assertEqual(before, after)
+
+
 class PyTestJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "pyTest-JUnit"
 

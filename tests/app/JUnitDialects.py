@@ -55,11 +55,12 @@ COMMANDLINE_NAMES: Dict[str, str] = {
 	"Catch2-JUnit":     "Catch2-JUnit",
 	"CTest-JUnit":      "CTest-JUnit",
 	"GoogleTest-JUnit": "gtest-JUnit",
+	"nextest-JUnit":    "nextest-JUnit",
 	"pyTest-JUnit":     "pyTest-JUnit",
 }
 
 #: Dialects the command line can write. ``Any-JUnit`` is readable but has no branch in ``_output``.
-WRITABLE = ("Ant-JUnit4", "Catch2-JUnit", "CTest-JUnit", "GoogleTest-JUnit", "pyTest-JUnit")
+WRITABLE = ("Ant-JUnit4", "Catch2-JUnit", "CTest-JUnit", "GoogleTest-JUnit", "nextest-JUnit", "pyTest-JUnit")
 
 #: (source, target) -> why the conversion cannot work, mirroring the unit-level table.
 FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
@@ -71,6 +72,20 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"CTest-JUnit requires 'timestamp' on its <testsuite> root, which Catch2 does not write on <testsuites>.",
 	("Catch2-JUnit", "GoogleTest-JUnit"):
 		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which Catch2 does not write.",
+	("Catch2-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which Catch2 does not write.",
+	("pyTest-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which pytest does not write.",
+	("nextest-JUnit", "Ant-JUnit4"):
+		"Ant + JUnit4 holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "CTest-JUnit"):
+		"CTest-JUnit holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuite>, which nextest does not write.",
+	("nextest-JUnit", "pyTest-JUnit"):
+		"pyTest-JUnit requires 'hostname' and 'timestamp' on <testsuite>, which nextest does not write.",
 	("Any-JUnit", "Ant-JUnit4"):
 		"Ant + JUnit4 holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "Catch2-JUnit"):
@@ -183,6 +198,9 @@ class ConversionMixin:
 	def test_ToGoogleTestJUnit(self) -> None:
 		self._roundTripThroughTheCommandLine("GoogleTest-JUnit")
 
+	def test_ToNextestJUnit(self) -> None:
+		self._roundTripThroughTheCommandLine("nextest-JUnit")
+
 	def test_ToPyTestJUnit(self) -> None:
 		self._roundTripThroughTheCommandLine("pyTest-JUnit")
 
@@ -201,6 +219,10 @@ class FromCTestJUnit(ConversionMixin, ApplicationTestcase):
 
 class FromGoogleTestJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "GoogleTest-JUnit"
+
+
+class FromNextestJUnit(ConversionMixin, ApplicationTestcase):
+	_dialectName = "nextest-JUnit"
 
 
 class FromPyTestJUnit(ConversionMixin, ApplicationTestcase):

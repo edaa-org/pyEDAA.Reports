@@ -132,6 +132,7 @@ Report Formats
 
       .. rubric:: Supported tools
 
+      * :ref:`cargo-nextest <UNITTEST/Tool/nextest>`
       * :ref:`Catch2 <UNITTEST/Tool/Catch2>`
       * :ref:`CTest <UNITTEST/Tool/CTest>`
       * :ref:`GoogleTest <UNITTEST/Tool/GoogleTest>`

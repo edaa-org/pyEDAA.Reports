@@ -116,6 +116,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
 					documentClass = Document
+				elif dialect == "nextest":
+					from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
+
+					documentClass = Document
 				elif dialect == "pytest":
 					from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
@@ -164,6 +168,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
 					self._mergeJUnit(testsuiteSummary, Document, foundFiles, "GoogleTest-JUnit")
+				elif dialect == "nextest":
+					from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
+
+					self._mergeJUnit(testsuiteSummary, Document, foundFiles, "nextest-JUnit")
 				elif dialect == "pytest":
 					from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
@@ -329,6 +337,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document, UnittestError
 
 					self._outputJUnit(testsuiteSummary, Document, outputFile, "GoogleTest-JUnit")
+				elif dialect == "nextest":
+					from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document, UnittestError
+
+					self._outputJUnit(testsuiteSummary, Document, outputFile, "nextest-JUnit")
 				elif dialect == "pytest":
 					from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document, UnittestError
 

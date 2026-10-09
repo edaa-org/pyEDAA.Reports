@@ -188,6 +188,19 @@ Reading unittest reports
                except UnittestError as ex:
                  ...
 
+         .. tab-item:: cargo-nextest JUnit
+            :sync: NextestJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
+
+               xmlReport = Path("Nextest-JUnit-Report.xml")
+               try:
+                 doc = Document(xmlReport, analyzeAndConvert=True)
+               except UnittestError as ex:
+                 ...
+
          .. tab-item:: pyTest JUnit
             :sync: pyTestJUnit
 
@@ -524,6 +537,23 @@ Writing unittest reports
             .. code-block:: Python
 
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
+
+               # Convert a TestsuiteSummary back to a Document
+               newXmlReport = Path("JUnit-Report.xml")
+               newDoc = Document.FromTestsuiteSummary(newXmlReport, summary)
+
+               # Write to XML file
+               try:
+                  newDoc.Write()
+               except UnittestError as ex:
+                 ...
+
+         .. tab-item:: cargo-nextest JUnit
+            :sync: NextestJUnit
+
+            .. code-block:: Python
+
+               from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
 
                # Convert a TestsuiteSummary back to a Document
                newXmlReport = Path("JUnit-Report.xml")

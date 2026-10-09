@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xsd:schema
+	version="0.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			Schema description for the JUnit XML report written by cargo-nextest (https://github.com/nextest-rs/nextest).
+
+			Derived from the source code of cargo-nextest 0.9.148: the report is assembled in nextest-runner 0.126.0
+			(src/reporter/aggregator/junit.rs) and serialized by quick-junit 0.8.0 (src/serialize.rs,
+			https://github.com/nextest-rs/quick-junit), and checked against reports cargo-nextest wrote.
+
+			An attribute nextest always writes is required, except the run ID (uuid) and the type of a failure, error or
+			skip: the unified data model of pyEDAA.Reports has no field for them, so a report converted from another dialect
+			has neither. Elements and attributes quick-junit offers, but nextest never writes (e.g. disabled, assertions,
+			stackTrace, properties of a testcase), are not allowed.
+		</xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:simpleType name="preservingstring">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="preserve"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="uuid">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="duration">
+		<xsd:restriction base="xsd:decimal">
+			<xsd:minInclusive value="0"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="output">
+		<xsd:simpleContent>
+			<xsd:extension base="preservingstring" />
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="status">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">The message is the first line of the test's error output, the text all of it.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="preservingstring">
+				<xsd:attribute name="message" type="xsd:string" use="optional" />
+				<xsd:attribute name="type" type="xsd:string" use="optional" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="rerun" mixed="true">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">An earlier attempt of a retried test: its error output as text, followed by its captured output.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="system-out" type="output" minOccurs="0" />
+			<xsd:element name="system-err" type="output" minOccurs="0" />
+		</xsd:sequence>
+		<xsd:attribute name="timestamp" type="xsd:dateTime" use="required" />
+		<xsd:attribute name="time" type="duration" use="required" />
+		<xsd:attribute name="message" type="xsd:string" use="optional" />
+		<xsd:attribute name="type" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="property">
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="value" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="properties">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Command, arguments and exported environment variables of a setup script.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="property" type="property" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="testcase">
+		<xsd:sequence>
+			<xsd:choice minOccurs="0">
+				<xsd:sequence>
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en">A failed test (or errored, e.g. leaked handles), followed by its retries.</xsd:documentation>
+					</xsd:annotation>
+					<xsd:choice>
+						<xsd:element name="failure" type="status" />
+						<xsd:element name="error" type="status" />
+					</xsd:choice>
+					<xsd:choice minOccurs="0" maxOccurs="unbounded">
+						<xsd:element name="flakyFailure" type="rerun" />
+						<xsd:element name="flakyError" type="rerun" />
+						<xsd:element name="rerunFailure" type="rerun" />
+						<xsd:element name="rerunError" type="rerun" />
+					</xsd:choice>
+				</xsd:sequence>
+				<xsd:element name="skipped" type="status">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en">A skipped test, written only if the profile's junit.report-skipped selects it.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en">A flaky test, which passed in a retry: its failed attempts.</xsd:documentation>
+					</xsd:annotation>
+					<xsd:element name="flakyFailure" type="rerun" />
+					<xsd:element name="flakyError" type="rerun" />
+				</xsd:choice>
+			</xsd:choice>
+			<xsd:element name="system-out" type="output" minOccurs="0" />
+			<xsd:element name="system-err" type="output" minOccurs="0" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="classname" type="xsd:string" use="required" />
+		<xsd:attribute name="timestamp" type="xsd:dateTime" use="optional">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">Start time of the test; a skipped test has none.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="time" type="duration" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuite">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">A test binary (named by its binary ID), or a setup script (named @setup-script:...).</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="properties" type="properties" minOccurs="0" />
+			<xsd:element name="testcase" type="testcase" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="tests" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="skipped" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="errors" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="failures" type="xsd:nonNegativeInteger" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuites">
+		<xsd:sequence>
+			<xsd:element name="testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="tests" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="skipped" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="failures" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="errors" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="uuid" type="uuid" use="optional" />
+		<xsd:attribute name="timestamp" type="xsd:dateTime" use="required" />
+		<xsd:attribute name="time" type="duration" use="required" />
+	</xsd:complexType>
+
+	<xsd:element name="testsuites" type="testsuites">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Describes the overall result of all tests of a run.</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+</xsd:schema>

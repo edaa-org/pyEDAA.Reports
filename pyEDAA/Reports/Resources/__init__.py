@@ -12,6 +12,7 @@ pyTooling ships in :mod:`pyTooling.Resources`.
 * :file:`Ant-JUnit4.xsd` - JUnit XML as written by Ant's JUnit 4 runner.
 * :file:`CTest-JUnit.xsd` - JUnit XML as written by CTest.
 * :file:`GoogleTest-JUnit.xsd` - JUnit XML as written by GoogleTest.
+* :file:`Nextest-JUnit.xsd` - JUnit XML as written by cargo-nextest.
 * :file:`PyTest-JUnit.xsd` - JUnit XML as written by pytest.
 
 The schemas of Open Test Reporting are in the resource package :mod:`pyEDAA.Reports.Resources.OpenTestReporting`.
