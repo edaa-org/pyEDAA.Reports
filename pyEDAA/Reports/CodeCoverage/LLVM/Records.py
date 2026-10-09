@@ -495,7 +495,9 @@ class Expansion(metaclass=ExtendedType, slots=True):
 @export
 class Counters(metaclass=ExtendedType, slots=True):
 	"""
-	The counters of one kind of a summary - e.g. its lines -: how many there are, and how many are covered.
+	The counters of one kind of a summary: how many there are, and how many are covered.
+
+	A summary counts lines, functions, regions, branches and MC/DC conditions.
 	"""
 
 	_count:      int            #: Number of lines, functions, regions, branches or MC/DC conditions.
