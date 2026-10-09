@@ -58,12 +58,13 @@ COMMANDLINE_NAMES: Dict[str, str] = {
 	"GoogleTest-JUnit":    "gtest-JUnit",
 	"nextest-JUnit":       "nextest-JUnit",
 	"pyTest-JUnit":        "pyTest-JUnit",
+	"TestLogger-JUnit":    "TestLogger-JUnit",
 }
 
 #: Dialects the command line can write. ``Any-JUnit`` is readable but has no branch in ``_output``.
 WRITABLE = (
 	"Ant-JUnit4", "Catch2-JUnit", "CTest-JUnit", "GoJUnitReport-JUnit", "GoogleTest-JUnit", "nextest-JUnit",
-	"pyTest-JUnit"
+	"pyTest-JUnit", "TestLogger-JUnit"
 )
 
 #: (source, target) -> why the conversion cannot work, mirroring the unit-level table.
@@ -110,6 +111,12 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
 	("GoJUnitReport-JUnit", "nextest-JUnit"):
 		"nextest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
+	("nextest-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires 'timestamp' on <testsuite>, which nextest does not write.",
+	("GoJUnitReport-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires test cases in each <testsuite>; go-junit-report writes a package without tests too.",
+	("Any-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires 'timestamp' on <testsuite>; the OSVVM report has none.",
 }
 
 
@@ -221,6 +228,9 @@ class ConversionMixin:
 	def test_ToPyTestJUnit(self) -> None:
 		self._roundTripThroughTheCommandLine("pyTest-JUnit")
 
+	def test_ToTestLoggerJUnit(self) -> None:
+		self._roundTripThroughTheCommandLine("TestLogger-JUnit")
+
 
 class FromAntJUnit4(ConversionMixin, ApplicationTestcase):
 	_dialectName = "Ant-JUnit4"
@@ -248,6 +258,10 @@ class FromNextestJUnit(ConversionMixin, ApplicationTestcase):
 
 class FromPyTestJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "pyTest-JUnit"
+
+
+class FromTestLoggerJUnit(ConversionMixin, ApplicationTestcase):
+	_dialectName = "TestLogger-JUnit"
 
 
 class FromAnyJUnit(ConversionMixin, ApplicationTestcase):
