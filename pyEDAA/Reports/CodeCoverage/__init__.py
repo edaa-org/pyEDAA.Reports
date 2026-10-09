@@ -59,6 +59,8 @@ The report formats have models of their own, which convert to this one:
       |rarr| lcov's tracefile format, as written e.g. by lcov (``lcov --capture``) or llvm-cov (``llvm-cov export``).
    :mod:`pyEDAA.Reports.CodeCoverage.JaCoCo`
       |rarr| JaCoCo's XML format, as written e.g. by Gradle's task ``jacocoTestReport``.
+   :mod:`pyEDAA.Reports.CodeCoverage.AldecUCDB`
+      |rarr| Aldec's UCDB XML format, as exported by ``acdb2xml`` of Riviera-PRO or Active-HDL.
 """
 from __future__            import annotations
 
