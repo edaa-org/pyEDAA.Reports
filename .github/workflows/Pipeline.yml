@@ -39,6 +39,9 @@ jobs:
   Example-DotNet:
     uses: ./.github/workflows/Example-DotNet.yml
 
+  Example-VHDL:
+    uses: ./.github/workflows/Example-VHDL.yml
+
   UnitTestingParams:
     uses: pyTooling/Actions/.github/workflows/Parameters.yml@r8
     with:
@@ -117,6 +120,7 @@ jobs:
       - Example-Rust
       - Example-Go
       - Example-DotNet
+      - Example-VHDL
     with:
       jobs:                 ${{ needs.AppTestingParams.outputs.python_jobs }}
       wheel:                ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
