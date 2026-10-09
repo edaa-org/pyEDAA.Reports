@@ -176,10 +176,10 @@ class BinContents(metaclass=ExtendedType, slots=True):
 @export
 class Bin(Base, ObjectAttributesMixin):
 	"""
-	A bin of a coverage item, e.g. a ``<bin>`` of a statement or a ``<branchBin>`` of a branch: its contents, its goal
-	and its attributes.
+	A bin of a coverage item: its contents, its goal and its attributes.
 
-	The element owning the bin takes it as a parameter and becomes its parent.
+	A statement has ``<bin>`` elements, a branch ``<branchBin>`` elements. The element owning the bin takes it as a
+	parameter and becomes its parent.
 	"""
 
 	_parent:            Nullable[Base]  #: The element owning the bin.
@@ -248,7 +248,9 @@ class Bin(Base, ObjectAttributesMixin):
 	@classmethod
 	def Parse(cls, element: _Element) -> Self:
 		"""
-		Parse a bin, its contents and its user-defined attributes from its element, e.g. ``<bin>`` or ``<branchBin>``.
+		Parse a bin, its contents and its user-defined attributes from its element.
+
+		The element is e.g. a ``<bin>`` or a ``<branchBin>``.
 
 		:param element:            The bin's element.
 		:returns:                  The bin.
