@@ -30,7 +30,9 @@
 #
 from datetime import timedelta, datetime
 from pathlib  import Path
-from unittest import TestCase as py_TestCase
+from unittest import TestCase as py_TestCase, mock
+
+from lxml.etree                       import XMLSchemaParseError
 
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary
@@ -460,6 +462,18 @@ class Document(py_TestCase):
 
 		self.assertEqual(f"Couldn't read JUnit XML file '{directory}'.", str(context.exception))
 		self.assertIsInstance(context.exception.__cause__, OSError)
+
+	def test_Analyze_SchemaParseError(self) -> None:
+		"""The error parsing the XML schema is the cause of the raised exception."""
+		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
+		doc = JUnitDocument(junitExampleFile)
+
+		with mock.patch("pyEDAA.Reports.Unittesting.JUnit.XMLSchema", side_effect=XMLSchemaParseError("broken")):
+			with self.assertRaises(UnittestError) as context:
+				doc.Analyze()
+
+		self.assertEqual("Error while parsing XML Schema 'Any-JUnit.xsd'.", str(context.exception))
+		self.assertIsInstance(context.exception.__cause__, XMLSchemaParseError)
 
 	def test_ReadWrite(self) -> None:
 		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")

@@ -1401,7 +1401,7 @@ class Document(TestsuiteSummary, ut_Document):
 			try:
 				junitSchema = XMLSchema(schemaRoot)
 			except XMLSchemaParseError as ex:
-				raise UnittestError(f"Error while parsing XML Schema '{xmlSchemaFile}'.")
+				raise UnittestError(f"Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
 
 			try:
 				junitParser = XMLParser(schema=junitSchema, ns_clean=True)
