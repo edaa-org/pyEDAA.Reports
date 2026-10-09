@@ -158,10 +158,19 @@ class Branch(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a branch from its JSON object.
 
-		:param record: The JSON object of the branch.
-		:param parent: Optional, the line the branch belongs to. Default: ``None``.
-		:returns:      The branch.
+		:param record:      The JSON object of the branch.
+		:param parent:      Optional, the line the branch belongs to. Default: ``None``.
+		:returns:           The branch.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		return cls(
 			record["count"],
 			record["throw"],
@@ -318,10 +327,19 @@ class Call(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a call from its JSON object.
 
-		:param record: The JSON object of the call.
-		:param parent: Optional, the line the call belongs to. Default: ``None``.
-		:returns:      The call.
+		:param record:      The JSON object of the call.
+		:param parent:      Optional, the line the call belongs to. Default: ``None``.
+		:returns:           The call.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		return cls(record["source_block_id"], record["destination_block_id"], record["returned"], parent=parent)
 
 	@readonly
@@ -429,17 +447,7 @@ class Condition(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got value '{covered}'.")
 			raise ex
 
-		if parent is not None and not isinstance(parent, Line):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
-			raise ex
-
-		self._parent =          parent
-		self._count =           count
-		self._covered =         covered
-		self._notCoveredTrue =  []
-		self._notCoveredFalse = []
-
+		notCoveredTrueList: list[int] = []
 		if notCoveredTrue is not None:
 			if not isinstance(notCoveredTrue, Iterable):
 				ex = TypeError(f"Parameter 'notCoveredTrue' is not iterable.")
@@ -452,8 +460,9 @@ class Condition(metaclass=ExtendedType, slots=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(term)}'.")
 					raise ex
 
-				self._notCoveredTrue.append(term)
+				notCoveredTrueList.append(term)
 
+		notCoveredFalseList: list[int] = []
 		if notCoveredFalse is not None:
 			if not isinstance(notCoveredFalse, Iterable):
 				ex = TypeError(f"Parameter 'notCoveredFalse' is not iterable.")
@@ -466,7 +475,18 @@ class Condition(metaclass=ExtendedType, slots=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(term)}'.")
 					raise ex
 
-				self._notCoveredFalse.append(term)
+				notCoveredFalseList.append(term)
+
+		if parent is not None and not isinstance(parent, Line):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =          parent
+		self._count =           count
+		self._covered =         covered
+		self._notCoveredTrue =  notCoveredTrueList
+		self._notCoveredFalse = notCoveredFalseList
 
 		if parent is not None:
 			parent._conditions.append(self)
@@ -476,10 +496,19 @@ class Condition(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a condition from its JSON object.
 
-		:param record: The JSON object of the condition.
-		:param parent: Optional, the line the condition belongs to. Default: ``None``.
-		:returns:      The condition.
+		:param record:      The JSON object of the condition.
+		:param parent:      Optional, the line the condition belongs to. Default: ``None``.
+		:returns:           The condition.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		return cls(
 			record["count"], record["covered"], record["not_covered_true"], record["not_covered_false"], parent=parent
 		)

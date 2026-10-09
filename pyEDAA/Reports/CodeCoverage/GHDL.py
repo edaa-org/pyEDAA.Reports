@@ -68,6 +68,7 @@ from collections.abc             import Iterable
 from datetime                    import datetime, timezone
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
+from re                          import fullmatch
 from typing                      import Any, Generic, TypeVar, Optional as Nullable
 
 from jsonschema                  import Draft202012Validator
@@ -82,14 +83,13 @@ from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Docu
 from pyEDAA.Reports.CodeCoverage import LineCoverageStatus
 
 
-__all__ = ["SCHEMAS"]
+__all__ = ["SCHEMAS", "ParentType"]
 
 # A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
 # body's namespace, where annotations are evaluated, binds the name to the property.
 _Path = Path
 
-ParentType = TypeVar("ParentType", bound="Report | MergedReport")
-"""A type variable for the report a :class:`File` belongs to: a :class:`Report` or a :class:`MergedReport`."""
+ParentType = TypeVar("ParentType", bound="Report | MergedReport")  #: The report a :class:`File` belongs to.
 
 
 @export
@@ -136,32 +136,122 @@ class File(Generic[ParentType], metaclass=ExtendedType, slots=True):
 
 	def __init__(
 		self,
-		name: Path,
+		name:      Path,
 		directory: Path,
-		sha1: str,
-		mode: CoverageMode,
-		lastLine: int,
-		result: dict[int, bool],
+		sha1:      str,
+		mode:      CoverageMode,
+		lastLine:  int,
+		result:    dict[int, bool],
 		*,
-		parent: Nullable[ParentType] = None
+		parent:    Nullable[ParentType] = None
 	) -> None:
 		"""
 		Initialize the file from the fields of its JSON object, and add it to the files of its report.
 
-		:param name:       The file's name, as given to the analysis.
-		:param directory:  The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
-		:param sha1:       SHA-1 checksum of the file's content.
-		:param mode:       Kind of coverage, e.g. statement coverage.
-		:param lastLine:   The last line with a coverage point.
-		:param result:     Per line with a coverage point, whether the line ran.
-		:param parent:     Optional, the report the file belongs to; the file is added to its files by :attr:`Path`.
-		                   Default: ``None``.
-		:raises TypeError: If parameter ``parent`` isn't of type :class:`Report` or :class:`MergedReport`.
+		:param name:        The file's name, as given to the analysis.
+		:param directory:   The directory the file was analyzed in; ``.`` for the directory GHDL ran in.
+		:param sha1:        SHA-1 checksum of the file's content.
+		:param mode:        Kind of coverage, e.g. statement coverage.
+		:param lastLine:    The last line with a coverage point.
+		:param result:      Per line with a coverage point, whether the line ran.
+		:param parent:      Optional, the report the file belongs to; the file is added to its files by :attr:`Path`.
+		                    Default: ``None``.
+		:raises ValueError: If parameter ``name`` is ``None``.
+		:raises TypeError:  If parameter ``name`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError: If parameter ``directory`` is ``None``.
+		:raises TypeError:  If parameter ``directory`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError: If parameter ``sha1`` is ``None``.
+		:raises TypeError:  If parameter ``sha1`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``sha1`` isn't 40 lowercase hexadecimal digits.
+		:raises ValueError: If parameter ``mode`` is ``None``.
+		:raises TypeError:  If parameter ``mode`` isn't of type :class:`CoverageMode`.
+		:raises ValueError: If parameter ``lastLine`` is ``None``.
+		:raises TypeError:  If parameter ``lastLine`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``lastLine`` is less than 1.
+		:raises ValueError: If parameter ``result`` is ``None``.
+		:raises TypeError:  If parameter ``result`` isn't of type :class:`dict`.
+		:raises TypeError:  If parameter ``result`` contains a line number not of type :class:`int`.
+		:raises ValueError: If parameter ``result`` contains a line number less than 1.
+		:raises ValueError: If parameter ``result`` contains a line number greater than ``lastLine``.
+		:raises TypeError:  If parameter ``result`` contains a flag not of type :class:`bool`.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report` or :class:`MergedReport`.
+		:raises ValueError: If parameter ``parent`` contains a file of the same path already.
 		"""
-		if parent is not None and not isinstance(parent, (Report, MergedReport)):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report' or 'MergedReport'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+		if name is None:
+			raise ValueError(f"Parameter 'name' is None.")
+		elif not isinstance(name, Path):
+			ex = TypeError(f"Parameter 'name' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
+
+		if directory is None:
+			raise ValueError(f"Parameter 'directory' is None.")
+		elif not isinstance(directory, Path):
+			ex = TypeError(f"Parameter 'directory' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(directory)}'.")
+			raise ex
+
+		if sha1 is None:
+			raise ValueError(f"Parameter 'sha1' is None.")
+		elif not isinstance(sha1, str):
+			ex = TypeError(f"Parameter 'sha1' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(sha1)}'.")
+			raise ex
+		elif fullmatch(r"[0-9a-f]{40}", sha1) is None:
+			ex = ValueError(f"Parameter 'sha1' is not 40 lowercase hexadecimal digits.")
+			ex.add_note(f"Got value '{sha1}'.")
+			raise ex
+
+		if mode is None:
+			raise ValueError(f"Parameter 'mode' is None.")
+		elif not isinstance(mode, CoverageMode):
+			ex = TypeError(f"Parameter 'mode' is not of type 'CoverageMode'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(mode)}'.")
+			raise ex
+
+		if lastLine is None:
+			raise ValueError(f"Parameter 'lastLine' is None.")
+		elif not isinstance(lastLine, int):
+			ex = TypeError(f"Parameter 'lastLine' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(lastLine)}'.")
+			raise ex
+		elif lastLine < 1:
+			ex = ValueError(f"Parameter 'lastLine' is less than 1.")
+			ex.add_note(f"Got value '{lastLine}'.")
+			raise ex
+
+		if result is None:
+			raise ValueError(f"Parameter 'result' is None.")
+		elif not isinstance(result, dict):
+			ex = TypeError(f"Parameter 'result' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(result)}'.")
+			raise ex
+
+		for number, ran in result.items():
+			if not isinstance(number, int):
+				ex = TypeError(f"Parameter 'result' contains a line number not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(number)}'.")
+				raise ex
+			elif number < 1:
+				ex = ValueError(f"Parameter 'result' contains a line number less than 1.")
+				ex.add_note(f"Got value '{number}'.")
+				raise ex
+			elif number > lastLine:
+				ex = ValueError(f"Parameter 'result' contains a line number greater than parameter 'lastLine'.")
+				ex.add_note(f"Got line {number} for 'lastLine' {lastLine}.")
+				raise ex
+			elif not isinstance(ran, bool):
+				ex = TypeError(f"Parameter 'result' contains a flag not of type 'bool'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(ran)}'.")
+				raise ex
+
+		if parent is not None:
+			if not isinstance(parent, (Report, MergedReport)):
+				ex = TypeError(f"Parameter 'parent' is not of type 'Report' or 'MergedReport'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
+			elif (path := directory / name) in parent._files:
+				raise ValueError(f"Parameter 'parent' contains file '{path.as_posix()}' already.")
 
 		self._parent =    parent
 		self._name =      name
@@ -365,10 +455,10 @@ class Document(cc_Document, Report):
 			version = jsonDocument.get("version", None) if isinstance(jsonDocument, dict) else None
 			try:
 				formatVersion = FormatVersion.Parse(version)
-			except (TypeError, ValueError) as ex:
-				error = CodeCoverageError(f"GHDL coverage file '{self._path}' states unsupported format version '{version}'.")
-				error.add_note(f"Supported format versions: {', '.join(FormatVersion)}.")
-				raise error from ex
+			except (TypeError, ValueError) as cause:
+				ex = CodeCoverageError(f"GHDL coverage file '{self._path}' states unsupported format version '{version}'.")
+				ex.add_note(f"Supported format versions: {', '.join(FormatVersion)}.")
+				raise ex from cause
 
 			if formatVersion is None:
 				ex = CodeCoverageError(f"GHDL coverage file '{self._path}' states no format version.")

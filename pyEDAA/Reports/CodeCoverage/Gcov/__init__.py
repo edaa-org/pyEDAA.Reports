@@ -173,6 +173,7 @@ class File(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``path`` is ``None``.
 		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`DataFile`.
+		:raises ValueError: If parameter ``parent`` contains a file of the same path already.
 		"""
 		if path is None:
 			raise ValueError(f"Parameter 'path' is None.")
@@ -181,10 +182,13 @@ class File(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
-		if parent is not None and not isinstance(parent, DataFile):
-			ex = TypeError(f"Parameter 'parent' is not of type 'DataFile'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
-			raise ex
+		if parent is not None:
+			if not isinstance(parent, DataFile):
+				ex = TypeError(f"Parameter 'parent' is not of type 'DataFile'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
+			elif path in parent._files:
+				raise ValueError(f"Parameter 'parent' contains file '{path.as_posix()}' already.")
 
 		self._parent =    parent
 		self._path =      path
@@ -204,8 +208,17 @@ class File(metaclass=ExtendedType, slots=True):
 		:param record:             The JSON object of the file.
 		:param parent:             Optional, the data file the file belongs to. Default: ``None``.
 		:returns:                  The file.
+		:raises ValueError:        If parameter ``record`` is ``None``.
+		:raises TypeError:         If parameter ``record`` isn't of type :class:`dict`.
 		:raises CodeCoverageError: If the file names a function twice.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		file = cls(Path(record["file"].replace("\\", "/")), parent=parent)
 
 		for function in record["functions"]:
@@ -352,8 +365,17 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		:param record:             The JSON object of the data file: a report's root object.
 		:param parent:             Optional, the report the data file belongs to. Default: ``None``.
 		:returns:                  The data file.
+		:raises ValueError:        If parameter ``record`` is ``None``.
+		:raises TypeError:         If parameter ``record`` isn't of type :class:`dict`.
 		:raises CodeCoverageError: If the data file names a source file twice.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		directory = record.get("current_working_directory")
 		dataFile = cls(
 			Path(record["data_file"].replace("\\", "/")),
@@ -537,12 +559,12 @@ class Document(cc_Document, Coverage):
 				version = jsonDocument.get("format_version") if isinstance(jsonDocument, dict) else None
 				try:
 					formatVersion = FormatVersion.Parse(version)
-				except (ValueError, TypeError) as ex:
-					error = CodeCoverageError(f"gcov report file '{self._path}' states an unsupported format version.")
+				except (ValueError, TypeError) as cause:
+					ex =  CodeCoverageError(f"gcov report file '{self._path}' states an unsupported format version.")
 					got = f"value '{version}'" if version is not None else "no value"
-					error.add_note(f"Got {got} at '{prefix}/format_version'.")
-					error.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
-					raise error from ex
+					ex.add_note(f"Got {got} at '{prefix}/format_version'.")
+					ex.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
+					raise ex from cause
 
 				schemaFile = SCHEMAS[formatVersion]
 				if (validator := validators.get(formatVersion)) is None:

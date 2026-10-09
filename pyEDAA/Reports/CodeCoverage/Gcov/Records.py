@@ -135,21 +135,7 @@ class Line(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(functionName)}'.")
 			raise ex
 
-		if parent is not None and not isinstance(parent, File):
-			ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
-			raise ex
-
-		self._parent =          parent
-		self._lineNumber =      lineNumber
-		self._functionName =    functionName
-		self._count =           count
-		self._unexecutedBlock = unexecutedBlock
-		self._blockIDs =        []
-		self._branches =        []
-		self._calls =           []
-		self._conditions =      []
-
+		blockIDList: list[int] = []
 		if blockIDs is not None:
 			if not isinstance(blockIDs, Iterable):
 				ex = TypeError(f"Parameter 'blockIDs' is not iterable.")
@@ -162,7 +148,22 @@ class Line(metaclass=ExtendedType, slots=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(blockID)}'.")
 					raise ex
 
-				self._blockIDs.append(blockID)
+				blockIDList.append(blockID)
+
+		if parent is not None and not isinstance(parent, File):
+			ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =          parent
+		self._lineNumber =      lineNumber
+		self._functionName =    functionName
+		self._count =           count
+		self._unexecutedBlock = unexecutedBlock
+		self._blockIDs =        blockIDList
+		self._branches =        []
+		self._calls =           []
+		self._conditions =      []
 
 		if parent is not None:
 			parent._lines.append(self)
@@ -172,10 +173,19 @@ class Line(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a line, its branches, calls and conditions from its JSON object.
 
-		:param record: The JSON object of the line.
-		:param parent: Optional, the file the line belongs to. Default: ``None``.
-		:returns:      The line.
+		:param record:      The JSON object of the line.
+		:param parent:      Optional, the file the line belongs to. Default: ``None``.
+		:returns:           The line.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		line = cls(
 			record["line_number"],
 			record["count"],
@@ -353,6 +363,7 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises TypeError:     If parameter ``executionCount`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``executionCount`` is negative.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Gcov.File`.
+		:raises ValueError:    If parameter ``parent`` contains a function of the same name already.
 		"""
 		from pyEDAA.Reports.CodeCoverage.Gcov import File
 
@@ -451,10 +462,13 @@ class Function(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got value '{executionCount}'.")
 			raise ex
 
-		if parent is not None and not isinstance(parent, File):
-			ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
-			raise ex
+		if parent is not None:
+			if not isinstance(parent, File):
+				ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
+			elif name in parent._functions:
+				raise ValueError(f"Parameter 'parent' contains function '{name}' already.")
 
 		self._parent =         parent
 		self._name =           name
@@ -475,10 +489,19 @@ class Function(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a function from its JSON object.
 
-		:param record: The JSON object of the function.
-		:param parent: Optional, the file the function belongs to. Default: ``None``.
-		:returns:      The function.
+		:param record:      The JSON object of the function.
+		:param parent:      Optional, the file the function belongs to. Default: ``None``.
+		:returns:           The function.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		return cls(
 			record["name"],
 			record["demangled_name"],

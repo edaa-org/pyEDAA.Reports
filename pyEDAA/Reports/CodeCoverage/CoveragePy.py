@@ -176,19 +176,27 @@ class Summary(metaclass=ExtendedType, slots=True):
 		:param coveredBranchCount: Optional, number of taken branches. Default: ``None`` (branch coverage wasn't measured).
 		:param partialBranchCount: Optional, number of branches never taken from executed lines. |br|
 		                           Default: ``None`` (branch coverage wasn't measured).
-		:raises ValueError:        If parameter ``lineCount``, ``coveredLineCount``, ``missingLineCount`` or
-		                           ``excludedLineCount`` is ``None``.
-		:raises TypeError:         If parameter ``lineCount``, ``coveredLineCount``, ``missingLineCount`` or
-		                           ``excludedLineCount`` is not of type :class:`int`.
-		:raises ValueError:        If parameter ``lineCount``, ``coveredLineCount``, ``missingLineCount`` or
-		                           ``excludedLineCount`` is negative.
+		:raises ValueError:        If parameter ``lineCount`` is ``None``.
+		:raises TypeError:         If parameter ``lineCount`` is not of type :class:`int`.
+		:raises ValueError:        If parameter ``lineCount`` is negative.
+		:raises ValueError:        If parameter ``coveredLineCount`` is ``None``.
+		:raises TypeError:         If parameter ``coveredLineCount`` is not of type :class:`int`.
+		:raises ValueError:        If parameter ``coveredLineCount`` is negative.
+		:raises ValueError:        If parameter ``missingLineCount`` is ``None``.
+		:raises TypeError:         If parameter ``missingLineCount`` is not of type :class:`int`.
+		:raises ValueError:        If parameter ``missingLineCount`` is negative.
+		:raises ValueError:        If parameter ``excludedLineCount`` is ``None``.
+		:raises TypeError:         If parameter ``excludedLineCount`` is not of type :class:`int`.
+		:raises ValueError:        If parameter ``excludedLineCount`` is negative.
 		:raises ValueError:        If parameter ``percentCovered`` is ``None``.
 		:raises TypeError:         If parameter ``percentCovered`` is not of type :class:`float`.
 		:raises ValueError:        If parameter ``percentCovered`` is out of range 0..100.
-		:raises TypeError:         If parameter ``branchCount``, ``coveredBranchCount`` or ``partialBranchCount`` is not of
-		                           type :class:`int`.
-		:raises ValueError:        If parameter ``branchCount``, ``coveredBranchCount`` or ``partialBranchCount`` is
-		                           negative.
+		:raises TypeError:         If parameter ``branchCount`` is not of type :class:`int`.
+		:raises ValueError:        If parameter ``branchCount`` is negative.
+		:raises TypeError:         If parameter ``coveredBranchCount`` is not of type :class:`int`.
+		:raises ValueError:        If parameter ``coveredBranchCount`` is negative.
+		:raises TypeError:         If parameter ``partialBranchCount`` is not of type :class:`int`.
+		:raises ValueError:        If parameter ``partialBranchCount`` is negative.
 		"""
 		for name, count in (
 			("lineCount",         lineCount),
@@ -386,12 +394,16 @@ class Base(metaclass=ExtendedType, slots=True):
 		                         Default: ``None`` (none, or branch coverage wasn't measured).
 		:raises ValueError:      If parameter ``summary`` is ``None``.
 		:raises TypeError:       If parameter ``summary`` is not of type :class:`Summary`.
-		:raises TypeError:       If parameter ``executedLines``, ``missingLines`` or ``excludedLines`` is not iterable.
-		:raises TypeError:       If an element of parameter ``executedLines``, ``missingLines`` or ``excludedLines`` is
-		                         not of type :class:`int`.
-		:raises TypeError:       If parameter ``executedBranches`` or ``missingBranches`` is not iterable.
-		:raises TypeError:       If an element of parameter ``executedBranches`` or ``missingBranches`` is not a pair of
-		                         :class:`int`.
+		:raises TypeError:       If parameter ``executedLines`` is not iterable.
+		:raises TypeError:       If an element of parameter ``executedLines`` is not of type :class:`int`.
+		:raises TypeError:       If parameter ``missingLines`` is not iterable.
+		:raises TypeError:       If an element of parameter ``missingLines`` is not of type :class:`int`.
+		:raises TypeError:       If parameter ``excludedLines`` is not iterable.
+		:raises TypeError:       If an element of parameter ``excludedLines`` is not of type :class:`int`.
+		:raises TypeError:       If parameter ``executedBranches`` is not iterable.
+		:raises TypeError:       If an element of parameter ``executedBranches`` is not a pair of :class:`int`.
+		:raises TypeError:       If parameter ``missingBranches`` is not iterable.
+		:raises TypeError:       If an element of parameter ``missingBranches`` is not a pair of :class:`int`.
 		"""
 		if summary is None:
 			raise ValueError(f"Parameter 'summary' is None.")
@@ -1010,12 +1022,12 @@ class Document(cc_Document, Report):
 			version = meta.get("format") if isinstance(meta, dict) else None
 			try:
 				formatVersion = FormatVersion.Parse(version)
-			except (ValueError, TypeError) as ex:
-				error = CodeCoverageError(f"coverage.py report file '{self._path}' states an unsupported format version.")
-				got =   f"value '{version}'" if version is not None else "no value"
-				error.add_note(f"Got {got} at '/meta/format'.")
-				error.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
-				raise error from ex
+			except (ValueError, TypeError) as cause:
+				ex =  CodeCoverageError(f"coverage.py report file '{self._path}' states an unsupported format version.")
+				got = f"value '{version}'" if version is not None else "no value"
+				ex.add_note(f"Got {got} at '/meta/format'.")
+				ex.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
+				raise ex from cause
 
 			schemaFile = SCHEMAS[formatVersion]
 			try:

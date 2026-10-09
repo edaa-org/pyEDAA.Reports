@@ -99,6 +99,16 @@ class Construction(Testcase):
 		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 
+	def test_Condition_CheckOrder(self) -> None:
+		"""The parameters are checked in their order: 'notCoveredTrue' and 'notCoveredFalse' before 'parent'."""
+		with self.assertRaises(TypeError) as context:
+			_ = Condition(4, 2, notCoveredTrue=5, parent=21)
+		self.assertEqual("Parameter 'notCoveredTrue' is not iterable.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = Condition(4, 2, notCoveredFalse=["0"], parent=21)
+		self.assertEqual("Parameter 'notCoveredFalse' contains an element not of type 'int'.", str(context.exception))
+
 class ParentRelation(Testcase):
 	"""Each record of a line names its line as its parent and is added to it."""
 
@@ -186,6 +196,19 @@ class Parsing(Testcase):
 
 		self.assertEqual((6, 5, [2], []),
 		                 (condition.Count, condition.Covered, condition.NotCoveredTrue, condition.NotCoveredFalse))
+
+	def test_Record(self) -> None:
+		"""Each class method 'Parse' checks the JSON object it is given."""
+		for recordClass in (Branch, Call, Condition):
+			with self.subTest(recordClass=recordClass.__name__):
+				with self.assertRaises(ValueError) as context:
+					_ = recordClass.Parse(None)
+				self.assertEqual("Parameter 'record' is None.", str(context.exception))
+
+				with self.assertRaises(TypeError) as context:
+					_ = recordClass.Parse("x")
+				self.assertEqual("Parameter 'record' is not of type 'dict'.", str(context.exception))
+				self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
 
 class Schema(Testcase):

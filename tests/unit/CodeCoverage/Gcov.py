@@ -215,6 +215,12 @@ class Construction(Testcase):
 			_ = Line(1, 0, False, blockIDs=[3, "4"])
 		self.assertEqual("Parameter 'blockIDs' contains an element not of type 'int'.", str(context.exception))
 
+	def test_Line_CheckOrder(self) -> None:
+		"""The parameters are checked in their order: 'blockIDs' before 'parent'."""
+		with self.assertRaises(TypeError) as context:
+			_ = Line(1, 0, False, blockIDs=5, parent="main.c")
+		self.assertEqual("Parameter 'blockIDs' is not iterable.", str(context.exception))
+
 	def test_Function_Name(self) -> None:
 		with self.assertRaises(ValueError) as context:
 			_ = gcov_Function("", "main", 1, 5, 3, 1, 4, 4, 1)
@@ -326,6 +332,24 @@ class ParentRelation(Testcase):
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
 	def test_File_Duplicate(self) -> None:
+		dataFile = DataFile(Path("main.c"), FormatVersion.Version2, SemanticVersion.Parse("14.2.0"))
+		file = File(Path("main.c"), parent=dataFile)
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("main.c"), parent=dataFile)
+
+		self.assertEqual("Parameter 'parent' contains file 'main.c' already.", str(context.exception))
+		self.assertEqual({Path("main.c"): file}, dataFile.Files)
+
+	def test_Function_Duplicate(self) -> None:
+		file = File(Path("main.c"))
+		main = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 1, parent=file)
+		with self.assertRaises(ValueError) as context:
+			_ = gcov_Function("main", "main", 1, 5, 3, 1, 4, 4, 9, parent=file)
+
+		self.assertEqual("Parameter 'parent' contains function 'main' already.", str(context.exception))
+		self.assertEqual({"main": main}, file.Functions)
+
+	def test_DataFile_DuplicateFile(self) -> None:
 		"""A data file naming a source file twice is rejected before the second file is created."""
 		main = _stream()[1]
 		main["files"].append(main["files"][1])
@@ -336,7 +360,7 @@ class ParentRelation(Testcase):
 			"gcov data file 'Main.cpp' names source file 'Containers/Stack.hpp' twice.", str(context.exception)
 		)
 
-	def test_Function_Duplicate(self) -> None:
+	def test_File_DuplicateFunction(self) -> None:
 		record = _stream()[1]["files"][0]
 		record["functions"].append(record["functions"][0])
 
@@ -420,6 +444,19 @@ class Parsing(Testcase):
 		                 (dataFile.Path, dataFile.FormatVersion, dataFile.GCCVersion))
 		self.assertIsInstance(dataFile.GCCVersion, SemanticVersion)
 		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(dataFile.Files))
+
+	def test_Record(self) -> None:
+		"""Each class method 'Parse' checks the JSON object it is given."""
+		for recordClass in (DataFile, File, gcov_Function, Line):
+			with self.subTest(recordClass=recordClass.__name__):
+				with self.assertRaises(ValueError) as context:
+					_ = recordClass.Parse(None)
+				self.assertEqual("Parameter 'record' is None.", str(context.exception))
+
+				with self.assertRaises(TypeError) as context:
+					_ = recordClass.Parse("x")
+				self.assertEqual("Parameter 'record' is not of type 'dict'.", str(context.exception))
+				self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
 
 class Conversion(Testcase):
