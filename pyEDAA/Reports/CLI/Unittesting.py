@@ -57,6 +57,8 @@ class OutputFormat(StringEnum):
 	PyTestJUnit =        "pyTest-JUnit"         #: JUnit XML as pytest writes it.
 	TestLoggerJUnit =    "TestLogger-JUnit"     #: JUnit XML as the .NET test logger JunitXml.TestLogger writes it.
 
+	DEFAULT = PyTestJUnit                       #: A file without format is written as JUnit XML as pytest writes it.
+
 
 #: The document class reading each input format.
 INPUT_FORMATS: Dict[InputFormat, Type[AnyJUnitDocument]] = {
@@ -99,7 +101,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 	)
 	@LongValuedFlag("--pytest", dest="pytest", metaName='cleanup;cleanup', optional=True, help="Remove pytest overhead.")
 	@LongValuedFlag("--render", dest="render", metaName='format', optional=True, help="Render unit testing results to <format>.")
-	@LongValuedFlag("--output", dest="output", metaName='format:JUnit File', optional=True, help="Processed unit testing summary file (XML).")
+	@LongValuedFlag(
+		"--output", dest="output", metaName="[Format:]File", optional=True,
+		help="Processed unit testing summary file (XML), e.g. 'Ant-JUnit:summary.xml'; without format: pyTest-JUnit."
+	)
 	def HandleUnittest(self, args: Namespace) -> None:
 		"""Handle program calls with command ``unittest``."""
 		self._PrintHeadline()
@@ -173,17 +178,14 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		:param formats:        The formats the option accepts.
 		:param direction:      ``input`` or ``output``, for the error message.
 		:returns:              The format and the file pattern.
-		:raises UnittestError: If the value names a format the option doesn't accept, or none and the option has no default
-		                       format. |br|
-		                       The exception notes the supported formats, and the default format.
+		:raises UnittestError: If the value names a format the option doesn't accept. |br|
+		                       The exception notes the supported formats and the default format.
 		"""
 		try:
 			fileFormat, globPattern = splitFormat(task, formats)
 		except ValueError as ex:
 			error = UnittestError(f"Unsupported unit testing report format for {direction}: '{task}'.")
-			default = formats.Parse(None)
-			without = f"; without format: {default}" if default is not None else ""
-			error.add_note(f"Supported formats: {', '.join(formats)}{without}.")
+			error.add_note(f"Supported formats: {', '.join(formats)}; without format: {formats.Parse(None)}.")
 			raise error from ex
 
 		return fileFormat, str(globPattern)

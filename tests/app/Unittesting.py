@@ -93,14 +93,13 @@ class UnittestCommand(ApplicationTestcase):
 		)
 		writeFormats = (
 			"Ant-JUnit, Catch2-JUnit, CTest-JUnit, GoJUnitReport-JUnit, gtest-JUnit, nextest-JUnit, pyTest-JUnit, "
-			"TestLogger-JUnit"
+			"TestLogger-JUnit; without format: pyTest-JUnit"
 		)
 		outputFile =   OUTPUT_DIRECTORY / "dialect.xml"
 		merge = f"--merge=pyTest-JUnit:{REFERENCE_FILE}"
 		for options, message, formats in (
 			((f"--input=pyTest:{REFERENCE_FILE}", ),                f"input: 'pyTest:{REFERENCE_FILE}'",     readFormats),
 			((f"--merge=pyTest:{REFERENCE_FILE}", ),                f"input: 'pyTest:{REFERENCE_FILE}'",     readFormats),
-			((merge, f"--output={outputFile}"),                     f"output: '{outputFile}'",               writeFormats),
 			((merge, f"--output=pyTest:{outputFile}"),              f"output: 'pyTest:{outputFile}'",        writeFormats),
 			((merge, f"--output=Any-JUnit:{outputFile}"),           f"output: 'Any-JUnit:{outputFile}'",     writeFormats)
 		):
@@ -119,6 +118,20 @@ class UnittestCommand(ApplicationTestcase):
 
 				self.assertExitCode(result, 0)
 				self.assertNotIn("Unsupported", result.stdout)
+
+	def test_OutputWithoutFormat(self) -> None:
+		"""A file without format is written as ``pyTest-JUnit``."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		outputFile = OUTPUT_DIRECTORY / "withoutFormat.xml"
+		outputFile.unlink(missing_ok=True)
+
+		result = self.RunEntrypoint(
+			"unittest", f"--merge=pyTest-JUnit:{REFERENCE_FILE}", f"--output={outputFile}", timeout=60.0
+		)
+
+		self.assertExitCode(result, 0)
+		self.assertIn(f"Output written to '{outputFile}' in pyTest-JUnit format.", result.stdout)
+		self.assertTrue(outputFile.exists())
 
 	def test_UnwritableOutput(self) -> None:
 		"""A file that can't be written: the error, and no claim it was written."""
