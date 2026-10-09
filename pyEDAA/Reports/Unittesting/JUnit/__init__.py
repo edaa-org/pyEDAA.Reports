@@ -1058,12 +1058,6 @@ class Testsuite(TestsuiteBase):
 			status= testsuite._status,
 		)
 
-		juTestsuite._tests = testsuite._tests
-		juTestsuite._skipped = testsuite._skipped
-		juTestsuite._errored = testsuite._errored
-		juTestsuite._failed = testsuite._failed
-		juTestsuite._passed = testsuite._passed
-
 		for tc in testsuite.IterateTestcases():
 			ts = tc._parent
 			if ts is None:
@@ -1318,8 +1312,31 @@ class Document(TestsuiteSummary, ut_Document):
 	_readerMode:        JUnitReaderMode
 	_xmlDocument:       Nullable[_ElementTree]
 
-	def __init__(self, xmlReportFile: Path, analyzeAndConvert: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default) -> None:
-		super().__init__("Unprocessed JUnit XML file")
+	def __init__(
+		self,
+		xmlReportFile: Path,
+		analyzeAndConvert: bool = False,
+		readerMode: JUnitReaderMode = JUnitReaderMode.Default,
+		*,
+		name: str = "Unprocessed JUnit XML file",
+		startTime: Nullable[datetime] = None,
+		duration:  Nullable[timedelta] = None,
+		status: TestsuiteStatus = TestsuiteStatus.Unknown,
+		testsuites: Nullable[Iterable[Testsuite]] = None
+	) -> None:
+		"""
+		Initializes a JUnit XML document, read from or written to a file.
+
+		:param xmlReportFile:     Path to the JUnit XML file.
+		:param analyzeAndConvert: Optional, if true, analyze (parse and validate) the file and convert its content.
+		:param readerMode:        Optional, how strictly the file is read.
+		:param name:              Optional, name of the test suite summary.
+		:param startTime:         Optional, time when the test run was started.
+		:param duration:          Optional, duration of the test run.
+		:param status:            Optional, overall status of the test run.
+		:param testsuites:        Optional, test suites of the summary.
+		"""
+		super().__init__(name, startTime, duration, status, testsuites)
 
 		self._readerMode = readerMode
 		self._xmlDocument = None
@@ -1327,19 +1344,26 @@ class Document(TestsuiteSummary, ut_Document):
 		ut_Document.__init__(self, xmlReportFile, analyzeAndConvert)
 
 	@classmethod
-	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary):
-		doc = cls(xmlReportFile)
-		doc._name = testsuiteSummary._name
-		doc._startTime = testsuiteSummary._startTime
-		doc._duration = testsuiteSummary._totalDuration
-		doc._status = testsuiteSummary._status
-		doc._tests = testsuiteSummary._tests
-		doc._skipped = testsuiteSummary._skipped
-		doc._errored = testsuiteSummary._errored
-		doc._failed = testsuiteSummary._failed
-		doc._passed = testsuiteSummary._passed
+	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary) -> Document:
+		"""
+		Convert a test suite summary of the unified test entity data model to a JUnit XML document of this dialect.
 
-		doc.AddTestsuites(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+		The test suites become test suites of the dialect (:attr:`_TESTSUITE`). The counters are computed by
+		:meth:`Aggregate`.
+
+		:param xmlReportFile:    Path to the JUnit XML file to write.
+		:param testsuiteSummary: Test suite summary from unified data model.
+		:returns:                JUnit XML document of this dialect.
+		"""
+		doc = cls(
+			xmlReportFile,
+			name=testsuiteSummary._name,
+			startTime=testsuiteSummary._startTime,
+			duration=testsuiteSummary._totalDuration,
+			status=testsuiteSummary._status,
+			testsuites=(cls._TESTSUITE.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+		)
+		doc.Aggregate()
 
 		return doc
 
