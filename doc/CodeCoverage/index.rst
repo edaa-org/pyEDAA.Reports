@@ -40,25 +40,25 @@ the JUnit dialects convert to the unified unit test model.
 
 The common model is a superset: it has two hierarchies over the same lines.
 
-.. code-block:: text
+.. py:currentmodule:: pyEDAA.Reports.CodeCoverage
 
-   CoverageSummary             the report
-   │
-   ├─ physical hierarchy       built from the file paths the report names
-   │  ├── Directory            e.g. myPackage/
-   │  │   └── File             e.g. myPackage/Shapes.py
-   │  │       └── Line         line number, LineCoverageStatus, coverage count
-   │  │           └── Branch   LineCoverageStatus, coverage count, target
-   │  └── File
-   │
-   └─ logical hierarchy        the language units the report names - each: file, first and last line
-      └── Package              e.g. myPackage
-          ├── Module           e.g. myPackage.Shapes
-          │   ├── Class        e.g. myPackage.Shapes.Circle
-          │   │   └── Method   e.g. myPackage.Shapes.Circle.Area
-          │   └── Function     e.g. myPackage.Shapes.Distance
-          └── SourceFile       e.g. main.c - for languages, where the file is the unit
-              └── Function     e.g. main
+.. tree::
+
+   - :class:`CoverageSummary`  | the report
+     - physical hierarchy      | built from the file paths the report names
+       - :class:`Directory`    | e.g. :file:`myPackage/`
+         - :class:`File`       | e.g. :file:`myPackage/Shapes.py`
+           - :class:`Line`     | line number, :class:`LineCoverageStatus`, coverage count
+             - :class:`Branch` | :class:`LineCoverageStatus`, coverage count, target
+       - :class:`File`
+     - logical hierarchy       | the language units the report names - each: file, first and last line
+       - :class:`Package`      | e.g. ``myPackage``
+         - :class:`Module`     | e.g. ``myPackage.Shapes``
+           - :class:`Class`    | e.g. ``myPackage.Shapes.Circle``
+             - :class:`Method` | e.g. ``myPackage.Shapes.Circle.Area``
+           - :class:`Function` | e.g. ``myPackage.Shapes.Distance``
+         - :class:`SourceFile` | e.g. :file:`main.c` - for languages, where the file is the unit
+           - :class:`Function` | e.g. ``main``
 
 * Every format has files and lines, so lines, branches and their counts live in the **physical** hierarchy.
 * A **unit** - :class:`~pyEDAA.Reports.CodeCoverage.Package`, :class:`~pyEDAA.Reports.CodeCoverage.Module`,
