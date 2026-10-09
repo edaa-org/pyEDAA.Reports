@@ -37,6 +37,7 @@ from pyTooling.Common import getResourceFile, zipdicts
 
 from pyEDAA.Reports                                   import Resources
 from pyEDAA.Reports.CodeCoverage.Cobertura            import STRICT_SCHEMA, Document as CoberturaDocument
+from pyEDAA.Reports.CodeCoverage.CoveragePy           import Document as CoveragePyDocument
 from pyEDAA.Reports.Unittesting                       import TestcaseStatus, UnittestError
 from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument
 # FIXME: change to generic JUnit
@@ -710,6 +711,43 @@ class PythonPyTest(TestCase):
 					self.assertEqual(tc.Status, sameTC.Status)
 					self.assertEqual(tc.Duration, sameTC.Duration)
 					self.assertEqual(tc.AssertionCount, sameTC.AssertionCount)
+
+
+class PythonPyTestCoverage(TestCase):
+	"""coverage.py measures the example's test run and writes its JSON and its Cobertura XML report."""
+
+	def test_CoveragePy(self) -> None:
+		report = CoveragePyDocument(Path("tests/data/CodeCoverage/Python-pytest/coverage.json"), analyzeAndConvert=True)
+
+		self.assertTrue(report.BranchCoverage)
+		self.assertEqual(["TestModuleA.py", "TestModuleB.py"], sorted(path.as_posix() for path in report.Files))
+
+		summary = report.ToCoverageSummary()
+		self.assertEqual((60, 59), (summary.TotalLines, summary.CoveredLines))
+
+	def test_Cobertura(self) -> None:
+		report = CoberturaDocument(Path("tests/data/CodeCoverage/Python-pytest/coverage.xml"), analyzeAndConvert=True)
+
+		self.assertEqual((60, 59), (report.LinesValid, report.LinesCovered))
+
+		summary = report.ToCoverageSummary()
+		self.assertEqual((60, 59), (summary.TotalLines, summary.CoveredLines))
+
+	def test_SameMeasurement(self) -> None:
+		"""Both reports of one measurement convert to the same files and line statuses."""
+		json = CoveragePyDocument(Path("tests/data/CodeCoverage/Python-pytest/coverage.json"), analyzeAndConvert=True)
+		xml =  CoberturaDocument(Path("tests/data/CodeCoverage/Python-pytest/coverage.xml"), analyzeAndConvert=True)
+
+		jsonFiles = {file.Path.as_posix(): file for file in json.ToCoverageSummary().IterateFiles()}
+		xmlFiles =  {file.Path.as_posix(): file for file in xml.ToCoverageSummary().IterateFiles()}
+		self.assertEqual(sorted(jsonFiles), sorted(xmlFiles))
+
+		for path, jsonFile, xmlFile in zipdicts(jsonFiles, xmlFiles):
+			with self.subTest(path=path):
+				self.assertEqual(
+					[(line.LineNumber, line.Status) for line in jsonFile.IterateLines()],
+					[(line.LineNumber, line.Status) for line in xmlFile.IterateLines()]
+				)
 
 
 class RustCargo(TestCase):
