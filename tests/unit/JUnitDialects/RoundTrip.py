@@ -78,6 +78,15 @@ class RoundTripMixin:
 				_, outputFile, _ = self._roundTrip(referenceFile)
 				schema.validate(str(outputFile))
 
+	def test_Aggregate(self) -> None:
+		"""Aggregating a document read from a file counts its test cases - the root's ``tests`` attribute when written."""
+		for referenceFile in self.Dialect.ReferenceFiles:
+			with self.subTest(file=referenceFile.name):
+				document = self.Dialect.DocumentClass(referenceFile, analyzeAndConvert=True)
+				document.Aggregate()
+
+				self.assertEqual(document.TestcaseCount, document._tests)
+
 	def test_TestcaseCountSurvives(self) -> None:
 		for referenceFile in self.Dialect.ReferenceFiles:
 			with self.subTest(file=referenceFile.name):

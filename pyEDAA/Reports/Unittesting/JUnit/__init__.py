@@ -972,6 +972,7 @@ class Testsuite(TestsuiteBase):
 			for testcase in  testclass._testcases.values():
 				_ = testcase.Aggregate()
 
+				tests += 1
 				status = testcase._status
 				if status is TestcaseStatus.Unknown:
 					raise UnittestError(f"Found testcase '{testcase._name}' with state 'Unknown'.")
