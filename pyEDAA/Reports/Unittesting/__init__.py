@@ -416,8 +416,12 @@ class Base(metaclass=ExtendedType, slots=True):
 			testDuration = totalDuration
 			if setupDuration is not None:
 				testDuration -= setupDuration
+
 			if teardownDuration is not None:
 				testDuration -= teardownDuration
+
+			if testDuration < timedelta():
+				raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of setup and teardown durations.")
 
 		self._startTime = startTime
 		self._setupDuration = setupDuration
@@ -460,7 +464,7 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
 			raise ex
 
-		self._dict = {} if keyValuePairs is None else {k: v for k, v in keyValuePairs}
+		self._dict = {} if keyValuePairs is None else dict(keyValuePairs)
 
 	# QUESTION: allow Parent as setter?
 	@readonly
@@ -1024,11 +1028,21 @@ class Testcase(Base, TestcaseOutputMixin):
 
 		:returns: Human-readable summary of a test case object.
 		"""
+		def formatDuration(duration: Nullable[timedelta]) -> str:
+			"""
+			Nested function formatting a duration in seconds.
+
+			:param duration: Duration to format.
+			:returns:        Duration in seconds with three decimal places, or ``None``.
+			"""
+			return "None" if duration is None else f"{duration.total_seconds():.3f}"
+
 		return (
 			f"<Testcase {self._name}: {self._status.name} -"
 			f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
 			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount} -"
-			f" setup/test/teardown:{self._setupDuration:.3f}/{self._testDuration:.3f}/{self._teardownDuration:.3f}>"
+			f" setup/test/teardown:{formatDuration(self._setupDuration)}/{formatDuration(self._testDuration)}/"
+			f"{formatDuration(self._teardownDuration)}>"
 		)
 
 
@@ -1151,7 +1165,6 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
 
-		self._status = TestsuiteStatus.Unknown
 		self._tests =        0
 		self._inconsistent = 0
 		self._excluded =     0
@@ -1621,7 +1634,12 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, expectedWarningCount, expectedErrorCount, expectedFatalCount, totalDuration = super().Aggregate()
+		(
+			tests, inconsistent, excluded, skipped, errored, weak, failed, passed,
+			warningCount, errorCount, fatalCount,
+			expectedWarningCount, expectedErrorCount, expectedFatalCount,
+			totalDuration
+		) = super().Aggregate(strict)
 
 		for testcase in self._testcases.values():
 			wc, ec, fc, ewc, eec, efc, td = testcase.Aggregate(strict)
@@ -1869,7 +1887,12 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
+		return (
+			tests, inconsistent, excluded, skipped, errored, weak, failed, passed,
+			warningCount, errorCount, fatalCount,
+			expectedWarningCount, expectedErrorCount, expectedFatalCount,
+			totalDuration
+		)
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
