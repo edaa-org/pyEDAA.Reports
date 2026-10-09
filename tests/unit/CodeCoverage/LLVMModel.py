@@ -30,9 +30,11 @@
 #
 #
 """Unit tests of the classes of LLVM's format model: constructed from typed values, or parsed from JSON elements."""
+from json                                       import dumps
 from pathlib                                    import Path
+from tempfile                                   import TemporaryDirectory
 
-from pyEDAA.Reports.CodeCoverage.LLVM           import Report
+from pyEDAA.Reports.CodeCoverage.LLVM           import Document
 from pyEDAA.Reports.CodeCoverage.LLVM.Records   import Expansion, File, Function, Segment
 from pyEDAA.Reports.CodeCoverage.LLVM.Regions   import BranchRegion, MCDCRecord, Region, RegionKind
 from pyEDAA.Reports.CodeCoverage.LLVM.Regions   import TestVector as MCDCTestVector
@@ -152,14 +154,16 @@ class Construction(Testcase):
 		self.assertEqual(0, function.MainFileID)
 
 	def test_Report(self) -> None:
-		report = Report()
+		report = Document(Path("coverage.json"))
 
 		self.assertEqual((None, {}, [], None), (report.Version, report.Files, report.Functions, report.Totals))
 
 		file = File(Path("/project/src/Statistics.c"), _summary())
 		function = Function("main", 1, [Region(1, 1, 3, 2, 1, 0, 0, RegionKind.Code)], [file.Path])
 		totals = _summary()
-		report = Report(SemanticVersion.Parse("2.0.1"), [file], [function], totals)
+		report = Document(
+			Path("coverage.json"), version=SemanticVersion.Parse("2.0.1"), files=[file], functions=[function], totals=totals
+		)
 
 		self.assertEqual(("2.0.1", {file.Path: file}, [function], totals), (
 			report.Version, report.Files, report.Functions, report.Totals
@@ -275,13 +279,13 @@ class ParameterChecks(Testcase):
 
 	def test_Report(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = Report("2.0.1")
+			_ = Document(Path("coverage.json"), version="2.0.1")
 
 		self.assertEqual("Parameter 'version' is not of type 'SemanticVersion'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
 
 		with self.assertRaises(TypeError) as context:
-			_ = Report(files=[Function("main", 0, [], [])])
+			_ = Document(Path("coverage.json"), files=[Function("main", 0, [], [])])
 
 		self.assertEqual("Parameter 'files' contains an element not of type 'File'.", str(context.exception))
 		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.LLVM.Records.Function'."], context.exception.__notes__)
@@ -368,9 +372,12 @@ class Parse(Testcase):
 		"""A report written with ``-skip-functions`` has no functions."""
 		counters = {"count": 0, "covered": 0, "percent": 0}
 		summary = {"lines": counters, "functions": counters, "instantiations": counters, "regions": counters}
-		report = Report.Parse({"version": "2.0.1", "type": "llvm.coverage.json.export", "data": [{
-			"files": [{"filename": "/project/src/Statistics.c", "summary": summary}], "totals": summary
-		}]})
+		with TemporaryDirectory() as directory:
+			jsonFile = Path(directory) / "coverage.json"
+			jsonFile.write_text(dumps({"version": "2.0.1", "type": "llvm.coverage.json.export", "data": [{
+				"files": [{"filename": "/project/src/Statistics.c", "summary": summary}], "totals": summary
+			}]}), encoding="utf-8")
+			report = Document(jsonFile, analyzeAndConvert=True)
 
 		self.assertEqual(("2.0.1", [Path("/project/src/Statistics.c")], [], 0), (
 			report.Version, list(report.Files), report.Functions, report.Totals.Lines.Count

@@ -43,8 +43,8 @@ source regions in :mod:`~pyEDAA.Reports.CodeCoverage.LLVM.Regions`, the summarie
 :mod:`~pyEDAA.Reports.CodeCoverage.LLVM.Summaries`.
 
 Each class of the format's model takes typed values in its constructor, so a model can be built by hand, too. A
-classmethod ``Parse`` reads the class' JSON element and calls the constructor; :meth:`Document.Convert` reads a report
-by :meth:`Report.Parse`.
+classmethod ``Parse`` reads the class' JSON element and calls the constructor; :meth:`Document.Convert` parses a
+report's files, functions and totals with it.
 
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
@@ -78,7 +78,7 @@ from json                                       import JSONDecodeError, loads
 from os.path                                    import commonprefix
 from pathlib                                    import Path
 from re                                         import match
-from typing                                     import Any, Optional as Nullable, Self
+from typing                                     import Any, Optional as Nullable
 
 from jsonschema                                 import Draft202012Validator
 from pyTooling.Common                           import getFullyQualifiedName, readResourceFile
@@ -178,22 +178,6 @@ class Report(metaclass=ExtendedType, mixin=True):
 
 				self._functions.append(function)
 
-	@classmethod
-	def Parse(cls, document: dict[str, Any]) -> Self:
-		"""
-		Parse a report from its JSON document.
-
-		:param document: The JSON document: its root object.
-		:returns:        The report.
-		"""
-		export = document["data"][0]
-		return cls(
-			SemanticVersion.Parse(document["version"]),
-			[File.Parse(file) for file in export["files"]],
-			[Function.Parse(function) for function in export.get("functions", [])],
-			Summary.Parse(export["totals"])
-		)
-
 	@readonly
 	def Version(self) -> Nullable[SemanticVersion]:
 		"""
@@ -239,15 +223,36 @@ class Document(cc_Document, Report):
 
 	_jsonDocument: Nullable[dict[str, Any]]  #: The parsed and validated JSON document, after :meth:`Analyze`.
 
-	def __init__(self, jsonReportFile: Path, analyzeAndConvert: bool = False) -> None:
+	def __init__(
+		self,
+		jsonReportFile: Path,
+		analyzeAndConvert: bool = False,
+		*,
+		version: Nullable[SemanticVersion] = None,
+		files: Nullable[Iterable[File]] = None,
+		functions: Nullable[Iterable[Function]] = None,
+		totals: Nullable[Summary] = None
+	) -> None:
 		"""
-		Initialize the report, and optionally read it.
+		Initialize the report, and optionally read it; or build it from typed values.
 
 		:param jsonReportFile:    Path to the JSON file.
 		:param analyzeAndConvert: Optional, if true, analyze the file and convert its content. Default: ``False``.
+		:param version:           Optional, version of the report format. Default: ``None``.
+		:param files:             Optional, the files. Default: none.
+		:param functions:         Optional, the functions. Default: none.
+		:param totals:            Optional, the counters of the whole report. Default: ``None``.
+		:raises TypeError:        If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
+		:raises TypeError:        If parameter ``files`` or ``functions`` isn't iterable.
+		:raises TypeError:        If parameter ``files`` contains an element not of type
+		                          :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Records.File`.
+		:raises TypeError:        If parameter ``functions`` contains an element not of type
+		                          :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Records.Function`.
+		:raises TypeError:        If parameter ``totals`` isn't of type
+		                          :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Summaries.Summary`.
 		"""
 		super().__init__(jsonReportFile)
-		Report.__init__(self)
+		Report.__init__(self, version, files, functions, totals)
 
 		self._jsonDocument = None
 
@@ -306,11 +311,15 @@ class Document(cc_Document, Report):
 			raise ex
 
 		with Stopwatch() as sw:
-			report =          Report.Parse(self._jsonDocument)
-			self._version =   report._version
-			self._files =     report._files
-			self._functions = report._functions
-			self._totals =    report._totals
+			data =            self._jsonDocument["data"][0]
+			self._version =   SemanticVersion.Parse(self._jsonDocument["version"])
+			self._files =     {}
+			self._functions = [Function.Parse(function) for function in data.get("functions", [])]
+			self._totals =    Summary.Parse(data["totals"])
+
+			for record in data["files"]:
+				file =                    File.Parse(record)
+				self._files[file._path] = file
 
 		self._conversionDuration = sw.Duration
 
