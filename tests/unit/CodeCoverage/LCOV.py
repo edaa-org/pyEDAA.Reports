@@ -30,6 +30,7 @@
 #
 #
 """Unit tests of lcov's tracefile format: its model, its line parser and the conversion to the common model."""
+from collections.abc                          import Callable
 from pathlib                                  import Path
 from tempfile                                 import TemporaryDirectory
 
@@ -193,12 +194,12 @@ class Parents(Testcase):
 
 	def test_Function(self) -> None:
 		section = Section("", Path("a.c"))
-		first = lcov_Function(1, 3, parent=section)
-		second = lcov_Function(5, None, 0, parent=section)
+		first = lcov_Function(1, 3, {"f": 1}, parent=section)
+		second = lcov_Function(5, None, {"g": None}, 0, parent=section)
 
 		self.assertEqual([section, section], [first.Parent, second.Parent])
 		self.assertEqual([first, second], section.Functions)
-		self.assertIsNone(lcov_Function(1, None).Parent)
+		self.assertIsNone(lcov_Function(1, None, {"f": 1}).Parent)
 
 	def test_Section(self) -> None:
 		tracefile = Document(Path("coverage.info"))
@@ -231,7 +232,7 @@ class Parents(Testcase):
 		section = Section("", Path("a.c"))
 		for create, expected in (
 			(lambda: Line(1, 0, parent=Document(Path("coverage.info"))), "Section"),
-			(lambda: lcov_Function(1, None, parent=Document(Path("coverage.info"))), "Section"),
+			(lambda: lcov_Function(1, None, {"f": 1}, parent=Document(Path("coverage.info"))), "Section"),
 			(lambda: Branch(1, 0, "0", 0, False, parent=Document(Path("coverage.info"))), "Section"),
 			(lambda: Condition(1, 1, True, 0, 0, "x", parent=Document(Path("coverage.info"))), "Section"),
 			(lambda: Section("", Path("a.c"), parent=section), "Tracefile")
@@ -260,8 +261,69 @@ class Parents(Testcase):
 				self.assertEqual([section], [condition.Parent for condition in section.Conditions])
 
 
+class Construction(Testcase):
+	"""The format's model is built by hand: each constructor takes typed values and checks them."""
+
+	def _AssertChecks(self, cases: tuple[tuple[Callable[[], object], type[Exception], str, list[str]], ...]) -> None:
+		"""
+		Assert that each constructor call raises the exception of its case.
+
+		:param cases: The cases: a constructor call, the exception's type, its message and its notes.
+		"""
+		for create, exceptionType, message, notes in cases:
+			with self.subTest(message=message):
+				with self.assertRaises(exceptionType) as context:
+					_ = create()
+
+				self.assertEqual(message, str(context.exception))
+				self.assertEqual(notes, getattr(context.exception, "__notes__", []))
+
+	def test_Function(self) -> None:
+		"""The first alias names the function; the function keeps its own copy of the aliases."""
+		aliases = {"Box<int>::Size": 2, "Box<float>::Size": None}
+		function = lcov_Function(3, 9, aliases, 0)
+		aliases["Box<char>::Size"] = 1
+
+		self.assertEqual((3, 9, 0, "Box<int>::Size", {"Box<int>::Size": 2, "Box<float>::Size": None}, 2, None), (
+			function.StartLine, function.EndLine, function.Index, function.Name, function.Aliases, function.Count,
+			function.Parent
+		))
+		self.assertEqual((None, None, None), (
+			lcov_Function(1, None, {"f": None}).EndLine, lcov_Function(1, None, {"f": None}).Index,
+			lcov_Function(1, None, {"f": None}).Count
+		))
+
+	def test_Function_Aliases(self) -> None:
+		"""A function has a name: the aliases are required and not empty."""
+		self._AssertChecks((
+			(lambda: lcov_Function(1, 3, None), ValueError, "Parameter 'aliases' is None.", []),
+			(lambda: lcov_Function(1, 3, ["f"]), TypeError, "Parameter 'aliases' is not a mapping.", ["Got type 'list'."]),
+			(lambda: lcov_Function(1, 3, {}), ValueError, "Parameter 'aliases' is empty.", []),
+			(lambda: lcov_Function(1, 3, {1: 1}), TypeError, "Parameter 'aliases' contains a name not of type 'str'.",
+			 ["Got type 'int'."]),
+			(lambda: lcov_Function(1, 3, {"": 1}), ValueError, "Parameter 'aliases' contains an empty name.", []),
+			(lambda: lcov_Function(1, 3, {"f": "1"}), TypeError, "Parameter 'aliases' contains a count not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: lcov_Function(1, 3, {"f": -1}), ValueError, "Parameter 'aliases' contains a negative count.",
+			 ["Got value '-1'."])
+		))
+
+
 class Conversion(Testcase):
 	"""The conversion to the common model: files, lines and branches, and source files and functions as units."""
+
+	def test_HandBuilt(self) -> None:
+		"""A model built by hand converts like a read one: a function is named by its first alias."""
+		tracefile = Document(Path("coverage.info"))
+		section = Section("", Path("a.c"), parent=tracefile)
+		lcov_Function(1, 3, {"f": 2, "g": 1}, parent=section)
+		Line(2, 3, parent=section)
+
+		summary = tracefile.ToCoverageSummary()
+
+		function = summary.Units["a.c"].Units["f"]
+		self.assertEqual((LineCoverageStatus.Covered, 3), (function.Status, function.CoverageCount))
+		self.assertEqual((1, 1), (summary.TotalLines, summary.CoveredLines))
 
 	def test_GHDL(self) -> None:
 		"""GHDL's function 'file' at line 1 spans no listed line."""

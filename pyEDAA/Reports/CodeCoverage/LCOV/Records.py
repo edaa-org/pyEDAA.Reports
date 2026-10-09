@@ -33,6 +33,7 @@ The records of lcov's tracefile format: a section, and its functions, lines, bra
 """
 from __future__                         import annotations
 
+from collections.abc                    import Mapping
 from pathlib                            import Path
 from typing                             import TYPE_CHECKING, Optional as Nullable
 
@@ -371,20 +372,39 @@ class Function(metaclass=ExtendedType, slots=True):
 		self,
 		startLine: int,
 		endLine: Nullable[int],
+		aliases: Mapping[str, Nullable[int]],
 		index: Nullable[int] = None,
 		*,
 		parent: Nullable[Section] = None
 	) -> None:
 		"""
-		Initialize a function without aliases, and append it to the functions of its section.
+		Initialize a function, and append it to the functions of its section.
 
-		:param startLine:  The function's first line.
-		:param endLine:    The function's last line, or ``None`` if not stated.
-		:param index:      Optional, index of the ``FNL`` record. Default: ``None``, for an ``FN`` record.
-		:param parent:     Optional, the section the function belongs to; the function is appended to its functions.
-		                   Default: ``None``.
-		:raises TypeError: If parameter ``parent`` isn't of type :class:`Section`.
+		:param startLine:   The function's first line.
+		:param endLine:     The function's last line, or ``None`` if not stated.
+		:param aliases:     The function's names, and how often each was called - ``None``, if not stated -; the first
+		                    name is the function's name.
+		:param index:       Optional, index of the ``FNL`` record. Default: ``None``, for an ``FN`` record.
+		:param parent:      Optional, the section the function belongs to; the function is appended to its functions.
+		                    Default: ``None``.
+		:raises ValueError: If parameter ``aliases`` is ``None``.
+		:raises TypeError:  If parameter ``aliases`` isn't a mapping.
+		:raises ValueError: If parameter ``aliases`` is empty.
+		:raises TypeError:  If parameter ``aliases`` contains a name not of type :class:`str`.
+		:raises ValueError: If parameter ``aliases`` contains an empty name.
+		:raises TypeError:  If parameter ``aliases`` contains a count not of type :class:`int`.
+		:raises ValueError: If parameter ``aliases`` contains a negative count.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
 		"""
+		if aliases is None:
+			raise ValueError(f"Parameter 'aliases' is None.")
+		elif not isinstance(aliases, Mapping):
+			ex = TypeError(f"Parameter 'aliases' is not a mapping.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(aliases)}'.")
+			raise ex
+		elif len(aliases) == 0:
+			raise ValueError(f"Parameter 'aliases' is empty.")
+
 		if parent is not None and not isinstance(parent, Section):
 			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
@@ -395,6 +415,24 @@ class Function(metaclass=ExtendedType, slots=True):
 		self._startLine = startLine
 		self._endLine =   endLine
 		self._aliases =   {}
+
+		for name, count in aliases.items():
+			if not isinstance(name, str):
+				ex = TypeError(f"Parameter 'aliases' contains a name not of type 'str'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+				raise ex
+			elif name == "":
+				raise ValueError(f"Parameter 'aliases' contains an empty name.")
+			elif count is not None and not isinstance(count, int):
+				ex = TypeError(f"Parameter 'aliases' contains a count not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
+				raise ex
+			elif count is not None and count < 0:
+				ex = ValueError(f"Parameter 'aliases' contains a negative count.")
+				ex.add_note(f"Got value '{count}'.")
+				raise ex
+
+			self._aliases[name] = count
 
 		if parent is not None:
 			parent._functions.append(self)

@@ -279,8 +279,9 @@ class Document(cc_Document, Tracefile):
 			testName = ""
 			section: Nullable[Section] = None
 			sectionLineNumber = 0
-			functionsByName: dict[str, Function] = {}
-			functionsByIndex: dict[int, Function] = {}
+			functions: list[tuple[int, Nullable[int], Nullable[int], dict[str, Nullable[int]]]] = []
+			functionsByName: dict[str, dict[str, Nullable[int]]] = {}
+			functionsByIndex: dict[int, dict[str, Nullable[int]]] = {}
 			for lineNumber, text, key, values in self._records:
 				if key == "#":
 					self._comments.append(values[0])
@@ -293,6 +294,7 @@ class Document(cc_Document, Tracefile):
 
 					section = Section(testName, Path(values[0].replace("\\", "/")), parent=self)
 					sectionLineNumber = lineNumber
+					functions = []
 					functionsByName = {}
 					functionsByIndex = {}
 				elif key == "TN":
@@ -308,12 +310,15 @@ class Document(cc_Document, Tracefile):
 					ex.add_note(f"A section starts with '{RECORD_SYNTAX['SF']}'.")
 					raise ex
 				elif key == "end_of_record":
-					for index, function in functionsByIndex.items():
-						if len(function._aliases) == 0:
+					for index, aliases in functionsByIndex.items():
+						if len(aliases) == 0:
 							ex = CodeCoverageError(f"Function index {index} has no alias in the section of '{section._sourceFile}'.")
 							ex.add_note(f"The section ends in line {lineNumber}.")
 							ex.add_note(f"Name the function by '{RECORD_SYNTAX['FNA']}'.")
 							raise ex
+
+					for startLine, endLine, index, aliases in functions:
+						Function(startLine, endLine, aliases, index, parent=section)
 
 					section = None
 				elif key == "DA":
@@ -335,32 +340,33 @@ class Document(cc_Document, Tracefile):
 						ex.add_note(f"Line {lineNumber}: '{text}'")
 						raise ex
 
-					function = Function(int(values[0]), None if values[1] is None else int(values[1]), parent=section)
-					function._aliases[name] = None
-					functionsByName[name] = function
+					aliases = {name: None}
+					functions.append((int(values[0]), None if values[1] is None else int(values[1]), None, aliases))
+					functionsByName[name] = aliases
 				elif key == "FNL":
 					if (index := int(values[0])) in functionsByIndex:
 						ex = CodeCoverageError(f"Function index {index} is stated twice in the section of '{section._sourceFile}'.")
 						ex.add_note(f"Line {lineNumber}: '{text}'")
 						raise ex
 
-					function = Function(int(values[1]), None if values[2] is None else int(values[2]), index, parent=section)
-					functionsByIndex[index] = function
+					aliases = {}
+					functions.append((int(values[1]), None if values[2] is None else int(values[2]), index, aliases))
+					functionsByIndex[index] = aliases
 				elif key == "FNDA" or key == "FNA":
 					if key == "FNDA":
 						count, name = int(values[0]), values[1]
-						function = functionsByName.get(name)
+						aliases = functionsByName.get(name)
 					else:
 						count, name = int(values[1]), values[2]
-						function = functionsByIndex.get(int(values[0]))
+						aliases = functionsByIndex.get(int(values[0]))
 
-					if function is None:
+					if aliases is None:
 						ex = CodeCoverageError(f"Record '{key}' refers to an unknown function in '{self._path}'.")
 						ex.add_note(f"Line {lineNumber}: '{text}'")
 						raise ex
 
-					previous = function._aliases.get(name)
-					function._aliases[name] = count if previous is None else previous + count
+					previous = aliases.get(name)
+					aliases[name] = count if previous is None else previous + count
 				elif key == "VER":
 					section._version = values[0]
 				elif key == "FNF":
