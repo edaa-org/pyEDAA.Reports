@@ -54,12 +54,12 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				document = self._open(openTask)
 			except UnittestError as ex:
 				self.WriteFatal(str(ex), immediateExit=False)
-				for note in getattr(ex, "__notes__", []):
-					self.WriteNormal(f"           {note}")
+				for note in getattr(ex, "__notes__", ()):
+					self.WriteErrorNote(note)
 
 				if (innerEx := ex.__cause__) is not None and isinstance(innerEx, XMLSyntaxError):
-					for note in getattr(innerEx, "__notes__", []):
-						self.WriteNormal(f"           {note}")
+					for note in getattr(innerEx, "__notes__", ()):
+						self.WriteErrorNote(note)
 
 				self.Exit(1)
 
@@ -194,8 +194,8 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			dialect, dataFormat, globPattern = self._SplitTask(task, self.UNITTEST_INPUT_FORMATS)
 		except UnittestError as ex:
 			self.WriteError(str(ex))
-			for note in getattr(ex, "__notes__", []):
-				self.WriteNormal(f"           {note}")
+			for note in getattr(ex, "__notes__", ()):
+				self.WriteErrorNote(note)
 
 			return
 
@@ -256,6 +256,8 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				junitDocuments.append(documentClass(file, analyzeAndConvert=True, readerMode=JUnitReaderMode.DecoupleTestsuiteHierarchyAndTestcaseClassName))
 			except UnittestError as ex:
 				self.WriteError(str(ex))
+				for note in getattr(ex, "__notes__", ()):
+					self.WriteErrorNote(note)
 
 		if len(junitDocuments) == 0:
 			self.WriteCritical(f"None of the {dialect} files were successfully read.")
@@ -381,8 +383,8 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			dialect, format, fileName = self._SplitTask(task, self.UNITTEST_OUTPUT_FORMATS)
 		except UnittestError as ex:
 			self.WriteError(str(ex))
-			for note in getattr(ex, "__notes__", []):
-				self.WriteNormal(f"           {note}")
+			for note in getattr(ex, "__notes__", ()):
+				self.WriteErrorNote(note)
 
 			return
 
