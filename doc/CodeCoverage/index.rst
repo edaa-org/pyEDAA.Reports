@@ -633,6 +633,54 @@ The tools write different parts of the format:
        subprogram, which was never called, aren't listed.
 
 
+.. _CODECOV/Formats/JaCoCo:
+
+JaCoCo XML
+==========
+
+JaCoCo - the Java code coverage library - writes its XML report with ``jacococli.jar report --xml``, Maven's goals
+``report`` and ``report-aggregate``, Ant's task ``report`` or Gradle's task ``jacocoTestReport``.
+:class:`pyEDAA.Reports.CodeCoverage.JaCoCo.Document` reads the format version from the public identifier of the DTD a
+report names - ``-//JACOCO//DTD Report 1.1//EN`` -, validates the report against the XML schema of that version -
+:ref:`JaCoCo-1.1.xsd <SCHEMAS/JaCoCo-1.1>`, a translation of JaCoCo's DTD ``report.dtd`` - and reads it into the
+format's model: the sessions, which contributed execution data, the groups - nested -, the packages, their classes with
+their methods and their source files with their lines, and every element's counters - per kind of items, e.g.
+instructions, branches or lines, the missed and the covered ones. A report naming no or another public identifier is
+rejected. JaCoCo's CSV report isn't read.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.JaCoCo.Document.ToCoverageSummary` converts it to the common model:
+
+* A source file's path is its package's name in VM notation - e.g. ``my/pack`` - and its name, relative to a source
+  directory, which the report doesn't name.
+* A line ran, if it has a covered instruction - partially covered, if it has a missed branch. Its missed and covered
+  branches become as many branches.
+* Packages, classes and methods become units; a package's name is split at ``/`` into nested packages. A class is
+  named by its binary name without its package - e.g. ``MyClass$Inner`` -, a method by its name and descriptor - e.g.
+  ``absolute(I)I``. The state of a class or method is its ``CLASS`` or ``METHOD`` counter's.
+
+The format states no counts, no branch targets, no excluded lines and no last line of a method. What the conversion
+loses or approximates:
+
+* A line's numbers of instructions and every counter: only the format's model keeps them. A line with missed and
+  covered instructions, but no missed branch, is covered.
+* A method spans its first line and the next lines of its file, as many as its ``LINE`` counter counts - so it ends
+  too early, if the lines of a lambda or of a nested class lie in between. A class spans its methods.
+* The groups have no counterpart: their packages are converted, as if the report had none. Two packages of the same
+  name in two groups, which state a source file of the same name, are rejected.
+* A class compiled without debug information has no source file, its methods no lines: their units have no lines.
+* gcovr's JaCoCo report (``--jacoco``) names the DTD by its system identifier only, so it is rejected.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.JaCoCo import Document
+
+   report = Document(Path("jacocoTestReport.xml"), analyzeAndConvert=True)
+   summary = report.ToCoverageSummary()
+   for unit in summary.IterateUnits():
+     print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
+
+
 .. _CODECOV/Formats/GoCoverProfile:
 
 Go Cover Profile

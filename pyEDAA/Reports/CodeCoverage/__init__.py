@@ -57,6 +57,8 @@ The report formats have models of their own, which convert to this one:
       |rarr| GCC's gcov JSON format (``gcov --json-format``).
    :mod:`pyEDAA.Reports.CodeCoverage.LCOV`
       |rarr| lcov's tracefile format, as written e.g. by lcov (``lcov --capture``) or llvm-cov (``llvm-cov export``).
+   :mod:`pyEDAA.Reports.CodeCoverage.JaCoCo`
+      |rarr| JaCoCo's XML format, as written e.g. by Gradle's task ``jacocoTestReport``.
 """
 from __future__            import annotations
 
