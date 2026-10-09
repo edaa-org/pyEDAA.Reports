@@ -33,9 +33,10 @@ GHDL's JSON code coverage format: a model of the format, read from coverage file
 model.
 
 GHDL writes the format when simulating with ``ghdl -r --coverage``, by default to :file:`coverage-<timestamp>.json`. A
-coverage file is validated against the JSON Schema :file:`GHDL-Coverage.schema.json`, reverse-engineered from
-GHDL, which accepts format version 1.0.0. The format's model keeps what the file states: a :class:`Document` holds
-:class:`File` records, each with its checksum and, per line with a coverage point, whether the line ran.
+coverage file is validated against the JSON Schema of the format version it states, listed in :data:`SCHEMAS` - e.g.
+:file:`GHDL-Coverage-1.0.0.schema.json`, reverse-engineered from GHDL. The format's model keeps what the file states: a
+:class:`Document` holds :class:`File` records, each with its checksum and, per line with a coverage point, whether the
+line ran.
 
 :class:`MergedReport` merges the coverage files of several simulation runs, as ``ghdl coverage`` reads several files.
 :meth:`Document.ToCoverageSummary` and :meth:`MergedReport.ToCoverageSummary` convert to the common model of
@@ -75,16 +76,13 @@ from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
 from pyTooling.MetaClasses       import ExtendedType
 from pyTooling.Stopwatch         import Stopwatch
-from pyTooling.Versioning        import SemanticVersion
 
 from pyEDAA.Reports              import Resources
 from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Document as cc_Document, Line as cc_Line
 from pyEDAA.Reports.CodeCoverage import LineCoverageStatus
 
 
-__all__ = ["SCHEMA"]
-
-SCHEMA = "GHDL-Coverage.schema.json"  #: The JSON Schema a coverage file is validated against.
+__all__ = ["SCHEMAS"]
 
 # A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
 # body's namespace, where annotations are evaluated, binds the name to the property.
@@ -92,6 +90,22 @@ _Path = Path
 
 ParentType = TypeVar("ParentType", bound="Report | MergedReport")
 """A type variable for the report a :class:`File` belongs to: a :class:`Report` or a :class:`MergedReport`."""
+
+
+@export
+class FormatVersion(StringEnum):
+	"""
+	Version of GHDL's coverage format, as a coverage file's ``version`` states it.
+
+	GHDL's writer :file:`src/ghdldrv/ghdlcovout.adb` writes only version ``1.0.0``.
+	"""
+
+	Version1_0_0 = "1.0.0"  #: Format version 1.0.0.
+
+
+SCHEMAS: dict[FormatVersion, str] = {
+	FormatVersion.Version1_0_0: "GHDL-Coverage-1.0.0.schema.json",
+}  #: The JSON Schema a coverage file is validated against, per format version.
 
 
 @export
@@ -172,9 +186,9 @@ class File(Generic[ParentType], metaclass=ExtendedType, slots=True):
 	@readonly
 	def Name(self) -> Path:
 		"""
-		Read-only property to access the file's name, as given to the analysis (:attr:`_name`).
+		Read-only property to access the file's name, as given to the analysis (:attr:`_name`), e.g. ``src/Counter.vhdl``.
 
-		:returns: The name, e.g. ``src/Counter.vhdl``.
+		:returns: The name.
 		"""
 		return self._name
 
@@ -208,9 +222,9 @@ class File(Generic[ParentType], metaclass=ExtendedType, slots=True):
 	@readonly
 	def Mode(self) -> CoverageMode:
 		"""
-		Read-only property to access the kind of coverage (:attr:`_mode`).
+		Read-only property to access the kind of coverage (:attr:`_mode`), e.g. :attr:`CoverageMode.Statement`.
 
-		:returns: The kind of coverage, e.g. :attr:`CoverageMode.Statement`.
+		:returns: The kind of coverage.
 		"""
 		return self._mode
 
@@ -239,10 +253,10 @@ class Report(metaclass=ExtendedType, mixin=True):
 	The coverage file's root: the format's version, when it was written, and the source files.
 	"""
 
-	_version:   Nullable[SemanticVersion]  #: Version of the format.
-	_testcase:  Nullable[str]              #: Name of the testcase.
-	_timestamp: Nullable[datetime]         #: Time the file was written, UTC.
-	_files:     dict[Path, File[Report]]   #: The source files, by path.
+	_version:   Nullable[FormatVersion]   #: Version of the format.
+	_testcase:  Nullable[str]             #: Name of the testcase.
+	_timestamp: Nullable[datetime]        #: Time the file was written, UTC.
+	_files:     dict[Path, File[Report]]  #: The source files, by path.
 
 	def __init__(self) -> None:
 		"""
@@ -254,20 +268,20 @@ class Report(metaclass=ExtendedType, mixin=True):
 		self._files =     {}
 
 	@readonly
-	def Version(self) -> Nullable[SemanticVersion]:
+	def Version(self) -> Nullable[FormatVersion]:
 		"""
 		Read-only property to access the version of the format (:attr:`_version`).
 
-		:returns: The version, ``1.0.0``; ``None`` before the coverage file was converted.
+		:returns: The version; ``None`` before the coverage file was converted.
 		"""
 		return self._version
 
 	@readonly
 	def Testcase(self) -> Nullable[str]:
 		"""
-		Read-only property to access the name of the testcase (:attr:`_testcase`).
+		Read-only property to access the name of the testcase (:attr:`_testcase`). GHDL writes ``unknown``.
 
-		:returns: The name; GHDL writes ``unknown``.
+		:returns: The name; ``None`` before the coverage file was converted.
 		"""
 		return self._testcase
 
@@ -318,10 +332,14 @@ class Document(cc_Document, Report):
 
 	def Analyze(self) -> None:
 		"""
-		Parse the JSON file and validate it against the JSON Schema :data:`SCHEMA`.
+		Parse the JSON file, read its format version and validate it against the version's JSON Schema in :data:`SCHEMAS`.
 
 		:raises CodeCoverageError: If the file doesn't exist.
 		:raises CodeCoverageError: If the file isn't valid JSON.
+		:raises CodeCoverageError: If the file states no format version. |br|
+		                           The note lists the supported format versions.
+		:raises CodeCoverageError: If the file states an unsupported format version. |br|
+		                           The note lists the supported format versions.
 		:raises CodeCoverageError: If the JSON Schema can't be read.
 		:raises CodeCoverageError: If the file isn't valid according to the JSON Schema.
 		"""
@@ -335,14 +353,28 @@ class Document(cc_Document, Report):
 			except JSONDecodeError as ex:
 				raise CodeCoverageError(f"JSON syntax error in GHDL coverage file '{self._path}'.") from ex
 
+			version = jsonDocument.get("version", None) if isinstance(jsonDocument, dict) else None
 			try:
-				schema = loads(readResourceFile(Resources, SCHEMA))
+				formatVersion = FormatVersion.Parse(version)
+			except (TypeError, ValueError) as ex:
+				error = CodeCoverageError(f"GHDL coverage file '{self._path}' states unsupported format version '{version}'.")
+				error.add_note(f"Supported format versions: {', '.join(FormatVersion)}.")
+				raise error from ex
+
+			if formatVersion is None:
+				ex = CodeCoverageError(f"GHDL coverage file '{self._path}' states no format version.")
+				ex.add_note(f"Supported format versions: {', '.join(FormatVersion)}.")
+				raise ex
+
+			schemaFile = SCHEMAS[formatVersion]
+			try:
+				schema = loads(readResourceFile(Resources, schemaFile))
 			except (ToolingException, JSONDecodeError) as ex:
-				raise CodeCoverageError(f"Couldn't read JSON Schema '{SCHEMA}' from package resources.") from ex
+				raise CodeCoverageError(f"Couldn't read JSON Schema '{schemaFile}' from package resources.") from ex
 
 			errors = sorted(Draft202012Validator(schema).iter_errors(jsonDocument), key=lambda error: list(error.path))
 			if len(errors) > 0:
-				ex = CodeCoverageError(f"Validation error for '{self._path}' using JSON Schema '{SCHEMA}'.")
+				ex = CodeCoverageError(f"Validation error for '{self._path}' using JSON Schema '{schemaFile}'.")
 				for error in errors:
 					ex.add_note(f"/{'/'.join(str(part) for part in error.path)}: {error.message}")
 				raise ex
@@ -369,7 +401,7 @@ class Document(cc_Document, Report):
 		with Stopwatch() as sw:
 			timestamp = datetime.strptime(self._jsonDocument["timestamp"], "%Y%m%d%H%M%S.%f")
 
-			self._version =   SemanticVersion.Parse(self._jsonDocument["version"])
+			self._version =   FormatVersion.Parse(self._jsonDocument["version"])
 			self._testcase =  self._jsonDocument["testcase"]
 			self._timestamp = timestamp.replace(tzinfo=timezone.utc)
 

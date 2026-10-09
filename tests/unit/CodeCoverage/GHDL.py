@@ -36,10 +36,11 @@ from pathlib                          import Path
 from tempfile                         import TemporaryDirectory
 from typing                           import Any
 
+from pyEDAA.Reports                   import Resources
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, CoverageSummary, LineCoverageStatus
-from pyEDAA.Reports.CodeCoverage.GHDL import CoverageMode, Document, File, MergedReport
+from pyEDAA.Reports.CodeCoverage.GHDL import SCHEMAS, CoverageMode, Document, File, FormatVersion, MergedReport
+from pyTooling.Common                 import readResourceFile
 from pyTooling.Testing                import Testcase
-from pyTooling.Versioning             import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -103,8 +104,8 @@ class FormatModel(Testcase):
 	def test_Report(self) -> None:
 		report = Document(COUNT, analyzeAndConvert=True)
 
-		self.assertEqual(("1.0.0", "unknown"), (report.Version, report.Testcase))
-		self.assertIsInstance(report.Version, SemanticVersion)
+		self.assertEqual((FormatVersion.Version1_0_0, "unknown"), (report.Version, report.Testcase))
+		self.assertIsInstance(report.Version, FormatVersion)
 		self.assertEqual(datetime(2026, 10, 8, 10, 48, 12, 89000, tzinfo=timezone.utc), report.Timestamp)
 		self.assertEqual(
 			["src/Counter.vhdl", "src/Utilities/Functions.vhdl", "tb/Counter_tb.vhdl"],
@@ -322,14 +323,52 @@ class Schema(Testcase):
 				_ = Document(jsonFile, analyzeAndConvert=True)
 
 		self.assertEqual(
-			f"Validation error for '{jsonFile}' using JSON Schema 'GHDL-Coverage.schema.json'.", str(context.exception)
+			f"Validation error for '{jsonFile}' using JSON Schema 'GHDL-Coverage-1.0.0.schema.json'.",
+			str(context.exception)
 		)
 		self.assertEqual(notes, context.exception.__notes__)
+
+	def _assertVersionRejected(self, content: Any, message: str) -> None:
+		"""
+		Assert a coverage file is rejected for its format version, before the JSON Schema is chosen.
+
+		:param content: The coverage file's JSON object.
+		:param message: The expected message of the exception, after the file's path.
+		"""
+		with TemporaryDirectory() as directory:
+			jsonFile = _write(directory, content)
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(f"GHDL coverage file '{jsonFile}' {message}", str(context.exception))
+		self.assertEqual(["Supported format versions: 1.0.0."], context.exception.__notes__)
+
+	def test_SchemaPerVersion(self) -> None:
+		"""Each format version has a JSON Schema, which accepts only that version."""
+		self.assertEqual(list(FormatVersion), list(SCHEMAS))
+		for version, schemaFile in SCHEMAS.items():
+			with self.subTest(version=version):
+				schema = loads(readResourceFile(Resources, schemaFile))
+				self.assertEqual(version, schema["properties"]["version"]["const"])
 
 	def test_Version(self) -> None:
 		content = loads(COUNT.read_text(encoding="utf-8"))
 		content["version"] = "2.0.0"
-		self._assertRejected(content, ["/version: '2.0.0' is not one of ['1.0.0']"])
+		self._assertVersionRejected(content, "states unsupported format version '2.0.0'.")
+
+	def test_Version_NotAString(self) -> None:
+		content = loads(COUNT.read_text(encoding="utf-8"))
+		content["version"] = 1
+		self._assertVersionRejected(content, "states unsupported format version '1'.")
+
+	def test_Version_Missing(self) -> None:
+		content = loads(COUNT.read_text(encoding="utf-8"))
+		del content["version"]
+		self._assertVersionRejected(content, "states no format version.")
+
+	def test_Version_NoObject(self) -> None:
+		self._assertVersionRejected([], "states no format version.")
 
 	def test_Mode(self) -> None:
 		content = loads(COUNT.read_text(encoding="utf-8"))

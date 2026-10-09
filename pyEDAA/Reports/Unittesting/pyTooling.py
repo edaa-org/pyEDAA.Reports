@@ -35,9 +35,9 @@ Reader for pyTooling's XML test report format.
 format of its own, which carries two things JUnit XML can't express: test suites nest, and every test suite and test
 case can carry a title, a summary and a description besides its name.
 
-The format's version is the version of its XML schema, which a report names in its ``xsi:noNamespaceSchemaLocation``
-attribute (e.g. ``TestReport-v0.1.xsd``). A report is validated against that schema and converted into the unified
-test entity hierarchy of :mod:`pyEDAA.Reports.Unittesting`.
+The format's version - a :class:`FormatVersion` - is the version of its XML schema, which a report names in its
+``xsi:noNamespaceSchemaLocation`` attribute (e.g. ``TestReport-v0.1.xsd``). A report is validated against that schema
+and converted into the unified test entity hierarchy of :mod:`pyEDAA.Reports.Unittesting`.
 
 .. rubric:: Example
 
@@ -59,11 +59,10 @@ from typing                     import Dict, Optional as Nullable
 from lxml.etree                 import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError, parse
 from lxml.etree                 import _Element, _ElementTree
 from pyTooling                  import Resources as pyToolingResources
-from pyTooling.Common           import getResourceFile
+from pyTooling.Common           import getResourceFile, StringEnum
 from pyTooling.Decorators       import export, readonly
 from pyTooling.Exceptions       import ToolingException
 from pyTooling.Stopwatch        import Stopwatch
-from pyTooling.Versioning       import SemanticVersion
 
 from pyEDAA.Reports.Unittesting import UnittestError, TestcaseStatus, TestsuiteKind
 from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary, Testsuite, Testcase
@@ -73,8 +72,18 @@ __all__ = ["XML_SCHEMA_INSTANCE_NAMESPACE", "SCHEMA_FILES", "STATUS_MAP"]
 
 XML_SCHEMA_INSTANCE_NAMESPACE = "http://www.w3.org/2001/XMLSchema-instance"  #: Namespace of the ``xsi:*`` attributes.
 
-SCHEMA_FILES: Dict[str, SemanticVersion] = {
-	"TestReport-v0.1.xsd": SemanticVersion(0, 1),
+
+@export
+class FormatVersion(StringEnum):
+	"""
+	Version of pyTooling's test report format, as the XML schema a report names states it.
+	"""
+
+	Version0_1 = "0.1"  #: Format version 0.1, defined by :file:`TestReport-v0.1.xsd`.
+
+
+SCHEMA_FILES: Dict[str, FormatVersion] = {
+	"TestReport-v0.1.xsd": FormatVersion.Version0_1,
 }  #: Supported schema files (as named by ``xsi:noNamespaceSchemaLocation``) and the format version they define.
 
 STATUS_MAP: Dict[str, TestcaseStatus] = {
@@ -100,8 +109,8 @@ class Document(TestsuiteSummary, ut_Document):
 	identifier) the key-value pair ``"nodeID"``.
 	"""
 
-	_xmlDocument:   Nullable[_ElementTree]     #: Parsed and validated XML document.
-	_schemaVersion: Nullable[SemanticVersion]  #: Format version named by the report's schema location.
+	_xmlDocument:   Nullable[_ElementTree]   #: Parsed and validated XML document.
+	_schemaVersion: Nullable[FormatVersion]  #: Format version named by the report's schema location.
 
 	def __init__(self, xmlReportFile: Path, analyzeAndConvert: bool = False) -> None:
 		"""
@@ -118,13 +127,14 @@ class Document(TestsuiteSummary, ut_Document):
 		ut_Document.__init__(self, xmlReportFile, analyzeAndConvert)
 
 	@readonly
-	def SchemaVersion(self) -> SemanticVersion:
+	def SchemaVersion(self) -> FormatVersion:
 		"""
 		Read-only property to access the report format's version (:attr:`_schemaVersion`).
 
-		The version is named by the schema the report points at, so it is known once the file was analyzed.
+		The version is named by the schema the report points at - e.g. ``0.1`` by :file:`TestReport-v0.1.xsd` -, so it is
+		known once the file was analyzed.
 
-		:returns:              The format version, e.g. ``0.1``.
+		:returns:              The format version.
 		:raises UnittestError: If the file wasn't analyzed yet.
 		"""
 		if self._schemaVersion is None:
