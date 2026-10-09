@@ -50,6 +50,9 @@ Available schemas
    * - :ref:`JaCoCo 1.1 <SCHEMAS/JaCoCo-1.1>`
      - :file:`JaCoCo-1.1.xsd`
      - :class:`pyEDAA.Reports.CodeCoverage.JaCoCo.Document`, format version 1.1
+   * - :ref:`LLVM coverage JSON <SCHEMAS/LLVM-Coverage-JSON>`
+     - :file:`LLVM-Coverage-JSON.schema.json`
+     - :class:`pyEDAA.Reports.CodeCoverage.LLVM.Document`
    * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
      - :file:`Any-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.Document`
@@ -123,6 +126,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    Gcov-1
    Gcov-2
    JaCoCo-1.1
+   LLVM-Coverage-JSON
    Any-JUnit
    Ant-JUnit4
    Catch2-JUnit

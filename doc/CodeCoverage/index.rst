@@ -697,6 +697,59 @@ loses or approximates:
      print(f"{unit.QualifiedName}: {unit.LineCoverage:.1%}")
 
 
+.. _CODECOV/Formats/LLVM:
+
+LLVM coverage JSON
+==================
+
+``llvm-cov export -format=text`` writes the source-based code coverage of Clang - and of other compilers based on LLVM,
+e.g. rustc or Swift - as JSON. :class:`pyEDAA.Reports.CodeCoverage.LLVM.Document` validates a report against the JSON
+Schema :ref:`LLVM-Coverage-JSON.schema.json <SCHEMAS/LLVM-Coverage-JSON>` - format versions 2.0.0 to 3.1.0, LLVM 4 to
+23 - and reads it into the format's model: per file its segments, branch regions, MC/DC records, macro expansions and
+summary, per function its call count, regions, branch regions and MC/DC records, and the totals. A region names its
+source range by line *and column*.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.LLVM.Document.ToCoverageSummary` converts it to the common model:
+
+* A file's path is relative to the directory common to all files, which becomes the report's source directory.
+* A line's count is derived from the file's segments, as ``llvm-cov show`` derives it: a line is executable, if a
+  region with a count starts on it, or one continues from a previous line - unless a skipped region starts the line,
+  e.g. ``#if 0``, an empty line or a comment. Its count is the largest of the regions starting on it - but gap
+  regions - and of the region continuing from a previous line.
+* A branch region becomes two branches - its true and its false outcome - of the line it starts at; a branch region in
+  a macro expansion becomes branches of the line the macro is expanded at. A line with an outcome never taken is
+  partially covered.
+* A file becomes a :class:`~pyEDAA.Reports.CodeCoverage.SourceFile`, named by its path, and each function a
+  :class:`~pyEDAA.Reports.CodeCoverage.Function` of its file, with its call count. A function local to its translation
+  unit is named without the file name prefixing it, e.g. ``Statistics.c:Square`` becomes ``Square``.
+* The format has no excluded lines.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.LLVM import Document
+
+   report = Document(Path("coverage.json"), analyzeAndConvert=True)
+   print(f"{report.Totals.Lines.Covered} of {report.Totals.Lines.Count} lines, as llvm-cov counts them")
+
+   summary = report.ToCoverageSummary()
+   for file in summary.IterateFiles():
+     print(f"{file.Path}: {file.LineCoverage:.1%} of lines, {file.BranchCoverage:.1%} of branches")
+
+.. hint::
+
+   llvm-cov's own summaries count lines and branches per function: a template's instantiations count as their best
+   one, and a macro's definition line doesn't count. The common model counts per line of the file: the branch outcomes
+   of a template's instantiations are summed, and a macro defined in the same file counts at its definition line, as
+   ``llvm-cov show`` shows it.
+
+.. attention::
+
+   The common model has no columns: the regions, the MC/DC records and the expansions stay in the format's model. The
+   export doesn't demangle names - a C++ function is named e.g. ``_ZNK8Geometry9Rectangle4AreaEv`` -, and states no
+   classes or namespaces.
+
+
 .. _CODECOV/Formats/GoCoverProfile:
 
 Go Cover Profile
