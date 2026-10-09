@@ -723,10 +723,10 @@ most tools read (see :ref:`References/cli`):
    Writing Cobertura XML report 'coverage.xml' ...
 
 ``--input`` names the format and the file: ``Any-Cobertura``, ``CoveragePy-Cobertura``, ``CoveragePy-JSON``,
-``Gcov-JSON``, ``GHDL-JSON`` or ``LCOV``, spelled as here (:class:`~pyEDAA.Reports.CLI.Coverage.InputFormat`). A file
-without format is read as ``Any-Cobertura``. ``--output`` names the format ``Cobertura``
-(:class:`~pyEDAA.Reports.CLI.Coverage.OutputFormat`, also the default) and the file. ``-v`` adds the figures of each
-file.
+``Gcov-JSON``, ``GHDL-JSON``, ``LCOV`` or ``NVC-Cobertura``, spelled as here
+(:class:`~pyEDAA.Reports.CLI.Coverage.InputFormat`). A file without format is read as ``Any-Cobertura``. ``--output``
+names the format ``Cobertura`` (:class:`~pyEDAA.Reports.CLI.Coverage.OutputFormat`, also the default) and the file.
+``-v`` adds the figures of each file.
 
 
 .. _CODECOV/Tools:

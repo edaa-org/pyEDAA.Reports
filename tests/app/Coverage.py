@@ -61,7 +61,8 @@ class CoverageCommand(ApplicationTestcase):
 			("CoveragePy-JSON",      DATA_DIRECTORY / "Python/coverage.json",       "Lines:    22 of 27 covered (81.5%)"),
 			("Gcov-JSON",            DATA_DIRECTORY / "GCC/Main.gcov.json.gz",      "Lines:    26 of 27 covered (96.3%)"),
 			("GHDL-JSON",            DATA_DIRECTORY / "VHDL/coverage-Count.json",   "Lines:    23 of 27 covered (85.2%)"),
-			("LCOV",                 DATA_DIRECTORY / "lcov/VHDL/GHDL.info",        "Lines:    9 of 11 covered (81.8%)")
+			("LCOV",                 DATA_DIRECTORY / "lcov/VHDL/GHDL.info",        "Lines:    9 of 11 covered (81.8%)"),
+			("NVC-Cobertura",        DATA_DIRECTORY / "NVC/Count.xml",              "Lines:    24 of 32 covered (75.0%)")
 		):
 			with self.subTest(format=formatName):
 				result = self.RunEntrypoint("coverage", f"--input={formatName}:{file}", timeout=60.0)
