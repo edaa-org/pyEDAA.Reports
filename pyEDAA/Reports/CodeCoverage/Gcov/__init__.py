@@ -31,8 +31,8 @@
 """
 GCC's gcov JSON code coverage format: a model of the format, read from a report and converted to the common model.
 
-gcov writes the format with ``gcov --json-format``: gzip-compressed to a :file:`*.gcov.json.gz` file per data file, or
-- with ``--stdout`` - as plain JSON, one line per data file. A report is read in either form, and each JSON object in
+gcov writes the format with ``gcov --json-format``: gzip-compressed to a :file:`*.gcov.json.gz` file per data file, or,
+with ``--stdout``, as plain JSON, one line per data file. A report is read in either form, and each JSON object in
 it is validated against the JSON Schema of the format version it states (:class:`FormatVersion`), reverse-engineered
 from GCC: :file:`Gcov-1.schema.json` for format 1 (GCC 9 to 13), :file:`Gcov-2.schema.json` for format 2 (GCC 14 and
 later). The format's model keeps what the report states: a :class:`Document` holds :class:`DataFile` records, a data
