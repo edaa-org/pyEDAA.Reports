@@ -62,11 +62,10 @@ The report formats have models of their own, which convert to this one:
 """
 from __future__            import annotations
 
-from collections.abc       import Iterable
 from datetime              import timedelta
 from enum                  import Enum
 from pathlib               import Path
-from typing                import ClassVar, Generator, Optional as Nullable
+from typing                import ClassVar, Generator, Iterable, Optional as Nullable
 
 from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly

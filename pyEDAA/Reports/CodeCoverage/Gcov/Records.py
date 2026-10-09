@@ -35,8 +35,7 @@ The records of a line - its branches, calls and conditions - are in :mod:`~pyEDA
 """
 from __future__                                import annotations
 
-from collections.abc                           import Iterable
-from typing                                    import TYPE_CHECKING, Any, Optional as Nullable, Self
+from typing                                    import TYPE_CHECKING, Any, Iterable, Optional as Nullable, Self
 
 from pyTooling.Common                          import getFullyQualifiedName
 from pyTooling.Decorators                      import export, readonly

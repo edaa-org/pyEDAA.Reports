@@ -33,8 +33,7 @@ The records of a line of GCC's gcov JSON format: its branches, calls and conditi
 """
 from __future__                                 import annotations
 
-from collections.abc                            import Iterable
-from typing                                     import TYPE_CHECKING, Any, Optional as Nullable, Self
+from typing                                     import TYPE_CHECKING, Any, Iterable, Optional as Nullable, Self
 
 from pyTooling.Common                           import getFullyQualifiedName
 from pyTooling.Decorators                       import export, readonly

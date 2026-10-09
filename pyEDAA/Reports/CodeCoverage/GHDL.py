@@ -64,12 +64,11 @@ line ran.
 """
 from __future__                  import annotations
 
-from collections.abc             import Iterable
 from datetime                    import datetime, timezone
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from re                          import fullmatch
-from typing                      import Any, Generic, TypeVar, Optional as Nullable
+from typing                      import Any, Generic, Iterable, Optional as Nullable, TypeVar
 
 from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import getFullyQualifiedName, readResourceFile, StringEnum
