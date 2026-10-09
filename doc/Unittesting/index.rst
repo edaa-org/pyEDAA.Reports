@@ -273,6 +273,7 @@ lcov tracefile (``lcov --capture``).
 CTest
 =====
 
+* :gh:`Kitware/CMake`
 * https://cmake.org/cmake/help/latest/manual/ctest.1.html
 
 
