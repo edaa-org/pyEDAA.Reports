@@ -67,13 +67,50 @@ class Line(metaclass=ExtendedType, slots=True):
 		"""
 		Initialize a line, and add it to the lines of its section.
 
-		:param number:     Line number.
-		:param count:      How often the line ran.
-		:param checksum:   Optional, checksum of the line's source text. Default: ``None``.
-		:param parent:     Optional, the section the line belongs to; the line is added to its lines by :attr:`Number`.
-		                   Default: ``None``.
-		:raises TypeError: If parameter ``parent`` isn't of type :class:`Section`.
+		:param number:      Line number.
+		:param count:       How often the line ran.
+		:param checksum:    Optional, checksum of the line's source text. Default: ``None``.
+		:param parent:      Optional, the section the line belongs to; the line is added to its lines by :attr:`Number`.
+		                    Default: ``None``.
+		:raises ValueError: If parameter ``number`` is ``None``.
+		:raises TypeError:  If parameter ``number`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``number`` is less than 1.
+		:raises ValueError: If parameter ``count`` is ``None``.
+		:raises TypeError:  If parameter ``count`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``count`` is negative.
+		:raises TypeError:  If parameter ``checksum`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``checksum`` is empty.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
 		"""
+		if number is None:
+			raise ValueError(f"Parameter 'number' is None.")
+		elif not isinstance(number, int):
+			ex = TypeError(f"Parameter 'number' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(number)}'.")
+			raise ex
+		elif number < 1:
+			ex = ValueError(f"Parameter 'number' is less than 1.")
+			ex.add_note(f"Got value '{number}'.")
+			raise ex
+
+		if count is None:
+			raise ValueError(f"Parameter 'count' is None.")
+		elif not isinstance(count, int):
+			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
+			raise ex
+		elif count < 0:
+			ex = ValueError(f"Parameter 'count' is negative.")
+			ex.add_note(f"Got value '{count}'.")
+			raise ex
+
+		if checksum is not None and not isinstance(checksum, str):
+			ex = TypeError(f"Parameter 'checksum' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(checksum)}'.")
+			raise ex
+		elif checksum == "":
+			raise ValueError(f"Parameter 'checksum' is empty.")
+
 		if parent is not None and not isinstance(parent, Section):
 			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
@@ -159,8 +196,68 @@ class Branch(metaclass=ExtendedType, slots=True):
 		:param isException: Whether the branch is taken by an exception.
 		:param parent:      Optional, the section the branch belongs to; the branch is appended to its branches.
 		                    Default: ``None``.
+		:raises ValueError: If parameter ``lineNumber`` is ``None``.
+		:raises TypeError:  If parameter ``lineNumber`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``lineNumber`` is less than 1.
+		:raises ValueError: If parameter ``block`` is ``None``.
+		:raises TypeError:  If parameter ``block`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``block`` is negative.
+		:raises ValueError: If parameter ``expression`` is ``None``.
+		:raises TypeError:  If parameter ``expression`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``expression`` is empty.
+		:raises TypeError:  If parameter ``taken`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``taken`` is negative.
+		:raises ValueError: If parameter ``isException`` is ``None``.
+		:raises TypeError:  If parameter ``isException`` isn't of type :class:`bool`.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
 		"""
+		if lineNumber is None:
+			raise ValueError(f"Parameter 'lineNumber' is None.")
+		elif not isinstance(lineNumber, int):
+			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
+			raise ex
+		elif lineNumber < 1:
+			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex.add_note(f"Got value '{lineNumber}'.")
+			raise ex
+
+		if block is None:
+			raise ValueError(f"Parameter 'block' is None.")
+		elif not isinstance(block, int):
+			ex = TypeError(f"Parameter 'block' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(block)}'.")
+			raise ex
+		elif block < 0:
+			ex = ValueError(f"Parameter 'block' is negative.")
+			ex.add_note(f"Got value '{block}'.")
+			raise ex
+
+		if expression is None:
+			raise ValueError(f"Parameter 'expression' is None.")
+		elif not isinstance(expression, str):
+			ex = TypeError(f"Parameter 'expression' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(expression)}'.")
+			raise ex
+		elif expression == "":
+			raise ValueError(f"Parameter 'expression' is empty.")
+
+		if taken is not None and not isinstance(taken, int):
+			ex = TypeError(f"Parameter 'taken' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(taken)}'.")
+			raise ex
+		elif taken is not None and taken < 0:
+			ex = ValueError(f"Parameter 'taken' is negative.")
+			ex.add_note(f"Got value '{taken}'.")
+			raise ex
+
+		if isException is None:
+			raise ValueError(f"Parameter 'isException' is None.")
+		elif not isinstance(isException, bool):
+			ex = TypeError(f"Parameter 'isException' is not of type 'bool'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(isException)}'.")
+			raise ex
+
 		if parent is not None and not isinstance(parent, Section):
 			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
@@ -262,16 +359,93 @@ class Condition(metaclass=ExtendedType, slots=True):
 		"""
 		Initialize a condition, and append it to the conditions of its section.
 
-		:param lineNumber: Line number of the expression.
-		:param groupSize:  Number of conditions in the expression's group.
-		:param sense:      ``True`` for a change of the condition from false to true; ``False`` for the converse.
-		:param taken:      How often - or whether - the condition was sensitized.
-		:param index:      Index of the condition in its group.
-		:param expression: The condition's expression.
-		:param parent:     Optional, the section the condition belongs to; the condition is appended to its conditions.
-		                   Default: ``None``.
-		:raises TypeError: If parameter ``parent`` isn't of type :class:`Section`.
+		:param lineNumber:  Line number of the expression.
+		:param groupSize:   Number of conditions in the expression's group.
+		:param sense:       ``True`` for a change of the condition from false to true; ``False`` for the converse.
+		:param taken:       How often - or whether - the condition was sensitized.
+		:param index:       Index of the condition in its group.
+		:param expression:  The condition's expression.
+		:param parent:      Optional, the section the condition belongs to; the condition is appended to its conditions.
+		                    Default: ``None``.
+		:raises ValueError: If parameter ``lineNumber`` is ``None``.
+		:raises TypeError:  If parameter ``lineNumber`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``lineNumber`` is less than 1.
+		:raises ValueError: If parameter ``groupSize`` is ``None``.
+		:raises TypeError:  If parameter ``groupSize`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``groupSize`` is negative.
+		:raises ValueError: If parameter ``sense`` is ``None``.
+		:raises TypeError:  If parameter ``sense`` isn't of type :class:`bool`.
+		:raises ValueError: If parameter ``taken`` is ``None``.
+		:raises TypeError:  If parameter ``taken`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``taken`` is negative.
+		:raises ValueError: If parameter ``index`` is ``None``.
+		:raises TypeError:  If parameter ``index`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``index`` is negative.
+		:raises ValueError: If parameter ``expression`` is ``None``.
+		:raises TypeError:  If parameter ``expression`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``expression`` is empty.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
 		"""
+		if lineNumber is None:
+			raise ValueError(f"Parameter 'lineNumber' is None.")
+		elif not isinstance(lineNumber, int):
+			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
+			raise ex
+		elif lineNumber < 1:
+			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex.add_note(f"Got value '{lineNumber}'.")
+			raise ex
+
+		if groupSize is None:
+			raise ValueError(f"Parameter 'groupSize' is None.")
+		elif not isinstance(groupSize, int):
+			ex = TypeError(f"Parameter 'groupSize' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(groupSize)}'.")
+			raise ex
+		elif groupSize < 0:
+			ex = ValueError(f"Parameter 'groupSize' is negative.")
+			ex.add_note(f"Got value '{groupSize}'.")
+			raise ex
+
+		if sense is None:
+			raise ValueError(f"Parameter 'sense' is None.")
+		elif not isinstance(sense, bool):
+			ex = TypeError(f"Parameter 'sense' is not of type 'bool'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(sense)}'.")
+			raise ex
+
+		if taken is None:
+			raise ValueError(f"Parameter 'taken' is None.")
+		elif not isinstance(taken, int):
+			ex = TypeError(f"Parameter 'taken' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(taken)}'.")
+			raise ex
+		elif taken < 0:
+			ex = ValueError(f"Parameter 'taken' is negative.")
+			ex.add_note(f"Got value '{taken}'.")
+			raise ex
+
+		if index is None:
+			raise ValueError(f"Parameter 'index' is None.")
+		elif not isinstance(index, int):
+			ex = TypeError(f"Parameter 'index' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
+			raise ex
+		elif index < 0:
+			ex = ValueError(f"Parameter 'index' is negative.")
+			ex.add_note(f"Got value '{index}'.")
+			raise ex
+
+		if expression is None:
+			raise ValueError(f"Parameter 'expression' is None.")
+		elif not isinstance(expression, str):
+			ex = TypeError(f"Parameter 'expression' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(expression)}'.")
+			raise ex
+		elif expression == "":
+			raise ValueError(f"Parameter 'expression' is empty.")
+
 		if parent is not None and not isinstance(parent, Section):
 			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
@@ -387,6 +561,11 @@ class Function(metaclass=ExtendedType, slots=True):
 		:param index:       Optional, index of the ``FNL`` record. Default: ``None``, for an ``FN`` record.
 		:param parent:      Optional, the section the function belongs to; the function is appended to its functions.
 		                    Default: ``None``.
+		:raises ValueError: If parameter ``startLine`` is ``None``.
+		:raises TypeError:  If parameter ``startLine`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``startLine`` is less than 1.
+		:raises TypeError:  If parameter ``endLine`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``endLine`` is less than 1.
 		:raises ValueError: If parameter ``aliases`` is ``None``.
 		:raises TypeError:  If parameter ``aliases`` isn't a mapping.
 		:raises ValueError: If parameter ``aliases`` is empty.
@@ -394,8 +573,30 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``aliases`` contains an empty name.
 		:raises TypeError:  If parameter ``aliases`` contains a count not of type :class:`int`.
 		:raises ValueError: If parameter ``aliases`` contains a negative count.
+		:raises TypeError:  If parameter ``index`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``index`` is negative.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
 		"""
+		if startLine is None:
+			raise ValueError(f"Parameter 'startLine' is None.")
+		elif not isinstance(startLine, int):
+			ex = TypeError(f"Parameter 'startLine' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
+			raise ex
+		elif startLine < 1:
+			ex = ValueError(f"Parameter 'startLine' is less than 1.")
+			ex.add_note(f"Got value '{startLine}'.")
+			raise ex
+
+		if endLine is not None and not isinstance(endLine, int):
+			ex = TypeError(f"Parameter 'endLine' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
+			raise ex
+		elif endLine is not None and endLine < 1:
+			ex = ValueError(f"Parameter 'endLine' is less than 1.")
+			ex.add_note(f"Got value '{endLine}'.")
+			raise ex
+
 		if aliases is None:
 			raise ValueError(f"Parameter 'aliases' is None.")
 		elif not isinstance(aliases, Mapping):
@@ -404,6 +605,15 @@ class Function(metaclass=ExtendedType, slots=True):
 			raise ex
 		elif len(aliases) == 0:
 			raise ValueError(f"Parameter 'aliases' is empty.")
+
+		if index is not None and not isinstance(index, int):
+			ex = TypeError(f"Parameter 'index' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
+			raise ex
+		elif index is not None and index < 0:
+			ex = ValueError(f"Parameter 'index' is negative.")
+			ex.add_note(f"Got value '{index}'.")
+			raise ex
 
 		if parent is not None and not isinstance(parent, Section):
 			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
@@ -532,13 +742,31 @@ class Section(metaclass=ExtendedType, slots=True):
 		"""
 		Initialize an empty section, and append it to the sections of its tracefile.
 
-		:param testName:   Name of the test; empty, if not stated.
-		:param sourceFile: Path of the source file.
-		:param parent:     Optional, the tracefile the section belongs to; the section is appended to its sections.
-		                   Default: ``None``.
-		:raises TypeError: If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.LCOV.Tracefile`.
+		:param testName:    Name of the test; empty, if not stated.
+		:param sourceFile:  Path of the source file.
+		:param parent:      Optional, the tracefile the section belongs to; the section is appended to its sections.
+		                    Default: ``None``.
+		:raises ValueError: If parameter ``testName`` is ``None``.
+		:raises TypeError:  If parameter ``testName`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``sourceFile`` is ``None``.
+		:raises TypeError:  If parameter ``sourceFile`` isn't of type :class:`~pathlib.Path`.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.LCOV.Tracefile`.
 		"""
 		from pyEDAA.Reports.CodeCoverage.LCOV import Tracefile
+
+		if testName is None:
+			raise ValueError(f"Parameter 'testName' is None.")
+		elif not isinstance(testName, str):
+			ex = TypeError(f"Parameter 'testName' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testName)}'.")
+			raise ex
+
+		if sourceFile is None:
+			raise ValueError(f"Parameter 'sourceFile' is None.")
+		elif not isinstance(sourceFile, Path):
+			ex = TypeError(f"Parameter 'sourceFile' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(sourceFile)}'.")
+			raise ex
 
 		if parent is not None and not isinstance(parent, Tracefile):
 			ex = TypeError(f"Parameter 'parent' is not of type 'Tracefile'.")

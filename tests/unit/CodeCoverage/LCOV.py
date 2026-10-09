@@ -278,6 +278,27 @@ class Construction(Testcase):
 				self.assertEqual(message, str(context.exception))
 				self.assertEqual(notes, getattr(context.exception, "__notes__", []))
 
+	def test_Line(self) -> None:
+		line = Line(13, 3, "i6lS0TI+70N3scXJXzSuRg")
+
+		self.assertEqual((13, 3, "i6lS0TI+70N3scXJXzSuRg", None), (line.Number, line.Count, line.Checksum, line.Parent))
+		self.assertIsNone(Line(1, 0).Checksum)
+
+	def test_Branch(self) -> None:
+		branch = Branch(4, 0, "jump to line 8", None, True)
+
+		self.assertEqual((4, 0, "jump to line 8", None, True, None), (
+			branch.LineNumber, branch.Block, branch.Expression, branch.Taken, branch.IsException, branch.Parent
+		))
+
+	def test_Condition(self) -> None:
+		condition = Condition(14, 2, False, 0, 1, "1")
+
+		self.assertEqual((14, 2, False, 0, 1, "1", None), (
+			condition.LineNumber, condition.GroupSize, condition.Sense, condition.Taken, condition.Index,
+			condition.Expression, condition.Parent
+		))
+
 	def test_Function(self) -> None:
 		"""The first alias names the function; the function keeps its own copy of the aliases."""
 		aliases = {"Box<int>::Size": 2, "Box<float>::Size": None}
@@ -293,6 +314,91 @@ class Construction(Testcase):
 			lcov_Function(1, None, {"f": None}).Count
 		))
 
+	def test_Section(self) -> None:
+		section = Section("", Path("a.c"))
+
+		self.assertEqual(("", Path("a.c"), None, [], {}, [], [], None), (
+			section.TestName, section.SourceFile, section.Version, section.Functions, section.Lines, section.Branches,
+			section.Conditions, section.Parent
+		))
+
+	def test_Line_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: Line(None, 1), ValueError, "Parameter 'number' is None.", []),
+			(lambda: Line("3", 1), TypeError, "Parameter 'number' is not of type 'int'.", ["Got type 'str'."]),
+			(lambda: Line(0, 1), ValueError, "Parameter 'number' is less than 1.", ["Got value '0'."]),
+			(lambda: Line(3, None), ValueError, "Parameter 'count' is None.", []),
+			(lambda: Line(3, 1.0), TypeError, "Parameter 'count' is not of type 'int'.", ["Got type 'float'."]),
+			(lambda: Line(3, -1), ValueError, "Parameter 'count' is negative.", ["Got value '-1'."]),
+			(lambda: Line(3, 1, 5), TypeError, "Parameter 'checksum' is not of type 'str'.", ["Got type 'int'."]),
+			(lambda: Line(3, 1, ""), ValueError, "Parameter 'checksum' is empty.", [])
+		))
+
+	def test_Branch_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: Branch(None, 0, "0", 1, False), ValueError, "Parameter 'lineNumber' is None.", []),
+			(lambda: Branch("4", 0, "0", 1, False), TypeError, "Parameter 'lineNumber' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Branch(0, 0, "0", 1, False), ValueError, "Parameter 'lineNumber' is less than 1.", ["Got value '0'."]),
+			(lambda: Branch(4, None, "0", 1, False), ValueError, "Parameter 'block' is None.", []),
+			(lambda: Branch(4, "e0", "0", 1, False), TypeError, "Parameter 'block' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Branch(4, -1, "0", 1, False), ValueError, "Parameter 'block' is negative.", ["Got value '-1'."]),
+			(lambda: Branch(4, 0, None, 1, False), ValueError, "Parameter 'expression' is None.", []),
+			(lambda: Branch(4, 0, 0, 1, False), TypeError, "Parameter 'expression' is not of type 'str'.",
+			 ["Got type 'int'."]),
+			(lambda: Branch(4, 0, "", 1, False), ValueError, "Parameter 'expression' is empty.", []),
+			(lambda: Branch(4, 0, "0", "-", False), TypeError, "Parameter 'taken' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Branch(4, 0, "0", -1, False), ValueError, "Parameter 'taken' is negative.", ["Got value '-1'."]),
+			(lambda: Branch(4, 0, "0", 1, None), ValueError, "Parameter 'isException' is None.", []),
+			(lambda: Branch(4, 0, "0", 1, "e"), TypeError, "Parameter 'isException' is not of type 'bool'.",
+			 ["Got type 'str'."])
+		))
+
+	def test_Condition_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: Condition(None, 2, True, 1, 0, "x"), ValueError, "Parameter 'lineNumber' is None.", []),
+			(lambda: Condition("7", 2, True, 1, 0, "x"), TypeError, "Parameter 'lineNumber' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(0, 2, True, 1, 0, "x"), ValueError, "Parameter 'lineNumber' is less than 1.",
+			 ["Got value '0'."]),
+			(lambda: Condition(7, None, True, 1, 0, "x"), ValueError, "Parameter 'groupSize' is None.", []),
+			(lambda: Condition(7, "2", True, 1, 0, "x"), TypeError, "Parameter 'groupSize' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(7, -2, True, 1, 0, "x"), ValueError, "Parameter 'groupSize' is negative.",
+			 ["Got value '-2'."]),
+			(lambda: Condition(7, 2, None, 1, 0, "x"), ValueError, "Parameter 'sense' is None.", []),
+			(lambda: Condition(7, 2, "t", 1, 0, "x"), TypeError, "Parameter 'sense' is not of type 'bool'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(7, 2, True, None, 0, "x"), ValueError, "Parameter 'taken' is None.", []),
+			(lambda: Condition(7, 2, True, "1", 0, "x"), TypeError, "Parameter 'taken' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(7, 2, True, -1, 0, "x"), ValueError, "Parameter 'taken' is negative.", ["Got value '-1'."]),
+			(lambda: Condition(7, 2, True, 1, None, "x"), ValueError, "Parameter 'index' is None.", []),
+			(lambda: Condition(7, 2, True, 1, "0", "x"), TypeError, "Parameter 'index' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: Condition(7, 2, True, 1, -1, "x"), ValueError, "Parameter 'index' is negative.", ["Got value '-1'."]),
+			(lambda: Condition(7, 2, True, 1, 0, None), ValueError, "Parameter 'expression' is None.", []),
+			(lambda: Condition(7, 2, True, 1, 0, 0), TypeError, "Parameter 'expression' is not of type 'str'.",
+			 ["Got type 'int'."]),
+			(lambda: Condition(7, 2, True, 1, 0, ""), ValueError, "Parameter 'expression' is empty.", [])
+		))
+
+	def test_Function_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: lcov_Function(None, 3, {"f": 1}), ValueError, "Parameter 'startLine' is None.", []),
+			(lambda: lcov_Function("1", 3, {"f": 1}), TypeError, "Parameter 'startLine' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: lcov_Function(0, 3, {"f": 1}), ValueError, "Parameter 'startLine' is less than 1.", ["Got value '0'."]),
+			(lambda: lcov_Function(1, "3", {"f": 1}), TypeError, "Parameter 'endLine' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: lcov_Function(1, 0, {"f": 1}), ValueError, "Parameter 'endLine' is less than 1.", ["Got value '0'."]),
+			(lambda: lcov_Function(1, 3, {"f": 1}, "0"), TypeError, "Parameter 'index' is not of type 'int'.",
+			 ["Got type 'str'."]),
+			(lambda: lcov_Function(1, 3, {"f": 1}, -1), ValueError, "Parameter 'index' is negative.", ["Got value '-1'."])
+		))
+
 	def test_Function_Aliases(self) -> None:
 		"""A function has a name: the aliases are required and not empty."""
 		self._AssertChecks((
@@ -306,6 +412,14 @@ class Construction(Testcase):
 			 ["Got type 'str'."]),
 			(lambda: lcov_Function(1, 3, {"f": -1}), ValueError, "Parameter 'aliases' contains a negative count.",
 			 ["Got value '-1'."])
+		))
+
+	def test_Section_Checks(self) -> None:
+		self._AssertChecks((
+			(lambda: Section(None, Path("a.c")), ValueError, "Parameter 'testName' is None.", []),
+			(lambda: Section(1, Path("a.c")), TypeError, "Parameter 'testName' is not of type 'str'.", ["Got type 'int'."]),
+			(lambda: Section("", None), ValueError, "Parameter 'sourceFile' is None.", []),
+			(lambda: Section("", "a.c"), TypeError, "Parameter 'sourceFile' is not of type 'Path'.", ["Got type 'str'."])
 		))
 
 
