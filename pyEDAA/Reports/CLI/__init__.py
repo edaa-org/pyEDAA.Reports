@@ -46,6 +46,8 @@ At next use this layer's service program to convert from UCDB to Cobertura forma
 
    pyedaa-ucis export --ucdb ucdb.xml --cobertura cobertura.xml
 """
+from __future__ import annotations
+
 from typing   import ClassVar, NoReturn, Optional as Nullable
 
 from argparse import RawDescriptionHelpFormatter, Namespace
@@ -56,15 +58,15 @@ from pyTooling.Attributes.ArgParse            import ArgParseHelperMixin, Defaul
 from pyTooling.Attributes.ArgParse.Argument   import StringArgument
 from pyTooling.TerminalUI                     import TerminalApplication
 
-from pyEDAA.Reports                           import __issue_tracker_url__
-from pyEDAA.Reports.Unittesting               import UnittestException
-# from pyEDAA.Reports.CLI.Coverage              import CoverageHandlers
+from pyEDAA.Reports                           import ReportException, __issue_tracker_url__
+from pyEDAA.Reports.Unittesting               import UnittestError
+from pyEDAA.Reports.CLI.Coverage              import CoverageHandlers
 # from pyEDAA.Reports.CLI.Dependency            import DependencyHandlers
 from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
 
 
 @export
-class Application(TerminalApplication, UnittestingHandlers, ArgParseHelperMixin):
+class Application(TerminalApplication, UnittestingHandlers, CoverageHandlers, ArgParseHelperMixin):
 	"""Program class to implement the command line interface (CLI) using commands and options."""
 
 	HeadLine: ClassVar[str] =          "Report Service Program"
@@ -156,11 +158,14 @@ def main() -> NoReturn:
 	)
 	try:
 		program.Run()
-	except UnittestException as ex:
+	except UnittestError as ex:
 		program.WriteLineToStdErr(f"{{RED}}[ERROR] {ex}{{NOCOLOR}}".format(**Application.Foreground))
 		if ex.__cause__ is not None:
 			program.WriteLineToStdErr(f"{{DARK_YELLOW}}Because of: {ex.__cause__}{{NOCOLOR}}".format(**Application.Foreground))
 
+		program.Exit(1)
+	except ReportException as ex:
+		program.PrintExceptionBase(ex)
 	except NotImplementedError as ex:
 		program.PrintNotImplementedError(ex)
 	except Exception as ex:

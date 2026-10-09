@@ -90,39 +90,42 @@ Ant + JUnit4 XML, a file format specific document is derived from a summary clas
 		 classDef cls fill:#ff9966
 		 classDef case fill:#eeccff
 """
+from __future__      import annotations
+
 from datetime        import datetime, timedelta
 from enum            import Flag
 from pathlib         import Path
-from time            import perf_counter_ns
 from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
 from lxml.etree                 import XMLParser, parse, XMLSchema, ElementTree, Element, SubElement, tostring
 from lxml.etree                 import XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
 from pyTooling.Common           import getFullyQualifiedName, getResourceFile
 from pyTooling.Decorators       import export, readonly
+from pyTooling.Stopwatch        import Stopwatch
 from pyTooling.Exceptions       import ToolingException
 from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmethod
 from pyTooling.Tree             import Node
 
 from pyEDAA.Reports             import Resources
-from pyEDAA.Reports.Unittesting import UnittestException, AlreadyInHierarchyException, DuplicateTestsuiteException, DuplicateTestcaseException
+from pyEDAA.Reports.Unittesting import UnittestError, AlreadyInHierarchyError, DuplicateTestsuiteError, DuplicateTestcaseError
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, TestsuiteKind, IterationScheme
+from pyEDAA.Reports.Unittesting import TestcaseOutputMixin
 from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
 from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut_Testcase
 
 
 @export
-class JUnitException:
-	"""An exception-mixin for JUnit format specific exceptions."""
+class JUnitErrorMixin:
+	"""An error-mixin for JUnit format specific errors."""
 
 
 @export
-class UnittestException(UnittestException, JUnitException):
+class UnittestError(UnittestError, JUnitErrorMixin):
 	pass
 
 
 @export
-class AlreadyInHierarchyException(AlreadyInHierarchyException, JUnitException):
+class AlreadyInHierarchyError(AlreadyInHierarchyError, JUnitErrorMixin):
 	"""
 	A unit test exception raised if the element is already part of a hierarchy.
 
@@ -136,7 +139,7 @@ class AlreadyInHierarchyException(AlreadyInHierarchyException, JUnitException):
 
 
 @export
-class DuplicateTestsuiteException(DuplicateTestsuiteException, JUnitException):
+class DuplicateTestsuiteError(DuplicateTestsuiteError, JUnitErrorMixin):
 	"""
 	A unit test exception raised on duplicate test suites (by name).
 
@@ -149,7 +152,7 @@ class DuplicateTestsuiteException(DuplicateTestsuiteException, JUnitException):
 
 
 @export
-class DuplicateTestcaseException(DuplicateTestcaseException, JUnitException):
+class DuplicateTestcaseError(DuplicateTestcaseError, JUnitErrorMixin):
 	"""
 	A unit test exception raised on duplicate test cases (by name).
 
@@ -185,15 +188,15 @@ class Base(metaclass=ExtendedType, slots=True):
 	E.g. it's used as a test case name in the dictionary of test cases in a test class.
 	"""
 
-	_parent:         Nullable["Testsuite"]
+	_parent:         Nullable[Testsuite]
 	_name:           str
 
-	def __init__(self, name: str, parent: Nullable["Testsuite"] = None) -> None:
+	def __init__(self, name: str, *, parent: Nullable[Testsuite] = None) -> None:
 		"""
 		Initializes the fields of the base-class.
 
 		:param name:        Name of the test entity.
-		:param parent:      Reference to the parent test entity.
+		:param parent:      Optional, reference to the parent test entity.
 		:raises ValueError: When parameter 'name' is None.
 		:raises TypeError:  When parameter 'name' is not a string.
 		:raises ValueError: When parameter 'name' is empty.
@@ -211,7 +214,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._name = name
 
 	@readonly
-	def Parent(self) -> Nullable["Testsuite"]:
+	def Parent(self) -> Nullable[Testsuite]:
 		"""
 		Read-only property to access the reference to the parent test entity.
 
@@ -250,19 +253,20 @@ class BaseWithProperties(Base):
 		name: str,
 		duration: Nullable[timedelta] = None,
 		assertionCount: Nullable[int] = None,
-		parent: Nullable["Testsuite"] = None
+		*,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of the base-class.
 
 		:param name:           Name of the test entity.
-		:param duration:       Duration of the entity's execution.
-		:param assertionCount: Number of assertions within the test.
-		:param parent:         Reference to the parent test entity.
+		:param duration:       Optional, duration of the entity's execution.
+		:param assertionCount: Optional, number of assertions within the test.
+		:param parent:         Optional, reference to the parent test entity.
 		:raises TypeError:     If parameter 'duration' is not a timedelta.
 		:raises TypeError:     If parameter 'assertionCount' is not an integer.
 		"""
-		super().__init__(name, parent)
+		super().__init__(name, parent=parent)
 
 		if duration is not None and not isinstance(duration, timedelta):
 			ex = TypeError(f"Parameter 'duration' is not of type 'timedelta'.")
@@ -372,14 +376,16 @@ class BaseWithProperties(Base):
 
 
 @export
-class Testcase(BaseWithProperties):
+class Testcase(BaseWithProperties, TestcaseOutputMixin):
 	"""
 	A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
 
 	Test cases are grouped by test classes in the test entity hierarchy. These are again grouped by test suites. The root
 	of the hierarchy is a test summary.
 
-	Every test case has an overall status like unknown, skipped, failed or passed.
+	Every test case has an overall status like unknown, skipped, failed or passed. The message and details of a
+	``<failure>``, ``<error>`` or ``<skipped>`` element, as well as the captured output of ``<system-out>`` and
+	``<system-err>`` are provided by :class:`~pyEDAA.Reports.Unittesting.TestcaseOutputMixin`.
 	"""
 
 	_status:         TestcaseStatus
@@ -390,17 +396,26 @@ class Testcase(BaseWithProperties):
 		duration:  Nullable[timedelta] = None,
 		status: TestcaseStatus = TestcaseStatus.Unknown,
 		assertionCount: Nullable[int] = None,
-		parent: Nullable["Testclass"] = None
+		message: Nullable[str] = None,
+		details: Nullable[str] = None,
+		standardOutput: Nullable[str] = None,
+		standardError: Nullable[str] = None,
+		*,
+		parent: Nullable[Testclass] = None
 	) -> None:
 		"""
 		Initializes the fields of a test case.
 
 		:param name:           Name of the test entity.
-		:param duration:       Duration of the entity's execution.
-		:param status:         Status of the test case.
-		:param assertionCount: Number of assertions within the test.
-		:param parent:         Reference to the parent test class.
-		:raises TypeError:     If parameter 'parent' is not a Testsuite.
+		:param duration:       Optional, duration of the entity's execution.
+		:param status:         Optional, status of the test case.
+		:param assertionCount: Optional, number of assertions within the test.
+		:param message:        Optional, message explaining the test case's status.
+		:param details:        Optional, details explaining the test case's status (e.g. a traceback).
+		:param standardOutput: Optional, captured standard output of the test case.
+		:param standardError:  Optional, captured standard error of the test case.
+		:param parent:         Optional, reference to the parent test class.
+		:raises TypeError:     If parameter 'parent' is not a Testclass.
 		:raises ValueError:    If parameter 'assertionCount' is not consistent.
 		"""
 		if parent is not None:
@@ -411,7 +426,8 @@ class Testcase(BaseWithProperties):
 
 			parent._testcases[name] = self
 
-		super().__init__(name, duration, assertionCount, parent)
+		super().__init__(name, duration, assertionCount, parent=parent)
+		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
 		if not isinstance(status, TestcaseStatus):
 			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
@@ -434,7 +450,7 @@ class Testcase(BaseWithProperties):
 		   name is represented by its own level and instances of test classes.
 		"""
 		if self._parent is None:
-			raise UnittestException("Standalone Testcase instance is not linked to a Testclass.")
+			raise UnittestError("Standalone Testcase instance is not linked to a Testclass.")
 		return self._parent._name
 
 	@readonly
@@ -461,12 +477,16 @@ class Testcase(BaseWithProperties):
 			return 0
 		return self._assertionCount
 
-	def Copy(self) -> "Testcase":
+	def Copy(self) -> Testcase:
 		return self.__class__(
 			self._name,
 			self._duration,
 			self._status,
-			self._assertionCount
+			self._assertionCount,
+			self._message,
+			self._details,
+			self._standardOutput,
+			self._standardError
 		)
 
 	def Aggregate(self) -> None:
@@ -482,7 +502,7 @@ class Testcase(BaseWithProperties):
 			# TODO: check for teardown errors
 
 	@classmethod
-	def FromTestcase(cls, testcase: ut_Testcase) -> "Testcase":
+	def FromTestcase(cls, testcase: ut_Testcase) -> Testcase:
 		"""
 		Convert a test case of the unified test entity data model to the JUnit specific data model's test case object.
 
@@ -493,7 +513,11 @@ class Testcase(BaseWithProperties):
 			testcase._name,
 			duration=testcase._testDuration,
 			status= testcase._status,
-			assertionCount=testcase._assertionCount
+			assertionCount=testcase._assertionCount,
+			message=testcase._message,
+			details=testcase._details,
+			standardOutput=testcase._standardOutput,
+			standardError=testcase._standardError
 		)
 
 	def ToTestcase(self) -> ut_Testcase:
@@ -503,7 +527,11 @@ class Testcase(BaseWithProperties):
 			status=self._status,
 			assertionCount=self._assertionCount,
 			# TODO: as only assertions are recorded by JUnit files, all are marked as passed
-			passedAssertionCount=self._assertionCount
+			passedAssertionCount=self._assertionCount,
+			message=self._message,
+			details=self._details,
+			standardOutput=self._standardOutput,
+			standardError=self._standardError
 		)
 
 	def ToTree(self) -> Node:
@@ -548,16 +576,17 @@ class TestsuiteBase(BaseWithProperties):
 		startTime: Nullable[datetime] = None,
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
-		parent: Nullable["Testsuite"] = None
+		*,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
 
 		:param name:       Name of the test entity.
-		:param startTime:  Time when the test entity was started.
-		:param duration:   Duration of the entity's execution.
-		:param status:     Overall status of the test entity.
-		:param parent:     Reference to the parent test entity.
+		:param startTime:  Optional, time when the test entity was started.
+		:param duration:   Optional, duration of the entity's execution.
+		:param status:     Optional, overall status of the test entity.
+		:param parent:     Optional, reference to the parent test entity.
 		:raises TypeError: If parameter 'parent' is not a TestsuiteBase.
 		"""
 		if parent is not None:
@@ -568,7 +597,7 @@ class TestsuiteBase(BaseWithProperties):
 
 			parent._testsuites[name] = self
 
-		super().__init__(name, duration, None, parent)
+		super().__init__(name, duration, None, parent=parent)
 
 		self._startTime = startTime
 		self._status = status
@@ -683,19 +712,20 @@ class Testclass(Base):
 	Test classes contain test cases and are grouped by a test suites.
 	"""
 
-	_testcases: Dict[str, "Testcase"]
+	_testcases: Dict[str, Testcase]
 
 	def __init__(
 		self,
 		classname: str,
-		testcases: Nullable[Iterable["Testcase"]] = None,
-		parent: Nullable["Testsuite"] = None
+		testcases: Nullable[Iterable[Testcase]] = None,
+		*,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of the test class.
 
 		:param classname:   Classname of the test entity.
-		:param parent:      Reference to the parent test suite.
+		:param parent:      Optional, reference to the parent test suite.
 		:raises ValueError: If parameter 'classname' is None.
 		:raises TypeError:  If parameter 'classname' is not a string.
 		:raises ValueError: If parameter 'classname' is empty.
@@ -708,16 +738,16 @@ class Testclass(Base):
 
 			parent._testclasses[classname] = self
 
-		super().__init__(classname, parent)
+		super().__init__(classname, parent=parent)
 
 		self._testcases = {}
 		if testcases is not None:
 			for testcase in testcases:
 				if testcase._parent is not None:
-					raise AlreadyInHierarchyException(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 				if testcase._name in self._testcases:
-					raise DuplicateTestcaseException(f"Class already contains a testcase with same name '{testcase._name}'.")
+					raise DuplicateTestcaseError(f"Class already contains a testcase with same name '{testcase._name}'.")
 
 				testcase._parent = self
 				self._testcases[testcase._name] = testcase
@@ -732,7 +762,7 @@ class Testclass(Base):
 		return self._name
 
 	@readonly
-	def Testcases(self) -> Dict[str, "Testcase"]:
+	def Testcases(self) -> Dict[str, Testcase]:
 		"""
 		Read-only property to access a reference to the internal dictionary of test cases.
 
@@ -758,24 +788,24 @@ class Testclass(Base):
 		"""
 		return sum(tc.AssertionCount for tc in self._testcases.values())
 
-	def AddTestcase(self, testcase: "Testcase") -> None:
+	def AddTestcase(self, testcase: Testcase) -> None:
 		if testcase._parent is not None:
 			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 		if testcase._name in self._testcases:
-			raise DuplicateTestcaseException(f"Class already contains a testcase with same name '{testcase._name}'.")
+			raise DuplicateTestcaseError(f"Class already contains a testcase with same name '{testcase._name}'.")
 
 		testcase._parent = self
 		self._testcases[testcase._name] = testcase
 
-	def AddTestcases(self, testcases: Iterable["Testcase"]) -> None:
+	def AddTestcases(self, testcases: Iterable[Testcase]) -> None:
 		for testcase in testcases:
 			self.AddTestcase(testcase)
 
 	def ToTestsuite(self) -> ut_Testsuite:
 		return ut_Testsuite(
 			self._name,
-			TestsuiteKind.Class,
+			kind=TestsuiteKind.Class,
 			# startTime=self._startTime,
 			# totalDuration=self._duration,
 			# status=self._status,
@@ -807,7 +837,7 @@ class Testsuite(TestsuiteBase):
 	"""
 
 	_hostname:    str
-	_testclasses: Dict[str, "Testclass"]
+	_testclasses: Dict[str, Testclass]
 
 	def __init__(
 		self,
@@ -816,21 +846,22 @@ class Testsuite(TestsuiteBase):
 		startTime: Nullable[datetime] = None,
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
-		testclasses: Nullable[Iterable["Testclass"]] = None,
-		parent: Nullable["TestsuiteSummary"] = None
+		testclasses: Nullable[Iterable[Testclass]] = None,
+		*,
+		parent: Nullable[TestsuiteSummary] = None
 	) -> None:
 		"""
 		Initializes the fields of a test suite.
 
-		:param name:               Name of the test suite.
-		:param startTime:          Time when the test suite was started.
-		:param duration:           duration of the entity's execution.
-		:param status:             Overall status of the test suite.
-		:param parent:             Reference to the parent test summary.
-		:raises TypeError:         If parameter 'testcases' is not iterable.
-		:raises TypeError:         If element in parameter 'testcases' is not a Testcase.
-		:raises AlreadyInHierarchyException: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
+		:param name:                     Name of the test suite.
+		:param startTime:                Optional, time when the test suite was started.
+		:param duration:                 Optional, duration of the entity's execution.
+		:param status:                   Optional, overall status of the test suite.
+		:param parent:                   Optional, reference to the parent test summary.
+		:raises TypeError:               If parameter 'testcases' is not iterable.
+		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
+		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
@@ -840,7 +871,7 @@ class Testsuite(TestsuiteBase):
 
 			parent._testsuites[name] = self
 
-		super().__init__(name, startTime, duration, status, parent)
+		super().__init__(name, startTime, duration, status, parent=parent)
 
 		self._hostname = hostname
 
@@ -851,7 +882,7 @@ class Testsuite(TestsuiteBase):
 					raise ValueError(f"Class '{testclass._name}' is already part of a testsuite hierarchy.")
 
 				if testclass._name in self._testclasses:
-					raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{testclass._name}'.")
+					raise DuplicateTestcaseError(f"Testsuite already contains a class with same name '{testclass._name}'.")
 
 				testclass._parent = self
 				self._testclasses[testclass._name] = testclass
@@ -866,7 +897,7 @@ class Testsuite(TestsuiteBase):
 		return self._hostname
 
 	@readonly
-	def Testclasses(self) -> Dict[str, "Testclass"]:
+	def Testclasses(self) -> Dict[str, Testclass]:
 		"""
 		Read-only property to access the testsuite's testclasses.
 
@@ -905,17 +936,17 @@ class Testsuite(TestsuiteBase):
 		"""
 		return sum(cls.AssertionCount for cls in self._testclasses.values())
 
-	def AddTestclass(self, testclass: "Testclass") -> None:
+	def AddTestclass(self, testclass: Testclass) -> None:
 		if testclass._parent is not None:
 			raise ValueError(f"Class '{testclass._name}' is already part of a testsuite hierarchy.")
 
 		if testclass._name in self._testclasses:
-			raise DuplicateTestcaseException(f"Testsuite already contains a class with same name '{testclass._name}'.")
+			raise DuplicateTestcaseError(f"Testsuite already contains a class with same name '{testclass._name}'.")
 
 		testclass._parent = self
 		self._testclasses[testclass._name] = testclass
 
-	def AddTestclasses(self, testclasses: Iterable["Testclass"]) -> None:
+	def AddTestclasses(self, testclasses: Iterable[Testclass]) -> None:
 		for testcase in testclasses:
 			self.AddTestclass(testcase)
 
@@ -925,7 +956,7 @@ class Testsuite(TestsuiteBase):
 	def IterateTestcases(self, scheme: IterationScheme = IterationScheme.TestcaseDefault) -> Generator[Testcase, None, None]:
 		return self.Iterate(scheme)
 
-	def Copy(self) -> "Testsuite":
+	def Copy(self) -> Testsuite:
 		return self.__class__(
 			self._name,
 			self._hostname,
@@ -941,9 +972,10 @@ class Testsuite(TestsuiteBase):
 			for testcase in  testclass._testcases.values():
 				_ = testcase.Aggregate()
 
+				tests += 1
 				status = testcase._status
 				if status is TestcaseStatus.Unknown:
-					raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+					raise UnittestError(f"Found testcase '{testcase._name}' with state 'Unknown'.")
 				elif status is TestcaseStatus.Skipped:
 					skipped += 1
 				elif status is TestcaseStatus.Errored:
@@ -955,9 +987,9 @@ class Testsuite(TestsuiteBase):
 				elif status is TestcaseStatus.Weak:
 					weak += 1
 				elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-					raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+					raise UnittestError(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
 				else:
-					raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
+					raise UnittestError(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
 		self._tests = tests
 		self._skipped = skipped
@@ -988,7 +1020,7 @@ class Testsuite(TestsuiteBase):
 
 		If no scheme is given, use the default scheme.
 
-		:param scheme: Scheme how to iterate the test suite and its child elements.
+		:param scheme: Optional, scheme how to iterate the test suite and its child elements.
 		:returns:      A generator for iterating the results filtered and in the order defined by the iteration scheme.
 		"""
 		if IterationScheme.PreOrder in scheme:
@@ -1011,7 +1043,7 @@ class Testsuite(TestsuiteBase):
 				yield self
 
 	@classmethod
-	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
+	def FromTestsuite(cls, testsuite: ut_Testsuite) -> Testsuite:
 		"""
 		Convert a test suite of the unified test entity data model to the JUnit specific data model's test suite object.
 
@@ -1026,16 +1058,10 @@ class Testsuite(TestsuiteBase):
 			status= testsuite._status,
 		)
 
-		juTestsuite._tests = testsuite._tests
-		juTestsuite._skipped = testsuite._skipped
-		juTestsuite._errored = testsuite._errored
-		juTestsuite._failed = testsuite._failed
-		juTestsuite._passed = testsuite._passed
-
 		for tc in testsuite.IterateTestcases():
 			ts = tc._parent
 			if ts is None:
-				raise UnittestException(f"Testcase '{tc._name}' is not part of a hierarchy.")
+				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
 
 			classname = ts._name
 			ts = ts._parent
@@ -1055,8 +1081,8 @@ class Testsuite(TestsuiteBase):
 	def ToTestsuite(self) -> ut_Testsuite:
 		testsuite = ut_Testsuite(
 			self._name,
-			TestsuiteKind.Logical,
-			self._hostname,
+			kind=TestsuiteKind.Logical,
+			hostname=self._hostname,
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
@@ -1109,7 +1135,7 @@ class TestsuiteSummary(TestsuiteBase):
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		testsuites: Nullable[Iterable[Testsuite]] = None
 	) -> None:
-		super().__init__(name, startTime, duration, status, None)
+		super().__init__(name, startTime, duration, status)
 
 		self._testsuites = {}
 		if testsuites is not None:
@@ -1118,7 +1144,7 @@ class TestsuiteSummary(TestsuiteBase):
 					raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 				if testsuite._name in self._testsuites:
-					raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+					raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
@@ -1164,7 +1190,7 @@ class TestsuiteSummary(TestsuiteBase):
 			raise ValueError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 		if testsuite._name in self._testsuites:
-			raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+			raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 		testsuite._parent = self
 		self._testsuites[testsuite._name] = testsuite
@@ -1214,7 +1240,7 @@ class TestsuiteSummary(TestsuiteBase):
 
 		If no scheme is given, use the default scheme.
 
-		:param scheme: Scheme how to iterate the test suite summary and its child elements.
+		:param scheme: Optional, scheme how to iterate the test suite summary and its child elements.
 		:returns:      A generator for iterating the results filtered and in the order defined by the iteration scheme.
 		"""
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
@@ -1227,7 +1253,7 @@ class TestsuiteSummary(TestsuiteBase):
 			yield self
 
 	@classmethod
-	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> "TestsuiteSummary":
+	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> TestsuiteSummary:
 		"""
 		Convert a test suite summary of the unified test entity data model to the JUnit specific data model's test suite.
 
@@ -1239,7 +1265,7 @@ class TestsuiteSummary(TestsuiteBase):
 			startTime=testsuiteSummary._startTime,
 			duration=testsuiteSummary._totalDuration,
 			status=testsuiteSummary._status,
-			testsuites=(ut_Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+			testsuites=(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
 		)
 
 	def ToTestsuiteSummary(self) -> ut_TestsuiteSummary:
@@ -1286,8 +1312,31 @@ class Document(TestsuiteSummary, ut_Document):
 	_readerMode:        JUnitReaderMode
 	_xmlDocument:       Nullable[_ElementTree]
 
-	def __init__(self, xmlReportFile: Path, analyzeAndConvert: bool = False, readerMode: JUnitReaderMode = JUnitReaderMode.Default) -> None:
-		super().__init__("Unprocessed JUnit XML file")
+	def __init__(
+		self,
+		xmlReportFile: Path,
+		analyzeAndConvert: bool = False,
+		readerMode: JUnitReaderMode = JUnitReaderMode.Default,
+		*,
+		name: str = "Unprocessed JUnit XML file",
+		startTime: Nullable[datetime] = None,
+		duration:  Nullable[timedelta] = None,
+		status: TestsuiteStatus = TestsuiteStatus.Unknown,
+		testsuites: Nullable[Iterable[Testsuite]] = None
+	) -> None:
+		"""
+		Initializes a JUnit XML document, read from or written to a file.
+
+		:param xmlReportFile:     Path to the JUnit XML file.
+		:param analyzeAndConvert: Optional, if true, analyze (parse and validate) the file and convert its content.
+		:param readerMode:        Optional, how strictly the file is read.
+		:param name:              Optional, name of the test suite summary.
+		:param startTime:         Optional, time when the test run was started.
+		:param duration:          Optional, duration of the test run.
+		:param status:            Optional, overall status of the test run.
+		:param testsuites:        Optional, test suites of the summary.
+		"""
+		super().__init__(name, startTime, duration, status, testsuites)
 
 		self._readerMode = readerMode
 		self._xmlDocument = None
@@ -1295,19 +1344,26 @@ class Document(TestsuiteSummary, ut_Document):
 		ut_Document.__init__(self, xmlReportFile, analyzeAndConvert)
 
 	@classmethod
-	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary):
-		doc = cls(xmlReportFile)
-		doc._name = testsuiteSummary._name
-		doc._startTime = testsuiteSummary._startTime
-		doc._duration = testsuiteSummary._totalDuration
-		doc._status = testsuiteSummary._status
-		doc._tests = testsuiteSummary._tests
-		doc._skipped = testsuiteSummary._skipped
-		doc._errored = testsuiteSummary._errored
-		doc._failed = testsuiteSummary._failed
-		doc._passed = testsuiteSummary._passed
+	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary) -> Document:
+		"""
+		Convert a test suite summary of the unified test entity data model to a JUnit XML document of this dialect.
 
-		doc.AddTestsuites(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+		The test suites become test suites of the dialect (:attr:`_TESTSUITE`). The counters are computed by
+		:meth:`Aggregate`.
+
+		:param xmlReportFile:    Path to the JUnit XML file to write.
+		:param testsuiteSummary: Test suite summary from unified data model.
+		:returns:                JUnit XML document of this dialect.
+		"""
+		doc = cls(
+			xmlReportFile,
+			name=testsuiteSummary._name,
+			startTime=testsuiteSummary._startTime,
+			duration=testsuiteSummary._totalDuration,
+			status=testsuiteSummary._status,
+			testsuites=(cls._TESTSUITE.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+		)
+		doc.Aggregate()
 
 		return doc
 
@@ -1327,72 +1383,75 @@ class Document(TestsuiteSummary, ut_Document):
 
 	def _Analyze(self, xmlSchemaFile: str) -> None:
 		if not self._path.exists():
-			raise UnittestException(f"JUnit XML file '{self._path}' does not exist.") \
+			raise UnittestError(f"JUnit XML file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
 
-		startAnalysis = perf_counter_ns()
-		try:
-			xmlSchemaResourceFile = getResourceFile(Resources, xmlSchemaFile)
-		except ToolingException as ex:
-			raise UnittestException(f"Couldn't locate XML Schema '{xmlSchemaFile}' in package resources.") from ex
+		with Stopwatch() as sw:
+			try:
+				xmlSchemaResourceFile = getResourceFile(Resources, xmlSchemaFile)
+			except ToolingException as ex:
+				raise UnittestError(f"Couldn't locate XML Schema '{xmlSchemaFile}' in package resources.") from ex
 
-		try:
-			schemaParser = XMLParser(ns_clean=True)
-			schemaRoot = parse(xmlSchemaResourceFile, schemaParser)
-		except XMLSyntaxError as ex:
-			raise UnittestException(f"XML Syntax Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
+			try:
+				schemaParser = XMLParser(ns_clean=True)
+				schemaRoot = parse(xmlSchemaResourceFile, schemaParser)
+			except XMLSyntaxError as ex:
+				raise UnittestError(f"XML Syntax Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
 
-		try:
-			junitSchema = XMLSchema(schemaRoot)
-		except XMLSchemaParseError as ex:
-			raise UnittestException(f"Error while parsing XML Schema '{xmlSchemaFile}'.")
+			try:
+				junitSchema = XMLSchema(schemaRoot)
+			except XMLSchemaParseError as ex:
+				raise UnittestError(f"Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
 
-		try:
-			junitParser = XMLParser(schema=junitSchema, ns_clean=True)
-			junitDocument = parse(self._path, parser=junitParser)
+			try:
+				junitParser = XMLParser(schema=junitSchema, ns_clean=True)
+				with self._path.open("rb") as file:
+					junitDocument = parse(file, parser=junitParser)
 
-			self._xmlDocument = junitDocument
-		except XMLSyntaxError as ex:
-			for logEntry in junitParser.error_log:
-				ex.add_note(str(logEntry))
-			raise UnittestException(f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'.") from ex
-		except Exception as ex:
-			raise UnittestException(f"Couldn't open '{self._path}'.") from ex
+				self._xmlDocument = junitDocument
+			except XMLSyntaxError as ex:
+				for logEntry in junitParser.error_log:
+					ex.add_note(str(logEntry))
+				raise UnittestError(
+					f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'."
+				) from ex
+			except Exception as ex:
+				raise UnittestError(f"Couldn't read JUnit XML file '{self._path}'.") from ex
 
-		endAnalysis = perf_counter_ns()
-		self._analysisDuration = (endAnalysis - startAnalysis) / 1e9
+		self._analysisDuration = sw.Duration
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
 		"""
 		Write the data model as XML into a file adhering to the Any JUnit dialect.
 
-		:param path:               Optional path to the XMl file, if internal path shouldn't be used.
-		:param overwrite:          If true, overwrite an existing file.
-		:param regenerate:         If true, regenerate the XML structure from data model.
-		:raises UnittestException: If the file cannot be overwritten.
-		:raises UnittestException: If the internal XML data structure wasn't generated.
-		:raises UnittestException: If the file cannot be opened or written.
+		:param path:           Optional, path to the XML file, if internal path shouldn't be used.
+		:param overwrite:      Optional, if true, overwrite an existing file.
+		:param regenerate:     Optional, if true, regenerate the XML structure from data model.
+		:raises UnittestError: If the file cannot be overwritten.
+		:raises UnittestError: If the internal XML data structure wasn't generated.
+		:raises UnittestError: If the file cannot be opened or written.
 		"""
 		if path is None:
 			path = self._path
 
 		if not overwrite and path.exists():
-			raise UnittestException(f"JUnit XML file '{path}' can not be overwritten.") \
+			raise UnittestError(f"JUnit XML file '{path}' can not be overwritten.") \
 				from FileExistsError(f"File '{path}' already exists.")
 
 		if regenerate:
 			self.Generate(overwrite=True)
 
 		if self._xmlDocument is None:
-			ex = UnittestException(f"Internal XML document tree is empty and needs to be generated before write is possible.")
+			ex = UnittestError(f"Internal XML document tree is empty and needs to be generated before write is possible.")
 			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
 			raise ex
 
+		content = tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True)
 		try:
 			with path.open("wb") as file:
-				file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
-		except Exception as ex:
-			raise UnittestException(f"JUnit XML file '{path}' can not be written.") from ex
+				file.write(content)
+		except OSError as ex:
+			raise UnittestError(f"JUnit XML file '{path}' can not be written.") from ex
 
 	def Convert(self) -> None:
 		"""
@@ -1404,50 +1463,49 @@ class Document(TestsuiteSummary, ut_Document):
 
 		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
 
-		:raises UnittestException: If XML was not read and parsed before.
+		:raises UnittestError: If XML was not read and parsed before.
 		"""
 		if self._xmlDocument is None:
-			ex = UnittestException(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
+			ex = UnittestError(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
 			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
-		startConversion = perf_counter_ns()
-		rootElement: _Element = self._xmlDocument.getroot()
+		with Stopwatch() as sw:
+			rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name = self._ConvertName(rootElement, optional=True)
-		self._startTime = self._ConvertTimestamp(rootElement, optional=True)
-		self._duration = self._ConvertTime(rootElement, optional=True)
+			self._name = self._ConvertName(rootElement, optional=True)
+			self._startTime = self._ConvertTimestamp(rootElement, optional=True)
+			self._duration = self._ConvertTime(rootElement, optional=True)
 
-		if False:  # self._readerMode is JUnitReaderMode.
-			self._tests = self._ConvertTests(testsuitesNode)
-			self._skipped = self._ConvertSkipped(testsuitesNode)
-			self._errored = self._ConvertErrors(testsuitesNode)
-			self._failed = self._ConvertFailures(testsuitesNode)
-			self._assertionCount = self._ConvertAssertions(testsuitesNode)
+			if False:  # self._readerMode is JUnitReaderMode.
+				self._tests = self._ConvertTests(testsuitesNode)
+				self._skipped = self._ConvertSkipped(testsuitesNode)
+				self._errored = self._ConvertErrors(testsuitesNode)
+				self._failed = self._ConvertFailures(testsuitesNode)
+				self._assertionCount = self._ConvertAssertions(testsuitesNode)
 
-		for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
-			self._ConvertTestsuite(self, rootNode)
+			for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
+				self._ConvertTestsuite(self, rootNode)
 
-		if True:  # self._readerMode is JUnitReaderMode.
-			self.Aggregate()
+			if True:  # self._readerMode is JUnitReaderMode.
+				self.Aggregate()
 
-		endConversation = perf_counter_ns()
-		self._modelConversion = (endConversation - startConversion) / 1e9
+		self._modelConversion = sw.Duration
 
 	def _ConvertName(self, element: _Element, default: str = "root", optional: bool = True) -> str:
 		"""
 		Convert the ``name`` attribute from an XML element node to a string.
 
-		:param element:            The XML element node with a ``name`` attribute.
-		:param default:            The default value, if no ``name`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``name`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``name`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``name`` attribute.
+		:param default:        Optional, the default value, if no ``name`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
+		:returns:              The ``name`` attribute's content if found, otherwise the given default value.
+		:raises UnittestError: If optional is false and no ``name`` attribute exists on the given element node.
 		"""
 		if "name" in element.attrib:
 			return element.attrib["name"]
 		elif not optional:
-			raise UnittestException(f"Required parameter 'name' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'name' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1455,16 +1513,16 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``timestamp`` attribute from an XML element node to a datetime.
 
-		:param element:            The XML element node with a ``timestamp`` attribute.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``timestamp`` attribute's content if found, otherwise ``None``.
-		:raises UnittestException: If optional is false and no ``timestamp`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``timestamp`` attribute.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
+		:returns:              The ``timestamp`` attribute's content if found, otherwise ``None``.
+		:raises UnittestError: If optional is false and no ``timestamp`` attribute exists on the given element node.
 		"""
 		if "timestamp" in element.attrib:
 			timestamp = element.attrib["timestamp"]
 			return datetime.fromisoformat(timestamp)
 		elif not optional:
-			raise UnittestException(f"Required parameter 'timestamp' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'timestamp' not found in tag '{element.tag}'.")
 		else:
 			return None
 
@@ -1472,16 +1530,16 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``time`` attribute from an XML element node to a timedelta.
 
-		:param element:            The XML element node with a ``time`` attribute.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``time`` attribute's content if found, otherwise ``None``.
-		:raises UnittestException: If optional is false and no ``time`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``time`` attribute.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
+		:returns:              The ``time`` attribute's content if found, otherwise ``None``.
+		:raises UnittestError: If optional is false and no ``time`` attribute exists on the given element node.
 		"""
 		if "time" in element.attrib:
 			time = element.attrib["time"]
 			return timedelta(seconds=float(time))
 		elif not optional:
-			raise UnittestException(f"Required parameter 'time' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'time' not found in tag '{element.tag}'.")
 		else:
 			return None
 
@@ -1489,16 +1547,16 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``hostname`` attribute from an XML element node to a string.
 
-		:param element:            The XML element node with a ``hostname`` attribute.
-		:param default:            The default value, if no ``hostname`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``hostname`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``hostname`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``hostname`` attribute.
+		:param default:        Optional, the default value, if no ``hostname`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
+		:returns:              The ``hostname`` attribute's content if found, otherwise the given default value.
+		:raises UnittestError: If optional is false and no ``hostname`` attribute exists on the given element node.
 		"""
 		if "hostname" in element.attrib:
 			return element.attrib["hostname"]
 		elif not optional:
-			raise UnittestException(f"Required parameter 'hostname' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'hostname' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1506,29 +1564,29 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``classname`` attribute from an XML element node to a string.
 
-		:param element:            The XML element node with a ``classname`` attribute.
-		:returns:                  The ``classname`` attribute's content.
-		:raises UnittestException: If no ``classname`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``classname`` attribute.
+		:returns:              The ``classname`` attribute's content.
+		:raises UnittestError: If no ``classname`` attribute exists on the given element node.
 		"""
 		if "classname" in element.attrib:
 			return element.attrib["classname"]
 		else:
-			raise UnittestException(f"Required parameter 'classname' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'classname' not found in tag '{element.tag}'.")
 
 	def _ConvertTests(self, element: _Element, default: Nullable[int] = None, optional: bool = True) -> Nullable[int]:
 		"""
 		Convert the ``tests`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``tests`` attribute.
-		:param default:            The default value, if no ``tests`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``tests`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``tests`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``tests`` attribute.
+		:param default:        Optional, the default value, if no ``tests`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
+		:returns:              The ``tests`` attribute's content if found, otherwise the given default value.
+		:raises UnittestError: If optional is false and no ``tests`` attribute exists on the given element node.
 		"""
 		if "tests" in element.attrib:
 			return int(element.attrib["tests"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'tests' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'tests' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1536,16 +1594,16 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``skipped`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``skipped`` attribute.
-		:param default:            The default value, if no ``skipped`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``skipped`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``skipped`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``skipped`` attribute.
+		:param default:        Optional, the default value, if no ``skipped`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
+		:returns:              The ``skipped`` attribute's content if found, otherwise the given default value.
+		:raises UnittestError: If optional is false and no ``skipped`` attribute exists on the given element node.
 		"""
 		if "skipped" in element.attrib:
 			return int(element.attrib["skipped"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'skipped' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'skipped' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1553,16 +1611,16 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``errors`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``errors`` attribute.
-		:param default:            The default value, if no ``errors`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``errors`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``errors`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``errors`` attribute.
+		:param default:        Optional, the default value, if no ``errors`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
+		:returns:              The ``errors`` attribute's content if found, otherwise the given default value.
+		:raises UnittestError: If optional is false and no ``errors`` attribute exists on the given element node.
 		"""
 		if "errors" in element.attrib:
 			return int(element.attrib["errors"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'errors' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'errors' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1570,16 +1628,16 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``failures`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``failures`` attribute.
-		:param default:            The default value, if no ``failures`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``failures`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``failures`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``failures`` attribute.
+		:param default:        Optional, the default value, if no ``failures`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
+		:returns:              The ``failures`` attribute's content if found, otherwise the given default value.
+		:raises UnittestError: If optional is false and no ``failures`` attribute exists on the given element node.
 		"""
 		if "failures" in element.attrib:
 			return int(element.attrib["failures"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'failures' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'failures' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1587,16 +1645,16 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		Convert the ``assertions`` attribute from an XML element node to an integer.
 
-		:param element:            The XML element node with a ``assertions`` attribute.
-		:param default:            The default value, if no ``assertions`` attribute was found.
-		:param optional:           If false, an exception is raised for the missing attribute.
-		:returns:                  The ``assertions`` attribute's content if found, otherwise the given default value.
-		:raises UnittestException: If optional is false and no ``assertions`` attribute exists on the given element node.
+		:param element:        The XML element node with a ``assertions`` attribute.
+		:param default:        Optional, the default value, if no ``assertions`` attribute was found.
+		:param optional:       Optional, if false, an exception is raised for the missing attribute.
+		:returns:              The ``assertions`` attribute's content if found, otherwise the given default value.
+		:raises UnittestError: If optional is false and no ``assertions`` attribute exists on the given element node.
 		"""
 		if "assertions" in element.attrib:
 			return int(element.attrib["assertions"])
 		elif not optional:
-			raise UnittestException(f"Required parameter 'assertions' not found in tag '{element.tag}'.")
+			raise UnittestError(f"Required parameter 'assertions' not found in tag '{element.tag}'.")
 		else:
 			return default
 
@@ -1648,7 +1706,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		newTestcase = self._TESTCASE(
 			self._ConvertName(testcaseNode, optional=False),
-			self._ConvertTime(testcaseNode, optional=False),
+			self._ConvertTime(testcaseNode, optional=True),
 			assertionCount=self._ConvertAssertions(testcaseNode),
 			parent=testclass
 		)
@@ -1662,29 +1720,66 @@ class Document(TestsuiteSummary, ut_Document):
 			return self._TESTCLASS(className, parent=parent)
 
 	def _ConvertTestcaseChildren(self, testcaseNode: _Element, newTestcase: Testcase) -> None:
+		"""
+		Convert the child elements of a ``<testcase>`` to the test case's status, message, details and captured output.
+
+		A ``<skipped>``, ``<failure>`` or ``<error>`` element sets the status. Its ``message`` attribute becomes the test
+		case's message, its text becomes the test case's details. The texts of ``<system-out>`` and ``<system-err>``
+		become the captured standard output and standard error; multiple such elements are concatenated. The reruns of a
+		test case (``<flakyFailure>``, ``<flakyError>``, ``<rerunFailure>`` and ``<rerunError>``) don't change its status.
+
+		:param testcaseNode:   The current XML element node representing a test case.
+		:param newTestcase:    The test case to update.
+		:raises UnittestError: If an unknown element is found.
+		"""
 		for node in testcaseNode.iterchildren():   # type: _Element
 			if isinstance(node, _Comment):
 				pass
 			elif isinstance(node, _Element):
 				if node.tag == "skipped":
 					newTestcase._status = TestcaseStatus.Skipped
+					self._ConvertStatusMessage(node, newTestcase)
 				elif node.tag == "failure":
 					newTestcase._status = TestcaseStatus.Failed
+					self._ConvertStatusMessage(node, newTestcase)
 				elif node.tag == "error":
 					newTestcase._status = TestcaseStatus.Errored
+					self._ConvertStatusMessage(node, newTestcase)
 				elif node.tag == "system-out":
-					pass
+					if node.text is None:
+						pass
+					elif newTestcase._standardOutput is None:
+						newTestcase._standardOutput = node.text
+					else:
+						newTestcase._standardOutput += node.text
 				elif node.tag == "system-err":
-					pass
-				elif node.tag == "properties":
+					if node.text is None:
+						pass
+					elif newTestcase._standardError is None:
+						newTestcase._standardError = node.text
+					else:
+						newTestcase._standardError += node.text
+				elif node.tag in ("properties", "flakyFailure", "flakyError", "rerunFailure", "rerunError"):
 					pass
 				else:
-					raise UnittestException(f"Unknown element '{node.tag}' in junit file.")
+					raise UnittestError(f"Unknown element '{node.tag}' in junit file.")
 			else:
 				pass
 
 		if newTestcase._status is TestcaseStatus.Unknown:
 			newTestcase._status = TestcaseStatus.Passed
+
+	def _ConvertStatusMessage(self, element: _Element, testcase: Testcase) -> None:
+		"""
+		Convert the ``message`` attribute and the text of a ``<skipped>``, ``<failure>`` or ``<error>`` element.
+
+		An empty text (only whitespace) is not recorded.
+
+		:param element:  The XML element node explaining the test case's status.
+		:param testcase: The test case to update.
+		"""
+		testcase._message = element.attrib.get("message", None)
+		testcase._details = None if element.text is None or element.text.strip() == "" else element.text
 
 	def Generate(self, overwrite: bool = False) -> None:
 		"""
@@ -1692,11 +1787,11 @@ class Document(TestsuiteSummary, ut_Document):
 
 		This method generates the XML root element (``<testsuites>``) and recursively calls other generated methods.
 
-		:param overwrite:          Overwrite the internal XML data structure.
-		:raises UnittestException: If overwrite is false and the internal XML data structure is not empty.
+		:param overwrite:      Optional, overwrite the internal XML data structure.
+		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
 		"""
 		if not overwrite and self._xmlDocument is not None:
-			raise UnittestException(f"Internal XML document is populated with data.")
+			raise UnittestError(f"Internal XML document is populated with data.")
 
 		rootElement = Element("testsuites")
 		rootElement.attrib["name"] = self._name
@@ -1762,14 +1857,40 @@ class Document(TestsuiteSummary, ut_Document):
 		if testcase._assertionCount is not None:
 			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
 
+		self._GenerateTestcaseChildren(testcase, testcaseElement)
+
+	def _GenerateTestcaseChildren(self, testcase: Testcase, testcaseElement: _Element) -> None:
+		"""
+		Generate the child elements of a ``<testcase>`` from the test case's status, message, details and captured output.
+
+		A failed, skipped or errored test case gets a ``<failure>``, ``<skipped>`` or ``<error>`` element carrying the
+		message (``message`` attribute) and details (text). Captured standard output and standard error are written as
+		``<system-out>`` and ``<system-err>`` elements.
+
+		:param testcase:        The test case to convert to XML child elements.
+		:param testcaseElement: The ``<testcase>`` element, the child elements will be added to.
+		"""
 		if testcase._status is TestcaseStatus.Passed:
-			pass
+			statusElement = None
 		elif testcase._status is TestcaseStatus.Failed:
-			failureElement = SubElement(testcaseElement, "failure")
+			statusElement = SubElement(testcaseElement, "failure")
 		elif testcase._status is TestcaseStatus.Skipped:
-			skippedElement = SubElement(testcaseElement, "skipped")
+			statusElement = SubElement(testcaseElement, "skipped")
 		else:
-			errorElement = SubElement(testcaseElement, "error")
+			statusElement = SubElement(testcaseElement, "error")
+
+		if statusElement is not None:
+			if testcase._message is not None:
+				statusElement.attrib["message"] = testcase._message
+
+			if testcase._details is not None:
+				statusElement.text = testcase._details
+
+		if testcase._standardOutput is not None:
+			SubElement(testcaseElement, "system-out").text = testcase._standardOutput
+
+		if testcase._standardError is not None:
+			SubElement(testcaseElement, "system-err").text = testcase._standardError
 
 	def __str__(self) -> str:
 		moduleName = self.__module__.split(".")[-1]

@@ -28,10 +28,13 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-from unittest import TestCase as ut_TestCase
+from datetime                   import timedelta
+from unittest                   import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting import DuplicateTestsuiteException, DuplicateTestcaseException, TestsuiteStatus
+from pyEDAA.Reports.Unittesting import DuplicateTestsuiteError, DuplicateTestcaseError, TestsuiteStatus
 from pyEDAA.Reports.Unittesting import TestcaseStatus, Testcase, Testsuite, TestsuiteSummary, IterationScheme
+from pyEDAA.Reports.Unittesting import MergedTestsuiteSummary
+from pyTooling.Testing          import Testcase as py_Testcase
 
 
 class TestcaseInstantiation(ut_TestCase):
@@ -254,14 +257,14 @@ class Duplicates(ut_TestCase):
 		ts2 = Testsuite("ts1")
 
 		ts.AddTestsuite(ts1)
-		with self.assertRaises(DuplicateTestsuiteException):
+		with self.assertRaises(DuplicateTestsuiteError):
 			ts.AddTestsuite(ts2)
 
 	def test_DuplicateTestsuites(self) -> None:
 		ts1 = Testsuite("ts1")
 		ts2 = Testsuite("ts1")
 
-		with self.assertRaises(DuplicateTestsuiteException):
+		with self.assertRaises(DuplicateTestsuiteError):
 			_ = Testsuite("root", testsuites=(ts1, ts2))
 
 	def test_DuplicateTestcase(self) -> None:
@@ -271,14 +274,14 @@ class Duplicates(ut_TestCase):
 		tc2 = Testcase("tc1")
 
 		ts.AddTestcase(tc1)
-		with self.assertRaises(DuplicateTestcaseException):
+		with self.assertRaises(DuplicateTestcaseError):
 			ts.AddTestcase(tc2)
 
 	def test_DuplicateTestcases(self) -> None:
 		tc1 = Testcase("tc1")
 		tc2 = Testcase("tc1")
 
-		with self.assertRaises(DuplicateTestcaseException):
+		with self.assertRaises(DuplicateTestcaseError):
 			_ = Testsuite("root", testcases=(tc1, tc2))
 
 
@@ -289,6 +292,140 @@ class Aggregate(ut_TestCase):
 		ts = Testsuite("root", testcases=(tc1, tc2))
 
 		ts.Aggregate()
+
+
+class KeyValuePairs(py_Testcase):
+	def test_Testcase(self) -> None:
+		tc = Testcase("tc", keyValuePairs={"key": 1, "ab": "cd"})
+
+		self.assertEqual(2, len(tc))
+		self.assertEqual(1, tc["key"])
+		self.assertEqual("cd", tc["ab"])
+		self.assertDictEqual({"key": 1, "ab": "cd"}, dict(tc))
+
+	def test_Testsuite(self) -> None:
+		ts = Testsuite("ts", keyValuePairs={"key": 1})
+
+		self.assertDictEqual({"key": 1}, dict(ts))
+
+	def test_NotAMapping(self) -> None:
+		with self.assertRaises(TypeError):
+			_ = Testcase("tc", keyValuePairs=[("key", 1)])
+
+
+class Durations(py_Testcase):
+	def test_DerivedTestDuration(self) -> None:
+		tc = Testcase(
+			"tc",
+			setupDuration=timedelta(seconds=1),
+			teardownDuration=timedelta(seconds=2),
+			totalDuration=timedelta(seconds=10)
+		)
+
+		self.assertEqual(timedelta(seconds=7), tc.TestDuration)
+
+	def test_DerivedTestDuration_Negative(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = Testcase("tc", setupDuration=timedelta(seconds=5), totalDuration=timedelta(seconds=1))
+
+		self.assertEqual(
+			"Parameter 'totalDuration' can not be less than the sum of setup and teardown durations.",
+			str(context.exception)
+		)
+
+
+class StringRepresentation(py_Testcase):
+	def test_Testcase(self) -> None:
+		tc = Testcase("tc")
+
+		self.assertEqual(
+			"<Testcase tc: Unknown - assert/pass/fail:None/None/None - warn/error/fatal:0/0/0 -"
+			" setup/test/teardown:None/None/None>",
+			str(tc)
+		)
+
+	def test_Testcase_WithDurations(self) -> None:
+		tc = Testcase(
+			"tc",
+			setupDuration=timedelta(seconds=1),
+			testDuration=timedelta(milliseconds=2500),
+			status=TestcaseStatus.Passed,
+			assertionCount=3,
+			failedAssertionCount=0
+		)
+
+		self.assertEqual(
+			"<Testcase tc: Passed - assert/pass/fail:3/3/0 - warn/error/fatal:0/0/0 - setup/test/teardown:1.000/2.500/None>",
+			str(tc)
+		)
+
+
+class StrictSpyTestcase(Testcase):
+	"""A test case recording the parameter 'strict' of its last aggregation."""
+
+	_strict: bool
+
+	def Aggregate(self, strict: bool = True):
+		self._strict = strict
+		return super().Aggregate(strict)
+
+
+class Aggregation(py_Testcase):
+	def test_Strict(self) -> None:
+		summary = TestsuiteSummary("summary")
+		ts1 =     Testsuite("ts1", parent=summary)
+		ts11 =    Testsuite("ts11", parent=ts1)
+		tc1 =     StrictSpyTestcase("tc1", status=TestcaseStatus.Passed, parent=ts1)
+		tc11 =    StrictSpyTestcase("tc11", status=TestcaseStatus.Passed, parent=ts11)
+
+		summary.Aggregate(strict=False)
+
+		self.assertFalse(tc1._strict)
+		self.assertFalse(tc11._strict)
+
+	def test_TestsuiteSummary_ReturnValue(self) -> None:
+		summary = TestsuiteSummary("summary")
+		ts1 =     Testsuite("ts1", parent=summary)
+		_ =       Testcase(
+			"tc1",
+			testDuration=timedelta(seconds=1),
+			status=TestcaseStatus.Passed,
+			warningCount=2,
+			expectedWarningCount=1,
+			parent=ts1
+		)
+
+		result = summary.Aggregate()
+
+		self.assertEqual(15, len(result))
+		self.assertTupleEqual(ts1.Aggregate(), result)
+
+
+class StatusParameter(py_Testcase):
+	def test_Testsuite(self) -> None:
+		ts = Testsuite("ts", status=TestsuiteStatus.Passed)
+
+		self.assertEqual(TestsuiteStatus.Passed, ts.Status)
+
+	def test_TestsuiteSummary(self) -> None:
+		summary = TestsuiteSummary("summary", status=TestsuiteStatus.Failed)
+
+		self.assertEqual(TestsuiteStatus.Failed, summary.Status)
+
+	def test_MergedTestsuiteSummary_ToTestsuiteSummary(self) -> None:
+		merged = MergedTestsuiteSummary("merged")
+		for name in ("run1", "run2"):
+			summary = TestsuiteSummary(name)
+			ts =      Testsuite("ts", parent=summary)
+			_ =       Testcase("tc", testDuration=timedelta(seconds=1), status=TestcaseStatus.Passed, parent=ts)
+			merged.Merge(summary)
+
+		merged.Aggregate()
+		result = merged.ToTestsuiteSummary()
+
+		self.assertEqual(TestsuiteStatus.Passed, merged.Status)
+		self.assertEqual(TestsuiteStatus.Passed, result.Status)
+		self.assertEqual(TestsuiteStatus.Passed, result.Testsuites["ts"].Status)
 
 
 def CreateTestsuiteStructure(rootIsSummary: bool = True, empty: bool = False) -> Testsuite:

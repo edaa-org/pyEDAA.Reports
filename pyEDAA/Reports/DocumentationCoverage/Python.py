@@ -32,6 +32,9 @@
 """
 **Abstract code documentation coverage data model for Python code.**
 """
+from __future__                           import annotations
+
+from itertools                            import chain
 from pathlib                              import Path
 from typing                               import Optional as Nullable, Iterable, Dict, Union, Tuple, List
 
@@ -41,7 +44,7 @@ from docstr_coverage.result_collection   import FileCount
 from pyTooling.Decorators                 import export, readonly
 from pyTooling.MetaClasses                import ExtendedType
 
-from pyEDAA.Reports.DocumentationCoverage import Class, Module, Package, CoverageState, DocCoverageException
+from pyEDAA.Reports.DocumentationCoverage import Class, Module, Package, CoverageState, DocCoverageError
 
 
 @export
@@ -159,7 +162,7 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 		covered =  0
 		for coverageState in iterator:
 			if coverageState is CoverageState.Unknown:
-				raise Exception(f"")
+				raise DocCoverageError(f"Element has coverage state 'Unknown', so it can't be counted.")
 
 			total += 1
 
@@ -167,10 +170,10 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 				excluded += 1
 			elif CoverageState.Ignored in coverageState:
 				ignored += 1
-
-			expected += 1
-			if CoverageState.Covered in coverageState:
-				covered += 1
+			else:
+				expected += 1
+				if CoverageState.Covered in coverageState:
+					covered += 1
 
 		return total, excluded, ignored, expected, covered
 
@@ -297,10 +300,10 @@ class ClassCoverage(Class, Coverage):
 	"""
 	_fields:  Dict[str, CoverageState]
 	_methods: Dict[str, CoverageState]
-	_classes: Dict[str, "ClassCoverage"]
+	_classes: Dict[str, ClassCoverage]
 
-	def __init__(self, name: str, parent: Union["PackageCoverage", "ClassCoverage", None] = None) -> None:
-		super().__init__(name, parent)
+	def __init__(self, name: str, *, parent: Union[PackageCoverage, ClassCoverage, None] = None) -> None:
+		super().__init__(name, parent=parent)
 		Coverage.__init__(self)
 
 		if parent is not None:
@@ -329,7 +332,7 @@ class ClassCoverage(Class, Coverage):
 		return self._methods
 
 	@readonly
-	def Classes(self) -> Dict[str, "ClassCoverage"]:
+	def Classes(self) -> Dict[str, ClassCoverage]:
 		"""
 		Read-only property to access the class' nested classes.
 
@@ -342,7 +345,7 @@ class ClassCoverage(Class, Coverage):
 			cls.CalculateCoverage()
 
 		self._total, self._excluded, self._ignored, self._expected, self._covered = \
-			self._CountCoverage(zip(
+			self._CountCoverage(chain(
 				self._fields.values(),
 				self._methods.values()
 			))
@@ -362,8 +365,8 @@ class ModuleCoverage(Module, AggregatedCoverage):
 	_functions: Dict[str, CoverageState]
 	_classes:   Dict[str, ClassCoverage]
 
-	def __init__(self, name: str, file: Path, parent: Nullable["PackageCoverage"] = None) -> None:
-		super().__init__(name, parent)
+	def __init__(self, name: str, file: Path, *, parent: Nullable[PackageCoverage] = None) -> None:
+		super().__init__(name, parent=parent)
 		AggregatedCoverage.__init__(self, file)
 
 		if parent is not None:
@@ -406,7 +409,7 @@ class ModuleCoverage(Module, AggregatedCoverage):
 			cls.CalculateCoverage()
 
 		self._total, self._excluded, self._ignored, self._expected, self._covered = \
-			self._CountCoverage(zip(
+			self._CountCoverage(chain(
 				self._variables.values(),
 				self._functions.values()
 			))
@@ -445,10 +448,10 @@ class PackageCoverage(Package, AggregatedCoverage):
 	_functions: Dict[str, CoverageState]
 	_classes:   Dict[str, ClassCoverage]
 	_modules:   Dict[str, ModuleCoverage]
-	_packages:  Dict[str, "PackageCoverage"]
+	_packages:  Dict[str, PackageCoverage]
 
-	def __init__(self, name: str, file: Path, parent: Nullable["PackageCoverage"] = None) -> None:
-		super().__init__(name, parent)
+	def __init__(self, name: str, file: Path, *, parent: Nullable[PackageCoverage] = None) -> None:
+		super().__init__(name, parent=parent)
 		AggregatedCoverage.__init__(self, file)
 
 		if parent is not None:
@@ -508,7 +511,7 @@ class PackageCoverage(Package, AggregatedCoverage):
 		return self._modules
 
 	@readonly
-	def Packages(self) -> Dict[str, "PackageCoverage"]:
+	def Packages(self) -> Dict[str, PackageCoverage]:
 		"""
 		Read-only property to access the package's sub-packages.
 
@@ -516,7 +519,7 @@ class PackageCoverage(Package, AggregatedCoverage):
 		"""
 		return self._packages
 
-	def __getitem__(self, key: str) -> Union["PackageCoverage", ModuleCoverage]:
+	def __getitem__(self, key: str) -> Union[PackageCoverage, ModuleCoverage]:
 		try:
 			return self._modules[key]
 		except KeyError:
@@ -533,7 +536,7 @@ class PackageCoverage(Package, AggregatedCoverage):
 			pkg.CalculateCoverage()
 
 		self._total, self._excluded, self._ignored, self._expected, self._covered = \
-			self._CountCoverage(zip(
+			self._CountCoverage(chain(
 				self._variables.values(),
 				self._functions.values()
 			))
@@ -552,21 +555,21 @@ class PackageCoverage(Package, AggregatedCoverage):
 		for pkg in self._packages.values():
 			pkg.Aggregate()
 			self._fileCount +=           pkg._fileCount
-			self._aggregatedTotal +=     pkg._total
-			self._aggregatedExcluded +=  pkg._excluded
-			self._aggregatedIgnored +=   pkg._ignored
-			self._aggregatedExpected +=  pkg._expected
-			self._aggregatedCovered +=   pkg._covered
-			self._aggregatedUncovered += pkg._uncovered
+			self._aggregatedTotal +=     pkg._aggregatedTotal
+			self._aggregatedExcluded +=  pkg._aggregatedExcluded
+			self._aggregatedIgnored +=   pkg._aggregatedIgnored
+			self._aggregatedExpected +=  pkg._aggregatedExpected
+			self._aggregatedCovered +=   pkg._aggregatedCovered
+			self._aggregatedUncovered += pkg._aggregatedUncovered
 
 		for mod in self._modules.values():
 			mod.Aggregate()
-			self._aggregatedTotal +=     mod._total
-			self._aggregatedExcluded +=  mod._excluded
-			self._aggregatedIgnored +=   mod._ignored
-			self._aggregatedExpected +=  mod._expected
-			self._aggregatedCovered +=   mod._covered
-			self._aggregatedUncovered += mod._uncovered
+			self._aggregatedTotal +=     mod._aggregatedTotal
+			self._aggregatedExcluded +=  mod._aggregatedExcluded
+			self._aggregatedIgnored +=   mod._aggregatedIgnored
+			self._aggregatedExpected +=  mod._aggregatedExpected
+			self._aggregatedCovered +=   mod._aggregatedCovered
+			self._aggregatedUncovered += mod._aggregatedUncovered
 
 		super().Aggregate()
 
@@ -575,7 +578,7 @@ class PackageCoverage(Package, AggregatedCoverage):
 
 
 @export
-class DocStrCoverageError(DocCoverageException):
+class DocStrCoverageError(DocCoverageError):
 	pass
 
 
@@ -652,10 +655,10 @@ class DocStrCoverage(metaclass=ExtendedType):
 				try:
 					currentCoverageObject = currentCoverageObject[packageName]
 				except KeyError:
-					currentCoverageObject = PackageCoverage(packageName, path, currentCoverageObject)
+					currentCoverageObject = PackageCoverage(packageName, path, parent=currentCoverageObject)
 
 			if moduleName != "__init__":
-				currentCoverageObject = ModuleCoverage(moduleName, path, currentCoverageObject)
+				currentCoverageObject = ModuleCoverage(moduleName, path, parent=currentCoverageObject)
 
 			currentCoverageObject._expected = perFileResult.needed
 			currentCoverageObject._covered = perFileResult.found

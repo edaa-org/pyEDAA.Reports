@@ -1,0 +1,11 @@
+mode: count
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter/counter.go:15.30,17.2 1 9
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter/counter.go:20.31,22.2 1 7
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter/counter.go:25.35,31.2 3 6
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter/counter.go:34.44,35.18 1 2
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter/counter.go:35.18,37.3 1 1
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter/counter.go:38.2,40.17 3 1
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter/counter.go:44.27,46.2 1 0
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/version/version.go:7.45,8.16 1 0
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/version/version.go:8.16,10.3 1 0
+github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/version/version.go:11.2,11.53 1 0

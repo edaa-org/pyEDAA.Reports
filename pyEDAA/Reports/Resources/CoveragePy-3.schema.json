@@ -1,0 +1,117 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/CoveragePy-3.schema.json",
+	"title": "coverage.py JSON report, format 3",
+	"description": "The JSON report coverage.py 7.6 and later write with 'coverage json', format version 3. Reverse-engineered from coverage.py's 'coverage/jsonreport.py' (7.16): format 3 adds the regions 'functions' and 'classes' to a file. Fields a later coverage.py added - e.g. 'percent_statements_covered' - are optional.",
+	"type": "object",
+	"required": ["meta", "files", "totals"],
+	"properties": {
+		"meta": {
+			"description": "How and when the report was written.",
+			"type": "object",
+			"required": ["format", "version", "timestamp", "branch_coverage", "show_contexts"],
+			"properties": {
+				"format":          {"description": "Version of the report format.", "const": 3},
+				"version":         {"description": "Version of coverage.py.", "type": "string"},
+				"timestamp":       {"description": "Time the report was written, ISO 8601.", "type": "string"},
+				"branch_coverage": {"description": "Whether branch coverage was measured.", "type": "boolean"},
+				"show_contexts":   {"description": "Whether the lines' contexts are listed.", "type": "boolean"}
+			}
+		},
+		"files": {
+			"description": "The measured files, by path relative to the directory coverage.py ran in.",
+			"type": "object",
+			"additionalProperties": {"$ref": "#/$defs/File"}
+		},
+		"totals": {"$ref": "#/$defs/Summary"}
+	},
+	"$defs": {
+		"LineNumbers": {
+			"type": "array",
+			"items": {"type": "integer", "minimum": 1}
+		},
+		"Arcs": {
+			"description": "Branches as pairs of source and destination line; a negative destination exits a code object.",
+			"type": "array",
+			"items": {
+				"type": "array",
+				"prefixItems": [{"type": "integer"}, {"type": "integer"}],
+				"minItems": 2,
+				"maxItems": 2
+			}
+		},
+		"Contexts": {
+			"description": "The contexts which ran a line, by line number.",
+			"type": "object",
+			"additionalProperties": {"type": "array", "items": {"type": "string"}}
+		},
+		"Summary": {
+			"description": "Counters and percentages, as coverage.py computed them.",
+			"type": "object",
+			"required": ["covered_lines", "num_statements", "percent_covered", "missing_lines", "excluded_lines"],
+			"properties": {
+				"covered_lines":                      {"type": "integer", "minimum": 0},
+				"num_statements":                     {"type": "integer", "minimum": 0},
+				"percent_covered":                    {"type": "number",  "minimum": 0, "maximum": 100},
+				"percent_covered_display":            {"type": "string"},
+				"missing_lines":                      {"type": "integer", "minimum": 0},
+				"excluded_lines":                     {"type": "integer", "minimum": 0},
+				"percent_statements_covered":         {"type": "number",  "minimum": 0, "maximum": 100},
+				"percent_statements_covered_display": {"type": "string"},
+				"num_branches":                       {"type": "integer", "minimum": 0},
+				"num_partial_branches":               {"type": "integer", "minimum": 0},
+				"covered_branches":                   {"type": "integer", "minimum": 0},
+				"missing_branches":                   {"type": "integer", "minimum": 0},
+				"percent_branches_covered":           {"type": "number",  "minimum": 0, "maximum": 100},
+				"percent_branches_covered_display":   {"type": "string"}
+			},
+			"additionalProperties": false
+		},
+		"Lines": {
+			"description": "The lines and branches of a file or a region.",
+			"type": "object",
+			"required": ["executed_lines", "summary", "missing_lines", "excluded_lines"],
+			"properties": {
+				"executed_lines":    {"$ref": "#/$defs/LineNumbers"},
+				"summary":           {"$ref": "#/$defs/Summary"},
+				"missing_lines":     {"$ref": "#/$defs/LineNumbers"},
+				"excluded_lines":    {"$ref": "#/$defs/LineNumbers"},
+				"executed_branches": {"$ref": "#/$defs/Arcs"},
+				"missing_branches":  {"$ref": "#/$defs/Arcs"},
+				"contexts":          {"$ref": "#/$defs/Contexts"}
+			}
+		},
+		"Region": {
+			"description": "A function or class of a file, by qualified name; the name '' holds the lines outside of every region of this kind.",
+			"allOf": [{"$ref": "#/$defs/Lines"}],
+			"required": ["start_line"],
+			"properties": {
+				"executed_lines":    true,
+				"summary":           true,
+				"missing_lines":     true,
+				"excluded_lines":    true,
+				"executed_branches": true,
+				"missing_branches":  true,
+				"contexts":          true,
+				"start_line":        {"type": "integer", "minimum": 1}
+			},
+			"additionalProperties": false
+		},
+		"File": {
+			"description": "A measured file: its lines and branches, and its functions and classes.",
+			"allOf": [{"$ref": "#/$defs/Lines"}],
+			"properties": {
+				"executed_lines":    true,
+				"summary":           true,
+				"missing_lines":     true,
+				"excluded_lines":    true,
+				"executed_branches": true,
+				"missing_branches":  true,
+				"contexts":          true,
+				"functions":         {"type": "object", "additionalProperties": {"$ref": "#/$defs/Region"}},
+				"classes":           {"type": "object", "additionalProperties": {"$ref": "#/$defs/Region"}}
+			},
+			"additionalProperties": false
+		}
+	}
+}

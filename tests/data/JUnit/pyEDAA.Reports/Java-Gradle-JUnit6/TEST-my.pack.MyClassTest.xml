@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Tests of MyClass" tests="8" skipped="2" failures="3" errors="0" timestamp="2026-10-08T10:50:24.521Z" hostname="dffa20ef8728" time="0.143">
+  <properties/>
+  <testcase name="[1] &quot;5&quot;, &quot;5&quot;" classname="my.pack.MyClassTest" time="0.036">
+    <properties>
+      <property name="value" value="5"/>
+    </properties>
+  </testcase>
+  <testcase name="[2] &quot;-5&quot;, &quot;5&quot;" classname="my.pack.MyClassTest" time="0.002">
+    <properties>
+      <property name="value" value="-5"/>
+    </properties>
+  </testcase>
+  <testcase name="[3] &quot;0&quot;, &quot;1&quot;" classname="my.pack.MyClassTest" time="0.01">
+    <properties>
+      <property name="value" value="0"/>
+    </properties>
+    <failure message="org.opentest4j.AssertionFailedError: expected: &lt;1&gt; but was: &lt;0&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: expected: &lt;1&gt; but was: &lt;0&gt;
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:569)
+	at my.pack.MyClassTest.testAbsolute(MyClassTest.java:50)
+</failure>
+  </testcase>
+  <testcase name="testAssumption()" classname="my.pack.MyClassTest" time="0.003">
+    <skipped message="org.opentest4j.TestAbortedException: Assumption failed: Aborted by a failed assumption." type="org.opentest4j.TestAbortedException">org.opentest4j.TestAbortedException: Assumption failed: Aborted by a failed assumption.
+	at org.junit.jupiter.api.Assumptions.throwAssumptionFailed(Assumptions.java:340)
+	at org.junit.jupiter.api.Assumptions.assumeTrue(Assumptions.java:127)
+	at my.pack.MyClassTest.testAssumption(MyClassTest.java:43)
+</skipped>
+  </testcase>
+  <testcase name="testDivideByZero()" classname="my.pack.MyClassTest" time="0.002">
+    <failure message="java.lang.ArithmeticException: / by zero" type="java.lang.ArithmeticException">java.lang.ArithmeticException: / by zero
+	at my.pack.MyClass.divide(MyClass.java:17)
+	at my.pack.MyClassTest.testDivideByZero(MyClassTest.java:32)
+</failure>
+  </testcase>
+  <testcase name="testReturnTrue()" classname="my.pack.MyClassTest" time="0.003">
+    <failure message="org.opentest4j.AssertionFailedError: returnTrue() returned false. ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: returnTrue() returned false. ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:232)
+	at my.pack.MyClassTest.testReturnTrue(MyClassTest.java:20)
+</failure>
+  </testcase>
+  <testcase name="testDisabled()" classname="my.pack.MyClassTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="returnFalse() returns false" classname="my.pack.MyClassTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

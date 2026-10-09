@@ -56,14 +56,51 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"start time to carry over.",
 	("pyTest-JUnit", "GoogleTest-JUnit"):
 		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which pytest does not write.",
+	("Catch2-JUnit", "CTest-JUnit"):
+		"CTest-JUnit requires 'timestamp' on its <testsuite> root. Catch2 writes none on <testsuites>, so the summary has "
+		"no start time to carry over.",
+	("Catch2-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which Catch2 does not write.",
+	("Catch2-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which Catch2 does not write.",
+	("pyTest-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which pytest does not write.",
+	("nextest-JUnit", "Ant-JUnit4"):
+		"Ant + JUnit4 holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "CTest-JUnit"):
+		"CTest-JUnit holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuite>, which nextest does not write.",
+	("nextest-JUnit", "pyTest-JUnit"):
+		"pyTest-JUnit requires 'hostname' and 'timestamp' on <testsuite>, which nextest does not write.",
+	("nextest-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires 'timestamp' on <testsuite>, which nextest does not write.",
 	("Any-JUnit", "Ant-JUnit4"):
 		"Ant + JUnit4 holds exactly one test suite; the OSVVM report has many.",
+	("Any-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "CTest-JUnit"):
 		"CTest-JUnit holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "GoogleTest-JUnit"):
 		"GoogleTest-JUnit requires 'timestamp' down to <testcase>; the OSVVM report has none.",
 	("Any-JUnit", "pyTest-JUnit"):
 		"pyTest-JUnit requires 'timestamp' on <testsuite>; the OSVVM report has none.",
+	("GoJUnitReport-JUnit", "Ant-JUnit4"):
+		"Ant + JUnit4 holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "CTest-JUnit"):
+		"CTest-JUnit holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
+	("GoJUnitReport-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
+	("GoJUnitReport-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires test cases in each <testsuite>; go-junit-report writes a package without tests too.",
+	("Any-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires 'timestamp' on <testsuite>; the OSVVM report has none.",
 }
 
 
@@ -111,14 +148,26 @@ class TranslationMixin:
 	def test_ToAntJUnit4(self) -> None:
 		self._translate("Ant-JUnit4")
 
+	def test_ToCatch2JUnit(self) -> None:
+		self._translate("Catch2-JUnit")
+
 	def test_ToCTestJUnit(self) -> None:
 		self._translate("CTest-JUnit")
+
+	def test_ToGoJUnitReport(self) -> None:
+		self._translate("GoJUnitReport-JUnit")
 
 	def test_ToGoogleTestJUnit(self) -> None:
 		self._translate("GoogleTest-JUnit")
 
+	def test_ToNextestJUnit(self) -> None:
+		self._translate("nextest-JUnit")
+
 	def test_ToPyTestJUnit(self) -> None:
 		self._translate("pyTest-JUnit")
+
+	def test_ToTestLoggerJUnit(self) -> None:
+		self._translate("TestLogger-JUnit")
 
 	def test_ToAnyJUnit(self) -> None:
 		self._translate("Any-JUnit")
@@ -128,16 +177,32 @@ class FromAntJUnit4(TranslationMixin, ut_TestCase):
 	_dialectName = "Ant-JUnit4"
 
 
+class FromCatch2JUnit(TranslationMixin, ut_TestCase):
+	_dialectName = "Catch2-JUnit"
+
+
 class FromCTestJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "CTest-JUnit"
+
+
+class FromGoJUnitReport(TranslationMixin, ut_TestCase):
+	_dialectName = "GoJUnitReport-JUnit"
 
 
 class FromGoogleTestJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "GoogleTest-JUnit"
 
 
+class FromNextestJUnit(TranslationMixin, ut_TestCase):
+	_dialectName = "nextest-JUnit"
+
+
 class FromPyTestJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "pyTest-JUnit"
+
+
+class FromTestLoggerJUnit(TranslationMixin, ut_TestCase):
+	_dialectName = "TestLogger-JUnit"
 
 
 class FromAnyJUnit(TranslationMixin, ut_TestCase):

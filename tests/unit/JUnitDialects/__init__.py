@@ -38,18 +38,23 @@ that rejects a reference file is wrong about the format, and a report this packa
 rejects is wrong about the format too.
 """
 from pathlib import Path
+from sys     import modules
 from typing  import Dict, List, Tuple, Type
 
 from pyTooling.Decorators import export, readonly
 from pyTooling.MetaClasses import ExtendedType
 from xmlschema             import XMLSchema
 
-from pyEDAA.Reports.Unittesting                      import TestsuiteSummary
-from pyEDAA.Reports.Unittesting.JUnit                import Document as AnyJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4      import Document as AntJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit     import Document as CTestJUnitDocument
+from pyEDAA.Reports.Unittesting                       import TestsuiteSummary
+from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit     import Document as Catch2JUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport   import Document as GoJUnitReportDocument
 from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GoogleTestJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit    import Document as PyTestJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit    import Document as NextestJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestJUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document as JunitXmlTestLoggerDocument
 
 
 DATA_DIRECTORY = Path("tests/data/JUnit")
@@ -99,6 +104,24 @@ class Dialect(metaclass=ExtendedType, slots=True):
 		return self._documentClass
 
 	@readonly
+	def TestsuiteSummaryClass(self) -> Type:
+		"""
+		Read-only property to return the dialect's test suite summary class, from the module of :attr:`_documentClass`.
+
+		:returns: The ``TestsuiteSummary`` class of the dialect.
+		"""
+		return modules[self._documentClass.__module__].TestsuiteSummary
+
+	@readonly
+	def TestsuiteClass(self) -> Type:
+		"""
+		Read-only property to return the dialect's test suite class, from the module of :attr:`_documentClass`.
+
+		:returns: The ``Testsuite`` class of the dialect.
+		"""
+		return modules[self._documentClass.__module__].Testsuite
+
+	@readonly
 	def SchemaFile(self) -> Path:
 		"""
 		Read-only property to return the path of the dialect's XML schema, derived from :attr:`_schemaName`.
@@ -132,15 +155,36 @@ DIALECTS: Dict[str, Dialect] = {
 	dialect.Name: dialect for dialect in (
 		Dialect(
 			"Ant-JUnit4", AntJUnitDocument, "Ant-JUnit4",
-			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Ant-JUnit4").glob("*.xml"))
+			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Ant-JUnit4").glob("*.xml")) +
+			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Gradle-JUnit4").glob("*.xml")) +
+			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Gradle-JUnit5").glob("*.xml")) +
+			sorted((DATA_DIRECTORY / "pyEDAA.Reports/Java-Gradle-JUnit6").glob("*.xml"))
+		),
+		Dialect(
+			"Catch2-JUnit", Catch2JUnitDocument, "Catch2-JUnit",
+			[
+				DATA_DIRECTORY / "pyEDAA.Reports/Cpp-Catch2/catch2-junit.xml",
+				DATA_DIRECTORY / "Catch2/catch2-junit-quirks.xml",
+			]
 		),
 		Dialect(
 			"CTest-JUnit", CTestJUnitDocument, "CTest-JUnit",
 			[DATA_DIRECTORY / "pyEDAA.Reports/Cpp-GoogleTest/ctest.xml"]
 		),
 		Dialect(
+			"GoJUnitReport-JUnit", GoJUnitReportDocument, "GoJUnitReport-JUnit",
+			[DATA_DIRECTORY / "pyEDAA.Reports/Go-Test/go-junit-report.xml"]
+		),
+		Dialect(
 			"GoogleTest-JUnit", GoogleTestJUnitDocument, "GoogleTest-JUnit",
 			[DATA_DIRECTORY / "pyEDAA.Reports/Cpp-GoogleTest/gtest.xml"]
+		),
+		Dialect(
+			"nextest-JUnit", NextestJUnitDocument, "Nextest-JUnit",
+			[
+				DATA_DIRECTORY / "pyEDAA.Reports/Rust-Cargo/nextest-junit.xml",
+				DATA_DIRECTORY / "pyEDAA.Reports/Rust-Cargo-Retries/nextest-junit-retries.xml",
+			]
 		),
 		Dialect(
 			"pyTest-JUnit", PyTestJUnitDocument, "PyTest-JUnit",
@@ -151,8 +195,15 @@ DIALECTS: Dict[str, Dialect] = {
 			]
 		),
 		Dialect(
+			"TestLogger-JUnit", JunitXmlTestLoggerDocument, "TestLogger-JUnit",
+			[DATA_DIRECTORY / "pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml"]
+		),
+		Dialect(
 			"Any-JUnit", AnyJUnitDocument, "Any-JUnit",
-			[DATA_DIRECTORY / "OsvvmLibraries/OSVVMLibraries_RunAllTests.xml"]
+			[
+				DATA_DIRECTORY / "OsvvmLibraries/OSVVMLibraries_RunAllTests.xml",
+				DATA_DIRECTORY / "pyEDAA.Reports/Go-Test/gotestsum.xml",
+			]
 		),
 	)
 }

@@ -57,7 +57,9 @@ setup(
 		dataFiles={
 			packageName: [
 				"py.typed",
-				"Resources/*.xsd"
+				"Resources/*.xsd",
+				"Resources/*.schema.json",
+				"Resources/OpenTestReporting/*.xsd"
 			]
 		},
 		debug=True

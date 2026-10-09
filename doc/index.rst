@@ -1,5 +1,3 @@
-.. include:: shields.inc
-
 .. image:: _static/logo.svg
    :height: 90 px
    :align: center
@@ -13,19 +11,15 @@
 
    \part{Introduction}
 
-.. only:: html
+.. shields::
+   :github:        edaa-org/pyEDAA.Reports
+   :gitter:        hdl/community
+   :codacy:        f8142b422c1742bdba38e8ac1893870c
+   :github-action: Pipeline.yml
+   :documentation: github-pages
 
-   |  |SHIELD:svg:Reports-github| |SHIELD:svg:Reports-ghp-doc| |SHIELD:svg:Reports-gitter|
-   |  |SHIELD:svg:Reports-gha-test| |SHIELD:svg:Reports-codacy-quality|
-
-.. Disabled shields: |SHIELD:svg:Reports-src-license| |SHIELD:svg:Reports-doc-license| |SHIELD:svg:Reports-pypi-tag| |SHIELD:svg:Reports-pypi-status| |SHIELD:svg:Reports-pypi-python| |SHIELD:svg:Reports-lib-status| |SHIELD:svg:Reports-codacy-coverage| |SHIELD:svg:Reports-codecov-coverage| |SHIELD:svg:Reports-lib-dep| |SHIELD:svg:Reports-req-status| |SHIELD:svg:Reports-lib-rank|
-
-.. only:: latex
-
-   |SHIELD:png:Reports-github| |SHIELD:png:Reports-ghp-doc| |SHIELD:png:Reports-gitter|
-   |SHIELD:png:Reports-gha-test| |SHIELD:png:Reports-codacy-quality|
-
-.. Disabled shields: |SHIELD:png:Reports-src-license| |SHIELD:png:Reports-doc-license| |SHIELD:png:Reports-pypi-tag| |SHIELD:png:Reports-pypi-status| |SHIELD:png:Reports-pypi-python| |SHIELD:png:Reports-lib-status| |SHIELD:png:Reports-codacy-coverage| |SHIELD:png:Reports-codecov-coverage| |SHIELD:png:Reports-lib-dep| |SHIELD:png:Reports-req-status| |SHIELD:png:Reports-lib-rank|
+   github, ghp-doc, gitter
+   github-action, codacy-quality
 
 The pyEDAA.Reports Documentation
 ################################
@@ -138,7 +132,11 @@ Report Formats
 
       .. rubric:: Supported tools
 
+      * :ref:`cargo-nextest <UNITTEST/Tool/nextest>`
+      * :ref:`Catch2 <UNITTEST/Tool/Catch2>`
       * :ref:`CTest <UNITTEST/Tool/CTest>`
+      * :ref:`dotnet test (VSTest) <UNITTEST/Tool/DotNetTest>`
+      * :ref:`Go <UNITTEST/Tool/Go>`
       * :ref:`GoogleTest <UNITTEST/Tool/GoogleTest>`
       * :ref:`Ant + JUnit4 <UNITTEST/Tool/JUnit4>`
       * :ref:`JUnit5 <UNITTEST/Tool/JUnit5>`
@@ -177,6 +175,7 @@ This layer is used by:
 
 * `pyTooling/Actions → PublishTestResults <https://github.com/pyTooling/Actions/>`__
 * 🚧 `pyTooling/Sphinx-Reports <https://github.com/pyTooling/sphinx-reports>`__
+* 🚧 `pyTooling/pyTooling.Sphinx <https://github.com/pyTooling/pyTooling.Sphinx>`__ - its domain ``report``
 
 
 .. _CONTRIBUTORS:
@@ -239,6 +238,7 @@ Contributors
    CodeCoverage
    Doc. Coverage Report <DocCoverage>
    Static Type Check Report ➚ <typing/index>
+   Schemas/index
 
 .. raw:: latex
 
@@ -250,6 +250,7 @@ Contributors
 
    License
    Doc-License
+   Abbreviations
    Glossary
    genindex
    Python Module Index <modindex>

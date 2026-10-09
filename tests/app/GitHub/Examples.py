@@ -29,16 +29,34 @@
 # ==================================================================================================================== #
 #
 """Testcase for application testing report files generated on GitHub."""
-from pathlib          import Path
-from unittest         import TestCase
+from datetime                                           import datetime, timezone
+from pathlib                                            import Path
+from unittest                                           import TestCase
 
-from pyTooling.Common import zipdicts
+from lxml.etree                                         import XMLSchema, parse
+from pyTooling.Common                                   import getResourceFile, zipdicts
 
+from pyEDAA.Reports                                     import Resources
+from pyEDAA.Reports.CodeCoverage                        import CodeCoverageError
+from pyEDAA.Reports.CodeCoverage.Cobertura              import STRICT_SCHEMA, Document as CoberturaDocument
+from pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura import Document as NVCCoberturaDocument
+from pyEDAA.Reports.CodeCoverage.CoveragePy             import Document as CoveragePyDocument
+from pyEDAA.Reports.CodeCoverage.GHDL                   import Document as GHDLDocument, MergedReport
+from pyEDAA.Reports.CodeCoverage.Gcov                   import Document as GcovDocument
+from pyEDAA.Reports.CodeCoverage.Gcov                   import FormatVersion as GcovFormatVersion
+from pyEDAA.Reports.Unittesting                         import TestcaseStatus, TestsuiteKind, TestsuiteStatus
+from pyEDAA.Reports.Unittesting                         import UnittestError
+from pyEDAA.Reports.Unittesting.JUnit                   import Document as AnyJUnitDocument
 # FIXME: change to generic JUnit
-from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as JUnit4Document
-from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestDocument
-from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GTestDocument
-from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4         import Document as JUnit4Document
+from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit       import Document as Catch2Document
+from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit        import Document as CTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport     import Document as GoJUnitReportDocument
+from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit   import Document as GTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit      import Document as NextestDocument
+from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit       import Document as PyTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit   import Document as JunitXmlTestLoggerDocument
+from pyTooling.Testing                                  import Testcase
 
 
 if __name__ == "__main__": # pragma: no cover
@@ -173,6 +191,482 @@ class CppGoogleTestCTest(TestCase):
 					self.assertEqual(tc.AssertionCount, sameTC.AssertionCount)
 
 
+class CppGoogleTestCoverage(TestCase):
+	"""gcov measures the library of the GoogleTest example in its direct test run and writes gcov JSON."""
+
+	def test_Gcov(self) -> None:
+		report = GcovDocument(Path("tests/data/CodeCoverage/Cpp-GoogleTest/Counter.cpp.gcov.json"), analyzeAndConvert=True)
+
+		self.assertEqual(1, len(report.DataFiles))
+		self.assertEqual(GcovFormatVersion.Version2, report.DataFiles[0].FormatVersion)
+
+		summary = report.ToCoverageSummary()
+		files = list(summary.IterateFiles())
+		self.assertEqual(1, len(files))
+		self.assertEqual(("src", "Counter.cpp"), files[0].Path.parts[-2:])
+		self.assertEqual((6, 6), (files[0].TotalLines, files[0].CoveredLines))
+		self.assertEqual(
+			[(3, 4), (4, 4), (7, 1), (8, 1), (11, 1), (12, 1)],
+			[(line.LineNumber, line.CoverageCount) for line in files[0].IterateLines()]
+		)
+		self.assertEqual(
+			["Counter::Decrement()", "Counter::Increment()", "Counter::Value()"],
+			sorted(unit.Name for unit in summary.IterateUnits() if unit.Name.startswith("Counter::"))
+		)
+
+
+class CppCatch2(TestCase):
+	def test_JUnit(self) -> None:
+		"""Each test case and each path of nested sections is a testcase; Catch2's console counts 6 test cases."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Cpp-Catch2/catch2-junit.xml")
+		doc = Catch2Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(1, doc.TestsuiteCount)
+		self.assertEqual(9, doc.TestcaseCount)
+		self.assertEqual(6, doc.Passed)
+		self.assertEqual(1, doc.Failed)
+		self.assertEqual(1, doc.Errored)
+		self.assertEqual(1, doc.Skipped)
+
+		testsuite = doc.Testsuites["unit_tests"]
+		self.assertEqual("tbd", testsuite.Hostname)
+		self.assertEqual(datetime(2026, 10, 8, 10, 47, 45, tzinfo=timezone.utc), testsuite.StartTime)
+
+		statuses = {
+			(testcase.Classname, testcase.Name): testcase.Status
+			for testclass in testsuite.Testclasses.values()
+			for testcase in testclass.Testcases.values()
+		}
+		self.assertEqual({
+			("unit_tests.global",         "Init"):                           TestcaseStatus.Passed,
+			("unit_tests.global",         "Operations"):                     TestcaseStatus.Passed,
+			("unit_tests.global",         "Operations/Increment"):           TestcaseStatus.Passed,
+			("unit_tests.global",         "Operations/Decrement"):           TestcaseStatus.Passed,
+			("unit_tests.global",         "Operations/Decrement/Underflow"): TestcaseStatus.Passed,
+			("unit_tests.CounterFixture", "Fixture"):                        TestcaseStatus.Passed,
+			("unit_tests.global",         "Failing"):                        TestcaseStatus.Failed,
+			("unit_tests.global",         "Skipped"):                        TestcaseStatus.Skipped,
+			("unit_tests.global",         "Exception"):                      TestcaseStatus.Errored,
+		}, statuses)
+
+	def test_ReadWrite(self) -> None:
+		print()
+
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Cpp-Catch2/catch2-junit.xml")
+		doc = Catch2Document(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Cpp-Catch2/catch2-junit.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = Catch2Document(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.Hostname, sameTS.Hostname)
+			self.assertEqual(ts.StartTime, sameTS.StartTime)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.AssertionCount, sameTS.AssertionCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+				self.assertEqual(tcls.AssertionCount, sameTCls.AssertionCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+					self.assertEqual(tc.AssertionCount, sameTC.AssertionCount)
+
+
+class CSharpXUnit(Testcase):
+	def test_JUnit(self) -> None:
+		"""Counts and statuses as ``dotnet test`` reports them: ``Failed: 3, Passed: 7, Skipped: 1, Total: 11``."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml")
+		doc = JunitXmlTestLoggerDocument(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(1, doc.TestsuiteCount)
+		self.assertEqual(11, doc.TestcaseCount)
+		self.assertEqual(7, doc.Passed)
+		self.assertEqual(3, doc.Failed)
+		self.assertEqual(1, doc.Skipped)
+		self.assertEqual(0, doc.Errored)
+
+		statuses = {
+			(testclass.Name, testcase.Name): testcase.Status
+			for testclass in doc.Testsuites["MyLibrary.Tests.dll"].Testclasses.values()
+			for testcase in testclass.Testcases.values()
+		}
+		self.assertEqual(
+			{
+				("MyLibrary.Tests.CalculatorTests", "Add"):                              TestcaseStatus.Passed,
+				("MyLibrary.Tests.CalculatorTests", "Absolute(value: -4, expected: 5)"): TestcaseStatus.Failed,
+				("MyLibrary.Tests.CalculatorTests", "Absolute(value: 3, expected: 3)"):  TestcaseStatus.Passed,
+				("MyLibrary.Tests.CalculatorTests", "Absolute(value: -3, expected: 3)"): TestcaseStatus.Passed,
+				("MyLibrary.Tests.CalculatorTests", "SumOfPositives"):                   TestcaseStatus.Passed,
+				("MyLibrary.Tests.CalculatorTests", "DivideByZero"):                     TestcaseStatus.Failed,
+				("MyLibrary.Tests.CalculatorTests", "Multiply"):                         TestcaseStatus.Skipped,
+				("MyLibrary.Tests.CalculatorTests", "IsEven"):                           TestcaseStatus.Failed,
+				("MyLibrary.Tests.CounterTests",    "Increment"):                        TestcaseStatus.Passed,
+				("MyLibrary.Tests.CounterTests",    "IncrementAsync"):                   TestcaseStatus.Passed,
+				("MyLibrary.Tests.CounterTests",    "Decrement"):                        TestcaseStatus.Passed,
+			},
+			statuses
+		)
+
+	def test_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml")
+		doc = JunitXmlTestLoggerDocument(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = JunitXmlTestLoggerDocument(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.Hostname, sameTS.Hostname)
+			self.assertEqual(ts.StartTime, sameTS.StartTime)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+					self.assertEqual(tc.Message, sameTC.Message)
+					self.assertEqual(tc.Details, sameTC.Details)
+					self.assertEqual(tc.StandardOutput, sameTC.StandardOutput)
+
+
+class GoTest(TestCase):
+	def test_gotestsum(self) -> None:
+		"""gotestsum's report is Any-JUnit: a test suite per package, a test case per test, subtest and example."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/gotestsum.xml")
+		doc = AnyJUnitDocument(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(3, doc.TestsuiteCount)
+		self.assertEqual(18, doc.TestcaseCount)
+		self.assertEqual(0, doc.Errored)
+		self.assertEqual(1, doc.Skipped)
+		self.assertEqual(4, doc.Failed)
+		self.assertEqual(13, doc.Passed)
+		self.assertEqual(18, doc.Tests)
+
+		module = "github.com/edaa-org/pyEDAA.Reports/examples/Go/testing"
+		counter = doc._testsuites[f"{module}/counter"]._testclasses[f"{module}/counter"]
+		stack = doc._testsuites[f"{module}/stack"]._testclasses[f"{module}/stack"]
+		self.assertEqual(0, doc._testsuites[f"{module}/version"].TestcaseCount)
+		self.assertEqual(TestcaseStatus.Passed, counter._testcases["TestOperations/Decrement/Underflow"].Status)
+		self.assertEqual(TestcaseStatus.Skipped, counter._testcases["TestSkipped"].Status)
+		self.assertEqual(TestcaseStatus.Failed, stack._testcases["TestPushPop/sorted"].Status)
+		self.assertEqual(TestcaseStatus.Failed, stack._testcases["TestPushPop"].Status)
+		# A panic is a failure, not an error.
+		self.assertEqual(TestcaseStatus.Failed, stack._testcases["TestPopEmpty"].Status)
+
+	def test_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/gotestsum.xml")
+		doc = AnyJUnitDocument(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Go-Test/gotestsum.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = AnyJUnitDocument(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+
+	def test_gotestsum_OtherDialects(self) -> None:
+		"""Specific dialects reject gotestsum's report; pyTest-JUnit's schema accepts it, its reader needs a hostname."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/gotestsum.xml")
+
+		for documentClass in (JUnit4Document, CTestDocument, GoJUnitReportDocument, GTestDocument, PyTestDocument):
+			with self.subTest(dialect=documentClass.__module__):
+				with self.assertRaises(UnittestError):
+					documentClass(junitExampleFile, analyzeAndConvert=True)
+
+	def test_GoJUnitReport(self) -> None:
+		"""go-junit-report's report: a test suite per package, a test case per test, subtest and example."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		doc = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(3, doc.TestsuiteCount)
+		self.assertEqual(18, doc.TestcaseCount)
+		self.assertEqual(0, doc.Errored)
+		self.assertEqual(1, doc.Skipped)
+		self.assertEqual(4, doc.Failed)
+		self.assertEqual(13, doc.Passed)
+		self.assertEqual(18, doc.Tests)
+
+		module = "github.com/edaa-org/pyEDAA.Reports/examples/Go/testing"
+		counter = doc._testsuites[f"{module}/counter"]._testclasses[f"{module}/counter"]
+		stack = doc._testsuites[f"{module}/stack"]._testclasses[f"{module}/stack"]
+		# Statuses as 'go test -v' prints them: '--- PASS', '--- FAIL', '--- SKIP'.
+		self.assertEqual(
+			{
+				"TestNew":                            TestcaseStatus.Passed,
+				"TestOperations":                     TestcaseStatus.Passed,
+				"TestOperations/Increment":           TestcaseStatus.Passed,
+				"TestOperations/Decrement":           TestcaseStatus.Passed,
+				"TestOperations/Decrement/Underflow": TestcaseStatus.Passed,
+				"TestIncrementFrom":                  TestcaseStatus.Passed,
+				"TestIncrementFrom/start=0":          TestcaseStatus.Passed,
+				"TestIncrementFrom/start=1":          TestcaseStatus.Passed,
+				"TestIncrementFrom/start=41":         TestcaseStatus.Passed,
+				"TestFailing":                        TestcaseStatus.Failed,
+				"TestSkipped":                        TestcaseStatus.Skipped,
+				"ExampleCounter":                     TestcaseStatus.Passed,
+			},
+			{name: testcase.Status for name, testcase in counter._testcases.items()}
+		)
+		self.assertEqual(
+			{
+				"TestPushPop":           TestcaseStatus.Failed,
+				"TestPushPop/one_item":  TestcaseStatus.Passed,
+				"TestPushPop/two_items": TestcaseStatus.Passed,
+				"TestPushPop/sorted":    TestcaseStatus.Failed,
+				"TestLen":               TestcaseStatus.Passed,
+				"TestPopEmpty":          TestcaseStatus.Failed,
+			},
+			{name: testcase.Status for name, testcase in stack._testcases.items()}
+		)
+
+		failing = counter._testcases["TestFailing"]
+		skipped = counter._testcases["TestSkipped"]
+		logging = counter._testcases["TestIncrementFrom/start=41"]
+		panicking = stack._testcases["TestPopEmpty"]
+		self.assertEqual(("Failed", "    counter_test.go:64: Increment() = 1, want 2"), (failing.Message, failing.Details))
+		self.assertEqual(("Skipped", "    counter_test.go:70: Reset isn't tested yet."), (skipped.Message, skipped.Details))
+		self.assertEqual("    counter_test.go:50: Incrementing from 41.", logging.StandardOutput)
+		# A panic's stack trace is in the package's <system-out>, the failure of the test case is empty.
+		self.assertEqual(("Failed", None), (panicking.Message, panicking.Details))
+
+	def test_GoJUnitReport_PackageWithoutTests(self) -> None:
+		"""go-junit-report writes an empty name for a package without tests; the import path is in its <system-out>."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		doc = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		version = doc._testsuites["github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/version"]
+		self.assertEqual(0, version.TestcaseCount)
+		self.assertEqual(TestsuiteStatus.Empty, version.Status)
+		# Host and time of the conversion by go-junit-report, not of the test run.
+		self.assertEqual("dffa20ef8728", version.Hostname)
+		self.assertEqual(datetime(2026, 10, 8, 11, 5, 11, tzinfo=timezone.utc), version.StartTime)
+
+	def test_GoJUnitReport_PackagesWithoutTests(self) -> None:
+		"""Each package without tests has an empty name; each is named by the import path in its <system-out>."""
+		report = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml").read_text()
+		start = report.index('<testsuite name="" ')
+		end = report.index("</testsuite>", start) + len("</testsuite>")
+		secondPackage = report[start:end].replace('id="2"', 'id="3"').replace("/version", "/version2")
+
+		junitExampleFile = Path("tests/output/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.packages-without-tests.xml")
+		junitExampleFile.parent.mkdir(parents=True, exist_ok=True)
+		junitExampleFile.write_text(f"{report[:end]}\n\t{secondPackage}{report[end:]}")
+		doc = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		module = "github.com/edaa-org/pyEDAA.Reports/examples/Go/testing"
+		self.assertEqual(
+			[f"{module}/counter", f"{module}/stack", f"{module}/version", f"{module}/version2"],
+			list(doc._testsuites)
+		)
+
+	def test_GoJUnitReport_EmptyName(self) -> None:
+		"""A test suite with an empty name and without a result line naming the package is rejected."""
+		report = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml").read_text()
+		start = report.index("<system-out>", report.index('<testsuite name="" '))
+		end = report.index("</system-out>", start) + len("</system-out>")
+
+		junitExampleFile = Path("tests/output/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.empty-name.xml")
+		junitExampleFile.parent.mkdir(parents=True, exist_ok=True)
+		junitExampleFile.write_text(f"{report[:start]}{report[end:]}")
+
+		with self.assertRaises(UnittestError) as context:
+			GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual("Test suite with id '2' has an empty name.", str(context.exception))
+
+	def test_GoJUnitReport_Unified(self) -> None:
+		"""In the unified data model, a package's test cases are in a test suite named by the whole import path."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		summary = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True).ToTestsuiteSummary()
+
+		module = "github.com/edaa-org/pyEDAA.Reports/examples/Go/testing"
+		self.assertEqual([f"{module}/counter", f"{module}/stack", f"{module}/version"], list(summary.Testsuites))
+		counter = summary.Testsuites[f"{module}/counter"]
+		self.assertEqual([f"{module}/counter"], list(counter.Testsuites))
+		self.assertEqual(TestsuiteKind.Class, counter.Testsuites[f"{module}/counter"].Kind)
+		self.assertEqual(12, len(counter.Testsuites[f"{module}/counter"].Testcases))
+
+	def test_GoJUnitReport_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		doc = GoJUnitReportDocument(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = GoJUnitReportDocument(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.Hostname, sameTS.Hostname)
+			self.assertEqual(ts.StartTime, sameTS.StartTime)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+					self.assertEqual(tc.Message, sameTC.Message)
+					self.assertEqual(tc.Details, sameTC.Details)
+					self.assertEqual(tc.StandardOutput, sameTC.StandardOutput)
+
+	def test_GoJUnitReport_OtherDialects(self) -> None:
+		"""Only the go-junit-report dialect reads go-junit-report's report."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Go-Test/go-junit-report.xml")
+
+		for documentClass in (AnyJUnitDocument, JUnit4Document, CTestDocument, GTestDocument, PyTestDocument):
+			with self.subTest(dialect=documentClass.__module__):
+				with self.assertRaises(UnittestError):
+					documentClass(junitExampleFile, analyzeAndConvert=True)
+
+
+class GoTestCoverage(TestCase):
+	def test_Cobertura(self) -> None:
+		"""gocover-cobertura writes a class per receiver type, ``-`` for a package's functions, a method per function."""
+		report = CoberturaDocument(Path("tests/data/CodeCoverage/Go-Test/cobertura.xml"), analyzeAndConvert=True)
+
+		self.assertEqual("", report.Version)
+		self.assertEqual(
+			(28, 20, 0, 0), (report.LinesValid, report.LinesCovered, report.BranchesValid, report.BranchesCovered)
+		)
+
+		module = "github.com/edaa-org/pyEDAA.Reports/examples/Go/testing"
+		self.assertEqual([f"{module}/counter", f"{module}/version"], [package.Name for package in report.Packages])
+		self.assertEqual(
+			[[("-", "counter/counter.go"), ("Counter", "counter/counter.go")], [("-", "version/version.go")]],
+			[[(klass.Name, klass.Filename) for klass in package.Classes] for package in report.Packages]
+		)
+		self.assertEqual(["Value", "Increment", "Decrement", "Reset"], list(report.Packages[0].Classes[1].Methods))
+
+	def test_Cobertura_Strict(self) -> None:
+		"""Known gap: the strict schema lacks a ``<method>``'s ``complexity``, which ``coverage-04.dtd`` requires."""
+		strict = XMLSchema(parse(getResourceFile(Resources, STRICT_SCHEMA)))
+
+		self.assertFalse(strict.validate(parse("tests/data/CodeCoverage/Go-Test/cobertura.xml")))
+		self.assertEqual(
+			{"Element 'method', attribute 'complexity': The attribute 'complexity' is not allowed."},
+			{error.message for error in strict.error_log}
+		)
+
+	def test_Cobertura_Summary(self) -> None:
+		report = CoberturaDocument(Path("tests/data/CodeCoverage/Go-Test/cobertura.xml"), analyzeAndConvert=True)
+		summary = report.ToCoverageSummary()
+
+		files = {file.Path.as_posix(): file for file in summary.IterateFiles()}
+		self.assertEqual(["counter/counter.go", "version/version.go"], sorted(files))
+
+		counter = files["counter/counter.go"]
+		version = files["version/version.go"]
+		self.assertEqual((23, 20), (counter.TotalLines, counter.CoveredLines))
+		self.assertEqual((5, 0), (version.TotalLines, version.CoveredLines))
+
+		# A block's count goes to every line it spans: also to a blank line and a comment line ...
+		self.assertEqual((6, 6), (counter.GetLine(28).CoverageCount, counter.GetLine(29).CoverageCount))
+		# ... and the counts of two blocks sharing a line are added: line 35 ran twice.
+		self.assertEqual(3, counter.GetLine(35).CoverageCount)
+
+	def test_Cobertura_Packages(self) -> None:
+		"""Known gap: a Go package is named by its import path, which the reader splits at ``.`` instead of ``/``."""
+		report = CoberturaDocument(Path("tests/data/CodeCoverage/Go-Test/cobertura.xml"), analyzeAndConvert=True)
+		summary = report.ToCoverageSummary()
+
+		self.assertEqual(["github"], list(summary.Units))
+		self.assertEqual(["com/edaa-org/pyEDAA"], list(summary.Units["github"].Units))
+		self.assertEqual(
+			["Reports/examples/Go/testing/counter", "Reports/examples/Go/testing/version"],
+			list(summary.Units["github"].Units["com/edaa-org/pyEDAA"].Units)
+		)
+
+
 class JavaAntJUnit4(TestCase):
 	def test_JUnit4(self) -> None:
 		print()
@@ -235,6 +729,245 @@ class JavaAntJUnit4(TestCase):
 					self.assertEqual(tc.Duration, sameTC.Duration)
 					self.assertEqual(tc.AssertionCount, sameTC.AssertionCount)
 
+
+class JavaGradleJUnit4(Testcase):
+	def test_JUnit4(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit4/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(1, doc.TestsuiteCount)
+		self.assertEqual(6, doc.TestcaseCount)
+		self.assertEqual(6, doc.Tests)
+		self.assertEqual(2, doc.Passed)
+		self.assertEqual(2, doc.Failed)
+		self.assertEqual(0, doc.Errored)
+		self.assertEqual(2, doc.Skipped)
+
+	def test_Status(self) -> None:
+		"""Gradle writes an exception as ``<failure>``, an ignored test and a failed assumption as ``<skipped>``."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit4/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		testclass = doc._testsuites["my.pack.MyClassTest"]._testclasses["my.pack.MyClassTest"]
+		self.assertEqual(
+			{
+				"testAbsolute":     TestcaseStatus.Passed,
+				"testAssumption":   TestcaseStatus.Skipped,
+				"testDivideByZero": TestcaseStatus.Failed,
+				"testIgnored":      TestcaseStatus.Skipped,
+				"testReturnFalse":  TestcaseStatus.Passed,
+				"testReturnTrue":   TestcaseStatus.Failed,
+			},
+			{name: testcase.Status for name, testcase in testclass._testcases.items()}
+		)
+
+	def test_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit4/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Java-Gradle-JUnit4/TEST-my.pack.MyClassTest.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = JUnit4Document(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.StartTime, sameTS.StartTime)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+
+
+class JavaGradleJUnit5(Testcase):
+	def test_JUnit5(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit5/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(1, doc.TestsuiteCount)
+		self.assertEqual(8, doc.TestcaseCount)
+		self.assertEqual(8, doc.Tests)
+		self.assertEqual(3, doc.Passed)
+		self.assertEqual(3, doc.Failed)
+		self.assertEqual(0, doc.Errored)
+		self.assertEqual(2, doc.Skipped)
+
+	def test_Names(self) -> None:
+		"""Test suite and test cases are named by their display names; ``classname`` is the class' name."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit5/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(["Tests of MyClass"], list(doc._testsuites))
+		testsuite = doc._testsuites["Tests of MyClass"]
+		self.assertEqual(["my.pack.MyClassTest"], list(testsuite._testclasses))
+		self.assertEqual(
+			{
+				"[1] 5, 5":                    TestcaseStatus.Passed,
+				"[2] -5, 5":                   TestcaseStatus.Passed,
+				"[3] 0, 1":                    TestcaseStatus.Failed,
+				"testAssumption()":            TestcaseStatus.Skipped,
+				"testDivideByZero()":          TestcaseStatus.Failed,
+				"testReturnTrue()":            TestcaseStatus.Failed,
+				"testDisabled()":              TestcaseStatus.Skipped,
+				"returnFalse() returns false": TestcaseStatus.Passed,
+			},
+			{name: testcase.Status for name, testcase in testsuite._testclasses["my.pack.MyClassTest"]._testcases.items()}
+		)
+
+	def test_NestedClass(self) -> None:
+		"""A nested test class is a test suite and a file of its own."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit5/TEST-my.pack.MyClassTest$Divide.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(["my.pack.MyClassTest$Divide"], list(doc._testsuites))
+		self.assertEqual(1, doc.Passed)
+
+	def test_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit5/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Java-Gradle-JUnit5/TEST-my.pack.MyClassTest.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = JUnit4Document(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.StartTime, sameTS.StartTime)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+
+
+class JavaGradleJUnit6(Testcase):
+	def test_JUnit6(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(1, doc.TestsuiteCount)
+		self.assertEqual(8, doc.TestcaseCount)
+		self.assertEqual(8, doc.Tests)
+		self.assertEqual(3, doc.Passed)
+		self.assertEqual(3, doc.Failed)
+		self.assertEqual(0, doc.Errored)
+		self.assertEqual(2, doc.Skipped)
+
+	def test_Names(self) -> None:
+		"""Test suite and test cases are named by their display names; ``classname`` is the class' name."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(["Tests of MyClass"], list(doc._testsuites))
+		testsuite = doc._testsuites["Tests of MyClass"]
+		self.assertEqual(["my.pack.MyClassTest"], list(testsuite._testclasses))
+		self.assertEqual(
+			{
+				'[1] "5", "5"':                TestcaseStatus.Passed,
+				'[2] "-5", "5"':               TestcaseStatus.Passed,
+				'[3] "0", "1"':                TestcaseStatus.Failed,
+				"testAssumption()":            TestcaseStatus.Skipped,
+				"testDivideByZero()":          TestcaseStatus.Failed,
+				"testReturnTrue()":            TestcaseStatus.Failed,
+				"testDisabled()":              TestcaseStatus.Skipped,
+				"returnFalse() returns false": TestcaseStatus.Passed,
+			},
+			{name: testcase.Status for name, testcase in testsuite._testclasses["my.pack.MyClassTest"]._testcases.items()}
+		)
+
+	def test_NestedClass(self) -> None:
+		"""A nested test class is a test suite and a file of its own."""
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest$Divide.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(["my.pack.MyClassTest$Divide"], list(doc._testsuites))
+		self.assertEqual(1, doc.Passed)
+
+	def test_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest.xml")
+		doc = JUnit4Document(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Java-Gradle-JUnit6/TEST-my.pack.MyClassTest.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = JUnit4Document(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.StartTime, sameTS.StartTime)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
 
 class PythonPyTest(TestCase):
 	def test_Read(self) -> None:
@@ -302,3 +1035,177 @@ class PythonPyTest(TestCase):
 					self.assertEqual(tc.Status, sameTC.Status)
 					self.assertEqual(tc.Duration, sameTC.Duration)
 					self.assertEqual(tc.AssertionCount, sameTC.AssertionCount)
+
+
+class PythonPyTestCoverage(TestCase):
+	"""coverage.py measures the example's test run and writes its JSON and its Cobertura XML report."""
+
+	def test_CoveragePy(self) -> None:
+		report = CoveragePyDocument(Path("tests/data/CodeCoverage/Python-pytest/coverage.json"), analyzeAndConvert=True)
+
+		self.assertTrue(report.BranchCoverage)
+		self.assertEqual(["TestModuleA.py", "TestModuleB.py"], sorted(path.as_posix() for path in report.Files))
+
+		summary = report.ToCoverageSummary()
+		self.assertEqual((60, 59), (summary.TotalLines, summary.CoveredLines))
+
+	def test_Cobertura(self) -> None:
+		report = CoberturaDocument(Path("tests/data/CodeCoverage/Python-pytest/coverage.xml"), analyzeAndConvert=True)
+
+		self.assertEqual((60, 59), (report.LinesValid, report.LinesCovered))
+
+		summary = report.ToCoverageSummary()
+		self.assertEqual((60, 59), (summary.TotalLines, summary.CoveredLines))
+
+	def test_SameMeasurement(self) -> None:
+		"""Both reports of one measurement convert to the same files and line statuses."""
+		json = CoveragePyDocument(Path("tests/data/CodeCoverage/Python-pytest/coverage.json"), analyzeAndConvert=True)
+		xml =  CoberturaDocument(Path("tests/data/CodeCoverage/Python-pytest/coverage.xml"), analyzeAndConvert=True)
+
+		jsonFiles = {file.Path.as_posix(): file for file in json.ToCoverageSummary().IterateFiles()}
+		xmlFiles =  {file.Path.as_posix(): file for file in xml.ToCoverageSummary().IterateFiles()}
+		self.assertEqual(sorted(jsonFiles), sorted(xmlFiles))
+
+		for path, jsonFile, xmlFile in zipdicts(jsonFiles, xmlFiles):
+			with self.subTest(path=path):
+				self.assertEqual(
+					[(line.LineNumber, line.Status) for line in jsonFile.IterateLines()],
+					[(line.LineNumber, line.Status) for line in xmlFile.IterateLines()]
+				)
+
+
+class RustCargo(TestCase):
+	def test_nextest(self) -> None:
+		"""Console: '12 tests run: 8 passed, 4 failed, 1 skipped' - the ignored test is missing from the report."""
+		print()
+
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Rust-Cargo/nextest-junit.xml")
+		doc = NextestDocument(junitExampleFile, analyzeAndConvert=True)
+
+		self.assertEqual(2, doc.TestsuiteCount)
+		self.assertEqual(12, doc.TestcaseCount)
+		self.assertEqual(0, doc.Errored)
+		self.assertEqual(0, doc.Skipped)
+		self.assertEqual(4, doc.Failed)
+		self.assertEqual(8, doc.Passed)
+		self.assertEqual(12, doc.Tests)
+
+		print(f"JUnit file:")
+		print(f"  Testsuites: {doc.TestsuiteCount}")
+		print(f"  Testcases:  {doc.TestcaseCount}")
+
+		print()
+		print(f"Statistics:")
+		print(
+			f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   "
+			f"convert: {doc.ModelConversionDuration.total_seconds():.3f}s"
+		)
+
+	def test_ReadWrite(self) -> None:
+		print()
+
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/Rust-Cargo/nextest-junit.xml")
+		doc = NextestDocument(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/Rust-Cargo/nextest-junit.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = NextestDocument(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.RunID, sameDoc.RunID)
+		self.assertEqual(doc.StartTime, sameDoc.StartTime)
+		self.assertEqual(doc.Duration, sameDoc.Duration)
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+			self.assertEqual(ts.AssertionCount, sameTS.AssertionCount)
+			self.assertEqual(ts.Errored, sameTS.Errored)
+			self.assertEqual(ts.Skipped, sameTS.Skipped)
+			self.assertEqual(ts.Failed, sameTS.Failed)
+			self.assertEqual(ts.Passed, sameTS.Passed)
+			self.assertEqual(ts.Tests, sameTS.Tests)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.Classname, sameTCls.Classname)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+				self.assertEqual(tcls.AssertionCount, sameTCls.AssertionCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Classname, sameTC.Classname)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.StartTime, sameTC.StartTime)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+					self.assertEqual(tc.AssertionCount, sameTC.AssertionCount)
+
+
+class VHDLGHDL(TestCase):
+	"""GHDL simulates the example's testbench twice - counting, and counting with resets - with statement coverage."""
+
+	def test_Runs(self) -> None:
+		for run, expected in (
+			("Count", [("src/Counter.vhdl", 6, 5), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 13)]),
+			("Reset", [("src/Counter.vhdl", 6, 6), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 12)])
+		):
+			with self.subTest(run=run):
+				report = GHDLDocument(Path(f"tests/data/CodeCoverage/VHDL-GHDL/coverage-{run}.json"), analyzeAndConvert=True)
+				summary = report.ToCoverageSummary()
+
+				self.assertEqual(
+					expected,
+					[(file.Path.as_posix(), file.TotalLines, file.CoveredLines) for file in summary.IterateFiles()]
+				)
+
+	def test_Merged(self) -> None:
+		"""A line ran, if it ran in one of the runs: the reset run covers the counter's reset branch."""
+		runs = [
+			GHDLDocument(Path(f"tests/data/CodeCoverage/VHDL-GHDL/coverage-{run}.json"), analyzeAndConvert=True)
+			for run in ("Count", "Reset")
+		]
+		summary = MergedReport("Counter", runs).ToCoverageSummary()
+
+		self.assertEqual((27, 25), (summary.TotalLines, summary.CoveredLines))
+		self.assertEqual(
+			[("src/Counter.vhdl", 6, 6), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 14)],
+			[(file.Path.as_posix(), file.TotalLines, file.CoveredLines) for file in summary.IterateFiles()]
+		)
+
+
+class VHDLNVC(TestCase):
+	"""NVC simulates the example's testbench twice, merges both coverage databases and exports them as Cobertura XML."""
+
+	def test_NVCCobertura(self) -> None:
+		"""NVC's dialect reads the merged report: the reset run covers the counter's reset branch."""
+		report = NVCCoberturaDocument(Path("tests/data/CodeCoverage/VHDL-NVC/cobertura.xml"), analyzeAndConvert=True)
+		summary = report.ToCoverageSummary()
+
+		self.assertEqual((24, 20), (summary.TotalLines, summary.CoveredLines))
+		self.assertEqual((18, 10), (summary.TotalBranches, summary.CoveredBranches))
+		self.assertEqual(
+			[("src/Counter.vhdl", 7, 7), ("tb/Counter_tb.vhdl", 17, 13)],
+			[(file.Path.as_posix(), file.TotalLines, file.CoveredLines) for file in summary.IterateFiles()]
+		)
+
+	def test_AnyCobertura(self) -> None:
+		"""
+		The generic reader rejects it: NVC writes ``condition-coverage`` without the conditions.
+
+		NVC writes e.g. ``100 %``.
+		"""
+		with self.assertRaises(CodeCoverageError) as context:
+			CoberturaDocument(Path("tests/data/CodeCoverage/VHDL-NVC/cobertura.xml"), analyzeAndConvert=True)
+
+		notes = context.exception.__notes__
+		self.assertEqual(9, len(notes))
+		self.assertTrue(all("attribute 'condition-coverage': [facet 'pattern']" in note for note in notes))

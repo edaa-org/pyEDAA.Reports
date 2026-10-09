@@ -72,6 +72,8 @@ derived from a summary class.
 		 classDef suite fill:#b3e6ff
 		 classDef case fill:#eeccff
 """
+from __future__            import annotations
+
 from datetime              import timedelta, datetime
 from enum                  import Flag, IntEnum
 from pathlib               import Path
@@ -86,12 +88,12 @@ from pyEDAA.Reports        import ReportException
 
 
 @export
-class UnittestException(ReportException):
+class UnittestError(ReportException):
 	"""Base-exception for all unit test related exceptions."""
 
 
 @export
-class AlreadyInHierarchyException(UnittestException):
+class AlreadyInHierarchyError(UnittestError):
 	"""
 	A unit test exception raised if the element is already part of a hierarchy.
 
@@ -105,7 +107,7 @@ class AlreadyInHierarchyException(UnittestException):
 
 
 @export
-class DuplicateTestsuiteException(UnittestException):
+class DuplicateTestsuiteError(UnittestError):
 	"""
 	A unit test exception raised on duplicate test suites (by name).
 
@@ -118,7 +120,7 @@ class DuplicateTestsuiteException(UnittestException):
 
 
 @export
-class DuplicateTestcaseException(UnittestException):
+class DuplicateTestcaseError(UnittestError):
 	"""
 	A unit test exception raised on duplicate test cases (by name).
 
@@ -159,7 +161,7 @@ class TestcaseStatus(Flag):
 	# TODO: timed out ?
 	# TODO: some passed (if merged, mixed results of passed and failed)
 
-	def __matmul__(self, other: "TestcaseStatus") -> "TestcaseStatus":
+	def __matmul__(self, other: TestcaseStatus) -> TestcaseStatus:
 		s = self & self.Mask
 		o = other & self.Mask
 		if s is self.Excluded:
@@ -267,10 +269,16 @@ class Base(metaclass=ExtendedType, slots=True):
 
 	Every test entity offers an internal dictionary for annotations. |br|
 	This feature is for example used by Ant + JUnit4's XML property fields.
+
+	Besides its name, a test entity can carry a title, a summary and a description written for a reader, like the
+	doc-string of a test method. Formats like JUnit XML can't express these, so they are ``None`` then.
 	"""
 
-	_parent:               Nullable["TestsuiteBase"]
+	_parent:               Nullable[TestsuiteBase]
 	_name:                 str
+	_title:                Nullable[str]  #: Short label of the test entity, written for a reader.
+	_summary:              Nullable[str]  #: Summary of the test entity, e.g. the first paragraph of its doc-string.
+	_description:          Nullable[str]  #: Description of the test entity, e.g. its doc-string.
 
 	_startTime:            Nullable[datetime]
 	_setupDuration:        Nullable[timedelta]
@@ -291,6 +299,9 @@ class Base(metaclass=ExtendedType, slots=True):
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
@@ -303,22 +314,26 @@ class Base(metaclass=ExtendedType, slots=True):
 		expectedErrorCount: int = 0,
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable["TestsuiteBase"] = None
+		*,
+		parent: Nullable[TestsuiteBase] = None
 	) -> None:
 		"""
 		Initializes the fields of the base-class.
 
 		:param name:               Name of the test entity.
-		:param startTime:          Time when the test entity was started.
-		:param setupDuration:      Duration it took to set up the entity.
-		:param testDuration:       Duration of the entity's test run.
-		:param teardownDuration:   Duration it took to tear down the entity.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown).
-		:param warningCount:       Count of encountered warnings.
-		:param errorCount:         Count of encountered errors.
-		:param fatalCount:         Count of encountered fatal errors.
-		:param keyValuePairs:      Mapping of key-value pairs to initialize the test entity with.
-		:param parent:             Reference to the parent test entity.
+		:param title:              Optional, short label of the test entity, written for a reader.
+		:param summary:            Optional, summary of the test entity.
+		:param description:        Optional, description of the test entity.
+		:param startTime:          Optional, time when the test entity was started.
+		:param setupDuration:      Optional, duration it took to set up the entity.
+		:param testDuration:       Optional, duration of the entity's test run.
+		:param teardownDuration:   Optional, duration it took to tear down the entity.
+		:param totalDuration:      Optional, total duration of the entity's execution (setup + test + teardown).
+		:param warningCount:       Optional, count of encountered warnings.
+		:param errorCount:         Optional, count of encountered errors.
+		:param fatalCount:         Optional, count of encountered fatal errors.
+		:param keyValuePairs:      Optional, mapping of key-value pairs to initialize the test entity with.
+		:param parent:             Optional, reference to the parent test entity.
 		:raises TypeError:         When parameter 'parent' is not a TestsuiteBase.
 		:raises ValueError:        When parameter 'name' is None.
 		:raises TypeError:         When parameter 'name' is not a string.
@@ -333,6 +348,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises TypeError:         When parameter 'expectedWarningCount' is not an integer.
 		:raises TypeError:         When parameter 'expectedErrorCount' is not an integer.
 		:raises TypeError:         When parameter 'expectedFatalCount' is not an integer.
+		:raises TypeError:         When parameter 'title' is not a string.
+		:raises TypeError:         When parameter 'summary' is not a string.
+		:raises TypeError:         When parameter 'description' is not a string.
 		:raises TypeError:         When parameter 'keyValuePairs' is not a Mapping.
 		:raises ValueError:        When parameter 'totalDuration' is not consistent.
 		"""
@@ -354,25 +372,16 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._parent = parent
 		self._name = name
 
-		if testDuration is not None and not isinstance(testDuration, timedelta):
-			ex = TypeError(f"Parameter 'testDuration' is not of type 'timedelta'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(testDuration)}'.")
-			raise ex
-
-		if setupDuration is not None and not isinstance(setupDuration, timedelta):
-			ex = TypeError(f"Parameter 'setupDuration' is not of type 'timedelta'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(setupDuration)}'.")
-			raise ex
-
-		if teardownDuration is not None and not isinstance(teardownDuration, timedelta):
-			ex = TypeError(f"Parameter 'teardownDuration' is not of type 'timedelta'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(teardownDuration)}'.")
-			raise ex
-
-		if totalDuration is not None and not isinstance(totalDuration, timedelta):
-			ex = TypeError(f"Parameter 'totalDuration' is not of type 'timedelta'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(totalDuration)}'.")
-			raise ex
+		for parameterName, value in (
+			("testDuration", testDuration),
+			("setupDuration", setupDuration),
+			("teardownDuration", teardownDuration),
+			("totalDuration", totalDuration)
+		):
+			if value is not None and not isinstance(value, timedelta):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'timedelta'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
 
 		if testDuration is not None:
 			if setupDuration is not None:
@@ -407,8 +416,12 @@ class Base(metaclass=ExtendedType, slots=True):
 			testDuration = totalDuration
 			if setupDuration is not None:
 				testDuration -= setupDuration
+
 			if teardownDuration is not None:
 				testDuration -= teardownDuration
+
+			if testDuration < timedelta():
+				raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of setup and teardown durations.")
 
 		self._startTime = startTime
 		self._setupDuration = setupDuration
@@ -416,35 +429,18 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._teardownDuration = teardownDuration
 		self._totalDuration = totalDuration
 
-		if not isinstance(warningCount, int):
-			ex = TypeError(f"Parameter 'warningCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(warningCount)}'.")
-			raise ex
-
-		if not isinstance(errorCount, int):
-			ex = TypeError(f"Parameter 'errorCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(errorCount)}'.")
-			raise ex
-
-		if not isinstance(fatalCount, int):
-			ex = TypeError(f"Parameter 'fatalCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(fatalCount)}'.")
-			raise ex
-
-		if not isinstance(expectedWarningCount, int):
-			ex = TypeError(f"Parameter 'expectedWarningCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(expectedWarningCount)}'.")
-			raise ex
-
-		if not isinstance(expectedErrorCount, int):
-			ex = TypeError(f"Parameter 'expectedErrorCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(expectedErrorCount)}'.")
-			raise ex
-
-		if not isinstance(expectedFatalCount, int):
-			ex = TypeError(f"Parameter 'expectedFatalCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(expectedFatalCount)}'.")
-			raise ex
+		for parameterName, value in (
+			("warningCount", warningCount),
+			("errorCount", errorCount),
+			("fatalCount", fatalCount),
+			("expectedWarningCount", expectedWarningCount),
+			("expectedErrorCount", expectedErrorCount),
+			("expectedFatalCount", expectedFatalCount)
+		):
+			if not isinstance(value, int):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
 
 		self._warningCount =         warningCount
 		self._errorCount =           errorCount
@@ -453,16 +449,26 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._expectedErrorCount =   expectedErrorCount
 		self._expectedFatalCount =   expectedFatalCount
 
+		for parameterName, value in (("title", title), ("summary", summary), ("description", description)):
+			if value is not None and not isinstance(value, str):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'str'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
+
+		self._title =       title
+		self._summary =     summary
+		self._description = description
+
 		if keyValuePairs is not None and not isinstance(keyValuePairs, Mapping):
 			ex = TypeError(f"Parameter 'keyValuePairs' is not a mapping.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
 			raise ex
 
-		self._dict = {} if keyValuePairs is None else {k: v for k, v in keyValuePairs}
+		self._dict = {} if keyValuePairs is None else dict(keyValuePairs)
 
 	# QUESTION: allow Parent as setter?
 	@readonly
-	def Parent(self) -> Nullable["TestsuiteBase"]:
+	def Parent(self) -> Nullable[TestsuiteBase]:
 		"""
 		Read-only property to access the reference to the parent test entity.
 
@@ -478,6 +484,35 @@ class Base(metaclass=ExtendedType, slots=True):
 		:returns: The test entities name.
 		"""
 		return self._name
+
+	@readonly
+	def Title(self) -> Nullable[str]:
+		"""
+		Read-only property to access the test entity's title (:attr:`_title`).
+
+		The title is a short label written for a reader, while the name identifies the test entity.
+
+		:returns: The test entity's title, or ``None`` if it wasn't recorded.
+		"""
+		return self._title
+
+	@readonly
+	def Summary(self) -> Nullable[str]:
+		"""
+		Read-only property to access the test entity's summary (:attr:`_summary`).
+
+		:returns: The test entity's summary, or ``None`` if it wasn't recorded.
+		"""
+		return self._summary
+
+	@readonly
+	def Description(self) -> Nullable[str]:
+		"""
+		Read-only property to access the test entity's description (:attr:`_description`).
+
+		:returns: The test entity's description, or ``None`` if it wasn't recorded.
+		"""
+		return self._description
 
 	@readonly
 	def StartTime(self) -> Nullable[datetime]:
@@ -650,7 +685,101 @@ class Base(metaclass=ExtendedType, slots=True):
 
 
 @export
-class Testcase(Base):
+class TestcaseOutputMixin(metaclass=ExtendedType, mixin=True):
+	"""
+	A mixin-class adding the output of a test case run: a message, details and the captured output streams.
+
+	A test case's status can be explained by a short message and details, like the message of a failed assertion and its
+	traceback. These are the explanation of a failure, an error or why a test case was skipped. |br|
+	In addition, the test case's standard output and standard error can be captured while it runs.
+
+	All fields are ``None``, if the information wasn't recorded.
+	"""
+
+	_message:        Nullable[str]  #: Message explaining the test case's status (e.g. a failed assertion).
+	_details:        Nullable[str]  #: Details explaining the test case's status (e.g. a traceback).
+	_standardOutput: Nullable[str]  #: Captured standard output of the test case.
+	_standardError:  Nullable[str]  #: Captured standard error of the test case.
+
+	def __init__(
+		self,
+		message: Nullable[str] = None,
+		details: Nullable[str] = None,
+		standardOutput: Nullable[str] = None,
+		standardError: Nullable[str] = None
+	) -> None:
+		"""
+		Initializes the fields of the mixin-class.
+
+		:param message:        Optional, message explaining the test case's status.
+		:param details:        Optional, details explaining the test case's status.
+		:param standardOutput: Optional, captured standard output of the test case.
+		:param standardError:  Optional, captured standard error of the test case.
+		:raises TypeError:     If parameter 'message' is not a string.
+		:raises TypeError:     If parameter 'details' is not a string.
+		:raises TypeError:     If parameter 'standardOutput' is not a string.
+		:raises TypeError:     If parameter 'standardError' is not a string.
+		"""
+		for parameterName, value in (
+			("message", message), ("details", details), ("standardOutput", standardOutput), ("standardError", standardError)
+		):
+			if value is not None and not isinstance(value, str):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'str'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
+
+		self._message =        message
+		self._details =        details
+		self._standardOutput = standardOutput
+		self._standardError =  standardError
+
+	@readonly
+	def Message(self) -> Nullable[str]:
+		"""
+		Read-only property to access the message explaining the test case's status (:attr:`_message`).
+
+		In a JUnit XML file, it's the ``message`` attribute of a ``<failure>``, ``<error>`` or ``<skipped>`` element.
+
+		:returns: The message, or ``None`` if it wasn't recorded.
+		"""
+		return self._message
+
+	@readonly
+	def Details(self) -> Nullable[str]:
+		"""
+		Read-only property to access the details explaining the test case's status (:attr:`_details`).
+
+		In a JUnit XML file, it's the text of a ``<failure>``, ``<error>`` or ``<skipped>`` element, e.g. a traceback.
+
+		:returns: The details, or ``None`` if they weren't recorded.
+		"""
+		return self._details
+
+	@readonly
+	def StandardOutput(self) -> Nullable[str]:
+		"""
+		Read-only property to access the captured standard output of the test case (:attr:`_standardOutput`).
+
+		In a JUnit XML file, it's the text of a ``<system-out>`` element.
+
+		:returns: The captured standard output, or ``None`` if it wasn't recorded.
+		"""
+		return self._standardOutput
+
+	@readonly
+	def StandardError(self) -> Nullable[str]:
+		"""
+		Read-only property to access the captured standard error of the test case (:attr:`_standardError`).
+
+		In a JUnit XML file, it's the text of a ``<system-err>`` element.
+
+		:returns: The captured standard error, or ``None`` if it wasn't recorded.
+		"""
+		return self._standardError
+
+
+@export
+class Testcase(Base, TestcaseOutputMixin):
 	"""
 	A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
 
@@ -659,7 +788,8 @@ class Testcase(Base):
 	Every test case has an overall status like unknown, skipped, failed or passed.
 
 	In addition to all features from its base-class, test cases provide additional statistics for passed and failed
-	assertions (checks) as well as a sum thereof.
+	assertions (checks) as well as a sum thereof. The message and details explaining the status, as well as the
+	captured output streams are provided by :class:`TestcaseOutputMixin`.
 	"""
 
 	_status:               TestcaseStatus
@@ -670,6 +800,9 @@ class Testcase(Base):
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
@@ -686,26 +819,41 @@ class Testcase(Base):
 		expectedErrorCount: int = 0,
 		expectedFatalCount: int = 0,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable["Testsuite"] = None
+		message: Nullable[str] = None,
+		details: Nullable[str] = None,
+		standardOutput: Nullable[str] = None,
+		standardError: Nullable[str] = None,
+		*,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of a test case.
 
 		:param name:                 Name of the test entity.
-		:param startTime:            Time when the test entity was started.
-		:param setupDuration:        Duration it took to set up the entity.
-		:param testDuration:         Duration of the entity's test run.
-		:param teardownDuration:     Duration it took to tear down the entity.
-		:param totalDuration:        Total duration of the entity's execution (setup + test + teardown)
-		:param status:               Status of the test case.
-		:param assertionCount:       Number of assertions within the test.
-		:param failedAssertionCount: Number of failed assertions within the test.
-		:param passedAssertionCount: Number of passed assertions within the test.
-		:param warningCount:         Count of encountered warnings.
-		:param errorCount:           Count of encountered errors.
-		:param fatalCount:           Count of encountered fatal errors.
-		:param keyValuePairs:        Mapping of key-value pairs to initialize the test case.
-		:param parent:               Reference to the parent test suite.
+		:param title:                Optional, short label of the test case, written for a reader.
+		:param summary:              Optional, summary of the test case.
+		:param description:          Optional, description of the test case.
+		:param startTime:            Optional, time when the test entity was started.
+		:param setupDuration:        Optional, duration it took to set up the entity.
+		:param testDuration:         Optional, duration of the entity's test run.
+		:param teardownDuration:     Optional, duration it took to tear down the entity.
+		:param totalDuration:        Optional, total duration of the entity's execution (setup + test + teardown)
+		:param status:               Optional, status of the test case.
+		:param assertionCount:       Optional, number of assertions within the test.
+		:param failedAssertionCount: Optional, number of failed assertions within the test.
+		:param passedAssertionCount: Optional, number of passed assertions within the test.
+		:param warningCount:         Optional, count of encountered warnings.
+		:param errorCount:           Optional, count of encountered errors.
+		:param fatalCount:           Optional, count of encountered fatal errors.
+		:param expectedWarningCount: Optional, count of expected warnings.
+		:param expectedErrorCount:   Optional, count of expected errors.
+		:param expectedFatalCount:   Optional, count of expected fatal errors.
+		:param keyValuePairs:        Optional, mapping of key-value pairs to initialize the test case.
+		:param message:              Optional, message explaining the test case's status.
+		:param details:              Optional, details explaining the test case's status (e.g. a traceback).
+		:param standardOutput:       Optional, captured standard output of the test case.
+		:param standardError:        Optional, captured standard error of the test case.
+		:param parent:               Optional, reference to the parent test suite.
 		:raises TypeError:           If parameter 'parent' is not a Testsuite.
 		:raises ValueError:          If parameter 'assertionCount' is not consistent.
 		"""
@@ -720,6 +868,7 @@ class Testcase(Base):
 
 		super().__init__(
 			name,
+			title, summary, description,
 			startTime,
 			setupDuration, testDuration, teardownDuration, totalDuration,
 			warningCount, errorCount, fatalCount,
@@ -727,6 +876,7 @@ class Testcase(Base):
 			keyValuePairs,
 			parent=parent
 		)
+		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
 		if not isinstance(status, TestcaseStatus):
 			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
@@ -735,20 +885,15 @@ class Testcase(Base):
 
 		self._status = status
 
-		if assertionCount is not None and not isinstance(assertionCount, int):
-			ex = TypeError(f"Parameter 'assertionCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
-			raise ex
-
-		if failedAssertionCount is not None and not isinstance(failedAssertionCount, int):
-			ex = TypeError(f"Parameter 'failedAssertionCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(failedAssertionCount)}'.")
-			raise ex
-
-		if passedAssertionCount is not None and not isinstance(passedAssertionCount, int):
-			ex = TypeError(f"Parameter 'passedAssertionCount' is not of type 'int'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(passedAssertionCount)}'.")
-			raise ex
+		for parameterName, value in (
+			("assertionCount", assertionCount),
+			("failedAssertionCount", failedAssertionCount),
+			("passedAssertionCount", passedAssertionCount)
+		):
+			if value is not None and not isinstance(value, int):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'int'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
 
 		self._assertionCount = assertionCount
 		if assertionCount is not None:
@@ -819,21 +964,29 @@ class Testcase(Base):
 		"""
 		return self._passedAssertionCount
 
-	def Copy(self) -> "Testcase":
+	def Copy(self) -> Testcase:
 		return self.__class__(
 			self._name,
+			self._title, self._summary, self._description,
 			self._startTime,
 			self._setupDuration,
 			self._testDuration,
 			self._teardownDuration,
 			self._totalDuration,
 			self._status,
-			self._warningCount,
-			self._errorCount,
-			self._fatalCount,
-			self._expectedWarningCount,
-			self._expectedErrorCount,
-			self._expectedFatalCount,
+			self._assertionCount,
+			self._failedAssertionCount,
+			self._passedAssertionCount,
+			warningCount=self._warningCount,
+			errorCount=self._errorCount,
+			fatalCount=self._fatalCount,
+			expectedWarningCount=self._expectedWarningCount,
+			expectedErrorCount=self._expectedErrorCount,
+			expectedFatalCount=self._expectedFatalCount,
+			message=self._message,
+			details=self._details,
+			standardOutput=self._standardOutput,
+			standardError=self._standardError
 		)
 		# TODO: copy key-value-pairs?
 
@@ -875,11 +1028,21 @@ class Testcase(Base):
 
 		:returns: Human-readable summary of a test case object.
 		"""
+		def formatDuration(duration: Nullable[timedelta]) -> str:
+			"""
+			Nested function formatting a duration in seconds.
+
+			:param duration: Duration to format.
+			:returns:        Duration in seconds with three decimal places, or ``None``.
+			"""
+			return "None" if duration is None else f"{duration.total_seconds():.3f}"
+
 		return (
 			f"<Testcase {self._name}: {self._status.name} -"
 			f" assert/pass/fail:{self._assertionCount}/{self._passedAssertionCount}/{self._failedAssertionCount} -"
 			f" warn/error/fatal:{self._warningCount}/{self._errorCount}/{self._fatalCount} -"
-			f" setup/test/teardown:{self._setupDuration:.3f}/{self._testDuration:.3f}/{self._teardownDuration:.3f}>"
+			f" setup/test/teardown:{formatDuration(self._setupDuration)}/{formatDuration(self._testDuration)}/"
+			f"{formatDuration(self._teardownDuration)}>"
 		)
 
 
@@ -909,6 +1072,9 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		kind: TestsuiteKind = TestsuiteKind.Logical,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
@@ -921,30 +1087,34 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: Nullable["Testsuite"] = None
+		*,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		"""
 		Initializes the based-class fields of a test suite or test summary.
 
-		:param name:               Name of the test entity.
-		:param kind:               Kind of the test entity.
-		:param startTime:          Time when the test entity was started.
-		:param setupDuration:      Duration it took to set up the entity.
-		:param testDuration:       Duration of all tests listed in the test entity.
-		:param teardownDuration:   Duration it took to tear down the entity.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
-		:param status:             Overall status of the test entity.
-		:param warningCount:       Count of encountered warnings incl. warnings from sub-elements.
-		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
-		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
-		:param testsuites:         List of test suites to initialize the test entity with.
-		:param keyValuePairs:      Mapping of key-value pairs to initialize the test entity with.
-		:param parent:             Reference to the parent test entity.
-		:raises TypeError:         If parameter 'parent' is not a TestsuiteBase.
-		:raises TypeError:         If parameter 'testsuites' is not iterable.
-		:raises TypeError:         If element in parameter 'testsuites' is not a Testsuite.
-		:raises AlreadyInHierarchyException: If a test suite in parameter 'testsuites' is already part of a test entity hierarchy.
-		:raises DuplicateTestsuiteException: If a test suite in parameter 'testsuites' is already listed (by name) in the list of test suites.
+		:param name:                     Name of the test entity.
+		:param title:                    Optional, short label of the test entity, written for a reader.
+		:param summary:                  Optional, summary of the test entity.
+		:param description:              Optional, description of the test entity.
+		:param kind:                     Optional, kind of the test entity.
+		:param startTime:                Optional, time when the test entity was started.
+		:param setupDuration:            Optional, duration it took to set up the entity.
+		:param testDuration:             Optional, duration of all tests listed in the test entity.
+		:param teardownDuration:         Optional, duration it took to tear down the entity.
+		:param totalDuration:            Optional, total duration of the entity's execution (setup + test + teardown)
+		:param status:                   Optional, overall status of the test entity.
+		:param warningCount:             Optional, count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:               Optional, count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:               Optional, count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:               Optional, list of test suites to initialize the test entity with.
+		:param keyValuePairs:            Optional, mapping of key-value pairs to initialize the test entity with.
+		:param parent:                   Optional, reference to the parent test entity.
+		:raises TypeError:               If parameter 'parent' is not a TestsuiteBase.
+		:raises TypeError:               If parameter 'testsuites' is not iterable.
+		:raises TypeError:               If element in parameter 'testsuites' is not a Testsuite.
+		:raises AlreadyInHierarchyError: If a test suite in parameter 'testsuites' is already part of a test entity hierarchy.
+		:raises DuplicateTestsuiteError: If a test suite in parameter 'testsuites' is already listed (by name) in the list of test suites.
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
@@ -956,6 +1126,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 
 		super().__init__(
 			name,
+			title, summary, description,
 			startTime,
 			setupDuration,
 			testDuration,
@@ -986,15 +1157,14 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 					raise ex
 
 				if testsuite._parent is not None:
-					raise AlreadyInHierarchyException(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 				if testsuite._name in self._testsuites:
-					raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+					raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
 
-		self._status = TestsuiteStatus.Unknown
 		self._tests =        0
 		self._inconsistent = 0
 		self._excluded =     0
@@ -1233,11 +1403,11 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		Add a test suite to the list of test suites.
 
-		:param testsuite:   The test suite to add.
-		:raises ValueError: If parameter 'testsuite' is None.
-		:raises TypeError:  If parameter 'testsuite' is not a Testsuite.
-		:raises AlreadyInHierarchyException: If parameter 'testsuite' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If parameter 'testsuite' is already listed (by name) in the list of test suites.
+		:param testsuite:                The test suite to add.
+		:raises ValueError:              If parameter 'testsuite' is None.
+		:raises TypeError:               If parameter 'testsuite' is not a Testsuite.
+		:raises AlreadyInHierarchyError: If parameter 'testsuite' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If parameter 'testsuite' is already listed (by name) in the list of test suites.
 		"""
 		if testsuite is None:
 			raise ValueError("Parameter 'testsuite' is None.")
@@ -1247,10 +1417,10 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 			raise ex
 
 		if testsuite._parent is not None:
-			raise AlreadyInHierarchyException(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
+			raise AlreadyInHierarchyError(f"Testsuite '{testsuite._name}' is already part of a testsuite hierarchy.")
 
 		if testsuite._name in self._testsuites:
-			raise DuplicateTestsuiteException(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
+			raise DuplicateTestsuiteError(f"Testsuite already contains a testsuite with same name '{testsuite._name}'.")
 
 		testsuite._parent = self
 		self._testsuites[testsuite._name] = testsuite
@@ -1313,12 +1483,15 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 	hierarchy of test entities. The root of the hierarchy is a test summary.
 	"""
 
-	_testcases: Dict[str, "Testcase"]
+	_testcases: Dict[str, Testcase]
 	_hostname:  Nullable[str]
 
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		kind: TestsuiteKind = TestsuiteKind.Logical,
 		hostname: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
@@ -1331,36 +1504,42 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		errorCount: int = 0,
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
-		testcases: Nullable[Iterable["Testcase"]] = None,
+		testcases: Nullable[Iterable[Testcase]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		*,
 		parent: Nullable[TestsuiteType] = None
 	) -> None:
 		"""
 		Initializes the fields of a test suite.
 
-		:param name:               Name of the test suite.
-		:param kind:               Kind of the test suite.
-		:param hostname:           Name of the host the test suite was executed on, or ``None`` if it wasn't recorded.
-		:param startTime:          Time when the test suite was started.
-		:param setupDuration:      Duration it took to set up the test suite.
-		:param testDuration:       Duration of all tests listed in the test suite.
-		:param teardownDuration:   Duration it took to tear down the test suite.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
-		:param status:             Overall status of the test suite.
-		:param warningCount:       Count of encountered warnings incl. warnings from sub-elements.
-		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
-		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
-		:param testsuites:         List of test suites to initialize the test suite with.
-		:param testcases:          List of test cases to initialize the test suite with.
-		:param keyValuePairs:      Mapping of key-value pairs to initialize the test suite with.
-		:param parent:             Reference to the parent test entity.
-		:raises TypeError:         If parameter 'testcases' is not iterable.
-		:raises TypeError:         If element in parameter 'testcases' is not a Testcase.
-		:raises AlreadyInHierarchyException: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
+		:param name:                     Name of the test suite.
+		:param title:                    Optional, short label of the test suite, written for a reader.
+		:param summary:                  Optional, summary of the test suite.
+		:param description:              Optional, description of the test suite.
+		:param kind:                     Optional, kind of the test suite.
+		:param hostname:                 Optional, name of the host the test suite was executed on, or ``None`` if it wasn't
+		                                 recorded.
+		:param startTime:                Optional, time when the test suite was started.
+		:param setupDuration:            Optional, duration it took to set up the test suite.
+		:param testDuration:             Optional, duration of all tests listed in the test suite.
+		:param teardownDuration:         Optional, duration it took to tear down the test suite.
+		:param totalDuration:            Optional, total duration of the entity's execution (setup + test + teardown)
+		:param status:                   Optional, overall status of the test suite.
+		:param warningCount:             Optional, count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:               Optional, count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:               Optional, count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:               Optional, list of test suites to initialize the test suite with.
+		:param testcases:                Optional, list of test cases to initialize the test suite with.
+		:param keyValuePairs:            Optional, mapping of key-value pairs to initialize the test suite with.
+		:param parent:                   Optional, reference to the parent test entity.
+		:raises TypeError:               If parameter 'testcases' is not iterable.
+		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
+		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
 		"""
 		super().__init__(
 			name,
+			title, summary, description,
 			kind,
 			startTime,
 			setupDuration,
@@ -1393,16 +1572,16 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 					raise ex
 
 				if testcase._parent is not None:
-					raise AlreadyInHierarchyException(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInHierarchyError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 				if testcase._name in self._testcases:
-					raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
+					raise DuplicateTestcaseError(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
 
 				testcase._parent = self
 				self._testcases[testcase._name] = testcase
 
 	@readonly
-	def Testcases(self) -> Dict[str, "Testcase"]:
+	def Testcases(self) -> Dict[str, Testcase]:
 		"""
 		Read-only property to access a reference to the internal dictionary of test cases.
 
@@ -1437,9 +1616,10 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		"""
 		return self._hostname
 
-	def Copy(self) -> "Testsuite":
+	def Copy(self) -> Testsuite:
 		return self.__class__(
 			self._name,
+			self._title, self._summary, self._description,
 			self._kind,
 			self._hostname,
 			self._startTime,
@@ -1454,7 +1634,12 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		)
 
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
-		tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, expectedWarningCount, expectedErrorCount, expectedFatalCount, totalDuration = super().Aggregate()
+		(
+			tests, inconsistent, excluded, skipped, errored, weak, failed, passed,
+			warningCount, errorCount, fatalCount,
+			expectedWarningCount, expectedErrorCount, expectedFatalCount,
+			totalDuration
+		) = super().Aggregate(strict)
 
 		for testcase in self._testcases.values():
 			wc, ec, fc, ewc, eec, efc, td = testcase.Aggregate(strict)
@@ -1473,7 +1658,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 			status = testcase._status
 			if status is TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+				raise UnittestError(f"Found testcase '{testcase._name}' with state 'Unknown'.")
 			elif TestcaseStatus.Inconsistent in status:
 				inconsistent += 1
 			elif status is TestcaseStatus.Excluded:
@@ -1488,10 +1673,14 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 				passed += 1
 			elif status is TestcaseStatus.Failed:
 				failed += 1
+			elif status is TestcaseStatus.ExpectedFailed:
+				passed += 1
+			elif status is TestcaseStatus.UnexpectedPassed:
+				failed += 1
 			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-				raise UnittestException(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+				raise UnittestError(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
 			else:
-				raise UnittestException(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
+				raise UnittestError(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
 		self._tests = tests
 		self._inconsistent = inconsistent
@@ -1528,15 +1717,15 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 
 		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, expectedWarningCount, expectedErrorCount, expectedFatalCount, totalDuration
 
-	def AddTestcase(self, testcase: "Testcase") -> None:
+	def AddTestcase(self, testcase: Testcase) -> None:
 		"""
 		Add a test case to the list of test cases.
 
-		:param testcase:    The test case to add.
-		:raises ValueError: If parameter 'testcase' is None.
-		:raises TypeError:  If parameter 'testcase' is not a Testcase.
-		:raises AlreadyInHierarchyException: If parameter 'testcase' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseException:  If parameter 'testcase' is already listed (by name) in the list of test cases.
+		:param testcase:                 The test case to add.
+		:raises ValueError:              If parameter 'testcase' is None.
+		:raises TypeError:               If parameter 'testcase' is not a Testcase.
+		:raises AlreadyInHierarchyError: If parameter 'testcase' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If parameter 'testcase' is already listed (by name) in the list of test cases.
 		"""
 		if testcase is None:
 			raise ValueError("Parameter 'testcase' is None.")
@@ -1549,12 +1738,12 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 		if testcase._name in self._testcases:
-			raise DuplicateTestcaseException(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
+			raise DuplicateTestcaseError(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
 
 		testcase._parent = self
 		self._testcases[testcase._name] = testcase
 
-	def AddTestcases(self, testcases: Iterable["Testcase"]) -> None:
+	def AddTestcases(self, testcases: Iterable[Testcase]) -> None:
 		"""
 		Add a list of test cases to the list of test cases.
 
@@ -1611,6 +1800,9 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 	def __init__(
 		self,
 		name: str,
+		title: Nullable[str] = None,
+		summary: Nullable[str] = None,
+		description: Nullable[str] = None,
 		startTime: Nullable[datetime] = None,
 		setupDuration: Nullable[timedelta] = None,
 		testDuration: Nullable[timedelta] = None,
@@ -1622,27 +1814,32 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		fatalCount: int = 0,
 		testsuites: Nullable[Iterable[TestsuiteType]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		*,
 		parent: Nullable[TestsuiteType] = None
 	) -> None:
 		"""
 		Initializes the fields of a test summary.
 
 		:param name:               Name of the test summary.
-		:param startTime:          Time when the test summary was started.
-		:param setupDuration:      Duration it took to set up the test summary.
-		:param testDuration:       Duration of all tests listed in the test summary.
-		:param teardownDuration:   Duration it took to tear down the test summary.
-		:param totalDuration:      Total duration of the entity's execution (setup + test + teardown)
-		:param status:             Overall status of the test summary.
-		:param warningCount:       Count of encountered warnings incl. warnings from sub-elements.
-		:param errorCount:         Count of encountered errors incl. errors from sub-elements.
-		:param fatalCount:         Count of encountered fatal errors incl. fatal errors from sub-elements.
-		:param testsuites:         List of test suites to initialize the test summary with.
-		:param keyValuePairs:      Mapping of key-value pairs to initialize the test summary with.
-		:param parent:             Reference to the parent test summary.
+		:param title:              Optional, short label of the test summary, written for a reader.
+		:param summary:            Optional, summary of the test summary.
+		:param description:        Optional, description of the test summary.
+		:param startTime:          Optional, time when the test summary was started.
+		:param setupDuration:      Optional, duration it took to set up the test summary.
+		:param testDuration:       Optional, duration of all tests listed in the test summary.
+		:param teardownDuration:   Optional, duration it took to tear down the test summary.
+		:param totalDuration:      Optional, total duration of the entity's execution (setup + test + teardown)
+		:param status:             Optional, overall status of the test summary.
+		:param warningCount:       Optional, count of encountered warnings incl. warnings from sub-elements.
+		:param errorCount:         Optional, count of encountered errors incl. errors from sub-elements.
+		:param fatalCount:         Optional, count of encountered fatal errors incl. fatal errors from sub-elements.
+		:param testsuites:         Optional, list of test suites to initialize the test summary with.
+		:param keyValuePairs:      Optional, mapping of key-value pairs to initialize the test summary with.
+		:param parent:             Optional, reference to the parent test summary.
 		"""
 		super().__init__(
 			name,
+			title, summary, description,
 			TestsuiteKind.Root,
 			startTime, setupDuration, testDuration, teardownDuration, totalDuration,
 			status,
@@ -1690,7 +1887,12 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 		else:
 			self._status = TestsuiteStatus.Unknown
 
-		return tests, inconsistent, excluded, skipped, errored, weak, failed, passed, warningCount, errorCount, fatalCount, totalDuration
+		return (
+			tests, inconsistent, excluded, skipped, errored, weak, failed, passed,
+			warningCount, errorCount, fatalCount,
+			expectedWarningCount, expectedErrorCount, expectedFatalCount,
+			totalDuration
+		)
 
 	def Iterate(self, scheme: IterationScheme = IterationScheme.Default) -> Generator[Union[TestsuiteType, Testcase], None, None]:
 		if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites | IterationScheme.PreOrder in scheme:
@@ -1805,6 +2007,21 @@ class Merged(metaclass=ExtendedType, mixin=True):
 		else:
 			return self._startTime
 
+	def _MergeTexts(self, other: Base) -> None:
+		"""
+		Take over the title, summary and description of an entity being merged in, where this entity has none.
+
+		:param other: The entity being merged in.
+		"""
+		if self._title is None:
+			self._title = other._title
+
+		if self._summary is None:
+			self._summary = other._summary
+
+		if self._description is None:
+			self._description = other._description
+
 	@readonly
 	def MergedCount(self) -> int:
 		"""
@@ -1834,24 +2051,37 @@ class Combined(metaclass=ExtendedType, mixin=True):
 
 @export
 class MergedTestcase(Testcase, Merged):
-	_mergedTestcases: List[Testcase]
+	"""
+	A test case merged from the same test case found in multiple test reports.
+
+	The message, details and captured output streams (see :class:`TestcaseOutputMixin`) as well as the title, summary
+	and description are taken from the first merged test case that has them.
+	"""
+
+	_mergedTestcases: List[Testcase]  #: List of test cases merged into this test case.
 
 	def __init__(
 		self,
 		testcase: Testcase,
-		parent: Nullable["Testsuite"] = None
+		*,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		if testcase is None:
 			raise ValueError(f"Parameter 'testcase' is None.")
 
 		super().__init__(
 			testcase._name,
+			testcase._title, testcase._summary, testcase._description,
 			testcase._startTime,
 			testcase._setupDuration, testcase._testDuration, testcase._teardownDuration, testcase._totalDuration,
 			TestcaseStatus.Unknown,
 			testcase._assertionCount, testcase._failedAssertionCount, testcase._passedAssertionCount,
 			testcase._warningCount, testcase._errorCount, testcase._fatalCount,
 			testcase._expectedWarningCount, testcase._expectedErrorCount, testcase._expectedFatalCount,
+			message=testcase._message,
+			details=testcase._details,
+			standardOutput=testcase._standardOutput,
+			standardError=testcase._standardError,
 			parent=parent
 		)
 		Merged.__init__(self)
@@ -1921,6 +2151,14 @@ class MergedTestcase(Testcase, Merged):
 		return warningCount, errorCount, fatalCount, self._expectedWarningCount, self._expectedErrorCount, self._expectedFatalCount, totalDuration
 
 	def Merge(self, tc: Testcase) -> None:
+		"""
+		Merge another occurrence of this test case into this merged test case.
+
+		Warning, error and fatal counts are summed up. The message, details, captured output streams, title, summary and
+		description are kept from the first merged test case that has them.
+
+		:param tc: The test case to merge.
+		"""
 		self._mergedCount += 1
 
 		self._mergedTestcases.append(tc)
@@ -1929,9 +2167,24 @@ class MergedTestcase(Testcase, Merged):
 		self._errorCount += tc._errorCount
 		self._fatalCount += tc._fatalCount
 
+		if self._message is None:
+			self._message = tc._message
+
+		if self._details is None:
+			self._details = tc._details
+
+		if self._standardOutput is None:
+			self._standardOutput = tc._standardOutput
+
+		if self._standardError is None:
+			self._standardError = tc._standardError
+
+		self._MergeTexts(tc)
+
 	def ToTestcase(self) -> Testcase:
 		return Testcase(
 			self._name,
+			self._title, self._summary, self._description,
 			self._startTime,
 			self._setupDuration,
 			self._testDuration,
@@ -1943,7 +2196,11 @@ class MergedTestcase(Testcase, Merged):
 			self._passedAssertionCount,
 			self._warningCount,
 			self._errorCount,
-			self._fatalCount
+			self._fatalCount,
+			message=self._message,
+			details=self._details,
+			standardOutput=self._standardOutput,
+			standardError=self._standardError
 		)
 
 
@@ -1954,13 +2211,15 @@ class MergedTestsuite(Testsuite, Merged):
 		testsuite: Testsuite,
 		addTestsuites: bool = False,
 		addTestcases: bool = False,
-		parent: Nullable["Testsuite"] = None
+		*,
+		parent: Nullable[Testsuite] = None
 	) -> None:
 		if testsuite is None:
 			raise ValueError(f"Parameter 'testsuite' is None.")
 
 		super().__init__(
 			testsuite._name,
+			testsuite._title, testsuite._summary, testsuite._description,
 			testsuite._kind,
 			testsuite._hostname,
 			testsuite._startTime,
@@ -2002,6 +2261,7 @@ class MergedTestsuite(Testsuite, Merged):
 		self._mergedCount += 1
 		self._hostname = self._MergeHostname(testsuite._hostname)
 		self._startTime = self._MergeStartTime(testsuite._startTime)
+		self._MergeTexts(testsuite)
 
 		for ts in testsuite._testsuites.values():
 			if ts._name in self._testsuites:
@@ -2020,6 +2280,7 @@ class MergedTestsuite(Testsuite, Merged):
 	def ToTestsuite(self) -> Testsuite:
 		testsuite = Testsuite(
 			self._name,
+			self._title, self._summary, self._description,
 			self._kind,
 			self._hostname,
 			self._startTime,
@@ -2065,6 +2326,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 		self._mergedCount += 1
 		self._mergedFiles[testsuiteSummary._name] = testsuiteSummary
 		self._startTime = self._MergeStartTime(testsuiteSummary._startTime)
+		self._MergeTexts(testsuiteSummary)
 
 		for testsuite in testsuiteSummary._testsuites.values():
 			if testsuite._name in self._testsuites:
@@ -2076,6 +2338,7 @@ class MergedTestsuiteSummary(TestsuiteSummary, Merged):
 	def ToTestsuiteSummary(self) -> TestsuiteSummary:
 		testsuiteSummary = TestsuiteSummary(
 			self._name,
+			self._title, self._summary, self._description,
 			self._startTime,
 			self._setupDuration,
 			self._testDuration,
