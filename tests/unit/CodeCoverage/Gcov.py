@@ -421,6 +421,19 @@ class Parsing(Testcase):
 		self.assertIsInstance(dataFile.GCCVersion, SemanticVersion)
 		self.assertEqual([Path("Main.cpp"), Path("Containers/Stack.hpp")], list(dataFile.Files))
 
+	def test_Record(self) -> None:
+		"""Each class method 'Parse' checks the JSON object it is given."""
+		for recordClass in (DataFile, File, gcov_Function, Line):
+			with self.subTest(recordClass=recordClass.__name__):
+				with self.assertRaises(ValueError) as context:
+					_ = recordClass.Parse(None)
+				self.assertEqual("Parameter 'record' is None.", str(context.exception))
+
+				with self.assertRaises(TypeError) as context:
+					_ = recordClass.Parse("x")
+				self.assertEqual("Parameter 'record' is not of type 'dict'.", str(context.exception))
+				self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
 
 class Conversion(Testcase):
 	"""The conversion to the common model: files, lines with branches, source files and functions."""

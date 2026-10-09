@@ -187,6 +187,19 @@ class Parsing(Testcase):
 		self.assertEqual((6, 5, [2], []),
 		                 (condition.Count, condition.Covered, condition.NotCoveredTrue, condition.NotCoveredFalse))
 
+	def test_Record(self) -> None:
+		"""Each class method 'Parse' checks the JSON object it is given."""
+		for recordClass in (Branch, Call, Condition):
+			with self.subTest(recordClass=recordClass.__name__):
+				with self.assertRaises(ValueError) as context:
+					_ = recordClass.Parse(None)
+				self.assertEqual("Parameter 'record' is None.", str(context.exception))
+
+				with self.assertRaises(TypeError) as context:
+					_ = recordClass.Parse("x")
+				self.assertEqual("Parameter 'record' is not of type 'dict'.", str(context.exception))
+				self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
 
 class Schema(Testcase):
 	"""The JSON Schema of each format version checks the records of a line."""

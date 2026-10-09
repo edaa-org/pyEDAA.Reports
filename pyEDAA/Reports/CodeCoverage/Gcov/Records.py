@@ -172,10 +172,19 @@ class Line(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a line, its branches, calls and conditions from its JSON object.
 
-		:param record: The JSON object of the line.
-		:param parent: Optional, the file the line belongs to. Default: ``None``.
-		:returns:      The line.
+		:param record:      The JSON object of the line.
+		:param parent:      Optional, the file the line belongs to. Default: ``None``.
+		:returns:           The line.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		line = cls(
 			record["line_number"],
 			record["count"],
@@ -475,10 +484,19 @@ class Function(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a function from its JSON object.
 
-		:param record: The JSON object of the function.
-		:param parent: Optional, the file the function belongs to. Default: ``None``.
-		:returns:      The function.
+		:param record:      The JSON object of the function.
+		:param parent:      Optional, the file the function belongs to. Default: ``None``.
+		:returns:           The function.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		return cls(
 			record["name"],
 			record["demangled_name"],

@@ -204,8 +204,17 @@ class File(metaclass=ExtendedType, slots=True):
 		:param record:             The JSON object of the file.
 		:param parent:             Optional, the data file the file belongs to. Default: ``None``.
 		:returns:                  The file.
+		:raises ValueError:        If parameter ``record`` is ``None``.
+		:raises TypeError:         If parameter ``record`` isn't of type :class:`dict`.
 		:raises CodeCoverageError: If the file names a function twice.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		file = cls(Path(record["file"].replace("\\", "/")), parent=parent)
 
 		for function in record["functions"]:
@@ -352,8 +361,17 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		:param record:             The JSON object of the data file: a report's root object.
 		:param parent:             Optional, the report the data file belongs to. Default: ``None``.
 		:returns:                  The data file.
+		:raises ValueError:        If parameter ``record`` is ``None``.
+		:raises TypeError:         If parameter ``record`` isn't of type :class:`dict`.
 		:raises CodeCoverageError: If the data file names a source file twice.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		directory = record.get("current_working_directory")
 		dataFile = cls(
 			Path(record["data_file"].replace("\\", "/")),

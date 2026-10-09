@@ -158,10 +158,19 @@ class Branch(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a branch from its JSON object.
 
-		:param record: The JSON object of the branch.
-		:param parent: Optional, the line the branch belongs to. Default: ``None``.
-		:returns:      The branch.
+		:param record:      The JSON object of the branch.
+		:param parent:      Optional, the line the branch belongs to. Default: ``None``.
+		:returns:           The branch.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		return cls(
 			record["count"],
 			record["throw"],
@@ -318,10 +327,19 @@ class Call(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a call from its JSON object.
 
-		:param record: The JSON object of the call.
-		:param parent: Optional, the line the call belongs to. Default: ``None``.
-		:returns:      The call.
+		:param record:      The JSON object of the call.
+		:param parent:      Optional, the line the call belongs to. Default: ``None``.
+		:returns:           The call.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		return cls(record["source_block_id"], record["destination_block_id"], record["returned"], parent=parent)
 
 	@readonly
@@ -476,10 +494,19 @@ class Condition(metaclass=ExtendedType, slots=True):
 		"""
 		Parse a condition from its JSON object.
 
-		:param record: The JSON object of the condition.
-		:param parent: Optional, the line the condition belongs to. Default: ``None``.
-		:returns:      The condition.
+		:param record:      The JSON object of the condition.
+		:param parent:      Optional, the line the condition belongs to. Default: ``None``.
+		:returns:           The condition.
+		:raises ValueError: If parameter ``record`` is ``None``.
+		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
+		if record is None:
+			raise ValueError(f"Parameter 'record' is None.")
+		elif not isinstance(record, dict):
+			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
+			raise ex
+
 		return cls(
 			record["count"], record["covered"], record["not_covered_true"], record["not_covered_false"], parent=parent
 		)
