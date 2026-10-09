@@ -758,11 +758,15 @@ them.
    covered = sum(1 for statement in statements if statement.Count > 0)
    print(f"Statements: {covered} of {len(statements)}")
 
+The command line reads the report as ``Aldec-UCDB-XML``, without merging the instances.
+
 .. hint::
 
    The reader was transferred from `pyEDAA.UCIS <https://github.com/edaa-org/pyEDAA.UCIS>`__, contributed by Aldec Inc.
-   The option ``--merge-instances`` of its command ``pyedaa-ucis export`` corresponds to the parameter
-   ``mergeInstances`` of :meth:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Document.ToCoverageSummary`.
+   Its command ``pyedaa-ucis export --ucdb ucdb.xml --cobertura cobertura.xml`` corresponds to
+   ``pyedaa-reports coverage --input=Aldec-UCDB-XML:ucdb.xml --output=Cobertura:cobertura.xml``; its option
+   ``--merge-instances`` to the parameter ``mergeInstances`` of
+   :meth:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Document.ToCoverageSummary`.
 
 
 .. _CODECOV/Formats/GoCoverProfile:
@@ -854,8 +858,8 @@ most tools read (see :ref:`References/cli`):
    Lines:    26 of 27 covered (96.3%)
    Writing Cobertura XML report 'coverage.xml' ...
 
-``--input`` names the format and the file: ``Any-Cobertura``, ``CoveragePy-Cobertura``, ``CoveragePy-JSON``,
-``Gcov-JSON``, ``GHDL-JSON``, ``JaCoCo-XML``, ``LCOV`` or ``NVC-Cobertura``, spelled as here
+``--input`` names the format and the file: ``Aldec-UCDB-XML``, ``Any-Cobertura``, ``CoveragePy-Cobertura``,
+``CoveragePy-JSON``, ``Gcov-JSON``, ``GHDL-JSON``, ``JaCoCo-XML``, ``LCOV`` or ``NVC-Cobertura``, spelled as here
 (:class:`~pyEDAA.Reports.CLI.Coverage.InputFormat`). A file without format is read as ``Any-Cobertura``. ``--output``
 names the format ``Cobertura`` (:class:`~pyEDAA.Reports.CLI.Coverage.OutputFormat`, also the default) and the file.
 ``-v`` adds the figures of each file.

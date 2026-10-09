@@ -46,6 +46,7 @@ from pyTooling.MetaClasses                    import ExtendedType
 
 from pyEDAA.Reports.CodeCoverage                                 import CodeCoverageError, CoverageSummary
 from pyEDAA.Reports.CodeCoverage                                 import Document as cc_Document
+from pyEDAA.Reports.CodeCoverage.AldecUCDB                       import Document as AldecUCDBDocument
 from pyEDAA.Reports.CodeCoverage.Cobertura                       import Document as CoberturaDocument
 from pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura   import Document as CoveragePyCoberturaDocument
 from pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura          import Document as NVCCoberturaDocument
@@ -63,6 +64,7 @@ __all__ = ["INPUT_FORMATS"]
 class InputFormat(StringEnum):
 	"""The code coverage formats ``--input`` reads, by their name on the command line."""
 
+	AldecUCDBXML =        "Aldec-UCDB-XML"        #: Aldec's UCDB XML export of Riviera-PRO or Active-HDL (``acdb2xml``).
 	AnyCobertura =        "Any-Cobertura"         #: Cobertura XML of any tool, read leniently.
 	CoveragePyCobertura = "CoveragePy-Cobertura"  #: Cobertura XML as coverage.py writes it.
 	CoveragePyJSON =      "CoveragePy-JSON"       #: coverage.py's JSON report.
@@ -86,6 +88,7 @@ class OutputFormat(StringEnum):
 
 #: The document class reading each input format.
 INPUT_FORMATS: Dict[InputFormat, Type[cc_Document]] = {
+	InputFormat.AldecUCDBXML:        AldecUCDBDocument,
 	InputFormat.AnyCobertura:        CoberturaDocument,
 	InputFormat.CoveragePyCobertura: CoveragePyCoberturaDocument,
 	InputFormat.CoveragePyJSON:      CoveragePyDocument,
