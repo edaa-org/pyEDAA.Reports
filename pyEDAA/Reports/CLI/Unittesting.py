@@ -246,7 +246,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		self.WriteVerbose(f"  Rewriting '__init__' in classnames to actual Python package names")
 
 		def processTestsuite(suite: Testsuite) -> None:
-			testsuites: Tuple[Testsuite, ...] = tuple(ts for ts in suite.Testsuites.values())
+			testsuites: Tuple[Testsuite, ...] = tuple(suite.Testsuites.values())
 			for testsuite in testsuites:                # type: Testsuite
 				if testsuite.Name != "__init__":
 					processTestsuite(testsuite)
