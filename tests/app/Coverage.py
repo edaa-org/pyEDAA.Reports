@@ -92,14 +92,38 @@ class CoverageCommand(ApplicationTestcase):
 		result = self.RunEntrypoint("coverage", timeout=60.0)
 
 		self.assertExitCode(result, 3)
-		self.assertIn("Option '--input=<Format>:<File>' is missing.", result.stdout)
+		self.assertIn("Option '--input=[<Format>:]<File>' is missing.", result.stdout)
 
 	def test_UnsupportedInputFormat(self) -> None:
 		result = self.RunEntrypoint("coverage", "--input=Foo:coverage.xml", timeout=60.0)
 
 		self.assertExitCode(result, 1)
-		self.assertIn("Unsupported code coverage format for input: 'Foo'.", result.stdout)
-		self.assertIn("Supported formats: any-cobertura, coveragepy-cobertura", result.stdout)
+		self.assertIn("Unsupported code coverage format for input: 'Foo:coverage.xml'.", result.stdout)
+		self.assertIn("Supported formats: Any-Cobertura, CoveragePy-Cobertura", result.stdout)
+		self.assertIn("without format: Any-Cobertura.", result.stdout)
+
+	def test_FormatNamesAreCaseSensitive(self) -> None:
+		"""The formats are spelled as the documentation names them."""
+		inputFile = DATA_DIRECTORY / "GCC/Main.gcov.json.gz"
+		result = self.RunEntrypoint("coverage", f"--input=gcov-json:{inputFile}", timeout=60.0)
+
+		self.assertExitCode(result, 1)
+		self.assertIn("Unsupported code coverage format for input", result.stdout)
+
+	def test_DefaultFormats(self) -> None:
+		"""A file without format is read as Cobertura XML of any tool, and written as Cobertura XML."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		outputFile = OUTPUT_DIRECTORY / "default.xml"
+		outputFile.unlink(missing_ok=True)
+
+		result = self.RunEntrypoint(
+			"coverage", f"--input={DATA_DIRECTORY / 'Go-Test/cobertura.xml'}", f"--output={outputFile}", timeout=60.0
+		)
+
+		self.assertExitCode(result)
+		self.assertIn("(Any-Cobertura)", result.stdout)
+		self.assertIn("Lines:    20 of 28 covered (71.4%)", result.stdout)
+		self.assertTrue(outputFile.exists())
 
 	def test_MissingFile(self) -> None:
 		result = self.RunEntrypoint("coverage", f"--input=Gcov-JSON:{OUTPUT_DIRECTORY / 'missing.json'}", timeout=60.0)
@@ -114,4 +138,5 @@ class CoverageCommand(ApplicationTestcase):
 		)
 
 		self.assertNotEqual(0, result.returncode)
-		self.assertIn("Unsupported code coverage format for output: 'LCOV'.", result.stdout)
+		self.assertIn("Unsupported code coverage format for output: 'LCOV:coverage.info'.", result.stdout)
+		self.assertIn("Supported formats: Cobertura; without format: Cobertura.", result.stdout)

@@ -602,9 +602,11 @@ most tools read (see :ref:`References/cli`):
    Lines:    26 of 27 covered (96.3%)
    Writing Cobertura XML report 'coverage.xml' ...
 
-``--input`` names the format - ``Any-Cobertura``, ``CoveragePy-Cobertura``, ``CoveragePy-JSON``, ``Gcov-JSON``,
-``GHDL-JSON`` or ``LCOV`` (case-insensitive) - and the file, ``--output`` the format ``Cobertura`` and the file. ``-v``
-adds the figures of each file.
+``--input`` names the format and the file: ``Any-Cobertura``, ``CoveragePy-Cobertura``, ``CoveragePy-JSON``,
+``Gcov-JSON``, ``GHDL-JSON`` or ``LCOV``, spelled as here (:class:`~pyEDAA.Reports.CLI.Coverage.InputFormat`). A file
+without format is read as ``Any-Cobertura``. ``--output`` names the format ``Cobertura``
+(:class:`~pyEDAA.Reports.CLI.Coverage.OutputFormat`, also the default) and the file. ``-v`` adds the figures of each
+file.
 
 
 .. _CODECOV/Tools:
