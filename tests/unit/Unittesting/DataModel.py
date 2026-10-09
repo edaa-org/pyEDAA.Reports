@@ -28,10 +28,11 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-from unittest import TestCase as ut_TestCase
+from unittest                   import TestCase as ut_TestCase
 
 from pyEDAA.Reports.Unittesting import DuplicateTestsuiteError, DuplicateTestcaseError, TestsuiteStatus
 from pyEDAA.Reports.Unittesting import TestcaseStatus, Testcase, Testsuite, TestsuiteSummary, IterationScheme
+from pyTooling.Testing          import Testcase as py_Testcase
 
 
 class TestcaseInstantiation(ut_TestCase):
@@ -289,6 +290,25 @@ class Aggregate(ut_TestCase):
 		ts = Testsuite("root", testcases=(tc1, tc2))
 
 		ts.Aggregate()
+
+
+class KeyValuePairs(py_Testcase):
+	def test_Testcase(self) -> None:
+		tc = Testcase("tc", keyValuePairs={"key": 1, "ab": "cd"})
+
+		self.assertEqual(2, len(tc))
+		self.assertEqual(1, tc["key"])
+		self.assertEqual("cd", tc["ab"])
+		self.assertDictEqual({"key": 1, "ab": "cd"}, dict(tc))
+
+	def test_Testsuite(self) -> None:
+		ts = Testsuite("ts", keyValuePairs={"key": 1})
+
+		self.assertDictEqual({"key": 1}, dict(ts))
+
+	def test_NotAMapping(self) -> None:
+		with self.assertRaises(TypeError):
+			_ = Testcase("tc", keyValuePairs=[("key", 1)])
 
 
 def CreateTestsuiteStructure(rootIsSummary: bool = True, empty: bool = False) -> Testsuite:

@@ -460,7 +460,7 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
 			raise ex
 
-		self._dict = {} if keyValuePairs is None else {k: v for k, v in keyValuePairs}
+		self._dict = {} if keyValuePairs is None else dict(keyValuePairs)
 
 	# QUESTION: allow Parent as setter?
 	@readonly
