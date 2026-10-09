@@ -173,6 +173,7 @@ class File(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``path`` is ``None``.
 		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`DataFile`.
+		:raises ValueError: If parameter ``parent`` contains a file of the same path already.
 		"""
 		if path is None:
 			raise ValueError(f"Parameter 'path' is None.")
@@ -181,10 +182,13 @@ class File(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
-		if parent is not None and not isinstance(parent, DataFile):
-			ex = TypeError(f"Parameter 'parent' is not of type 'DataFile'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
-			raise ex
+		if parent is not None:
+			if not isinstance(parent, DataFile):
+				ex = TypeError(f"Parameter 'parent' is not of type 'DataFile'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
+			elif path in parent._files:
+				raise ValueError(f"Parameter 'parent' contains file '{path.as_posix()}' already.")
 
 		self._parent =    parent
 		self._path =      path

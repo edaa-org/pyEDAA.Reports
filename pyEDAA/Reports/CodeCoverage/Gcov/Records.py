@@ -362,6 +362,7 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises TypeError:     If parameter ``executionCount`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``executionCount`` is negative.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Gcov.File`.
+		:raises ValueError:    If parameter ``parent`` contains a function of the same name already.
 		"""
 		from pyEDAA.Reports.CodeCoverage.Gcov import File
 
@@ -460,10 +461,13 @@ class Function(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got value '{executionCount}'.")
 			raise ex
 
-		if parent is not None and not isinstance(parent, File):
-			ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
-			raise ex
+		if parent is not None:
+			if not isinstance(parent, File):
+				ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
+			elif name in parent._functions:
+				raise ValueError(f"Parameter 'parent' contains function '{name}' already.")
 
 		self._parent =         parent
 		self._name =           name
