@@ -446,9 +446,10 @@ class Document(cc_Document, Report):
 
 	def _CollectBranches(self) -> dict[Path, dict[tuple[Any, ...], list[int]]]:
 		"""
-		Collect the branch regions of the functions by file, each at the line it starts at, or at the line its macro is
-		expanded at; the counts of a branch region found in several functions - e.g. the instantiations of a template - are
-		summed.
+		Collect the branch regions of the functions by file; a branch region found in several functions is summed.
+
+		A branch region is collected at the line it starts at, or at the line its macro is expanded at. It is found in
+		several functions e.g. in the instantiations of a template.
 
 		:returns:                  By path, the summed true and false counts of each branch region, keyed by the line
 		                           number first.
