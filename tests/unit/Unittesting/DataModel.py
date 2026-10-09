@@ -33,6 +33,7 @@ from unittest                   import TestCase as ut_TestCase
 
 from pyEDAA.Reports.Unittesting import DuplicateTestsuiteError, DuplicateTestcaseError, TestsuiteStatus
 from pyEDAA.Reports.Unittesting import TestcaseStatus, Testcase, Testsuite, TestsuiteSummary, IterationScheme
+from pyEDAA.Reports.Unittesting import MergedTestsuiteSummary
 from pyTooling.Testing          import Testcase as py_Testcase
 
 
@@ -398,6 +399,33 @@ class Aggregation(py_Testcase):
 
 		self.assertEqual(15, len(result))
 		self.assertTupleEqual(ts1.Aggregate(), result)
+
+
+class StatusParameter(py_Testcase):
+	def test_Testsuite(self) -> None:
+		ts = Testsuite("ts", status=TestsuiteStatus.Passed)
+
+		self.assertEqual(TestsuiteStatus.Passed, ts.Status)
+
+	def test_TestsuiteSummary(self) -> None:
+		summary = TestsuiteSummary("summary", status=TestsuiteStatus.Failed)
+
+		self.assertEqual(TestsuiteStatus.Failed, summary.Status)
+
+	def test_MergedTestsuiteSummary_ToTestsuiteSummary(self) -> None:
+		merged = MergedTestsuiteSummary("merged")
+		for name in ("run1", "run2"):
+			summary = TestsuiteSummary(name)
+			ts =      Testsuite("ts", parent=summary)
+			_ =       Testcase("tc", testDuration=timedelta(seconds=1), status=TestcaseStatus.Passed, parent=ts)
+			merged.Merge(summary)
+
+		merged.Aggregate()
+		result = merged.ToTestsuiteSummary()
+
+		self.assertEqual(TestsuiteStatus.Passed, merged.Status)
+		self.assertEqual(TestsuiteStatus.Passed, result.Status)
+		self.assertEqual(TestsuiteStatus.Passed, result.Testsuites["ts"].Status)
 
 
 def CreateTestsuiteStructure(rootIsSummary: bool = True, empty: bool = False) -> Testsuite:

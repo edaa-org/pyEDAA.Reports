@@ -1165,7 +1165,6 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 				testsuite._parent = self
 				self._testsuites[testsuite._name] = testsuite
 
-		self._status = TestsuiteStatus.Unknown
 		self._tests =        0
 		self._inconsistent = 0
 		self._excluded =     0
