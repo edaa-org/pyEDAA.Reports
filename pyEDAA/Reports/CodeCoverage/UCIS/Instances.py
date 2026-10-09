@@ -32,22 +32,27 @@
 The instances of the UCIS XML interchange format, each with its coverage of each kind, and the source files the
 report's statement identifiers name by their ID.
 """
-from __future__                                import annotations
+from __future__                                   import annotations
 
-from pathlib                                   import Path
-from typing                                    import TYPE_CHECKING, Iterable, Mapping, Optional as Nullable, Self
+from pathlib                                      import Path
+from typing                                       import TYPE_CHECKING, Iterable, Mapping, Optional as Nullable, Self
 
-from lxml.etree                                import _Element
-from pyTooling.Common                          import getFullyQualifiedName
-from pyTooling.Decorators                      import export, readonly
-from pyTooling.MetaClasses                     import ExtendedType
+from lxml.etree                                   import _Element
+from pyTooling.Common                             import getFullyQualifiedName
+from pyTooling.Decorators                         import export, readonly
+from pyTooling.MetaClasses                        import ExtendedType
 
-from pyEDAA.Reports.CodeCoverage.UCIS.Blocks   import BlockCoverage
-from pyEDAA.Reports.CodeCoverage.UCIS.Branches import BranchCoverage
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements import Base, StatementID, UserAttribute
+from pyEDAA.Reports.CodeCoverage.UCIS.Assertions  import AssertionCoverage
+from pyEDAA.Reports.CodeCoverage.UCIS.Blocks      import BlockCoverage
+from pyEDAA.Reports.CodeCoverage.UCIS.Branches    import BranchCoverage
+from pyEDAA.Reports.CodeCoverage.UCIS.Conditions  import ConditionCoverage
+from pyEDAA.Reports.CodeCoverage.UCIS.Covergroups import CovergroupCoverage
+from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, StatementID, UserAttribute
+from pyEDAA.Reports.CodeCoverage.UCIS.FSMs        import FSMCoverage
+from pyEDAA.Reports.CodeCoverage.UCIS.Toggles     import ToggleCoverage
 
 if TYPE_CHECKING:
-	from pyEDAA.Reports.CodeCoverage.UCIS        import Report
+	from pyEDAA.Reports.CodeCoverage.UCIS           import Report
 
 # A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
 # body's namespace, where annotations are evaluated, binds the name to the property.
@@ -159,17 +164,22 @@ class InstanceCoverage(Base):
 	An instance names the instance it is instantiated in by that instance's ID.
 	"""
 
-	_parent:           Nullable[Report]      #: The report the instance belongs to.
-	_name:             str                   #: Name of the instance.
-	_key:              str                   #: UCIS key of the instance.
-	_id:               StatementID           #: Where the instance is instantiated.
-	_instanceID:       Nullable[int]         #: ID of the instance.
-	_alias:            Nullable[str]         #: An alias of the instance's name.
-	_moduleName:       Nullable[str]         #: Name of the design unit the instance instantiates.
-	_parentInstanceID: Nullable[int]         #: ID of the instance this one is instantiated in.
-	_designParameters: dict[str, str]        #: The design parameters of the instance, by name.
-	_blockCoverages:   list[BlockCoverage]   #: The statement and block coverage, per metric mode.
-	_branchCoverages:  list[BranchCoverage]  #: The branch coverage, per metric mode.
+	_parent:              Nullable[Report]          #: The report the instance belongs to.
+	_name:                str                       #: Name of the instance.
+	_key:                 str                       #: UCIS key of the instance.
+	_id:                  StatementID               #: Where the instance is instantiated.
+	_instanceID:          Nullable[int]             #: ID of the instance.
+	_alias:               Nullable[str]             #: An alias of the instance's name.
+	_moduleName:          Nullable[str]             #: Name of the design unit the instance instantiates.
+	_parentInstanceID:    Nullable[int]             #: ID of the instance this one is instantiated in.
+	_designParameters:    dict[str, str]            #: The design parameters of the instance, by name.
+	_toggleCoverages:     list[ToggleCoverage]      #: The toggle coverage, per metric mode.
+	_blockCoverages:      list[BlockCoverage]       #: The statement and block coverage, per metric mode.
+	_conditionCoverages:  list[ConditionCoverage]   #: The condition and expression coverage, per metric mode.
+	_branchCoverages:     list[BranchCoverage]      #: The branch coverage, per metric mode.
+	_fsmCoverages:        list[FSMCoverage]         #: The FSM coverage, per metric mode.
+	_assertionCoverages:  list[AssertionCoverage]   #: The assertion coverage, per metric mode.
+	_covergroupCoverages: list[CovergroupCoverage]  #: The covergroup coverage, per metric mode.
 
 	def __init__(
 		self,
@@ -270,17 +280,22 @@ class InstanceCoverage(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
-		self._parent =           parent
-		self._name =             name
-		self._key =              key
-		self._id =               statementID
-		self._instanceID =       instanceID
-		self._alias =            alias
-		self._moduleName =       moduleName
-		self._parentInstanceID = parentInstanceID
-		self._designParameters = {}
-		self._blockCoverages =   []
-		self._branchCoverages =  []
+		self._parent =              parent
+		self._name =                name
+		self._key =                 key
+		self._id =                  statementID
+		self._instanceID =          instanceID
+		self._alias =               alias
+		self._moduleName =          moduleName
+		self._parentInstanceID =    parentInstanceID
+		self._designParameters =    {}
+		self._toggleCoverages =     []
+		self._blockCoverages =      []
+		self._conditionCoverages =  []
+		self._branchCoverages =     []
+		self._fsmCoverages =        []
+		self._assertionCoverages =  []
+		self._covergroupCoverages = []
 
 		if designParameters is not None:
 			if not isinstance(designParameters, Mapping):
@@ -330,11 +345,26 @@ class InstanceCoverage(Base):
 			parent=parent
 		)
 
+		for coverageElement in element.iterfind("{*}toggleCoverage"):
+			ToggleCoverage.Parse(coverageElement, parent=instance)
+
 		for coverageElement in element.iterfind("{*}blockCoverage"):
 			BlockCoverage.Parse(coverageElement, parent=instance)
 
+		for coverageElement in element.iterfind("{*}conditionCoverage"):
+			ConditionCoverage.Parse(coverageElement, parent=instance)
+
 		for coverageElement in element.iterfind("{*}branchCoverage"):
 			BranchCoverage.Parse(coverageElement, parent=instance)
+
+		for coverageElement in element.iterfind("{*}fsmCoverage"):
+			FSMCoverage.Parse(coverageElement, parent=instance)
+
+		for coverageElement in element.iterfind("{*}assertionCoverage"):
+			AssertionCoverage.Parse(coverageElement, parent=instance)
+
+		for coverageElement in element.iterfind("{*}covergroupCoverage"):
+			CovergroupCoverage.Parse(coverageElement, parent=instance)
 
 		return instance
 
@@ -436,3 +466,48 @@ class InstanceCoverage(Base):
 		:returns: The branch coverages, one per metric mode, in the order the report lists them.
 		"""
 		return self._branchCoverages
+
+	@readonly
+	def ToggleCoverages(self) -> list[ToggleCoverage]:
+		"""
+		Read-only property to access the toggle coverage (:attr:`_toggleCoverages`).
+
+		:returns: The toggle coverages, one per metric mode, in the order the report lists them.
+		"""
+		return self._toggleCoverages
+
+	@readonly
+	def ConditionCoverages(self) -> list[ConditionCoverage]:
+		"""
+		Read-only property to access the condition and expression coverage (:attr:`_conditionCoverages`).
+
+		:returns: The condition coverages, one per metric mode, in the order the report lists them.
+		"""
+		return self._conditionCoverages
+
+	@readonly
+	def FSMCoverages(self) -> list[FSMCoverage]:
+		"""
+		Read-only property to access the FSM coverage (:attr:`_fsmCoverages`).
+
+		:returns: The FSM coverages, one per metric mode, in the order the report lists them.
+		"""
+		return self._fsmCoverages
+
+	@readonly
+	def AssertionCoverages(self) -> list[AssertionCoverage]:
+		"""
+		Read-only property to access the assertion coverage (:attr:`_assertionCoverages`).
+
+		:returns: The assertion coverages, one per metric mode, in the order the report lists them.
+		"""
+		return self._assertionCoverages
+
+	@readonly
+	def CovergroupCoverages(self) -> list[CovergroupCoverage]:
+		"""
+		Read-only property to access the covergroup coverage (:attr:`_covergroupCoverages`).
+
+		:returns: The covergroup coverages, one per metric mode, in the order the report lists them.
+		"""
+		return self._covergroupCoverages
