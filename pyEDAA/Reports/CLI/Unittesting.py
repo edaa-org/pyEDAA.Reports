@@ -128,6 +128,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
 					documentClass = Document
+				elif dialect == "testlogger":
+					from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document
+
+					documentClass = Document
 				else:
 					raise UnittestError(f"Unsupported JUnit XML dialect for input: '{dataFormat}-{dialect}'")
 
@@ -184,6 +188,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
 					self._mergeJUnit(testsuiteSummary, Document, foundFiles, "pyTest-JUnit")
+				elif dialect == "testlogger":
+					from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document
+
+					self._mergeJUnit(testsuiteSummary, Document, foundFiles, "TestLogger-JUnit")
 				else:
 					self.WriteError(f"Unsupported JUnit XML dialect for merging: '{dataFormat}-{dialect}'")
 			else:
@@ -357,6 +365,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 					from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document, UnittestError
 
 					self._outputJUnit(testsuiteSummary, Document, outputFile, "pyTest-JUnit")
+				elif dialect == "testlogger":
+					from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document, UnittestError
+
+					self._outputJUnit(testsuiteSummary, Document, outputFile, "TestLogger-JUnit")
 				else:
 					self.WriteError(f"Unsupported JUnit XML dialect for writing: '{format}-{dialect}'")
 			else:

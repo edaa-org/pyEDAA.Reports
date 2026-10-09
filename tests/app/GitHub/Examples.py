@@ -55,6 +55,7 @@ from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport     import Document as GoJUn
 from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit   import Document as GTestDocument
 from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit      import Document as NextestDocument
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit       import Document as PyTestDocument
+from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit   import Document as JunitXmlTestLoggerDocument
 from pyTooling.Testing                                  import Testcase
 
 
@@ -297,13 +298,75 @@ class CppCatch2(TestCase):
 
 class CSharpXUnit(Testcase):
 	def test_JUnit(self) -> None:
-		"""Known gap: no dialect reads the report of the .NET test logger ``JunitXml.TestLogger`` yet."""
+		"""Counts and statuses as ``dotnet test`` reports them: ``Failed: 3, Passed: 7, Skipped: 1, Total: 11``."""
 		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml")
+		doc = JunitXmlTestLoggerDocument(junitExampleFile, analyzeAndConvert=True)
 
-		for documentClass in (AnyJUnitDocument, JUnit4Document, CTestDocument, GTestDocument, PyTestDocument):
-			with self.subTest(dialect=documentClass.__module__):
-				with self.assertRaises(UnittestError):
-					documentClass(junitExampleFile, analyzeAndConvert=True)
+		self.assertEqual(1, doc.TestsuiteCount)
+		self.assertEqual(11, doc.TestcaseCount)
+		self.assertEqual(7, doc.Passed)
+		self.assertEqual(3, doc.Failed)
+		self.assertEqual(1, doc.Skipped)
+		self.assertEqual(0, doc.Errored)
+
+		statuses = {
+			(testclass.Name, testcase.Name): testcase.Status
+			for testclass in doc.Testsuites["MyLibrary.Tests.dll"].Testclasses.values()
+			for testcase in testclass.Testcases.values()
+		}
+		self.assertEqual(
+			{
+				("MyLibrary.Tests.CalculatorTests", "Add"):                              TestcaseStatus.Passed,
+				("MyLibrary.Tests.CalculatorTests", "Absolute(value: -4, expected: 5)"): TestcaseStatus.Failed,
+				("MyLibrary.Tests.CalculatorTests", "Absolute(value: 3, expected: 3)"):  TestcaseStatus.Passed,
+				("MyLibrary.Tests.CalculatorTests", "Absolute(value: -3, expected: 3)"): TestcaseStatus.Passed,
+				("MyLibrary.Tests.CalculatorTests", "SumOfPositives"):                   TestcaseStatus.Passed,
+				("MyLibrary.Tests.CalculatorTests", "DivideByZero"):                     TestcaseStatus.Failed,
+				("MyLibrary.Tests.CalculatorTests", "Multiply"):                         TestcaseStatus.Skipped,
+				("MyLibrary.Tests.CalculatorTests", "IsEven"):                           TestcaseStatus.Failed,
+				("MyLibrary.Tests.CounterTests",    "Increment"):                        TestcaseStatus.Passed,
+				("MyLibrary.Tests.CounterTests",    "IncrementAsync"):                   TestcaseStatus.Passed,
+				("MyLibrary.Tests.CounterTests",    "Decrement"):                        TestcaseStatus.Passed,
+			},
+			statuses
+		)
+
+	def test_ReadWrite(self) -> None:
+		junitExampleFile = Path("tests/data/JUnit/pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml")
+		doc = JunitXmlTestLoggerDocument(junitExampleFile, analyzeAndConvert=True)
+
+		junitOutputFile = Path("tests/output/JUnit/pyEDAA.Reports/CSharp-xUnit/MyLibrary.Tests.junit.xml")
+		junitOutputFile.parent.mkdir(parents=True, exist_ok=True)
+		doc.Write(junitOutputFile, regenerate=True, overwrite=True)
+
+		sameDoc = JunitXmlTestLoggerDocument(junitOutputFile, analyzeAndConvert=True)
+
+		self.assertEqual(doc.TestsuiteCount, sameDoc.TestsuiteCount)
+		self.assertEqual(doc.TestcaseCount, sameDoc.TestcaseCount)
+		self.assertEqual(doc.Errored, sameDoc.Errored)
+		self.assertEqual(doc.Skipped, sameDoc.Skipped)
+		self.assertEqual(doc.Failed, sameDoc.Failed)
+		self.assertEqual(doc.Passed, sameDoc.Passed)
+		self.assertEqual(doc.Tests, sameDoc.Tests)
+
+		for tsName, ts, sameTS in zipdicts(doc._testsuites, sameDoc._testsuites):
+			self.assertEqual(ts.Name, sameTS.Name)
+			self.assertEqual(ts.Hostname, sameTS.Hostname)
+			self.assertEqual(ts.StartTime, sameTS.StartTime)
+			self.assertEqual(ts.Duration, sameTS.Duration)
+			self.assertEqual(ts.TestcaseCount, sameTS.TestcaseCount)
+
+			for tclsName, tcls, sameTCls in zipdicts(ts._testclasses, sameTS._testclasses):
+				self.assertEqual(tcls.Name, sameTCls.Name)
+				self.assertEqual(tcls.TestcaseCount, sameTCls.TestcaseCount)
+
+				for tcName, tc, sameTC in zipdicts(tcls._testcases, sameTCls._testcases):
+					self.assertEqual(tc.Name, sameTC.Name)
+					self.assertEqual(tc.Status, sameTC.Status)
+					self.assertEqual(tc.Duration, sameTC.Duration)
+					self.assertEqual(tc.Message, sameTC.Message)
+					self.assertEqual(tc.Details, sameTC.Details)
+					self.assertEqual(tc.StandardOutput, sameTC.StandardOutput)
 
 
 class GoTest(TestCase):

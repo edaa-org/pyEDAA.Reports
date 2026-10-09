@@ -75,6 +75,8 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"GoogleTest-JUnit requires 'timestamp' on <testsuite>, which nextest does not write.",
 	("nextest-JUnit", "pyTest-JUnit"):
 		"pyTest-JUnit requires 'hostname' and 'timestamp' on <testsuite>, which nextest does not write.",
+	("nextest-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires 'timestamp' on <testsuite>, which nextest does not write.",
 	("Any-JUnit", "Ant-JUnit4"):
 		"Ant + JUnit4 holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "Catch2-JUnit"):
@@ -95,6 +97,10 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
 	("GoJUnitReport-JUnit", "nextest-JUnit"):
 		"nextest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
+	("GoJUnitReport-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires test cases in each <testsuite>; go-junit-report writes a package without tests too.",
+	("Any-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires 'timestamp' on <testsuite>; the OSVVM report has none.",
 }
 
 
@@ -160,6 +166,9 @@ class TranslationMixin:
 	def test_ToPyTestJUnit(self) -> None:
 		self._translate("pyTest-JUnit")
 
+	def test_ToTestLoggerJUnit(self) -> None:
+		self._translate("TestLogger-JUnit")
+
 	def test_ToAnyJUnit(self) -> None:
 		self._translate("Any-JUnit")
 
@@ -190,6 +199,10 @@ class FromNextestJUnit(TranslationMixin, ut_TestCase):
 
 class FromPyTestJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "pyTest-JUnit"
+
+
+class FromTestLoggerJUnit(TranslationMixin, ut_TestCase):
+	_dialectName = "TestLogger-JUnit"
 
 
 class FromAnyJUnit(TranslationMixin, ut_TestCase):

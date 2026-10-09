@@ -116,6 +116,10 @@ class PyTestJUnit(SchemaMixin, ut_TestCase):
 	_dialectName = "pyTest-JUnit"
 
 
+class TestLoggerJUnit(SchemaMixin, ut_TestCase):
+	_dialectName = "TestLogger-JUnit"
+
+
 class AnyJUnit(SchemaMixin, ut_TestCase):
 	"""
 	``Any-JUnit`` is the permissive dialect, so it has to accept what the specific ones accept.

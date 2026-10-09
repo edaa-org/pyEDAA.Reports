@@ -80,7 +80,7 @@ rather stuffed their language constructs into the concepts and limitations of th
 * ✅ :ref:`go-junit-report JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/GoJUnitReport>`
 * ✅ :ref:`GoogleTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/GoogleTest>`
 * 🚧 Jenkins JUnit (planned)
-* 🚧 :ref:`JunitXml.TestLogger <UNITTEST/Tool/DotNetTest>` for ``dotnet test`` (planned)
+* ✅ :ref:`JunitXml.TestLogger JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/TestLogger>` for ``dotnet test``
 * ✅ :ref:`cargo-nextest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/nextest>`
 * ✅ :ref:`pyTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/PyTest>`
 
@@ -294,7 +294,9 @@ dotnet test (VSTest)
   A ``<testsuites>`` root without attributes, holding one ``<testsuite>`` per test assembly, named after the
   assembly's file (e.g. ``MyLibrary.Tests.dll``). Each test is a ``<testcase>``; its ``classname`` is the test class,
   its ``name`` the method, followed by the arguments of a parameterized test, e.g. ``Absolute(value: -4, expected: 5)``.
-  The test cases follow in the order they finished, not grouped by class. Compared to Ant + JUnit4, the logger writes:
+  The test cases follow in the order they finished, not grouped by class. The report is read by the
+  :ref:`JunitXml.TestLogger JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/TestLogger>` dialect. Compared to
+  Ant + JUnit4, the logger writes:
 
   * the additional attributes ``id`` and ``package`` on ``<testsuite>``. Only these keep the
     :ref:`Any JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit>` and

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xsd:schema
+	version="0.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			JUnit XML as written by the .NET test logger 'JunitXml.TestLogger' ('dotnet test --logger junit').
+
+			Derived from the logger's serializer (spekt/testlogger v8.0.0, 'src/JUnit.Xml.TestLogger/JunitXmlSerializer.cs',
+			https://github.com/spekt/testlogger) and from reports it wrote. Elements, their order, and the attributes the
+			logger always writes are required; no other element or attribute is allowed. The logger's options change only
+			content: 'MethodFormat' the test case's name, 'FailureBodyFormat' the text of a failure, 'StoreConsoleOutput'
+			whether 'system-out' and 'system-err' are written.
+		</xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:simpleType name="preservingstring">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="preserve"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="timestamp">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				Start of the test run in UTC, without fractional seconds and time zone.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:dateTime">
+			<xsd:pattern value="\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="testcasetime">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Duration in seconds with seven decimals, at least 0.0000001.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:decimal">
+			<xsd:pattern value="\d+\.\d{7}"/>
+			<xsd:minExclusive value="0"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="empty"/>
+
+	<xsd:complexType name="output">
+		<xsd:simpleContent>
+			<xsd:extension base="preservingstring"/>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="failure">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				A failed test: a failed assertion, an exception escaping the test, a time-out or a cancellation. The message is
+				omitted if the test framework reports none; the text is the stack trace.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="preservingstring">
+				<xsd:attribute name="type" type="xsd:string" use="required" fixed="failure"/>
+				<xsd:attribute name="message" type="xsd:string" use="optional"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="property">
+		<xsd:attribute name="name" type="xsd:string" use="required"/>
+		<xsd:attribute name="value" type="xsd:string" use="required"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="properties">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">A test's traits; one 'property' per value of a trait.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="property" type="property" minOccurs="1" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="testcase">
+		<xsd:sequence>
+			<xsd:choice minOccurs="0">
+				<xsd:element name="failure" type="failure"/>
+				<xsd:element name="skipped" type="empty">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="en">A skipped test, without the reason.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+			</xsd:choice>
+			<xsd:element name="system-out" type="output" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						The test's standard output, followed by its attachments as '[[ATTACHMENT|path]]'.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="system-err" type="output" minOccurs="0"/>
+			<xsd:element name="properties" type="properties" minOccurs="0"/>
+		</xsd:sequence>
+		<xsd:attribute name="classname" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">Namespace and class of the test, separated by a dot.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="name" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					Method of the test with its arguments, prefixed by the class ('MethodFormat=Class') or the namespace and class
+					('MethodFormat=Full').
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="time" type="testcasetime" use="required"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuite">
+		<xsd:sequence>
+			<xsd:element name="properties" type="empty"/>
+			<xsd:element name="testcase" type="testcase" minOccurs="1" maxOccurs="unbounded"/>
+			<xsd:element name="system-out" type="output" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						The test framework's informational messages of the whole test run.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="system-err" type="output" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						The test framework's warnings and errors of the whole test run, one per line, prefixed by their level.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">File name of the test assembly.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="tests" type="xsd:nonNegativeInteger" use="required"/>
+		<xsd:attribute name="skipped" type="xsd:nonNegativeInteger" use="required"/>
+		<xsd:attribute name="failures" type="xsd:nonNegativeInteger" use="required"/>
+		<xsd:attribute name="errors" type="xsd:nonNegativeInteger" use="required" fixed="0"/>
+		<xsd:attribute name="time" type="xsd:double" use="required">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">Sum of the test cases' durations in seconds.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="timestamp" type="timestamp" use="required"/>
+		<xsd:attribute name="hostname" type="xsd:string" use="required"/>
+		<xsd:attribute name="id" type="xsd:nonNegativeInteger" use="required" fixed="0"/>
+		<xsd:attribute name="package" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">File name of the test assembly, same as 'name'.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuites">
+		<xsd:sequence>
+			<xsd:element name="testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">The results of one test assembly.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:element name="testsuites" type="testsuites">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">The results of a test run, without attributes.</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+</xsd:schema>
