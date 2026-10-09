@@ -278,7 +278,7 @@ class Document(ju_Document):
 		statusNodes = list(testcaseNode.iterchildren("skipped", "failure", "error"))
 		if len(statusNodes) == 2:
 			newTestcase._status = TestcaseStatus.Skipped
-			newTestcase._message = statusNodes[0].attrib["message"]
+			newTestcase._message = statusNodes[0].attrib.get("message", None)
 
 	def Generate(self, overwrite: bool = False) -> None:
 		"""

@@ -1705,7 +1705,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 		newTestcase = self._TESTCASE(
 			self._ConvertName(testcaseNode, optional=False),
-			self._ConvertTime(testcaseNode, optional=False),
+			self._ConvertTime(testcaseNode, optional=True),
 			assertionCount=self._ConvertAssertions(testcaseNode),
 			parent=testclass
 		)
