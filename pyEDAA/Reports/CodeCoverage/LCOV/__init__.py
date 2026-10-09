@@ -196,6 +196,7 @@ class Document(cc_Document, Tracefile):
 		Empty lines are skipped.
 
 		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file can't be read.
 		:raises CodeCoverageError: If the file isn't UTF-8 encoded.
 		:raises CodeCoverageError: If a line is no record lcov knows. |br|
 		                           The exception notes the line and the known records.
@@ -209,6 +210,8 @@ class Document(cc_Document, Tracefile):
 		with Stopwatch() as sw:
 			try:
 				content = self._path.read_text(encoding="utf-8")
+			except OSError as ex:
+				raise CodeCoverageError(f"Couldn't read lcov tracefile '{self._path}'.") from ex
 			except UnicodeDecodeError as ex:
 				raise CodeCoverageError(f"lcov tracefile '{self._path}' is not UTF-8 encoded.") from ex
 

@@ -362,6 +362,7 @@ class Document(cc_Document, Coverage):
 		Parse the XML file and validate it against the lenient XML schema :data:`READ_SCHEMA`.
 
 		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file can't be read.
 		:raises CodeCoverageError: If the file isn't well-formed XML.
 		:raises CodeCoverageError: If the root element isn't ``<coverage>``.
 		:raises CodeCoverageError: If the XML schema can't be located or parsed.
@@ -377,6 +378,7 @@ class Document(cc_Document, Coverage):
 
 		:param xmlSchemaFile:      File name of the XML schema in :mod:`pyEDAA.Reports.Resources`.
 		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file can't be read.
 		:raises CodeCoverageError: If the file isn't well-formed XML.
 		:raises CodeCoverageError: If the root element isn't ``<coverage>``.
 		:raises CodeCoverageError: If the XML schema can't be located or parsed.
@@ -389,6 +391,8 @@ class Document(cc_Document, Coverage):
 		with Stopwatch() as sw:
 			try:
 				xmlDocument = parse(self._path, XMLParser(ns_clean=True))
+			except OSError as ex:
+				raise CodeCoverageError(f"Couldn't read Cobertura report file '{self._path}'.") from ex
 			except XMLSyntaxError as ex:
 				raise CodeCoverageError(f"XML syntax error in Cobertura report file '{self._path}'.") from ex
 

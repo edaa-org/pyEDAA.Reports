@@ -981,6 +981,8 @@ class Document(cc_Document, Report):
 		(:data:`SCHEMAS`).
 
 		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file can't be read.
+		:raises CodeCoverageError: If the file isn't UTF-8 encoded.
 		:raises CodeCoverageError: If the file isn't valid JSON.
 		:raises CodeCoverageError: If the file states no supported format version. |br|
 		                           The note lists the supported format versions.
@@ -993,7 +995,14 @@ class Document(cc_Document, Report):
 
 		with Stopwatch() as sw:
 			try:
-				jsonDocument = loads(self._path.read_text(encoding="utf-8"))
+				content = self._path.read_text(encoding="utf-8")
+			except OSError as ex:
+				raise CodeCoverageError(f"Couldn't read coverage.py report file '{self._path}'.") from ex
+			except UnicodeDecodeError as ex:
+				raise CodeCoverageError(f"coverage.py report file '{self._path}' is not UTF-8 encoded.") from ex
+
+			try:
+				jsonDocument = loads(content)
 			except JSONDecodeError as ex:
 				raise CodeCoverageError(f"JSON syntax error in coverage.py report file '{self._path}'.") from ex
 

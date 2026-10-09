@@ -578,6 +578,24 @@ class Schema(Testcase):
 
 		self.assertEqual(f"coverage.py report file '{DATA / 'missing.json'}' does not exist.", str(context.exception))
 
+	def test_Unreadable(self) -> None:
+		"""A directory can't be read as a file."""
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = Document(DATA, analyzeAndConvert=True)
+
+		self.assertEqual(f"Couldn't read coverage.py report file '{DATA}'.", str(context.exception))
+		self.assertIsInstance(context.exception.__cause__, OSError)
+
+	def test_Encoding(self) -> None:
+		with TemporaryDirectory() as directory:
+			jsonFile = Path(directory) / "coverage.json"
+			jsonFile.write_bytes(b'{"\xff": 1}')
+
+			with self.assertRaises(CodeCoverageError) as context:
+				_ = Document(jsonFile, analyzeAndConvert=True)
+
+		self.assertEqual(f"coverage.py report file '{jsonFile}' is not UTF-8 encoded.", str(context.exception))
+
 	def test_NotAnalyzed(self) -> None:
 		with self.assertRaises(CodeCoverageError):
 			Document(REPORT).Convert()

@@ -676,6 +676,14 @@ class Schema(Testcase):
 
 		self.assertEqual(f"gcov report file '{DATA / 'missing.gcov.json.gz'}' does not exist.", str(context.exception))
 
+	def test_Unreadable(self) -> None:
+		"""A directory can't be read as a file."""
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = Document(DATA, analyzeAndConvert=True)
+
+		self.assertEqual(f"Couldn't read gcov report file '{DATA}'.", str(context.exception))
+		self.assertIsInstance(context.exception.__cause__, OSError)
+
 	def test_NotAnalyzed(self) -> None:
 		with self.assertRaises(CodeCoverageError):
 			Document(GZIP).Convert()

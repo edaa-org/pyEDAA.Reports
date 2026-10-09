@@ -489,6 +489,7 @@ class Document(cc_Document, Coverage):
 		Schema of the format version it states (:data:`SCHEMAS`).
 
 		:raises CodeCoverageError: If the file doesn't exist.
+		:raises CodeCoverageError: If the file can't be read.
 		:raises CodeCoverageError: If the file is gzip-compressed, but corrupt.
 		:raises CodeCoverageError: If the file isn't valid JSON.
 		:raises CodeCoverageError: If the file holds no JSON object.
@@ -501,7 +502,11 @@ class Document(cc_Document, Coverage):
 				from FileNotFoundError(f"File '{self._path}' not found.")
 
 		with Stopwatch() as sw:
-			content = self._path.read_bytes()
+			try:
+				content = self._path.read_bytes()
+			except OSError as ex:
+				raise CodeCoverageError(f"Couldn't read gcov report file '{self._path}'.") from ex
+
 			if content[:2] == b"\x1f\x8b":
 				try:
 					content = decompress(content)
