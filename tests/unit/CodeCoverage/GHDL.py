@@ -163,6 +163,118 @@ class FormatModel(Testcase):
 		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
 
 
+	def test_Parent_Duplicate(self) -> None:
+		"""A file of the same path - name prefixed by directory - is rejected; the first file is kept."""
+		report = Document(Path("coverage.json"))
+		file = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 1, {1: True}, parent=report)
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("src/Counter.vhdl"), Path("."), "1" * 40, CoverageMode.Statement, 1, {1: False}, parent=report)
+
+		self.assertEqual("Parameter 'parent' contains file 'src/Counter.vhdl' already.", str(context.exception))
+		self.assertEqual({Path("src/Counter.vhdl"): file}, report.Files)
+
+
+class Construction(Testcase):
+	"""The format's model is built by hand: each constructor takes typed values and checks them."""
+
+	def test_File_Name(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = File(None, Path("src"), "0" * 40, CoverageMode.Statement, 1, {1: True})
+		self.assertEqual("Parameter 'name' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = File("Counter.vhdl", Path("src"), "0" * 40, CoverageMode.Statement, 1, {1: True})
+		self.assertEqual("Parameter 'name' is not of type 'Path'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_File_Directory(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Counter.vhdl"), None, "0" * 40, CoverageMode.Statement, 1, {1: True})
+		self.assertEqual("Parameter 'directory' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("Counter.vhdl"), "src", "0" * 40, CoverageMode.Statement, 1, {1: True})
+		self.assertEqual("Parameter 'directory' is not of type 'Path'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_File_SHA1(self) -> None:
+		"""A checksum is 40 lowercase hexadecimal digits, as GHDL writes it."""
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), None, CoverageMode.Statement, 1, {1: True})
+		self.assertEqual("Parameter 'sha1' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), 0, CoverageMode.Statement, 1, {1: True})
+		self.assertEqual("Parameter 'sha1' is not of type 'str'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
+
+		for sha1 in ("0" * 39, "0" * 41, "A" * 40, "g" * 40):
+			with self.subTest(sha1=sha1):
+				with self.assertRaises(ValueError) as context:
+					_ = File(Path("Counter.vhdl"), Path("src"), sha1, CoverageMode.Statement, 1, {1: True})
+				self.assertEqual("Parameter 'sha1' is not 40 lowercase hexadecimal digits.", str(context.exception))
+				self.assertEqual([f"Got value '{sha1}'."], context.exception.__notes__)
+
+	def test_File_Mode(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, None, 1, {1: True})
+		self.assertEqual("Parameter 'mode' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, "stmt", 1, {1: True})
+		self.assertEqual("Parameter 'mode' is not of type 'CoverageMode'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_File_LastLine(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, None, {1: True})
+		self.assertEqual("Parameter 'lastLine' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, "1", {1: True})
+		self.assertEqual("Parameter 'lastLine' is not of type 'int'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 0, {1: True})
+		self.assertEqual("Parameter 'lastLine' is less than 1.", str(context.exception))
+		self.assertEqual(["Got value '0'."], context.exception.__notes__)
+
+	def test_File_Result(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 1, None)
+		self.assertEqual("Parameter 'result' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 1, [1])
+		self.assertEqual("Parameter 'result' is not of type 'dict'.", str(context.exception))
+		self.assertEqual(["Got type 'list'."], context.exception.__notes__)
+
+	def test_File_Result_Lines(self) -> None:
+		"""A line number is an integer from 1 to the last line; its flag is a boolean."""
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 1, {"1": True})
+		self.assertEqual("Parameter 'result' contains a line number not of type 'int'.", str(context.exception))
+		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 1, {0: True})
+		self.assertEqual("Parameter 'result' contains a line number less than 1.", str(context.exception))
+		self.assertEqual(["Got value '0'."], context.exception.__notes__)
+
+		with self.assertRaises(ValueError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 5, {5: True, 6: False})
+		self.assertEqual(
+			"Parameter 'result' contains a line number greater than parameter 'lastLine'.", str(context.exception)
+		)
+		self.assertEqual(["Got line 6 for 'lastLine' 5."], context.exception.__notes__)
+
+		with self.assertRaises(TypeError) as context:
+			_ = File(Path("Counter.vhdl"), Path("src"), "0" * 40, CoverageMode.Statement, 1, {1: 1})
+		self.assertEqual("Parameter 'result' contains a flag not of type 'bool'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
+
+
 class Conversion(Testcase):
 	"""The conversion to the common model agrees with GHDL's own conversion to lcov."""
 
