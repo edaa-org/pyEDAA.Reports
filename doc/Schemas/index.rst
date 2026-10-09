@@ -62,6 +62,9 @@ Available schemas
    * - :ref:`CTest JUnit <SCHEMAS/CTest-JUnit>`
      - :file:`CTest-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.CTestJUnit.Document`
+   * - :ref:`go-junit-report JUnit <SCHEMAS/GoJUnitReport-JUnit>`
+     - :file:`GoJUnitReport-JUnit.xsd`
+     - :class:`pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport.Document`
    * - :ref:`GoogleTest JUnit <SCHEMAS/GoogleTest-JUnit>`
      - :file:`GoogleTest-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit.Document`
@@ -121,6 +124,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    Ant-JUnit4
    Catch2-JUnit
    CTest-JUnit
+   GoJUnitReport-JUnit
    GoogleTest-JUnit
    Nextest-JUnit
    PyTest-JUnit

@@ -85,6 +85,16 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"GoogleTest-JUnit requires 'timestamp' down to <testcase>; the OSVVM report has none.",
 	("Any-JUnit", "pyTest-JUnit"):
 		"pyTest-JUnit requires 'timestamp' on <testsuite>; the OSVVM report has none.",
+	("GoJUnitReport-JUnit", "Ant-JUnit4"):
+		"Ant + JUnit4 holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "CTest-JUnit"):
+		"CTest-JUnit holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
+	("GoJUnitReport-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
 }
 
 
@@ -138,6 +148,9 @@ class TranslationMixin:
 	def test_ToCTestJUnit(self) -> None:
 		self._translate("CTest-JUnit")
 
+	def test_ToGoJUnitReport(self) -> None:
+		self._translate("GoJUnitReport-JUnit")
+
 	def test_ToGoogleTestJUnit(self) -> None:
 		self._translate("GoogleTest-JUnit")
 
@@ -161,6 +174,10 @@ class FromCatch2JUnit(TranslationMixin, ut_TestCase):
 
 class FromCTestJUnit(TranslationMixin, ut_TestCase):
 	_dialectName = "CTest-JUnit"
+
+
+class FromGoJUnitReport(TranslationMixin, ut_TestCase):
+	_dialectName = "GoJUnitReport-JUnit"
 
 
 class FromGoogleTestJUnit(TranslationMixin, ut_TestCase):

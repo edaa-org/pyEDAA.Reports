@@ -77,6 +77,7 @@ rather stuffed their language constructs into the concepts and limitations of th
 * 🚧 Bamboo JUnit (planned)
 * ✅ :ref:`Catch2 JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/Catch2>`
 * ✅ :ref:`CTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/CTest>`
+* ✅ :ref:`go-junit-report JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/GoJUnitReport>`
 * ✅ :ref:`GoogleTest JUnit format <UNITTEST/SpecificDataModel/JUnit/Dialect/GoogleTest>`
 * 🚧 Jenkins JUnit (planned)
 * 🚧 :ref:`JunitXml.TestLogger <UNITTEST/Tool/DotNetTest>` for ``dotnet test`` (planned)
@@ -335,9 +336,8 @@ go-junit-report
   ``go-junit-report -parser gojson -in go-test.json -out go-junit-report.xml`` converts the JSON events - by default
   ``go test -v``'s text output. It writes the same tree, but a test's log in the test case's ``<system-out>``, a panic's
   stack trace in the package's ``<system-out>``, and ``id``, ``hostname`` and ``timestamp`` - of the conversion - on
-  each ``<testsuite>``; a package without tests is a ``<testsuite>`` with an empty name. Except for the ``id``
-  attribute, the report is :ref:`Any JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/AnyJUnit>`; no dialect reads it
-  yet.
+  each ``<testsuite>``; a package without tests is a ``<testsuite>`` with an empty name. The report is read by the
+  :ref:`go-junit-report JUnit <UNITTEST/SpecificDataModel/JUnit/Dialect/GoJUnitReport>` dialect.
 
 A panic ends the package's test binary: the package's later tests don't run, and its code coverage is lost.
 

@@ -50,17 +50,21 @@ OUTPUT_DIRECTORY = Path("tests/output/AppJUnitDialects")
 #: The command line spells a dialect ``<dialect>-JUnit``, and its vocabulary is not the one the documents use:
 #: ``Ant-JUnit4`` and ``GoogleTest-JUnit`` are not accepted there.
 COMMANDLINE_NAMES: Dict[str, str] = {
-	"Ant-JUnit4":       "Ant-JUnit",
-	"Any-JUnit":        "Any-JUnit",
-	"Catch2-JUnit":     "Catch2-JUnit",
-	"CTest-JUnit":      "CTest-JUnit",
-	"GoogleTest-JUnit": "gtest-JUnit",
-	"nextest-JUnit":    "nextest-JUnit",
-	"pyTest-JUnit":     "pyTest-JUnit",
+	"Ant-JUnit4":          "Ant-JUnit",
+	"Any-JUnit":           "Any-JUnit",
+	"Catch2-JUnit":        "Catch2-JUnit",
+	"CTest-JUnit":         "CTest-JUnit",
+	"GoJUnitReport-JUnit": "GoJUnitReport-JUnit",
+	"GoogleTest-JUnit":    "gtest-JUnit",
+	"nextest-JUnit":       "nextest-JUnit",
+	"pyTest-JUnit":        "pyTest-JUnit",
 }
 
 #: Dialects the command line can write. ``Any-JUnit`` is readable but has no branch in ``_output``.
-WRITABLE = ("Ant-JUnit4", "Catch2-JUnit", "CTest-JUnit", "GoogleTest-JUnit", "nextest-JUnit", "pyTest-JUnit")
+WRITABLE = (
+	"Ant-JUnit4", "Catch2-JUnit", "CTest-JUnit", "GoJUnitReport-JUnit", "GoogleTest-JUnit", "nextest-JUnit",
+	"pyTest-JUnit"
+)
 
 #: (source, target) -> why the conversion cannot work, mirroring the unit-level table.
 FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
@@ -96,6 +100,16 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"GoogleTest-JUnit requires 'timestamp' down to <testcase>; the OSVVM report has none.",
 	("Any-JUnit", "pyTest-JUnit"):
 		"pyTest-JUnit requires 'timestamp' on <testsuite>; the OSVVM report has none.",
+	("GoJUnitReport-JUnit", "Ant-JUnit4"):
+		"Ant + JUnit4 holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "CTest-JUnit"):
+		"CTest-JUnit holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
+	("GoJUnitReport-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
 }
 
 
@@ -195,6 +209,9 @@ class ConversionMixin:
 	def test_ToCTestJUnit(self) -> None:
 		self._roundTripThroughTheCommandLine("CTest-JUnit")
 
+	def test_ToGoJUnitReport(self) -> None:
+		self._roundTripThroughTheCommandLine("GoJUnitReport-JUnit")
+
 	def test_ToGoogleTestJUnit(self) -> None:
 		self._roundTripThroughTheCommandLine("GoogleTest-JUnit")
 
@@ -215,6 +232,10 @@ class FromCatch2JUnit(ConversionMixin, ApplicationTestcase):
 
 class FromCTestJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "CTest-JUnit"
+
+
+class FromGoJUnitReport(ConversionMixin, ApplicationTestcase):
+	_dialectName = "GoJUnitReport-JUnit"
 
 
 class FromGoogleTestJUnit(ConversionMixin, ApplicationTestcase):

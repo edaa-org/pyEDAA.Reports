@@ -134,6 +134,10 @@ class CTestJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "CTest-JUnit"
 
 
+class GoJUnitReport(RoundTripMixin, ut_TestCase):
+	_dialectName = "GoJUnitReport-JUnit"
+
+
 class GoogleTestJUnit(RoundTripMixin, ut_TestCase):
 	_dialectName = "GoogleTest-JUnit"
 
