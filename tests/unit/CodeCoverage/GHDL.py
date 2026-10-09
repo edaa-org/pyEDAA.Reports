@@ -37,7 +37,7 @@ from tempfile                         import TemporaryDirectory
 from typing                           import Any
 
 from pyEDAA.Reports                   import Resources
-from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, CoverageSummary, LineCoverageStatus
+from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, CoverageSummary, GHDL, LineCoverageStatus
 from pyEDAA.Reports.CodeCoverage.GHDL import SCHEMAS, CoverageMode, Document, File, FormatVersion, MergedReport
 from pyTooling.Common                 import readResourceFile
 from pyTooling.Testing                import Testcase
@@ -173,6 +173,10 @@ class FormatModel(Testcase):
 		self.assertEqual("Parameter 'parent' contains file 'src/Counter.vhdl' already.", str(context.exception))
 		self.assertEqual({Path("src/Counter.vhdl"): file}, report.Files)
 
+
+	def test_PublicNames(self) -> None:
+		"""The module-level data is listed in '__all__'."""
+		self.assertLessEqual({"SCHEMAS", "ParentType"}, set(GHDL.__all__))
 
 class Construction(Testcase):
 	"""The format's model is built by hand: each constructor takes typed values and checks them."""

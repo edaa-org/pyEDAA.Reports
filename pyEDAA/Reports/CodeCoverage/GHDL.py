@@ -83,14 +83,13 @@ from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Docu
 from pyEDAA.Reports.CodeCoverage import LineCoverageStatus
 
 
-__all__ = ["SCHEMAS"]
+__all__ = ["SCHEMAS", "ParentType"]
 
 # A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
 # body's namespace, where annotations are evaluated, binds the name to the property.
 _Path = Path
 
-ParentType = TypeVar("ParentType", bound="Report | MergedReport")
-"""A type variable for the report a :class:`File` belongs to: a :class:`Report` or a :class:`MergedReport`."""
+ParentType = TypeVar("ParentType", bound="Report | MergedReport")  #: The report a :class:`File` belongs to.
 
 
 @export
