@@ -636,7 +636,9 @@ class Directory(BaseWithPath):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the directory for debugging, e.g. ``<Directory src: 3 files, 75.0%>``.
+		Return a representation of the directory for debugging.
+
+		A directory ``src`` of 3 files reads ``<Directory src: 3 files, 75.0%>``.
 
 		:returns: The directory's path, its number of files and its line coverage.
 		"""
@@ -990,7 +992,9 @@ class File(BaseWithPath):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the file for debugging, e.g. ``<File src/Counter.vhdl: 80.0%>``.
+		Return a representation of the file for debugging.
+
+		A file ``src/Counter.vhdl`` reads ``<File src/Counter.vhdl: 80.0%>``.
 
 		:returns: The file's path and line coverage.
 		"""
@@ -1130,7 +1134,9 @@ class Line(BaseWithStatus):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the line's coverage for debugging, e.g. ``<Line 12: PartiallyCovered (1/2 branches)>``.
+		Return a representation of the line's coverage for debugging.
+
+		Line 12 with one of two branches taken reads ``<Line 12: PartiallyCovered (1/2 branches)>``.
 
 		:returns: The line number, the state and the branches.
 		"""
@@ -1433,7 +1439,9 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the unit for debugging, e.g. ``<Function Shapes.Circle.Area: 100.0%>``.
+		Return a representation of the unit for debugging.
+
+		A method ``Area`` of class ``Circle`` in module ``Shapes`` reads ``<Function Shapes.Circle.Area: 100.0%>``.
 
 		:returns: The unit's kind, qualified name and line coverage.
 		"""
@@ -1445,27 +1453,47 @@ Unit._PARENT_TYPE = (Unit, CoverageSummary)
 
 @export
 class Package(Unit):
-	"""A package: e.g. a Python package, a Java package, a VHDL library."""
+	"""
+	A package: a unit grouping modules.
+
+	Python and Java have packages, VHDL has libraries.
+	"""
 
 
 @export
 class Module(Unit):
-	"""A module: e.g. a Python module, a VHDL package or entity."""
+	"""
+	A module: a unit of a package.
+
+	A Python module is one, and so are a VHDL package and a VHDL entity.
+	"""
 
 
 @export
 class SourceFile(Unit):
-	"""A source file as a unit, where the file is the language's unit: e.g. a C translation unit, a Bash or TCL script."""
+	"""
+	A source file as a unit, where the file is the language's unit.
+
+	A C translation unit is one, and so is a Bash or TCL script.
+	"""
 
 
 @export
 class Class(Unit):
-	"""A class: e.g. a Python, Java or C++ class."""
+	"""
+	A class.
+
+	Python, Java and C++ have classes.
+	"""
 
 
 @export
 class Function(Unit):
-	"""A function: e.g. a Python or C function, a VHDL function or procedure."""
+	"""
+	A function.
+
+	Python and C have functions, VHDL has functions and procedures.
+	"""
 
 
 @export

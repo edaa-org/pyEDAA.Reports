@@ -344,7 +344,9 @@ class Counter(metaclass=ExtendedType, slots=True):
 @abstractclass
 class Base(metaclass=ExtendedType, slots=True):
 	"""
-	Base-class of the named elements below the report, e.g. packages and classes.
+	Base-class of the named elements below the report.
+
+	Packages and classes are named elements.
 	"""
 
 	_name: str  #: Name of the element.

@@ -86,7 +86,9 @@ READ_SCHEMA = "NVC-Cobertura.xsd"  #: The XML schema a report is validated again
 @export
 class Class(cob_Class):
 	"""
-	A ``<class>`` as NVC writes it: a design unit, its entity and architecture, e.g. ``COUNTER(RTL)``.
+	A ``<class>`` as NVC writes it: a design unit, its entity and architecture.
+
+	Entity ``COUNTER`` with architecture ``RTL`` is named ``COUNTER(RTL)``.
 	"""
 
 	_entity:       str  #: Name of the design unit's entity.

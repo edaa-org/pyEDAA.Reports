@@ -1198,7 +1198,11 @@ class VHDLNVC(TestCase):
 		)
 
 	def test_AnyCobertura(self) -> None:
-		"""The generic reader rejects it: NVC writes ``condition-coverage`` as e.g. ``100 %``, without the conditions."""
+		"""
+		The generic reader rejects it: NVC writes ``condition-coverage`` without the conditions.
+
+		NVC writes e.g. ``100 %``.
+		"""
 		with self.assertRaises(CodeCoverageError) as context:
 			CoberturaDocument(Path("tests/data/CodeCoverage/VHDL-NVC/cobertura.xml"), analyzeAndConvert=True)
 
