@@ -129,6 +129,7 @@ Report Formats
 
       * :ref:`Ant JUnit4 XML format and various dialects <UNITTEST/FileFormats/AntJUnit4>`
       * :ref:`JUnit5 XML format (Open Test Reporting) <UNITTEST/FileFormats/JUnit5>`
+      * :ref:`Visual Studio test results (TRX) <UNITTEST/FileFormats/TRX>`
 
       .. rubric:: Supported tools
 
