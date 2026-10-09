@@ -559,12 +559,12 @@ class Document(cc_Document, Coverage):
 				version = jsonDocument.get("format_version") if isinstance(jsonDocument, dict) else None
 				try:
 					formatVersion = FormatVersion.Parse(version)
-				except (ValueError, TypeError) as ex:
-					error = CodeCoverageError(f"gcov report file '{self._path}' states an unsupported format version.")
+				except (ValueError, TypeError) as cause:
+					ex =  CodeCoverageError(f"gcov report file '{self._path}' states an unsupported format version.")
 					got = f"value '{version}'" if version is not None else "no value"
-					error.add_note(f"Got {got} at '{prefix}/format_version'.")
-					error.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
-					raise error from ex
+					ex.add_note(f"Got {got} at '{prefix}/format_version'.")
+					ex.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
+					raise ex from cause
 
 				schemaFile = SCHEMAS[formatVersion]
 				if (validator := validators.get(formatVersion)) is None:

@@ -455,10 +455,10 @@ class Document(cc_Document, Report):
 			version = jsonDocument.get("version", None) if isinstance(jsonDocument, dict) else None
 			try:
 				formatVersion = FormatVersion.Parse(version)
-			except (TypeError, ValueError) as ex:
-				error = CodeCoverageError(f"GHDL coverage file '{self._path}' states unsupported format version '{version}'.")
-				error.add_note(f"Supported format versions: {', '.join(FormatVersion)}.")
-				raise error from ex
+			except (TypeError, ValueError) as cause:
+				ex = CodeCoverageError(f"GHDL coverage file '{self._path}' states unsupported format version '{version}'.")
+				ex.add_note(f"Supported format versions: {', '.join(FormatVersion)}.")
+				raise ex from cause
 
 			if formatVersion is None:
 				ex = CodeCoverageError(f"GHDL coverage file '{self._path}' states no format version.")

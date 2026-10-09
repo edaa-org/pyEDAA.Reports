@@ -1022,12 +1022,12 @@ class Document(cc_Document, Report):
 			version = meta.get("format") if isinstance(meta, dict) else None
 			try:
 				formatVersion = FormatVersion.Parse(version)
-			except (ValueError, TypeError) as ex:
-				error = CodeCoverageError(f"coverage.py report file '{self._path}' states an unsupported format version.")
-				got =   f"value '{version}'" if version is not None else "no value"
-				error.add_note(f"Got {got} at '/meta/format'.")
-				error.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
-				raise error from ex
+			except (ValueError, TypeError) as cause:
+				ex =  CodeCoverageError(f"coverage.py report file '{self._path}' states an unsupported format version.")
+				got = f"value '{version}'" if version is not None else "no value"
+				ex.add_note(f"Got {got} at '/meta/format'.")
+				ex.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
+				raise ex from cause
 
 			schemaFile = SCHEMAS[formatVersion]
 			try:
