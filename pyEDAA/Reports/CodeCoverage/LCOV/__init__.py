@@ -36,8 +36,9 @@ coverage.py (``coverage lcov``) or GHDL (``ghdl coverage --format=lcov``). The f
 page :manpage:`geninfo(1)`, section *TRACEFILE FORMAT*: a text file of records, one per line, e.g.
 ``DA:<line number>,<execution count>``. The format's model keeps what the tracefile states: a :class:`Document` holds
 :class:`~pyEDAA.Reports.CodeCoverage.LCOV.Records.Section` records - a source file, as a test measured it -, a section
-:class:`~pyEDAA.Reports.CodeCoverage.LCOV.Records.Function` and :class:`~pyEDAA.Reports.CodeCoverage.LCOV.Records.Line`
-records, and the summaries it states.
+:class:`~pyEDAA.Reports.CodeCoverage.LCOV.Records.Function`, :class:`~pyEDAA.Reports.CodeCoverage.LCOV.Records.Line`,
+:class:`~pyEDAA.Reports.CodeCoverage.LCOV.Records.Branch` and
+:class:`~pyEDAA.Reports.CodeCoverage.LCOV.Records.Condition` records, and the summaries it states.
 
 A tracefile is read by a strict line parser: an unknown, malformed or misplaced record raises an exception, which notes
 the record's line number.
@@ -45,9 +46,11 @@ the record's line number.
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
 * A section's source file is a file; sections of the same file - one per test - are merged, their counts added.
-* A line's execution count is its count.
+* A line's execution count is its count; a branching line is partially covered, if one of its branches wasn't taken. A
+  branch never evaluated - ``-`` - is uncovered without count.
 * A file becomes a source file unit, its functions function units, each spanning its start to its end line.
-* The format has no excluded lines and no units but functions.
+* The format has no excluded lines, no branch targets and no units but functions; the conditions of MC/DC coverage
+  have no counterpart in the common model.
 
 .. rubric:: Example
 
@@ -71,10 +74,10 @@ from pyTooling.Decorators                     import export, readonly
 from pyTooling.MetaClasses                    import ExtendedType
 from pyTooling.Stopwatch                      import Stopwatch
 
-from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, CoverageSummary
+from pyEDAA.Reports.CodeCoverage              import Branch as cc_Branch, CodeCoverageError, CoverageSummary
 from pyEDAA.Reports.CodeCoverage              import Document as cc_Document, File as cc_File, Function as cc_Function
 from pyEDAA.Reports.CodeCoverage              import Line as cc_Line, LineCoverageStatus, SourceFile as cc_SourceFile
-from pyEDAA.Reports.CodeCoverage.LCOV.Records import Function, Line, Section
+from pyEDAA.Reports.CodeCoverage.LCOV.Records import Branch, Condition, Function, Line, Section
 
 
 __all__ = ["RECORD_PATTERNS", "RECORD_SYNTAX"]
@@ -90,6 +93,12 @@ RECORD_PATTERNS: dict[str, Pattern[str]] = {
 	"FNA":  re_compile(r"(\d+),(\d+),(.+)"),
 	"FNF":  re_compile(r"(\d+)"),
 	"FNH":  re_compile(r"(\d+)"),
+	"BRDA": re_compile(r"([1-9]\d*),(e?)(\d+),(.+),(\d+|-)"),
+	"BRF":  re_compile(r"(\d+)"),
+	"BRH":  re_compile(r"(\d+)"),
+	"MCDC": re_compile(r"([1-9]\d*),(\d+),([tf]),(\d+),(\d+),(.+)"),
+	"MCF":  re_compile(r"(\d+)"),
+	"MCH":  re_compile(r"(\d+)"),
 	"DA":   re_compile(r"([1-9]\d*),(\d+)(?:,([^,\s]+))?"),
 	"LF":   re_compile(r"(\d+)"),
 	"LH":   re_compile(r"(\d+)"),
@@ -106,6 +115,12 @@ RECORD_SYNTAX: dict[str, str] = {
 	"FNA":           "FNA:<index>,<execution count>,<name>",
 	"FNF":           "FNF:<number of functions found>",
 	"FNH":           "FNH:<number of functions hit>",
+	"BRDA":          "BRDA:<line number>,[<exception>]<block>,<branch>,<taken>",
+	"BRF":           "BRF:<number of branches found>",
+	"BRH":           "BRH:<number of branches hit>",
+	"MCDC":          "MCDC:<line number>,<group size>,<sense>,<taken>,<index>,<expression>",
+	"MCF":           "MCF:<number of conditions found>",
+	"MCH":           "MCH:<number of conditions hit>",
 	"DA":            "DA:<line number>,<execution count>[,<checksum>]",
 	"LF":            "LF:<number of instrumented lines>",
 	"LH":            "LH:<number of lines with a non-zero execution count>",
@@ -304,6 +319,13 @@ class Document(cc_Document, Tracefile):
 						Line(number, count, values[2], parent=section)
 					else:
 						line._count += count
+				elif key == "BRDA":
+					taken = None if values[4] == "-" else int(values[4])
+					Branch(int(values[0]), int(values[2]), values[3], taken, values[1] == "e", parent=section)
+				elif key == "MCDC":
+					Condition(
+						int(values[0]), int(values[1]), values[2] == "t", int(values[3]), int(values[4]), values[5], parent=section
+					)
 				elif key == "FN":
 					if (name := values[2]) in functionsByName:
 						ex = CodeCoverageError(f"Function '{name}' is stated twice in the section of '{section._sourceFile}'.")
@@ -342,6 +364,14 @@ class Document(cc_Document, Tracefile):
 					section._functionsFound = int(values[0])
 				elif key == "FNH":
 					section._functionsHit = int(values[0])
+				elif key == "BRF":
+					section._branchesFound = int(values[0])
+				elif key == "BRH":
+					section._branchesHit = int(values[0])
+				elif key == "MCF":
+					section._conditionsFound = int(values[0])
+				elif key == "MCH":
+					section._conditionsHit = int(values[0])
 				elif key == "LF":
 					section._linesFound = int(values[0])
 				else:
@@ -358,9 +388,11 @@ class Document(cc_Document, Tracefile):
 		"""
 		Convert the format's model to the common model, and aggregate it.
 
-		The sections of one source file - one per test - are one file: the counts of a line and of a function are added. A
-		file becomes a source file unit, spanning its first to its last line, its functions become function units, each
-		spanning its start to its end line; a function without end line names its start line only.
+		The sections of one source file - one per test - are one file: the counts of a line, of a branch and of a function
+		are added. A line is partially covered, if one of its branches wasn't taken; a line with branches, but without
+		``DA`` record, has an unknown state. A file becomes a source file unit, spanning its first to its last line, its
+		functions become function units, each spanning its start to its end line; a function without end line - e.g. from
+		llvm-cov - names its start line only.
 
 		:returns:                  The report's root of the common model, named after the tracefile.
 		:raises CodeCoverageError: If a file's path runs through another file.
@@ -369,6 +401,7 @@ class Document(cc_Document, Tracefile):
 
 		files: dict[int, cc_File] = {}
 		lineCounts: dict[int, dict[int, int]] = {}
+		branchCounts: dict[int, dict[tuple[int, int, str, bool], Nullable[int]]] = {}
 		functionCounts: dict[int, dict[str, tuple[int, Nullable[int], Nullable[int]]]] = {}
 		for section in self._sections:
 			file = summary.GetOrAddFile(section._sourceFile)
@@ -378,6 +411,15 @@ class Document(cc_Document, Tracefile):
 			for number, line in section._lines.items():
 				lines[number] = lines.get(number, 0) + line._count
 
+			branches = branchCounts.setdefault(id(file), {})
+			for branch in section._branches:
+				key = (branch._lineNumber, branch._block, branch._expression, branch._isException)
+				taken = branches.get(key)
+				if branch._taken is not None:
+					branches[key] = branch._taken if taken is None else taken + branch._taken
+				elif key not in branches:
+					branches[key] = None
+
 			functions = functionCounts.setdefault(id(file), {})
 			for function in section._functions:
 				count = function.Count
@@ -386,14 +428,48 @@ class Document(cc_Document, Tracefile):
 				functions[function.Name] = (function._startLine, function._endLine, count)
 
 		for fileID, file in files.items():
-			for lineNumber, count in sorted(lineCounts[fileID].items()):
-				status = LineCoverageStatus.Covered if count > 0 else LineCoverageStatus.Uncovered
-				cc_Line(lineNumber, status, count, parent=file)
-
+			self._ConvertLines(file, lineCounts[fileID], branchCounts[fileID])
 			self._ConvertUnits(file, functionCounts[fileID], summary)
 
 		summary.Aggregate()
 		return summary
+
+	@staticmethod
+	def _ConvertLines(
+		file: cc_File,
+		lineCounts: dict[int, int],
+		branchCounts: dict[tuple[int, int, str, bool], Nullable[int]]
+	) -> None:
+		"""
+		Convert a file's merged line and branch counts to lines of the common model.
+
+		:param file:         The file of the common model.
+		:param lineCounts:   The execution counts, by line number.
+		:param branchCounts: How often each branch was taken - ``None``, if never evaluated -, by line number, block,
+		                     expression and exception flag.
+		"""
+		branchesByLine: dict[int, list[Nullable[int]]] = {}
+		for (lineNumber, *_), taken in branchCounts.items():
+			branchesByLine.setdefault(lineNumber, []).append(taken)
+
+		for lineNumber in sorted({*lineCounts, *branchesByLine}):
+			takenCounts = branchesByLine.get(lineNumber, [])
+			statuses = [
+				LineCoverageStatus.Covered if taken is not None and taken > 0 else LineCoverageStatus.Uncovered
+				for taken in takenCounts
+			]
+			branches = [cc_Branch(status, taken) for status, taken in zip(statuses, takenCounts)]
+
+			if (count := lineCounts.get(lineNumber)) is None:
+				status = LineCoverageStatus.Unknown
+			elif count == 0:
+				status = LineCoverageStatus.Uncovered
+			elif LineCoverageStatus.Uncovered in statuses:
+				status = LineCoverageStatus.PartiallyCovered
+			else:
+				status = LineCoverageStatus.Covered
+
+			cc_Line(lineNumber, status, count, branches, parent=file)
 
 	@staticmethod
 	def _ConvertUnits(

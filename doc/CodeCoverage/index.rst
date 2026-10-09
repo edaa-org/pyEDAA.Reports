@@ -478,17 +478,20 @@ format is specified by lcov's manual page
 text file of records, one per line, e.g. ``DA:<line number>,<execution count>``.
 :class:`pyEDAA.Reports.CodeCoverage.LCOV.Document` reads it with a strict line parser - an unknown, malformed or
 misplaced record raises an exception noting its line - into the format's model: a section per source file and test,
-with its functions and their aliases, its lines with counts and checksums, and the summaries it states.
+with its functions and their aliases, its lines with counts and checksums, its branches, its MC/DC conditions, and the
+summaries it states.
 
 :meth:`~pyEDAA.Reports.CodeCoverage.LCOV.Document.ToCoverageSummary` converts it to the common model:
 
 * A section names its source file in ``SF``. The sections of one file - one per test, named by ``TN`` - become one file,
   their counts added.
-* A line's ``DA`` count is its count.
+* A line's ``DA`` count is its count. A branch - ``BRDA`` - is covered, if it was taken; a branch never evaluated -
+  ``-`` - is uncovered without count. A line is partially covered, if one of its branches wasn't taken.
 * A file becomes a :class:`~pyEDAA.Reports.CodeCoverage.SourceFile` unit, its functions - ``FN``, or ``FNL`` with its
   aliases ``FNA`` - :class:`~pyEDAA.Reports.CodeCoverage.Function` units, each spanning its start to its end line. A
   function without end line names its start line only.
-* The format has no excluded lines - lcov leaves them out - and no units but functions.
+* The format has no excluded lines - lcov leaves them out -, no branch targets and no units but functions. The MC/DC
+  conditions - ``MCDC`` - stay in the format's model.
 
 .. code-block:: Python
 
@@ -508,6 +511,17 @@ The tools write different parts of the format:
 
    * - Tool
      - Tracefile
+   * - lcov 2.3 (GCC)
+     - ``TN`` from ``--test-name``. Functions as ``FNL`` leader with end line and ``FNA`` aliases. Branches never
+       evaluated as ``-``. ``MCDC`` conditions with ``--mcdc-coverage``, summarized by ``MCF`` and ``MCH`` - the manual
+       page names them ``MRF`` and ``MRH``, while lcov writes and reads ``MCF`` and ``MCH``. Checksums with
+       ``--checksum``.
+   * - llvm-cov 19
+     - No ``TN``. Functions as ``FN`` without end line and ``FNDA``; a static function of a header named after its
+       translation unit, e.g. ``Classify.c:Clamp``. No branch as ``-``.
+   * - coverage.py 7.16
+     - No ``TN``. Functions as ``FN`` with end line, named by qualified names like ``Circle.Area``. Branches named after
+       their target, e.g. ``jump to line 8``. A section without records for an empty file.
    * - GHDL 7.0
      - ``TN`` only before the first section. Each file as one function ``file`` at line 1. No summaries. Lines of a
        subprogram, which was never called, aren't listed.

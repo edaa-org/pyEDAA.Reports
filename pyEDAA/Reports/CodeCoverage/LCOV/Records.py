@@ -29,7 +29,7 @@
 # ==================================================================================================================== #
 #
 """
-The records of lcov's tracefile format: a section, and its functions and lines.
+The records of lcov's tracefile format: a section, and its functions, lines, branches and conditions.
 """
 from __future__                         import annotations
 
@@ -123,6 +123,234 @@ class Line(metaclass=ExtendedType, slots=True):
 		:returns: The checksum, or ``None`` if not stated.
 		"""
 		return self._checksum
+
+
+@export
+class Branch(metaclass=ExtendedType, slots=True):
+	"""
+	A ``BRDA`` record: a branch of a line, and how often it was taken.
+	"""
+
+	_parent:      Nullable[Section]  #: The section the branch belongs to.
+	_lineNumber:  int                #: Line number of the branch.
+	_block:       int                #: Number of the branch's block - the conditional - in its line.
+	_expression:  str                #: Index or expression identifying the branch in its block.
+	_taken:       Nullable[int]      #: How often the branch was taken; ``None``, if it was never evaluated.
+	_isException: bool               #: Whether the branch is taken by an exception.
+
+	def __init__(
+		self,
+		lineNumber: int,
+		block: int,
+		expression: str,
+		taken: Nullable[int],
+		isException: bool,
+		*,
+		parent: Nullable[Section] = None
+	) -> None:
+		"""
+		Initialize a branch, and append it to the branches of its section.
+
+		:param lineNumber:  Line number of the branch.
+		:param block:       Number of the branch's block in its line.
+		:param expression:  Index or expression identifying the branch in its block.
+		:param taken:       How often the branch was taken; ``None``, if it was never evaluated.
+		:param isException: Whether the branch is taken by an exception.
+		:param parent:      Optional, the section the branch belongs to; the branch is appended to its branches.
+		                    Default: ``None``.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
+		"""
+		if parent is not None and not isinstance(parent, Section):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =      parent
+		self._lineNumber =  lineNumber
+		self._block =       block
+		self._expression =  expression
+		self._taken =       taken
+		self._isException = isException
+
+		if parent is not None:
+			parent._branches.append(self)
+
+	@readonly
+	def Parent(self) -> Nullable[Section]:
+		"""
+		Read-only property to access the section the branch belongs to (:attr:`_parent`).
+
+		:returns: The section; ``None`` if the branch belongs to no section.
+		"""
+		return self._parent
+
+	@readonly
+	def LineNumber(self) -> int:
+		"""
+		Read-only property to access the line number of the branch (:attr:`_lineNumber`).
+
+		:returns: The line number.
+		"""
+		return self._lineNumber
+
+	@readonly
+	def Block(self) -> int:
+		"""
+		Read-only property to access the number of the branch's block in its line (:attr:`_block`).
+
+		:returns: The block number, counted from 0.
+		"""
+		return self._block
+
+	@readonly
+	def Expression(self) -> str:
+		"""
+		Read-only property to access the index or expression identifying the branch in its block (:attr:`_expression`).
+
+		Each tool identifies a branch its own way, e.g. GCC by an index like ``1``, coverage.py by a text like
+		``jump to line 8``.
+
+		:returns: The identifier.
+		"""
+		return self._expression
+
+	@readonly
+	def Taken(self) -> Nullable[int]:
+		"""
+		Read-only property to access how often the branch was taken (:attr:`_taken`).
+
+		:returns: The count, or ``None`` if the branch was never evaluated - stated as ``-``.
+		"""
+		return self._taken
+
+	@readonly
+	def IsException(self) -> bool:
+		"""
+		Read-only property to access whether the branch is taken by an exception (:attr:`_isException`).
+
+		:returns: ``True``, if the branch is marked by the prefix ``e``.
+		"""
+		return self._isException
+
+
+@export
+class Condition(metaclass=ExtendedType, slots=True):
+	"""
+	An ``MCDC`` record: whether the outcome of a line's expression changed, when one of its conditions changed.
+	"""
+
+	_parent:     Nullable[Section]  #: The section the condition belongs to.
+	_lineNumber: int                #: Line number of the expression.
+	_groupSize:  int                #: Number of conditions in the expression's group.
+	_sense:      bool               #: ``True`` for a change from false to true; ``False`` for the converse.
+	_taken:      int                #: How often - or whether - the condition was sensitized.
+	_index:      int                #: Index of the condition in its group.
+	_expression: str                #: The condition's expression.
+
+	def __init__(
+		self,
+		lineNumber: int,
+		groupSize: int,
+		sense: bool,
+		taken: int,
+		index: int,
+		expression: str,
+		*,
+		parent: Nullable[Section] = None
+	) -> None:
+		"""
+		Initialize a condition, and append it to the conditions of its section.
+
+		:param lineNumber: Line number of the expression.
+		:param groupSize:  Number of conditions in the expression's group.
+		:param sense:      ``True`` for a change of the condition from false to true; ``False`` for the converse.
+		:param taken:      How often - or whether - the condition was sensitized.
+		:param index:      Index of the condition in its group.
+		:param expression: The condition's expression.
+		:param parent:     Optional, the section the condition belongs to; the condition is appended to its conditions.
+		                   Default: ``None``.
+		:raises TypeError: If parameter ``parent`` isn't of type :class:`Section`.
+		"""
+		if parent is not None and not isinstance(parent, Section):
+			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+
+		self._parent =     parent
+		self._lineNumber = lineNumber
+		self._groupSize =  groupSize
+		self._sense =      sense
+		self._taken =      taken
+		self._index =      index
+		self._expression = expression
+
+		if parent is not None:
+			parent._conditions.append(self)
+
+	@readonly
+	def Parent(self) -> Nullable[Section]:
+		"""
+		Read-only property to access the section the condition belongs to (:attr:`_parent`).
+
+		:returns: The section; ``None`` if the condition belongs to no section.
+		"""
+		return self._parent
+
+	@readonly
+	def LineNumber(self) -> int:
+		"""
+		Read-only property to access the line number of the expression (:attr:`_lineNumber`).
+
+		:returns: The line number.
+		"""
+		return self._lineNumber
+
+	@readonly
+	def GroupSize(self) -> int:
+		"""
+		Read-only property to access the number of conditions in the expression's group (:attr:`_groupSize`).
+
+		:returns: The group size.
+		"""
+		return self._groupSize
+
+	@readonly
+	def Sense(self) -> bool:
+		"""
+		Read-only property to access the sense of the condition's change (:attr:`_sense`).
+
+		:returns: ``True`` for a change from false to true - stated as ``t`` -, ``False`` for the converse - ``f``.
+		"""
+		return self._sense
+
+	@readonly
+	def Taken(self) -> int:
+		"""
+		Read-only property to access how often - or whether - the condition was sensitized (:attr:`_taken`).
+
+		:returns: The count; ``0``, if the condition was never sensitized.
+		"""
+		return self._taken
+
+	@readonly
+	def Index(self) -> int:
+		"""
+		Read-only property to access the index of the condition in its group (:attr:`_index`).
+
+		:returns: The index, counted from 0.
+		"""
+		return self._index
+
+	@readonly
+	def Expression(self) -> str:
+		"""
+		Read-only property to access the condition's expression (:attr:`_expression`).
+
+		The text depends on the tool, e.g. GCC states ``0``.
+
+		:returns: The expression.
+		"""
+		return self._expression
 
 
 @export
@@ -251,8 +479,14 @@ class Section(metaclass=ExtendedType, slots=True):
 	_version:         Nullable[str]        #: Version ID of the source file, if stated.
 	_functions:       list[Function]       #: The functions, in the tracefile's order.
 	_lines:           dict[int, Line]      #: The lines, by number.
+	_branches:        list[Branch]         #: The branches, in the tracefile's order.
+	_conditions:      list[Condition]      #: The conditions of MC/DC coverage, in the tracefile's order.
 	_functionsFound:  Nullable[int]        #: Number of functions, as the section states it.
 	_functionsHit:    Nullable[int]        #: Number of functions called, as the section states it.
+	_branchesFound:   Nullable[int]        #: Number of branches, as the section states it.
+	_branchesHit:     Nullable[int]        #: Number of branches taken, as the section states it.
+	_conditionsFound: Nullable[int]        #: Number of conditions, as the section states it.
+	_conditionsHit:   Nullable[int]        #: Number of conditions sensitized, as the section states it.
 	_linesFound:      Nullable[int]        #: Number of instrumented lines, as the section states it.
 	_linesHit:        Nullable[int]        #: Number of lines, which ran, as the section states it.
 
@@ -279,8 +513,14 @@ class Section(metaclass=ExtendedType, slots=True):
 		self._version =         None
 		self._functions =       []
 		self._lines =           {}
+		self._branches =        []
+		self._conditions =      []
 		self._functionsFound =  None
 		self._functionsHit =    None
+		self._branchesFound =   None
+		self._branchesHit =     None
+		self._conditionsFound = None
+		self._conditionsHit =   None
 		self._linesFound =      None
 		self._linesHit =        None
 
@@ -343,6 +583,24 @@ class Section(metaclass=ExtendedType, slots=True):
 		return self._lines
 
 	@readonly
+	def Branches(self) -> list[Branch]:
+		"""
+		Read-only property to access the branches (:attr:`_branches`).
+
+		:returns: The branches, in the tracefile's order.
+		"""
+		return self._branches
+
+	@readonly
+	def Conditions(self) -> list[Condition]:
+		"""
+		Read-only property to access the conditions of MC/DC coverage (:attr:`_conditions`).
+
+		:returns: The conditions, in the tracefile's order.
+		"""
+		return self._conditions
+
+	@readonly
 	def FunctionsFound(self) -> Nullable[int]:
 		"""
 		Read-only property to access the number of functions, as the section states it (:attr:`_functionsFound`).
@@ -359,6 +617,43 @@ class Section(metaclass=ExtendedType, slots=True):
 		:returns: The number from record ``FNH``, or ``None`` if not stated.
 		"""
 		return self._functionsHit
+
+	@readonly
+	def BranchesFound(self) -> Nullable[int]:
+		"""
+		Read-only property to access the number of branches, as the section states it (:attr:`_branchesFound`).
+
+		:returns: The number from record ``BRF``, or ``None`` if not stated.
+		"""
+		return self._branchesFound
+
+	@readonly
+	def BranchesHit(self) -> Nullable[int]:
+		"""
+		Read-only property to access the number of branches taken, as the section states it (:attr:`_branchesHit`).
+
+		:returns: The number from record ``BRH``, or ``None`` if not stated.
+		"""
+		return self._branchesHit
+
+	@readonly
+	def ConditionsFound(self) -> Nullable[int]:
+		"""
+		Read-only property to access the number of conditions, as the section states it (:attr:`_conditionsFound`).
+
+		:returns: The number from record ``MCF``, or ``None`` if not stated.
+		"""
+		return self._conditionsFound
+
+	@readonly
+	def ConditionsHit(self) -> Nullable[int]:
+		"""
+		Read-only property to access the number of conditions sensitized, as the section states it
+		(:attr:`_conditionsHit`).
+
+		:returns: The number from record ``MCH``, or ``None`` if not stated.
+		"""
+		return self._conditionsHit
 
 	@readonly
 	def LinesFound(self) -> Nullable[int]:
