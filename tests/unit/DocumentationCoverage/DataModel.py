@@ -28,10 +28,12 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-from pathlib  import Path
-from unittest import TestCase
+from pathlib                                     import Path
+from unittest                                    import TestCase
 
+from pyEDAA.Reports.DocumentationCoverage        import DocCoverageError
 from pyEDAA.Reports.DocumentationCoverage.Python import CoverageState, ClassCoverage, ModuleCoverage, PackageCoverage
+from pyTooling.Testing                           import Testcase
 
 
 class ClassCoverageInstantiation(TestCase):
@@ -87,3 +89,60 @@ class Hierarchy(TestCase):
 		cc22 = ClassCoverage("class22", parent=mc2)
 
 		pc.Aggregate()
+
+
+class Counting(Testcase):
+	def test_ClassCoverage(self) -> None:
+		cc = ClassCoverage("class")
+		cc.Fields["field1"] =   CoverageState.Covered
+		cc.Fields["field2"] =   CoverageState.Undocumented
+		cc.Methods["method1"] = CoverageState.Covered
+		cc.Methods["method2"] = CoverageState.Excluded
+		cc.Methods["method3"] = CoverageState.Ignored
+
+		cc.CalculateCoverage()
+
+		self.assertEqual(5, cc.Total)
+		self.assertEqual(1, cc.Excluded)
+		self.assertEqual(1, cc.Ignored)
+		self.assertEqual(3, cc.Expected)
+		self.assertEqual(2, cc.Covered)
+		self.assertEqual(1, cc.Uncovered)
+		self.assertAlmostEqual(2 / 3, cc.Coverage)
+
+	def test_ModuleCoverage_VariablesOnly(self) -> None:
+		mc = ModuleCoverage("module", Path("module.py"))
+		mc.Variables["variable1"] = CoverageState.Covered
+		mc.Variables["variable2"] = CoverageState.Undocumented
+
+		mc.CalculateCoverage()
+
+		self.assertEqual(2, mc.Total)
+		self.assertEqual(2, mc.Expected)
+		self.assertEqual(1, mc.Covered)
+		self.assertEqual(1, mc.Uncovered)
+		self.assertEqual(0.5, mc.Coverage)
+
+	def test_PackageCoverage_FunctionsOnly(self) -> None:
+		pc = PackageCoverage("package", Path("package/__init__.py"))
+		pc.Functions["function1"] = CoverageState.Covered
+		pc.Functions["function2"] = CoverageState.Excluded | CoverageState.Covered
+
+		pc.CalculateCoverage()
+
+		self.assertEqual(2, pc.Total)
+		self.assertEqual(1, pc.Excluded)
+		self.assertEqual(1, pc.Expected)
+		self.assertEqual(1, pc.Covered)
+		self.assertEqual(0, pc.Uncovered)
+		self.assertEqual(1.0, pc.Coverage)
+
+	def test_UnknownState(self) -> None:
+		cc = ClassCoverage("class")
+		cc.Fields["field1"] =   CoverageState.Unknown
+		cc.Methods["method1"] = CoverageState.Covered
+
+		with self.assertRaises(DocCoverageError) as context:
+			cc.CalculateCoverage()
+
+		self.assertEqual("Element has coverage state 'Unknown', so it can't be counted.", str(context.exception))

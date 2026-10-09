@@ -34,6 +34,7 @@
 """
 from __future__                           import annotations
 
+from itertools                            import chain
 from pathlib                              import Path
 from typing                               import Optional as Nullable, Iterable, Dict, Union, Tuple, List
 
@@ -161,7 +162,7 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 		covered =  0
 		for coverageState in iterator:
 			if coverageState is CoverageState.Unknown:
-				raise DocCoverageException(f"Element has coverage state 'Unknown', so it can't be counted.")
+				raise DocCoverageError(f"Element has coverage state 'Unknown', so it can't be counted.")
 
 			total += 1
 
@@ -169,10 +170,10 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 				excluded += 1
 			elif CoverageState.Ignored in coverageState:
 				ignored += 1
-
-			expected += 1
-			if CoverageState.Covered in coverageState:
-				covered += 1
+			else:
+				expected += 1
+				if CoverageState.Covered in coverageState:
+					covered += 1
 
 		return total, excluded, ignored, expected, covered
 
@@ -344,7 +345,7 @@ class ClassCoverage(Class, Coverage):
 			cls.CalculateCoverage()
 
 		self._total, self._excluded, self._ignored, self._expected, self._covered = \
-			self._CountCoverage(zip(
+			self._CountCoverage(chain(
 				self._fields.values(),
 				self._methods.values()
 			))
@@ -408,7 +409,7 @@ class ModuleCoverage(Module, AggregatedCoverage):
 			cls.CalculateCoverage()
 
 		self._total, self._excluded, self._ignored, self._expected, self._covered = \
-			self._CountCoverage(zip(
+			self._CountCoverage(chain(
 				self._variables.values(),
 				self._functions.values()
 			))
@@ -535,7 +536,7 @@ class PackageCoverage(Package, AggregatedCoverage):
 			pkg.CalculateCoverage()
 
 		self._total, self._excluded, self._ignored, self._expected, self._covered = \
-			self._CountCoverage(zip(
+			self._CountCoverage(chain(
 				self._variables.values(),
 				self._functions.values()
 			))
