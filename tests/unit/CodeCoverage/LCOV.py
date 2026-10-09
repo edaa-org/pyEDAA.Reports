@@ -260,6 +260,18 @@ class Parents(Testcase):
 				self.assertEqual([section], [branch.Parent for branch in section.Branches])
 				self.assertEqual([section], [condition.Parent for condition in section.Conditions])
 
+	def test_Line_Duplicate(self) -> None:
+		"""A section has one line per number: the first stays, the second is rejected."""
+		section = Section("", Path("src/a.c"))
+		first = Line(3, 1, parent=section)
+
+		with self.assertRaises(CodeCoverageError) as context:
+			_ = Line(3, 7, parent=section)
+
+		self.assertEqual("Line 3 of the section of 'src/a.c' is added twice.", str(context.exception))
+		self.assertEqual({3: first}, section.Lines)
+		self.assertEqual(1, section.Lines[3].Count)
+
 
 class Construction(Testcase):
 	"""The format's model is built by hand: each constructor takes typed values and checks them."""

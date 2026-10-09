@@ -41,6 +41,8 @@ from pyTooling.Common                   import getFullyQualifiedName
 from pyTooling.Decorators               import export, readonly
 from pyTooling.MetaClasses              import ExtendedType
 
+from pyEDAA.Reports.CodeCoverage        import CodeCoverageError
+
 if TYPE_CHECKING:
 	from pyEDAA.Reports.CodeCoverage.LCOV import Tracefile
 
@@ -67,20 +69,21 @@ class Line(metaclass=ExtendedType, slots=True):
 		"""
 		Initialize a line, and add it to the lines of its section.
 
-		:param number:      Line number.
-		:param count:       How often the line ran.
-		:param checksum:    Optional, checksum of the line's source text. Default: ``None``.
-		:param parent:      Optional, the section the line belongs to; the line is added to its lines by :attr:`Number`.
-		                    Default: ``None``.
-		:raises ValueError: If parameter ``number`` is ``None``.
-		:raises TypeError:  If parameter ``number`` isn't of type :class:`int`.
-		:raises ValueError: If parameter ``number`` is less than 1.
-		:raises ValueError: If parameter ``count`` is ``None``.
-		:raises TypeError:  If parameter ``count`` isn't of type :class:`int`.
-		:raises ValueError: If parameter ``count`` is negative.
-		:raises TypeError:  If parameter ``checksum`` isn't of type :class:`str`.
-		:raises ValueError: If parameter ``checksum`` is empty.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
+		:param number:             Line number.
+		:param count:              How often the line ran.
+		:param checksum:           Optional, checksum of the line's source text. Default: ``None``.
+		:param parent:             Optional, the section the line belongs to; the line is added to its lines by
+		                           :attr:`Number`. Default: ``None``.
+		:raises ValueError:        If parameter ``number`` is ``None``.
+		:raises TypeError:         If parameter ``number`` isn't of type :class:`int`.
+		:raises ValueError:        If parameter ``number`` is less than 1.
+		:raises ValueError:        If parameter ``count`` is ``None``.
+		:raises TypeError:         If parameter ``count`` isn't of type :class:`int`.
+		:raises ValueError:        If parameter ``count`` is negative.
+		:raises TypeError:         If parameter ``checksum`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``checksum`` is empty.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Section`.
+		:raises CodeCoverageError: If the section already has a line of this number.
 		"""
 		if number is None:
 			raise ValueError(f"Parameter 'number' is None.")
@@ -122,6 +125,9 @@ class Line(metaclass=ExtendedType, slots=True):
 		self._checksum = checksum
 
 		if parent is not None:
+			if number in parent._lines:
+				raise CodeCoverageError(f"Line {number} of the section of '{parent._sourceFile.as_posix()}' is added twice.")
+
 			parent._lines[number] = self
 
 	@readonly
