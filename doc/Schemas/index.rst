@@ -29,6 +29,9 @@ Available schemas
    * - :ref:`coverage.py Cobertura <SCHEMAS/CoveragePy-Cobertura>`
      - :file:`CoveragePy-Cobertura.xsd`
      - :class:`pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura.Document`
+   * - :ref:`NVC Cobertura <SCHEMAS/NVC-Cobertura>`
+     - :file:`NVC-Cobertura.xsd`
+     - :class:`pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura.Document`
    * - :ref:`coverage.py JSON, format 2 <SCHEMAS/CoveragePy-2>`
      - :file:`CoveragePy-2.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.CoveragePy.Document`
@@ -44,9 +47,6 @@ Available schemas
    * - :ref:`gcov JSON 2 <SCHEMAS/Gcov-2>`
      - :file:`Gcov-2.schema.json`
      - :class:`pyEDAA.Reports.CodeCoverage.Gcov.Document`, format version 2
-   * - :ref:`NVC Cobertura <SCHEMAS/NVC-Cobertura>`
-     - :file:`NVC-Cobertura.xsd`
-     - :class:`pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura.Document`
    * - :ref:`JaCoCo 1.1 <SCHEMAS/JaCoCo-1.1>`
      - :file:`JaCoCo-1.1.xsd`
      - :class:`pyEDAA.Reports.CodeCoverage.JaCoCo.Document`, format version 1.1
@@ -116,12 +116,12 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    Any-Cobertura
    Cobertura-04
    CoveragePy-Cobertura
+   NVC-Cobertura
    CoveragePy-2
    CoveragePy-3
    GHDL-Coverage-1.0.0
    Gcov-1
    Gcov-2
-   NVC-Cobertura
    JaCoCo-1.1
    Any-JUnit
    Ant-JUnit4
