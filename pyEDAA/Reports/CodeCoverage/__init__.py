@@ -56,7 +56,8 @@ The report formats have models of their own, which convert to this one:
    :mod:`pyEDAA.Reports.CodeCoverage.Gcov`
       |rarr| GCC's gcov JSON format (``gcov --json-format``).
    :mod:`pyEDAA.Reports.CodeCoverage.LCOV`
-      |rarr| lcov's tracefile format, as written e.g. by lcov (``lcov --capture``) or llvm-cov (``llvm-cov export``).
+      |rarr| lcov's tracefile format, as written e.g. by lcov (``lcov --capture``) or llvm-cov
+      (``llvm-cov export -format=lcov``).
    :mod:`pyEDAA.Reports.CodeCoverage.JaCoCo`
       |rarr| JaCoCo's XML format, as written e.g. by Gradle's task ``jacocoTestReport``.
 """
@@ -469,8 +470,9 @@ class BaseWithPath(Base, CoverageCountersMixin):
 	@readonly
 	def Path(self) -> Path:
 		"""
-		Read-only property to return the path below the root: the names of the parent directories and the own name, e.g.
-		``src/Counter.vhdl``.
+		Read-only property to return the path below the root: the names of the parent directories and the own name.
+
+		A file ``Counter.vhdl`` in a directory ``src`` has the path ``src/Counter.vhdl``.
 
 		:returns: The path; the name, if there is no parent.
 		"""
@@ -634,7 +636,9 @@ class Directory(BaseWithPath):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the directory for debugging, e.g. ``<Directory src: 3 files, 75.0%>``.
+		Return a representation of the directory for debugging.
+
+		A directory ``src`` of 3 files reads ``<Directory src: 3 files, 75.0%>``.
 
 		:returns: The directory's path, its number of files and its line coverage.
 		"""
@@ -926,7 +930,9 @@ class File(BaseWithPath):
 	@readonly
 	def Units(self) -> list[Unit]:
 		"""
-		Read-only property to access the units naming this file (:attr:`_units`), e.g. a module, its classes and functions.
+		Read-only property to access the units naming this file (:attr:`_units`).
+
+		A Python file is named by its module, its classes and its functions.
 
 		:returns: The units.
 		"""
@@ -986,7 +992,9 @@ class File(BaseWithPath):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the file for debugging, e.g. ``<File src/Counter.vhdl: 80.0%>``.
+		Return a representation of the file for debugging.
+
+		A file ``src/Counter.vhdl`` reads ``<File src/Counter.vhdl: 80.0%>``.
 
 		:returns: The file's path and line coverage.
 		"""
@@ -1126,7 +1134,9 @@ class Line(BaseWithStatus):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the line's coverage for debugging, e.g. ``<Line 12: PartiallyCovered (1/2 branches)>``.
+		Return a representation of the line's coverage for debugging.
+
+		Line 12 with one of two branches taken reads ``<Line 12: PartiallyCovered (1/2 branches)>``.
 
 		:returns: The line number, the state and the branches.
 		"""
@@ -1341,7 +1351,9 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 	@readonly
 	def QualifiedName(self) -> str:
 		"""
-		Read-only property to return the names of the units from the top down to this one, joined by ``.``, e.g.
+		Read-only property to return the names of the units from the top down to this one, joined by ``.``.
+
+		A method ``Area`` of a class ``Circle`` in a module ``myPackage.Shapes`` has the qualified name
 		``myPackage.Shapes.Circle.Area``.
 
 		:returns: The qualified name.
@@ -1427,7 +1439,9 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 
 	def __repr__(self) -> str:
 		"""
-		Return a representation of the unit for debugging, e.g. ``<Function Shapes.Circle.Area: 100.0%>``.
+		Return a representation of the unit for debugging.
+
+		A method ``Area`` of class ``Circle`` in module ``Shapes`` reads ``<Function Shapes.Circle.Area: 100.0%>``.
 
 		:returns: The unit's kind, qualified name and line coverage.
 		"""
@@ -1439,27 +1453,47 @@ Unit._PARENT_TYPE = (Unit, CoverageSummary)
 
 @export
 class Package(Unit):
-	"""A package: e.g. a Python package, a Java package, a VHDL library."""
+	"""
+	A package: a unit grouping modules.
+
+	Python and Java have packages, VHDL has libraries.
+	"""
 
 
 @export
 class Module(Unit):
-	"""A module: e.g. a Python module, a VHDL package or entity."""
+	"""
+	A module: a unit of a package.
+
+	A Python module is one, and so are a VHDL package and a VHDL entity.
+	"""
 
 
 @export
 class SourceFile(Unit):
-	"""A source file as a unit, where the file is the language's unit: e.g. a C translation unit, a Bash or TCL script."""
+	"""
+	A source file as a unit, where the file is the language's unit.
+
+	A C translation unit is one, and so is a Bash or TCL script.
+	"""
 
 
 @export
 class Class(Unit):
-	"""A class: e.g. a Python, Java or C++ class."""
+	"""
+	A class.
+
+	Python, Java and C++ have classes.
+	"""
 
 
 @export
 class Function(Unit):
-	"""A function: e.g. a Python or C function, a VHDL function or procedure."""
+	"""
+	A function.
+
+	Python and C have functions, VHDL has functions and procedures.
+	"""
 
 
 @export

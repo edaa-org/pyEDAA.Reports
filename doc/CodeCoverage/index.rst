@@ -4,8 +4,8 @@ Code Coverage
 #############
 
 Code coverage measures used and unused code lines, statements, branches, etc. Depending on the programming language this
-is measured by instrumenting the code/binary and running the program, it's test cases or simulating the code. In
-generate code coverage is a measure of test coverage. Unused code is not (yet) covered by tests.
+is measured by instrumenting the code/binary and running the program, its test cases or simulating the code. In
+general, code coverage is a measure of test coverage. Unused code is not (yet) covered by tests.
 
 The code coverage metric in percent is a ratio of used code versus all possibly usable code. A coverage of <100%
 indicates unused code. This can be dead code (unreachable) or untested code (⇒ needs more test cases).
@@ -777,7 +777,7 @@ Command Line
 
 The command ``coverage`` of :program:`pyedaa-reports` reads a report of any format above, which a reader exists for,
 shows its line and branch figures and, with ``--output``, writes it as Cobertura XML - so any format becomes the format
-most tools read (see :ref:`References/cli`):
+most tools read (see :ref:`CLI`):
 
 .. code-block:: console
 
@@ -816,7 +816,9 @@ simulated by a Bash script per simulator, twice: counting, then counting with re
 * :file:`NVC.sh` (job ``VHDL-NVC``): ``nvc -e --cover=statement,branch`` writes a coverage database per run,
   ``nvc --cover-merge`` merges them, ``nvc --cover-export --format=cobertura --relative=.`` exports Cobertura XML -
   NVC's only export format. NVC writes ``condition-coverage`` as e.g. ``50 %``, without the numbers of covered and
-  valid conditions ``coverage-04.dtd`` writers add (``50% (1/2)``), so the Cobertura reader rejects the file.
+  valid conditions ``coverage-04.dtd`` writers add (``50% (1/2)``), so the generic Cobertura reader rejects the file.
+  :class:`~pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura.Document` (CLI ``--input=NVC-Cobertura:...``) reads it,
+  see :ref:`CODECOV/Formats/Cobertura/NVC`.
 
 
 .. _CODECOV/Tool/DotNet:

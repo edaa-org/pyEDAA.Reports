@@ -538,7 +538,9 @@ class RegionKind(StringEnum):
 @export
 class Region(Base):
 	"""
-	A function or a class of a file - in format 3 -, named by its qualified name, e.g. ``Circle.Area``.
+	A function or a class of a file - in format 3 -, named by its qualified name.
+
+	A method ``Area`` of a class ``Circle`` is named ``Circle.Area``.
 	"""
 
 	_parent:    Nullable[File]  #: The file the region belongs to.

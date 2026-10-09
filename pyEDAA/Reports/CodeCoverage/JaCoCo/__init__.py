@@ -311,8 +311,10 @@ class Package(Base, CountersMixin, Generic[ParentType]):
 		"""
 		Read-only property to access the classes (:attr:`_classes`).
 
-		:returns: The classes, by name, e.g. ``my/pack/MyClass``; a nested class by its binary name, e.g.
-		          ``my/pack/MyClass$Inner``.
+		A class is keyed by its name, e.g. ``my/pack/MyClass``, a nested class by its binary name, e.g.
+		``my/pack/MyClass$Inner``.
+
+		:returns: The classes, by name.
 		"""
 		return self._classes
 
@@ -321,7 +323,9 @@ class Package(Base, CountersMixin, Generic[ParentType]):
 		"""
 		Read-only property to access the source files (:attr:`_sourceFiles`).
 
-		:returns: The source files, by name, e.g. ``MyClass.java``.
+		A source file is keyed by its name, e.g. ``MyClass.java``.
+
+		:returns: The source files, by name.
 		"""
 		return self._sourceFiles
 
@@ -357,7 +361,9 @@ class Report(CountersMixin, mixin=True):
 		"""
 		Read-only property to access the name of the report (:attr:`_name`).
 
-		:returns: The name, e.g. of the project measured; ``None`` before the report was converted.
+		The name is chosen by the tool writing the report, e.g. the name of the project measured.
+
+		:returns: The name; ``None`` before the report was converted.
 		"""
 		return self._name
 

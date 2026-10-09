@@ -81,7 +81,9 @@ class Condition(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the kind of condition (:attr:`_type`).
 
-		:returns: The kind, e.g. ``jump``.
+		The kind is stated as the report states it, e.g. ``jump``.
+
+		:returns: The kind.
 		"""
 		return self._type
 
@@ -90,7 +92,9 @@ class Condition(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the coverage of the condition (:attr:`_coverage`).
 
-		:returns: The coverage, e.g. ``50%``.
+		The coverage is stated as the report states it, e.g. ``50%``.
+
+		:returns: The coverage.
 		"""
 		return self._coverage
 
@@ -174,7 +178,9 @@ class Line(metaclass=ExtendedType, slots=True):
 		"""
 		Read-only property to access the line's taken and all branches (:attr:`_conditionCoverage`).
 
-		:returns: The taken and all branches, e.g. ``(1, 2)``; ``None`` if the line doesn't state them.
+		A line with one of two branches taken has ``(1, 2)``.
+
+		:returns: The taken and all branches; ``None`` if the line doesn't state them.
 		"""
 		return self._conditionCoverage
 

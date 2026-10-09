@@ -185,7 +185,9 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 		"""
 		Read-only property to access the version of the tool, which wrote the report (:attr:`_version`).
 
-		:returns: The version, e.g. ``gcovr 8.4``, or ``None`` if the report doesn't state it.
+		The version is stated as the report states it, e.g. ``gcovr 8.4``.
+
+		:returns: The version, or ``None`` if the report doesn't state it.
 		"""
 		return self._version
 
@@ -194,7 +196,9 @@ class Coverage(metaclass=ExtendedType, mixin=True):
 		"""
 		Read-only property to access the time the report was written, as the report states it (:attr:`_timestamp`).
 
-		:returns: The timestamp - e.g. milliseconds or seconds since the epoch, depending on the tool -, or ``None``.
+		The unit depends on the tool, e.g. milliseconds or seconds since the epoch.
+
+		:returns: The timestamp, or ``None``.
 		"""
 		return self._timestamp
 

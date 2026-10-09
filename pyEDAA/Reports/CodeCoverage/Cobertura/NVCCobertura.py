@@ -86,7 +86,9 @@ READ_SCHEMA = "NVC-Cobertura.xsd"  #: The XML schema a report is validated again
 @export
 class Class(cob_Class):
 	"""
-	A ``<class>`` as NVC writes it: a design unit, its entity and architecture, e.g. ``COUNTER(RTL)``.
+	A ``<class>`` as NVC writes it: a design unit, its entity and architecture.
+
+	Entity ``COUNTER`` with architecture ``RTL`` is named ``COUNTER(RTL)``.
 	"""
 
 	_entity:       str  #: Name of the design unit's entity.
@@ -147,7 +149,9 @@ class Class(cob_Class):
 		"""
 		Read-only property to access the name of the design unit's entity (:attr:`_entity`).
 
-		:returns: The entity's name, e.g. ``COUNTER``.
+		NVC writes it in upper case, e.g. ``COUNTER``.
+
+		:returns: The entity's name.
 		"""
 		return self._entity
 
@@ -156,7 +160,9 @@ class Class(cob_Class):
 		"""
 		Read-only property to access the name of the design unit's architecture (:attr:`_architecture`).
 
-		:returns: The architecture's name, e.g. ``RTL``.
+		NVC writes it in upper case, e.g. ``RTL``.
+
+		:returns: The architecture's name.
 		"""
 		return self._architecture
 

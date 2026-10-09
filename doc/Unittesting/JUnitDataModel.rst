@@ -162,6 +162,8 @@ Any JUnit
       The Any JUnit format uses a relaxed XML schema definition aiming to parse many JUnit XML dialects, which use a
       ``<testsuites>`` root element.
 
+      A report is validated against :ref:`Any-JUnit.xsd <SCHEMAS/Any-JUnit>`.
+
    .. grid-item::
       :columns: 6
 
@@ -172,11 +174,13 @@ Any JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit import Document
 
                xmlReport = Path("AnyJUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -185,6 +189,7 @@ Any JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit import Document
 
                # Convert to unified test data model
@@ -199,6 +204,8 @@ Any JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit import Document
 
                xmlReport = Path("AnyJUnit-Report.xml")
@@ -221,6 +228,8 @@ Ant + JUnit4
       The original JUnit format created by `Ant <https://github.com/apache/ant>`__ for `JUnit4 <https://github.com/junit-team/junit4>`__
       uses ``<testsuite>`` as a root element.
 
+      A report is validated against :ref:`Ant-JUnit4.xsd <SCHEMAS/Ant-JUnit4>`.
+
       :ref:`Gradle <UNITTEST/Tool/Gradle>` writes this format too, when it runs JUnit4 tests.
 
    .. grid-item::
@@ -233,11 +242,13 @@ Ant + JUnit4
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 
                xmlReport = Path("AntJUnit4-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -246,6 +257,7 @@ Ant + JUnit4
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 
                # Convert to unified test data model
@@ -260,9 +272,11 @@ Ant + JUnit4
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4 import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("AntJUnit4-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
@@ -283,6 +297,8 @@ Catch2 JUnit
       The Catch2 JUnit format written by the JUnit reporter of `Catch2 <https://github.com/catchorg/Catch2>`__
       (version 3) uses ``<testsuites>`` as a root element. It holds exactly one ``<testsuite>``, named after the test
       executable.
+
+      A report is validated against :ref:`Catch2-JUnit.xsd <SCHEMAS/Catch2-JUnit>`.
 
       * Each test case and each path of nested sections is a ``<testcase>``, named by its section path
         (``TestCase/Section/Subsection``). A test case or section containing sections is a ``<testcase>`` of its own.
@@ -315,11 +331,13 @@ Catch2 JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
 
                xmlReport = Path("Catch2JUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -328,6 +346,7 @@ Catch2 JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
 
                # Convert to unified test data model
@@ -342,9 +361,11 @@ Catch2 JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("Catch2JUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
@@ -361,8 +382,10 @@ CTest JUnit
    .. grid-item::
       :columns: 6
 
-      The CTest JUnit format written by `CTest <https://github.com/bvdberg/ctest>`__ uses ``<testsuite>`` as a root
-      element.
+      The CTest JUnit format written by CMake's :gh:`CTest <Kitware/CMake>` (``ctest --output-junit``) uses
+      ``<testsuite>`` as a root element.
+
+      A report is validated against :ref:`CTest-JUnit.xsd <SCHEMAS/CTest-JUnit>`.
 
    .. grid-item::
       :columns: 6
@@ -374,11 +397,13 @@ CTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
                xmlReport = Path("CTestJUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -387,6 +412,7 @@ CTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
                # Convert to unified test data model
@@ -401,9 +427,11 @@ CTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("CTestJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
@@ -515,6 +543,8 @@ GoogleTest JUnit
       The GoogleTest JUnit format written by `GoogleTest <https://github.com/google/googletest>`__ (sometimes GTest)
       uses ``<testsuites>`` as a root element.
 
+      A report is validated against :ref:`GoogleTest-JUnit.xsd <SCHEMAS/GoogleTest-JUnit>`.
+
    .. grid-item::
       :columns: 6
 
@@ -525,11 +555,13 @@ GoogleTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
                xmlReport = Path("GoogleTestJUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -538,6 +570,7 @@ GoogleTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
                # Convert to unified test data model
@@ -552,9 +585,11 @@ GoogleTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("GoogleTestJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:
@@ -574,6 +609,8 @@ cargo-nextest JUnit
       The JUnit format written by `cargo-nextest <https://github.com/nextest-rs/nextest>`__, the test runner for Rust,
       uses ``<testsuites>`` as a root element. nextest serializes it with the crate
       `quick-junit <https://github.com/nextest-rs/quick-junit>`__.
+
+      A report is validated against :ref:`Nextest-JUnit.xsd <SCHEMAS/Nextest-JUnit>`.
 
       .. rubric:: Mapping to the data model
 
@@ -623,6 +660,8 @@ cargo-nextest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
 
                xmlReport = Path("target/nextest/ci/junit.xml")
@@ -636,6 +675,7 @@ cargo-nextest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
 
                # Convert to unified test data model
@@ -650,6 +690,8 @@ cargo-nextest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document
 
                xmlReport = Path("Nextest-JUnit-Report.xml")
@@ -672,6 +714,8 @@ pyTest JUnit
       The pyTest JUnit format written by `pyTest <https://github.com/pytest-dev/pytest>`__ uses ``<testsuites>`` as a
       root element.
 
+      A report is validated against :ref:`PyTest-JUnit.xsd <SCHEMAS/PyTest-JUnit>`.
+
    .. grid-item::
       :columns: 6
 
@@ -682,11 +726,13 @@ pyTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
                xmlReport = Path("PyTestJUnit-Report.xml")
                try:
-                 doc = Document(xmlReport, parse=True)
+                 doc = Document(xmlReport, analyzeAndConvert=True)
                except UnittestError as ex:
                  ...
 
@@ -695,6 +741,7 @@ pyTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
                from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
                # Convert to unified test data model
@@ -709,9 +756,11 @@ pyTest JUnit
 
             .. code-block:: Python
 
+               from pathlib import Path
+               from pyEDAA.Reports.Unittesting import UnittestError
                from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
-               xmlReport = Path("AnyJUnit-Report.xml")
+               xmlReport = Path("PyTestJUnit-Report.xml")
                try:
                  newDoc.Write(xmlReport)
                except UnittestError as ex:

@@ -614,7 +614,11 @@ class Schema(Testcase):
 		)
 
 	def test_FormatVersion_Missing(self) -> None:
-		"""A report without the DTD's public identifier - e.g. gcovr's - states no format version."""
+		"""
+		A report without the DTD's public identifier states no format version.
+
+		gcovr writes such a report.
+		"""
 		content = GRADLE.read_text(encoding="utf-8").replace(
 			'<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">', ""
 		)

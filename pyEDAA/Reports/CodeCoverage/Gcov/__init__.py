@@ -116,7 +116,9 @@ class FormatVersion(IntEnum):
 	@classmethod
 	def Parse(cls, value: str) -> Self:
 		"""
-		Convert the version, as gcov states it - a string, e.g. ``"2"`` -, to the member of that version.
+		Convert the version, as gcov states it, to the member of that version.
+
+		gcov states the version as a string, e.g. ``"2"``.
 
 		:param value:       The version, as a report's ``format_version`` states it.
 		:returns:           The member of that version.

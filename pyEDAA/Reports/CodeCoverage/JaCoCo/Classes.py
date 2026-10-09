@@ -150,7 +150,9 @@ class Class(Base, CountersMixin):
 		"""
 		Read-only property to access the methods (:attr:`_methods`).
 
-		:returns: The methods, by name and descriptor, e.g. ``absolute(I)I``.
+		A method is keyed by its name and descriptor, e.g. ``absolute(I)I``.
+
+		:returns: The methods, by name and descriptor.
 		"""
 		return self._methods
 

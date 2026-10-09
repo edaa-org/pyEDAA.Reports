@@ -58,7 +58,13 @@ exclude_patterns = [
 	"_build",
 	"_theme",
 	"Thumbs.db",
-	".DS_Store"
+	".DS_Store",
+# Fragments included by Unittesting/index.rst
+	"Unittesting/DataModel.rst",
+	"Unittesting/Features.rst",
+	"Unittesting/JUnitDataModel.rst",
+	"Unittesting/OpenTestReportingDataModel.rst",
+	"Unittesting/OSVVMDataModel.rst"
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -168,6 +174,7 @@ extensions = [
 	"sphinx.ext.viewcode",
 # SphinxContrib extensions
 	"sphinxcontrib.mermaid",
+	"sphinxcontrib.autoprogram",
 # Other extensions
 	"sphinx_design",
 	"sphinx_copybutton",
