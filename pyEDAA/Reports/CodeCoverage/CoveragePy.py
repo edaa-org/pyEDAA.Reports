@@ -31,10 +31,13 @@
 """
 coverage.py's JSON code coverage format: a model of the format, read from a report and converted to the common model.
 
-coverage.py writes the format with ``coverage json``. A report is validated against the JSON Schema
-:file:`CoveragePy-JSON.schema.json`, reverse-engineered from coverage.py, which accepts format versions 2 and 3. The
+coverage.py writes the format with ``coverage json``. A report is validated against the JSON Schema of the format
+version it states (:class:`FormatVersion`), reverse-engineered from coverage.py: :file:`CoveragePy-2.schema.json` for
+format 2 (coverage.py 7.4.1 to 7.5), :file:`CoveragePy-3.schema.json` for format 3 (coverage.py 7.6 and later). The
 format's model keeps what the report states: a :class:`Document` holds :class:`File` records, a file - in format 3 -
-:class:`Region` records of its functions and classes, and each its lines, branches and :class:`Summary`.
+:class:`Region` records of its functions and classes, and each its lines, branches and :class:`Summary`. Each
+record's constructor takes typed values, so the model can be built by hand: a file or a region names its parent with
+the keyword parameter ``parent`` and is added to it. Its class method ``Parse`` reads the record's JSON object.
 
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
@@ -61,12 +64,13 @@ format's model keeps what the report states: a :class:`Document` holds :class:`F
 from __future__                  import annotations
 
 from datetime                    import datetime
+from enum                        import IntEnum
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from typing                      import Any, Iterable, Optional as Nullable, Self
 
 from jsonschema                  import Draft202012Validator
-from pyTooling.Common            import getFullyQualifiedName, readResourceFile
+from pyTooling.Common            import getFullyQualifiedName, readResourceFile, StringEnum
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
 from pyTooling.MetaClasses       import ExtendedType, abstractclass
@@ -80,13 +84,55 @@ from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus, Met
 from pyEDAA.Reports.CodeCoverage import Package as cc_Package, Unit as cc_Unit
 
 
-__all__ = ["SCHEMA"]
-
-SCHEMA = "CoveragePy-JSON.schema.json"  #: The JSON Schema a report is validated against.
+__all__ = ["SCHEMAS"]
 
 # A class with a property named like a class - ``Path``, ``Summary`` - can't name that class in the annotation of a
 # field: the class body's namespace, where annotations are evaluated, binds the name to the property.
 _Path = Path
+
+
+@export
+class FormatVersion(IntEnum):
+	"""
+	Version of coverage.py's JSON report format, as a report's ``meta.format`` states it.
+
+	coverage.py 7.4.1 added ``meta.format`` with format 2. coverage.py 7.6 and later write format 3, which adds the
+	functions and classes of a file. A report of an earlier coverage.py states no format version and isn't supported.
+	"""
+
+	Version2 = 2  #: Format 2, written by coverage.py 7.4.1 to 7.5.
+	Version3 = 3  #: Format 3, written by coverage.py 7.6 and later.
+
+	@classmethod
+	def Parse(cls, value: int) -> Self:
+		"""
+		Convert the version, as a report's ``meta.format`` states it, to the member of that version.
+
+		:param value:       The version.
+		:returns:           The member of that version.
+		:raises ValueError: If parameter ``value`` is ``None``.
+		:raises TypeError:  If parameter ``value`` is not of type :class:`int`.
+		:raises ValueError: If parameter ``value`` is not a supported format version.
+		"""
+		if value is None:
+			raise ValueError(f"Parameter 'value' is None.")
+		elif not isinstance(value, int) or isinstance(value, bool):
+			ex = TypeError(f"Parameter 'value' is not of type 'int'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+			raise ex
+		elif value not in [member.value for member in cls]:
+			ex = ValueError(f"Parameter 'value' is not a supported coverage.py JSON format version.")
+			ex.add_note(f"Got value '{value}'.")
+			ex.add_note(f"Supported format versions: {', '.join(str(member.value) for member in cls)}.")
+			raise ex
+
+		return cls(value)
+
+
+SCHEMAS: dict[FormatVersion, str] = {
+	FormatVersion.Version2: "CoveragePy-2.schema.json",
+	FormatVersion.Version3: "CoveragePy-3.schema.json"
+}  #: Per format version, the JSON Schema a report of that version is validated against.
 
 
 @export
@@ -466,29 +512,48 @@ class Base(metaclass=ExtendedType, slots=True):
 
 
 @export
+class RegionKind(StringEnum):
+	"""
+	Kind of a region of a file, as coverage.py names it: a function or a class.
+
+	A file states its regions of each kind in their own JSON object: ``functions`` and ``classes``.
+	"""
+
+	Function = "function"  #: A function or a method, listed in ``functions``.
+	Class =    "class"     #: A class, listed in ``classes``.
+
+
+@export
 class Region(Base):
 	"""
 	A function or a class of a file - in format 3 -, named by its qualified name, e.g. ``Circle.Area``.
 	"""
 
-	_name:      str  #: Qualified name of the function or class.
-	_startLine: int  #: The region's first line.
+	_parent:    Nullable[File]  #: The file the region belongs to.
+	_name:      str             #: Qualified name of the function or class.
+	_kind:      RegionKind      #: Kind of the region: a function or a class.
+	_startLine: int             #: The region's first line.
 
 	def __init__(
 		self,
 		name:             str,
+		kind:             RegionKind,
 		startLine:        int,
 		summary:          Summary,
 		executedLines:    Nullable[Iterable[int]] = None,
 		missingLines:     Nullable[Iterable[int]] = None,
 		excludedLines:    Nullable[Iterable[int]] = None,
 		executedBranches: Nullable[Iterable[tuple[int, int]]] = None,
-		missingBranches:  Nullable[Iterable[tuple[int, int]]] = None
+		missingBranches:  Nullable[Iterable[tuple[int, int]]] = None,
+		*,
+		parent:           Nullable[File] = None
 	) -> None:
 		"""
-		Initialize the region from its name, its first line, its summary, its lines and its branches.
+		Initialize the region from its name, its kind, its first line, its summary, its lines and its branches, and add it
+		to the functions or classes of its file.
 
 		:param name:             Qualified name of the function or class, e.g. ``Circle.Area``.
+		:param kind:             Kind of the region: a function or a class.
 		:param startLine:        The region's first line.
 		:param summary:          The counters coverage.py computed.
 		:param executedLines:    Optional, the executed lines. Default: ``None`` (none).
@@ -498,12 +563,18 @@ class Region(Base):
 		                         Default: ``None`` (none, or branch coverage wasn't measured).
 		:param missingBranches:  Optional, the branches never taken, as pairs of source and destination line. |br|
 		                         Default: ``None`` (none, or branch coverage wasn't measured).
+		:param parent:           Optional, the file the region belongs to; the region is added to its functions or classes
+		                         by :attr:`Name`, as its :attr:`Kind` says. Default: ``None``.
 		:raises ValueError:      If parameter ``name`` is ``None``.
 		:raises TypeError:       If parameter ``name`` is not of type :class:`str`.
 		:raises ValueError:      If parameter ``name`` is empty.
+		:raises ValueError:      If parameter ``kind`` is ``None``.
+		:raises TypeError:       If parameter ``kind`` is not of type :class:`RegionKind`.
 		:raises ValueError:      If parameter ``startLine`` is ``None``.
 		:raises TypeError:       If parameter ``startLine`` is not of type :class:`int`.
 		:raises ValueError:      If parameter ``startLine`` is less than 1.
+		:raises TypeError:       If parameter ``parent`` is not of type :class:`File`.
+		:raises ValueError:      If parameter ``parent`` contains a region of the same kind and name already.
 		"""
 		super().__init__(summary, executedLines, missingLines, excludedLines, executedBranches, missingBranches)
 
@@ -516,6 +587,13 @@ class Region(Base):
 		elif name == "":
 			raise ValueError(f"Parameter 'name' is empty.")
 
+		if kind is None:
+			raise ValueError(f"Parameter 'kind' is None.")
+		elif not isinstance(kind, RegionKind):
+			ex = TypeError(f"Parameter 'kind' is not of type 'RegionKind'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
+			raise ex
+
 		if startLine is None:
 			raise ValueError(f"Parameter 'startLine' is None.")
 		elif not isinstance(startLine, int):
@@ -527,16 +605,34 @@ class Region(Base):
 			ex.add_note(f"Got value '{startLine}'.")
 			raise ex
 
+		if parent is not None:
+			if not isinstance(parent, File):
+				ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
+
+			regions = parent._functions if kind is RegionKind.Function else parent._classes
+			if name in regions:
+				raise ValueError(f"Parameter 'parent' contains {kind} '{name}' already.")
+
+		self._parent =    parent
 		self._name =      name
+		self._kind =      kind
 		self._startLine = startLine
 
+		if parent is not None:
+			regions[name] = self
+
 	@classmethod
-	def Parse(cls, name: str, region: dict[str, Any]) -> Self:
+	def Parse(cls, name: str, kind: RegionKind, region: dict[str, Any], *, parent: Nullable[File] = None) -> Self:
 		"""
 		Read a region from its JSON object.
 
 		:param name:        Qualified name of the function or class: the region's key in ``functions`` or ``classes``.
+		:param kind:        Kind of the region: :attr:`RegionKind.Function` in ``functions``, :attr:`RegionKind.Class` in
+		                    ``classes``.
 		:param region:      The JSON object of the region.
+		:param parent:      Optional, the file the region belongs to. Default: ``None``.
 		:returns:           The region.
 		:raises ValueError: If parameter ``region`` is ``None``.
 		:raises TypeError:  If parameter ``region`` is not of type :class:`dict`.
@@ -550,14 +646,25 @@ class Region(Base):
 
 		return cls(
 			name,
+			kind,
 			region["start_line"],
 			Summary.Parse(region["summary"]),
 			region["executed_lines"],
 			region["missing_lines"],
 			region["excluded_lines"],
 			(tuple(branch) for branch in region.get("executed_branches", [])),
-			(tuple(branch) for branch in region.get("missing_branches", []))
+			(tuple(branch) for branch in region.get("missing_branches", [])),
+			parent=parent
 		)
+
+	@readonly
+	def Parent(self) -> Nullable[File]:
+		"""
+		Read-only property to access the file the region belongs to (:attr:`_parent`).
+
+		:returns: The file; ``None`` if the region belongs to no file.
+		"""
+		return self._parent
 
 	@readonly
 	def Name(self) -> str:
@@ -567,6 +674,15 @@ class Region(Base):
 		:returns: The qualified name.
 		"""
 		return self._name
+
+	@readonly
+	def Kind(self) -> RegionKind:
+		"""
+		Read-only property to access the kind of the region (:attr:`_kind`).
+
+		:returns: The kind: a function or a class.
+		"""
+		return self._kind
 
 	@readonly
 	def StartLine(self) -> int:
@@ -586,6 +702,7 @@ class File(Base):
 	The regions named ``""`` - the lines outside of every function or class - aren't kept: :meth:`Parse` skips them.
 	"""
 
+	_parent:    Nullable[Report]   #: The report the file belongs to.
 	_path:      _Path              #: The file's path, relative to the directory coverage.py ran in.
 	_functions: dict[str, Region]  #: The functions, by qualified name.
 	_classes:   dict[str, Region]  #: The classes, by qualified name.
@@ -599,11 +716,13 @@ class File(Base):
 		excludedLines:    Nullable[Iterable[int]] = None,
 		executedBranches: Nullable[Iterable[tuple[int, int]]] = None,
 		missingBranches:  Nullable[Iterable[tuple[int, int]]] = None,
-		functions:        Nullable[Iterable[Region]] = None,
-		classes:          Nullable[Iterable[Region]] = None
+		*,
+		parent:           Nullable[Report] = None
 	) -> None:
 		"""
-		Initialize the file from its path, its summary, its lines, its branches, its functions and its classes.
+		Initialize the file from its path, its summary, its lines and its branches, and add it to the files of its report.
+
+		Its functions and classes are added by creating them with this file as their parent.
 
 		:param path:             The file's path, relative to the directory coverage.py ran in.
 		:param summary:          The counters coverage.py computed.
@@ -614,13 +733,12 @@ class File(Base):
 		                         Default: ``None`` (none, or branch coverage wasn't measured).
 		:param missingBranches:  Optional, the branches never taken, as pairs of source and destination line. |br|
 		                         Default: ``None`` (none, or branch coverage wasn't measured).
-		:param functions:        Optional, the functions. Default: ``None`` (none, or format 2).
-		:param classes:          Optional, the classes. Default: ``None`` (none, or format 2).
+		:param parent:           Optional, the report the file belongs to; the file is added to its files by :attr:`Path`.
+		                         Default: ``None``.
 		:raises ValueError:      If parameter ``path`` is ``None``.
 		:raises TypeError:       If parameter ``path`` is not of type :class:`~pathlib.Path`.
-		:raises TypeError:       If parameter ``functions`` or ``classes`` is not iterable.
-		:raises TypeError:       If an element of parameter ``functions`` or ``classes`` is not of type :class:`Region`.
-		:raises ValueError:      If parameter ``functions`` or ``classes`` contains two regions of the same name.
+		:raises TypeError:       If parameter ``parent`` is not of type :class:`Report`.
+		:raises ValueError:      If parameter ``parent`` contains a file of the same path already.
 		"""
 		super().__init__(summary, executedLines, missingLines, excludedLines, executedBranches, missingBranches)
 
@@ -631,44 +749,39 @@ class File(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
-		regionDicts: list[dict[str, Region]] = []
-		for name, regions in (("functions", functions), ("classes", classes)):
-			regionDict: dict[str, Region] = {}
-			if regions is not None:
-				if not isinstance(regions, Iterable):
-					ex = TypeError(f"Parameter '{name}' is not iterable.")
-					ex.add_note(f"Got type '{getFullyQualifiedName(regions)}'.")
-					raise ex
+		if parent is not None:
+			if not isinstance(parent, Report):
+				ex = TypeError(f"Parameter 'parent' is not of type 'Report'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+				raise ex
+			elif path in parent._files:
+				raise ValueError(f"Parameter 'parent' contains file '{path.as_posix()}' already.")
 
-				for region in regions:
-					if not isinstance(region, Region):
-						ex = TypeError(f"An element of parameter '{name}' is not of type 'Region'.")
-						ex.add_note(f"Got type '{getFullyQualifiedName(region)}'.")
-						raise ex
-					elif region._name in regionDict:
-						raise ValueError(f"Parameter '{name}' contains region '{region._name}' twice.")
+		self._parent =    parent
+		self._path =      path
+		self._functions = {}
+		self._classes =   {}
 
-					regionDict[region._name] = region
-			regionDicts.append(regionDict)
-
-		self._path =                     path
-		self._functions, self._classes = regionDicts
+		if parent is not None:
+			parent._files[path] = self
 
 	@classmethod
-	def Parse(cls, name: str, file: dict[str, Any]) -> Self:
+	def Parse(cls, name: str, file: dict[str, Any], *, parent: Nullable[Report] = None) -> Self:
 		"""
-		Read a file from its JSON object.
+		Read a file, its functions and classes from its JSON object.
 
 		The regions named ``""`` - the lines outside of every function or class - are skipped.
 
-		:param name:        The file's path as the report states it - its key in ``files`` -, relative to the directory
-		                    coverage.py ran in; ``\\`` separators become ``/``.
-		:param file:        The JSON object of the file.
-		:returns:           The file.
-		:raises ValueError: If parameter ``name`` is ``None``.
-		:raises TypeError:  If parameter ``name`` is not of type :class:`str`.
-		:raises ValueError: If parameter ``file`` is ``None``.
-		:raises TypeError:  If parameter ``file`` is not of type :class:`dict`.
+		:param name:               The file's path as the report states it - its key in ``files`` -, relative to the
+		                           directory coverage.py ran in; ``\\`` separators become ``/``.
+		:param file:               The JSON object of the file.
+		:param parent:             Optional, the report the file belongs to. Default: ``None``.
+		:returns:                  The file.
+		:raises ValueError:        If parameter ``name`` is ``None``.
+		:raises TypeError:         If parameter ``name`` is not of type :class:`str`.
+		:raises ValueError:        If parameter ``file`` is ``None``.
+		:raises TypeError:         If parameter ``file`` is not of type :class:`dict`.
+		:raises CodeCoverageError: If the report names the file's path twice.
 		"""
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
@@ -684,17 +797,36 @@ class File(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
-		return cls(
-			Path(name.replace("\\", "/")),
+		path = Path(name.replace("\\", "/"))
+		if parent is not None and path in parent._files:
+			raise CodeCoverageError(f"coverage.py report names file '{path.as_posix()}' twice.")
+
+		measuredFile = cls(
+			path,
 			Summary.Parse(file["summary"]),
 			file["executed_lines"],
 			file["missing_lines"],
 			file["excluded_lines"],
 			(tuple(branch) for branch in file.get("executed_branches", [])),
 			(tuple(branch) for branch in file.get("missing_branches", [])),
-			(Region.Parse(key, region) for key, region in file.get("functions", {}).items() if key != ""),
-			(Region.Parse(key, region) for key, region in file.get("classes", {}).items() if key != "")
+			parent=parent
 		)
+
+		for kind, regions in ((RegionKind.Function, "functions"), (RegionKind.Class, "classes")):
+			for regionName, region in file.get(regions, {}).items():
+				if regionName != "":
+					Region.Parse(regionName, kind, region, parent=measuredFile)
+
+		return measuredFile
+
+	@readonly
+	def Parent(self) -> Nullable[Report]:
+		"""
+		Read-only property to access the report the file belongs to (:attr:`_parent`).
+
+		:returns: The report; ``None`` if the file belongs to no report.
+		"""
+		return self._parent
 
 	@readonly
 	def Path(self) -> Path:
@@ -730,7 +862,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 	The report's root: how and when it was written, the measured files, and the totals.
 	"""
 
-	_format:         Nullable[int]              #: Version of the report format.
+	_format:         Nullable[FormatVersion]    #: Version of the report format.
 	_version:        Nullable[SemanticVersion]  #: Version of coverage.py.
 	_timestamp:      Nullable[datetime]         #: Time the report was written, local time without time zone.
 	_branchCoverage: bool                       #: Whether branch coverage was measured.
@@ -751,11 +883,11 @@ class Report(metaclass=ExtendedType, mixin=True):
 		self._totals =         None
 
 	@readonly
-	def Format(self) -> Nullable[int]:
+	def Format(self) -> Nullable[FormatVersion]:
 		"""
 		Read-only property to access the version of the report format (:attr:`_format`).
 
-		:returns: The version, ``2`` or ``3``; ``None`` before the report was converted.
+		:returns: The version; ``None`` before the report was converted.
 		"""
 		return self._format
 
@@ -764,7 +896,9 @@ class Report(metaclass=ExtendedType, mixin=True):
 		"""
 		Read-only property to access the version of coverage.py, which wrote the report (:attr:`_version`).
 
-		:returns: The version, e.g. ``7.16.1``; ``None`` before the report was converted.
+		The report states it as ``meta.version``, e.g. ``7.16.1``.
+
+		:returns: The version; ``None`` before the report was converted.
 		"""
 		return self._version
 
@@ -843,12 +977,15 @@ class Document(cc_Document, Report):
 
 	def Analyze(self) -> None:
 		"""
-		Parse the JSON file and validate it against the JSON Schema :data:`SCHEMA`.
+		Parse the JSON file, read the format version it states, and validate it against the JSON Schema of that version
+		(:data:`SCHEMAS`).
 
 		:raises CodeCoverageError: If the file doesn't exist.
 		:raises CodeCoverageError: If the file isn't valid JSON.
+		:raises CodeCoverageError: If the file states no supported format version. |br|
+		                           The note lists the supported format versions.
 		:raises CodeCoverageError: If the JSON Schema can't be read.
-		:raises CodeCoverageError: If the file isn't valid according to the JSON Schema.
+		:raises CodeCoverageError: If the file isn't valid according to the JSON Schema of its format version.
 		"""
 		if not self._path.exists():
 			raise CodeCoverageError(f"coverage.py report file '{self._path}' does not exist.") \
@@ -860,14 +997,26 @@ class Document(cc_Document, Report):
 			except JSONDecodeError as ex:
 				raise CodeCoverageError(f"JSON syntax error in coverage.py report file '{self._path}'.") from ex
 
+			meta =    jsonDocument.get("meta") if isinstance(jsonDocument, dict) else None
+			version = meta.get("format") if isinstance(meta, dict) else None
 			try:
-				schema = loads(readResourceFile(Resources, SCHEMA))
+				formatVersion = FormatVersion.Parse(version)
+			except (ValueError, TypeError) as ex:
+				error = CodeCoverageError(f"coverage.py report file '{self._path}' states an unsupported format version.")
+				got =   f"value '{version}'" if version is not None else "no value"
+				error.add_note(f"Got {got} at '/meta/format'.")
+				error.add_note(f"Supported format versions: {', '.join(str(member.value) for member in FormatVersion)}.")
+				raise error from ex
+
+			schemaFile = SCHEMAS[formatVersion]
+			try:
+				schema = loads(readResourceFile(Resources, schemaFile))
 			except (ToolingException, JSONDecodeError) as ex:
-				raise CodeCoverageError(f"Couldn't read JSON Schema '{SCHEMA}' from package resources.") from ex
+				raise CodeCoverageError(f"Couldn't read JSON Schema '{schemaFile}' from package resources.") from ex
 
 			errors = sorted(Draft202012Validator(schema).iter_errors(jsonDocument), key=lambda error: list(error.path))
 			if len(errors) > 0:
-				ex = CodeCoverageError(f"Validation error for '{self._path}' using JSON Schema '{SCHEMA}'.")
+				ex = CodeCoverageError(f"Validation error for '{self._path}' using JSON Schema '{schemaFile}'.")
 				for error in errors:
 					ex.add_note(f"/{'/'.join(str(part) for part in error.path)}: {error.message}")
 				raise ex
@@ -883,6 +1032,7 @@ class Document(cc_Document, Report):
 		:raises CodeCoverageError: If the JSON file was not analyzed before. |br|
 		                           Call 'Document.Analyze()' or create the document using
 		                           'Document(path, analyzeAndConvert=True)'.
+		:raises CodeCoverageError: If the report names a file's path twice.
 		"""
 		if self._jsonDocument is None:
 			ex = CodeCoverageError(f"coverage.py report file '{self._path}' needs to be read and analyzed by a JSON parser.")
@@ -891,17 +1041,15 @@ class Document(cc_Document, Report):
 
 		with Stopwatch() as sw:
 			meta = self._jsonDocument["meta"]
-			self._format =         meta["format"]
+			self._format =         FormatVersion(meta["format"])
 			self._version =        SemanticVersion.Parse(meta["version"])
 			self._timestamp =      datetime.fromisoformat(meta["timestamp"])
 			self._branchCoverage = meta["branch_coverage"]
 			self._hasContexts =    meta["show_contexts"]
-			self._files =          {}
 			self._totals =         Summary.Parse(self._jsonDocument["totals"])
 
 			for name, record in self._jsonDocument["files"].items():
-				file =                    File.Parse(name, record)
-				self._files[file._path] = file
+				File.Parse(name, record, parent=self)
 
 		self._conversionDuration = sw.Duration
 
