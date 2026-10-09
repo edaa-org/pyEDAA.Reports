@@ -62,9 +62,8 @@ taken, which coverage.py adds as ``missing-branches``.
 """
 from __future__                            import annotations
 
-from collections.abc                       import Iterable
 from pathlib                               import Path
-from typing                                import Optional as Nullable
+from typing                                import Iterable, Optional as Nullable
 
 from lxml.etree                            import _Element
 from pyTooling.Decorators                  import export, readonly

@@ -73,11 +73,10 @@ element.
 """
 from __future__                                  import annotations
 
-from collections.abc                             import Generator
 from itertools                                   import islice
 from pathlib                                     import Path
 from re                                          import compile as re_compile
-from typing                                      import Generic, Optional as Nullable, Self, TypeVar
+from typing                                      import Generator, Generic, Optional as Nullable, Self, TypeVar
 
 from lxml.etree                                  import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError
 from lxml.etree                                  import _Element, _ElementTree, parse

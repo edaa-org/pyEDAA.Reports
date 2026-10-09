@@ -33,8 +33,7 @@ The elements of the Cobertura XML format below ``<coverage>``: its packages, cla
 """
 from __future__                  import annotations
 
-from collections.abc             import Iterable
-from typing                      import Optional as Nullable
+from typing                      import Iterable, Optional as Nullable
 
 from lxml.etree                  import Element as XMLElement, SubElement, _Element
 from pyTooling.Common            import getFullyQualifiedName
