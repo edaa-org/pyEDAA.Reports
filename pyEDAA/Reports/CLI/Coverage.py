@@ -126,8 +126,8 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 			summary = self._ReadCoverage(args.input)
 		except CodeCoverageError as ex:
 			self.WriteFatal(str(ex), immediateExit=False)
-			for note in getattr(ex, "__notes__", []):
-				self.WriteNormal(f"           {note}")
+			for note in getattr(ex, "__notes__", ()):
+				self.WriteErrorNote(note)
 			self.Exit(1)
 
 		lines =    f"{summary.CoveredLines} of {summary.TotalLines}"
@@ -178,7 +178,7 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 		except ValueError:
 			self.WriteError(f"Unsupported code coverage format for output: '{task}'.")
 			formats = ", ".join(OutputFormat)
-			self.WriteNormal(f"           Supported formats: {formats}; without format: {OutputFormat.DEFAULT}.")
+			self.WriteErrorNote(f"Supported formats: {formats}; without format: {OutputFormat.DEFAULT}.")
 			return
 
 		self.WriteNormal(f"Writing Cobertura XML report '{file}' ...")

@@ -163,6 +163,7 @@ def main() -> NoReturn:
 		if ex.__cause__ is not None:
 			program.WriteLineToStdErr(f"{{DARK_YELLOW}}Because of: {ex.__cause__}{{NOCOLOR}}".format(**Application.Foreground))
 
+		program.Exit(1)
 	except ReportException as ex:
 		program.PrintExceptionBase(ex)
 	except NotImplementedError as ex:

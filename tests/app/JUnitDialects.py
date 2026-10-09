@@ -284,7 +284,7 @@ class TheCommandLineVocabulary(ApplicationTestcase):
 		return f"{result.stdout}\n{result.stderr}"
 
 	def test_TheDocumentedAntNameIsRejected(self) -> None:
-		"""``Ant-JUnit4`` is how the schema and the reports name it; the command line splits on '-' and sees 'junit4'."""
+		"""``Ant-JUnit4`` is how the schema and the reports name it; the command line's format is ``Ant-JUnit``."""
 		self.assertIn("Unsupported", self._merge("Ant-JUnit4"))
 
 	def test_TheDocumentedGoogleTestNameIsRejected(self) -> None:
@@ -292,11 +292,11 @@ class TheCommandLineVocabulary(ApplicationTestcase):
 		self.assertIn("Unsupported", self._merge("GoogleTest-JUnit"))
 
 	def test_AnyJUnitCannotBeWritten(self) -> None:
-		"""It can be read, but ``_output`` has no branch for it."""
+		"""It can be read, but :class:`~pyEDAA.Reports.CLI.Unittesting.OutputFormat` has no member for it."""
 		reference = DIALECTS["pyTest-JUnit"].ReferenceFiles[0]
 		result = self.RunEntrypoint(
 			"unittest", f"--merge=pyTest-JUnit:{reference}", f"--output=Any-JUnit:{OUTPUT_DIRECTORY / 'any.xml'}",
 			timeout=60.0
 		)
 
-		self.assertIn("Unsupported JUnit XML dialect for writing", f"{result.stdout}\n{result.stderr}")
+		self.assertIn("Unsupported unit testing report format for output", f"{result.stdout}\n{result.stderr}")
