@@ -109,6 +109,30 @@ class CoverageCommand(ApplicationTestcase):
 		self.assertEqual((8, 6), (summary.TotalLines, summary.CoveredLines))
 		self.assertEqual((2, 1), (summary.TotalBranches, summary.CoveredBranches))
 
+	def test_QuestaSim(self) -> None:
+		"""QuestaSim's report with details: the line and branch figures of its statements, ``if`` and ``case``."""
+		inputFile = DATA_DIRECTORY / "QuestaSim/coverage_report_details_bcesf.xml"
+		result = self.RunEntrypoint("coverage", f"--input=QuestaSim-XML:{inputFile}", timeout=60.0)
+
+		self.assertExitCode(result)
+		self.assertIn("Lines:    2782 of 9698 covered (28.7%)", result.stdout)
+		self.assertIn("Branches: 587 of 2744 covered (21.4%)", result.stdout)
+
+	def test_QuestaSimWithoutDetails(self) -> None:
+		"""A QuestaSim report without details: the message and how to write one, exit code 1."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		inputFile = OUTPUT_DIRECTORY / "questasim-without-details.xml"
+		inputFile.write_text(
+			"<coverage_report><code_coverage_report byInstance='1'><instanceData path='/tb' du='tb'>"
+			"<statements active='4' hits='4' percent='100.00'/></instanceData></code_coverage_report></coverage_report>",
+			encoding="utf-8"
+		)
+		result = self.RunEntrypoint("coverage", f"--input=QuestaSim-XML:{inputFile}", timeout=60.0)
+
+		self.assertExitCode(result, 1)
+		self.assertIn(f"QuestaSim coverage report '{inputFile}' has no statements to convert.", result.stdout)
+		self.assertIn("Write the report with details: 'vcover report -xml -details ...'.", result.stdout)
+
 	def test_MissingInput(self) -> None:
 		result = self.RunEntrypoint("coverage", timeout=60.0)
 
