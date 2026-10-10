@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:annotation>
+		<xs:documentation>
+			QuestaSim code coverage report XML, as written by 'vcover report -xml -details' or 'coverage report -xml'.
+
+			Questa states neither a namespace nor a format version. The schema is built from three sources:
+
+			* a report of Questa 2026.2 written with 'vcover report -xml -details -code bcesf': root attributes
+			  'questa_version' and 'command'; 'lines', 'byInstance', 'instanceData' with 'sourceTable', 'fileMap', the
+			  statistics 'branches', 'states', 'transitions' and 'statements' - in this order, which contradicts the DTD -,
+			  'stmt', 'if'/'ielem', 'case'/'celem', and the states and transitions of finite state machines,
+			  'state'/'trans', which name no file number;
+			* the Questa User's Manual and a report of Questa 2023.3 (by design unit): 'byDU', 'DuData';
+			* ModelSim's DTD 'covreport.dtd' for the elements no Questa sample shows yet: the summary records, 'fileData',
+			  the details of conditions, expressions and toggles.
+
+			A scope's 'sourceTable' comes first; its statistics and details follow in any order, except a finite state
+			machine's: 'states', 'transitions', then each 'state' and each 'trans'. Functional coverage reports
+			('functional_coverage_report') aren't covered.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:simpleType name="Flag">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="0"/>
+			<xs:enumeration value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Percent">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="100"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="LineNumber">
+		<xs:restriction base="xs:positiveInteger"/>
+	</xs:simpleType>
+
+	<!-- Coverage statistics of a scope or a summary record: items, hit items, percentage. -->
+	<xs:complexType name="Statistics">
+		<xs:attribute name="active"  type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="hits"    type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="percent" type="Percent"               use="required"/>
+	</xs:complexType>
+
+	<!-- A coverage item with a truth table: a condition or an expression (DTD only). -->
+	<xs:complexType name="TableItem">
+		<xs:sequence>
+			<xs:element ref="table" minOccurs="0"/>
+		</xs:sequence>
+		<xs:attribute name="active"  type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="fn"      type="xs:nonNegativeInteger"/>
+		<xs:attribute name="hits"    type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="ln"      type="LineNumber"            use="required"/>
+		<xs:attribute name="percent" type="Percent"               use="required"/>
+		<xs:attribute name="st"      type="xs:positiveInteger"    use="required"/>
+	</xs:complexType>
+
+	<!-- The items of a scope: statistics and details, in any order. -->
+	<xs:group name="ScopeItems">
+		<xs:sequence>
+			<xs:element ref="sourceTable" minOccurs="0"/>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="statements"    type="Statistics"/>
+				<xs:element name="branches"      type="Statistics"/>
+				<xs:element name="conditions"    type="Statistics"/>
+				<xs:element name="expressions"   type="Statistics"/>
+				<xs:group ref="StateMachines"/>
+				<xs:element name="toggleSummary" type="Statistics"/>
+				<xs:element ref="stmt"/>
+				<xs:element ref="if"/>
+				<xs:element ref="case"/>
+				<xs:element name="condition"     type="TableItem"/>
+				<xs:element name="expression"    type="TableItem"/>
+				<xs:element ref="tog"/>
+				<xs:element ref="toge"/>
+				<xs:element ref="togenum"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+
+	<!-- The finite state machines of a scope: their statistics, then their states and transitions. -->
+	<xs:group name="StateMachines">
+		<xs:sequence>
+			<xs:element name="states"      type="Statistics"/>
+			<xs:element name="transitions" type="Statistics"/>
+			<xs:element ref="state" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="trans" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:group>
+
+	<!-- The statistics of a summary record (DTD only). -->
+	<xs:group name="SummaryItems">
+		<xs:sequence>
+			<xs:element name="statements"    type="Statistics" minOccurs="0"/>
+			<xs:element name="branches"      type="Statistics" minOccurs="0"/>
+			<xs:element name="conditions"    type="Statistics" minOccurs="0"/>
+			<xs:element name="expressions"   type="Statistics" minOccurs="0"/>
+			<xs:element name="toggleSummary" type="Statistics" minOccurs="0"/>
+		</xs:sequence>
+	</xs:group>
+
+	<xs:element name="coverage_report">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="code_coverage_report"/>
+			</xs:sequence>
+			<xs:attribute name="questa_version" type="xs:string"/>
+			<xs:attribute name="command"        type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="code_coverage_report">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="summaryByFile"     minOccurs="0"/>
+				<xs:element ref="summaryByInstance" minOccurs="0"/>
+				<xs:choice>
+					<xs:element ref="DuData"       minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="fileData"     minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="instanceData" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:choice>
+			</xs:sequence>
+			<xs:attribute name="byDU"       type="Flag"/>
+			<xs:attribute name="byFile"     type="Flag"/>
+			<xs:attribute name="byInstance" type="Flag"/>
+			<xs:attribute name="lines"      type="Flag"/>
+			<xs:attribute name="totals"     type="Flag"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="summaryByFile">
+		<xs:complexType>
+			<xs:group ref="SummaryItems"/>
+			<xs:attribute name="files" type="xs:nonNegativeInteger" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="summaryByInstance">
+		<xs:complexType>
+			<xs:group ref="SummaryItems"/>
+			<xs:attribute name="instances" type="xs:nonNegativeInteger" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="instanceData">
+		<xs:complexType>
+			<xs:group ref="ScopeItems"/>
+			<xs:attribute name="path" type="xs:string" use="required"/>
+			<xs:attribute name="du"   type="xs:string" use="required"/>
+			<xs:attribute name="sec"  type="xs:string"/>
+		</xs:complexType>
+		<xs:key name="InstanceFileNumber">
+			<xs:selector xpath="sourceTable/fileMap"/>
+			<xs:field xpath="@fn"/>
+		</xs:key>
+		<xs:keyref name="InstanceFileReference" refer="InstanceFileNumber">
+			<xs:selector xpath="stmt|if/ielem|case/celem|condition|expression"/>
+			<xs:field xpath="@fn"/>
+		</xs:keyref>
+	</xs:element>
+
+	<xs:element name="DuData">
+		<xs:complexType>
+			<xs:group ref="ScopeItems"/>
+			<xs:attribute name="du"  type="xs:string" use="required"/>
+			<xs:attribute name="sec" type="xs:string"/>
+		</xs:complexType>
+		<xs:key name="DesignUnitFileNumber">
+			<xs:selector xpath="sourceTable/fileMap"/>
+			<xs:field xpath="@fn"/>
+		</xs:key>
+		<xs:keyref name="DesignUnitFileReference" refer="DesignUnitFileNumber">
+			<xs:selector xpath="stmt|if/ielem|case/celem|condition|expression"/>
+			<xs:field xpath="@fn"/>
+		</xs:keyref>
+	</xs:element>
+
+	<xs:element name="fileData">
+		<xs:complexType>
+			<xs:group ref="ScopeItems"/>
+			<xs:attribute name="path" type="xs:string" use="required"/>
+		</xs:complexType>
+		<xs:key name="FileFileNumber">
+			<xs:selector xpath="sourceTable/fileMap"/>
+			<xs:field xpath="@fn"/>
+		</xs:key>
+		<xs:keyref name="FileFileReference" refer="FileFileNumber">
+			<xs:selector xpath="stmt|if/ielem|case/celem|condition|expression"/>
+			<xs:field xpath="@fn"/>
+		</xs:keyref>
+	</xs:element>
+
+	<xs:element name="sourceTable">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="fileMap" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="files" type="xs:nonNegativeInteger" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="fileMap">
+		<xs:complexType>
+			<xs:attribute name="fn"   type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="path" type="xs:string"             use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="stmt">
+		<xs:complexType>
+			<xs:attribute name="fn"   type="xs:nonNegativeInteger"/>
+			<xs:attribute name="ln"   type="LineNumber"            use="required"/>
+			<xs:attribute name="st"   type="xs:positiveInteger"    use="required"/>
+			<xs:attribute name="hits" type="xs:nonNegativeInteger" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- A state of a finite state machine: its name, line and how often it was entered. -->
+	<xs:element name="state">
+		<xs:complexType>
+			<xs:attribute name="ln"    type="LineNumber"            use="required"/>
+			<xs:attribute name="hits"  type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="state" type="xs:string"             use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- A transition of a finite state machine: its number, line, how often it was taken, and 'from -> to'. -->
+	<xs:element name="trans">
+		<xs:complexType>
+			<xs:attribute name="ln"    type="LineNumber"            use="required"/>
+			<xs:attribute name="tid"   type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="hits"  type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="state" type="xs:string"             use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- An if statement: its branches (if, elsif, else or the implicit AllFalse branch), how often each was taken. -->
+	<xs:element name="if">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ielem" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="active"  type="xs:positiveInteger"    use="required"/>
+			<xs:attribute name="hasElse" type="Flag"                  use="required"/>
+			<xs:attribute name="hits"    type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="percent" type="Percent"               use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="ielem">
+		<xs:complexType>
+			<xs:attribute name="false" type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="fn"    type="xs:nonNegativeInteger"/>
+			<xs:attribute name="ln"    type="LineNumber"            use="required"/>
+			<xs:attribute name="st"    type="xs:positiveInteger"    use="required"/>
+			<xs:attribute name="true"  type="xs:nonNegativeInteger" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- A case statement: its case items, and how often each was taken. -->
+	<xs:element name="case">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="celem" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="active"  type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="hits"    type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="percent" type="Percent"               use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="celem">
+		<xs:complexType>
+			<xs:attribute name="fn"   type="xs:nonNegativeInteger"/>
+			<xs:attribute name="hits" type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="ln"   type="LineNumber"            use="required"/>
+			<xs:attribute name="st"   type="xs:positiveInteger"    use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- Truth table of a condition or an expression (DTD only). -->
+	<xs:element name="table">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="col" maxOccurs="unbounded"/>
+				<xs:element ref="row" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="cols"    type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="rows"    type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="unknown" type="xs:string"             use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="col">
+		<xs:complexType>
+			<xs:attribute name="i"     type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="label" type="xs:string"             use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="row">
+		<xs:complexType>
+			<xs:attribute name="body" type="xs:string"             use="required"/>
+			<xs:attribute name="hits" type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="j"    type="xs:nonNegativeInteger" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- Toggle details (DTD only). -->
+	<xs:element name="tog">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string"             use="required"/>
+			<xs:attribute name="c0"   type="xs:nonNegativeInteger"/>
+			<xs:attribute name="c1"   type="xs:nonNegativeInteger"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="toge">
+		<xs:complexType>
+			<xs:attribute name="name"   type="xs:string"             use="required"/>
+			<xs:attribute name="c1H_0L" type="xs:nonNegativeInteger"/>
+			<xs:attribute name="c0L_1H" type="xs:nonNegativeInteger"/>
+			<xs:attribute name="c0L_Z"  type="xs:nonNegativeInteger"/>
+			<xs:attribute name="cZ_0L"  type="xs:nonNegativeInteger"/>
+			<xs:attribute name="c1H_Z"  type="xs:nonNegativeInteger"/>
+			<xs:attribute name="cZ_1H"  type="xs:nonNegativeInteger"/>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- An enumerated signal: Questa writes one attribute per enumeration value, ModelSim's DTD child elements. -->
+	<xs:element name="togenum">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="togenumval" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+			<xs:anyAttribute processContents="skip"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="togenumval">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string"             use="required"/>
+			<xs:attribute name="c"    type="xs:nonNegativeInteger"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

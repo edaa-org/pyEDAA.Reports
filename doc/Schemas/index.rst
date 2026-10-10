@@ -59,6 +59,9 @@ Available schemas
    * - :ref:`Aldec UCDB <SCHEMAS/Aldec-UCDB>`
      - :file:`Aldec-UCDB.xsd`
      - :class:`pyEDAA.Reports.CodeCoverage.AldecUCDB.Document`
+   * - :ref:`QuestaSim Coverage <SCHEMAS/QuestaSim-Coverage>`
+     - :file:`QuestaSim-Coverage.xsd`
+     - :class:`pyEDAA.Reports.CodeCoverage.QuestaSim.Document`
    * - :ref:`Any JUnit <SCHEMAS/Any-JUnit>`
      - :file:`Any-JUnit.xsd`
      - :class:`pyEDAA.Reports.Unittesting.JUnit.Document`
@@ -135,6 +138,7 @@ resource file, whether pyEDAA.Reports is installed, inside a wheel, or a checkou
    Gcov-2
    JaCoCo-1.1
    Aldec-UCDB
+   QuestaSim-Coverage
    Any-JUnit
    Ant-JUnit4
    Catch2-JUnit
