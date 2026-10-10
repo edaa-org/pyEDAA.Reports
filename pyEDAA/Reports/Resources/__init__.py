@@ -36,6 +36,7 @@ The XML schemas and JSON Schemas the code coverage formats are validated against
 * :file:`Gcov-1.schema.json` - gcov JSON, format 1.
 * :file:`Gcov-2.schema.json` - gcov JSON, format 2.
 * :file:`JaCoCo-1.1.xsd` - JaCoCo XML, format 1.1.
+* :file:`QuestaSim-Coverage.xsd` - QuestaSim's code coverage report XML (``vcover report -xml -details``).
 
 .. rubric:: Usage
 

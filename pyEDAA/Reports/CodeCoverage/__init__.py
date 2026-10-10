@@ -60,6 +60,8 @@ The report formats have models of their own, which convert to this one:
       (``llvm-cov export -format=lcov``).
    :mod:`pyEDAA.Reports.CodeCoverage.JaCoCo`
       |rarr| JaCoCo's XML format, as written e.g. by Gradle's task ``jacocoTestReport``.
+   :mod:`pyEDAA.Reports.CodeCoverage.QuestaSim`
+      |rarr| QuestaSim's code coverage report XML (``vcover report -xml -details``).
 """
 from __future__            import annotations
 
