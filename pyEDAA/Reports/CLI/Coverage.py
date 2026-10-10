@@ -54,6 +54,7 @@ from pyEDAA.Reports.CodeCoverage.Gcov                            import Document
 from pyEDAA.Reports.CodeCoverage.GHDL                            import Document as GHDLDocument
 from pyEDAA.Reports.CodeCoverage.JaCoCo                          import Document as JaCoCoDocument
 from pyEDAA.Reports.CodeCoverage.LCOV                            import Document as LCOVDocument
+from pyEDAA.Reports.CodeCoverage.QuestaSim                       import Document as QuestaSimDocument
 
 
 __all__ = ["INPUT_FORMATS"]
@@ -71,6 +72,7 @@ class InputFormat(StringEnum):
 	JaCoCoXML =           "JaCoCo-XML"            #: JaCoCo's XML report.
 	LCOV =                "LCOV"                  #: lcov's tracefile.
 	NVCCobertura =        "NVC-Cobertura"         #: Cobertura XML as NVC writes it.
+	QuestaSimXML =        "QuestaSim-XML"         #: QuestaSim's coverage report XML (``vcover report -xml -details``).
 
 	DEFAULT = AnyCobertura                        #: A file without format is read as Cobertura XML.
 
@@ -93,7 +95,8 @@ INPUT_FORMATS: Dict[InputFormat, Type[cc_Document]] = {
 	InputFormat.GHDLJSON:            GHDLDocument,
 	InputFormat.JaCoCoXML:           JaCoCoDocument,
 	InputFormat.LCOV:                LCOVDocument,
-	InputFormat.NVCCobertura:        NVCCoberturaDocument
+	InputFormat.NVCCobertura:        NVCCoberturaDocument,
+	InputFormat.QuestaSimXML:        QuestaSimDocument
 }
 
 

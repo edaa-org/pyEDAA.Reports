@@ -763,6 +763,13 @@ What the conversion leaves out:
    for file in summary.IterateFiles():
      print(f"{file.Path}: {file.LineCoverage:.1%} lines, {file.BranchCoverage:.1%} branches")
 
+The command line reads the report as ``QuestaSim-XML`` and writes it as Cobertura XML:
+
+.. code-block:: bash
+
+   vcover report -xml -details -output CoverageReport.xml Testsuite.ucdb
+   pyedaa-reports coverage --input=QuestaSim-XML:CoverageReport.xml --output=Cobertura:coverage.xml
+
 
 .. _CODECOV/Formats/GoCoverProfile:
 
@@ -854,7 +861,7 @@ most tools read (see :ref:`CLI`):
    Writing Cobertura XML report 'coverage.xml' ...
 
 ``--input`` names the format and the file: ``Any-Cobertura``, ``CoveragePy-Cobertura``, ``CoveragePy-JSON``,
-``Gcov-JSON``, ``GHDL-JSON``, ``JaCoCo-XML``, ``LCOV`` or ``NVC-Cobertura``, spelled as here
+``Gcov-JSON``, ``GHDL-JSON``, ``JaCoCo-XML``, ``LCOV``, ``NVC-Cobertura`` or ``QuestaSim-XML``, spelled as here
 (:class:`~pyEDAA.Reports.CLI.Coverage.InputFormat`). A file without format is read as ``Any-Cobertura``. ``--output``
 names the format ``Cobertura`` (:class:`~pyEDAA.Reports.CLI.Coverage.OutputFormat`, also the default) and the file.
 ``-v`` adds the figures of each file.
