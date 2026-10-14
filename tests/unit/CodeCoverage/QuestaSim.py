@@ -158,7 +158,8 @@ class FormatModel(Testcase):
 		"""UartRx's finite state machine: 6 of 6 states, 7 of 9 transitions; the file is the instance's only file."""
 		instance = _scope(self.report, "/tbuart/UartRx_1")
 
-		states, transitions = instance.Statistics[CoverageKind.States], instance.Statistics[CoverageKind.Transitions]
+		states =      instance.Statistics[CoverageKind.States]
+		transitions = instance.Statistics[CoverageKind.Transitions]
 		self.assertEqual((6, 6, 9, 7), (states.Active, states.Hits, transitions.Active, transitions.Hits))
 		self.assertEqual(
 			["RX_IDLE", "RX_HUNT", "RX_DATA", "RX_PARITY", "RX_STOP", "RX_BREAK"], [state.Name for state in instance.States]
@@ -488,7 +489,8 @@ class Parsing(Testcase):
 			"<celem fn='0' ln='9' st='1' hits='4'/></case></instanceData>"
 		))
 
-		ifStatement, caseStatement = instance.IfStatements[0], instance.CaseStatements[0]
+		ifStatement =   instance.IfStatements[0]
+		caseStatement = instance.CaseStatements[0]
 		self.assertFalse(ifStatement.HasElse)
 		self.assertEqual([(5, 3), (5, 0)], [(branch.LineNumber, branch.TrueCount) for branch in ifStatement.Branches])
 		self.assertEqual(Path("tb.vhdl"), ifStatement.Branches[0].File)
@@ -646,7 +648,8 @@ class Conversion(Testcase):
 		self.assertEqual(OSVVM / "UART/src/UartRx.vhd", self._file("UartRx.vhd").Path)
 
 	def test_File(self) -> None:
-		passThru, uartRx = self._file("Axi4PassThru.vhd"), self._file("UartRx.vhd")
+		passThru = self._file("Axi4PassThru.vhd")
+		uartRx =   self._file("UartRx.vhd")
 
 		self.assertEqual((45, 45, 0), (passThru.TotalLines, passThru.CoveredLines, passThru.TotalBranches))
 		self.assertEqual((95, 82), (uartRx.TotalLines, uartRx.CoveredLines))

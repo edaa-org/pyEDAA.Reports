@@ -305,8 +305,9 @@ class IfStatement(metaclass=ExtendedType, slots=True):
 		for branchElement in element.iterfind("ielem"):
 			IfBranch.Parse(branchElement, parent=ifStatement)
 
-		active, hits = int(element.attrib["active"]), int(element.attrib["hits"])
-		if (active, hits) != (len(ifStatement._branches), ifStatement.TakenBranches):
+		active = int(element.attrib["active"])
+		hits =   int(element.attrib["hits"])
+		if active != len(ifStatement._branches) or hits != ifStatement.TakenBranches:
 			ex = CodeCoverageError(f"'<if>' in line {element.sourceline} states other figures than its branches have.")
 			ex.add_note(f"Got '{hits}' of '{active}' branches taken, its branches have {ifStatement.TakenBranches} of "
 			            f"{len(ifStatement._branches)}.")
@@ -545,8 +546,9 @@ class CaseStatement(metaclass=ExtendedType, slots=True):
 		for branchElement in element.iterfind("celem"):
 			CaseBranch.Parse(branchElement, parent=caseStatement)
 
-		active, hits = int(element.attrib["active"]), int(element.attrib["hits"])
-		if (active, hits) != (len(caseStatement._branches), caseStatement.TakenBranches):
+		active = int(element.attrib["active"])
+		hits =   int(element.attrib["hits"])
+		if active != len(caseStatement._branches) or hits != caseStatement.TakenBranches:
 			ex = CodeCoverageError(f"'<case>' in line {element.sourceline} states other figures than its branches have.")
 			ex.add_note(f"Got '{hits}' of '{active}' branches taken, its branches have {caseStatement.TakenBranches} of "
 			            f"{len(caseStatement._branches)}.")
