@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	A synthetic UCIS 1.0 XML interchange file, written by hand after the standard's XML schema (chapter 9): no tool wrote
+	it. It describes a simulation of these sources:
+
+	rtl/counter.sv                                     tb/top.sv
+	 1 module counter(input clk, rst,                   1 module top;
+	 2                output reg [3:0] q);              2   reg clk = 0, rst = 1;
+	 3   always @(posedge clk) if (rst)                 3   wire [3:0] q1, q2;
+	 4     q <= 0;                                      4   counter c1(clk, rst, q1);
+	 5   else                                           5   counter c2(clk, 1'b1, q2);
+	 6     q <= q + 1;                                  6   always #5 clk = ~clk;
+	 7 endmodule                                        7   initial begin
+	                                                    8     #12 rst = 0;
+	                                                    9     #100 $finish;
+	                                                   10   end
+	                                                   11 endmodule
+-->
+<UCIS xmlns="UCIS" ucisVersion="1.0" writtenBy="hand-written" writtenTime="2026-10-09T12:00:00">
+	<sourceFiles fileName="rtl/counter.sv" id="1"/>
+	<sourceFiles fileName="tb/top.sv" id="2"/>
+	<historyNodes historyNodeId="1" logicalName="test_counter" physicalName="test_counter.ucdb"
+	              kind="UCIS_HISTORYNODE_TEST" testStatus="true" simtime="112" timeunit="ns" runCwd="/home/user/project" cpuTime="0.25" seed="0"
+	              cmd="vsim" args="-c top" date="2026-10-09T11:59:00" userName="user" toolCategory="UCIS:Simulator"
+	              ucisVersion="1.0" vendorId="synthetic" vendorTool="hand-written" vendorToolVersion="1.0">
+		<userAttr key="optimization_level" type="int">3</userAttr>
+	</historyNodes>
+	<instanceCoverages name="top" key="0" instanceId="1" moduleName="top">
+		<id file="2" line="1" inlineCount="1"/>
+		<blockCoverage>
+			<statement>
+				<id file="2" line="6" inlineCount="1"/>
+				<bin><contents coverageCount="23"><historyNodeId>1</historyNodeId></contents></bin>
+			</statement>
+			<statement>
+				<id file="2" line="8" inlineCount="1"/>
+				<bin><contents coverageCount="1"><historyNodeId>1</historyNodeId></contents></bin>
+			</statement>
+			<statement excluded="true" excludedReason="end of simulation">
+				<id file="2" line="9" inlineCount="1"/>
+				<bin><contents coverageCount="0"/></bin>
+			</statement>
+		</blockCoverage>
+	</instanceCoverages>
+	<instanceCoverages name="top.c1" key="1" instanceId="2" moduleName="counter" parentInstanceId="1">
+		<id file="2" line="4" inlineCount="1"/>
+		<blockCoverage metricMode="UCIS:STATEMENT">
+			<statement>
+				<id file="1" line="3" inlineCount="1"/>
+				<bin><contents nameComponent="#stmt#3#1#" typeComponent=":5:" coverageCount="12"/></bin>
+			</statement>
+			<statement>
+				<id file="1" line="4" inlineCount="1"/>
+				<bin><contents coverageCount="2"/></bin>
+			</statement>
+			<statement>
+				<id file="1" line="6" inlineCount="1"/>
+				<bin><contents coverageCount="10"/></bin>
+			</statement>
+		</blockCoverage>
+		<branchCoverage>
+			<statement branchExpr="(rst)" statementType="if">
+				<id file="1" line="3" inlineCount="1"/>
+				<branch>
+					<id file="1" line="4" inlineCount="1"/>
+					<branchBin><contents nameComponent="true" typeComponent=":6:" coverageCount="2"/></branchBin>
+				</branch>
+				<branch>
+					<id file="1" line="6" inlineCount="1"/>
+					<branchBin><contents nameComponent="all_false_bin" typeComponent=":6:" coverageCount="10"/></branchBin>
+				</branch>
+			</statement>
+		</branchCoverage>
+	</instanceCoverages>
+	<instanceCoverages name="top.c2" key="2" instanceId="3" moduleName="counter" parentInstanceId="1">
+		<designParameter><name>WIDTH</name><value>4</value></designParameter>
+		<id file="2" line="5" inlineCount="1"/>
+		<blockCoverage metricMode="UCIS:STATEMENT">
+			<statement>
+				<id file="1" line="3" inlineCount="1"/>
+				<bin><contents coverageCount="12"/></bin>
+			</statement>
+			<statement>
+				<id file="1" line="4" inlineCount="1"/>
+				<bin><contents coverageCount="12"/></bin>
+			</statement>
+			<statement>
+				<id file="1" line="6" inlineCount="1"/>
+				<bin><contents coverageCount="0"/></bin>
+			</statement>
+		</blockCoverage>
+		<branchCoverage>
+			<statement branchExpr="(rst)" statementType="if">
+				<id file="1" line="3" inlineCount="1"/>
+				<branch>
+					<id file="1" line="4" inlineCount="1"/>
+					<branchBin><contents nameComponent="true" typeComponent=":6:" coverageCount="12"/></branchBin>
+				</branch>
+				<branch>
+					<id file="1" line="6" inlineCount="1"/>
+					<branchBin><contents nameComponent="all_false_bin" typeComponent=":6:" coverageCount="0"/></branchBin>
+				</branch>
+			</statement>
+		</branchCoverage>
+	</instanceCoverages>
+</UCIS>
