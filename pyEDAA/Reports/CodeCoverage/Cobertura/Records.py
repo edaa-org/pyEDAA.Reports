@@ -342,7 +342,8 @@ class Element(metaclass=ExtendedType, slots=True):
 		:param xmlElement: The element's XML element.
 		:param lines:      The element's lines.
 		"""
-		lineRate, branchRate = self._lineRate, self._branchRate
+		lineRate =   self._lineRate
+		branchRate = self._branchRate
 		if lineRate is None or branchRate is None:
 			computedLineRate, computedBranchRate = self._Rates(self._CountLines(lines))
 			lineRate =   computedLineRate if lineRate is None else lineRate

@@ -322,7 +322,8 @@ class Document(cc_Document, Tracefile):
 
 					section = None
 				elif key == "DA":
-					number, count = int(values[0]), int(values[1])
+					number = int(values[0])
+					count =  int(values[1])
 					if (line := section._lines.get(number)) is None:
 						Line(number, count, values[2], parent=section)
 					else:
@@ -354,10 +355,12 @@ class Document(cc_Document, Tracefile):
 					functionsByIndex[index] = aliases
 				elif key == "FNDA" or key == "FNA":
 					if key == "FNDA":
-						count, name = int(values[0]), values[1]
+						count = int(values[0])
+						name =  values[1]
 						aliases = functionsByName.get(name)
 					else:
-						count, name = int(values[1]), values[2]
+						count = int(values[1])
+						name =  values[2]
 						aliases = functionsByIndex.get(int(values[0]))
 
 					if aliases is None:
