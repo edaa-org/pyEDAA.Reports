@@ -56,6 +56,7 @@ class CoverageCommand(ApplicationTestcase):
 	def test_Read(self) -> None:
 		"""Each format shows the line figures of its fixture."""
 		for formatName, file, expected in (
+			("Aldec-UCDB-XML",       DATA_DIRECTORY / "Aldec/ucdb.xml",             "Lines:    112 of 112 covered (100.0%)"),
 			("Any-Cobertura",        DATA_DIRECTORY / "Go-Test/cobertura.xml",      "Lines:    20 of 28 covered (71.4%)"),
 			("CoveragePy-Cobertura", DATA_DIRECTORY / "Python/coverage.xml",        "Lines:    22 of 27 covered (81.5%)"),
 			("CoveragePy-JSON",      DATA_DIRECTORY / "Python/coverage.json",       "Lines:    22 of 27 covered (81.5%)"),
@@ -109,6 +110,25 @@ class CoverageCommand(ApplicationTestcase):
 		self.assertEqual((8, 6), (summary.TotalLines, summary.CoveredLines))
 		self.assertEqual((2, 1), (summary.TotalBranches, summary.CoveredBranches))
 
+	def test_AldecUCDBToCobertura(self) -> None:
+		"""Aldec's UCDB XML export written as Cobertura XML: valid by the strict schema, the same figures read back."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		outputFile = OUTPUT_DIRECTORY / "ucdb.xml"
+		outputFile.unlink(missing_ok=True)
+
+		inputFile = DATA_DIRECTORY / "Aldec/ucdb002_partially_excluded.xml"
+		result = self.RunEntrypoint(
+			"coverage", f"--input=Aldec-UCDB-XML:{inputFile}", f"--output=Cobertura:{outputFile}", timeout=60.0
+		)
+
+		self.assertExitCode(result)
+		self.assertIn("Lines:    4 of 5 covered (80.0%)", result.stdout)
+		strict = XMLSchema(parse(getResourceFile(Resources, STRICT_SCHEMA)))
+		self.assertTrue(strict.validate(parse(outputFile)), msg=str(strict.error_log))
+
+		summary = CoberturaDocument(outputFile, analyzeAndConvert=True).ToCoverageSummary()
+		self.assertEqual((5, 4), (summary.TotalLines, summary.CoveredLines))
+
 	def test_MissingInput(self) -> None:
 		result = self.RunEntrypoint("coverage", timeout=60.0)
 
@@ -120,7 +140,7 @@ class CoverageCommand(ApplicationTestcase):
 
 		self.assertExitCode(result, 1)
 		self.assertIn("Unsupported code coverage format for input: 'Foo:coverage.xml'.", result.stdout)
-		self.assertIn("Supported formats: Any-Cobertura, CoveragePy-Cobertura", result.stdout)
+		self.assertIn("Supported formats: Aldec-UCDB-XML, Any-Cobertura, CoveragePy-Cobertura", result.stdout)
 		self.assertIn("without format: Any-Cobertura.", result.stdout)
 
 	def test_FormatNamesAreCaseSensitive(self) -> None:
