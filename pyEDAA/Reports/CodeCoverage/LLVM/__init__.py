@@ -68,7 +68,6 @@ its regions, branch regions and MC/DC records. The records below a file or a fun
 from __future__                               import annotations
 
 from json                                     import JSONDecodeError, loads
-from os.path                                  import commonprefix
 from pathlib                                  import Path
 from re                                       import match
 from typing                                   import Any, Optional as Nullable
@@ -430,7 +429,14 @@ class Document(cc_Document, Report):
 		:raises CodeCoverageError: If a file's path runs through another file.
 		:raises CodeCoverageError: If a function has a branch region in a file, which none of its regions expands to.
 		"""
-		common = commonprefix([path.parent.parts for path in self._files])
+		parents = [path.parent.parts for path in self._files]
+		first =   min(parents, default=())
+		last =    max(parents, default=())
+		common =  first
+		for index, part in enumerate(first):
+			if part != last[index]:
+				common = first[:index]
+				break
 
 		summary = CoverageSummary(self._path.stem, sourceDirectories=[Path(*common)] if len(common) > 0 else [])
 		commonFiles = {path: summary.GetOrAddFile("/".join(path.parts[len(common):])) for path in self._files}
