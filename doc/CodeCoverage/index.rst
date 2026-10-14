@@ -216,9 +216,9 @@ binary format of their own, which only the tool itself or its API reads.
      - —
      - ACDB
    * - `Siemens <https://eda.sw.siemens.com/>`__ QuestaSim (VHDL, Verilog, SystemVerilog)
-     - an XML report of its own (``vcover report -xml``)
+     - coverage report XML (``vcover report -xml -details``)
      - —
-     - ``vcover report``
+     - text, HTML (``vcover report``)
      - UCDB (read via the UCDB or UCIS C API)
    * - `pyucis <https://github.com/fvutils/pyucis>`__, PyVSC (Python)
      - UCIS XML without namespace (``pyucis convert``)
@@ -242,6 +242,7 @@ pyEDAA.Reports reads these formats:
 * :ref:`UCIS XML <CODECOV/Formats/UCIS>`, and the dialect of :ref:`pyucis <CODECOV/Formats/UCIS/PyUCIS>`
 * :ref:`JaCoCo XML <CODECOV/Formats/JaCoCo>`
 * :ref:`Aldec's UCDB XML <CODECOV/Formats/AldecUCDB>`
+* :ref:`QuestaSim's coverage report XML <CODECOV/Formats/QuestaSim>`
 
 The Go cover profile, OpenCover XML and coverlet's JSON are described below, but not read yet.
 
@@ -731,7 +732,7 @@ The command line reads the report as ``UCIS-XML``, without merging the instances
 
    * Siemens QuestaSim documents no command writing it - neither in the command reference of Questa SIM 2024.2 nor of
      2025.2. Questa supports the UCIS by a C library implementing its API; its XML report (``vcover report -xml``) is a
-     format of its own.
+     format of its own: :ref:`CODECOV/Formats/QuestaSim`.
    * Aldec's ``acdb2xml`` writes a dump of the UCIS data model in a format of its own (namespace ``www.aldec.com``,
      root ``<ux:ucdb>``), not the interchange format.
    * pyucis - and PyVSC, which writes its coverage with pyucis - write the interchange format with the elements in no
@@ -895,6 +896,72 @@ The command line reads the report as ``Aldec-UCDB-XML``, without merging the ins
    ``pyedaa-reports coverage --input=Aldec-UCDB-XML:ucdb.xml --output=Cobertura:cobertura.xml``; its option
    ``--merge-instances`` to the parameter ``mergeInstances`` of
    :meth:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Document.ToCoverageSummary`.
+
+
+.. _CODECOV/Formats/QuestaSim:
+
+QuestaSim coverage report XML
+=============================
+
+Questa SIM - and ModelSim before it - keeps code coverage in a coverage database (UCDB), whose format is proprietary.
+The command ``vcover report`` writes a report of a database; with ``-xml -details``, the report is XML with the coverage
+items of each instance, which pyEDAA.Reports reads:
+
+.. code-block:: bash
+
+   vcover report -xml -details -output CoverageReport.xml Testsuite.ucdb
+
+``-code`` chooses the kinds of coverage items - by default, all kinds collected at compile time -, e.g.
+``-code bcesf`` for branches (``b``), conditions (``c``), expressions (``e``), statements (``s``) and finite state
+machines (``f``). In a simulation, ``coverage report -xml -details -output CoverageReport.xml`` writes the same format.
+The XML's root is ``<coverage_report>``, without namespace; it isn't the XML interchange format of the UCIS standard.
+:class:`pyEDAA.Reports.CodeCoverage.QuestaSim.Document` validates a report against
+:ref:`QuestaSim-Coverage.xsd <SCHEMAS/QuestaSim-Coverage>` and reads it into the format's model:
+
+* The Questa version and the command, which wrote the report.
+* The report's mode - by instance (the default), by design unit (``-du=<name>``) or by source file - and its scopes:
+  ``<instanceData>``, ``<DuData>`` or ``<fileData>``. An instance names its path, its design unit and - unless it is a
+  package - its architecture, and its source files, numbered in a source table.
+* Per scope, the coverage statistics - per kind of coverage items, how many the scope has and how many were hit - and
+  the coverage items:
+
+  * statements (``<stmt>``): file, line, index in the line, and how often the statement ran;
+  * ``if`` statements (``<if>``) with a branch per ``if``, ``elsif`` and ``else`` (``<ielem>``): how often the branch
+    was taken (``true``), and how often its condition was false, so the evaluation went on to the next branch
+    (``false``). An ``if`` without ``else`` has an implicit *AllFalse* branch as its last branch, in the line of the
+    ``if``;
+  * ``case`` statements (``<case>``) with a branch per case item (``<celem>``): how often it was taken;
+  * the states (``<state>``) and transitions (``<trans>``) of finite state machines: how often a state was entered and a
+    transition taken.
+
+:meth:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Document.ToCoverageSummary` converts the statements and branches to the
+common model:
+
+* The coverage items of all scopes are merged by file, line and index: a statement or branch of a design unit with
+  several instances counts as often as in all instances together.
+* An ``if`` or ``case`` statement adds its branches to the line of its first branch - the line of the ``if``, or of the
+  first case item, as Questa states no line of the ``case`` itself -; a branch counts as often as Questa counted it
+  taken. The line ran as often as the statement was evaluated: the sum of its branches' counts.
+* A line ran as often as its least often run statement or branching statement. A line, which ran, is covered, if all
+  its branches were taken, otherwise partially covered.
+* A file's path is the one the report states - relative to the directory Questa ran in, or absolute.
+
+What the conversion leaves out:
+
+* The coverage statistics, and the states and transitions of finite state machines - only the format's model has them.
+* Conditions, expressions and toggles: no report with their details is known yet, so they aren't read.
+* The design units and instances: they don't become units of the common model.
+* Functional coverage reports (``-cvg``, ``-directive``, ``-assert``) are rejected.
+
+.. code-block:: Python
+
+   from pathlib import Path
+   from pyEDAA.Reports.CodeCoverage.QuestaSim import Document
+
+   report = Document(Path("CoverageReport.xml"), analyzeAndConvert=True)
+   summary = report.ToCoverageSummary()
+   for file in summary.IterateFiles():
+     print(f"{file.Path}: {file.LineCoverage:.1%} lines, {file.BranchCoverage:.1%} branches")
 
 
 .. _CODECOV/Formats/GoCoverProfile:

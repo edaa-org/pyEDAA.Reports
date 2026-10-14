@@ -64,6 +64,8 @@ The report formats have models of their own, which convert to this one:
       |rarr| JaCoCo's XML format, as written e.g. by Gradle's task ``jacocoTestReport``.
    :mod:`pyEDAA.Reports.CodeCoverage.AldecUCDB`
       |rarr| Aldec's UCDB XML format, as exported by ``acdb2xml`` of Riviera-PRO or Active-HDL.
+   :mod:`pyEDAA.Reports.CodeCoverage.QuestaSim`
+      |rarr| QuestaSim's code coverage report XML (``vcover report -xml -details``).
 """
 from __future__            import annotations
 
