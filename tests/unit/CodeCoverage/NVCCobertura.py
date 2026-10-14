@@ -199,9 +199,9 @@ class Conversion(Testcase):
 		summary = Document(REPORT, analyzeAndConvert=True).ToCoverageSummary()
 		counter = summary.Directories["src"].Files["Counter.vhdl"]
 
-		Covered, Partial, Uncovered = (
-			LineCoverageStatus.Covered, LineCoverageStatus.PartiallyCovered, LineCoverageStatus.Uncovered
-		)
+		Covered =   LineCoverageStatus.Covered
+		Partial =   LineCoverageStatus.PartiallyCovered
+		Uncovered = LineCoverageStatus.Uncovered
 		for number, status, count, branches in (
 			(29, Covered,   86,   [Covered, Covered]),      # if rising_edge(Clock)
 			(30, Partial,   42,   [Covered, Uncovered]),    # if Reset = '1': never true
