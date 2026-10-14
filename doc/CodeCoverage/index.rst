@@ -723,6 +723,8 @@ expression, FSM, assertion and covergroup coverage stays in the format's model: 
    for instance in report.Instances:
      print(f"{instance.Name}: {instance.ModuleName}")
 
+The command line reads the report as ``UCIS-XML``, without merging the instances.
+
 .. hint::
 
    Which tools write the UCIS XML interchange format:
@@ -762,6 +764,8 @@ no file.
 
    report = Document(Path("coverage.xml"), analyzeAndConvert=True)
    summary = report.ToCoverageSummary()
+
+The command line reads the report as ``PyUCIS-XML``, without merging the instances.
 
 
 .. _CODECOV/Formats/JaCoCo:
@@ -973,10 +977,10 @@ most tools read (see :ref:`CLI`):
    Writing Cobertura XML report 'coverage.xml' ...
 
 ``--input`` names the format and the file: ``Aldec-UCDB-XML``, ``Any-Cobertura``, ``CoveragePy-Cobertura``,
-``CoveragePy-JSON``, ``Gcov-JSON``, ``GHDL-JSON``, ``JaCoCo-XML``, ``LCOV`` or ``NVC-Cobertura``, spelled as here
-(:class:`~pyEDAA.Reports.CLI.Coverage.InputFormat`). A file without format is read as ``Any-Cobertura``. ``--output``
-names the format ``Cobertura`` (:class:`~pyEDAA.Reports.CLI.Coverage.OutputFormat`, also the default) and the file.
-``-v`` adds the figures of each file.
+``CoveragePy-JSON``, ``Gcov-JSON``, ``GHDL-JSON``, ``JaCoCo-XML``, ``LCOV``, ``NVC-Cobertura``, ``PyUCIS-XML`` or
+``UCIS-XML``, spelled as here (:class:`~pyEDAA.Reports.CLI.Coverage.InputFormat`). A file without format is read as
+``Any-Cobertura``. ``--output`` names the format ``Cobertura`` (:class:`~pyEDAA.Reports.CLI.Coverage.OutputFormat`,
+also the default) and the file. ``-v`` adds the figures of each file.
 
 
 .. _CODECOV/Tools:
