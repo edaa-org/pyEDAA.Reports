@@ -743,6 +743,16 @@ The command line reads the report as ``UCIS-XML``, without merging the instances
    for ``statement``, ``exprBin`` for ``bin``, a ``coverpointBin`` with ``name`` and ``key`` -, which look like
    leftovers of a draft. The reader follows the schema.
 
+.. seealso::
+
+   :ref:`Why pyEDAA.Reports reads UCIS XML itself <CODECOV/Formats/UCIS/WhyOwnReader>`
+      |rarr| pyucis and pyEDAA.Reports compared, where the schema comes from, and how both work together.
+
+.. toctree::
+   :hidden:
+
+   UCIS-OwnReader
+
 .. _CODECOV/Formats/UCIS/PyUCIS:
 
 pyucis UCIS XML
