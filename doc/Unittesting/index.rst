@@ -8,9 +8,9 @@ testcases grouped in testsuites. Testsuites can be nested in other testsuites. T
 special testsuite called testsuite summary. It contains only testsuites, but no testcases.
 
 The data model can be filled from various sources like **Ant JUnit test reports**, **Open Test Reporting files**,
-**pyTooling test reports** or **OSVVM testsuite summaries** (more to be added). Many programming languages and/or unit
-testing frameworks support exporting results in the Ant JUnit format. See below for supported formats and their
-variations (dialects).
+**pyTooling test reports**, **Visual Studio test results (TRX)** or **OSVVM testsuite summaries** (more to be added).
+Many programming languages and/or unit testing frameworks support exporting results in the Ant JUnit format. See below
+for supported formats and their variations (dialects).
 
 .. attention::
 
@@ -31,6 +31,7 @@ Specific Data Models
 
 .. include:: JUnitDataModel.rst
 .. include:: OpenTestReportingDataModel.rst
+.. include:: TRXDataModel.rst
 .. include:: OSVVMDataModel.rst
 
 
@@ -176,7 +177,9 @@ Visual Studio and ``dotnet test`` (VSTest) write a test run's results as TRX fil
   The run's outcome and ``<Counters>`` (``total``, ``executed``, ``passed``, ``failed``, ``notExecuted``, ...), the
   run's output and the attachments of data collectors, e.g. code coverage reports.
 
-There is no reader yet.
+The file is read by :class:`pyEDAA.Reports.Unittesting.TRX.Document`: the test run, its test lists and its summary,
+see :ref:`UNITTEST/SpecificDataModel/TRX`. The counters contradict the results. Results and test definitions aren't read
+yet.
 
 
 .. _UNITTEST/FileFormats/OSVVM:
@@ -290,7 +293,8 @@ dotnet test (VSTest)
 (e.g. xUnit.net, NUnit, MSTest). Each logger given on its command line writes a report:
 
 ``--logger trx``
-  A :ref:`TRX file <UNITTEST/FileFormats/TRX>`, Visual Studio's own format.
+  A :ref:`TRX file <UNITTEST/FileFormats/TRX>`, Visual Studio's own format, read by
+  :class:`pyEDAA.Reports.Unittesting.TRX.Document`. It keeps a skipped test's reason.
 
 ``--logger junit`` (NuGet package ``JunitXml.TestLogger``)
   A ``<testsuites>`` root without attributes, holding one ``<testsuite>`` per test assembly, named after the
