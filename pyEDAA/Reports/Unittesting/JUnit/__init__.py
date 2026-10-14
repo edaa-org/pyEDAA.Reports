@@ -94,6 +94,7 @@ from __future__      import annotations
 
 from datetime        import datetime, timedelta
 from enum            import Flag
+from io              import BytesIO
 from pathlib         import Path
 from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
@@ -1404,19 +1405,19 @@ class Document(TestsuiteSummary, ut_Document):
 				raise UnittestError(f"Error while parsing XML Schema '{xmlSchemaFile}'.") from ex
 
 			try:
-				junitParser = XMLParser(schema=junitSchema, ns_clean=True)
-				with self._path.open("rb") as file:
-					junitDocument = parse(file, parser=junitParser)
+				content = self._path.read_bytes()
+			except OSError as ex:
+				raise UnittestError(f"Couldn't read JUnit XML file '{self._path}'.") from ex
 
-				self._xmlDocument = junitDocument
+			junitParser = XMLParser(schema=junitSchema, ns_clean=True)
+			try:
+				self._xmlDocument = parse(BytesIO(content), parser=junitParser, base_url=str(self._path))
 			except XMLSyntaxError as ex:
 				for logEntry in junitParser.error_log:
 					ex.add_note(str(logEntry))
 				raise UnittestError(
 					f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'."
 				) from ex
-			except Exception as ex:
-				raise UnittestError(f"Couldn't read JUnit XML file '{self._path}'.") from ex
 
 		self._analysisDuration = sw.Duration
 

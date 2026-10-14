@@ -73,6 +73,7 @@ element.
 """
 from __future__                                  import annotations
 
+from io                                          import BytesIO
 from itertools                                   import islice
 from pathlib                                     import Path
 from re                                          import compile as re_compile
@@ -447,10 +448,12 @@ class Document(cc_Document, Report):
 
 		with Stopwatch() as sw:
 			try:
-				with self._path.open("rb") as file:
-					xmlDocument = parse(file, XMLParser(ns_clean=True))
+				content = self._path.read_bytes()
 			except OSError as ex:
 				raise CodeCoverageError(f"Couldn't read JaCoCo report file '{self._path}'.") from ex
+
+			try:
+				xmlDocument = parse(BytesIO(content), XMLParser(ns_clean=True), base_url=str(self._path))
 			except XMLSyntaxError as ex:
 				raise CodeCoverageError(f"XML syntax error in JaCoCo report file '{self._path}'.") from ex
 

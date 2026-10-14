@@ -53,6 +53,7 @@ and converted into the unified test entity hierarchy of :mod:`pyEDAA.Reports.Uni
 from __future__                 import annotations
 
 from datetime                   import datetime, timedelta
+from io                         import BytesIO
 from pathlib                    import Path
 from typing                     import Dict, Optional as Nullable
 
@@ -167,10 +168,12 @@ class Document(TestsuiteSummary, ut_Document):
 
 		with Stopwatch() as sw:
 			try:
-				with self._path.open("rb") as file:
-					xmlDocument = parse(file, XMLParser(ns_clean=True))
+				content = self._path.read_bytes()
 			except OSError as ex:
 				raise UnittestError(f"Couldn't read pyTooling test report file '{self._path}'.") from ex
+
+			try:
+				xmlDocument = parse(BytesIO(content), XMLParser(ns_clean=True), base_url=str(self._path))
 			except XMLSyntaxError as ex:
 				raise UnittestError(f"XML syntax error in pyTooling test report file '{self._path}'.") from ex
 
