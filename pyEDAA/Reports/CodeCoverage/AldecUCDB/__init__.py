@@ -75,6 +75,7 @@ parameter ``parent`` and is added to it. Its class method ``Parse`` reads the el
 """
 from __future__                                      import annotations
 
+from io                                              import BytesIO
 from pathlib                                         import Path
 from typing                                          import Generator, Iterable, Optional as Nullable
 
@@ -414,10 +415,12 @@ class Document(cc_Document, Report):
 
 		with Stopwatch() as sw:
 			try:
-				with self._path.open("rb") as file:
-					xmlDocument = parse(file, XMLParser(ns_clean=True))
+				content = self._path.read_bytes()
 			except OSError as ex:
 				raise CodeCoverageError(f"Couldn't read Aldec UCDB file '{self._path}'.") from ex
+
+			try:
+				xmlDocument = parse(BytesIO(content), XMLParser(ns_clean=True), base_url=str(self._path))
 			except XMLSyntaxError as ex:
 				raise CodeCoverageError(f"XML syntax error in Aldec UCDB file '{self._path}'.") from ex
 
