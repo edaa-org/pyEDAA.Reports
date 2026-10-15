@@ -29,79 +29,92 @@
 # ==================================================================================================================== #
 #
 """
-The physical hierarchy of the documentation coverage model: the analysis' root, its directories and source files.
+The physical hierarchy of the documentation coverage model: the report, its directories and source files.
 
 A file counts the items declared in it; a directory sums its directories and files. The items themselves are in the
-logical hierarchy (:mod:`~pyEDAA.Reports.DocumentationCoverage.Items`), which the root holds too.
+logical hierarchy (:mod:`~pyEDAA.Reports.DocumentationCoverage.Items`), which the report holds too.
 """
-from __future__                           import annotations
+from __future__                                   import annotations
 
-from pathlib                              import Path
-from typing                               import TYPE_CHECKING, ClassVar, Generator, Optional as Nullable
+from datetime                                     import timedelta
+from pathlib                                      import Path
+from typing                                       import TYPE_CHECKING, ClassVar, Generator, Optional as Nullable
 
-from pyTooling.Common                     import getFullyQualifiedName
-from pyTooling.Decorators                 import export, readonly
+from pyTooling.Common                             import getFullyQualifiedName
+from pyTooling.Decorators                         import export, readonly
 
-from pyEDAA.Reports.DocumentationCoverage import Base, DocCoverageError
+from pyEDAA.Reports.DocumentationCoverage         import Base, DocCoverageError
 
 if TYPE_CHECKING:  # pragma: no cover
 	from pyEDAA.Reports.DocumentationCoverage.Items import Item
 
 
+# A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
+# body's namespace, where annotations are evaluated, binds the name to the property.
+_Path = Path
+
+
 @export
 class BaseWithPath(Base):
 	"""
-	Base-class of the physical hierarchy - directories and source files -: a name and a path below the analysis' root.
+	Base-class of the physical hierarchy - directories and source files -: a name and a path below the report.
 
 	Its parent is the :class:`Directory` containing it.
 	"""
 
-	_name: str  #: Name of the directory or file.
+	_name: _Path  #: Name of the directory or file: a path of one component.
 
-	def __init__(self, name: str, *, parent: Nullable[Directory]) -> None:
+	def __init__(self, name: Path, *, parent: Nullable[Directory]) -> None:
 		"""
 		Initializes the parent, the name and the counters.
 
-		:param name:        Name of the directory or file.
+		:param name:        Name of the directory or file: a path of one component.
 		:param parent:      The directory containing this one, or ``None``.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError: If parameter ``name`` is ``None``.
-		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError: If parameter ``name`` is empty.
+		:raises TypeError:  If parameter ``name`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError: If parameter ``name`` is empty or ``.``.
+		:raises ValueError: If parameter ``name`` has more than one component.
 		"""
 		super().__init__(parent=parent)
 
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
-		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+		elif not isinstance(name, Path):
+			ex = TypeError(f"Parameter 'name' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
-		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+		elif name.name == "":
+			ex = ValueError(f"Parameter 'name' is empty.")
+			ex.add_note(f"Got path '{name}'.")
+			raise ex
+		elif len(name.parts) > 1:
+			ex = ValueError(f"Parameter 'name' has more than one component.")
+			ex.add_note(f"Got path '{name.as_posix()}'.")
+			raise ex
 
 		self._name = name
 
 	@readonly
-	def Name(self) -> str:
+	def Name(self) -> Path:
 		"""
 		Read-only property to access the name of the directory or file (:attr:`_name`).
 
-		:returns: The name.
+		:returns: The name: a path of one component.
 		"""
 		return self._name
 
 	@readonly
 	def Path(self) -> Path:
 		"""
-		Read-only property to return the path below the root: the names of the parent directories and the own name.
+		Read-only property to return the path below the report: the names of the parent directories and the own name.
 
 		A file ``Shapes.py`` in a directory ``myPackage`` has the path ``myPackage/Shapes.py``.
 
 		:returns: The path; the name, if there is no parent.
 		"""
 		if self._parent is None:
-			return Path(self._name)
+			return self._name
 
 		return self._parent.Path / self._name
 
@@ -114,19 +127,20 @@ class Directory(BaseWithPath):
 
 	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: A directory is in a directory; assigned below the class.
 
-	_directories: dict[str, Directory]  #: The directories in this directory, by name.
-	_files:       dict[str, File]       #: The source files in this directory, by name.
+	_directories: dict[_Path, Directory]  #: The directories in this directory, by name.
+	_files:       dict[_Path, File]       #: The source files in this directory, by name.
 
-	def __init__(self, name: str, *, parent: Nullable[Directory] = None) -> None:
+	def __init__(self, name: Path, *, parent: Nullable[Directory] = None) -> None:
 		"""
 		Initializes a directory, and adds it to its parent directory.
 
-		:param name:              Name of the directory.
+		:param name:              Name of the directory: a path of one component.
 		:param parent:            Optional, the directory containing this one. Default: ``None``.
 		:raises TypeError:        If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError:       If parameter ``name`` is ``None``.
-		:raises TypeError:        If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:       If parameter ``name`` is empty.
+		:raises TypeError:        If parameter ``name`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:       If parameter ``name`` is empty or ``.``.
+		:raises ValueError:       If parameter ``name`` has more than one component.
 		:raises DocCoverageError: If the parent directory already contains a file or directory of this name.
 		"""
 		super().__init__(name, parent=parent)
@@ -145,7 +159,7 @@ class Directory(BaseWithPath):
 		:raises DocCoverageError: If this directory already contains a file or directory of this name.
 		"""
 		if element._name in self._directories or element._name in self._files:
-			raise DocCoverageError(f"Directory '{self.Path.as_posix()}' already contains '{element._name}'.")
+			raise DocCoverageError(f"Directory '{self.Path.as_posix()}' already contains '{element._name.as_posix()}'.")
 
 		if isinstance(element, Directory):
 			self._directories[element._name] = element
@@ -163,7 +177,7 @@ class Directory(BaseWithPath):
 			yield from child.IterateElements()
 
 	@readonly
-	def Directories(self) -> dict[str, Directory]:
+	def Directories(self) -> dict[Path, Directory]:
 		"""
 		Read-only property to access the directories in this directory (:attr:`_directories`).
 
@@ -172,7 +186,7 @@ class Directory(BaseWithPath):
 		return self._directories
 
 	@readonly
-	def Files(self) -> dict[str, File]:
+	def Files(self) -> dict[Path, File]:
 		"""
 		Read-only property to access the source files in this directory (:attr:`_files`).
 
@@ -208,7 +222,7 @@ class Directory(BaseWithPath):
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
-		parts = [part for part in path.parts if part not in ("", ".", path.anchor)]
+		parts = [Path(part) for part in path.parts if part not in ("", ".", path.anchor)]
 		if len(parts) == 0:
 			ex = ValueError(f"Parameter 'path' names no file.")
 			ex.add_note(f"Got path '{path}'.")
@@ -263,30 +277,33 @@ Directory._PARENT_TYPE = (Directory, )
 
 
 @export
-class CoverageSummary(Directory):
+class DocumentationReport(Directory):
 	"""
-	The root of a documentation coverage analysis: the directory the source files' paths are relative to, and the
+	The report of a documentation coverage analysis: the directory the source files' paths are relative to, and the
 	top-level items of the logical hierarchy.
 
 	It is its own root. Its counters count every item of the logical hierarchy; its directories and files count only
 	the items declared in a source file.
 	"""
 
-	_items: list[Item]  #: The top-level items, in the order they were added.
+	_items:            list[Item]           #: The top-level items, in the order they were added.
+	_analysisDuration: Nullable[timedelta]  #: Duration of the analysis, which produced the report, if measured.
 
-	def __init__(self, name: str) -> None:
+	def __init__(self, name: Path) -> None:
 		"""
-		Initializes the root of a documentation coverage analysis.
+		Initializes the report of a documentation coverage analysis.
 
-		:param name:        Name of the analysis, e.g. of the package analyzed.
+		:param name:        Name of the report: a path of one component, e.g. the analyzed package's name.
 		:raises ValueError: If parameter ``name`` is ``None``.
-		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError: If parameter ``name`` is empty.
+		:raises TypeError:  If parameter ``name`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError: If parameter ``name`` is empty or ``.``.
+		:raises ValueError: If parameter ``name`` has more than one component.
 		"""
 		super().__init__(name)
 
-		self._root =  self
-		self._items = []
+		self._root =             self
+		self._items =            []
+		self._analysisDuration = None
 
 	@Base.Parent.setter
 	def Parent(self, parent: None) -> None:
@@ -296,10 +313,10 @@ class CoverageSummary(Directory):
 
 	def _AddElement(self, element: Directory | File | Item) -> None:
 		"""
-		Add a top-level item, a directory or a file, which names the analysis' root as its parent.
+		Add a top-level item, a directory or a file, which names the report as its parent.
 
 		:param element:           The item, directory or file.
-		:raises DocCoverageError: If the root already contains a file or directory of this name.
+		:raises DocCoverageError: If the report already contains a file or directory of this name.
 		"""
 		if isinstance(element, BaseWithPath):
 			super()._AddElement(element)
@@ -310,7 +327,7 @@ class CoverageSummary(Directory):
 		"""
 		Iterate the elements of the physical hierarchy, then those of the logical hierarchy.
 
-		:returns: A generator of every element below the analysis' root.
+		:returns: A generator of every element below the report.
 		"""
 		yield from super().IterateElements()
 		for item in self._items:
@@ -320,9 +337,9 @@ class CoverageSummary(Directory):
 	@readonly
 	def Path(self) -> Path:
 		"""
-		Read-only property to return the path below the root, which is the root's own: ``.``.
+		Read-only property to return the path below the report, which is the report's own: ``.``.
 
-		So the paths of the directories and files below are relative to the root, without its name.
+		So the paths of the directories and files below are relative to the report, without its name.
 
 		:returns: ``.``
 		"""
@@ -337,10 +354,21 @@ class CoverageSummary(Directory):
 		"""
 		return self._items
 
+	@readonly
+	def AnalysisDuration(self) -> Nullable[timedelta]:
+		"""
+		Read-only property to access the duration of the analysis, which produced the report (:attr:`_analysisDuration`).
+
+		A reader measures it; a report built otherwise has none.
+
+		:returns: The duration, or ``None`` if it wasn't measured.
+		"""
+		return self._analysisDuration
+
 	def Aggregate(self) -> None:
 		"""
 		Aggregate the physical hierarchy - directories and files -, then the items of the logical hierarchy, which the
-		root's counters sum.
+		report's counters sum.
 		"""
 		super().Aggregate()
 
@@ -363,16 +391,17 @@ class File(BaseWithPath):
 
 	_items: list[Item]  #: The items declared in this file, in the order they were added.
 
-	def __init__(self, name: str, *, parent: Nullable[Directory] = None) -> None:
+	def __init__(self, name: Path, *, parent: Nullable[Directory] = None) -> None:
 		"""
 		Initializes a source file, and adds it to its directory.
 
-		:param name:              Name of the file.
+		:param name:              Name of the file: a path of one component.
 		:param parent:            Optional, the directory containing the file. Default: ``None``.
 		:raises TypeError:        If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError:       If parameter ``name`` is ``None``.
-		:raises TypeError:        If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:       If parameter ``name`` is empty.
+		:raises TypeError:        If parameter ``name`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:       If parameter ``name`` is empty or ``.``.
+		:raises ValueError:       If parameter ``name`` has more than one component.
 		:raises DocCoverageError: If the directory already contains a file or directory of this name.
 		"""
 		super().__init__(name, parent=parent)

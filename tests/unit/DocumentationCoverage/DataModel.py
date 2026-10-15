@@ -31,9 +31,9 @@
 """Unit tests of the documentation coverage model: kinds, states, both hierarchies, and aggregation."""
 from pathlib                                    import Path
 
-from pyEDAA.Reports.DocumentationCoverage       import CATEGORIES, CoverageCounters, CoverageState, DocCoverageError
+from pyEDAA.Reports.DocumentationCoverage       import CoverageCounters, CoverageState, DocCoverageError
 from pyEDAA.Reports.DocumentationCoverage       import ItemCategory, ItemKind
-from pyEDAA.Reports.DocumentationCoverage.Files import CoverageSummary, Directory, File
+from pyEDAA.Reports.DocumentationCoverage.Files import DocumentationReport, Directory, File
 from pyEDAA.Reports.DocumentationCoverage.Items import Item
 from pyTooling.Testing                          import Testcase
 
@@ -62,14 +62,19 @@ class Kinds(Testcase):
 
 	def test_ItemKind_Category(self) -> None:
 		"""Every kind belongs to a category."""
-		self.assertEqual(set(ItemKind), set(CATEGORIES))
+		self.assertTrue(all(isinstance(kind.Category, ItemCategory) for kind in ItemKind))
 		self.assertIs(ItemCategory.Container, ItemKind.Entity.Category)
 		self.assertIs(ItemCategory.Type, ItemKind.TypeAlias.Category)
-		self.assertIs(ItemCategory.Callable, ItemKind.Property.Category)
+		self.assertIs(ItemCategory.Callable, ItemKind.Destructor.Category)
 		self.assertIs(ItemCategory.Field, ItemKind.EnumerationMember.Category)
 		self.assertIs(ItemCategory.Variable, ItemKind.Signal.Category)
+		self.assertIs(ItemCategory.Variable, ItemKind.FileObject.Category)
+		self.assertIs(ItemCategory.Constant, ItemKind.Constant.Category)
+		self.assertIs(ItemCategory.Generic, ItemKind.Generic.Category)
+		self.assertIs(ItemCategory.Generic, ItemKind.TypeParameter.Category)
 		self.assertIs(ItemCategory.Parameter, ItemKind.Port.Category)
 		self.assertIs(ItemCategory.Other, ItemKind.Other.Category)
+		self.assertIs(ItemCategory.Other, ItemKind.DEFAULT.Category)
 
 	def test_ItemCategory_Parse(self) -> None:
 		self.assertIs(ItemCategory.Callable, ItemCategory.Parse("callable"))
@@ -133,7 +138,7 @@ class ItemInstantiation(Testcase):
 		self.assertEqual("<Item class Circle: 100.0%>", repr(item))
 
 	def test_Item_Lines(self) -> None:
-		file = File("Shapes.py")
+		file = File(Path("Shapes.py"))
 		item = Item("Circle", ItemKind.Class, DOCUMENTED, file=file, startLine=3, endLine=10)
 
 		self.assertIs(file, item.File)
@@ -204,21 +209,21 @@ class ItemInstantiation(Testcase):
 
 	def test_Parent(self) -> None:
 		with self.assertRaises(TypeError) as context:
-			_ = Item("Circle", ItemKind.Class, DOCUMENTED, parent=File("Shapes.py"))
-		self.assertEqual("Parameter 'parent' is not of type 'Item' or 'CoverageSummary'.", str(context.exception))
+			_ = Item("Circle", ItemKind.Class, DOCUMENTED, parent=File(Path("Shapes.py")))
+		self.assertEqual("Parameter 'parent' is not of type 'Item' or 'DocumentationReport'.", str(context.exception))
 
 
 class ItemHierarchy(Testcase):
 	def test_Children(self) -> None:
-		summary = CoverageSummary("myPackage")
-		package = Item("myPackage", ItemKind.Package, DOCUMENTED, parent=summary)
+		report = DocumentationReport(Path("myPackage"))
+		package = Item("myPackage", ItemKind.Package, DOCUMENTED, parent=report)
 		module = Item("Shapes", ItemKind.Module, DOCUMENTED, parent=package)
 		getter = Item("Radius", ItemKind.Property, DOCUMENTED, parent=module)
 		setter = Item("Radius", ItemKind.Property, CoverageState.Ignored | UNDOCUMENTED, parent=module)
 
-		self.assertEqual([package], summary.Items)
-		self.assertIs(summary, package.Root)
-		self.assertIs(summary, setter.Root)
+		self.assertEqual([package], report.Items)
+		self.assertIs(report, package.Root)
+		self.assertIs(report, setter.Root)
 		self.assertEqual("myPackage.Shapes.Radius", setter.QualifiedName)
 		self.assertEqual(2, len(module))
 		self.assertEqual([getter, setter], list(module))
@@ -233,102 +238,110 @@ class ItemHierarchy(Testcase):
 		self.assertEqual([module, getter, setter], list(package.IterateElements()))
 
 	def test_ParentSetter(self) -> None:
-		summary = CoverageSummary("myPackage")
+		report = DocumentationReport(Path("myPackage"))
 		package = Item("myPackage", ItemKind.Package, DOCUMENTED)
 		module = Item("Shapes", ItemKind.Module, DOCUMENTED, parent=package)
 
-		package.Parent = summary
+		package.Parent = report
 
-		self.assertIs(summary, package.Parent)
-		self.assertIs(summary, module.Root)
-		self.assertEqual([package], summary.Items)
+		self.assertIs(report, package.Parent)
+		self.assertIs(report, module.Root)
+		self.assertEqual([package], report.Items)
 
 		with self.assertRaises(ValueError) as context:
 			module.Parent = None
 		self.assertEqual("Parameter 'parent' is None.", str(context.exception))
 
 		with self.assertRaises(TypeError) as context:
-			module.Parent = Directory("myPackage")
-		self.assertEqual("Parameter 'parent' is not of type 'Item' or 'CoverageSummary'.", str(context.exception))
+			module.Parent = Directory(Path("myPackage"))
+		self.assertEqual("Parameter 'parent' is not of type 'Item' or 'DocumentationReport'.", str(context.exception))
 
 	def test_RootHasNoParent(self) -> None:
-		summary = CoverageSummary("myPackage")
+		report = DocumentationReport(Path("myPackage"))
 
 		with self.assertRaises(TypeError) as context:
-			summary.Parent = Directory("other")
+			report.Parent = Directory(Path("other"))
 		self.assertEqual(
-			"A 'pyEDAA.Reports.DocumentationCoverage.Files.CoverageSummary' has no parent.", str(context.exception)
+			"A 'pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport' has no parent.", str(context.exception)
 		)
 
 
 class Files(Testcase):
 	def test_GetOrAddFile(self) -> None:
-		summary = CoverageSummary("myPackage")
-		file = summary.GetOrAddFile(Path("Units/Length.py"))
+		report = DocumentationReport(Path("myPackage"))
+		file = report.GetOrAddFile(Path("Units/Length.py"))
 
-		self.assertIs(file, summary.GetOrAddFile(Path("Units/Length.py")))
+		self.assertIs(file, report.GetOrAddFile(Path("Units/Length.py")))
 		self.assertEqual(Path("Units/Length.py"), file.Path)
-		self.assertEqual(Path("."), summary.Path)
-		self.assertIs(summary, file.Root)
-		self.assertEqual(1, summary.FileCount)
-		self.assertEqual(["Units"], list(summary.Directories))
+		self.assertEqual(Path("."), report.Path)
+		self.assertIs(report, file.Root)
+		self.assertEqual(1, report.FileCount)
+		self.assertEqual([Path("Units")], list(report.Directories))
+		self.assertEqual(Path("Length.py"), file.Name)
 		self.assertEqual("<File Units/Length.py: 0 items, 100.0%>", repr(file))
-		self.assertEqual("<Directory Units: 1 files, 100.0%>", repr(summary.Directories["Units"]))
+		self.assertEqual("<Directory Units: 1 files, 100.0%>", repr(report.Directories[Path("Units")]))
 
 	def test_IterateFiles(self) -> None:
-		summary = CoverageSummary("myPackage")
+		report = DocumentationReport(Path("myPackage"))
 		for path in ("Units/Length.py", "__init__.py", "Units/__init__.py", "Shapes.py"):
-			summary.GetOrAddFile(Path(path))
+			report.GetOrAddFile(Path(path))
 
 		self.assertEqual(
 			[Path("Shapes.py"), Path("__init__.py"), Path("Units/Length.py"), Path("Units/__init__.py")],
-			[file.Path for file in summary.IterateFiles()]
+			[file.Path for file in report.IterateFiles()]
 		)
 
 	def test_GetOrAddFile_Errors(self) -> None:
-		summary = CoverageSummary("myPackage")
-		summary.GetOrAddFile(Path("Shapes.py"))
+		report = DocumentationReport(Path("myPackage"))
+		report.GetOrAddFile(Path("Shapes.py"))
 
 		with self.assertRaises(ValueError) as context:
-			summary.GetOrAddFile(None)
+			report.GetOrAddFile(None)
 		self.assertEqual("Parameter 'path' is None.", str(context.exception))
 
 		with self.assertRaises(TypeError) as context:
-			summary.GetOrAddFile("Shapes.py")
+			report.GetOrAddFile("Shapes.py")
 		self.assertEqual("Parameter 'path' is not of type 'Path'.", str(context.exception))
 
 		with self.assertRaises(ValueError) as context:
-			summary.GetOrAddFile(Path("."))
+			report.GetOrAddFile(Path("."))
 		self.assertEqual("Parameter 'path' names no file.", str(context.exception))
 
 		with self.assertRaises(DocCoverageError) as context:
-			summary.GetOrAddFile(Path("Shapes.py/Circle.py"))
+			report.GetOrAddFile(Path("Shapes.py/Circle.py"))
 		self.assertEqual("'Shapes.py' is a file, not a directory.", str(context.exception))
 
 	def test_DuplicateName(self) -> None:
-		directory = Directory("myPackage")
-		File("Shapes.py", parent=directory)
+		directory = Directory(Path("myPackage"))
+		File(Path("Shapes.py"), parent=directory)
 
 		with self.assertRaises(DocCoverageError) as context:
-			_ = Directory("Shapes.py", parent=directory)
+			_ = Directory(Path("Shapes.py"), parent=directory)
 		self.assertEqual("Directory 'myPackage' already contains 'Shapes.py'.", str(context.exception))
 
 	def test_Name(self) -> None:
+		self.assertEqual(Path("Units"), Directory(Path("Units")).Name)
+
 		with self.assertRaises(ValueError) as context:
 			_ = File(None)
 		self.assertEqual("Parameter 'name' is None.", str(context.exception))
 
 		with self.assertRaises(TypeError) as context:
-			_ = Directory(Path("Units"))
-		self.assertEqual("Parameter 'name' is not of type 'str'.", str(context.exception))
+			_ = Directory("Units")
+		self.assertEqual("Parameter 'name' is not of type 'Path'.", str(context.exception))
+
+		for name in ("", "."):
+			with self.subTest(name=name), self.assertRaises(ValueError) as context:
+				_ = DocumentationReport(Path(name))
+			self.assertEqual("Parameter 'name' is empty.", str(context.exception))
 
 		with self.assertRaises(ValueError) as context:
-			_ = CoverageSummary("")
-		self.assertEqual("Parameter 'name' is empty.", str(context.exception))
+			_ = File(Path("Units/Length.py"))
+		self.assertEqual("Parameter 'name' has more than one component.", str(context.exception))
 
 
 class Aggregation(Testcase):
-	def _Build(self) -> CoverageSummary:
+	def _Build(self) -> DocumentationReport:
 		"""
 		Build an analysis of a package ``myPackage`` with a module ``Shapes``.
 
@@ -337,13 +350,13 @@ class Aggregation(Testcase):
 		  field and an ignored setter, and a nested class with an excluded field.
 		* A namespace package ``myPackage.Plugins`` without a file, and nothing to document.
 
-		:returns: The analysis' root, aggregated.
+		:returns: The report, aggregated.
 		"""
-		summary = CoverageSummary("myPackage")
-		initFile = summary.GetOrAddFile(Path("__init__.py"))
-		shapesFile = summary.GetOrAddFile(Path("Shapes.py"))
+		report = DocumentationReport(Path("myPackage"))
+		initFile = report.GetOrAddFile(Path("__init__.py"))
+		shapesFile = report.GetOrAddFile(Path("Shapes.py"))
 
-		package = Item("myPackage", ItemKind.Package, DOCUMENTED, file=initFile, parent=summary)
+		package = Item("myPackage", ItemKind.Package, DOCUMENTED, file=initFile, parent=report)
 		Item("VERSION", ItemKind.Constant, UNDOCUMENTED, file=initFile, parent=package)
 		module = Item("Shapes", ItemKind.Module, DOCUMENTED, file=shapesFile, parent=package)
 		circle = Item("Circle", ItemKind.Class, DOCUMENTED, file=shapesFile, parent=module)
@@ -354,13 +367,13 @@ class Aggregation(Testcase):
 		Item("_x", ItemKind.Field, CoverageState.Excluded | UNDOCUMENTED, file=shapesFile, parent=nested)
 		Item("Plugins", ItemKind.Package, CoverageState.Empty, parent=package)
 
-		summary.Aggregate()
-		return summary
+		report.Aggregate()
+		return report
 
 	def test_Item(self) -> None:
 		"""An item counts itself and the items below it; a nested class aggregates into its class."""
-		summary = self._Build()
-		circle = summary.Items[0]["Shapes"]["Circle"]
+		report = self._Build()
+		circle = report.Items[0]["Shapes"]["Circle"]
 		nested = circle["Center"]
 
 		self.assertEqual(1, nested.Counters.Expected)
@@ -376,8 +389,8 @@ class Aggregation(Testcase):
 
 	def test_Package(self) -> None:
 		"""A package counts its own items and its modules; a package with nothing to document isn't counted."""
-		summary = self._Build()
-		package = summary.Items[0]
+		report = self._Build()
+		package = report.Items[0]
 
 		self.assertEqual(9, package.Counters.Total)
 		self.assertEqual(7, package.Counters.Expected)
@@ -387,9 +400,9 @@ class Aggregation(Testcase):
 
 	def test_Files(self) -> None:
 		"""A file counts the own states of the items declared in it; a directory sums its files."""
-		summary = self._Build()
-		initFile = summary.Files["__init__.py"]
-		shapesFile = summary.Files["Shapes.py"]
+		report = self._Build()
+		initFile = report.Files[Path("__init__.py")]
+		shapesFile = report.Files[Path("Shapes.py")]
 
 		self.assertEqual(2, initFile.Counters.Expected)
 		self.assertEqual(1, initFile.Counters.Covered)
@@ -397,58 +410,59 @@ class Aggregation(Testcase):
 		self.assertEqual(5, shapesFile.Counters.Expected)
 		self.assertEqual(3, shapesFile.Counters.Covered)
 
-	def test_Summary(self) -> None:
-		"""The root sums its top-level items, which here equals the sum of its files."""
-		summary = self._Build()
+	def test_Report(self) -> None:
+		"""The report sums its top-level items, which here equals the sum of its files; nothing measured its analysis."""
+		report = self._Build()
 
-		self.assertEqual(9, summary.Counters.Total)
-		self.assertEqual(7, summary.Counters.Expected)
-		self.assertEqual(4, summary.Counters.Covered)
-		self.assertAlmostEqual(4 / 7, summary.Counters.Coverage)
-		self.assertEqual(2, summary.FileCount)
+		self.assertEqual(9, report.Counters.Total)
+		self.assertEqual(7, report.Counters.Expected)
+		self.assertEqual(4, report.Counters.Covered)
+		self.assertAlmostEqual(4 / 7, report.Counters.Coverage)
+		self.assertEqual(2, report.FileCount)
+		self.assertIsNone(report.AnalysisDuration)
 
-	def test_SummaryWithoutFiles(self) -> None:
-		"""The root counts an item without a file, its files don't."""
-		summary = CoverageSummary("Design")
-		library = Item("work", ItemKind.Library, DOCUMENTED, parent=summary)
+	def test_ReportWithoutFiles(self) -> None:
+		"""The report counts an item without a file, its files don't."""
+		report = DocumentationReport(Path("Design"))
+		library = Item("work", ItemKind.Library, DOCUMENTED, parent=report)
 		Item("Counter", ItemKind.Entity, UNDOCUMENTED, parent=library)
 
-		summary.Aggregate()
+		report.Aggregate()
 
-		self.assertEqual(2, summary.Counters.Expected)
-		self.assertEqual(1, summary.Counters.Covered)
-		self.assertEqual(0, summary.FileCount)
+		self.assertEqual(2, report.Counters.Expected)
+		self.assertEqual(1, report.Counters.Covered)
+		self.assertEqual(0, report.FileCount)
 
 	def test_Categories(self) -> None:
 		"""The counters break down by the category of the items' kinds."""
-		summary = self._Build()
-		categories = summary.Categories
+		report = self._Build()
+		categories = report.Categories
 
 		self.assertEqual(
-			{ItemCategory.Container, ItemCategory.Variable, ItemCategory.Type, ItemCategory.Callable, ItemCategory.Field},
+			{ItemCategory.Container, ItemCategory.Constant, ItemCategory.Type, ItemCategory.Callable, ItemCategory.Field},
 			set(categories)
 		)
 		self.assertEqual(2, categories[ItemCategory.Container].Expected)
 		self.assertEqual(2, categories[ItemCategory.Container].Covered)
-		self.assertEqual(1, categories[ItemCategory.Variable].Uncovered)
+		self.assertEqual(1, categories[ItemCategory.Constant].Uncovered)
 		self.assertEqual(2, categories[ItemCategory.Type].Expected)
 		self.assertEqual(1, categories[ItemCategory.Callable].Expected)
 		self.assertEqual(1, categories[ItemCategory.Callable].Ignored)
 		self.assertEqual(1, categories[ItemCategory.Field].Expected)
 		self.assertEqual(1, categories[ItemCategory.Field].Excluded)
 		self.assertEqual(
-			summary.Counters.Expected, sum(counters.Expected for counters in categories.values())
+			report.Counters.Expected, sum(counters.Expected for counters in categories.values())
 		)
 
-		shapesFile = summary.Files["Shapes.py"]
-		self.assertNotIn(ItemCategory.Variable, shapesFile.Categories)
+		shapesFile = report.Files[Path("Shapes.py")]
+		self.assertNotIn(ItemCategory.Constant, shapesFile.Categories)
 		self.assertEqual(2, shapesFile.Categories[ItemCategory.Field].Total)
 
 	def test_Reaggregate(self) -> None:
 		"""Aggregating again computes the same counters."""
-		summary = self._Build()
-		summary.Aggregate()
+		report = self._Build()
+		report.Aggregate()
 
-		self.assertEqual(7, summary.Counters.Expected)
-		self.assertEqual(7, summary.Items[0].Counters.Expected)
-		self.assertEqual(5, summary.Files["Shapes.py"].Counters.Expected)
+		self.assertEqual(7, report.Counters.Expected)
+		self.assertEqual(7, report.Items[0].Counters.Expected)
+		self.assertEqual(5, report.Files[Path("Shapes.py")].Counters.Expected)

@@ -34,22 +34,29 @@ A Python source file, read once for the documentation coverage: its lines, synta
 The tokens hold the comments, which document a field or variable for Sphinx' autodoc, or excuse a missing doc-string
 for docstr_coverage.
 """
-from __future__                                 import annotations
+from __future__                           import annotations
 
-from ast                                        import AsyncFunctionDef, ClassDef, FunctionDef, Module, get_docstring
-from ast                                        import parse, stmt
-from io                                         import StringIO
-from pathlib                                    import Path
-from re                                         import Pattern, compile as re_compile
-from tokenize                                   import COMMENT, ENDMARKER, NAME, NEWLINE, NL, NUMBER, OP, STRING
-from tokenize                                   import TokenInfo, generate_tokens, open as tokenize_open
-from typing                                     import ClassVar
+from ast                                  import AsyncFunctionDef, ClassDef, FunctionDef, Module, get_docstring
+from ast                                  import parse, stmt
+from datetime                             import timedelta
+from io                                   import StringIO
+from pathlib                              import Path
+from re                                   import Pattern, compile as re_compile
+from tokenize                             import COMMENT, ENDMARKER, NAME, NEWLINE, NL, NUMBER, OP, STRING
+from tokenize                             import TokenInfo, generate_tokens, open as tokenize_open
+from typing                               import ClassVar, Optional as Nullable
 
-from pyTooling.Common                           import getFullyQualifiedName
-from pyTooling.Decorators                       import export, readonly
-from pyTooling.MetaClasses                      import ExtendedType
+from pyTooling.Common                     import getFullyQualifiedName
+from pyTooling.Decorators                 import export, readonly
+from pyTooling.MetaClasses                import ExtendedType
+from pyTooling.Stopwatch                  import Stopwatch
 
-from pyEDAA.Reports.DocumentationCoverage       import CoverageState
+from pyEDAA.Reports.DocumentationCoverage import CoverageState
+
+
+# A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
+# body's namespace, where annotations are evaluated, binds the name to the property.
+_Path = Path
 
 
 @export
@@ -58,34 +65,45 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 	A Python source file, read once: its lines, its syntax tree, and its tokens, which hold the comments.
 	"""
 
-	_COMMENT:   ClassVar[Pattern[str]] = re_compile(r"^\s*#: ?(.*)\r?\n?$")                         #: Sphinx' comment.
-	_INHERITED: ClassVar[Pattern[str]] = re_compile(r"#\s*docstr-coverage\s*:\s*inherit(ed)?\s*")    #: Inherited.
+	_COMMENT:   ClassVar[Pattern[str]] = re_compile(r"^\s*#: ?(.*)\r?\n?$")                              #: ``#:`` line.
+	_INHERITED: ClassVar[Pattern[str]] = re_compile(r"#\s*docstr-coverage\s*:\s*inherit(ed)?\s*")        #: Inherited.
 	_EXCUSED:   ClassVar[Pattern[str]] = re_compile(r"#\s*docstr-coverage\s*:\s*excuse(d)?\s* `.*`\s*")  #: Excused.
 
-	_path:       Path                        #: Path to the source file.
-	_lines:      list[str]                   #: The source's lines, without line endings.
-	_tree:       Module                      #: The source's syntax tree.
-	_tokens:     list[TokenInfo]             #: The source's tokens.
-	_positions:  dict[tuple[int, int], int]  #: The index of the token starting at a line and column.
-	_lineStarts: dict[int, int]              #: The index of the first token starting in a line.
-	_closings:   dict[int, int]              #: The index of the closing bracket of an opening bracket.
+	_path:            _Path                       #: Path to the source file.
+	_lines:           list[str]                   #: The source's lines, without line endings.
+	_tree:            Module                      #: The source's syntax tree.
+	_tokens:          list[TokenInfo]             #: The source's tokens.
+	_parsingDuration: Nullable[timedelta]         #: Duration of reading and parsing the file, if measured.
+	_positions:       dict[tuple[int, int], int]  #: The index of the token starting at a line and column.
+	_lineStarts:      dict[int, int]              #: The index of the first token starting in a line.
+	_closings:        dict[int, int]              #: The index of the closing bracket of an opening bracket.
 
-	def __init__(self, path: Path, lines: list[str], tree: Module, tokens: list[TokenInfo]) -> None:
+	def __init__(
+		self,
+		path: Path,
+		lines: list[str],
+		tree: Module,
+		tokens: list[TokenInfo],
+		*,
+		parsingDuration: Nullable[timedelta] = None
+	) -> None:
 		"""
 		Initializes a read source file, and indexes its tokens.
 
-		:param path:        Path to the source file.
-		:param lines:       The source's lines, without line endings.
-		:param tree:        The source's syntax tree.
-		:param tokens:      The source's tokens.
-		:raises ValueError: If parameter ``path`` is ``None``.
-		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
-		:raises ValueError: If parameter ``lines`` is ``None``.
-		:raises TypeError:  If parameter ``lines`` isn't of type :class:`list`.
-		:raises ValueError: If parameter ``tree`` is ``None``.
-		:raises TypeError:  If parameter ``tree`` isn't of type :class:`ast.Module`.
-		:raises ValueError: If parameter ``tokens`` is ``None``.
-		:raises TypeError:  If parameter ``tokens`` isn't of type :class:`list`.
+		:param path:            Path to the source file.
+		:param lines:           The source's lines, without line endings.
+		:param tree:            The source's syntax tree.
+		:param tokens:          The source's tokens.
+		:param parsingDuration: Optional, the duration of reading and parsing the file. Default: ``None``.
+		:raises ValueError:     If parameter ``path`` is ``None``.
+		:raises TypeError:      If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:     If parameter ``lines`` is ``None``.
+		:raises TypeError:      If parameter ``lines`` isn't of type :class:`list`.
+		:raises ValueError:     If parameter ``tree`` is ``None``.
+		:raises TypeError:      If parameter ``tree`` isn't of type :class:`ast.Module`.
+		:raises ValueError:     If parameter ``tokens`` is ``None``.
+		:raises TypeError:      If parameter ``tokens`` isn't of type :class:`list`.
+		:raises TypeError:      If parameter ``parsingDuration`` isn't of type :class:`~datetime.timedelta`.
 		"""
 		for parameterName, value, expectedType in (
 			("path",   path,   Path),
@@ -100,13 +118,19 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 				raise ex
 
-		self._path =       path
-		self._lines =      lines
-		self._tree =       tree
-		self._tokens =     tokens
-		self._positions =  {}
-		self._lineStarts = {}
-		self._closings =   {}
+		if parsingDuration is not None and not isinstance(parsingDuration, timedelta):
+			ex = TypeError(f"Parameter 'parsingDuration' is not of type 'timedelta'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parsingDuration)}'.")
+			raise ex
+
+		self._path =            path
+		self._lines =           lines
+		self._tree =            tree
+		self._tokens =          tokens
+		self._parsingDuration = parsingDuration
+		self._positions =       {}
+		self._lineStarts =      {}
+		self._closings =        {}
 
 		openings: list[int] = []
 		for index, token in enumerate(tokens):
@@ -121,7 +145,7 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 	@classmethod
 	def Read(cls, path: Path) -> SourceFile:
 		"""
-		Read a source file in its declared encoding, and parse it.
+		Read a source file in its declared encoding, and parse it, measuring the duration of both.
 
 		:param path:                  The source file.
 		:returns:                     The read source file.
@@ -140,13 +164,14 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
-		with tokenize_open(path) as file:
-			source = file.read()
+		with Stopwatch() as stopwatch:
+			with tokenize_open(path) as file:
+				source = file.read()
 
-		tree = parse(source, filename=str(path))
-		tokens = list(generate_tokens(StringIO(source).readline))
+			tree = parse(source, filename=str(path))
+			tokens = list(generate_tokens(StringIO(source).readline))
 
-		return cls(path, source.split("\n"), tree, tokens)
+		return cls(path, source.split("\n"), tree, tokens, parsingDuration=timedelta(seconds=stopwatch.Duration))
 
 	@readonly
 	def Path(self) -> Path:
@@ -175,6 +200,15 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 		"""
 		return self._tree
 
+	@readonly
+	def ParsingDuration(self) -> Nullable[timedelta]:
+		"""
+		Read-only property to access the duration of reading, tokenizing and parsing the file (:attr:`_parsingDuration`).
+
+		:returns: The duration, or ``None`` if it wasn't measured.
+		"""
+		return self._parsingDuration
+
 	def DocumentationState(self, node: Module | ClassDef | FunctionDef | AsyncFunctionDef) -> CoverageState:
 		"""
 		Return how a module, class or function is documented: by a non-empty doc-string, or excused by a comment.
@@ -183,11 +217,7 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 		skipping blank lines and the lines of decorators.
 
 		:param node: The module, class or function.
-		:returns:    :attr:`~pyEDAA.Reports.DocumentationCoverage.CoverageState.Documented`,
-		             :attr:`~pyEDAA.Reports.DocumentationCoverage.CoverageState.Inherited` or
-		             :attr:`~pyEDAA.Reports.DocumentationCoverage.CoverageState.Excused`, each with
-		             :attr:`~pyEDAA.Reports.DocumentationCoverage.CoverageState.Covered`; otherwise
-		             :attr:`~pyEDAA.Reports.DocumentationCoverage.CoverageState.Undocumented`.
+		:returns:    The documentation state of the declaration.
 		"""
 		docString = get_docstring(node)
 		if docString is not None and docString.strip() != "":

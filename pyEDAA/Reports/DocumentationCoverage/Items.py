@@ -42,7 +42,7 @@ from pyTooling.Common                           import getFullyQualifiedName
 from pyTooling.Decorators                       import export, readonly
 
 from pyEDAA.Reports.DocumentationCoverage       import Base, CoverageState, ItemCategory, ItemKind
-from pyEDAA.Reports.DocumentationCoverage.Files import CoverageSummary, File
+from pyEDAA.Reports.DocumentationCoverage.Files import DocumentationReport, File
 
 
 # A class with a property named like a class - ``File`` - can't name that class in the annotation of a field: the class
@@ -55,15 +55,15 @@ class Item(Base):
 	"""
 	A documentable item of a language, its coverage state, and the items it contains.
 
-	Its parent is the :class:`Item` containing it, or the analysis'
-	:class:`~pyEDAA.Reports.DocumentationCoverage.Files.CoverageSummary` for a top-level item. Items of one parent may
+	Its parent is the :class:`Item` containing it, or the
+	:class:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport` for a top-level item. Items of one parent may
 	share a name, e.g. a property's getter and setter.
 
 	A container's own documentation - a module's or a class' doc-string - is the container's own coverage state; the
 	items it contains have states of their own. So an item's counters count the item itself and every item below it.
 	"""
 
-	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: An item is in an item or the analysis' root; assigned below the class.
+	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: An item is in an item or the report; assigned below the class.
 
 	_name:      str              #: Name of the item.
 	_kind:      ItemKind         #: The language construct the item is.
@@ -82,10 +82,10 @@ class Item(Base):
 		file: Nullable[File] = None,
 		startLine: Nullable[int] = None,
 		endLine: Nullable[int] = None,
-		parent: Nullable[Item | CoverageSummary] = None
+		parent: Nullable[Item | DocumentationReport] = None
 	) -> None:
 		"""
-		Initializes an item, and adds it to its file and to the item or analysis containing it.
+		Initializes an item, and adds it to its file and to the item or report containing it.
 
 		:param name:        Name of the item.
 		:param kind:        The language construct the item is.
@@ -93,9 +93,9 @@ class Item(Base):
 		:param file:        Optional, the source file the item is declared in. Default: ``None``.
 		:param startLine:   Optional, the item's first line. Default: ``None``.
 		:param endLine:     Optional, the item's last line. Default: ``None``.
-		:param parent:      Optional, the item or analysis containing this item. Default: ``None``.
+		:param parent:      Optional, the item or report containing this item. Default: ``None``.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Item` or
-		                    :class:`~pyEDAA.Reports.DocumentationCoverage.Files.CoverageSummary`.
+		                    :class:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport`.
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``name`` is empty.
@@ -216,7 +216,7 @@ class Item(Base):
 	@readonly
 	def Category(self) -> ItemCategory:
 		"""
-		Read-only property to return the category of the item's kind.
+		Read-only property to access the category of the item's kind (:attr:`_kind`).
 
 		:returns: The item's category.
 		"""
@@ -344,4 +344,4 @@ class Item(Base):
 		return f"<Item {self._kind} {self.QualifiedName}: {self._counters.Coverage:.1%}>"
 
 
-Item._PARENT_TYPE = (Item, CoverageSummary)
+Item._PARENT_TYPE = (Item, DocumentationReport)

@@ -33,7 +33,7 @@ Abstract data model of documentation coverage, the common model every language's
 
 The model has two hierarchies over the same documentable items:
 
-* The **physical** hierarchy - :class:`~pyEDAA.Reports.DocumentationCoverage.Files.CoverageSummary`,
+* The **physical** hierarchy - :class:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport`,
   :class:`~pyEDAA.Reports.DocumentationCoverage.Files.Directory` and
   :class:`~pyEDAA.Reports.DocumentationCoverage.Files.File` - is built from the source files a reader analyzed. A file
   counts the items declared in it.
@@ -60,24 +60,21 @@ An item's :class:`CoverageState` says, whether it is documented, and whether it 
    :mod:`pyEDAA.Reports.DocumentationCoverage.DocStrCoverage`
       |rarr| The converter of docstr_coverage's analysis.
 """
-from __future__                import annotations
+from __future__                                   import annotations
 
-from enum                      import Flag
-from typing                    import TYPE_CHECKING, ClassVar, Generator, Optional as Nullable
+from enum                                         import Flag
+from typing                                       import TYPE_CHECKING, ClassVar, Generator, Optional as Nullable
 
-from pyTooling.Common          import getFullyQualifiedName, StringEnum
-from pyTooling.Decorators      import export, readonly
-from pyTooling.MetaClasses     import ExtendedType, abstractmethod
-from pyTooling.Warning         import CriticalWarning
+from pyTooling.Common                             import getFullyQualifiedName, StringEnum
+from pyTooling.Decorators                         import export, readonly
+from pyTooling.MetaClasses                        import ExtendedType, abstractmethod
+from pyTooling.Warning                            import CriticalWarning
 
-from pyEDAA.Reports            import ReportException
+from pyEDAA.Reports                               import ReportException
 
 if TYPE_CHECKING:  # pragma: no cover
-	from pyEDAA.Reports.DocumentationCoverage.Files import CoverageSummary
+	from pyEDAA.Reports.DocumentationCoverage.Files import DocumentationReport
 	from pyEDAA.Reports.DocumentationCoverage.Items import Item
-
-
-__all__ = ["CATEGORIES"]
 
 
 @export
@@ -106,12 +103,13 @@ class CoverageState(Flag):
 	"""
 	The documentation state of an item, as flags.
 
-	A reader combines a flag saying how the item is documented - :attr:`Documented`, :attr:`Undocumented`,
-	:attr:`Inherited`, :attr:`Excused` - with :attr:`Covered`, if the item counts as documented, and with
-	:attr:`Excluded`, :attr:`Ignored` or :attr:`Empty`, if it isn't expected to be documented.
+	:class:`CoverageCounters` counts an item by the first of these flags it has:
 
-	:class:`CoverageCounters` reads the flags in this order: :attr:`Empty`, :attr:`Excluded`, :attr:`Ignored`,
-	:attr:`Covered`.
+	* :attr:`Empty`: not counted.
+	* :attr:`Excluded`: counted as excluded.
+	* :attr:`Ignored`: counted as ignored.
+	* :attr:`Covered`: counted as expected and covered.
+	* None of them: counted as expected and uncovered.
 	"""
 
 	Unknown =      0      #: No state; an item can't have it.
@@ -141,16 +139,18 @@ class ItemCategory(StringEnum):
 	"""
 	The category of a documentable item, shared by all languages.
 
-	Each :class:`ItemKind` belongs to one category (:data:`CATEGORIES`), so the counters of every language break down
-	the same way.
+	Each :class:`ItemKind` belongs to one category (:attr:`ItemKind.Category`), so the counters of every language break
+	down the same way.
 	"""
 
 	Container = "container"  #: Contains other items, e.g. a package, a module, a namespace or a VHDL entity.
 	Type =      "type"       #: Declares a type, e.g. a class, a struct, an enumeration or a type alias.
 	Callable =  "callable"   #: Can be called, e.g. a function, a method, a procedure or a property.
 	Field =     "field"      #: Data of a type, e.g. a class' field, a record's element or an enumeration's member.
-	Variable =  "variable"   #: Data of a container, e.g. a module's variable, a constant or a VHDL signal.
-	Parameter = "parameter"  #: Declared as an item of an interface, e.g. a VHDL generic or port.
+	Variable =  "variable"   #: Data of a container, whose value can change, e.g. a module's variable or a VHDL signal.
+	Constant =  "constant"   #: Data of a container, whose value can't change, e.g. a constant of C or VHDL.
+	Generic =   "generic"    #: A compile-time parameter, e.g. a VHDL generic or a C++ template parameter.
+	Parameter = "parameter"  #: A run-time parameter declared as an item of its own, e.g. a VHDL port.
 	Other =     "other"      #: Belongs to no other category.
 
 	DEFAULT =   Other        #: The category of an item, which belongs to no other category.
@@ -191,6 +191,7 @@ class ItemKind(StringEnum):
 	Function =          "function"            #: A function.
 	Method =            "method"              #: A method of a type.
 	Constructor =       "constructor"         #: A type's constructor, e.g. Python's ``__init__``.
+	Destructor =        "destructor"          #: A type's destructor, e.g. of C++, or Python's ``__del__``.
 	Property =          "property"            #: A property: a method accessed like a field.
 	Procedure =         "procedure"           #: A procedure, e.g. of VHDL or TCL.
 	Macro =             "macro"               #: A preprocessor macro, e.g. of C.
@@ -200,11 +201,13 @@ class ItemKind(StringEnum):
 	EnumerationMember = "enumeration-member"  #: A member of an enumeration.
 
 	Variable =          "variable"            #: A variable of a container, e.g. a module's variable.
-	Constant =          "constant"            #: A constant.
 	Signal =            "signal"              #: A VHDL signal.
+	FileObject =        "file-object"         #: A file object, e.g. declared by a VHDL file declaration.
+	Constant =          "constant"            #: A constant.
 
-	Parameter =         "parameter"           #: A parameter declared as an item of its own, e.g. of a VHDL subprogram.
 	Generic =           "generic"             #: A VHDL generic.
+	TypeParameter =     "type-parameter"      #: A type parameter, e.g. of a C++ template or a Java generic class.
+	Parameter =         "parameter"           #: A parameter declared as an item of its own, e.g. of a VHDL subprogram.
 	Port =              "port"                #: A VHDL port.
 
 	Alias =             "alias"               #: An alias, e.g. a VHDL alias declaration.
@@ -213,57 +216,58 @@ class ItemKind(StringEnum):
 
 	DEFAULT =           Other                 #: The kind of an item, which is no other kind.
 
+	__CATEGORIES: ClassVar[dict[str, ItemCategory]] = {
+		Library:           ItemCategory.Container,
+		Package:           ItemCategory.Container,
+		PackageBody:       ItemCategory.Container,
+		Namespace:         ItemCategory.Container,
+		Module:            ItemCategory.Container,
+		SourceFile:        ItemCategory.Container,
+		Entity:            ItemCategory.Container,
+		Architecture:      ItemCategory.Container,
+		Configuration:     ItemCategory.Container,
+		Context:           ItemCategory.Container,
+		Class:             ItemCategory.Type,
+		Struct:            ItemCategory.Type,
+		Union:             ItemCategory.Type,
+		Interface:         ItemCategory.Type,
+		Enumeration:       ItemCategory.Type,
+		Record:            ItemCategory.Type,
+		Type:              ItemCategory.Type,
+		TypeAlias:         ItemCategory.Type,
+		TypeVariable:      ItemCategory.Type,
+		Component:         ItemCategory.Type,
+		Function:          ItemCategory.Callable,
+		Method:            ItemCategory.Callable,
+		Constructor:       ItemCategory.Callable,
+		Destructor:        ItemCategory.Callable,
+		Property:          ItemCategory.Callable,
+		Procedure:         ItemCategory.Callable,
+		Macro:             ItemCategory.Callable,
+		Process:           ItemCategory.Callable,
+		Field:             ItemCategory.Field,
+		EnumerationMember: ItemCategory.Field,
+		Variable:          ItemCategory.Variable,
+		Signal:            ItemCategory.Variable,
+		FileObject:        ItemCategory.Variable,
+		Constant:          ItemCategory.Constant,
+		Generic:           ItemCategory.Generic,
+		TypeParameter:     ItemCategory.Generic,
+		Parameter:         ItemCategory.Parameter,
+		Port:              ItemCategory.Parameter,
+		Alias:             ItemCategory.Other,
+		Attribute:         ItemCategory.Other,
+		Other:             ItemCategory.Other,
+	}  #: The category of each kind, by the kind's value.
+
 	@readonly
 	def Category(self) -> ItemCategory:
 		"""
 		Read-only property to return the category this kind belongs to.
 
-		:returns: The kind's category, as :data:`CATEGORIES` maps it.
+		:returns: The kind's category.
 		"""
-		return CATEGORIES[self]
-
-
-CATEGORIES: dict[ItemKind, ItemCategory] = {
-	ItemKind.Library:           ItemCategory.Container,
-	ItemKind.Package:           ItemCategory.Container,
-	ItemKind.PackageBody:       ItemCategory.Container,
-	ItemKind.Namespace:         ItemCategory.Container,
-	ItemKind.Module:            ItemCategory.Container,
-	ItemKind.SourceFile:        ItemCategory.Container,
-	ItemKind.Entity:            ItemCategory.Container,
-	ItemKind.Architecture:      ItemCategory.Container,
-	ItemKind.Configuration:     ItemCategory.Container,
-	ItemKind.Context:           ItemCategory.Container,
-	ItemKind.Class:             ItemCategory.Type,
-	ItemKind.Struct:            ItemCategory.Type,
-	ItemKind.Union:             ItemCategory.Type,
-	ItemKind.Interface:         ItemCategory.Type,
-	ItemKind.Enumeration:       ItemCategory.Type,
-	ItemKind.Record:            ItemCategory.Type,
-	ItemKind.Type:              ItemCategory.Type,
-	ItemKind.TypeAlias:         ItemCategory.Type,
-	ItemKind.TypeVariable:      ItemCategory.Type,
-	ItemKind.Component:         ItemCategory.Type,
-	ItemKind.Function:          ItemCategory.Callable,
-	ItemKind.Method:            ItemCategory.Callable,
-	ItemKind.Constructor:       ItemCategory.Callable,
-	ItemKind.Property:          ItemCategory.Callable,
-	ItemKind.Procedure:         ItemCategory.Callable,
-	ItemKind.Macro:             ItemCategory.Callable,
-	ItemKind.Process:           ItemCategory.Callable,
-	ItemKind.Field:             ItemCategory.Field,
-	ItemKind.EnumerationMember: ItemCategory.Field,
-	ItemKind.Variable:          ItemCategory.Variable,
-	ItemKind.Constant:          ItemCategory.Variable,
-	ItemKind.Signal:            ItemCategory.Variable,
-	ItemKind.Parameter:         ItemCategory.Parameter,
-	ItemKind.Generic:           ItemCategory.Parameter,
-	ItemKind.Port:              ItemCategory.Parameter,
-	ItemKind.Alias:             ItemCategory.Other,
-	ItemKind.Attribute:         ItemCategory.Other,
-	ItemKind.Other:             ItemCategory.Other,
-}
-"""The category of each :class:`ItemKind`."""
+		return self.__CATEGORIES[self]
 
 
 @export
@@ -412,10 +416,10 @@ class Base(metaclass=ExtendedType, slots=True):
 
 	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: The types a parent may have; assigned by each class having a parent.
 
-	_parent:     Nullable[Base]                          #: The element containing this one, or ``None``.
-	_root:       Nullable[CoverageSummary]               #: The analysis' root, or ``None`` while not part of one.
-	_counters:   CoverageCounters                        #: The counters of the items this element counts.
-	_categories: dict[ItemCategory, CoverageCounters]    #: The counters per category of the items.
+	_parent:     Nullable[Base]                        #: The element containing this one, or ``None``.
+	_root:       Nullable[DocumentationReport]         #: The report, or ``None`` while the element isn't part of one.
+	_counters:   CoverageCounters                      #: The counters of the items this element counts.
+	_categories: dict[ItemCategory, CoverageCounters]  #: The counters per category of the items.
 
 	def __init__(self, *, parent: Nullable[Base] = None) -> None:
 		"""
@@ -454,7 +458,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises ValueError:       If ``None`` is assigned.
 		:raises TypeError:        If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		:raises TypeError:        If a parent is assigned to a
-		                          :class:`~pyEDAA.Reports.DocumentationCoverage.Files.CoverageSummary`, which has no
+		                          :class:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport`, which has no
 		                          parent.
 		:raises DocCoverageError: If the assigned parent is a directory, which already contains an element of this name.
 		"""
@@ -477,7 +481,7 @@ class Base(metaclass=ExtendedType, slots=True):
 			element._root = parent._root
 
 	@readonly
-	def Root(self) -> Nullable[CoverageSummary]:
+	def Root(self) -> Nullable[DocumentationReport]:
 		"""
 		Read-only property to access the analysis' root (:attr:`_root`).
 

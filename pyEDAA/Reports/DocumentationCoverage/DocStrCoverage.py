@@ -45,6 +45,7 @@ these identifiers, and every item but a module or package is of kind
 """
 from __future__                                 import annotations
 
+from datetime                                   import timedelta
 from pathlib                                    import Path
 from typing                                     import Optional as Nullable
 
@@ -53,9 +54,10 @@ from docstr_coverage.result_collection          import ExpectedDocstring
 from pyTooling.Common                           import getFullyQualifiedName
 from pyTooling.Decorators                       import export, readonly
 from pyTooling.MetaClasses                      import ExtendedType
+from pyTooling.Stopwatch                        import Stopwatch
 
 from pyEDAA.Reports.DocumentationCoverage       import CoverageState, DocCoverageError, ItemKind
-from pyEDAA.Reports.DocumentationCoverage.Files import CoverageSummary
+from pyEDAA.Reports.DocumentationCoverage.Files import DocumentationReport
 from pyEDAA.Reports.DocumentationCoverage.Items import Item
 
 
@@ -70,10 +72,12 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 	Runs docstr_coverage's analysis on a package's directory, and converts it to the documentation coverage model.
 	"""
 
-	_packageName:     str                         #: Name of the package.
-	_searchDirectory: Path                        #: The directory searched for Python source files.
-	_moduleFiles:     list[Path]                  #: The Python source files found.
-	_coverageReport:  Nullable[ResultCollection]  #: docstr_coverage's analysis, or ``None`` before :meth:`Analyze` ran.
+	_packageName:        str                         #: Name of the package.
+	_searchDirectory:    Path                        #: The directory searched for Python source files.
+	_moduleFiles:        list[Path]                  #: The Python source files found.
+	_coverageReport:     Nullable[ResultCollection]  #: docstr_coverage's analysis, or ``None`` before :meth:`Analyze`.
+	_analysisDuration:   Nullable[timedelta]         #: Duration of :meth:`Analyze`, or ``None`` before it ran.
+	_conversionDuration: Nullable[timedelta]         #: Duration of :meth:`Convert`, or ``None`` before it ran.
 
 	def __init__(self, packageName: str, directory: Path) -> None:
 		"""
@@ -107,10 +111,12 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 			raise DocStrCoverageError(f"Package source directory '{directory}' does not exist.") \
 				from FileNotFoundError(f"Directory '{directory}' does not exist.")
 
-		self._packageName =     packageName
-		self._searchDirectory = directory
-		self._moduleFiles =     list(directory.glob("**/*.py"))
-		self._coverageReport =  None
+		self._packageName =        packageName
+		self._searchDirectory =    directory
+		self._moduleFiles =        list(directory.glob("**/*.py"))
+		self._coverageReport =     None
+		self._analysisDuration =   None
+		self._conversionDuration = None
 
 	@readonly
 	def SearchDirectory(self) -> Path:
@@ -148,24 +154,49 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 		"""
 		return self._coverageReport
 
+	@readonly
+	def AnalysisDuration(self) -> Nullable[timedelta]:
+		"""
+		Read-only property to access the duration of docstr_coverage's analysis (:attr:`_analysisDuration`).
+
+		:returns: The duration, or ``None`` before :meth:`Analyze` ran.
+		"""
+		return self._analysisDuration
+
+	@readonly
+	def ModelConversionDuration(self) -> Nullable[timedelta]:
+		"""
+		Read-only property to access the duration of :meth:`Convert`: building the documentation coverage report
+		(:attr:`_conversionDuration`).
+
+		:returns: The duration, or ``None`` before :meth:`Convert` ran.
+		"""
+		return self._conversionDuration
+
 	def Analyze(self) -> ResultCollection:
 		"""
-		Run docstr_coverage's analysis on the Python source files found.
+		Run docstr_coverage's analysis on the Python source files found, and measure its duration.
 
 		:returns: The analyzer's result collection.
 		"""
-		self._coverageReport = analyze(self._moduleFiles, show_progress=False)
+		with Stopwatch() as stopwatch:
+			self._coverageReport = analyze(self._moduleFiles, show_progress=False)
+
+		self._analysisDuration = timedelta(seconds=stopwatch.Duration)
 		return self._coverageReport
 
-	def Convert(self) -> CoverageSummary:
+	def Convert(self) -> DocumentationReport:
 		"""
-		Convert docstr_coverage's analysis to the documentation coverage model, and aggregate it.
+		Convert docstr_coverage's analysis to a documentation coverage report, aggregate it, and measure the duration.
+
+		The report's :attr:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport.AnalysisDuration` is the
+		duration of docstr_coverage's analysis.
 
 		A source file is a module, an ``__init__.py`` the package of its directory, and a directory without
 		``__init__.py`` a package without anything to document. docstr_coverage's identifier of an item names its parent:
 		the item is added to the innermost item of that name, which encloses the item reported before.
 
-		:returns:                    The analysis' root; its top-level item is the package.
+		:returns:                    The report; its top-level item is the package.
 		:raises DocStrCoverageError: If :meth:`Analyze` didn't run.
 		"""
 		if self._coverageReport is None:
@@ -185,50 +216,54 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 
 			return (documentation | CoverageState.Ignored) if expected.ignore_reason else documentation
 
-		summary = CoverageSummary(self._packageName)
-		packages: dict[tuple[str, ...], Item] = {}
+		with Stopwatch() as stopwatch:
+			report = DocumentationReport(Path(self._packageName))
+			packages: dict[tuple[str, ...], Item] = {}
 
-		fileResults = {
-			Path(path).relative_to(self._searchDirectory): fileResult for path, fileResult in self._coverageReport.files()
-		}
-		for path in sorted(fileResults, key=lambda path: (path.parent.parts, path.name != "__init__.py", path.name)):
-			directoryParts = path.parent.parts
-			parent: Item | CoverageSummary = summary
-			for depth in range(len(directoryParts) + 1):
-				if (package := packages.get(directoryParts[:depth], None)) is None:
-					if depth == len(directoryParts) and path.name == "__init__.py":
-						break
+			fileResults = {
+				Path(path).relative_to(self._searchDirectory): fileResult for path, fileResult in self._coverageReport.files()
+			}
+			for path in sorted(fileResults, key=lambda path: (path.parent.parts, path.name != "__init__.py", path.name)):
+				directoryParts = path.parent.parts
+				parent: Item | DocumentationReport = report
+				for depth in range(len(directoryParts) + 1):
+					if (package := packages.get(directoryParts[:depth], None)) is None:
+						if depth == len(directoryParts) and path.name == "__init__.py":
+							break
 
-					packageName = directoryParts[depth - 1] if depth > 0 else self._packageName
-					package = Item(packageName, ItemKind.Package, CoverageState.Empty, parent=parent)
-					packages[directoryParts[:depth]] = package
+						packageName = directoryParts[depth - 1] if depth > 0 else self._packageName
+						package = Item(packageName, ItemKind.Package, CoverageState.Empty, parent=parent)
+						packages[directoryParts[:depth]] = package
 
-				parent = package
+					parent = package
 
-			moduleState = CoverageState.Empty
-			expectedDocstrings: list[ExpectedDocstring] = []
-			for expected in fileResults[path].expected_docstrings():
-				if expected.node_identifier == "module docstring":
-					moduleState = state(expected)
+				moduleState = CoverageState.Empty
+				expectedDocstrings: list[ExpectedDocstring] = []
+				for expected in fileResults[path].expected_docstrings():
+					if expected.node_identifier == "module docstring":
+						moduleState = state(expected)
+					else:
+						expectedDocstrings.append(expected)
+
+				file = report.GetOrAddFile(path)
+				if path.name != "__init__.py":
+					module = Item(path.stem, ItemKind.Module, moduleState, file=file, parent=parent)
 				else:
-					expectedDocstrings.append(expected)
+					packageName = directoryParts[-1] if len(directoryParts) > 0 else self._packageName
+					module = Item(packageName, ItemKind.Package, moduleState, file=file, parent=parent)
+					packages[directoryParts] = module
 
-			file = summary.GetOrAddFile(path)
-			if path.name != "__init__.py":
-				module = Item(path.stem, ItemKind.Module, moduleState, file=file, parent=parent)
-			else:
-				packageName = directoryParts[-1] if len(directoryParts) > 0 else self._packageName
-				module = Item(packageName, ItemKind.Package, moduleState, file=file, parent=parent)
-				packages[directoryParts] = module
+				enclosing: list[Item] = [module]
+				for expected in expectedDocstrings:
+					parentName, _, name = expected.node_identifier.rpartition(".")
+					while len(enclosing) > 1 and (parentName == "" or enclosing[-1]._name != parentName):
+						enclosing.pop()
 
-			enclosing: list[Item] = [module]
-			for expected in expectedDocstrings:
-				parentName, _, name = expected.node_identifier.rpartition(".")
-				while len(enclosing) > 1 and (parentName == "" or enclosing[-1]._name != parentName):
-					enclosing.pop()
+					enclosing.append(Item(name, ItemKind.Other, state(expected), file=file, parent=enclosing[-1]))
 
-				enclosing.append(Item(name, ItemKind.Other, state(expected), file=file, parent=enclosing[-1]))
+			report.Aggregate()
 
-		summary.Aggregate()
+		report._analysisDuration =  self._analysisDuration
+		self._conversionDuration = timedelta(seconds=stopwatch.Duration)
 
-		return summary
+		return report

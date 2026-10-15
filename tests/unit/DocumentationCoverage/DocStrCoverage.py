@@ -30,6 +30,7 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the converter of docstr_coverage's analysis to the documentation coverage model."""
+from datetime                                            import timedelta
 from pathlib                                             import Path
 
 from pyEDAA.Reports.DocumentationCoverage                import CoverageState, ItemKind
@@ -87,8 +88,8 @@ class Analyze(Testcase):
 		self.assertEqual(12, coverage.Counters.Uncovered)
 		self.assertEqual(0.0, coverage.Counters.Coverage)
 
-		self.assertEqual(6, coverage.Files["__init__.py"].Counters.Expected)
-		self.assertEqual(0, coverage.Files["__init__.py"].Counters.Covered)
+		self.assertEqual(6, coverage.Files[Path("__init__.py")].Counters.Expected)
+		self.assertEqual(0, coverage.Files[Path("__init__.py")].Counters.Covered)
 		self.assertEqual(CoverageState.Undocumented, package.Status)
 		self.assertEqual(["PackageClass", "DerivedPackageClass", "MyModule"], [item.Name for item in package])
 		self.assertEqual(["__init__", "Method", "__str__"], [item.Name for item in package["PackageClass"]])
@@ -106,9 +107,9 @@ class Analyze(Testcase):
 		self.assertEqual(7, coverage.Counters.Uncovered)
 		self.assertAlmostEqual(0.417, coverage.Counters.Coverage, 3)
 
-		self.assertEqual(6, coverage.Files["__init__.py"].Counters.Expected)
-		self.assertEqual(3, coverage.Files["__init__.py"].Counters.Covered)
-		self.assertEqual(0.5, coverage.Files["__init__.py"].Counters.Coverage)
+		self.assertEqual(6, coverage.Files[Path("__init__.py")].Counters.Expected)
+		self.assertEqual(3, coverage.Files[Path("__init__.py")].Counters.Covered)
+		self.assertEqual(0.5, coverage.Files[Path("__init__.py")].Counters.Coverage)
 
 	def test_Documented(self) -> None:
 		docStrCov = DocStrCoverage("MyPackage", Path("tests/packages/documented"))
@@ -118,7 +119,22 @@ class Analyze(Testcase):
 		self.assertEqual(12, coverage.Counters.Expected)
 		self.assertEqual(12, coverage.Counters.Covered)
 		self.assertEqual(1.0, coverage.Counters.Coverage)
-		self.assertEqual(6, coverage.Files["MyModule.py"].Counters.Covered)
+		self.assertEqual(6, coverage.Files[Path("MyModule.py")].Counters.Covered)
+
+	def test_Durations(self) -> None:
+		"""Analysis and conversion are measured; the report takes the analysis' duration."""
+		docStrCov = DocStrCoverage("MyPackage", Path("tests/packages/documented"))
+
+		self.assertIsNone(docStrCov.AnalysisDuration)
+		self.assertIsNone(docStrCov.ModelConversionDuration)
+
+		docStrCov.Analyze()
+		coverage = docStrCov.Convert()
+
+		self.assertGreaterEqual(docStrCov.AnalysisDuration, timedelta(0))
+		self.assertGreaterEqual(docStrCov.ModelConversionDuration, timedelta(0))
+		self.assertEqual(docStrCov.AnalysisDuration, coverage.AnalysisDuration)
+		self.assertEqual(Path("MyPackage"), coverage.Name)
 
 	def test_ConvertBeforeAnalyze(self) -> None:
 		docStrCov = DocStrCoverage("MyPackage", Path("tests/packages/documented"))

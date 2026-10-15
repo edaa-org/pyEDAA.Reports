@@ -14,7 +14,7 @@ Alias: TypeAlias = "int | str"
 undocumented = 1
 #:
 emptyComment = 2
-first, second = 1, 2               #: Both names of a tuple.
+first, second = divmod(7, 2)       #: Both names of a tuple.
 chained = other = 3
 """Only the first target."""
 lookup = {                         #: Behind an opening bracket.

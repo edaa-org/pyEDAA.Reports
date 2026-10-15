@@ -29,20 +29,20 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the reader of Python source code for the documentation coverage model."""
-from importlib.util                                     import find_spec
+from datetime                                           import timedelta
 from pathlib                                            import Path
 from sys                                                import version_info
 from tempfile                                           import TemporaryDirectory
 from textwrap                                           import dedent
 from tokenize                                           import generate_tokens
-from typing                                             import Optional as Nullable
+from typing                                             import Iterable, Optional as Nullable
 from unittest                                           import skipIf
 
 from pyEDAA.Reports.DocumentationCoverage               import CoverageState, DocCoverageError, ItemKind
 from pyEDAA.Reports.DocumentationCoverage               import SourceFileWarning
-from pyEDAA.Reports.DocumentationCoverage.Files         import CoverageSummary
+from pyEDAA.Reports.DocumentationCoverage.Files         import DocumentationReport
 from pyEDAA.Reports.DocumentationCoverage.Items         import Item
-from pyEDAA.Reports.DocumentationCoverage.Python        import Analyzer, Options
+from pyEDAA.Reports.DocumentationCoverage.Python        import Analyzer, CountedItems
 from pyEDAA.Reports.DocumentationCoverage.Python.Source import SourceFile
 from pyTooling.Warning                                  import UnhandledCriticalWarningError, WarningCollector
 from pyTooling.Testing                                  import Testcase
@@ -56,18 +56,21 @@ if __name__ == "__main__":  # pragma: no cover
 
 DOCUMENTED =   CoverageState.Documented | CoverageState.Covered                 #: State of a documented item.
 UNDOCUMENTED = CoverageState.Undocumented                                       #: State of an undocumented item.
-FIXTURE =      Path("tests/data/DocumentationCoverage/Attributes.py")           #: Fields and variables for the oracle.
-ATTRIBUTES =   (ItemKind.Field, ItemKind.EnumerationMember, ItemKind.Variable, ItemKind.Constant, ItemKind.TypeAlias,
-                ItemKind.TypeVariable, ItemKind.Type)                           #: The kinds of fields and variables.
+FIXTURE =      Path("tests/data/DocumentationCoverage/Attributes.py")           #: A source file to read.
 
 
-def analyzePackage(files: dict[str, str], options: Nullable[Options] = None) -> CoverageSummary:
+def analyzePackage(
+	files: dict[str, str],
+	countedItems: CountedItems = CountedItems.Default,
+	excludePatterns: Nullable[Iterable[str]] = None
+) -> DocumentationReport:
 	"""
 	Write a package ``myPackage`` into a temporary directory and analyze it.
 
-	:param files:   The source of each file, by its path in the package; the source is dedented.
-	:param options: Optional, the options of the analysis. Default: the defaults.
-	:returns:       The analysis' root.
+	:param files:           The source of each file, by its path in the package; the source is dedented.
+	:param countedItems:    Optional, the items the analysis counts. Default: all of them.
+	:param excludePatterns: Optional, the patterns of qualified names to exclude. Default: none.
+	:returns:               The report.
 	"""
 	with TemporaryDirectory() as directory:
 		for path, source in files.items():
@@ -75,23 +78,28 @@ def analyzePackage(files: dict[str, str], options: Nullable[Options] = None) -> 
 			file.parent.mkdir(parents=True, exist_ok=True)
 			file.write_text(dedent(source), encoding="utf-8")
 
-		return Analyzer("myPackage", Path(directory), options=options).Analyze()
+		return Analyzer("myPackage", Path(directory), countedItems=countedItems, excludePatterns=excludePatterns).Analyze()
 
 
-def analyzeModule(source: str, options: Nullable[Options] = None) -> Item:
+def analyzeModule(
+	source: str,
+	countedItems: CountedItems = CountedItems.Default,
+	excludePatterns: Nullable[Iterable[str]] = None
+) -> Item:
 	"""
 	Analyze a package ``myPackage`` of a module ``Module``.
 
-	:param source:  The module's source; it is dedented.
-	:param options: Optional, the options of the analysis. Default: the defaults.
-	:returns:       The module's item.
+	:param source:          The module's source; it is dedented.
+	:param countedItems:    Optional, the items the analysis counts. Default: all of them.
+	:param excludePatterns: Optional, the patterns of qualified names to exclude. Default: none.
+	:returns:               The module's item.
 	"""
-	return analyzePackage({"Module.py": source}, options).Items[0]["Module"]
+	return analyzePackage({"Module.py": source}, countedItems, excludePatterns).Items[0]["Module"]
 
 
 class Modules(Testcase):
 	def test_Package(self) -> None:
-		summary = analyzePackage({
+		report = analyzePackage({
 			"__init__.py":          '"""A package."""\n',
 			"Shapes.py":            '"""A module."""\n',
 			"Empty.py":             "# A comment only.\n",
@@ -101,10 +109,11 @@ class Modules(Testcase):
 			"Plugins/Loader.py":    '"""A module of a namespace package."""\n',
 			"Resources/README.txt": "No Python file.\n",
 		})
-		package = summary.Items[0]
+		package = report.Items[0]
 
-		self.assertEqual("myPackage", summary.Name)
-		self.assertEqual([package], summary.Items)
+		self.assertEqual(Path("myPackage"), report.Name)
+		self.assertGreaterEqual(report.AnalysisDuration, timedelta(0))
+		self.assertEqual([package], report.Items)
 		self.assertEqual(ItemKind.Package, package.Kind)
 		self.assertEqual(DOCUMENTED, package.Status)
 		self.assertEqual(["Empty", "Shapes", "Undocumented", "Plugins", "Units"], [item.Name for item in package])
@@ -119,9 +128,9 @@ class Modules(Testcase):
 		self.assertEqual(Path("Units/Length.py"), package["Units"]["Length"].File.Path)
 		self.assertIsNone(package["Shapes"].StartLine)
 
-		self.assertEqual(7, summary.FileCount)
-		self.assertEqual(5, summary.Counters.Expected)
-		self.assertEqual(4, summary.Counters.Covered)
+		self.assertEqual(7, report.FileCount)
+		self.assertEqual(5, report.Counters.Expected)
+		self.assertEqual(4, report.Counters.Covered)
 
 	def test_Parameters(self) -> None:
 		with self.assertRaises(ValueError) as context:
@@ -132,14 +141,31 @@ class Modules(Testcase):
 			_ = Analyzer("myPackage", ".")
 		self.assertEqual("Parameter 'directory' is not of type 'Path'.", str(context.exception))
 
+		with self.assertRaises(ValueError) as context:
+			_ = Analyzer("myPackage", Path("."), countedItems=None)
+		self.assertEqual("Parameter 'countedItems' is None.", str(context.exception))
+
 		with self.assertRaises(TypeError) as context:
-			_ = Analyzer("myPackage", Path("."), options={"countFields": False})
-		self.assertEqual("Parameter 'options' is not of type 'Options'.", str(context.exception))
+			_ = Analyzer("myPackage", Path("."), countedItems=1)
+		self.assertEqual("Parameter 'countedItems' is not of type 'CountedItems'.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = Analyzer("myPackage", Path("."), excludePatterns=1)
+		self.assertEqual("Parameter 'excludePatterns' is not iterable.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = Analyzer("myPackage", Path("."), excludePatterns=[1])
+		self.assertEqual("Parameter 'excludePatterns' contains an element not of type 'str'.", str(context.exception))
+
+		with self.assertRaises(ValueError) as context:
+			_ = Analyzer("myPackage", Path("."), excludePatterns=["myPackage.("])
+		self.assertEqual("Parameter 'excludePatterns' contains an invalid regular expression.", str(context.exception))
 
 		analyzer = Analyzer("myPackage", Path("src"))
 		self.assertEqual("myPackage", analyzer.PackageName)
 		self.assertEqual(Path("src"), analyzer.Directory)
-		self.assertTrue(analyzer.Options.CountFields)
+		self.assertIs(CountedItems.Default, analyzer.CountedItems)
+		self.assertEqual([], analyzer.ExcludePatterns)
 
 	def test_MissingDirectory(self) -> None:
 		with self.assertRaises(DocCoverageError) as context:
@@ -200,6 +226,9 @@ class Callables(Testcase):
 				def __str__(self) -> str:
 					pass
 
+				def __del__(self) -> None:
+					"""A destructor."""
+
 				class Inner:
 					"""A nested class."""
 		''')
@@ -223,6 +252,7 @@ class Callables(Testcase):
 				("Scale",    ItemKind.Method,      CoverageState.Ignored | UNDOCUMENTED),
 				("Scale",    ItemKind.Method,      DOCUMENTED),
 				("__str__",  ItemKind.Method,      UNDOCUMENTED),
+				("__del__",  ItemKind.Destructor,  DOCUMENTED),
 				("Inner",    ItemKind.Class,       DOCUMENTED),
 			],
 			[(item.Name, item.Kind, item.Status) for item in shape]
@@ -469,109 +499,116 @@ class Variables(Testcase):
 		)
 
 
-class AnalysisOptions(Testcase):
+class Counting(Testcase):
 	SOURCE = '''\
 		"""A module."""
 
 		VERSION = "1.0"
 
+		def _Protected() -> None:
+			"""A function of a protected name."""
+
 		class Shape:
 			"""A class."""
 
-			_name: str                      #: A field.
+			_name:  str                     #: A field of a protected name.
+			__size: int                     #: A field of a private name.
 
 			def __init__(self) -> None:
 				pass
 
 			def _Helper(self) -> None:
 				pass
-	'''  #: A module with a variable, a field, a constructor and a private method.
 
-	def test_Defaults(self) -> None:
-		options = Options()
+			def __Mangled(self) -> None:
+				pass
+	'''  #: A module with a variable, fields and callables of public, protected and private names.
 
-		self.assertTrue(options.CountFields)
-		self.assertTrue(options.CountVariables)
-		self.assertFalse(options.SkipPrivate)
-		self.assertEqual([], options.ExcludePatterns)
-
+	def test_Default(self) -> None:
 		module = analyzeModule(self.SOURCE)
-		self.assertEqual(UNDOCUMENTED, module["VERSION"].Status)
-		self.assertEqual(DOCUMENTED, module["Shape"]["_name"].Status)
-		self.assertEqual(UNDOCUMENTED, module["Shape"]["_Helper"].Status)
-		self.assertEqual(6, module.Counters.Expected)
+		shape = module["Shape"]
 
-	def test_CountFields(self) -> None:
-		module = analyzeModule(self.SOURCE, Options(countFields=False))
+		self.assertEqual(UNDOCUMENTED, module["VERSION"].Status)
+		self.assertEqual(DOCUMENTED, module["_Protected"].Status)
+		self.assertEqual(DOCUMENTED, shape["_name"].Status)
+		self.assertEqual(DOCUMENTED, shape["__size"].Status)
+		self.assertEqual(UNDOCUMENTED, shape["_Helper"].Status)
+		self.assertEqual(UNDOCUMENTED, shape["__Mangled"].Status)
+		self.assertEqual(9, module.Counters.Expected)
+
+	def test_Fields(self) -> None:
+		"""Fields not counted are excluded."""
+		module = analyzeModule(self.SOURCE, CountedItems.Default & ~CountedItems.Fields)
 
 		self.assertEqual(CoverageState.Excluded | DOCUMENTED, module["Shape"]["_name"].Status)
 		self.assertEqual(UNDOCUMENTED, module["VERSION"].Status)
-		self.assertEqual(1, module.Counters.Excluded)
+		self.assertEqual(2, module.Counters.Excluded)
 
-	def test_CountVariables(self) -> None:
-		module = analyzeModule(self.SOURCE, Options(countVariables=False))
+	def test_Variables(self) -> None:
+		"""Variables not counted are excluded."""
+		module = analyzeModule(self.SOURCE, CountedItems.Default & ~CountedItems.Variables)
 
 		self.assertEqual(CoverageState.Excluded | UNDOCUMENTED, module["VERSION"].Status)
 		self.assertEqual(DOCUMENTED, module["Shape"]["_name"].Status)
+		self.assertEqual(1, module.Counters.Excluded)
 
-	def test_SkipPrivate(self) -> None:
-		module = analyzeModule(self.SOURCE, Options(skipPrivate=True))
+	def test_Protected(self) -> None:
+		"""Items of a protected name - one leading underscore - not counted are ignored, whatever their kind."""
+		module = analyzeModule(self.SOURCE, CountedItems.Default & ~CountedItems.Protected)
 		shape = module["Shape"]
 
+		self.assertEqual(CoverageState.Ignored | DOCUMENTED, module["_Protected"].Status)
 		self.assertEqual(CoverageState.Ignored | DOCUMENTED, shape["_name"].Status)
 		self.assertEqual(CoverageState.Ignored | UNDOCUMENTED, shape["_Helper"].Status)
+		self.assertEqual(DOCUMENTED, shape["__size"].Status)
 		self.assertEqual(UNDOCUMENTED, shape["__init__"].Status)
-		self.assertEqual(4, module.Counters.Expected)
+		self.assertEqual(6, module.Counters.Expected)
+
+	def test_Private(self) -> None:
+		"""Items of a private name - two leading, but no trailing underscores - not counted are ignored."""
+		module = analyzeModule(self.SOURCE, CountedItems.Default & ~CountedItems.Private)
+		shape = module["Shape"]
+
+		self.assertEqual(CoverageState.Ignored | DOCUMENTED, shape["__size"].Status)
+		self.assertEqual(CoverageState.Ignored | UNDOCUMENTED, shape["__Mangled"].Status)
+		self.assertEqual(DOCUMENTED, shape["_name"].Status)
+		self.assertEqual(UNDOCUMENTED, shape["__init__"].Status)
+		self.assertEqual(7, module.Counters.Expected)
+
+	def test_ProtectedModule(self) -> None:
+		"""A module of a protected name not counted is ignored."""
+		package = analyzePackage({"_Internal.py": '"""A module."""\n'}, CountedItems.Fields).Items[0]
+
+		self.assertEqual(CoverageState.Ignored | DOCUMENTED, package["_Internal"].Status)
 
 	def test_ExcludePatterns(self) -> None:
 		"""An item matching a pattern is excluded, and so are the items it contains."""
-		module = analyzeModule(self.SOURCE, Options(excludePatterns=[r"myPackage\.Module\.Shape", r".*\.VERSION"]))
+		module = analyzeModule(self.SOURCE, excludePatterns=[r"myPackage\.Module\.Shape", r".*\.VERSION"])
 		shape = module["Shape"]
 
 		self.assertEqual(CoverageState.Excluded | DOCUMENTED, shape.Status)
 		self.assertEqual(CoverageState.Excluded | UNDOCUMENTED, shape["__init__"].Status)
 		self.assertEqual(CoverageState.Excluded | UNDOCUMENTED, module["VERSION"].Status)
 		self.assertEqual(DOCUMENTED, module.Status)
-		self.assertEqual(1, module.Counters.Expected)
-		self.assertEqual(5, module.Counters.Excluded)
-
-	def test_Parameters(self) -> None:
-		with self.assertRaises(ValueError) as context:
-			_ = Options(countFields=None)
-		self.assertEqual("Parameter 'countFields' is None.", str(context.exception))
-
-		with self.assertRaises(TypeError) as context:
-			_ = Options(skipPrivate=1)
-		self.assertEqual("Parameter 'skipPrivate' is not of type 'bool'.", str(context.exception))
-
-		with self.assertRaises(TypeError) as context:
-			_ = Options(excludePatterns=1)
-		self.assertEqual("Parameter 'excludePatterns' is not iterable.", str(context.exception))
-
-		with self.assertRaises(TypeError) as context:
-			_ = Options(excludePatterns=[1])
-		self.assertEqual("Parameter 'excludePatterns' contains an element not of type 'str'.", str(context.exception))
-
-		with self.assertRaises(ValueError) as context:
-			_ = Options(excludePatterns=["myPackage.("])
-		self.assertEqual("Parameter 'excludePatterns' contains an invalid regular expression.", str(context.exception))
+		self.assertEqual(2, module.Counters.Expected)
+		self.assertEqual(7, module.Counters.Excluded)
 
 
 class SourceFiles(Testcase):
 	def test_SyntaxError(self) -> None:
 		"""A file that can't be parsed is collected as a critical warning, its item excluded, and the analysis goes on."""
 		with WarningCollector() as warnings:
-			summary = analyzePackage({"Broken.py": "def (:\n", "Shapes.py": '"""A module."""\n'})
+			report = analyzePackage({"Broken.py": "def (:\n", "Shapes.py": '"""A module."""\n'})
 
-		package = summary.Items[0]
+		package = report.Items[0]
 		self.assertEqual(1, len(warnings))
 		self.assertIsInstance(warnings[0], SourceFileWarning)
 		self.assertEqual("Source file 'Broken.py' can't be analyzed.", str(warnings[0]))
 		self.assertIsInstance(warnings[0].__cause__, SyntaxError)
 		self.assertEqual(CoverageState.Excluded, package["Broken"].Status)
 		self.assertEqual(DOCUMENTED, package["Shapes"].Status)
-		self.assertEqual(1, summary.Counters.Expected)
-		self.assertEqual(1, summary.Counters.Excluded)
+		self.assertEqual(1, report.Counters.Expected)
+		self.assertEqual(1, report.Counters.Excluded)
 
 	def test_SyntaxError_Uncollected(self) -> None:
 		"""Without a warning collector, a file that can't be parsed stops the analysis."""
@@ -587,9 +624,9 @@ class SourceFiles(Testcase):
 			(Path(directory) / "Invalid.py").write_bytes('"""Bötzingen."""\n'.encode("latin-1"))
 
 			with WarningCollector() as warnings:
-				summary = Analyzer("myPackage", Path(directory)).Analyze()
+				report = Analyzer("myPackage", Path(directory)).Analyze()
 
-		package = summary.Items[0]
+		package = report.Items[0]
 		self.assertEqual(DOCUMENTED, package["Latin1"].Status)
 		self.assertEqual(CoverageState.Excluded, package["Invalid"].Status)
 		self.assertEqual(1, len(warnings))
@@ -601,6 +638,7 @@ class SourceFiles(Testcase):
 		self.assertEqual(FIXTURE, sourceFile.Path)
 		self.assertEqual("from enum   import Enum", sourceFile.Lines[1])
 		self.assertEqual(sourceFile.Tree.body[0].lineno, 1)
+		self.assertGreaterEqual(sourceFile.ParsingDuration, timedelta(0))
 
 		with self.assertRaises(ValueError) as context:
 			_ = SourceFile.Read(None)
@@ -622,49 +660,8 @@ class SourceFiles(Testcase):
 			_ = SourceFile(FIXTURE, tuple(sourceFile.Lines), sourceFile.Tree, tokens)
 		self.assertEqual("Parameter 'lines' is not of type 'list'.", str(context.exception))
 
+		with self.assertRaises(TypeError) as context:
+			_ = SourceFile(FIXTURE, sourceFile.Lines, sourceFile.Tree, tokens, parsingDuration=0.5)
+		self.assertEqual("Parameter 'parsingDuration' is not of type 'timedelta'.", str(context.exception))
 
-class Regression(Testcase):
-	@skipIf(find_spec("docstr_coverage") is None, "docstr_coverage isn't installed.")
-	def test_DocStrCoverage(self) -> None:
-		"""Without fields and variables, the reader counts per file what docstr_coverage counts."""
-		from docstr_coverage import analyze
-
-		directory = Path("pyEDAA/Reports")
-		summary = Analyzer("pyEDAA.Reports", directory, options=Options(countFields=False, countVariables=False)).Analyze()
-		result = analyze(sorted(directory.rglob("*.py")), show_progress=False)
-
-		for path, fileResult in result.files():
-			count = fileResult.count_aggregate()
-			file = summary.GetOrAddFile(Path(path).relative_to(directory))
-			self.assertEqual(count.needed, file.Counters.Expected, f"{file.Path}: expected")
-			self.assertEqual(count.found, file.Counters.Covered, f"{file.Path}: covered")
-
-		self.assertEqual(len(result.files()), summary.FileCount)
-
-	@skipIf(find_spec("sphinx") is None, "Sphinx isn't installed.")
-	def test_SphinxAutodoc(self) -> None:
-		"""A field or variable is documented, if Sphinx' autodoc finds non-empty documentation for it."""
-		from sphinx.pycode import ModuleAnalyzer
-
-		with TemporaryDirectory() as directory:
-			(Path(directory) / "Attributes.py").write_bytes(FIXTURE.read_bytes())
-			module = Analyzer("Attributes", Path(directory)).Analyze().Items[0]["Attributes"]
-
-		oracle = {
-			key for key, lines in ModuleAnalyzer.for_file(str(FIXTURE), "Attributes").find_attr_docs().items()
-			if any(line.strip() != "" for line in lines)
-		}
-		items = [item for item in module.IterateElements() if item.Kind in ATTRIBUTES]
-		for item in items:
-			scope = item.Parent.QualifiedName.removeprefix("Attributes.Attributes").removeprefix(".")
-			with self.subTest(item=item.QualifiedName):
-				self.assertEqual((scope, item.Name) in oracle, CoverageState.Documented in item.Status)
-
-		self.assertEqual(
-			{
-				"T", "Length", "MAXIMUM", "first", "second", "chained", "table", "afterSemicolon", "conditional", "guarded",
-				"Red", "_name", "_size", "_initialized", "_value"
-			} | ({"formatted"} if version_info < (3, 12) else set()),
-			{item.Name for item in items if CoverageState.Documented in item.Status}
-		)
-		self.assertEqual(27, len(items))
+		self.assertIsNone(SourceFile(FIXTURE, sourceFile.Lines, sourceFile.Tree, tokens).ParsingDuration)

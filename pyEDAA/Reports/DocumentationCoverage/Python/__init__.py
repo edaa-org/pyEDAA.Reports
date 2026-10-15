@@ -32,7 +32,7 @@
 Reader of Python source code for the documentation coverage model.
 
 :class:`Analyzer` reads a package's directory - every ``*.py`` file below it - into a
-:class:`~pyEDAA.Reports.DocumentationCoverage.Files.CoverageSummary`. Each file is read once
+:class:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport`. Each file is read once
 (:class:`~pyEDAA.Reports.DocumentationCoverage.Python.Source.SourceFile`): in its declared encoding, into its syntax
 tree and its tokens, which hold the comments.
 
@@ -40,8 +40,8 @@ tree and its tokens, which hold the comments.
 
 * A package - a directory - and a module - a file - are items; a package's doc-string is its ``__init__.py``'s. A
   directory without ``__init__.py`` is a namespace package, which has nothing to document.
-* Classes, functions, methods, constructors (``__init__``) and properties are items, wherever they are declared, also in
-  a function's body.
+* Classes, functions, methods, constructors (``__init__``), destructors (``__del__``) and properties are items, wherever
+  they are declared, also in a function's body.
 * A class' fields are the names its body assigns or annotates - class variables and enumeration members too -, and its
   ``type`` statements, also inside an ``if`` or ``try`` statement. A name assigned several times is one item.
 * A module's variables are the same statements in the module's body, e.g. constants, type aliases and type variables.
@@ -60,16 +60,19 @@ tree and its tokens, which hold the comments.
 .. rubric:: Ignored and excluded items
 
 * Ignored: a property's setter and deleter, an ``@overload`` stub, a field or variable named with a leading and a
-  trailing underscore (``__all__``, ``_value_``), and - if :attr:`Options.SkipPrivate` - every private name.
-* Excluded: an item, whose qualified name matches one of :attr:`Options.ExcludePatterns`, and the items it contains;
-  the fields or variables, if not counted (:attr:`Options.CountFields`, :attr:`Options.CountVariables`); a module, which
-  can't be read or parsed (:exc:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning`).
+  trailing underscore (``__all__``, ``_value_``), and an item of a protected or private name, if :class:`CountedItems`
+  doesn't select these names.
+* Excluded: an item, whose qualified name matches one of :attr:`Analyzer.ExcludePatterns`, and the items it contains;
+  the fields or variables, if :class:`CountedItems` doesn't select them; a module, which can't be read or parsed
+  (:exc:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning`).
 """
 from __future__                                         import annotations
 
 from ast                                                import AnnAssign, Assign, AST, AsyncFunctionDef, Attribute
 from ast                                                import Call, ClassDef, Constant, Expr, FunctionDef, If, List
 from ast                                                import Name, Starred, Subscript, Try, Tuple, expr, stmt
+from datetime                                           import timedelta
+from enum                                               import Flag
 from pathlib                                            import Path
 from re                                                 import Pattern, compile as re_compile
 from re                                                 import error as RegularExpressionError
@@ -80,11 +83,12 @@ from typing                                             import Iterable, Optiona
 from pyTooling.Common                                   import getFullyQualifiedName
 from pyTooling.Decorators                               import export, readonly
 from pyTooling.MetaClasses                              import ExtendedType
+from pyTooling.Stopwatch                                import Stopwatch
 from pyTooling.Warning                                  import WarningCollector
 
 from pyEDAA.Reports.DocumentationCoverage               import CoverageState, DocCoverageError, ItemKind
 from pyEDAA.Reports.DocumentationCoverage               import SourceFileWarning
-from pyEDAA.Reports.DocumentationCoverage.Files         import CoverageSummary
+from pyEDAA.Reports.DocumentationCoverage.Files         import DocumentationReport
 from pyEDAA.Reports.DocumentationCoverage.Items         import Item
 from pyEDAA.Reports.DocumentationCoverage.Python.Source import SourceFile
 
@@ -93,58 +97,107 @@ if version_info >= (3, 12):  # pragma: no cover
 
 
 @export
-class Options(metaclass=ExtendedType, slots=True):
+class CountedItems(Flag):
 	"""
-	The options of an analysis: which items are counted, and which are ignored or excluded.
+	The items an analysis counts, besides the packages, modules, classes and callables of a public name.
+
+	A protected name has one leading underscore; a private name two, but not two trailing ones like a dunder name. An
+	item of a name, which isn't selected, is ignored. Fields and variables, which aren't selected, are excluded.
 	"""
 
-	_countFields:     bool                #: Whether the fields of a class are counted.
-	_countVariables:  bool                #: Whether the variables of a module are counted.
-	_skipPrivate:     bool                #: Whether items of a private name are ignored.
+	Fields =    1                                         #: The fields of a class.
+	Variables = 2                                         #: The variables of a module.
+	Protected = 4                                         #: Items of a protected name, e.g. ``_x``.
+	Private =   8                                         #: Items of a private, name-mangled name, e.g. ``__x``.
+
+	Default =   Fields | Variables | Protected | Private  #: All items.
+
+
+# A class with a property named like a class - ``CountedItems`` - can't name that class in the annotation of a field:
+# the class body's namespace, where annotations are evaluated, binds the name to the property.
+_CountedItems = CountedItems
+
+
+@export
+class Analyzer(metaclass=ExtendedType, slots=True):
+	"""
+	Reads the documentation coverage of a Python package from its source files.
+
+	A package's or module's lines are its file's, so their items name no lines.
+
+	.. rubric:: Example
+
+	.. code-block:: Python
+
+	   from pathlib import Path
+	   from pyEDAA.Reports.DocumentationCoverage.Python import Analyzer, CountedItems
+	   from pyTooling.Warning import WarningCollector
+
+	   with WarningCollector() as warnings:
+	     counted = CountedItems.Fields | CountedItems.Variables
+	     report = Analyzer("myPackage", Path("src/myPackage"), countedItems=counted).Analyze()
+
+	   print(f"{report.Counters.Covered}/{report.Counters.Expected}: {report.Counters.Coverage:.1%}")
+	"""
+
+	_packageName:     str                 #: Name of the package.
+	_directory:       Path                #: The package's directory.
+	_countedItems:    _CountedItems       #: The items the analysis counts.
 	_excludePatterns: list[Pattern[str]]  #: The patterns of qualified names, whose items are excluded.
 
 	def __init__(
 		self,
+		packageName: str,
+		directory: Path,
 		*,
-		countFields: bool = True,
-		countVariables: bool = True,
-		skipPrivate: bool = False,
+		countedItems: CountedItems = CountedItems.Default,
 		excludePatterns: Nullable[Iterable[str]] = None
 	) -> None:
 		"""
-		Initializes the options of an analysis.
+		Initializes the analysis of a package.
 
-		:param countFields:     Optional, whether a class' fields are counted, or excluded. Default: ``True``.
-		:param countVariables:  Optional, whether a module's variables are counted, or excluded. Default: ``True``.
-		:param skipPrivate:     Optional, whether items of a private name - a leading underscore, but not a dunder name -
-		                        are ignored. Default: ``False``.
+		:param packageName:     Name of the package, which is the name of the top-level item, e.g. ``myPackage``.
+		:param directory:       The package's directory.
+		:param countedItems:    Optional, the items the analysis counts. Default: all of them.
 		:param excludePatterns: Optional, regular expressions matching the whole qualified name of an item to exclude,
-		                        e.g. ``myPackage\\.CLI(\\..*)?``. Default: none.
-		:raises ValueError:     If parameter ``countFields`` is ``None``.
-		:raises TypeError:      If parameter ``countFields`` isn't of type :class:`bool`.
-		:raises ValueError:     If parameter ``countVariables`` is ``None``.
-		:raises TypeError:      If parameter ``countVariables`` isn't of type :class:`bool`.
-		:raises ValueError:     If parameter ``skipPrivate`` is ``None``.
-		:raises TypeError:      If parameter ``skipPrivate`` isn't of type :class:`bool`.
+		                        e.g. ``myPackage\\.CLI``; the items it contains are excluded too. Default: none.
+		:raises ValueError:     If parameter ``packageName`` is ``None``.
+		:raises TypeError:      If parameter ``packageName`` isn't of type :class:`str`.
+		:raises ValueError:     If parameter ``packageName`` is empty.
+		:raises ValueError:     If parameter ``directory`` is ``None``.
+		:raises TypeError:      If parameter ``directory`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:     If parameter ``countedItems`` is ``None``.
+		:raises TypeError:      If parameter ``countedItems`` isn't of type :class:`CountedItems`.
 		:raises TypeError:      If parameter ``excludePatterns`` isn't iterable.
 		:raises TypeError:      If parameter ``excludePatterns`` contains an element not of type :class:`str`.
 		:raises ValueError:     If parameter ``excludePatterns`` contains an invalid regular expression.
 		"""
-		for parameterName, value in (
-			("countFields",    countFields),
-			("countVariables", countVariables),
-			("skipPrivate",    skipPrivate)
-		):
-			if value is None:
-				raise ValueError(f"Parameter '{parameterName}' is None.")
-			elif not isinstance(value, bool):
-				ex = TypeError(f"Parameter '{parameterName}' is not of type 'bool'.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
-				raise ex
+		if packageName is None:
+			raise ValueError(f"Parameter 'packageName' is None.")
+		elif not isinstance(packageName, str):
+			ex = TypeError(f"Parameter 'packageName' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(packageName)}'.")
+			raise ex
+		elif packageName == "":
+			raise ValueError(f"Parameter 'packageName' is empty.")
 
-		self._countFields =     countFields
-		self._countVariables =  countVariables
-		self._skipPrivate =     skipPrivate
+		if directory is None:
+			raise ValueError(f"Parameter 'directory' is None.")
+		elif not isinstance(directory, Path):
+			ex = TypeError(f"Parameter 'directory' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(directory)}'.")
+			raise ex
+
+		if countedItems is None:
+			raise ValueError(f"Parameter 'countedItems' is None.")
+		elif not isinstance(countedItems, CountedItems):
+			ex = TypeError(f"Parameter 'countedItems' is not of type 'CountedItems'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(countedItems)}'.")
+			raise ex
+
+		self._packageName =     packageName
+		self._directory =       directory
+		self._countedItems =    countedItems
 		self._excludePatterns = []
 
 		if excludePatterns is not None:
@@ -167,107 +220,6 @@ class Options(metaclass=ExtendedType, slots=True):
 					raise ex from cause
 
 	@readonly
-	def CountFields(self) -> bool:
-		"""
-		Read-only property to access whether the fields of a class are counted (:attr:`_countFields`).
-
-		:returns: ``True``, if fields are counted; otherwise they are excluded.
-		"""
-		return self._countFields
-
-	@readonly
-	def CountVariables(self) -> bool:
-		"""
-		Read-only property to access whether the variables of a module are counted (:attr:`_countVariables`).
-
-		:returns: ``True``, if variables are counted; otherwise they are excluded.
-		"""
-		return self._countVariables
-
-	@readonly
-	def SkipPrivate(self) -> bool:
-		"""
-		Read-only property to access whether items of a private name are ignored (:attr:`_skipPrivate`).
-
-		:returns: ``True``, if private items are ignored.
-		"""
-		return self._skipPrivate
-
-	@readonly
-	def ExcludePatterns(self) -> list[Pattern[str]]:
-		"""
-		Read-only property to access the patterns of qualified names, whose items are excluded (:attr:`_excludePatterns`).
-
-		:returns: The compiled regular expressions.
-		"""
-		return self._excludePatterns
-
-
-@export
-class Analyzer(metaclass=ExtendedType, slots=True):
-	"""
-	Reads the documentation coverage of a Python package from its source files.
-
-	A package's or module's lines are its file's, so their items name no lines.
-
-	.. rubric:: Example
-
-	.. code-block:: Python
-
-	   from pathlib import Path
-	   from pyEDAA.Reports.DocumentationCoverage.Python import Analyzer, Options
-	   from pyTooling.Warning import WarningCollector
-
-	   with WarningCollector() as warnings:
-	     summary = Analyzer("myPackage", Path("src/myPackage"), options=Options(skipPrivate=True)).Analyze()
-
-	   print(f"{summary.Counters.Covered}/{summary.Counters.Expected}: {summary.Counters.Coverage:.1%}")
-	"""
-
-	_packageName: str      #: Name of the package.
-	_directory:   Path     #: The package's directory.
-	_options:     Options  #: The options of the analysis.
-
-	def __init__(self, packageName: str, directory: Path, *, options: Nullable[Options] = None) -> None:
-		"""
-		Initializes the analysis of a package.
-
-		:param packageName: Name of the package, which is the name of the top-level item, e.g. ``myPackage``.
-		:param directory:   The package's directory.
-		:param options:     Optional, the options of the analysis. Default: the defaults of :class:`Options`.
-		:raises ValueError: If parameter ``packageName`` is ``None``.
-		:raises TypeError:  If parameter ``packageName`` isn't of type :class:`str`.
-		:raises ValueError: If parameter ``packageName`` is empty.
-		:raises ValueError: If parameter ``directory`` is ``None``.
-		:raises TypeError:  If parameter ``directory`` isn't of type :class:`~pathlib.Path`.
-		:raises TypeError:  If parameter ``options`` isn't of type :class:`Options`.
-		"""
-		if packageName is None:
-			raise ValueError(f"Parameter 'packageName' is None.")
-		elif not isinstance(packageName, str):
-			ex = TypeError(f"Parameter 'packageName' is not of type 'str'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(packageName)}'.")
-			raise ex
-		elif packageName == "":
-			raise ValueError(f"Parameter 'packageName' is empty.")
-
-		if directory is None:
-			raise ValueError(f"Parameter 'directory' is None.")
-		elif not isinstance(directory, Path):
-			ex = TypeError(f"Parameter 'directory' is not of type 'Path'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(directory)}'.")
-			raise ex
-
-		if options is not None and not isinstance(options, Options):
-			ex = TypeError(f"Parameter 'options' is not of type 'Options'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(options)}'.")
-			raise ex
-
-		self._packageName = packageName
-		self._directory =   directory
-		self._options =     Options() if options is None else options
-
-	@readonly
 	def PackageName(self) -> str:
 		"""
 		Read-only property to access the name of the package (:attr:`_packageName`).
@@ -286,23 +238,33 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		return self._directory
 
 	@readonly
-	def Options(self) -> Options:
+	def CountedItems(self) -> CountedItems:
 		"""
-		Read-only property to access the options of the analysis (:attr:`_options`).
+		Read-only property to access the items the analysis counts (:attr:`_countedItems`).
 
-		:returns: The options.
+		:returns: The counted items.
 		"""
-		return self._options
+		return self._countedItems
 
-	def Analyze(self) -> CoverageSummary:
+	@readonly
+	def ExcludePatterns(self) -> list[Pattern[str]]:
 		"""
-		Read every Python source file of the package into a documentation coverage model, and aggregate it.
+		Read-only property to access the patterns of qualified names, whose items are excluded (:attr:`_excludePatterns`).
 
-		A source file, which can't be read or parsed, is raised as a
+		:returns: The compiled regular expressions.
+		"""
+		return self._excludePatterns
+
+	def Analyze(self) -> DocumentationReport:
+		"""
+		Read every Python source file of the package into a documentation coverage report, and aggregate it.
+
+		The report's :attr:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport.AnalysisDuration` is the
+		duration of the analysis. A source file, which can't be read or parsed, is raised as a
 		:exc:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning` to the current
 		:class:`~pyTooling.Warning.WarningCollector`; its module is excluded, and the analysis continues.
 
-		:returns:                                                 The analysis' root; its top-level item is the package.
+		:returns:                                                 The report; its top-level item is the package.
 		:raises DocCoverageError:                                 If the package's directory doesn't exist.
 		:raises ~pyTooling.Warning.UnhandledCriticalWarningError: If a source file can't be analyzed, and no warning
 		                                                          collector collects the warning. |br|
@@ -312,56 +274,65 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		if not self._directory.is_dir():
 			raise DocCoverageError(f"Package directory '{self._directory}' doesn't exist.")
 
-		summary = CoverageSummary(self._packageName)
-		self._ReadPackage(self._directory, self._packageName, summary, summary)
-		summary.Aggregate()
+		with Stopwatch() as stopwatch:
+			report = DocumentationReport(Path(self._packageName))
+			self._ReadPackage(self._directory, self._packageName, report, report)
+			report.Aggregate()
 
-		return summary
+		report._analysisDuration = timedelta(seconds=stopwatch.Duration)
 
-	def _ReadPackage(self, directory: Path, name: str, parent: Item | CoverageSummary, summary: CoverageSummary) -> None:
+		return report
+
+	def _ReadPackage(
+		self,
+		directory: Path,
+		name: str,
+		parent: Item | DocumentationReport,
+		report: DocumentationReport
+	) -> None:
 		"""
 		Read a package's ``__init__.py``, its modules, then its sub-packages, each sorted by name.
 
 		:param directory: The package's directory.
 		:param name:      The package's name.
-		:param parent:    The package containing this one, or the analysis' root.
-		:param summary:   The analysis' root.
+		:param parent:    The package containing this one, or the report.
+		:param report:    The report.
 		"""
 		if (directory / "__init__.py").is_file():
-			package = self._ReadModule(directory / "__init__.py", name, ItemKind.Package, parent, summary)
+			package = self._ReadModule(directory / "__init__.py", name, ItemKind.Package, parent, report)
 		else:
 			package = Item(name, ItemKind.Package, self._State(CoverageState.Empty, name, parent), parent=parent)
 
 		paths = sorted(directory.iterdir())
 		for path in paths:
 			if path.suffix == ".py" and path.name != "__init__.py" and path.is_file():
-				self._ReadModule(path, path.stem, ItemKind.Module, package, summary)
+				self._ReadModule(path, path.stem, ItemKind.Module, package, report)
 
 		for path in paths:
 			if path.is_dir() and next(path.rglob("*.py"), None) is not None:
-				self._ReadPackage(path, path.name, package, summary)
+				self._ReadPackage(path, path.name, package, report)
 
 	def _ReadModule(
 		self,
 		path: Path,
 		name: str,
 		kind: ItemKind,
-		parent: Item | CoverageSummary,
-		summary: CoverageSummary
+		parent: Item | DocumentationReport,
+		report: DocumentationReport
 	) -> Item:
 		"""
 		Read a module, or a package's ``__init__.py``, and the items declared in it.
 
 		:param path:                                              The source file.
 		:param name:                                              The module's or package's name.
-		:param kind:                                              The item's kind: a module or a package.
-		:param parent:                                            The package containing the module, or the analysis' root.
-		:param summary:                                           The analysis' root.
+		:param kind:                                              The kind of the module's item.
+		:param parent:                                            The package containing the module, or the report.
+		:param report:                                            The report.
 		:returns:                                                 The module's or package's item.
 		:raises ~pyTooling.Warning.UnhandledCriticalWarningError: If the source file can't be analyzed, and no warning
 		                                                          collector collects the warning.
 		"""
-		file = summary.GetOrAddFile(path.relative_to(self._directory))
+		file = report.GetOrAddFile(path.relative_to(self._directory))
 		try:
 			sourceFile = SourceFile.Read(path)
 		except (OSError, SyntaxError, TokenError, ValueError) as ex:
@@ -513,6 +484,8 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 			kind = ItemKind.Property
 		elif isMember and statement.name == "__init__":
 			kind = ItemKind.Constructor
+		elif isMember and statement.name == "__del__":
+			kind = ItemKind.Destructor
 		elif isMember:
 			kind = ItemKind.Method
 		else:
@@ -573,7 +546,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 				name,
 				parent,
 				ignored=name.startswith("_") and name.endswith("_"),
-				excluded=not (self._options._countFields if isField else self._options._countVariables)
+				excluded=(CountedItems.Fields if isField else CountedItems.Variables) not in self._countedItems
 			),
 			file=parent._file,
 			startLine=statement.lineno,
@@ -585,7 +558,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		self,
 		documentation: CoverageState,
 		name: str,
-		parent: Item | CoverageSummary,
+		parent: Item | DocumentationReport,
 		*,
 		ignored: bool = False,
 		excluded: bool = False
@@ -594,7 +567,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		Return an item's coverage state: how it is documented, and whether it is excluded or ignored.
 
 		An item is excluded, if its qualified name, or the qualified name of an item containing it, matches an exclude
-		pattern. It is ignored, if it is private and private items are skipped.
+		pattern. It is ignored, if its name is protected or private, and :class:`CountedItems` doesn't select such names.
 
 		:param documentation: How the item is documented.
 		:param name:          The item's name.
@@ -606,11 +579,14 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		names = f"{parent.QualifiedName}.{name}".split(".") if isinstance(parent, Item) else name.split(".")
 		if excluded or any(
 			pattern.fullmatch(".".join(names[:length])) is not None
-			for pattern in self._options._excludePatterns for length in range(1, len(names) + 1)
+			for pattern in self._excludePatterns for length in range(1, len(names) + 1)
 		):
 			return documentation | CoverageState.Excluded
-		elif ignored or (self._options._skipPrivate and name.startswith("_") and
-				not (name.startswith("__") and name.endswith("__"))):
+		elif ignored or (
+			name.startswith("_") and not name.startswith("__") and CountedItems.Protected not in self._countedItems
+		) or (
+			name.startswith("__") and not name.endswith("__") and CountedItems.Private not in self._countedItems
+		):
 			return documentation | CoverageState.Ignored
 
 		return documentation
