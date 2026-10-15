@@ -29,106 +29,115 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-from pathlib  import Path
-from unittest import TestCase
+"""Unit tests of the converter of docstr_coverage's analysis to the documentation coverage model."""
+from pathlib                                             import Path
 
-from pyEDAA.Reports.DocumentationCoverage import CoverageState
-from pyEDAA.Reports.DocumentationCoverage.Python import DocStrCoverage
+from pyEDAA.Reports.DocumentationCoverage                import CoverageState, ItemKind
+from pyEDAA.Reports.DocumentationCoverage.DocStrCoverage import DocStrCoverage, DocStrCoverageError
+from pyTooling.Testing                                   import Testcase
 
 
-class Analyze(TestCase):
+if __name__ == "__main__":  # pragma: no cover
+	print("ERROR: you called a testcase declaration file as an executable module.")
+	print("Use: 'python -m unittest <testcase module>'")
+	exit(1)
+
+
+class Analyze(Testcase):
 	def test_PackageCode(self) -> None:
-		docStrCov = DocStrCoverage("pyEDAA.Reports", Path("pyEDAA"))
+		"""A directory without ``__init__.py`` is a package with nothing to document."""
+		docStrCov = DocStrCoverage("pyEDAA", Path("pyEDAA"))
 		docStrCov.Analyze()
 		coverage = docStrCov.Convert()
-		coverage.Aggregate()
 
-		self.assertEqual(CoverageState.Unknown, coverage.Status)
-		self.assertGreaterEqual(coverage.AggregatedCoverage, 0.10)
+		self.assertIs(CoverageState.Empty, coverage.Items[0].Status)
+		self.assertIs(ItemKind.Package, coverage.Items[0]["Reports"].Kind)
+		self.assertGreaterEqual(coverage.Counters.Coverage, 0.10)
 
 	def test_PackageCode_Aggregation(self) -> None:
+		"""The model counts what docstr_coverage counts, per file and in total."""
 		docStrCov = DocStrCoverage("pyEDAA.Reports", Path("pyEDAA/Reports"))
 		docStrCov.Analyze()
 		coverage = docStrCov.Convert()
-		coverage.Aggregate()
 
-		fileCounts = [result.count_aggregate() for _, result in docStrCov.CoverageReport.files()]
+		fileCounts = {
+			Path(path).relative_to(Path("pyEDAA/Reports")): result.count_aggregate()
+			for path, result in docStrCov.CoverageReport.files()
+		}
+		for path, fileCount in fileCounts.items():
+			file = coverage.GetOrAddFile(path)
+			self.assertEqual(fileCount.needed, file.Counters.Expected, f"{path}: expected")
+			self.assertEqual(fileCount.found, file.Counters.Covered, f"{path}: covered")
 
-		self.assertEqual(sum(fileCount.needed for fileCount in fileCounts), coverage.AggregatedExpected)
-		self.assertEqual(sum(fileCount.found for fileCount in fileCounts), coverage.AggregatedCovered)
-		self.assertEqual(sum(fileCount.missing for fileCount in fileCounts), coverage.AggregatedUncovered)
+		self.assertEqual(sum(fileCount.needed for fileCount in fileCounts.values()), coverage.Counters.Expected)
+		self.assertEqual(sum(fileCount.found for fileCount in fileCounts.values()), coverage.Counters.Covered)
+		self.assertEqual(sum(fileCount.missing for fileCount in fileCounts.values()), coverage.Counters.Uncovered)
 
 	def test_Undocumented(self) -> None:
-		packageName = "MyPackage"
-		packageDirectory = Path(f"tests/packages/undocumented")
-
-		docStrCov = DocStrCoverage(packageName, packageDirectory)
+		docStrCov = DocStrCoverage("MyPackage", Path("tests/packages/undocumented"))
 		docStrCov.Analyze()
 		coverage = docStrCov.Convert()
-		coverage.Aggregate()
+		package = coverage.Items[0]
 
-		self.assertEqual(0, coverage.AggregatedTotal)
-		self.assertEqual(0, coverage.AggregatedExcluded)
-		self.assertEqual(0, coverage.AggregatedIgnored)
-		self.assertEqual(12, coverage.AggregatedExpected)
-		self.assertEqual(0, coverage.AggregatedCovered)
-		self.assertEqual(12, coverage.AggregatedUncovered)
-		self.assertEqual(0.0, coverage.AggregatedCoverage)
+		self.assertEqual(12, coverage.Counters.Total)
+		self.assertEqual(0, coverage.Counters.Excluded)
+		self.assertEqual(0, coverage.Counters.Ignored)
+		self.assertEqual(12, coverage.Counters.Expected)
+		self.assertEqual(0, coverage.Counters.Covered)
+		self.assertEqual(12, coverage.Counters.Uncovered)
+		self.assertEqual(0.0, coverage.Counters.Coverage)
 
-		self.assertEqual(0, coverage.Total)
-		self.assertEqual(0, coverage.Excluded)
-		self.assertEqual(0, coverage.Ignored)
-		self.assertEqual(6, coverage.Expected)
-		self.assertEqual(0, coverage.Covered)
-		self.assertEqual(6, coverage.Uncovered)
-		self.assertEqual(0.0, coverage.Coverage)
+		self.assertEqual(6, coverage.Files["__init__.py"].Counters.Expected)
+		self.assertEqual(0, coverage.Files["__init__.py"].Counters.Covered)
+		self.assertEqual(CoverageState.Undocumented, package.Status)
+		self.assertEqual(["PackageClass", "DerivedPackageClass", "MyModule"], [item.Name for item in package])
+		self.assertEqual(["__init__", "Method", "__str__"], [item.Name for item in package["PackageClass"]])
+		self.assertIs(ItemKind.Module, package["MyModule"].Kind)
+		self.assertIs(ItemKind.Other, package["PackageClass"].Kind)
 
 	def test_Partial(self) -> None:
-		packageName = "MyPackage"
-		packageDirectory = Path(f"tests/packages/partially")
-
-		docStrCov = DocStrCoverage(packageName, packageDirectory)
+		docStrCov = DocStrCoverage("MyPackage", Path("tests/packages/partially"))
 		docStrCov.Analyze()
 		coverage = docStrCov.Convert()
-		coverage.Aggregate()
 
-		self.assertEqual(0, coverage.AggregatedTotal)
-		self.assertEqual(0, coverage.AggregatedExcluded)
-		self.assertEqual(0, coverage.AggregatedIgnored)
-		self.assertEqual(12, coverage.AggregatedExpected)
-		self.assertEqual(5, coverage.AggregatedCovered)
-		self.assertEqual(7, coverage.AggregatedUncovered)
-		self.assertAlmostEqual(0.417, coverage.AggregatedCoverage, 3)
+		self.assertEqual(12, coverage.Counters.Total)
+		self.assertEqual(12, coverage.Counters.Expected)
+		self.assertEqual(5, coverage.Counters.Covered)
+		self.assertEqual(7, coverage.Counters.Uncovered)
+		self.assertAlmostEqual(0.417, coverage.Counters.Coverage, 3)
 
-		self.assertEqual(0, coverage.Total)
-		self.assertEqual(0, coverage.Excluded)
-		self.assertEqual(0, coverage.Ignored)
-		self.assertEqual(6, coverage.Expected)
-		self.assertEqual(3, coverage.Covered)
-		self.assertEqual(3, coverage.Uncovered)
-		self.assertEqual(0.5, coverage.Coverage)
+		self.assertEqual(6, coverage.Files["__init__.py"].Counters.Expected)
+		self.assertEqual(3, coverage.Files["__init__.py"].Counters.Covered)
+		self.assertEqual(0.5, coverage.Files["__init__.py"].Counters.Coverage)
 
 	def test_Documented(self) -> None:
-		packageName = "MyPackage"
-		packageDirectory = Path(f"tests/packages/documented")
-
-		docStrCov = DocStrCoverage(packageName, packageDirectory)
+		docStrCov = DocStrCoverage("MyPackage", Path("tests/packages/documented"))
 		docStrCov.Analyze()
 		coverage = docStrCov.Convert()
-		coverage.Aggregate()
 
-		self.assertEqual(0, coverage.AggregatedTotal)
-		self.assertEqual(0, coverage.AggregatedExcluded)
-		self.assertEqual(0, coverage.AggregatedIgnored)
-		self.assertEqual(12, coverage.AggregatedExpected)
-		self.assertEqual(12, coverage.AggregatedCovered)
-		self.assertEqual(0, coverage.AggregatedUncovered)
-		self.assertEqual(1.0, coverage.AggregatedCoverage)
+		self.assertEqual(12, coverage.Counters.Expected)
+		self.assertEqual(12, coverage.Counters.Covered)
+		self.assertEqual(1.0, coverage.Counters.Coverage)
+		self.assertEqual(6, coverage.Files["MyModule.py"].Counters.Covered)
 
-		self.assertEqual(0, coverage.Total)
-		self.assertEqual(0, coverage.Excluded)
-		self.assertEqual(0, coverage.Ignored)
-		self.assertEqual(6, coverage.Expected)
-		self.assertEqual(6, coverage.Covered)
-		self.assertEqual(0, coverage.Uncovered)
-		self.assertEqual(1.0, coverage.Coverage)
+	def test_ConvertBeforeAnalyze(self) -> None:
+		docStrCov = DocStrCoverage("MyPackage", Path("tests/packages/documented"))
+
+		self.assertIsNone(docStrCov.CoverageReport)
+		with self.assertRaises(DocStrCoverageError) as context:
+			docStrCov.Convert()
+		self.assertEqual("docstr_coverage's analysis didn't run.", str(context.exception))
+
+	def test_MissingDirectory(self) -> None:
+		with self.assertRaises(DocStrCoverageError) as context:
+			_ = DocStrCoverage("MyPackage", Path("tests/packages/missing"))
+		self.assertEqual("Package source directory 'tests/packages/missing' does not exist.", str(context.exception))
+
+	def test_Parameters(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			_ = DocStrCoverage(None, Path("tests/packages/documented"))
+		self.assertEqual("Parameter 'packageName' is None.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = DocStrCoverage("MyPackage", "tests/packages/documented")
+		self.assertEqual("Parameter 'directory' is not of type 'Path'.", str(context.exception))
