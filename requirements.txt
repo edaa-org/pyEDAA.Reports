@@ -1,4 +1,4 @@
-pyTooling[terminal] @ git+https://github.com/pyTooling/pyTooling.git@dev
+pyTooling[terminal] >= 10.0.0rc2, < 11.0
 ruamel.yaml ~= 0.19.1
 lxml >= 6.1.3, < 7.0
 jsonschema ~= 4.26
