@@ -121,6 +121,18 @@ modindex_common_prefix = [
 ]
 
 # ==============================================================================
+# Nitpicky mode
+# ==============================================================================
+# Types, which no intersphinx inventory lists.
+nitpick_ignore = [
+	("py:class", "ast.expr"),
+	("py:class", "ast.stmt"),
+	("py:class", "tokenize.TokenInfo"),
+	("py:class", "docstr_coverage.result_collection.ResultCollection"),
+]
+
+
+# ==============================================================================
 # Options for LaTeX / PDF output
 # ==============================================================================
 latex_engine = "lualatex"
