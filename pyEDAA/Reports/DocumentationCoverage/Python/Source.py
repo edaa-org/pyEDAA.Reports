@@ -123,15 +123,15 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 		"""
 		Read a source file in its declared encoding, and parse it.
 
-		:param path:                The source file.
-		:returns:                   The read source file.
-		:raises ValueError:         If parameter ``path`` is ``None``.
-		:raises TypeError:          If parameter ``path`` isn't of type :class:`~pathlib.Path`.
-		:raises OSError:            If the file can't be read.
-		:raises SyntaxError:        If the file declares an unknown encoding, or isn't valid Python.
-		:raises UnicodeDecodeError: If the file isn't encoded as it declares.
-		:raises ValueError:         If the source contains a null byte (Python 3.11).
-		:raises TokenError:         If the source ends inside a statement.
+		:param path:                  The source file.
+		:returns:                     The read source file.
+		:raises ValueError:           If parameter ``path`` is ``None``.
+		:raises TypeError:            If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises OSError:              If the file can't be read.
+		:raises SyntaxError:          If the file declares an unknown encoding, or isn't valid Python.
+		:raises UnicodeDecodeError:   If the file isn't encoded as it declares.
+		:raises ValueError:           If the source contains a null byte (Python 3.11).
+		:raises ~tokenize.TokenError: If the source ends inside a statement.
 		"""
 		if path is None:
 			raise ValueError(f"Parameter 'path' is None.")

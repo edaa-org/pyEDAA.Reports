@@ -302,11 +302,12 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		:exc:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning` to the current
 		:class:`~pyTooling.Warning.WarningCollector`; its module is excluded, and the analysis continues.
 
-		:returns:                              The analysis' root; its top-level item is the package.
-		:raises DocCoverageError:              If the package's directory doesn't exist.
-		:raises UnhandledCriticalWarningError: If a source file can't be analyzed, and no warning collector collects the
-		                                       warning. |br|
-		                                       Add a with-statement using :class:`~pyTooling.Warning.WarningCollector`.
+		:returns:                                                 The analysis' root; its top-level item is the package.
+		:raises DocCoverageError:                                 If the package's directory doesn't exist.
+		:raises ~pyTooling.Warning.UnhandledCriticalWarningError: If a source file can't be analyzed, and no warning
+		                                                          collector collects the warning. |br|
+		                                                          Add a with-statement using
+		                                                          :class:`~pyTooling.Warning.WarningCollector`.
 		"""
 		if not self._directory.is_dir():
 			raise DocCoverageError(f"Package directory '{self._directory}' doesn't exist.")
@@ -351,15 +352,14 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		"""
 		Read a module, or a package's ``__init__.py``, and the items declared in it.
 
-		:param path:                           The source file.
-		:param name:                           The module's or package's name.
-		:param kind:                           :attr:`~pyEDAA.Reports.DocumentationCoverage.ItemKind.Module` or
-		                                       :attr:`~pyEDAA.Reports.DocumentationCoverage.ItemKind.Package`.
-		:param parent:                         The package containing the module, or the analysis' root.
-		:param summary:                        The analysis' root.
-		:returns:                              The module's or package's item.
-		:raises UnhandledCriticalWarningError: If the source file can't be analyzed, and no warning collector collects the
-		                                       warning.
+		:param path:                                              The source file.
+		:param name:                                              The module's or package's name.
+		:param kind:                                              The item's kind: a module or a package.
+		:param parent:                                            The package containing the module, or the analysis' root.
+		:param summary:                                           The analysis' root.
+		:returns:                                                 The module's or package's item.
+		:raises ~pyTooling.Warning.UnhandledCriticalWarningError: If the source file can't be analyzed, and no warning
+		                                                          collector collects the warning.
 		"""
 		file = summary.GetOrAddFile(path.relative_to(self._directory))
 		try:
