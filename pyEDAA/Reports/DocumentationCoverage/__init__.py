@@ -61,7 +61,7 @@ from __future__            import annotations
 from datetime              import timedelta
 from enum                  import Flag
 from pathlib               import Path
-from typing                import ClassVar, Generator, Iterator, Optional as Nullable
+from typing                import Callable, ClassVar, Generator, Iterator, Optional as Nullable
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
 from pyTooling.Decorators  import export, readonly
@@ -538,14 +538,6 @@ class Base(metaclass=ExtendedType, slots=True):
 
 			counters._Add(otherCounters)
 
-	@abstractmethod
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate every element below this one, depth-first.
-
-		:returns: A generator of the elements below this one.
-		"""
-
 	def _SetRoot(self, root: Nullable[DocumentationReport]) -> None:
 		"""
 		Set the analysis' root of this element.
@@ -679,16 +671,6 @@ class Directory(BaseWithPath):
 			self._directories[element._name] = element
 		else:
 			self._files[element._name] = element
-
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the directories and files in this directory, each followed by the elements below it.
-
-		:returns: A generator of the elements below this directory.
-		"""
-		for child in (*self._directories.values(), *self._files.values()):
-			yield child
-			yield from child.IterateElements()
 
 	def _SetRoot(self, root: Nullable[DocumentationReport]) -> None:
 		"""
@@ -852,17 +834,6 @@ class DocumentationReport(Directory):
 		else:
 			self._items.append(element)
 
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the elements of the physical hierarchy, then those of the logical hierarchy.
-
-		:returns: A generator of every element below the report.
-		"""
-		yield from super().IterateElements()
-		for item in self._items:
-			yield item
-			yield from item.IterateElements()
-
 	@readonly
 	def Path(self) -> Path:
 		"""
@@ -939,14 +910,6 @@ class File(BaseWithPath):
 
 		if parent is not None:
 			parent._AddElement(self)
-
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the elements below this file, which are none: its items belong to the logical hierarchy.
-
-		:returns: An empty generator.
-		"""
-		yield from ()
 
 	@readonly
 	def Items(self) -> list[Item]:
@@ -1113,16 +1076,6 @@ class Item(Base):
 		"""
 		self._items.append(item)
 
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the items this item contains, each followed by the items below it.
-
-		:returns: A generator of the items below this one.
-		"""
-		for item in self._items:
-			yield item
-			yield from item.IterateElements()
-
 	def _SetRoot(self, root: Nullable[DocumentationReport]) -> None:
 		"""
 		Set the analysis' root of this item, and of the items below it.
@@ -1132,6 +1085,28 @@ class Item(Base):
 		self._root = root
 		for item in self._items:
 			item._SetRoot(root)
+
+	def IterateDescendants(self, predicate: Nullable[Callable[[Item], bool]] = None) -> Generator[Item, None, None]:
+		"""
+		Iterate all or selected items below this one - the items it contains, theirs, ... -, depth-first: each item
+		followed by the items below it.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip items in the generator. A skipped
+		item's items are still iterated.
+
+		:param predicate: Optional, filter function accepting an item and returning a boolean. Default: ``None``.
+		:returns:         A generator of the items below this one.
+		"""
+		if predicate is None:
+			for item in self._items:
+				yield item
+				yield from item.IterateDescendants()
+		else:
+			for item in self._items:
+				if predicate(item):
+					yield item
+
+				yield from item.IterateDescendants(predicate)
 
 	@readonly
 	def Name(self) -> str:
