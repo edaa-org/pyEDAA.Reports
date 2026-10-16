@@ -193,8 +193,11 @@ class MitigationKind(StringEnum):
 class MitigationState(StringEnum):
 	"""
 	The state of a mitigation: whether it is applied.
+
+	A mitigation *on hold* waits to be planned; a new mitigation is *planned*.
 	"""
 
+	OnHold =    "on-hold"    #: Proposed, but waiting to be planned, e.g. for a decision or a budget.
 	Planned =   "planned"    #: Decided, but not started.
 	Active =    "active"     #: Being applied.
 	Done =      "done"       #: Applied completely.

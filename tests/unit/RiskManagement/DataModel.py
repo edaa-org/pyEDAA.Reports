@@ -82,8 +82,10 @@ class Enumerations(Testcase):
 		self.assertIs(MitigationKind.Prevent, MitigationKind.Parse(None))
 
 	def test_MitigationState(self) -> None:
+		self.assertIs(MitigationState.OnHold, MitigationState.Parse("on-hold"))
 		self.assertIs(MitigationState.Abandoned, MitigationState.Parse("abandoned"))
 		self.assertIs(MitigationState.Planned, MitigationState.Parse(None))
+		self.assertEqual(["on-hold", "planned", "active", "done", "abandoned"], [str(state) for state in MitigationState])
 
 
 class RiskManagementInstantiation(Testcase):

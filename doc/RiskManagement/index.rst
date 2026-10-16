@@ -42,7 +42,8 @@ references its implications and mitigations, so several risks can share one.
   and the side effects of its mitigations.
 * A mitigation's :class:`MitigationKind` says how it reduces a risk: it *avoids* its cause, *prevents* it - reduces its
   probability -, is a *contingency* plan applied, when the risk occurs, or *transfers* the impact to a third party. Its
-  :class:`MitigationState` says whether it is applied: *planned*, *active*, *done* or *abandoned*.
+  :class:`MitigationState` says whether it is applied: *on hold* - waiting to be planned -, *planned*, *active*, *done*
+  or *abandoned*.
 * A risk names its owner - the person responsible for it - and the date of its next review; a date without a time
   zone is a local time. The owner is a :class:`~pyEDAA.Reports.Person` - user ID, name, e-mail address -, which the
   register refers to (:meth:`RiskManagement.AddPerson`, :attr:`RiskManagement.Persons`). The same person may be
