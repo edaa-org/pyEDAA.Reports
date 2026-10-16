@@ -40,8 +40,8 @@ The implications form a chain: an implication can have implications of its own, 
 implications too: its side effects. Both are the second-order implications of a risk. An implication can be mitigated
 like a risk.
 
-Risks relate to each other by a :class:`Link`: from a source risk to a destination risk, of a :class:`LinkKind`, e.g.
-one risk causing another.
+Risks of a register relate to each other by a :class:`Link`: from a source risk to a destination risk, of a
+:class:`LinkKind`, e.g. one risk causing another. A link has no parent: its risks and the register list it.
 
 A risk's :attr:`~Risk.Score` - the rank of its probability times the rank of its impact - classifies it by a
 :class:`RiskLevel`. A risk names its owner - a :class:`~pyEDAA.Reports.Person` the register refers to - and the date of
@@ -365,34 +365,19 @@ class RiskManagement(Base):
 		ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 		raise ex
 
-	def _AddElement(self, element: BaseWithID | Link) -> None:
+	def _AddElement(self, element: BaseWithID) -> None:
 		"""
-		Add a risk, an implication, a mitigation or a link, which names the risk register as its parent.
+		Add a risk, an implication or a mitigation, which names the risk register as its parent.
 
-		:param element:              The risk, implication, mitigation or link.
+		:param element:              The risk, implication or mitigation.
 		:raises RiskManagementError: If the risk register already contains an element of the same kind and ID.
 		:raises ValueError:          If the element references an implication or a mitigation, which isn't part of the risk
 		                             register. |br|
 		                             Add the referenced elements to the risk register first.
-		:raises ValueError:          If the element is a link from or to a risk, which isn't part of the risk register. |br|
-		                             Add the risks to the risk register first.
 		:raises ValueError:          If the element is a risk, whose owner isn't a person of the risk register. |br|
 		                             Add the person to the risk register first.
 		"""
-		if isinstance(element, Link):
-			for role, risk in (
-				("source",      element._source),
-				("destination", element._destination)
-			):
-				if risk._root is not self:
-					ex = ValueError(f"Link's {role} is outside the risk register.")
-					ex.add_note(f"Got risk '{risk._id}'.")
-					ex.add_note(f"Add the risk to the risk register first.")
-					raise ex
-
-			self._links.append(element)
-			return
-		elif isinstance(element, Risk):
+		if isinstance(element, Risk):
 			kind =     "Risk"
 			elements = self._risks
 		elif isinstance(element, Implication):
@@ -1394,11 +1379,15 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		return self._inboundLinks
 
-	def LinkTo(self, destination: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
+	def LinkTo(
+		self,
+		destination: Risk,
+		kind: LinkKind,
+		*,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> Link:
 		"""
 		Create an outbound link from this risk to the given risk.
-
-		The link joins the risk register of this risk, if it is part of one.
 
 		:param destination:          The risk the link ends at.
 		:param kind:                 The relationship the link states.
@@ -1407,27 +1396,31 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
 		:raises TypeError:           If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
 		:raises ValueError:          If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:          If this risk isn't part of a risk register.
 		:raises ValueError:          If parameter ``destination`` is ``None``.
 		:raises TypeError:           If parameter ``destination`` isn't of type :class:`Risk`.
 		:raises ValueError:          If parameter ``destination`` is this risk.
+		:raises ValueError:          If parameter ``destination`` isn't part of this risk's risk register.
 		:raises ValueError:          If parameter ``kind`` is ``None``.
 		:raises TypeError:           If parameter ``kind`` isn't of type :class:`LinkKind`.
 		:raises RiskManagementError: If this risk already has a link of this kind to the destination.
-		:raises ValueError:          If the destination isn't part of this risk's risk register. |br|
-		                             Add the risk to the risk register first.
 
 		.. seealso::
 
 		   :meth:`LinkFrom`
 		      |rarr| Create an inbound link from the given risk to this risk.
 		"""
-		return Link(self, destination, kind, keyValuePairs, parent=self._root)
+		return Link(self, destination, kind, keyValuePairs=keyValuePairs)
 
-	def LinkFrom(self, source: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
+	def LinkFrom(
+		self,
+		source: Risk,
+		kind: LinkKind,
+		*,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> Link:
 		"""
 		Create an inbound link from the given risk to this risk.
-
-		The link joins the risk register of this risk, if it is part of one.
 
 		:param source:               The risk the link starts at.
 		:param kind:                 The relationship the link states.
@@ -1439,11 +1432,11 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:raises ValueError:          If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:          If parameter ``source`` is ``None``.
 		:raises TypeError:           If parameter ``source`` isn't of type :class:`Risk`.
+		:raises ValueError:          If parameter ``source`` isn't part of a risk register.
+		:raises ValueError:          If this risk isn't part of the source's risk register.
 		:raises ValueError:          If parameter ``kind`` is ``None``.
 		:raises TypeError:           If parameter ``kind`` isn't of type :class:`LinkKind`.
 		:raises RiskManagementError: If the source already has a link of this kind to this risk.
-		:raises ValueError:          If the source isn't part of this risk's risk register. |br|
-		                             Add the risk to the risk register first.
 
 		.. seealso::
 
@@ -1455,7 +1448,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 			ex.add_note(f"Got risk '{source._id}'.")
 			raise ex
 
-		return Link(source, self, kind, keyValuePairs, parent=self._root)
+		return Link(source, self, kind, keyValuePairs=keyValuePairs)
 
 	def __repr__(self) -> str:
 		"""
@@ -1472,12 +1465,13 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 
 
 @export
-class Link(Base):
+class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 	"""
-	A link from a source risk to a destination risk, and the relationship it states.
+	A link from a source risk to a destination risk of the same risk register, and the relationship it states.
 
-	The link is listed by both risks: as an outbound link of its source, as an inbound link of its destination. A link
-	of a risk register connects risks of that register.
+	A link connects two risks; it is no element of the risk register and has no parent. The source lists it in
+	:attr:`~Risk.OutboundLinks`, the destination in :attr:`~Risk.InboundLinks`, the risk register in
+	:attr:`~RiskManagement.Links`.
 	"""
 
 	_source:      Risk      #: The risk the link starts at.
@@ -1489,40 +1483,41 @@ class Link(Base):
 		source: Risk,
 		destination: Risk,
 		kind: LinkKind,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		*,
-		parent: Nullable[RiskManagement] = None
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
 	) -> None:
 		"""
-		Initializes a link from a source risk to a destination risk, and adds it to its risk register and to both risks.
+		Initializes a link, and adds it to its source, its destination and their risk register.
 
 		:param source:               The risk the link starts at.
 		:param destination:          The risk the link ends at.
 		:param kind:                 The relationship the link states.
 		:param keyValuePairs:        Optional, the key-value pairs. Default: ``None``.
-		:param parent:               Optional, the risk register containing the link. Default: ``None``.
 		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
 		:raises TypeError:           If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
 		:raises ValueError:          If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:           If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		:raises ValueError:          If parameter ``source`` is ``None``.
 		:raises TypeError:           If parameter ``source`` isn't of type :class:`Risk`.
+		:raises ValueError:          If parameter ``source`` isn't part of a risk register.
 		:raises ValueError:          If parameter ``destination`` is ``None``.
 		:raises TypeError:           If parameter ``destination`` isn't of type :class:`Risk`.
 		:raises ValueError:          If parameter ``destination`` is the source.
+		:raises ValueError:          If parameter ``destination`` isn't part of the source's risk register.
 		:raises ValueError:          If parameter ``kind`` is ``None``.
 		:raises TypeError:           If parameter ``kind`` isn't of type :class:`LinkKind`.
 		:raises RiskManagementError: If the source already has a link of this kind to the destination.
-		:raises ValueError:          If the source or the destination isn't part of the risk register. |br|
-		                             Add the risks to the risk register first.
 		"""
-		super().__init__(keyValuePairs, parent=parent)
+		super().__init__(keyValuePairs)
 
 		if source is None:
 			raise ValueError(f"Parameter 'source' is None.")
 		elif not isinstance(source, Risk):
 			ex = TypeError(f"Parameter 'source' is not of type 'Risk'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
+			raise ex
+		elif source._root is None:
+			ex = ValueError(f"Parameter 'source' isn't part of a risk register.")
+			ex.add_note(f"Got risk '{source._id}'.")
 			raise ex
 
 		if destination is None:
@@ -1533,6 +1528,10 @@ class Link(Base):
 			raise ex
 		elif destination is source:
 			ex = ValueError(f"Parameter 'destination' is the source.")
+			ex.add_note(f"Got risk '{destination._id}'.")
+			raise ex
+		elif destination._root is not source._root:
+			ex = ValueError(f"Parameter 'destination' isn't part of the source's risk register.")
 			ex.add_note(f"Got risk '{destination._id}'.")
 			raise ex
 
@@ -1551,11 +1550,9 @@ class Link(Base):
 		self._destination = destination
 		self._kind =        kind
 
-		if parent is not None:
-			parent._AddElement(self)
-
 		source._outboundLinks.append(self)
 		destination._inboundLinks.append(self)
+		source._root._links.append(self)
 
 
 	@readonly
