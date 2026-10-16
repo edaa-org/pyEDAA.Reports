@@ -28,7 +28,6 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Unit tests of the documentation coverage model: kinds, states, both hierarchies, and aggregation."""
 """Unit tests of :class:`~pyEDAA.Reports.KeyValuePairsMixin`."""
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Testing     import Testcase
