@@ -987,6 +987,10 @@ Each class of the format's model takes typed values in its constructor, so a mod
 classmethod ``Parse`` reads the class' JSON element and calls the constructor - e.g.
 :meth:`File.Parse() <pyEDAA.Reports.CodeCoverage.LLVM.File.Parse>` reads a file's JSON object.
 
+Every element knows the element containing it (``Parent``) and the report (``Root``). A container connects the
+elements given to its constructor; an element created with a ``parent`` is added to the parent's collection. When a
+file or function joins the report, the report becomes the root of every element below it.
+
 :meth:`~pyEDAA.Reports.CodeCoverage.LLVM.Document.ToCoverageSummary` converts it to the common model:
 
 * A file's path is relative to the directory common to all files, which becomes the report's source directory.
