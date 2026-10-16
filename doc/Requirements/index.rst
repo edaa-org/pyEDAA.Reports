@@ -70,9 +70,10 @@ of ISO/IEC/IEEE 29148 and RFC 2119:
      - *may*
      - A permission.
 
-Its :class:`ItemState` follows its life cycle from ``draft`` over ``in-review``, ``final`` and ``implemented`` to
-``verified``. A verified requirement is ``closed``, when it is released and changes no more, e.g. in a baseline. At any
-time, a requirement can be ``rejected`` or become ``obsolete``.
+Its :class:`ItemState` follows its life cycle from ``placeholder`` over ``draft``, ``in-review``, ``final`` and
+``implemented`` to ``verified``; a new requirement is a ``draft``. A verified requirement is ``closed``, when it is
+released and changes no more, e.g. in a baseline. At any time, a requirement can be ``rejected`` or become
+``obsolete``.
 
 A requirement contains child requirements, which refine it. :meth:`~BaseItem.IterateChildren` iterates the children,
 :meth:`~BaseItem.IterateDescendants` the children and grandchildren, depth-first.

@@ -55,10 +55,12 @@ class ItemState(StringEnum):
 	"""
 	The state of an item in its life cycle.
 
-	An item is open from :attr:`Draft` over :attr:`InReview`, :attr:`Final` and :attr:`Implemented` to :attr:`Verified`.
-	It ends :attr:`Closed` after its verification, or :attr:`Rejected` or :attr:`Obsolete` at any time.
+	An item is open from :attr:`Placeholder` over :attr:`Draft`, :attr:`InReview`, :attr:`Final` and :attr:`Implemented`
+	to :attr:`Verified`. It ends :attr:`Closed` after its verification, or :attr:`Rejected` or :attr:`Obsolete` at any
+	time.
 	"""
 
+	Placeholder = "placeholder"  #: Reserved, e.g. an ID and a title, but not yet written.
 	Draft =       "draft"        #: Written, but not yet reviewed.
 	InReview =    "in-review"    #: Under review by its stakeholders.
 	Final =       "final"        #: Reviewed and agreed by its stakeholders; it binds the design.

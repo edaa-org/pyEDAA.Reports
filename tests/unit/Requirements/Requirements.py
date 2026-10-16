@@ -50,6 +50,7 @@ FUNCTIONAL = RequirementKind.Functional                                       #:
 
 class Enumerations(Testcase):
 	def test_Parse(self) -> None:
+		self.assertIs(ItemState.Placeholder, ItemState.Parse("placeholder"))
 		self.assertIs(ItemState.InReview, ItemState.Parse("in-review"))
 		self.assertIs(ItemState.Final, ItemState.Parse("final"))
 		self.assertIs(ItemState.Closed, ItemState.Parse("closed"))
