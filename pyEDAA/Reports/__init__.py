@@ -178,3 +178,101 @@ class KeyValuePairsMixin(metaclass=ExtendedType, mixin=True):
 		:returns:   ``True``, if the element has a pair of that key.
 		"""
 		return key in self._keyValuePairs
+
+
+@export
+class Person(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
+	"""
+	A real person: a user ID, a name and an e-mail address.
+
+	A person belongs to no single data model: a root registers the persons it refers to, and the same person may be
+	registered in several roots, e.g. as the author of requirements and as the owner of risks. The role a person acts in,
+	e.g. a reviewer, is a persona of the requirements model.
+	"""
+
+	_userID: str            #: The person's user ID, unique among persons.
+	_name:   str            #: The person's name.
+	_email:  Nullable[str]  #: The person's e-mail address, if known.
+
+	def __init__(
+		self,
+		userID: str,
+		name: str,
+		email: Nullable[str] = None,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> None:
+		"""
+		Initialize a person.
+
+		:param userID:        The person's user ID, e.g. ``paebbels``.
+		:param name:          The person's name.
+		:param email:         Optional, the person's e-mail address. Default: ``None``.
+		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:   If parameter ``userID`` or ``name`` is ``None``.
+		:raises TypeError:    If parameter ``userID``, ``name`` or ``email`` isn't of type :class:`str`.
+		:raises ValueError:   If parameter ``userID`` or ``name`` is empty.
+		:raises ValueError:   If parameter ``email`` isn't of the form ``local@domain``.
+		"""
+		super().__init__(keyValuePairs)
+
+		for parameterName, text in (("userID", userID), ("name", name)):
+			if text is None:
+				raise ValueError(f"Parameter '{parameterName}' is None.")
+			elif not isinstance(text, str):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type 'str'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(text)}'.")
+				raise ex
+			elif text == "":
+				raise ValueError(f"Parameter '{parameterName}' is empty.")
+
+		if email is not None and not isinstance(email, str):
+			ex = TypeError(f"Parameter 'email' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(email)}'.")
+			raise ex
+		elif email is not None and "" in email.partition("@"):
+			ex = ValueError(f"Parameter 'email' isn't of the form 'local@domain'.")
+			ex.add_note(f"Got value '{email}'.")
+			raise ex
+
+		self._userID = userID
+		self._name =   name
+		self._email =  email
+
+	@readonly
+	def UserID(self) -> str:
+		"""
+		Read-only property to access the person's user ID (:attr:`_userID`).
+
+		:returns: The user ID, unique among persons.
+		"""
+		return self._userID
+
+	@readonly
+	def Name(self) -> str:
+		"""
+		Read-only property to access the person's name (:attr:`_name`).
+
+		:returns: The name.
+		"""
+		return self._name
+
+	@readonly
+	def Email(self) -> Nullable[str]:
+		"""
+		Read-only property to access the person's e-mail address (:attr:`_email`).
+
+		:returns: The e-mail address, or ``None`` if unknown.
+		"""
+		return self._email
+
+	def __repr__(self) -> str:
+		"""
+		Return a representation of the person.
+
+		:returns: The user ID, the name and the e-mail address, if known.
+		"""
+		return f"<Person {self._userID}: {self._name}{'' if self._email is None else f' <{self._email}>'}>"
+
