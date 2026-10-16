@@ -815,18 +815,18 @@ class BaseItem(BaseWithID):
 	one to refer to any. A child item has the class of its parent; its ID is unique in the specification, too.
 	"""
 
-	_title:        str                  #: The item's title.
-	_created:      datetime             #: The time the item was created.
-	_state:        ItemState            #: The item's state in its life cycle.
-	_layer:        Nullable[_Layer]     #: The layer the item belongs to, or ``None``.
-	_authors:      dict[str, Person]    #: The authors of the item, by user ID.
-	_owners:       dict[str, Person]    #: The owners of the item, by user ID.
-	_personas:     dict[str, Persona]   #: The personas the item is about, by ID.
-	_labels:       dict[str, Label]     #: The labels of the item, by ID.
-	_attachments:  dict[str, Document]  #: The documents attached to the item, by ID.
-	_children:     dict[str, Self]      #: The child items, by ID.
-	_links:        list[Link]           #: The links from this item, in the order they were added.
-	_inboundLinks: list[Link]           #: The links to this item, in the order they were added.
+	_title:         str                  #: The item's title.
+	_created:       datetime             #: The time the item was created.
+	_state:         ItemState            #: The item's state in its life cycle.
+	_layer:         Nullable[_Layer]     #: The layer the item belongs to, or ``None``.
+	_authors:       dict[str, Person]    #: The authors of the item, by user ID.
+	_owners:        dict[str, Person]    #: The owners of the item, by user ID.
+	_personas:      dict[str, Persona]   #: The personas the item is about, by ID.
+	_labels:        dict[str, Label]     #: The labels of the item, by ID.
+	_attachments:   dict[str, Document]  #: The documents attached to the item, by ID.
+	_children:      dict[str, Self]      #: The child items, by ID.
+	_outboundLinks: list[Link]           #: The links from this item, in the order they were added.
+	_inboundLinks:  list[Link]           #: The links to this item, in the order they were added.
 
 	def __init__(
 		self,
@@ -926,18 +926,18 @@ class BaseItem(BaseWithID):
 				ex.add_note(f"Got layer '{layer._id}'.")
 				raise ex
 
-		self._title =        title
-		self._created =      created
-		self._state =        state
-		self._layer =        layer
-		self._authors =      {}
-		self._owners =       {}
-		self._personas =     {}
-		self._labels =       {}
-		self._attachments =  {}
-		self._children =     {}
-		self._links =        []
-		self._inboundLinks = []
+		self._title =         title
+		self._created =       created
+		self._state =         state
+		self._layer =         layer
+		self._authors =       {}
+		self._owners =        {}
+		self._personas =      {}
+		self._labels =        {}
+		self._attachments =   {}
+		self._children =      {}
+		self._outboundLinks = []
+		self._inboundLinks =  []
 
 		for parameterName, references, referenceType, container in (
 			("authors",     authors,     Person,   self._authors),
@@ -994,13 +994,13 @@ class BaseItem(BaseWithID):
 		:raises RequirementsError: If this item has a link of the same kind to the same destination already.
 		"""
 		if isinstance(element, Link):
-			for link in self._links:
+			for link in self._outboundLinks:
 				if link._destination is element._destination and link._kind is element._kind:
 					ex = RequirementsError(f"{self.__class__.__name__} '{self._id}' has a '{element._kind}' link already.")
 					ex.add_note(f"Got destination '{element._destination._id}'.")
 					raise ex
 
-			self._links.append(element)
+			self._outboundLinks.append(element)
 			element._destination._inboundLinks.append(element)
 		else:
 			if self._root is not None:
@@ -1116,13 +1116,13 @@ class BaseItem(BaseWithID):
 		return self._children
 
 	@readonly
-	def Links(self) -> list[Link]:
+	def OutboundLinks(self) -> list[Link]:
 		"""
-		Read-only property to access the links from this item (:attr:`_links`).
+		Read-only property to access the links from this item (:attr:`_outboundLinks`).
 
 		:returns: The links, in the order they were added.
 		"""
-		return self._links
+		return self._outboundLinks
 
 	@readonly
 	def InboundLinks(self) -> list[Link]:
@@ -1171,7 +1171,7 @@ class BaseItem(BaseWithID):
 
 				yield from child.IterateDescendants(predicate)
 
-	def IterateLinks(self, predicate: Nullable[Callable[[Link], bool]] = None) -> Generator[Link, None, None]:
+	def IterateOutboundLinks(self, predicate: Nullable[Callable[[Link], bool]] = None) -> Generator[Link, None, None]:
 		"""
 		Iterate all or selected links from this item.
 
@@ -1181,9 +1181,9 @@ class BaseItem(BaseWithID):
 		:returns:         A generator of the links from this item.
 		"""
 		if predicate is None:
-			yield from self._links
+			yield from self._outboundLinks
 		else:
-			for link in self._links:
+			for link in self._outboundLinks:
 				if predicate(link):
 					yield link
 
@@ -1567,7 +1567,7 @@ class Link(Base):
 	A link from an item - its source - to another item of the same specification - its destination -, and the
 	relationship it states.
 
-	Its parent is its source: the source lists it in :attr:`~BaseItem.Links`, the destination in
+	Its parent is its source: the source lists it in :attr:`~BaseItem.OutboundLinks`, the destination in
 	:attr:`~BaseItem.InboundLinks`.
 	"""
 

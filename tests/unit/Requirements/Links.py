@@ -62,7 +62,7 @@ class Links(Testcase):
 		self.assertIs(LinkKind.CounterpartOf, firmware.Kind)
 		self.assertIs(specification, firmware.Root)
 		self.assertEqual("IRQ0", firmware["pin"])
-		self.assertEqual([software, derived], requirements["SW-1"].Links)
+		self.assertEqual([software, derived], requirements["SW-1"].OutboundLinks)
 		self.assertEqual([firmware, derived], requirements["EL-1"].InboundLinks)
 		self.assertEqual([software], requirements["FW-1"].InboundLinks)
 
@@ -78,8 +78,9 @@ class Links(Testcase):
 			"""Nested function selecting counterpart links."""
 			return link.Kind is LinkKind.CounterpartOf
 
-		self.assertEqual(["FW-1"], [link.Destination.ID for link in requirements["SW-1"].IterateLinks(isCounterpart)])
-		self.assertEqual(2, len(list(requirements["SW-1"].IterateLinks())))
+		source = requirements["SW-1"]
+		self.assertEqual(["FW-1"], [link.Destination.ID for link in source.IterateOutboundLinks(isCounterpart)])
+		self.assertEqual(2, len(list(source.IterateOutboundLinks())))
 		self.assertEqual(["DES-1"], [link.Source.ID for link in requirements["SW-1"].IterateInboundLinks()])
 		self.assertEqual([], list(requirements["SW-1"].IterateInboundLinks(isCounterpart)))
 		self.assertEqual(["SW-1"], [link.Source.ID for link in requirements["FW-1"].IterateInboundLinks(isCounterpart)])
@@ -129,7 +130,7 @@ class Links(Testcase):
 
 				self.assertEqual(message, str(context.exception))
 
-		self.assertEqual([], requirements["FW-1"].Links)
+		self.assertEqual([], requirements["FW-1"].OutboundLinks)
 
 		with self.assertRaises(ValueError) as context:
 			_ = Link(requirements["EL-1"], LinkKind.RelatesTo, parent=Requirement("REQ-2", "Title", FUNCTIONAL))

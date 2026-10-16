@@ -155,6 +155,6 @@ destination*.
    * - ``relates-to``
      - has any other relationship to the destination.
 
-A source has one link of a kind to a destination. :meth:`~BaseItem.IterateLinks` and
+A source has one link of a kind to a destination. :meth:`~BaseItem.IterateOutboundLinks` and
 :meth:`~BaseItem.IterateInboundLinks` take an optional predicate, e.g. to follow the counterparts of a requirement
 through the layers.
