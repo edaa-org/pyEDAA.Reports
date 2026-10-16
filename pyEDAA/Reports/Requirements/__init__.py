@@ -981,34 +981,21 @@ class BaseItem(BaseWithID):
 
 				container[key] = reference
 
-	def _AddElement(self, element: Self | Link) -> None:
+	def _AddElement(self, element: Self) -> None:
 		"""
-		Add a child item or a link, which names this item as its parent.
+		Add a child item, which names this item as its parent, and register it with every item below it in the
+		specification.
 
-		A child item is registered with every item below it in the specification. A link is added to its destination's
-		inbound links, too.
-
-		:param element:            The child item or link.
+		:param element:            The child item.
 		:raises RequirementsError: If the specification already contains an item of an ID of the child or an item below it.
 		:raises RequirementsError: If this item isn't part of a specification, and has a child of this ID already.
-		:raises RequirementsError: If this item has a link of the same kind to the same destination already.
 		"""
-		if isinstance(element, Link):
-			for link in self._outboundLinks:
-				if link._destination is element._destination and link._kind is element._kind:
-					ex = RequirementsError(f"{self.__class__.__name__} '{self._id}' has a '{element._kind}' link already.")
-					ex.add_note(f"Got destination '{element._destination._id}'.")
-					raise ex
+		if self._root is not None:
+			self._root._AddItems(element)
+		elif element._id in self._children:
+			raise RequirementsError(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
 
-			self._outboundLinks.append(element)
-			element._destination._inboundLinks.append(element)
-		else:
-			if self._root is not None:
-				self._root._AddItems(element)
-			elif element._id in self._children:
-				raise RequirementsError(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
-
-			self._children[element._id] = element
+		self._children[element._id] = element
 
 	@readonly
 	def Title(self) -> str:
@@ -1188,6 +1175,7 @@ class BaseItem(BaseWithID):
 		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
 		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
 		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:        If this item isn't part of a specification.
 		:raises ValueError:        If parameter ``destination`` is ``None``.
 		:raises TypeError:         If parameter ``destination`` isn't of type :class:`BaseItem`.
 		:raises ValueError:        If parameter ``destination`` is this item.
@@ -1201,7 +1189,7 @@ class BaseItem(BaseWithID):
 		   :meth:`LinkFrom`
 		      |rarr| Create an inbound link from the given item to this item.
 		"""
-		return Link(destination, kind, keyValuePairs=keyValuePairs, parent=self)
+		return Link(self, destination, kind, keyValuePairs=keyValuePairs)
 
 	def LinkFrom(
 		self,
@@ -1217,13 +1205,14 @@ class BaseItem(BaseWithID):
 		:param kind:               The relationship the link states.
 		:param keyValuePairs:      Optional, the key-value pairs of the link. Default: ``None``.
 		:returns:                  The link from the source to this item.
-		:raises ValueError:        If parameter ``source`` is ``None``.
-		:raises TypeError:         If parameter ``source`` isn't of type :class:`BaseItem`.
-		:raises ValueError:        If parameter ``source`` is this item.
-		:raises ValueError:        If parameter ``source`` isn't part of this item's specification.
 		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
 		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
 		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:        If parameter ``source`` is ``None``.
+		:raises TypeError:         If parameter ``source`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``source`` isn't part of a specification.
+		:raises ValueError:        If parameter ``source`` is this item.
+		:raises ValueError:        If this item isn't part of the source's specification.
 		:raises ValueError:        If parameter ``kind`` is ``None``.
 		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
 		:raises RequirementsError: If the source has a link of this kind to this item already.
@@ -1233,22 +1222,7 @@ class BaseItem(BaseWithID):
 		   :meth:`LinkTo`
 		      |rarr| Create an outbound link from this item to the given item.
 		"""
-		if source is None:
-			raise ValueError(f"Parameter 'source' is None.")
-		elif not isinstance(source, BaseItem):
-			ex = TypeError(f"Parameter 'source' is not of type 'BaseItem'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
-			raise ex
-		elif source is self:
-			ex = ValueError(f"Parameter 'source' is this item.")
-			ex.add_note(f"Got item '{source._id}'.")
-			raise ex
-		elif self._root is None or source._root is not self._root:
-			ex = ValueError(f"Parameter 'source' isn't part of this item's specification.")
-			ex.add_note(f"Got item '{source._id}'.")
-			raise ex
-
-		return Link(self, kind, keyValuePairs=keyValuePairs, parent=source)
+		return Link(source, self, kind, keyValuePairs=keyValuePairs)
 
 	def IterateOutboundLinks(self, predicate: Nullable[Callable[[Link], bool]] = None) -> Generator[Link, None, None]:
 		"""
@@ -1641,53 +1615,60 @@ class LinkKind(StringEnum):
 
 
 @export
-class Link(Base):
+class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 	"""
 	A link from an item - its source - to another item of the same specification - its destination -, and the
 	relationship it states.
 
-	Its parent is its source: the source lists it in :attr:`~BaseItem.OutboundLinks`, the destination in
-	:attr:`~BaseItem.InboundLinks`.
+	A link connects two items of the item hierarchy; it is no element of the hierarchy and has no parent. The source
+	lists it in :attr:`~BaseItem.OutboundLinks`, the destination in :attr:`~BaseItem.InboundLinks`.
 	"""
 
-	_PARENT_TYPE: ClassVar[tuple[type, ...]] = (BaseItem, )  #: A link is in its source item.
-
-	_source:      BaseItem                                   #: The item the link starts at: its parent.
-	_destination: BaseItem                                   #: The item the link points to.
-	_kind:        LinkKind                                   #: The relationship the link states.
+	_source:      BaseItem  #: The item the link starts at.
+	_destination: BaseItem  #: The item the link points to.
+	_kind:        LinkKind  #: The relationship the link states.
 
 	def __init__(
 		self,
+		source: BaseItem,
 		destination: BaseItem,
 		kind: LinkKind,
 		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
-		parent: BaseItem
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
 	) -> None:
 		"""
 		Initializes a link, and adds it to its source and its destination.
 
+		:param source:             The item the link starts at.
 		:param destination:        The item the link points to.
 		:param kind:               The relationship the link states.
 		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
-		:param parent:             The item the link starts at: its source.
 		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
 		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
 		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
-		:raises ValueError:        If parameter ``parent`` is ``None``.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``source`` is ``None``.
+		:raises TypeError:         If parameter ``source`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``source`` isn't part of a specification.
 		:raises ValueError:        If parameter ``destination`` is ``None``.
 		:raises TypeError:         If parameter ``destination`` isn't of type :class:`BaseItem`.
-		:raises ValueError:        If parameter ``destination`` is the link's source.
+		:raises ValueError:        If parameter ``destination`` is the source.
 		:raises ValueError:        If parameter ``destination`` isn't part of the source's specification.
 		:raises ValueError:        If parameter ``kind`` is ``None``.
 		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
 		:raises RequirementsError: If the source has a link of this kind to this destination already.
 		"""
-		super().__init__(keyValuePairs=keyValuePairs, parent=parent)
+		super().__init__(keyValuePairs)
 
-		if parent is None:
-			raise ValueError(f"Parameter 'parent' is None.")
+		if source is None:
+			raise ValueError(f"Parameter 'source' is None.")
+		elif not isinstance(source, BaseItem):
+			ex = TypeError(f"Parameter 'source' is not of type 'BaseItem'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
+			raise ex
+		elif source._root is None:
+			ex = ValueError(f"Parameter 'source' isn't part of a specification.")
+			ex.add_note(f"Got item '{source._id}'.")
+			raise ex
 
 		if destination is None:
 			raise ValueError(f"Parameter 'destination' is None.")
@@ -1695,11 +1676,11 @@ class Link(Base):
 			ex = TypeError(f"Parameter 'destination' is not of type 'BaseItem'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(destination)}'.")
 			raise ex
-		elif destination is parent:
-			ex = ValueError(f"Parameter 'destination' is the link's source.")
+		elif destination is source:
+			ex = ValueError(f"Parameter 'destination' is the source.")
 			ex.add_note(f"Got item '{destination._id}'.")
 			raise ex
-		elif self._root is None or destination._root is not self._root:
+		elif destination._root is not source._root:
 			ex = ValueError(f"Parameter 'destination' isn't part of the source's specification.")
 			ex.add_note(f"Got item '{destination._id}'.")
 			raise ex
@@ -1711,16 +1692,23 @@ class Link(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
-		self._source =      parent
+		for link in source._outboundLinks:
+			if link._destination is destination and link._kind is kind:
+				ex = RequirementsError(f"{source.__class__.__name__} '{source._id}' has a '{kind}' link already.")
+				ex.add_note(f"Got destination '{destination._id}'.")
+				raise ex
+
+		self._source =      source
 		self._destination = destination
 		self._kind =        kind
 
-		parent._AddElement(self)
+		source._outboundLinks.append(self)
+		destination._inboundLinks.append(self)
 
 	@readonly
 	def Source(self) -> BaseItem:
 		"""
-		Read-only property to access the item the link starts at: its parent (:attr:`_source`).
+		Read-only property to access the item the link starts at (:attr:`_source`).
 
 		:returns: The source item.
 		"""

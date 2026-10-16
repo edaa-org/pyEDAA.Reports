@@ -48,19 +48,18 @@ class Links(Testcase):
 		specification = BuildSpecification()
 		requirements =  specification.Requirements
 		firmware =      Link(
+			requirements["FW-1"],
 			requirements["EL-1"],
 			LinkKind.CounterpartOf,
-			keyValuePairs={"pin": "IRQ0"},
-			parent=requirements["FW-1"]
+			keyValuePairs={"pin": "IRQ0"}
 		)
-		software = Link(requirements["FW-1"], LinkKind.CounterpartOf, parent=requirements["SW-1"])
-		derived =  Link(requirements["EL-1"], LinkKind.DerivesFrom, parent=requirements["SW-1"])
+		software = Link(requirements["SW-1"], requirements["FW-1"], LinkKind.CounterpartOf)
+		derived =  Link(requirements["SW-1"], requirements["EL-1"], LinkKind.DerivesFrom)
 
 		self.assertIs(requirements["FW-1"], firmware.Source)
-		self.assertIs(requirements["FW-1"], firmware.Parent)
 		self.assertIs(requirements["EL-1"], firmware.Destination)
 		self.assertIs(LinkKind.CounterpartOf, firmware.Kind)
-		self.assertIs(specification, firmware.Root)
+		self.assertFalse(hasattr(firmware, "Parent"))
 		self.assertEqual("IRQ0", firmware["pin"])
 		self.assertEqual([software, derived], requirements["SW-1"].OutboundLinks)
 		self.assertEqual([firmware, derived], requirements["EL-1"].InboundLinks)
@@ -81,13 +80,12 @@ class Links(Testcase):
 		self.assertEqual([link], requirements["EL-1"].InboundLinks)
 
 	def test_LinkFrom(self) -> None:
-		"""'LinkFrom()' creates an inbound link: the given item is the link's source and parent."""
+		"""'LinkFrom()' creates an inbound link: the given item is the link's source."""
 		specification = BuildSpecification()
 		requirements =  specification.Requirements
 		link =          requirements["EL-1"].LinkFrom(requirements["FW-1"], LinkKind.DerivesFrom)
 
 		self.assertIs(requirements["FW-1"], link.Source)
-		self.assertIs(requirements["FW-1"], link.Parent)
 		self.assertIs(requirements["EL-1"], link.Destination)
 		self.assertEqual([link], requirements["FW-1"].OutboundLinks)
 		self.assertEqual([link], requirements["EL-1"].InboundLinks)
@@ -102,8 +100,8 @@ class Links(Testcase):
 		for source, exception, message in (
 			(None,                 ValueError, "Parameter 'source' is None."),
 			("FW-1",               TypeError,  "Parameter 'source' is not of type 'BaseItem'."),
-			(requirements["EL-1"], ValueError, "Parameter 'source' is this item."),
-			(other,                ValueError, "Parameter 'source' isn't part of this item's specification."),
+			(requirements["EL-1"], ValueError, "Parameter 'destination' is the source."),
+			(other,                ValueError, "Parameter 'destination' isn't part of the source's specification."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -115,9 +113,9 @@ class Links(Testcase):
 		specification = BuildSpecification()
 		requirements =  specification.Requirements
 		design =        SpecificationItem("DES-1", "Interrupt controller", parent=specification)
-		Link(requirements["FW-1"], LinkKind.CounterpartOf, parent=requirements["SW-1"])
-		Link(requirements["EL-1"], LinkKind.DependsOn, parent=requirements["SW-1"])
-		Link(requirements["SW-1"], LinkKind.RelatesTo, parent=design)
+		Link(requirements["SW-1"], requirements["FW-1"], LinkKind.CounterpartOf)
+		Link(requirements["SW-1"], requirements["EL-1"], LinkKind.DependsOn)
+		Link(design, requirements["SW-1"], LinkKind.RelatesTo)
 
 		def isCounterpart(link: Link) -> bool:
 			"""Nested function selecting counterpart links."""
@@ -134,11 +132,11 @@ class Links(Testcase):
 		"""A source has one link of a kind to a destination."""
 		specification = BuildSpecification()
 		requirements =  specification.Requirements
-		Link(requirements["EL-1"], LinkKind.CounterpartOf, parent=requirements["FW-1"])
-		Link(requirements["EL-1"], LinkKind.DependsOn, parent=requirements["FW-1"])
+		Link(requirements["FW-1"], requirements["EL-1"], LinkKind.CounterpartOf)
+		Link(requirements["FW-1"], requirements["EL-1"], LinkKind.DependsOn)
 
 		with self.assertRaises(RequirementsError) as context:
-			Link(requirements["EL-1"], LinkKind.CounterpartOf, parent=requirements["FW-1"])
+			Link(requirements["FW-1"], requirements["EL-1"], LinkKind.CounterpartOf)
 
 		self.assertEqual("Requirement 'FW-1' has a 'counterpart-of' link already.", str(context.exception))
 		self.assertEqual(["Got destination 'EL-1'."], context.exception.__notes__)
@@ -151,39 +149,23 @@ class Links(Testcase):
 		other =         Requirement("REQ-1", "Title", FUNCTIONAL, parent=system)
 		electrical =    requirements["EL-1"]
 		firmware =      requirements["FW-1"]
-		for destination, kind, parent, exception, message in (
-			(electrical, LinkKind.RelatesTo, None,          ValueError,
-				"Parameter 'parent' is None."),
-			(electrical, LinkKind.RelatesTo, specification, TypeError,
-				"Parameter 'parent' is not of type 'BaseItem'."),
-			(None,       LinkKind.RelatesTo, firmware,      ValueError,
-				"Parameter 'destination' is None."),
-			("EL-1",     LinkKind.RelatesTo, firmware,      TypeError,
-				"Parameter 'destination' is not of type 'BaseItem'."),
-			(firmware,   LinkKind.RelatesTo, firmware,      ValueError,
-				"Parameter 'destination' is the link's source."),
-			(other,      LinkKind.RelatesTo, firmware,      ValueError,
+		alone =         Requirement("REQ-2", "Title", FUNCTIONAL)
+		for source, destination, kind, exception, message in (
+			(None,       electrical, LinkKind.RelatesTo, ValueError, "Parameter 'source' is None."),
+			(system,     electrical, LinkKind.RelatesTo, TypeError,  "Parameter 'source' is not of type 'BaseItem'."),
+			(alone,      electrical, LinkKind.RelatesTo, ValueError, "Parameter 'source' isn't part of a specification."),
+			(firmware,   None,       LinkKind.RelatesTo, ValueError, "Parameter 'destination' is None."),
+			(firmware,   "EL-1",     LinkKind.RelatesTo, TypeError,  "Parameter 'destination' is not of type 'BaseItem'."),
+			(firmware,   firmware,   LinkKind.RelatesTo, ValueError, "Parameter 'destination' is the source."),
+			(firmware,   other,      LinkKind.RelatesTo, ValueError,
 				"Parameter 'destination' isn't part of the source's specification."),
-			(electrical, None,               firmware,      ValueError,
-				"Parameter 'kind' is None."),
-			(electrical, "relates-to",       firmware,      TypeError,
-				"Parameter 'kind' is not of type 'LinkKind'."),
+			(firmware,   electrical, None,               ValueError, "Parameter 'kind' is None."),
+			(firmware,   electrical, "relates-to",       TypeError,  "Parameter 'kind' is not of type 'LinkKind'."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
-					_ = Link(destination, kind, parent=parent)
+					_ = Link(source, destination, kind)
 
 				self.assertEqual(message, str(context.exception))
 
 		self.assertEqual([], requirements["FW-1"].OutboundLinks)
-
-		with self.assertRaises(ValueError) as context:
-			_ = Link(requirements["EL-1"], LinkKind.RelatesTo, parent=Requirement("REQ-2", "Title", FUNCTIONAL))
-
-		self.assertEqual("Parameter 'destination' isn't part of the source's specification.", str(context.exception))
-
-		link = Link(requirements["EL-1"], LinkKind.RelatesTo, parent=requirements["FW-1"])
-		with self.assertRaises(RequirementsError) as context:
-			link.Parent = requirements["SW-1"]
-
-		self.assertEqual("Link already has a parent.", str(context.exception))

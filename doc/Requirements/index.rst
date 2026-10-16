@@ -128,10 +128,11 @@ predicate.
 Links
 *****
 
-A :class:`Link` starts at an item - its source and parent - and points to another item of the same specification, its
-destination. The destination lists it as an inbound link. Its :class:`LinkKind` names the relationship: *source kind
-destination*. :meth:`~BaseItem.LinkTo` and :meth:`~BaseItem.LinkFrom` create an outbound or inbound link of an item,
-with the parameters of the link's constructor.
+A :class:`Link` starts at an item - its source - and points to another item of the same specification, its
+destination. A link is no element of the item hierarchy: it has no parent. The source lists it as an outbound link, the
+destination as an inbound link. Its :class:`LinkKind` names the relationship: *source kind destination*.
+:meth:`~BaseItem.LinkTo` and :meth:`~BaseItem.LinkFrom` create an outbound or inbound link of an item, with the
+parameters of the link's constructor.
 
 .. list-table::
    :header-rows: 1
