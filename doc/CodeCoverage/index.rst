@@ -985,7 +985,7 @@ source range by line *and column*.
 
 Each class of the format's model takes typed values in its constructor, so a model can be built by hand, too. A
 classmethod ``Parse`` reads the class' JSON element and calls the constructor - e.g.
-:meth:`File.Parse() <pyEDAA.Reports.CodeCoverage.LLVM.Records.File.Parse>` reads a file's JSON object.
+:meth:`File.Parse() <pyEDAA.Reports.CodeCoverage.LLVM.File.Parse>` reads a file's JSON object.
 
 :meth:`~pyEDAA.Reports.CodeCoverage.LLVM.Document.ToCoverageSummary` converts it to the common model:
 

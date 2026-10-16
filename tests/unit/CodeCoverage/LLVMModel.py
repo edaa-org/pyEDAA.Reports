@@ -30,17 +30,14 @@
 #
 #
 """Unit tests of the classes of LLVM's format model: constructed from typed values, or parsed from JSON elements."""
-from json                                       import dumps
-from pathlib                                    import Path
-from tempfile                                   import TemporaryDirectory
+from json                             import dumps
+from pathlib                          import Path
+from tempfile                         import TemporaryDirectory
 
-from pyEDAA.Reports.CodeCoverage.LLVM           import Document
-from pyEDAA.Reports.CodeCoverage.LLVM.Records   import Expansion, File, Function, Segment
-from pyEDAA.Reports.CodeCoverage.LLVM.Regions   import BranchRegion, MCDCRecord, Region, RegionKind
-from pyEDAA.Reports.CodeCoverage.LLVM.Regions   import TestVector as MCDCTestVector
-from pyEDAA.Reports.CodeCoverage.LLVM.Summaries import Counters, Summary
-from pyTooling.Testing                          import Testcase
-from pyTooling.Versioning                       import SemanticVersion
+from pyEDAA.Reports.CodeCoverage.LLVM import BranchRegion, Counters, Document, Expansion, File, Function, MCDCRecord
+from pyEDAA.Reports.CodeCoverage.LLVM import Region, RegionKind, Segment, Summary, TestVector as MCDCTestVector
+from pyTooling.Testing                import Testcase
+from pyTooling.Versioning             import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -288,7 +285,7 @@ class ParameterChecks(Testcase):
 			_ = Document(Path("coverage.json"), files=[Function("main", 0, [], [])])
 
 		self.assertEqual("Parameter 'files' contains an element not of type 'File'.", str(context.exception))
-		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.LLVM.Records.Function'."], context.exception.__notes__)
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.LLVM.Function'."], context.exception.__notes__)
 
 
 class Parse(Testcase):

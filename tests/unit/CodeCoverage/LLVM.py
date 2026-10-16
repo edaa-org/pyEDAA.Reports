@@ -30,17 +30,16 @@
 #
 #
 """Unit tests of LLVM's JSON code coverage export: its model, its JSON Schema and the conversion to the common model."""
-from copy                                     import deepcopy
-from json                                     import dumps, loads
-from pathlib                                  import Path
-from tempfile                                 import TemporaryDirectory
-from typing                                   import Any
+from copy                             import deepcopy
+from json                             import dumps, loads
+from pathlib                          import Path
+from tempfile                         import TemporaryDirectory
+from typing                           import Any
 
-from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.LLVM         import Document
-from pyEDAA.Reports.CodeCoverage.LLVM.Regions import RegionKind
-from pyTooling.Testing                        import Testcase
-from pyTooling.Versioning                     import SemanticVersion
+from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, Function, LineCoverageStatus, SourceFile
+from pyEDAA.Reports.CodeCoverage.LLVM import Document, RegionKind
+from pyTooling.Testing                import Testcase
+from pyTooling.Versioning             import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
