@@ -72,7 +72,6 @@ class RiskManagementInstantiation(Testcase):
 		self.assertEqual({}, riskManagement.Risks)
 		self.assertEqual({}, riskManagement.Implications)
 		self.assertEqual({}, riskManagement.Mitigations)
-		self.assertEqual([], list(riskManagement.IterateElements()))
 		self.assertEqual("pyEDAA", riskManagement["project"])
 		self.assertEqual("<RiskManagement 1.0.0: 0 risks, 0 implications, 0 mitigations>", repr(riskManagement))
 
@@ -123,7 +122,6 @@ class ElementInstantiation(Testcase):
 		self.assertEqual({}, risk.Mitigations)
 		self.assertEqual({}, risk.SecondOrderImplications)
 		self.assertEqual(0, len(risk))
-		self.assertEqual([], list(risk.IterateElements()))
 		self.assertEqual("<Risk R1: open, probability medium, impact high>", repr(risk))
 
 	def test_Risk_Assessment(self) -> None:
@@ -282,7 +280,9 @@ class Register(Testcase):
 		self.assertEqual({"I2": launch, "I3": budget}, foundry.SecondOrderImplications)
 		self.assertEqual({"I2": launch}, tools.SecondOrderImplications)
 		self.assertEqual({"I3": budget}, foundry.Mitigations["M1"].Implications)
-		self.assertEqual([foundry, tools, budget, launch, tapeOut, shuttle], list(register.IterateElements()))
+		self.assertEqual([foundry, tools], list(register.IterateRisks()))
+		self.assertEqual([budget, launch, tapeOut], list(register.IterateImplications()))
+		self.assertEqual([shuttle], list(register.IterateMitigations()))
 		self.assertEqual("<RiskManagement 1.0.0: 2 risks, 3 implications, 1 mitigations>", repr(register))
 
 	def test_Iterate(self) -> None:

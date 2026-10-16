@@ -48,7 +48,7 @@ from typing                import Any, Callable, Generator, Iterable, Mapping, O
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
 from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import ExtendedType, abstractmethod
+from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
 from pyEDAA.Reports        import KeyValuePairsMixin
@@ -142,8 +142,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		"""
 		Property to access the risk register containing this element (:attr:`_parent`).
 
-		Assigning a risk register adds this element to it, and sets the register's root as the root of this element and of
-		every element below it.
+		Assigning a risk register adds this element to it, and sets the register's root as the root of this element.
 
 		:returns:           The parent, or ``None``.
 		:raises ValueError: If ``None`` is assigned.
@@ -172,27 +171,17 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		parent._AddElement(self)
 		self._parent = parent
 		self._root =   parent._root
-		for element in self.IterateElements():
-			element._root = parent._root
 
 	@readonly
 	def Root(self) -> Nullable[RiskManagement]:
 		"""
 		Read-only property to access the risk register's root (:attr:`_root`).
 
-		The root is maintained by :attr:`Parent`: assigning a parent sets it for this element and every element below it.
+		The root is maintained by :attr:`Parent`: assigning a parent sets it.
 
 		:returns: The root, or ``None`` while the element isn't part of a risk register.
 		"""
 		return self._root
-
-	@abstractmethod
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate every element below this one.
-
-		:returns: A generator of the elements below this one.
-		"""
 
 
 @export
@@ -300,16 +289,6 @@ class RiskManagement(Base):
 					raise ex
 
 		elements[element._id] = element
-
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the risks, implications and mitigations of the risk register.
-
-		:returns: A generator of every element below the risk register.
-		"""
-		yield from self._risks.values()
-		yield from self._implications.values()
-		yield from self._mitigations.values()
 
 	@readonly
 	def Version(self) -> SemanticVersion:
@@ -501,15 +480,6 @@ class BaseWithID(Base):
 		:returns: The description.
 		"""
 		return self._description
-
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the elements below this one, which are none: referenced implications and mitigations belong to the risk
-		register.
-
-		:returns: An empty generator.
-		"""
-		yield from ()
 
 
 @export
