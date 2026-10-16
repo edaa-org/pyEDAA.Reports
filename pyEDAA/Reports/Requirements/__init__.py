@@ -42,7 +42,8 @@ registered in the same specification. A requirement contains child requirements,
 A :class:`SpecificationItem` mirrors a requirement: it states how the system meets requirements. Specification items and
 requirements are in an N:M relation.
 
-An item's :class:`Link` states a relationship to another item, e.g. to its counterpart in another layer.
+An item's :class:`Link` states a relationship to another item, e.g. to its counterpart in another layer. An item's
+history lists the events of its life cycle (:class:`HistoryEvent`), e.g. a split into other requirements.
 """
 from __future__            import annotations
 
@@ -395,7 +396,8 @@ class RequirementSpecification(Base):
 
 	def _AddItems(self, item: BaseItem) -> None:
 		"""
-		Register an item and every item below it by their IDs, and set the specification as their specification.
+		Register an item and every item below it by their IDs, and set the specification as their specification and the
+		specification of their history events.
 
 		Either all of them are registered, or none.
 
@@ -414,6 +416,8 @@ class RequirementSpecification(Base):
 		for element in subtree:
 			element._root =     self
 			items[element._id] = element
+			for event in element._history:
+				event._root = self
 
 	@readonly
 	def Name(self) -> Nullable[str]:
@@ -809,7 +813,8 @@ _Layer = Layer
 class BaseItem(BaseWithID):
 	"""
 	Base-class of the items of a specification - requirements and specification items -: a title, a creation time, a
-	state, the layer, the persons, personas, labels and documents it refers to, its child items and its links.
+	state, the layer, the persons, personas, labels and documents it refers to, its child items, its links and its
+	history.
 
 	An item refers only to persons, personas, labels, documents and layers of its own specification, so it must be part of
 	one to refer to any. A child item has the class of its parent; its ID is unique in the specification, too.
@@ -827,6 +832,7 @@ class BaseItem(BaseWithID):
 	_children:      dict[str, Self]      #: The child items, by ID.
 	_outboundLinks: list[Link]           #: The links from this item, in the order they were added.
 	_inboundLinks:  list[Link]           #: The links to this item, in the order they were added.
+	_history:       list[HistoryEvent]   #: The events in the item's life cycle, in chronological order.
 
 	def __init__(
 		self,
@@ -938,6 +944,7 @@ class BaseItem(BaseWithID):
 		self._children =      {}
 		self._outboundLinks = []
 		self._inboundLinks =  []
+		self._history =       []
 
 		for parameterName, references, referenceType, container in (
 			("authors",     authors,     Person,   self._authors),
@@ -981,21 +988,32 @@ class BaseItem(BaseWithID):
 
 				container[key] = reference
 
-	def _AddElement(self, element: Self) -> None:
+	def _AddElement(self, element: Self | HistoryEvent) -> None:
 		"""
-		Add a child item, which names this item as its parent, and register it with every item below it in the
-		specification.
+		Add a child item or a history event, which names this item as its parent.
 
-		:param element:            The child item.
+		A child item is registered with every item below it in the specification.
+
+		:param element:            The child item or history event.
 		:raises RequirementsError: If the specification already contains an item of an ID of the child or an item below it.
 		:raises RequirementsError: If this item isn't part of a specification, and has a child of this ID already.
+		:raises ValueError:        If the history event is earlier than the item's creation or its last event.
 		"""
-		if self._root is not None:
-			self._root._AddItems(element)
-		elif element._id in self._children:
-			raise RequirementsError(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
+		if isinstance(element, HistoryEvent):
+			previous = self._history[-1]._timestamp if len(self._history) > 0 else self._created
+			if element._timestamp.astimezone() < previous.astimezone():
+				ex = ValueError(f"History event is earlier than the item's creation or its last event.")
+				ex.add_note(f"Got '{element._timestamp.isoformat()}' after '{previous.isoformat()}'.")
+				raise ex
 
-		self._children[element._id] = element
+			self._history.append(element)
+		else:
+			if self._root is not None:
+				self._root._AddItems(element)
+			elif element._id in self._children:
+				raise RequirementsError(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
+
+			self._children[element._id] = element
 
 	@readonly
 	def Title(self) -> str:
@@ -1119,6 +1137,15 @@ class BaseItem(BaseWithID):
 		:returns: The links, in the order they were added.
 		"""
 		return self._inboundLinks
+
+	@readonly
+	def History(self) -> list[HistoryEvent]:
+		"""
+		Read-only property to access the events in the item's life cycle (:attr:`_history`).
+
+		:returns: The events, in chronological order.
+		"""
+		return self._history
 
 	def IterateChildren(self, predicate: Nullable[Callable[[Self], bool]] = None) -> Generator[Self, None, None]:
 		"""
@@ -1421,7 +1448,7 @@ class SpecificationItem(BaseItem):
 	A specification item: how the system meets requirements.
 
 	E.g. a design decision, an architecture or an interface description. It mirrors a requirement - with an ID, a title, a
-	state, a layer, persons, personas, labels, documents, child items and links -, and specifies any number of
+	state, a layer, persons, personas, labels, documents, child items, links and a history -, and specifies any number of
 	requirements; a requirement is specified by any number of specification items.
 
 	Its parent is the :class:`RequirementSpecification` for a top-level item, or the :class:`SpecificationItem` it
@@ -1731,3 +1758,200 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:returns: The link's kind.
 		"""
 		return self._kind
+
+
+@export
+class EventKind(StringEnum):
+	"""
+	The kind of an event in the life cycle of an item.
+	"""
+
+	Opened =    "opened"     #: The item was opened, e.g. written as a draft.
+	Modified =  "modified"   #: The item's text or fields were changed.
+	Reviewed =  "reviewed"   #: The item was reviewed.
+	Approved =  "approved"   #: The item was approved: it became final.
+	Rejected =  "rejected"   #: The item was rejected.
+	Split =     "split"      #: The item was split; the event names the other items involved.
+	Merged =    "merged"     #: The item was merged; the event names the other items involved.
+	Closed =    "closed"     #: The item was closed after its verification, e.g. released.
+	Reopened =  "reopened"   #: The closed item was opened again.
+	Obsoleted = "obsoleted"  #: The item became obsolete, e.g. replaced by the items the event names.
+
+
+# A class with a property named like a class - ``Person`` - can't name that class in the annotation of a field: the
+# class body's namespace, where annotations are evaluated, binds the name to the property.
+_Person = Person
+
+
+@export
+class HistoryEvent(Base):
+	"""
+	An event in the life cycle of an item: its kind, its time, the person causing it, and the other items involved.
+
+	Its parent is the item, which lists it in :attr:`~BaseItem.History`, in chronological order. A split or a merge names
+	the other items involved, e.g. the requirements a requirement was split into, or merged with.
+	"""
+
+	_PARENT_TYPE: ClassVar[tuple[type, ...]] = (BaseItem, )  #: An event is in the history of an item.
+
+	_kind:        EventKind                                  #: The kind of the event.
+	_timestamp:   datetime                                   #: The time of the event.
+	_person:      Nullable[_Person]                          #: The person causing the event, or ``None``.
+	_involved:    list[BaseItem]                             #: The other items involved, in the order given.
+	_description: str                                        #: The event's description, or ``""``.
+
+	def __init__(
+		self,
+		kind: EventKind,
+		timestamp: datetime,
+		*,
+		person: Nullable[Person] = None,
+		involved: Nullable[Iterable[BaseItem]] = None,
+		description: str = "",
+		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		parent: Nullable[BaseItem] = None
+	) -> None:
+		"""
+		Initializes a history event, and adds it to the history of its item.
+
+		:param kind:          The kind of the event.
+		:param timestamp:     The time of the event; without a time zone, it is a local time.
+		:param person:        Optional, the person causing the event. Default: ``None``.
+		:param involved:      Optional, the other items involved. Default: ``None``.
+		:param description:   Optional, the event's description. Default: ``""``.
+		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
+		:param parent:        Optional, the item the event happened to. Default: ``None``.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`BaseItem`.
+		:raises ValueError:   If parameter ``kind`` is ``None``.
+		:raises TypeError:    If parameter ``kind`` isn't of type :class:`EventKind`.
+		:raises ValueError:   If parameter ``timestamp`` is ``None``.
+		:raises TypeError:    If parameter ``timestamp`` isn't of type :class:`~datetime.datetime`.
+		:raises TypeError:    If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises ValueError:   If parameter ``person`` isn't part of the item's specification.
+		:raises TypeError:    If parameter ``involved`` isn't iterable, or is a single element.
+		:raises TypeError:    If parameter ``involved`` contains an element not of type :class:`BaseItem`.
+		:raises ValueError:   If parameter ``involved`` contains an item, which isn't part of the item's specification.
+		:raises ValueError:   If parameter ``involved`` contains an item twice.
+		:raises ValueError:   If parameter ``involved`` names no item for a split or a merge.
+		:raises ValueError:   If parameter ``description`` is ``None``.
+		:raises TypeError:    If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:   If parameter ``timestamp`` is earlier than the item's creation or its last event.
+		"""
+		super().__init__(keyValuePairs=keyValuePairs, parent=parent)
+
+		if kind is None:
+			raise ValueError(f"Parameter 'kind' is None.")
+		elif not isinstance(kind, EventKind):
+			ex = TypeError(f"Parameter 'kind' is not of type 'EventKind'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
+			raise ex
+
+		if timestamp is None:
+			raise ValueError(f"Parameter 'timestamp' is None.")
+		elif not isinstance(timestamp, datetime):
+			ex = TypeError(f"Parameter 'timestamp' is not of type 'datetime'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(timestamp)}'.")
+			raise ex
+
+		if person is not None:
+			if not isinstance(person, Person):
+				ex = TypeError(f"Parameter 'person' is not of type 'Person'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(person)}'.")
+				raise ex
+			elif self._root is None or self._root._persons.get(person._userID) is not person:
+				ex = ValueError(f"Parameter 'person' isn't part of the item's specification.")
+				ex.add_note(f"Got person '{person._userID}'.")
+				raise ex
+
+		self._involved = []
+		if involved is not None:
+			if not isinstance(involved, Iterable):
+				ex = TypeError(f"Parameter 'involved' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(involved)}'.")
+				raise ex
+			elif isinstance(involved, KeyValuePairsMixin):
+				ex = TypeError(f"Parameter 'involved' is a single element, not an iterable of elements.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(involved)}'.")
+				raise ex
+
+			for item in involved:
+				if not isinstance(item, BaseItem):
+					ex = TypeError(f"Parameter 'involved' contains an element not of type 'BaseItem'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(item)}'.")
+					raise ex
+				elif self._root is None or item._root is not self._root:
+					ex = ValueError(f"Parameter 'involved' contains an item not part of the item's specification.")
+					ex.add_note(f"Got item '{item._id}'.")
+					raise ex
+				elif item in self._involved:
+					ex = ValueError(f"Parameter 'involved' contains an item twice.")
+					ex.add_note(f"Got item '{item._id}'.")
+					raise ex
+
+				self._involved.append(item)
+
+		if len(self._involved) == 0 and kind in (EventKind.Split, EventKind.Merged):
+			raise ValueError(f"Parameter 'involved' names no item for a '{kind}' event.")
+
+		if description is None:
+			raise ValueError(f"Parameter 'description' is None.")
+		elif not isinstance(description, str):
+			ex = TypeError(f"Parameter 'description' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(description)}'.")
+			raise ex
+
+		self._kind =        kind
+		self._timestamp =   timestamp
+		self._person =      person
+		self._description = description
+
+		if parent is not None:
+			parent._AddElement(self)
+
+	@readonly
+	def Kind(self) -> EventKind:
+		"""
+		Read-only property to access the kind of the event (:attr:`_kind`).
+
+		:returns: The event's kind.
+		"""
+		return self._kind
+
+	@readonly
+	def Timestamp(self) -> datetime:
+		"""
+		Read-only property to access the time of the event (:attr:`_timestamp`).
+
+		:returns: The time; without a time zone, it is a local time.
+		"""
+		return self._timestamp
+
+	@readonly
+	def Person(self) -> Nullable[Person]:
+		"""
+		Read-only property to access the person causing the event (:attr:`_person`).
+
+		:returns: The person, or ``None``.
+		"""
+		return self._person
+
+	@readonly
+	def Involved(self) -> list[BaseItem]:
+		"""
+		Read-only property to access the other items involved in the event (:attr:`_involved`).
+
+		:returns: The items, in the order given.
+		"""
+		return self._involved
+
+	@readonly
+	def Description(self) -> str:
+		"""
+		Read-only property to access the event's description (:attr:`_description`).
+
+		:returns: The description, or ``""``.
+		"""
+		return self._description
