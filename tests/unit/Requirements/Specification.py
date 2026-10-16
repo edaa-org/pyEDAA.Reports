@@ -30,7 +30,7 @@
 #
 """Unit tests of the requirements model: the specification, and its persons, personas, labels, documents and layers."""
 from pyEDAA.Reports              import Person
-from pyEDAA.Reports.Requirements import Document, Label, Layer, Persona, RequirementSpecification
+from pyEDAA.Reports.Requirements import Document, Label, Layer, Persona, RequirementSpecification, RequirementsError
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
 
@@ -57,7 +57,12 @@ class Root(Testcase):
 		self.assertEqual({}, specification.Labels)
 		self.assertEqual({}, specification.Documents)
 		self.assertEqual({}, specification.Layers)
-		self.assertEqual([], list(specification.IterateElements()))
+		self.assertEqual([], list(specification.IteratePersons()))
+		self.assertEqual([], list(specification.IteratePersonas()))
+		self.assertEqual([], list(specification.IterateLabels()))
+		self.assertEqual([], list(specification.IterateDocuments()))
+		self.assertEqual([], list(specification.IterateLayers()))
+		self.assertEqual([], list(specification.IterateRequirements()))
 		self.assertEqual(0, len(specification))
 
 	def test_Unnamed(self) -> None:
@@ -109,7 +114,8 @@ class Persons(Testcase):
 
 		self.assertEqual({"alice": alice}, board.Persons)
 		self.assertIs(alice, system.Persons["alice"])
-		self.assertEqual([], list(board.IterateElements()))
+		self.assertEqual([alice], list(board.IteratePersons()))
+		self.assertEqual([], list(board.IteratePersons(lambda person: person.Name == "Bob")))
 
 	def test_Duplicate(self) -> None:
 		specification = RequirementSpecification(VERSION, "Board")
@@ -118,7 +124,7 @@ class Persons(Testcase):
 
 		for person in (alice, Person("alice", "Alice Doe")):
 			with self.subTest(person=person):
-				with self.assertRaises(ValueError) as context:
+				with self.assertRaises(RequirementsError) as context:
 					specification.AddPerson(person)
 
 				self.assertEqual("Person 'alice' already exists in the specification.", str(context.exception))
@@ -160,9 +166,22 @@ class Registries(Testcase):
 				self.assertIs(specification, element.Parent)
 				self.assertIs(specification, element.Root)
 				self.assertEqual({"id": element}, dictionary)
-				self.assertEqual([], list(element.IterateElements()))
 
-		self.assertEqual(4, len(list(specification.IterateElements())))
+	def test_Iterate(self) -> None:
+		"""Personas, labels, documents and layers are iterated in the order they were added: all, or selected ones."""
+		specification = RequirementSpecification(VERSION, "Board")
+		for elementClass, iterate in (
+			(Persona,  specification.IteratePersonas),
+			(Label,    specification.IterateLabels),
+			(Document, specification.IterateDocuments),
+			(Layer,    specification.IterateLayers),
+		):
+			with self.subTest(elementClass=elementClass.__name__):
+				first =  elementClass("a", "First", parent=specification)
+				second = elementClass("b", "Second", parent=specification)
+
+				self.assertEqual([first, second], list(iterate()))
+				self.assertEqual([second], list(iterate(lambda element: element.Name == "Second")))
 
 	def test_Standalone(self) -> None:
 		persona = Persona("alice", "Alice")
@@ -185,7 +204,7 @@ class Registries(Testcase):
 		specification = RequirementSpecification(VERSION, "Board")
 		label =         Label("asic", "ASIC variant", parent=specification)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RequirementsError) as context:
 			label.Parent = RequirementSpecification(VERSION, "System")
 
 		self.assertEqual("Label already has a parent.", str(context.exception))
@@ -196,7 +215,7 @@ class Registries(Testcase):
 		Persona("fw", "Firmware engineer", parent=specification)
 		Layer("fw", "FPGA firmware", parent=specification)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RequirementsError) as context:
 			Persona("fw", "Firmware architect", parent=specification)
 
 		self.assertEqual("Persona 'fw' already exists in the specification.", str(context.exception))
@@ -204,7 +223,7 @@ class Registries(Testcase):
 
 		Document("manual", "Board manual", parent=specification)
 		document = Document("manual", "Firmware manual")
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RequirementsError) as context:
 			document.Parent = specification
 
 		self.assertEqual("Document 'manual' already exists in the specification.", str(context.exception))

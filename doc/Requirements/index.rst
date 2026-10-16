@@ -26,9 +26,14 @@ Every element carries key-value pairs for the information the model has no field
      - :class:`Label`                  | e.g. a product variant
      - :class:`Document`               | e.g. a datasheet - attached to items
      - :class:`Layer`                  | e.g. electrical, FPGA firmware or software
+     - :class:`Requirement`            | e.g. ``EL-1`` - kind, obligation, state
+       - :class:`Requirement`          | e.g. ``EL-1.1`` - a child requirement refining it
 
-* The :class:`RequirementSpecification` registers every person by user ID, and every persona, label, document and layer
-  by its ID. An ID is unique among the elements of a class; a duplicate is rejected.
+* The :class:`RequirementSpecification` registers every person by user ID, and every persona, label, document and layer,
+  and every requirement - also the child requirements - by its ID. An ID is unique among the elements of a class; a
+  duplicate raises a :exc:`RequirementsError`. Each registry is a dictionary property, e.g.
+  :attr:`~RequirementSpecification.Labels`, with an iterator taking an optional predicate, e.g.
+  :meth:`~RequirementSpecification.IterateLabels`.
 * The root's :attr:`~RequirementSpecification.Version` is the version of the specification itself; its name is
   optional.
 * A :class:`Persona` is a role a user of the system acts in, e.g. an administrator, a reviewer or a quality inspector.
@@ -38,3 +43,54 @@ Every element carries key-value pairs for the information the model has no field
 * Every element knows the element containing it - :attr:`~Base.Parent` - and its specification - :attr:`~Base.Root`.
   Assigning a parent, in the constructor or later, adds the element to it and passes the specification on to the
   elements below it.
+
+
+.. _REQ/Requirements:
+
+Requirements
+************
+
+A :class:`Requirement` has an ID, a title, a description, a creation time - the current time, unless given - and a
+:class:`RequirementKind`, which names what it constrains: e.g. a function, its performance, a quality, safety or
+security, an interface, the environment, a design constraint or a regulation. Its :class:`Obligation` answers whether
+it is mandatory or optional, by the levels of ISO/IEC/IEEE 29148 and RFC 2119:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 20 60
+
+   * - Obligation
+     - Keyword
+     - Meaning
+   * - ``mandatory``
+     - *shall*, *must*
+     - Binding; the default.
+   * - ``recommended``
+     - *should*
+     - A goal; a deviation is justified.
+   * - ``optional``
+     - *may*
+     - A permission.
+
+Its :class:`ItemState` follows its life cycle from ``placeholder`` over ``draft``, ``in-review``, ``final`` and
+``implemented`` to ``verified``; a new requirement is a ``draft``. A verified requirement is ``closed``, when it is
+released and changes no more, e.g. in a baseline. At any time, a requirement can be ``rejected`` or become
+``obsolete``.
+
+A requirement contains child requirements, which refine it. :meth:`~BaseItem.IterateChildren` iterates the children,
+:meth:`~BaseItem.IterateDescendants` the children and grandchildren, depth-first.
+:meth:`~RequirementSpecification.IterateRequirements` iterates every requirement of the specification. Each takes an
+optional predicate to select the requirements:
+
+.. code-block:: Python
+
+   from pyTooling.Versioning import SemanticVersion
+   from pyEDAA.Reports.Requirements import Requirement, RequirementKind, RequirementSpecification
+
+   specification = RequirementSpecification(SemanticVersion(1, 0, 0), "Board")
+
+   power = Requirement("EL-1", "Power supply", RequirementKind.Functional, parent=specification)
+   Requirement("EL-1.1", "Core rail", RequirementKind.Performance, "0.9 V, 5 A.", parent=power)
+
+   for requirement in specification.IterateRequirements(lambda r: r.Kind is RequirementKind.Performance):
+     print(f"{requirement.ID}: {requirement.Title}")
