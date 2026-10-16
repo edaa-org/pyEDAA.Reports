@@ -163,6 +163,25 @@ A source has one link of a kind to a destination. :meth:`~BaseItem.IterateOutbou
 through the layers.
 
 
+.. _REQ/Verification:
+
+Verification and Traceability
+*****************************
+
+An item states its :attr:`~BaseItem.Rationale`: why a requirement exists, or why a design decision was taken. A
+requirement names the :class:`VerificationMethod` flags verifying it - the inspection, analysis, demonstration and test
+of ISO/IEC/IEEE 29148, plus simulation and formal verification - and its acceptance criteria.
+
+:meth:`~BaseItem.IterateTrace` follows the links of an item transitively, :meth:`~BaseItem.IterateInboundTrace` the
+inbound links; each item is reached once, also in a cycle. A predicate selects the links followed, e.g. the
+counterparts of an electrical requirement through the FPGA firmware into the software:
+
+.. code-block:: Python
+
+   for item in electrical.IterateInboundTrace(lambda link: link.Kind is LinkKind.CounterpartOf):
+     print(f"{item.ID} ({item.Layer.Name}): {item.Title}")
+
+
 .. _REQ/History:
 
 History

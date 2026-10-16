@@ -48,6 +48,7 @@ history lists the events of its life cycle (:class:`HistoryEvent`), e.g. a split
 from __future__            import annotations
 
 from datetime              import datetime
+from enum                  import Flag
 from typing                import Any, Callable, ClassVar, Generator, Iterable, Mapping, Optional as Nullable, Self
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
@@ -123,6 +124,24 @@ class Obligation(StringEnum):
 # A class with a property named like a class - ``Obligation`` - can't name that class in the annotation of a field: the
 # class body's namespace, where annotations are evaluated, binds the name to the property.
 _Obligation = Obligation
+
+
+@export
+class VerificationMethod(Flag):
+	"""
+	The methods verifying a requirement, as flags.
+
+	The methods follow the verification methods of ISO/IEC/IEEE 29148 - inspection, analysis, demonstration and test -,
+	with simulation and formal verification as methods of their own, as hardware designs are verified by them.
+	"""
+
+	Unknown =       0   #: Not decided yet.
+	Inspection =    1   #: Examining the item, e.g. reviewing a schematic or source code.
+	Analysis =      2   #: Calculating or modeling, e.g. a timing analysis or a power budget.
+	Demonstration = 4   #: Operating the system without measurements, e.g. showing a feature works.
+	Test =          8   #: Operating the system with measurements under defined conditions, e.g. on a test bench.
+	Simulation =    16  #: Simulating a model of the design, e.g. a VHDL testbench.
+	Formal =        32  #: Proving properties of the design, e.g. by formal property checking.
 
 
 @export
@@ -821,6 +840,7 @@ class BaseItem(BaseWithID):
 	"""
 
 	_title:         str                  #: The item's title.
+	_rationale:     str                  #: Why the item exists or is as it is, or ``""``.
 	_created:       datetime             #: The time the item was created.
 	_state:         ItemState            #: The item's state in its life cycle.
 	_layer:         Nullable[_Layer]     #: The layer the item belongs to, or ``None``.
@@ -841,6 +861,7 @@ class BaseItem(BaseWithID):
 		description: str = "",
 		created: Nullable[datetime] = None,
 		*,
+		rationale: str = "",
 		state: ItemState = ItemState.Draft,
 		layer: Nullable[Layer] = None,
 		authors: Nullable[Iterable[Person]] = None,
@@ -860,6 +881,7 @@ class BaseItem(BaseWithID):
 		:param description:   Optional, the item's description. Default: ``""``.
 		:param created:       Optional, the time the item was created; without a time zone, it is a local time. Default:
 		                      ``None``, the current time.
+		:param rationale:     Optional, why the item exists or is as it is. Default: ``""``.
 		:param state:         Optional, the item's state. Default: :attr:`ItemState.Draft`.
 		:param layer:         Optional, the layer the item belongs to. Default: ``None``.
 		:param authors:       Optional, the authors of the item. Default: ``None``.
@@ -881,6 +903,8 @@ class BaseItem(BaseWithID):
 		:raises ValueError:   If parameter ``title`` is ``None``.
 		:raises TypeError:    If parameter ``title`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``title`` is empty.
+		:raises ValueError:   If parameter ``rationale`` is ``None``.
+		:raises TypeError:    If parameter ``rationale`` isn't of type :class:`str`.
 		:raises TypeError:    If parameter ``created`` isn't of type :class:`~datetime.datetime`.
 		:raises ValueError:   If parameter ``state`` is ``None``.
 		:raises TypeError:    If parameter ``state`` isn't of type :class:`ItemState`.
@@ -908,6 +932,13 @@ class BaseItem(BaseWithID):
 		elif title == "":
 			raise ValueError(f"Parameter 'title' is empty.")
 
+		if rationale is None:
+			raise ValueError(f"Parameter 'rationale' is None.")
+		elif not isinstance(rationale, str):
+			ex = TypeError(f"Parameter 'rationale' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(rationale)}'.")
+			raise ex
+
 		if created is None:
 			created = datetime.now()
 		elif not isinstance(created, datetime):
@@ -933,6 +964,7 @@ class BaseItem(BaseWithID):
 				raise ex
 
 		self._title =         title
+		self._rationale =     rationale
 		self._created =       created
 		self._state =         state
 		self._layer =         layer
@@ -1023,6 +1055,15 @@ class BaseItem(BaseWithID):
 		:returns: The title.
 		"""
 		return self._title
+
+	@readonly
+	def Rationale(self) -> str:
+		"""
+		Read-only property to access why the item exists or is as it is (:attr:`_rationale`).
+
+		:returns: The rationale, or ``""``.
+		"""
+		return self._rationale
 
 	@readonly
 	def Created(self) -> datetime:
@@ -1283,6 +1324,75 @@ class BaseItem(BaseWithID):
 				if predicate(link):
 					yield link
 
+	def _IterateTrace(
+		self,
+		predicate: Nullable[Callable[[Link], bool]],
+		inbound: bool
+	) -> Generator[BaseItem, None, None]:
+		"""
+		Iterate the items reached by following links transitively, depth-first, each item once.
+
+		:param predicate: Filter function accepting a link and returning a boolean, or ``None`` to follow every link.
+		:param inbound:   ``True`` to follow links to their sources, ``False`` to their destinations.
+		:returns:         A generator of the items reached, without this item.
+		"""
+		visited = {self}
+
+		if predicate is None:
+			def follow(item: BaseItem) -> Generator[BaseItem, None, None]:
+				"""
+				Nested function for recursion, following every link.
+
+				:param item: The item, whose links are followed.
+				:returns:    A generator of the items reached from the item, not visited before.
+				"""
+				for link in (item._inboundLinks if inbound else item._outboundLinks):
+					reached = link._source if inbound else link._destination
+					if reached not in visited:
+						visited.add(reached)
+						yield reached
+						yield from follow(reached)
+		else:
+			def follow(item: BaseItem) -> Generator[BaseItem, None, None]:
+				"""
+				Nested function for recursion, following the links the predicate accepts.
+
+				:param item: The item, whose links are followed.
+				:returns:    A generator of the items reached from the item, not visited before.
+				"""
+				for link in (item._inboundLinks if inbound else item._outboundLinks):
+					reached = link._source if inbound else link._destination
+					if reached not in visited and predicate(link):
+						visited.add(reached)
+						yield reached
+						yield from follow(reached)
+
+		yield from follow(self)
+
+	def IterateTrace(self, predicate: Nullable[Callable[[Link], bool]] = None) -> Generator[BaseItem, None, None]:
+		"""
+		Iterate the items this item traces to: the destinations of its links, and of their links, ..., depth-first, each
+		item once.
+
+		If parameter ``predicate`` is not None, only links accepted by the given filter function are followed.
+
+		:param predicate: Optional, filter function accepting a link and returning a boolean. Default: ``None``.
+		:returns:         A generator of the items reached, without this item.
+		"""
+		yield from self._IterateTrace(predicate, False)
+
+	def IterateInboundTrace(self, predicate: Nullable[Callable[[Link], bool]] = None) -> Generator[BaseItem, None, None]:
+		"""
+		Iterate the items tracing to this item: the sources of its inbound links, and of their inbound links, ...,
+		depth-first, each item once.
+
+		If parameter ``predicate`` is not None, only links accepted by the given filter function are followed.
+
+		:param predicate: Optional, filter function accepting a link and returning a boolean. Default: ``None``.
+		:returns:         A generator of the items reached, without this item.
+		"""
+		yield from self._IterateTrace(predicate, True)
+
 
 @export
 class Requirement(BaseItem):
@@ -1293,11 +1403,13 @@ class Requirement(BaseItem):
 	refines - a child requirement. The specification registers either by its ID.
 	"""
 
-	_PARENT_TYPE:        ClassVar[tuple[type, ...]]    #: In a requirement or the specification; assigned below.
+	_PARENT_TYPE:         ClassVar[tuple[type, ...]]    #: In a requirement or the specification; assigned below.
 
-	_kind:               RequirementKind               #: What the requirement constrains.
-	_obligation:         _Obligation                   #: Whether the requirement must, should or may be met.
-	_specificationItems: dict[str, SpecificationItem]  #: The specification items specifying this requirement, by ID.
+	_kind:                RequirementKind               #: What the requirement constrains.
+	_obligation:          _Obligation                   #: Whether the requirement must, should or may be met.
+	_verificationMethods: VerificationMethod            #: The methods verifying the requirement.
+	_acceptanceCriteria:  list[str]                     #: The criteria the verification accepts the requirement by.
+	_specificationItems:  dict[str, SpecificationItem]  #: The specification items specifying this requirement, by ID.
 
 	def __init__(
 		self,
@@ -1308,6 +1420,9 @@ class Requirement(BaseItem):
 		created: Nullable[datetime] = None,
 		*,
 		obligation: Obligation = Obligation.Mandatory,
+		verificationMethods: VerificationMethod = VerificationMethod.Unknown,
+		acceptanceCriteria: Nullable[Iterable[str]] = None,
+		rationale: str = "",
 		state: ItemState = ItemState.Draft,
 		layer: Nullable[Layer] = None,
 		authors: Nullable[Iterable[Person]] = None,
@@ -1321,62 +1436,74 @@ class Requirement(BaseItem):
 		"""
 		Initializes a requirement, adds it to its parent, and registers it in its specification.
 
-		:param identifier:         The requirement's ID.
-		:param title:              The requirement's title.
-		:param kind:               What the requirement constrains.
-		:param description:        Optional, the requirement's description. Default: ``""``.
-		:param created:            Optional, the time the requirement was created; without a time zone, it is a local time.
-		                           Default: ``None``, the current time.
-		:param obligation:         Optional, whether the requirement must, should or may be met. Default:
-		                           :attr:`Obligation.Mandatory`.
-		:param state:              Optional, the requirement's state. Default: :attr:`ItemState.Draft`.
-		:param layer:              Optional, the layer the requirement belongs to. Default: ``None``.
-		:param authors:            Optional, the authors of the requirement. Default: ``None``.
-		:param owners:             Optional, the owners of the requirement. Default: ``None``.
-		:param personas:           Optional, the personas the requirement is about. Default: ``None``.
-		:param labels:             Optional, the labels of the requirement. Default: ``None``.
-		:param attachments:        Optional, the documents attached to the requirement. Default: ``None``.
-		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
-		:param parent:             Optional, the requirement this one refines, or the specification. Default: ``None``.
-		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Requirement` or
-		                           :class:`RequirementSpecification`.
-		:raises ValueError:        If parameter ``identifier`` is ``None``.
-		:raises TypeError:         If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``identifier`` is empty.
-		:raises ValueError:        If parameter ``description`` is ``None``.
-		:raises TypeError:         If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``title`` is ``None``.
-		:raises TypeError:         If parameter ``title`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``title`` is empty.
-		:raises TypeError:         If parameter ``created`` isn't of type :class:`~datetime.datetime`.
-		:raises ValueError:        If parameter ``state`` is ``None``.
-		:raises TypeError:         If parameter ``state`` isn't of type :class:`ItemState`.
-		:raises TypeError:         If parameter ``layer`` isn't of type :class:`Layer`.
-		:raises ValueError:        If parameter ``layer`` isn't part of the requirement's specification.
-		:raises TypeError:         If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` isn't
-		                           iterable, or is a single element.
-		:raises TypeError:         If parameter ``authors`` or ``owners`` contains an element not of type
-		                           :class:`~pyEDAA.Reports.Person`.
-		:raises TypeError:         If parameter ``personas``, ``labels`` or ``attachments`` contains an element not of type
-		                           :class:`Persona`, :class:`Label` or :class:`Document`.
-		:raises ValueError:        If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
-		                           contains an element, which isn't part of the requirement's specification.
-		:raises ValueError:        If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
-		                           contains an element twice.
-		:raises ValueError:        If parameter ``kind`` is ``None``.
-		:raises TypeError:         If parameter ``kind`` isn't of type :class:`RequirementKind`.
-		:raises ValueError:        If parameter ``obligation`` is ``None``.
-		:raises TypeError:         If parameter ``obligation`` isn't of type :class:`Obligation`.
-		:raises RequirementsError: If the specification already contains a requirement of this ID.
+		:param identifier:          The requirement's ID.
+		:param title:               The requirement's title.
+		:param kind:                What the requirement constrains.
+		:param description:         Optional, the requirement's description. Default: ``""``.
+		:param created:             Optional, the time the requirement was created; without a time zone, it is a local
+		                            time. Default: ``None``, the current time.
+		:param obligation:          Optional, whether the requirement must, should or may be met. Default:
+		                            :attr:`Obligation.Mandatory`.
+		:param verificationMethods: Optional, the methods verifying the requirement. Default:
+		                            :attr:`VerificationMethod.Unknown`.
+		:param acceptanceCriteria:  Optional, the criteria the verification accepts the requirement by. Default: ``None``.
+		:param rationale:           Optional, why the requirement exists or is as it is. Default: ``""``.
+		:param state:               Optional, the requirement's state. Default: :attr:`ItemState.Draft`.
+		:param layer:               Optional, the layer the requirement belongs to. Default: ``None``.
+		:param authors:             Optional, the authors of the requirement. Default: ``None``.
+		:param owners:              Optional, the owners of the requirement. Default: ``None``.
+		:param personas:            Optional, the personas the requirement is about. Default: ``None``.
+		:param labels:              Optional, the labels of the requirement. Default: ``None``.
+		:param attachments:         Optional, the documents attached to the requirement. Default: ``None``.
+		:param keyValuePairs:       Optional, the key-value pairs. Default: ``None``.
+		:param parent:              Optional, the requirement this one refines, or the specification. Default: ``None``.
+		:raises TypeError:          If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:          If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:         If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Requirement` or
+		                            :class:`RequirementSpecification`.
+		:raises ValueError:         If parameter ``identifier`` is ``None``.
+		:raises TypeError:          If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:         If parameter ``identifier`` is empty.
+		:raises ValueError:         If parameter ``description`` is ``None``.
+		:raises TypeError:          If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:         If parameter ``title`` is ``None``.
+		:raises TypeError:          If parameter ``title`` isn't of type :class:`str`.
+		:raises ValueError:         If parameter ``title`` is empty.
+		:raises ValueError:         If parameter ``rationale`` is ``None``.
+		:raises TypeError:          If parameter ``rationale`` isn't of type :class:`str`.
+		:raises TypeError:          If parameter ``created`` isn't of type :class:`~datetime.datetime`.
+		:raises ValueError:         If parameter ``state`` is ``None``.
+		:raises TypeError:          If parameter ``state`` isn't of type :class:`ItemState`.
+		:raises TypeError:          If parameter ``layer`` isn't of type :class:`Layer`.
+		:raises ValueError:         If parameter ``layer`` isn't part of the requirement's specification.
+		:raises TypeError:          If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` isn't
+		                            iterable, or is a single element.
+		:raises TypeError:          If parameter ``authors`` or ``owners`` contains an element not of type
+		                            :class:`~pyEDAA.Reports.Person`.
+		:raises TypeError:          If parameter ``personas``, ``labels`` or ``attachments`` contains an element not of type
+		                            :class:`Persona`, :class:`Label` or :class:`Document`.
+		:raises ValueError:         If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                            contains an element, which isn't part of the requirement's specification.
+		:raises ValueError:         If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                            contains an element twice.
+		:raises ValueError:         If parameter ``kind`` is ``None``.
+		:raises TypeError:          If parameter ``kind`` isn't of type :class:`RequirementKind`.
+		:raises ValueError:         If parameter ``obligation`` is ``None``.
+		:raises TypeError:          If parameter ``obligation`` isn't of type :class:`Obligation`.
+		:raises ValueError:         If parameter ``verificationMethods`` is ``None``.
+		:raises TypeError:          If parameter ``verificationMethods`` isn't of type :class:`VerificationMethod`.
+		:raises TypeError:          If parameter ``acceptanceCriteria`` isn't iterable, or is a single string.
+		:raises TypeError:          If parameter ``acceptanceCriteria`` contains an element not of type :class:`str`.
+		:raises ValueError:         If parameter ``acceptanceCriteria`` contains an empty criterion.
+		:raises RequirementsError:  If the specification already contains a requirement of this ID.
 		"""
 		super().__init__(
 			identifier,
 			title,
 			description,
 			created,
+			rationale=rationale,
 			state=state,
 			layer=layer,
 			authors=authors,
@@ -1402,9 +1529,38 @@ class Requirement(BaseItem):
 			ex.add_note(f"Got type '{getFullyQualifiedName(obligation)}'.")
 			raise ex
 
-		self._kind =               kind
-		self._obligation =         obligation
-		self._specificationItems = {}
+		if verificationMethods is None:
+			raise ValueError(f"Parameter 'verificationMethods' is None.")
+		elif not isinstance(verificationMethods, VerificationMethod):
+			ex = TypeError(f"Parameter 'verificationMethods' is not of type 'VerificationMethod'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(verificationMethods)}'.")
+			raise ex
+
+		self._acceptanceCriteria = []
+		if acceptanceCriteria is not None:
+			if not isinstance(acceptanceCriteria, Iterable):
+				ex = TypeError(f"Parameter 'acceptanceCriteria' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(acceptanceCriteria)}'.")
+				raise ex
+			elif isinstance(acceptanceCriteria, str):
+				ex = TypeError(f"Parameter 'acceptanceCriteria' is a single string, not an iterable of strings.")
+				ex.add_note(f"Got value '{acceptanceCriteria}'.")
+				raise ex
+
+			for criterion in acceptanceCriteria:
+				if not isinstance(criterion, str):
+					ex = TypeError(f"Parameter 'acceptanceCriteria' contains an element not of type 'str'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(criterion)}'.")
+					raise ex
+				elif criterion == "":
+					raise ValueError(f"Parameter 'acceptanceCriteria' contains an empty criterion.")
+
+				self._acceptanceCriteria.append(criterion)
+
+		self._kind =                kind
+		self._obligation =          obligation
+		self._verificationMethods = verificationMethods
+		self._specificationItems =  {}
 
 		if parent is not None:
 			parent._AddElement(self)
@@ -1426,6 +1582,24 @@ class Requirement(BaseItem):
 		:returns: The requirement's obligation.
 		"""
 		return self._obligation
+
+	@readonly
+	def VerificationMethods(self) -> VerificationMethod:
+		"""
+		Read-only property to access the methods verifying the requirement (:attr:`_verificationMethods`).
+
+		:returns: The verification methods.
+		"""
+		return self._verificationMethods
+
+	@readonly
+	def AcceptanceCriteria(self) -> list[str]:
+		"""
+		Read-only property to access the criteria the verification accepts the requirement by (:attr:`_acceptanceCriteria`).
+
+		:returns: The acceptance criteria, in the order given.
+		"""
+		return self._acceptanceCriteria
 
 	@readonly
 	def SpecificationItems(self) -> dict[str, SpecificationItem]:
@@ -1467,6 +1641,7 @@ class SpecificationItem(BaseItem):
 		created: Nullable[datetime] = None,
 		*,
 		requirements: Nullable[Iterable[Requirement]] = None,
+		rationale: str = "",
 		state: ItemState = ItemState.Draft,
 		layer: Nullable[Layer] = None,
 		authors: Nullable[Iterable[Person]] = None,
@@ -1487,6 +1662,7 @@ class SpecificationItem(BaseItem):
 		:param created:            Optional, the time the item was created; without a time zone, it is a local time.
 		                           Default: ``None``, the current time.
 		:param requirements:       Optional, the requirements the item specifies. Default: ``None``.
+		:param rationale:          Optional, why the item exists or is as it is. Default: ``""``.
 		:param state:              Optional, the item's state. Default: :attr:`ItemState.Draft`.
 		:param layer:              Optional, the layer the item belongs to. Default: ``None``.
 		:param authors:            Optional, the authors of the item. Default: ``None``.
@@ -1510,6 +1686,8 @@ class SpecificationItem(BaseItem):
 		:raises ValueError:        If parameter ``title`` is ``None``.
 		:raises TypeError:         If parameter ``title`` isn't of type :class:`str`.
 		:raises ValueError:        If parameter ``title`` is empty.
+		:raises ValueError:        If parameter ``rationale`` is ``None``.
+		:raises TypeError:         If parameter ``rationale`` isn't of type :class:`str`.
 		:raises TypeError:         If parameter ``created`` isn't of type :class:`~datetime.datetime`.
 		:raises ValueError:        If parameter ``state`` is ``None``.
 		:raises TypeError:         If parameter ``state`` isn't of type :class:`ItemState`.
@@ -1537,6 +1715,7 @@ class SpecificationItem(BaseItem):
 			title,
 			description,
 			created,
+			rationale=rationale,
 			state=state,
 			layer=layer,
 			authors=authors,
