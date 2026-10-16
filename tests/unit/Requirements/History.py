@@ -33,7 +33,7 @@ from datetime                    import datetime, timedelta, timezone
 
 from pyEDAA.Reports              import Person
 from pyEDAA.Reports.Requirements import EventKind, HistoryEvent, ItemState, Persona, Requirement, RequirementKind
-from pyEDAA.Reports.Requirements import RequirementSpecification
+from pyEDAA.Reports.Requirements import RequirementSpecification, RequirementsError
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
 
@@ -104,7 +104,7 @@ class History(Testcase):
 
 		self.assertEqual(datetime(2026, 3, 5, 9, 30), reviewed.Timestamp)
 
-		with self.assertRaises(ValueError):
+		with self.assertRaises(RequirementsError):
 			HistoryEvent(EventKind.Approved, CREATED + DAY, parent=requirement)
 
 	def test_Chronology(self) -> None:
@@ -117,7 +117,7 @@ class History(Testcase):
 			(CREATED - DAY, "Got '2026-02-28T09:30:00+00:00' after '2026-03-02T09:30:00+00:00'."),
 		):
 			with self.subTest(timestamp=timestamp):
-				with self.assertRaises(ValueError) as context:
+				with self.assertRaises(RequirementsError) as context:
 					HistoryEvent(EventKind.Modified, timestamp, parent=requirement)
 
 				self.assertEqual(
@@ -125,9 +125,14 @@ class History(Testcase):
 					str(context.exception)
 				)
 				self.assertEqual([message], context.exception.__notes__)
+				self.assertIsInstance(context.exception.__cause__, ValueError)
+				self.assertEqual(
+					"Parameter 'timestamp' is earlier than '2026-03-02T09:30:00+00:00'.",
+					str(context.exception.__cause__)
+				)
 
 		other = Requirement("REQ-2", "Title", FUNCTIONAL, created=CREATED)
-		with self.assertRaises(ValueError):
+		with self.assertRaises(RequirementsError):
 			HistoryEvent(EventKind.Opened, CREATED - DAY, parent=other)
 
 		self.assertEqual(2, len(requirement.History))
