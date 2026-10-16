@@ -220,6 +220,7 @@ Contributors
    :hidden:
 
    Requirements/index
+   RiskManagement/index
 
 
 .. #toctree::
