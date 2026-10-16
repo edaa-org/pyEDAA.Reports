@@ -31,8 +31,9 @@
 """
 Abstract data model of requirements management.
 
-A :class:`RequirementSpecification` is the root: it registers the personas (:class:`Persona`), labels
-(:class:`Label`), documents (:class:`Document`) and layers (:class:`Layer`) of a system's requirements by their IDs.
+A :class:`RequirementSpecification` is the root: it registers the personas (:class:`Persona`), labels (:class:`Label`),
+documents (:class:`Document`) and layers (:class:`Layer`) of a system's requirements by their IDs, and the persons
+(:class:`~pyEDAA.Reports.Person`) by their user IDs.
 """
 from __future__            import annotations
 
@@ -43,7 +44,7 @@ from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import KeyValuePairsMixin
+from pyEDAA.Reports        import KeyValuePairsMixin, Person
 
 
 @export
@@ -226,41 +227,41 @@ class RequirementSpecification(Base):
 	The root of the requirements model: the personas, labels, documents and layers of a system's requirements.
 
 	It registers each of them by its ID, and is its own specification.
+
+	Persons have no parent: the specification registers the persons its items refer to by their user IDs, and a person may
+	be registered in several specifications.
 	"""
 
-	_name:      str                  #: The specification's name.
+	_name:      Nullable[str]        #: The specification's name, or ``None``.
 	_version:   SemanticVersion      #: The version of the specification.
+	_persons:   dict[str, Person]    #: The persons, by user ID.
 	_personas:  dict[str, Persona]   #: The personas, by ID.
 	_labels:    dict[str, Label]     #: The labels, by ID.
 	_documents: dict[str, Document]  #: The documents, by ID.
 	_layers:    dict[str, Layer]     #: The layers, by ID.
 
-	def __init__(self, name: str, version: SemanticVersion, *, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> None:
+	def __init__(
+		self,
+		version: SemanticVersion,
+		name: Nullable[str] = None,
+		*,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> None:
 		"""
 		Initializes an empty requirement specification.
 
-		:param name:          The specification's name.
 		:param version:       The version of the specification.
+		:param name:          Optional, the specification's name. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
 		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
 		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		:raises ValueError:   If parameter ``name`` is ``None``.
-		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``name`` is empty.
 		:raises ValueError:   If parameter ``version`` is ``None``.
 		:raises TypeError:    If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
+		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:   If parameter ``name`` is empty.
 		"""
 		super().__init__(keyValuePairs=keyValuePairs)
-
-		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
-		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
-			raise ex
-		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
 
 		if version is None:
 			raise ValueError(f"Parameter 'version' is None.")
@@ -269,9 +270,18 @@ class RequirementSpecification(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(version)}'.")
 			raise ex
 
+		if name is not None:
+			if not isinstance(name, str):
+				ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+				raise ex
+			elif name == "":
+				raise ValueError(f"Parameter 'name' is empty.")
+
 		self._root =      self
 		self._name =      name
 		self._version =   version
+		self._persons =   {}
 		self._personas =  {}
 		self._labels =    {}
 		self._documents = {}
@@ -300,7 +310,7 @@ class RequirementSpecification(Base):
 			elements = self._layers
 
 		if element._id in elements:
-			raise ValueError(f"{element.__class__.__name__} '{element._id}' already exists in specification '{self._name}'.")
+			raise ValueError(f"{element.__class__.__name__} '{element._id}' already exists in the specification.")
 
 		elements[element._id] = element
 
@@ -313,11 +323,11 @@ class RequirementSpecification(Base):
 		yield from (*self._personas.values(), *self._labels.values(), *self._documents.values(), *self._layers.values())
 
 	@readonly
-	def Name(self) -> str:
+	def Name(self) -> Nullable[str]:
 		"""
 		Read-only property to access the specification's name (:attr:`_name`).
 
-		:returns: The name.
+		:returns: The name, or ``None``.
 		"""
 		return self._name
 
@@ -329,6 +339,38 @@ class RequirementSpecification(Base):
 		:returns: The version.
 		"""
 		return self._version
+
+	@readonly
+	def Persons(self) -> dict[str, Person]:
+		"""
+		Read-only property to access the persons (:attr:`_persons`).
+
+		:returns: The persons, by user ID.
+		"""
+		return self._persons
+
+	def AddPerson(self, person: Person) -> None:
+		"""
+		Register a person, whom the specification's items can refer to.
+
+		E.g. an author or an owner of requirements. A person has no parent: the same person may be registered in several
+		specifications.
+
+		:param person:      The person.
+		:raises ValueError: If parameter ``person`` is ``None``.
+		:raises TypeError:  If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises ValueError: If the specification already contains a person of this user ID.
+		"""
+		if person is None:
+			raise ValueError(f"Parameter 'person' is None.")
+		elif not isinstance(person, Person):
+			ex = TypeError(f"Parameter 'person' is not of type 'Person'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(person)}'.")
+			raise ex
+		elif person._userID in self._persons:
+			raise ValueError(f"Person '{person._userID}' already exists in the specification.")
+
+		self._persons[person._userID] = person
 
 	@readonly
 	def Personas(self) -> dict[str, Persona]:
@@ -448,9 +490,10 @@ class BaseWithName(BaseWithID):
 @export
 class Persona(BaseWithName):
 	"""
-	A persona: a person or a role, who writes or owns items.
+	A persona: a role a user of the system acts in, like the role of a use case or a user story.
 
-	E.g. an FPGA designer, a test engineer or a product manager.
+	E.g. an administrator, a reviewer or a quality inspector. A real person, e.g. an author, is a
+	:class:`~pyEDAA.Reports.Person`.
 	"""
 
 

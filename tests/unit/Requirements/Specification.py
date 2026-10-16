@@ -28,7 +28,8 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Unit tests of the requirements model: the specification, and its personas, labels, documents and layers."""
+"""Unit tests of the requirements model: the specification, and its persons, personas, labels, documents and layers."""
+from pyEDAA.Reports              import Person
 from pyEDAA.Reports.Requirements import Document, Label, Layer, Persona, RequirementSpecification
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
@@ -45,12 +46,13 @@ VERSION = SemanticVersion(1, 2, 0)  #: Version of the specifications under test.
 
 class Root(Testcase):
 	def test_Empty(self) -> None:
-		specification = RequirementSpecification("Board", VERSION)
+		specification = RequirementSpecification(VERSION, "Board")
 
 		self.assertEqual("Board", specification.Name)
 		self.assertIs(VERSION, specification.Version)
 		self.assertIsNone(specification.Parent)
 		self.assertIs(specification, specification.Root)
+		self.assertEqual({}, specification.Persons)
 		self.assertEqual({}, specification.Personas)
 		self.assertEqual({}, specification.Labels)
 		self.assertEqual({}, specification.Documents)
@@ -58,8 +60,14 @@ class Root(Testcase):
 		self.assertEqual([], list(specification.IterateElements()))
 		self.assertEqual(0, len(specification))
 
+	def test_Unnamed(self) -> None:
+		specification = RequirementSpecification(VERSION)
+
+		self.assertIsNone(specification.Name)
+		self.assertIs(VERSION, specification.Version)
+
 	def test_KeyValuePairs(self) -> None:
-		specification =           RequirementSpecification("Board", VERSION, keyValuePairs={"customer": "EDA²"})
+		specification =           RequirementSpecification(VERSION, "Board", keyValuePairs={"customer": "EDA²"})
 		specification["status"] = "draft"
 
 		self.assertEqual(2, len(specification))
@@ -68,32 +76,74 @@ class Root(Testcase):
 
 	def test_Parent(self) -> None:
 		"""A specification is the root: it has no parent."""
-		specification = RequirementSpecification("Board", VERSION)
+		specification = RequirementSpecification(VERSION, "Board")
 
 		with self.assertRaises(TypeError) as context:
-			specification.Parent = RequirementSpecification("System", VERSION)
+			specification.Parent = RequirementSpecification(VERSION, "System")
 
 		self.assertEqual("A 'pyEDAA.Reports.Requirements.RequirementSpecification' has no parent.", str(context.exception))
 
 	def test_ParameterChecks(self) -> None:
-		for name, version, exception, message in (
-			(None,    VERSION, ValueError, "Parameter 'name' is None."),
-			(1,       VERSION, TypeError,  "Parameter 'name' is not of type 'str'."),
-			("",      VERSION, ValueError, "Parameter 'name' is empty."),
-			("Board", None,    ValueError, "Parameter 'version' is None."),
-			("Board", "1.2.0", TypeError,  "Parameter 'version' is not of type 'SemanticVersion'."),
+		for version, name, exception, message in (
+			(None,    "Board", ValueError, "Parameter 'version' is None."),
+			("1.2.0", "Board", TypeError,  "Parameter 'version' is not of type 'SemanticVersion'."),
+			(VERSION, 1,       TypeError,  "Parameter 'name' is not of type 'str'."),
+			(VERSION, "",      ValueError, "Parameter 'name' is empty."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
-					_ = RequirementSpecification(name, version)
+					_ = RequirementSpecification(version, name)
 
 				self.assertEqual(message, str(context.exception))
+
+
+
+class Persons(Testcase):
+	def test_AddPerson(self) -> None:
+		"""A person has no parent: it is registered by user ID, also in several specifications."""
+		board =  RequirementSpecification(VERSION, "Board")
+		system = RequirementSpecification(VERSION, "System")
+		alice =  Person("alice", "Alice", "alice@example.com")
+		for specification in (board, system):
+			specification.AddPerson(alice)
+
+		self.assertEqual({"alice": alice}, board.Persons)
+		self.assertIs(alice, system.Persons["alice"])
+		self.assertEqual([], list(board.IterateElements()))
+
+	def test_Duplicate(self) -> None:
+		specification = RequirementSpecification(VERSION, "Board")
+		alice =         Person("alice", "Alice")
+		specification.AddPerson(alice)
+
+		for person in (alice, Person("alice", "Alice Doe")):
+			with self.subTest(person=person):
+				with self.assertRaises(ValueError) as context:
+					specification.AddPerson(person)
+
+				self.assertEqual("Person 'alice' already exists in the specification.", str(context.exception))
+
+		self.assertIs(alice, specification.Persons["alice"])
+
+	def test_ParameterChecks(self) -> None:
+		specification = RequirementSpecification(VERSION, "Board")
+		for person, exception, message in (
+			(None,                         ValueError, "Parameter 'person' is None."),
+			(Persona("alice", "Reviewer"), TypeError,  "Parameter 'person' is not of type 'Person'."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					specification.AddPerson(person)
+
+				self.assertEqual(message, str(context.exception))
+
+		self.assertEqual({}, specification.Persons)
 
 
 class Registries(Testcase):
 	def test_Elements(self) -> None:
 		"""Personas, labels, documents and layers are registered in their specification by ID."""
-		specification = RequirementSpecification("Board", VERSION)
+		specification = RequirementSpecification(VERSION, "Board")
 		for elementClass, dictionary in (
 			(Persona,  specification.Personas),
 			(Label,    specification.Labels),
@@ -123,7 +173,7 @@ class Registries(Testcase):
 
 	def test_Parent(self) -> None:
 		"""An element without a parent is registered, when the parent is assigned."""
-		specification = RequirementSpecification("Board", VERSION)
+		specification = RequirementSpecification(VERSION, "Board")
 		label =         Label("asic", "ASIC variant")
 		label.Parent =  specification
 
@@ -132,24 +182,24 @@ class Registries(Testcase):
 		self.assertIs(label, specification.Labels["asic"])
 
 	def test_Parent_Twice(self) -> None:
-		specification = RequirementSpecification("Board", VERSION)
+		specification = RequirementSpecification(VERSION, "Board")
 		label =         Label("asic", "ASIC variant", parent=specification)
 
 		with self.assertRaises(ValueError) as context:
-			label.Parent = RequirementSpecification("System", VERSION)
+			label.Parent = RequirementSpecification(VERSION, "System")
 
 		self.assertEqual("Label already has a parent.", str(context.exception))
 
 	def test_Duplicate(self) -> None:
 		"""An ID is unique per class: a duplicate is rejected, the same ID of another class is not."""
-		specification = RequirementSpecification("Board", VERSION)
+		specification = RequirementSpecification(VERSION, "Board")
 		Persona("fw", "Firmware engineer", parent=specification)
 		Layer("fw", "FPGA firmware", parent=specification)
 
 		with self.assertRaises(ValueError) as context:
 			Persona("fw", "Firmware architect", parent=specification)
 
-		self.assertEqual("Persona 'fw' already exists in specification 'Board'.", str(context.exception))
+		self.assertEqual("Persona 'fw' already exists in the specification.", str(context.exception))
 		self.assertEqual("Firmware engineer", specification.Personas["fw"].Name)
 
 		Document("manual", "Board manual", parent=specification)
@@ -157,7 +207,7 @@ class Registries(Testcase):
 		with self.assertRaises(ValueError) as context:
 			document.Parent = specification
 
-		self.assertEqual("Document 'manual' already exists in specification 'Board'.", str(context.exception))
+		self.assertEqual("Document 'manual' already exists in the specification.", str(context.exception))
 		self.assertIsNone(document.Parent)
 		self.assertIsNone(document.Root)
 
