@@ -189,8 +189,7 @@ class Branch(metaclass=ExtendedType, slots=True):
 		:raises ValueError:        If parameter ``sourceBlockID`` is negative.
 		:raises TypeError:         If parameter ``destinationBlockID`` isn't of type :class:`int`.
 		:raises ValueError:        If parameter ``destinationBlockID`` is negative.
-		:raises TypeError:         If parameter ``parent`` isn't of type
-		                           :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Line`.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Line`.
 		"""
 		if count is None:
 			raise ValueError(f"Parameter 'count' is None.")
@@ -370,8 +369,7 @@ class Call(metaclass=ExtendedType, slots=True):
 		:raises ValueError:        If parameter ``returned`` is ``None``.
 		:raises TypeError:         If parameter ``returned`` isn't of type :class:`int`.
 		:raises ValueError:        If parameter ``returned`` is negative.
-		:raises TypeError:         If parameter ``parent`` isn't of type
-		                           :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Line`.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Line`.
 		"""
 		if sourceBlockID is None:
 			raise ValueError(f"Parameter 'sourceBlockID' is None.")
@@ -517,8 +515,7 @@ class Condition(metaclass=ExtendedType, slots=True):
 		:raises TypeError:      If parameter ``notCoveredTrue`` contains an element not of type :class:`int`.
 		:raises TypeError:      If parameter ``notCoveredFalse`` isn't iterable.
 		:raises TypeError:      If parameter ``notCoveredFalse`` contains an element not of type :class:`int`.
-		:raises TypeError:      If parameter ``parent`` isn't of type
-		                        :class:`~pyEDAA.Reports.CodeCoverage.Gcov.Line`.
+		:raises TypeError:      If parameter ``parent`` isn't of type :class:`Line`.
 		"""
 		if count is None:
 			raise ValueError(f"Parameter 'count' is None.")
@@ -703,7 +700,7 @@ class Line(metaclass=ExtendedType, slots=True):
 		:raises TypeError:      If parameter ``functionName`` isn't of type :class:`str`.
 		:raises TypeError:      If parameter ``blockIDs`` isn't iterable.
 		:raises TypeError:      If parameter ``blockIDs`` contains an element not of type :class:`int`.
-		:raises TypeError:      If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Gcov.File`.
+		:raises TypeError:      If parameter ``parent`` isn't of type :class:`File`.
 		"""
 		if lineNumber is None:
 			raise ValueError(f"Parameter 'lineNumber' is None.")
@@ -966,7 +963,7 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises ValueError:    If parameter ``executionCount`` is ``None``.
 		:raises TypeError:     If parameter ``executionCount`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``executionCount`` is negative.
-		:raises TypeError:     If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Gcov.File`.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`File`.
 		:raises ValueError:    If parameter ``parent`` contains a function of the same name already.
 		"""
 		if name is None:
