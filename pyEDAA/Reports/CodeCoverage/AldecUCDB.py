@@ -108,11 +108,11 @@ NAMESPACE = "www.aldec.com"            #: The XML namespace of the format's elem
 NAMESPACES = {"ux": NAMESPACE}         #: The XML namespaces of the format by their prefix, for finding elements.
 
 HistoryNodeParentType = TypeVar("HistoryNodeParentType", bound="Report | HistoryNode")
-"""A type variable for the parent of a :class:`HistoryNode`: a :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Report`
+"""A type variable for the parent of a :class:`HistoryNode`: a :class:`Report`
 or a :class:`HistoryNode`."""
 
 ScopeParentType = TypeVar("ScopeParentType", bound="Report | Scope")
-"""A type variable for the parent of a :class:`Scope`: a :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Report` or a
+"""A type variable for the parent of a :class:`Scope`: a :class:`Report` or a
 :class:`Scope`."""
 
 
@@ -539,7 +539,7 @@ class Bin(Base, AttributesMixin):
 		                    :class:`str`.
 		:raises ValueError: If parameter ``coverType`` is ``None``.
 		:raises TypeError:  If parameter ``coverType`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.CoverType`.
+		                    :class:`CoverType`.
 		:raises ValueError: If parameter ``flags`` is ``None``.
 		:raises TypeError:  If parameter ``flags`` isn't of type :class:`BinFlags`.
 		:raises ValueError: If parameter ``count`` is ``None``.
@@ -730,10 +730,10 @@ class Scope(Base, AttributesMixin, Generic[ScopeParentType]):
 		:raises ValueError: If parameter ``name`` is empty.
 		:raises ValueError: If parameter ``scopeType`` is ``None``.
 		:raises TypeError:  If parameter ``scopeType`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.ScopeType`.
+		                    :class:`ScopeType`.
 		:raises ValueError: If parameter ``language`` is ``None``.
 		:raises TypeError:  If parameter ``language`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Language`.
+		                    :class:`Language`.
 		:raises ValueError: If parameter ``weight`` is ``None``.
 		:raises TypeError:  If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``weight`` is negative.
@@ -744,7 +744,7 @@ class Scope(Base, AttributesMixin, Generic[ScopeParentType]):
 		:raises TypeError:  If parameter ``source`` isn't of type :class:`SourceLocation`.
 		:raises TypeError:  If parameter ``designUnit`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``designUnit`` is empty.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Report`
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report`
 		                    or :class:`Scope`.
 		"""
 		super().__init__(name)
@@ -867,7 +867,7 @@ class Scope(Base, AttributesMixin, Generic[ScopeParentType]):
 		"""
 		Read-only property to access the report or scope the scope belongs to (:attr:`_parent`).
 
-		:returns: The :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Report` or :class:`Scope`; ``None`` if the scope
+		:returns: The :class:`Report` or :class:`Scope`; ``None`` if the scope
 		          belongs to none.
 		"""
 		return self._parent
@@ -991,7 +991,7 @@ class HistoryNode(Base, AttributesMixin, Generic[HistoryNodeParentType]):
 		:raises TypeError:   If parameter ``physicalName`` isn't of type :class:`~pathlib.Path`.
 		:raises ValueError:  If parameter ``kind`` is ``None``.
 		:raises TypeError:   If parameter ``kind`` isn't of type :class:`HistoryNodeKind`.
-		:raises TypeError:   If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Report`
+		:raises TypeError:   If parameter ``parent`` isn't of type :class:`Report`
 		                     or :class:`HistoryNode`.
 		"""
 		super().__init__(name)
@@ -1055,7 +1055,7 @@ class HistoryNode(Base, AttributesMixin, Generic[HistoryNodeParentType]):
 		"""
 		Read-only property to access the report or merge the history node belongs to (:attr:`_parent`).
 
-		:returns: The :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Report` or :class:`HistoryNode`; ``None`` if the
+		:returns: The :class:`Report` or :class:`HistoryNode`; ``None`` if the
 		          history node belongs to none.
 		"""
 		return self._parent
@@ -1122,7 +1122,7 @@ class Command(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``index`` is ``None``.
 		:raises TypeError:  If parameter ``index`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``index`` is negative.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Report`.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report`.
 		"""
 		if commandType is None:
 			raise ValueError(f"Parameter 'commandType' is None.")
@@ -1272,7 +1272,7 @@ class Statement(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``bins`` is ``None``.
 		:raises TypeError:  If parameter ``bins`` isn't iterable.
 		:raises TypeError:  If parameter ``bins`` contains an element not of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.AldecUCDB.Bin`.
+		                    :class:`Bin`.
 		:raises ValueError: If parameter ``bins`` is empty.
 		"""
 		if file is None:
