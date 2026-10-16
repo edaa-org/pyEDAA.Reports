@@ -41,6 +41,8 @@ registered in the same specification. A requirement contains child requirements,
 
 A :class:`SpecificationItem` mirrors a requirement: it states how the system meets requirements. Specification items and
 requirements are in an N:M relation.
+
+An item's :class:`Link` states a relationship to another item, e.g. to its counterpart in another layer.
 """
 from __future__            import annotations
 
@@ -742,7 +744,8 @@ class Layer(BaseWithName):
 
 	E.g. electrical, mechanical, FPGA firmware and software requirements are four layers. Each item belongs to at most one
 	layer. A requirement of one layer has its counterparts in other layers, e.g. an electrical requirement in the FPGA
-	firmware, and this one in the software.
+	firmware, and this one in the software; links of kind :attr:`LinkKind.CounterpartOf` or :attr:`LinkKind.DerivesFrom`
+	state it.
 	"""
 
 	def IterateRequirements(
@@ -806,22 +809,24 @@ _Layer = Layer
 class BaseItem(BaseWithID):
 	"""
 	Base-class of the items of a specification - requirements and specification items -: a title, a creation time, a
-	state, the layer, the persons, personas, labels and documents it refers to, and its child items.
+	state, the layer, the persons, personas, labels and documents it refers to, its child items and its links.
 
 	An item refers only to persons, personas, labels, documents and layers of its own specification, so it must be part of
 	one to refer to any. A child item has the class of its parent; its ID is unique in the specification, too.
 	"""
 
-	_title:       str                  #: The item's title.
-	_created:     datetime             #: The time the item was created.
-	_state:       ItemState            #: The item's state in its life cycle.
-	_layer:       Nullable[_Layer]     #: The layer the item belongs to, or ``None``.
-	_authors:     dict[str, Person]    #: The authors of the item, by user ID.
-	_owners:      dict[str, Person]    #: The owners of the item, by user ID.
-	_personas:    dict[str, Persona]   #: The personas the item is about, by ID.
-	_labels:      dict[str, Label]     #: The labels of the item, by ID.
-	_attachments: dict[str, Document]  #: The documents attached to the item, by ID.
-	_children:    dict[str, Self]      #: The child items, by ID.
+	_title:         str                  #: The item's title.
+	_created:       datetime             #: The time the item was created.
+	_state:         ItemState            #: The item's state in its life cycle.
+	_layer:         Nullable[_Layer]     #: The layer the item belongs to, or ``None``.
+	_authors:       dict[str, Person]    #: The authors of the item, by user ID.
+	_owners:        dict[str, Person]    #: The owners of the item, by user ID.
+	_personas:      dict[str, Persona]   #: The personas the item is about, by ID.
+	_labels:        dict[str, Label]     #: The labels of the item, by ID.
+	_attachments:   dict[str, Document]  #: The documents attached to the item, by ID.
+	_children:      dict[str, Self]      #: The child items, by ID.
+	_outboundLinks: list[Link]           #: The links from this item, in the order they were added.
+	_inboundLinks:  list[Link]           #: The links to this item, in the order they were added.
 
 	def __init__(
 		self,
@@ -921,16 +926,18 @@ class BaseItem(BaseWithID):
 				ex.add_note(f"Got layer '{layer._id}'.")
 				raise ex
 
-		self._title =       title
-		self._created =     created
-		self._state =       state
-		self._layer =       layer
-		self._authors =     {}
-		self._owners =      {}
-		self._personas =    {}
-		self._labels =      {}
-		self._attachments = {}
-		self._children =    {}
+		self._title =         title
+		self._created =       created
+		self._state =         state
+		self._layer =         layer
+		self._authors =       {}
+		self._owners =        {}
+		self._personas =      {}
+		self._labels =        {}
+		self._attachments =   {}
+		self._children =      {}
+		self._outboundLinks = []
+		self._inboundLinks =  []
 
 		for parameterName, references, referenceType, container in (
 			("authors",     authors,     Person,   self._authors),
@@ -1095,6 +1102,24 @@ class BaseItem(BaseWithID):
 		"""
 		return self._children
 
+	@readonly
+	def OutboundLinks(self) -> list[Link]:
+		"""
+		Read-only property to access the links from this item (:attr:`_outboundLinks`).
+
+		:returns: The links, in the order they were added.
+		"""
+		return self._outboundLinks
+
+	@readonly
+	def InboundLinks(self) -> list[Link]:
+		"""
+		Read-only property to access the links to this item (:attr:`_inboundLinks`).
+
+		:returns: The links, in the order they were added.
+		"""
+		return self._inboundLinks
+
 	def IterateChildren(self, predicate: Nullable[Callable[[Self], bool]] = None) -> Generator[Self, None, None]:
 		"""
 		Iterate all or selected child items.
@@ -1132,6 +1157,104 @@ class BaseItem(BaseWithID):
 					yield child
 
 				yield from child.IterateDescendants(predicate)
+
+	def LinkTo(
+		self,
+		destination: BaseItem,
+		kind: LinkKind,
+		*,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> Link:
+		"""
+		Create an outbound link from this item to the given item.
+
+		:param destination:        The item the link points to.
+		:param kind:               The relationship the link states.
+		:param keyValuePairs:      Optional, the key-value pairs of the link. Default: ``None``.
+		:returns:                  The link from this item to the destination.
+		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:        If this item isn't part of a specification.
+		:raises ValueError:        If parameter ``destination`` is ``None``.
+		:raises TypeError:         If parameter ``destination`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``destination`` is this item.
+		:raises ValueError:        If parameter ``destination`` isn't part of this item's specification.
+		:raises ValueError:        If parameter ``kind`` is ``None``.
+		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises RequirementsError: If this item has a link of this kind to the destination already.
+
+		.. seealso::
+
+		   :meth:`LinkFrom`
+		      |rarr| Create an inbound link from the given item to this item.
+		"""
+		return Link(self, destination, kind, keyValuePairs=keyValuePairs)
+
+	def LinkFrom(
+		self,
+		source: BaseItem,
+		kind: LinkKind,
+		*,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> Link:
+		"""
+		Create an inbound link from the given item to this item.
+
+		:param source:             The item the link starts at.
+		:param kind:               The relationship the link states.
+		:param keyValuePairs:      Optional, the key-value pairs of the link. Default: ``None``.
+		:returns:                  The link from the source to this item.
+		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:        If parameter ``source`` is ``None``.
+		:raises TypeError:         If parameter ``source`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``source`` isn't part of a specification.
+		:raises ValueError:        If parameter ``source`` is this item.
+		:raises ValueError:        If this item isn't part of the source's specification.
+		:raises ValueError:        If parameter ``kind`` is ``None``.
+		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises RequirementsError: If the source has a link of this kind to this item already.
+
+		.. seealso::
+
+		   :meth:`LinkTo`
+		      |rarr| Create an outbound link from this item to the given item.
+		"""
+		return Link(source, self, kind, keyValuePairs=keyValuePairs)
+
+	def IterateOutboundLinks(self, predicate: Nullable[Callable[[Link], bool]] = None) -> Generator[Link, None, None]:
+		"""
+		Iterate all or selected links from this item.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip links in the generator.
+
+		:param predicate: Optional, filter function accepting a link and returning a boolean. Default: ``None``.
+		:returns:         A generator of the links from this item.
+		"""
+		if predicate is None:
+			yield from self._outboundLinks
+		else:
+			for link in self._outboundLinks:
+				if predicate(link):
+					yield link
+
+	def IterateInboundLinks(self, predicate: Nullable[Callable[[Link], bool]] = None) -> Generator[Link, None, None]:
+		"""
+		Iterate all or selected links to this item.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip links in the generator.
+
+		:param predicate: Optional, filter function accepting a link and returning a boolean. Default: ``None``.
+		:returns:         A generator of the links to this item.
+		"""
+		if predicate is None:
+			yield from self._inboundLinks
+		else:
+			for link in self._inboundLinks:
+				if predicate(link):
+					yield link
 
 
 @export
@@ -1298,8 +1421,8 @@ class SpecificationItem(BaseItem):
 	A specification item: how the system meets requirements.
 
 	E.g. a design decision, an architecture or an interface description. It mirrors a requirement - with an ID, a title, a
-	state, a layer, persons, personas, labels, documents and child items -, and specifies any number of requirements; a
-	requirement is specified by any number of specification items.
+	state, a layer, persons, personas, labels, documents, child items and links -, and specifies any number of
+	requirements; a requirement is specified by any number of specification items.
 
 	Its parent is the :class:`RequirementSpecification` for a top-level item, or the :class:`SpecificationItem` it
 	details. The specification registers either by its ID.
@@ -1469,3 +1592,142 @@ class SpecificationItem(BaseItem):
 
 
 SpecificationItem._PARENT_TYPE = (SpecificationItem, RequirementSpecification)
+
+
+@export
+class LinkKind(StringEnum):
+	"""
+	The relationship a link states: the source item *<kind>* the destination item.
+
+	A link connects items of the same or of different layers, e.g. an FPGA firmware requirement derived from an electrical
+	one. Which specification item specifies which requirement, isn't a link, but the relation of
+	:attr:`SpecificationItem.Requirements` and :attr:`Requirement.SpecificationItems`.
+	"""
+
+	Refines =       "refines"         #: The source states the destination in more detail, outside the item hierarchy.
+	DerivesFrom =   "derives-from"    #: The source is derived from the destination, e.g. from a higher layer.
+	CounterpartOf = "counterpart-of"  #: The source is the destination's counterpart in another layer.
+	DependsOn =     "depends-on"      #: The source can only be met, if the destination is met.
+	ConflictsWith = "conflicts-with"  #: The source and the destination can't both be met.
+	Duplicates =    "duplicates"      #: The source states the same as the destination.
+	Replaces =      "replaces"        #: The source replaces the destination, which is obsolete.
+	RelatesTo =     "relates-to"      #: Any other relationship.
+
+
+@export
+class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
+	"""
+	A link from an item - its source - to another item of the same specification - its destination -, and the
+	relationship it states.
+
+	A link connects two items of the item hierarchy; it is no element of the hierarchy and has no parent. The source
+	lists it in :attr:`~BaseItem.OutboundLinks`, the destination in :attr:`~BaseItem.InboundLinks`.
+	"""
+
+	_source:      BaseItem  #: The item the link starts at.
+	_destination: BaseItem  #: The item the link points to.
+	_kind:        LinkKind  #: The relationship the link states.
+
+	def __init__(
+		self,
+		source: BaseItem,
+		destination: BaseItem,
+		kind: LinkKind,
+		*,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> None:
+		"""
+		Initializes a link, and adds it to its source and its destination.
+
+		:param source:             The item the link starts at.
+		:param destination:        The item the link points to.
+		:param kind:               The relationship the link states.
+		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
+		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:        If parameter ``source`` is ``None``.
+		:raises TypeError:         If parameter ``source`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``source`` isn't part of a specification.
+		:raises ValueError:        If parameter ``destination`` is ``None``.
+		:raises TypeError:         If parameter ``destination`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``destination`` is the source.
+		:raises ValueError:        If parameter ``destination`` isn't part of the source's specification.
+		:raises ValueError:        If parameter ``kind`` is ``None``.
+		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises RequirementsError: If the source has a link of this kind to this destination already.
+		"""
+		super().__init__(keyValuePairs)
+
+		if source is None:
+			raise ValueError(f"Parameter 'source' is None.")
+		elif not isinstance(source, BaseItem):
+			ex = TypeError(f"Parameter 'source' is not of type 'BaseItem'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
+			raise ex
+		elif source._root is None:
+			ex = ValueError(f"Parameter 'source' isn't part of a specification.")
+			ex.add_note(f"Got item '{source._id}'.")
+			raise ex
+
+		if destination is None:
+			raise ValueError(f"Parameter 'destination' is None.")
+		elif not isinstance(destination, BaseItem):
+			ex = TypeError(f"Parameter 'destination' is not of type 'BaseItem'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(destination)}'.")
+			raise ex
+		elif destination is source:
+			ex = ValueError(f"Parameter 'destination' is the source.")
+			ex.add_note(f"Got item '{destination._id}'.")
+			raise ex
+		elif destination._root is not source._root:
+			ex = ValueError(f"Parameter 'destination' isn't part of the source's specification.")
+			ex.add_note(f"Got item '{destination._id}'.")
+			raise ex
+
+		if kind is None:
+			raise ValueError(f"Parameter 'kind' is None.")
+		elif not isinstance(kind, LinkKind):
+			ex = TypeError(f"Parameter 'kind' is not of type 'LinkKind'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
+			raise ex
+
+		for link in source._outboundLinks:
+			if link._destination is destination and link._kind is kind:
+				ex = RequirementsError(f"{source.__class__.__name__} '{source._id}' has a '{kind}' link already.")
+				ex.add_note(f"Got destination '{destination._id}'.")
+				raise ex
+
+		self._source =      source
+		self._destination = destination
+		self._kind =        kind
+
+		source._outboundLinks.append(self)
+		destination._inboundLinks.append(self)
+
+	@readonly
+	def Source(self) -> BaseItem:
+		"""
+		Read-only property to access the item the link starts at (:attr:`_source`).
+
+		:returns: The source item.
+		"""
+		return self._source
+
+	@readonly
+	def Destination(self) -> BaseItem:
+		"""
+		Read-only property to access the item the link points to (:attr:`_destination`).
+
+		:returns: The destination item.
+		"""
+		return self._destination
+
+	@readonly
+	def Kind(self) -> LinkKind:
+		"""
+		Read-only property to access the relationship the link states (:attr:`_kind`).
+
+		:returns: The link's kind.
+		"""
+		return self._kind

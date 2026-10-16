@@ -28,6 +28,7 @@ Every element carries key-value pairs for the information the model has no field
      - :class:`Layer`                  | e.g. electrical, FPGA firmware or software
      - :class:`Requirement`            | e.g. ``EL-1`` - kind, obligation, state, layer, personas, labels, documents
        - :class:`Requirement`          | e.g. ``EL-1.1`` - a child requirement refining it
+       - :class:`Link`                 | e.g. ``FW-1`` is the counterpart of ``EL-1``
      - :class:`SpecificationItem`      | e.g. ``DES-1`` - a specification item, which specifies requirements
        - :class:`SpecificationItem`    | e.g. ``DES-1.1`` - a child item detailing it
 
@@ -114,9 +115,48 @@ Specification Items
 *******************
 
 A :class:`SpecificationItem` mirrors a requirement - with an ID, a title, a state, a layer, persons, personas, labels,
-documents and child items - and states how the system meets requirements, e.g. a design decision or an interface
+documents, child items and links - and states how the system meets requirements, e.g. a design decision or an interface
 description. Specification items and requirements are in an N:M relation: :attr:`SpecificationItem.Requirements` lists
 the requirements an item specifies, :attr:`Requirement.SpecificationItems` the items specifying a requirement.
 :meth:`SpecificationItem.AddRequirement` maintains both sides.
 :meth:`~RequirementSpecification.IterateSpecificationItems` iterates every specification item, with an optional
 predicate.
+
+
+.. _REQ/Links:
+
+Links
+*****
+
+A :class:`Link` starts at an item - its source - and points to another item of the same specification, its
+destination. A link is no element of the item hierarchy: it has no parent. The source lists it as an outbound link, the
+destination as an inbound link. Its :class:`LinkKind` names the relationship: *source kind destination*.
+:meth:`~BaseItem.LinkTo` and :meth:`~BaseItem.LinkFrom` create an outbound or inbound link of an item, with the
+parameters of the link's constructor.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Link kind
+     - The source ...
+   * - ``refines``
+     - states the destination in more detail, outside the item hierarchy.
+   * - ``derives-from``
+     - is derived from the destination, e.g. a firmware requirement from an electrical one.
+   * - ``counterpart-of``
+     - is the destination's counterpart in another layer.
+   * - ``depends-on``
+     - can only be met, if the destination is met.
+   * - ``conflicts-with``
+     - can't be met together with the destination.
+   * - ``duplicates``
+     - states the same as the destination.
+   * - ``replaces``
+     - replaces the destination, which is obsolete.
+   * - ``relates-to``
+     - has any other relationship to the destination.
+
+A source has one link of a kind to a destination. :meth:`~BaseItem.IterateOutboundLinks` and
+:meth:`~BaseItem.IterateInboundLinks` take an optional predicate, e.g. to follow the counterparts of a requirement
+through the layers.
