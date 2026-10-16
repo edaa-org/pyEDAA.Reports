@@ -881,11 +881,16 @@ class BaseItem(BaseWithID):
 		:param predicate: Optional, filter function accepting an item and returning a boolean. Default: ``None``.
 		:returns:         A generator of the items below this one.
 		"""
-		for child in self._children.values():
-			if predicate is None or predicate(child):
+		if predicate is None:
+			for child in self._children.values():
 				yield child
+				yield from child.IterateDescendants()
+		else:
+			for child in self._children.values():
+				if predicate(child):
+					yield child
 
-			yield from child.IterateDescendants(predicate)
+				yield from child.IterateDescendants(predicate)
 
 
 @export
