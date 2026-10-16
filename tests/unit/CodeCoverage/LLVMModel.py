@@ -387,7 +387,21 @@ class Tree(Testcase):
 	def test_Parsed(self) -> None:
 		document = Document(Path("tests/data/CodeCoverage/LLVM/coverage-3.1.0.json"), analyzeAndConvert=True)
 
-		elements = list(document.IterateElements())
+		files =      list(document.Files.values())
+		expansions = [expansion for file in files for expansion in file.Expansions]
+		summaries =  [document.Totals, *(file.Summary for file in files)]
+		records =    [record for element in (*files, *document.Functions) for record in element.MCDCRecords]
+		elements =   [
+			*files, *document.Functions, *expansions, *summaries, *records,
+			*(segment for file in files for segment in file.Segments),
+			*(branch for element in (*files, *document.Functions, *expansions) for branch in element.Branches),
+			*(region for function in document.Functions for region in function.Regions),
+			*(region for expansion in expansions for region in (expansion.SourceRegion, *expansion.TargetRegions)),
+			*(testVector for record in records for testVector in record.TestVectors),
+			*(counters for summary in summaries for counters in (
+				summary.Lines, summary.Functions, summary.Instantiations, summary.Regions, summary.Branches, summary.MCDC
+			) if counters is not None)
+		]
 		self.assertEqual(
 			{BranchRegion, Counters, Expansion, File, Function, MCDCRecord, MCDCTestVector, Region, Segment, Summary},
 			{type(element) for element in elements}
