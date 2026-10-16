@@ -473,7 +473,7 @@ class Statement(SourceItem):
 		:raises TypeError:  If parameter ``hits`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``hits`` is negative.
 		:raises TypeError:  If parameter ``parent`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Scope`.
+		                    :class:`Scope`.
 		"""
 		super().__init__(file, lineNumber, index)
 
@@ -697,7 +697,7 @@ class IfStatement(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``hasElse`` is ``None``.
 		:raises TypeError:  If parameter ``hasElse`` isn't of type :class:`bool`.
 		:raises TypeError:  If parameter ``parent`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Scope`.
+		                    :class:`Scope`.
 		"""
 		if hasElse is None:
 			raise ValueError(f"Parameter 'hasElse' is None.")
@@ -913,7 +913,7 @@ class CaseStatement(metaclass=ExtendedType, slots=True):
 
 		:param parent:     Optional, the scope the ``case`` statement belongs to. Default: ``None``.
 		:raises TypeError: If parameter ``parent`` isn't of type
-		                   :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Scope`.
+		                   :class:`Scope`.
 		"""
 		if parent is not None and not isinstance(parent, Scope):
 			ex = TypeError(f"Parameter 'parent' is not of type 'Scope'.")
@@ -1032,7 +1032,7 @@ class FSMState(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``hits`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``hits`` is negative.
 		:raises TypeError:  If parameter ``parent`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Scope`.
+		                    :class:`Scope`.
 		"""
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
@@ -1199,7 +1199,7 @@ class FSMTransition(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``hits`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``hits`` is negative.
 		:raises TypeError:  If parameter ``parent`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Scope`.
+		                    :class:`Scope`.
 		"""
 		if identifier is None:
 			raise ValueError(f"Parameter 'identifier' is None.")
@@ -1397,7 +1397,7 @@ class Scope(StatisticsMixin, slots=True):
 		:raises ValueError: If parameter ``files`` contains a negative key.
 		:raises TypeError:  If parameter ``files`` contains a value not of type :class:`~pathlib.Path`.
 		:raises TypeError:  If parameter ``parent`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Report`.
+		                    :class:`Report`.
 		"""
 		super().__init__()
 
@@ -1601,7 +1601,7 @@ class InstanceData(Scope):
 		:raises ValueError:   If parameter ``files`` contains a negative key.
 		:raises TypeError:    If parameter ``files`` contains a value not of type :class:`~pathlib.Path`.
 		:raises TypeError:    If parameter ``parent`` isn't of type
-		                      :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Report`.
+		                      :class:`Report`.
 		:raises ValueError:   If parameter ``path`` is ``None``.
 		:raises TypeError:    If parameter ``path`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``path`` is empty.
@@ -1723,7 +1723,7 @@ class DesignUnitData(Scope):
 		:raises ValueError:   If parameter ``files`` contains a negative key.
 		:raises TypeError:    If parameter ``files`` contains a value not of type :class:`~pathlib.Path`.
 		:raises TypeError:    If parameter ``parent`` isn't of type
-		                      :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Report`.
+		                      :class:`Report`.
 		:raises ValueError:   If parameter ``designUnit`` is ``None``.
 		:raises TypeError:    If parameter ``designUnit`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``designUnit`` is empty.
@@ -1814,7 +1814,7 @@ class FileData(Scope):
 		:raises ValueError: If parameter ``files`` contains a negative key.
 		:raises TypeError:  If parameter ``files`` contains a value not of type :class:`~pathlib.Path`.
 		:raises TypeError:  If parameter ``parent`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Report`.
+		                    :class:`Report`.
 		:raises ValueError: If parameter ``path`` is ``None``.
 		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
 		"""
@@ -1884,7 +1884,7 @@ class Totals(StatisticsMixin):
 		:raises TypeError:         If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError:        If parameter ``count`` is negative.
 		:raises TypeError:         If parameter ``parent`` isn't of type
-		                           :class:`~pyEDAA.Reports.CodeCoverage.QuestaSim.Report`.
+		                           :class:`Report`.
 		:raises CodeCoverageError: If the report already has a summary record of this mode.
 		"""
 		super().__init__()
