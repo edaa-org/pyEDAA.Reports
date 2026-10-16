@@ -30,16 +30,14 @@
 #
 #
 """Unit tests of the records of a line of GCC's gcov JSON format: its branches, calls and conditions."""
-from json                                      import dumps
-from pathlib                                   import Path
-from tempfile                                  import TemporaryDirectory
-from typing                                    import Any
+from json                             import dumps
+from pathlib                          import Path
+from tempfile                         import TemporaryDirectory
+from typing                           import Any
 
-from pyEDAA.Reports.CodeCoverage               import CodeCoverageError
-from pyEDAA.Reports.CodeCoverage.Gcov          import Document, File
-from pyEDAA.Reports.CodeCoverage.Gcov.Branches import Branch, Call, Condition
-from pyEDAA.Reports.CodeCoverage.Gcov.Records  import Line
-from pyTooling.Testing                         import Testcase
+from pyEDAA.Reports.CodeCoverage      import CodeCoverageError
+from pyEDAA.Reports.CodeCoverage.Gcov import Branch, Call, Condition, Document, File, Line
+from pyTooling.Testing                import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -140,7 +138,7 @@ class ParentRelation(Testcase):
 		with self.assertRaises(TypeError) as context:
 			_ = Branch(1, False, True, parent=Call(3, 1, 1))
 		self.assertEqual("Parameter 'parent' is not of type 'Line'.", str(context.exception))
-		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.Branches.Call'."], context.exception.__notes__)
+		self.assertEqual(["Got type 'pyEDAA.Reports.CodeCoverage.Gcov.Call'."], context.exception.__notes__)
 
 	def test_Call_Parent(self) -> None:
 		with self.assertRaises(TypeError) as context:

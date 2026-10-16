@@ -30,16 +30,16 @@
 #
 #
 """Unit tests of GCC's gcov JSON format: its model, its JSON Schema and the conversion to the common model."""
-from json                                     import dumps, loads
-from pathlib                                  import Path
-from tempfile                                 import TemporaryDirectory
-from typing                                   import Any
+from json                             import dumps, loads
+from pathlib                          import Path
+from tempfile                         import TemporaryDirectory
+from typing                           import Any
 
-from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.Gcov         import DataFile, Document, File, FormatVersion, SCHEMAS
-from pyEDAA.Reports.CodeCoverage.Gcov.Records import Function as gcov_Function, Line
-from pyTooling.Testing                        import Testcase
-from pyTooling.Versioning                     import SemanticVersion
+from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, Function, LineCoverageStatus, SourceFile
+from pyEDAA.Reports.CodeCoverage.Gcov import DataFile, Document, File, FormatVersion, Function as gcov_Function, Line
+from pyEDAA.Reports.CodeCoverage.Gcov import SCHEMAS
+from pyTooling.Testing                import Testcase
+from pyTooling.Versioning             import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover
