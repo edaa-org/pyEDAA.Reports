@@ -50,7 +50,8 @@ references its implications and mitigations, so several risks can share one.
   registered in several registers, e.g. a register of risks and a specification of requirements.
 * A :class:`Link` relates two risks: from its source to its destination, of a :class:`LinkKind` - e.g. *causes*,
   *amplifies*, *depends on*, *duplicates*. Both risks list it: :attr:`Risk.OutboundLinks` and
-  :attr:`Risk.InboundLinks`. A source has at most one link of a kind to a destination.
+  :attr:`Risk.InboundLinks`. A source has at most one link of a kind to a destination. :meth:`Risk.LinkTo` and
+  :meth:`Risk.LinkFrom` create an outbound or inbound link of a risk, with the parameters of the link's constructor.
 * An element joins the register by naming it as its parent, in its constructor or by :attr:`~Base.Parent`. An ID is
   unique among the elements of its kind; a second element of the same ID raises a :exc:`RiskManagementError`.
 * An element of the register references only implications and mitigations of the same register, and a link connects

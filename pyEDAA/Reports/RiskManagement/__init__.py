@@ -1394,6 +1394,69 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		return self._inboundLinks
 
+	def LinkTo(self, destination: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
+		"""
+		Create an outbound link from this risk to the given risk.
+
+		The link joins the risk register of this risk, if it is part of one.
+
+		:param destination:          The risk the link ends at.
+		:param kind:                 The relationship the link states.
+		:param keyValuePairs:        Optional, the key-value pairs of the link. Default: ``None``.
+		:returns:                    The link from this risk to the destination.
+		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:           If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:          If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:          If parameter ``destination`` is ``None``.
+		:raises TypeError:           If parameter ``destination`` isn't of type :class:`Risk`.
+		:raises ValueError:          If parameter ``destination`` is this risk.
+		:raises ValueError:          If parameter ``kind`` is ``None``.
+		:raises TypeError:           If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises RiskManagementError: If this risk already has a link of this kind to the destination.
+		:raises ValueError:          If the destination isn't part of this risk's risk register. |br|
+		                             Add the risk to the risk register first.
+
+		.. seealso::
+
+		   :meth:`LinkFrom`
+		      |rarr| Create an inbound link from the given risk to this risk.
+		"""
+		return Link(self, destination, kind, keyValuePairs, parent=self._root)
+
+	def LinkFrom(self, source: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
+		"""
+		Create an inbound link from the given risk to this risk.
+
+		The link joins the risk register of this risk, if it is part of one.
+
+		:param source:               The risk the link starts at.
+		:param kind:                 The relationship the link states.
+		:param keyValuePairs:        Optional, the key-value pairs of the link. Default: ``None``.
+		:returns:                    The link from the source to this risk.
+		:raises ValueError:          If parameter ``source`` is this risk.
+		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:           If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:          If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:          If parameter ``source`` is ``None``.
+		:raises TypeError:           If parameter ``source`` isn't of type :class:`Risk`.
+		:raises ValueError:          If parameter ``kind`` is ``None``.
+		:raises TypeError:           If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises RiskManagementError: If the source already has a link of this kind to this risk.
+		:raises ValueError:          If the source isn't part of this risk's risk register. |br|
+		                             Add the risk to the risk register first.
+
+		.. seealso::
+
+		   :meth:`LinkTo`
+		      |rarr| Create an outbound link from this risk to the given risk.
+		"""
+		if source is self:
+			ex = ValueError(f"Parameter 'source' is this risk.")
+			ex.add_note(f"Got risk '{source._id}'.")
+			raise ex
+
+		return Link(source, self, kind, keyValuePairs, parent=self._root)
+
 	def __repr__(self) -> str:
 		"""
 		Return a representation of the risk for debugging.

@@ -478,6 +478,44 @@ class Links(Testcase):
 		self.assertEqual([depends], list(register.IterateLinks(lambda link: link.Kind is LinkKind.DependsOn)))
 		self.assertEqual([foundry, board, tools], list(register.IterateRisks()))
 
+	def test_LinkTo(self) -> None:
+		"""'LinkTo()' creates an outbound link with everything a link's constructor takes; it joins the risk's register."""
+		register = RiskManagement(VERSION)
+		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
+		causes =   foundry.LinkTo(board, LinkKind.Causes, {"since": "v1.0.0"})
+
+		self.assertIs(foundry, causes.Source)
+		self.assertIs(board, causes.Destination)
+		self.assertIs(LinkKind.Causes, causes.Kind)
+		self.assertEqual("v1.0.0", causes["since"])
+		self.assertIs(register, causes.Parent)
+		self.assertEqual([causes], foundry.OutboundLinks)
+		self.assertEqual([causes], board.InboundLinks)
+		self.assertEqual([causes], register.Links)
+
+	def test_LinkFrom(self) -> None:
+		"""'LinkFrom()' creates an inbound link: the given risk is the link's source."""
+		foundry = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
+		board =   Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High)
+		causes =  board.LinkFrom(foundry, LinkKind.Causes)
+
+		self.assertIs(foundry, causes.Source)
+		self.assertIs(board, causes.Destination)
+		self.assertIsNone(causes.Parent)
+		self.assertEqual([causes], foundry.OutboundLinks)
+		self.assertEqual([causes], board.InboundLinks)
+
+		for source, exception, message in (
+			(None,  ValueError, "Parameter 'source' is None."),
+			("R1",  TypeError,  "Parameter 'source' is not of type 'Risk'."),
+			(board, ValueError, "Parameter 'source' is this risk."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					board.LinkFrom(source, LinkKind.Related)
+				self.assertEqual(message, str(context.exception))
+
 	def test_ParameterChecks(self) -> None:
 		foundry = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
 		board =   Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High)
