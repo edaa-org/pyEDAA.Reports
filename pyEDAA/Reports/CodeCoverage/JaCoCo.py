@@ -351,7 +351,7 @@ class SessionInfo(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``start`` isn't of type :class:`~datetime.datetime`.
 		:raises ValueError: If parameter ``dump`` is ``None``.
 		:raises TypeError:  If parameter ``dump`` isn't of type :class:`~datetime.datetime`.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.JaCoCo.Report`.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report`.
 		"""
 		if sessionID is None:
 			raise ValueError(f"Parameter 'sessionID' is None.")
@@ -603,7 +603,7 @@ class Class(Base, CountersMixin):
 		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``name`` is empty.
 		:raises TypeError:     If parameter ``sourceFileName`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.JaCoCo.Package`.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`Package`.
 		"""
 		super().__init__(name)
 		CountersMixin.__init__(self)
@@ -870,7 +870,7 @@ class SourceFile(Base, CountersMixin):
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``name`` is empty.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.JaCoCo.Package`.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Package`.
 		"""
 		super().__init__(name)
 		CountersMixin.__init__(self)
