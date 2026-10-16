@@ -106,8 +106,8 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(directory)}'.")
 			raise ex
 		elif not directory.exists():
-			raise DocStrCoverageError(f"Package source directory '{directory}' does not exist.") \
-				from FileNotFoundError(f"Directory '{directory}' does not exist.")
+			raise DocStrCoverageError(f"Package source directory '{directory.as_posix()}' does not exist.") \
+				from FileNotFoundError(f"Directory '{directory.as_posix()}' does not exist.")
 
 		self._packageName =        packageName
 		self._searchDirectory =    directory
