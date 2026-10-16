@@ -14,7 +14,8 @@ Data Model
 **********
 
 The risk management model of :mod:`pyEDAA.Reports.RiskManagement` is a risk register: the root,
-:class:`~pyEDAA.Reports.RiskManagement.RiskManagement`, holds every risk by its ID.
+:class:`~pyEDAA.Reports.RiskManagement.RiskManagement`, holds every risk, implication and mitigation by its ID. A risk
+references its implications and mitigations, so several risks can share one.
 
 .. py:currentmodule:: pyEDAA.Reports.RiskManagement
 
@@ -22,6 +23,8 @@ The risk management model of :mod:`pyEDAA.Reports.RiskManagement` is a risk regi
 
    - :class:`RiskManagement`  | the risk register - version, name, key-value pairs
      - :class:`Risk`          | e.g. ``R1`` - title, description, probability, impact, state
+     - :class:`Implication`   | e.g. ``I1`` - a consequence, if a risk occurs
+     - :class:`Mitigation`    | e.g. ``M1`` - a measure reducing a risk or an implication
 
 * A risk's :class:`Probability` says how likely it occurs: from *low* (identified, but sleeping) to *occurred* (the
   risk is active and causes heavy effects). Its :class:`Impact` says how much delay it causes, if it occurs: from
@@ -29,22 +32,35 @@ The risk management model of :mod:`pyEDAA.Reports.RiskManagement` is a risk regi
 * A risk's :class:`RiskState` follows its life cycle: *open* or *on hold* while it is tracked; then either *solved* -
   its mitigations removed it - or *closed* - it isn't tracked anymore, without being solved, e.g. because it was
   accepted or its time has passed.
-* A risk joins the register by naming it as its parent, in its constructor or by :attr:`~Base.Parent`. An ID is unique
-  among the risks of a register; a second risk of the same ID is rejected.
+* An :class:`Implication` can have implications of its own, and it can be mitigated like a risk.
+* A :class:`Mitigation` can have implications too: its side effects. So the same mitigation reduces a risk and a
+  second-order implication, and its side effects are visible in the register.
+* A risk's second-order implications (:attr:`Risk.SecondOrderImplications`) are the implications of its implications
+  and the side effects of its mitigations.
+* An element joins the register by naming it as its parent, in its constructor or by :attr:`~Base.Parent`. An ID is
+  unique among the elements of its kind; a second element of the same ID is rejected.
+* An element of the register references only implications and mitigations of the same register: referenced elements
+  join the register first.
 * Every element - the register too - has key-value pairs for data the model doesn't name, e.g. an owner:
   ``risk["owner"] = "Paebbels"``.
-* The register iterates its risks, optionally filtered by a predicate: :meth:`RiskManagement.IterateRisks`.
+* The register iterates its risks, implications and mitigations, optionally filtered by a predicate, e.g.
+  :meth:`RiskManagement.IterateRisks`.
 
 .. code-block:: Python
 
    from pyTooling.Versioning import SemanticVersion
-   from pyEDAA.Reports.RiskManagement import Impact, Probability, Risk, RiskManagement, RiskState
+   from pyEDAA.Reports.RiskManagement import Impact, Implication, Mitigation, Probability, Risk, RiskManagement
 
    register = RiskManagement(SemanticVersion(1, 0, 0), "Wafer tape-out")
-   foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.Medium, Impact.High, parent=register)
-   tools =    Risk("R2", "Tool license", "A license expires.", Probability.Low, Impact.Medium, parent=register)
+   budget =   Implication("I3", "The budget rises.", parent=register)
+   shuttle =  Mitigation("M1", "Order a second shuttle run.", implications=[budget], parent=register)
+   launch =   Implication("I2", "The product launch is delayed.", parent=register)
+   tapeOut =  Implication("I1", "The tape-out is delayed.", implications=[launch], parent=register)
+   foundry =  Risk(
+     "R1", "Late silicon", "The foundry delays the wafers.", Probability.Medium, Impact.High,
+     implications=[tapeOut], mitigations=[shuttle], parent=register
+   )
    foundry["owner"] = "Paebbels"
-   tools.State = RiskState.Closed
 
-   for risk in register.IterateRisks(lambda risk: risk.State is RiskState.Open):
-     print(f"{risk.ID}: {risk.Title} ({risk.Probability}, {risk.Impact}), owner {risk['owner']}")
+   for risk in register.IterateRisks(lambda risk: risk.Impact in (Impact.High, Impact.Critical)):
+     print(f"{risk.ID}: {risk.Title} -> {', '.join(risk.SecondOrderImplications)}")

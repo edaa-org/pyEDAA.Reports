@@ -29,8 +29,8 @@
 # ==================================================================================================================== #
 #
 #
-"""Unit tests of the risk management model: enumerations, risks and the risk register."""
-from pyEDAA.Reports.RiskManagement import Impact, Probability, Risk, RiskManagement, RiskState
+"""Unit tests of the risk management model: enumerations, risks, implications, mitigations and the risk register."""
+from pyEDAA.Reports.RiskManagement import Impact, Implication, Mitigation, Probability, Risk, RiskManagement, RiskState
 from pyTooling.Versioning          import SemanticVersion
 from pyTooling.Testing             import Testcase
 
@@ -70,9 +70,11 @@ class RiskManagementInstantiation(Testcase):
 		self.assertIsNone(riskManagement.Parent)
 		self.assertIs(riskManagement, riskManagement.Root)
 		self.assertEqual({}, riskManagement.Risks)
+		self.assertEqual({}, riskManagement.Implications)
+		self.assertEqual({}, riskManagement.Mitigations)
 		self.assertEqual([], list(riskManagement.IterateElements()))
 		self.assertEqual("pyEDAA", riskManagement["project"])
-		self.assertEqual("<RiskManagement 1.0.0: 0 risks>", repr(riskManagement))
+		self.assertEqual("<RiskManagement 1.0.0: 0 risks, 0 implications, 0 mitigations>", repr(riskManagement))
 
 	def test_Version(self) -> None:
 		with self.assertRaises(ValueError) as context:
@@ -117,6 +119,9 @@ class ElementInstantiation(Testcase):
 		self.assertIs(Probability.Medium, risk.Probability)
 		self.assertIs(Impact.High, risk.Impact)
 		self.assertIs(RiskState.Open, risk.State)
+		self.assertEqual({}, risk.Implications)
+		self.assertEqual({}, risk.Mitigations)
+		self.assertEqual({}, risk.SecondOrderImplications)
 		self.assertEqual(0, len(risk))
 		self.assertEqual([], list(risk.IterateElements()))
 		self.assertEqual("<Risk R1: open, probability medium, impact high>", repr(risk))
@@ -171,50 +176,227 @@ class ElementInstantiation(Testcase):
 					_ = Risk(*arguments)
 				self.assertEqual(message, str(context.exception))
 
+	def test_Implication(self) -> None:
+		followUp =    Implication("I2", "The product launch is delayed.")
+		mitigation =  Mitigation("M1", "Order a second shuttle run.")
+		implication = Implication("I1", "The tape-out is delayed.", [followUp], [mitigation], {"weeks": 3})
+
+		self.assertEqual("I1", implication.ID)
+		self.assertEqual("The tape-out is delayed.", implication.Description)
+		self.assertEqual({"I2": followUp}, implication.Implications)
+		self.assertEqual({"M1": mitigation}, implication.Mitigations)
+		self.assertEqual(3, implication["weeks"])
+		self.assertEqual("<Implication I1: 1 implications, 1 mitigations>", repr(implication))
+
+	def test_Mitigation(self) -> None:
+		sideEffect = Implication("I1", "The budget rises.")
+		mitigation = Mitigation("M1", "Order a second shuttle run.", [sideEffect])
+
+		self.assertEqual("M1", mitigation.ID)
+		self.assertEqual("Order a second shuttle run.", mitigation.Description)
+		self.assertEqual({"I1": sideEffect}, mitigation.Implications)
+		self.assertEqual("<Mitigation M1: 1 implications>", repr(mitigation))
+
+	def test_References_ParameterChecks(self) -> None:
+		implication = Implication("I1", "The tape-out is delayed.")
+		mitigation =  Mitigation("M1", "Order a second shuttle run.")
+
+		for implications, mitigations, exception, message in (
+			(1,                          None,                     TypeError,  "Parameter 'implications' is not iterable."),
+			(None,                       1,                        TypeError,  "Parameter 'mitigations' is not iterable."),
+			(
+				implication, None,
+				TypeError, "Parameter 'implications' is a single element, not an iterable of elements."
+			),
+			(
+				None, mitigation,
+				TypeError, "Parameter 'mitigations' is a single element, not an iterable of elements."
+			),
+			(
+				[implication, implication], None,
+				ValueError, "Parameter 'implications' contains implication 'I1' twice."
+			),
+			(
+				None, [mitigation, mitigation],
+				ValueError, "Parameter 'mitigations' contains mitigation 'M1' twice."
+			),
+			(
+				[mitigation], None,
+				TypeError, "Parameter 'implications' contains an element not of type 'Implication'."
+			),
+			(
+				None, [implication],
+				TypeError, "Parameter 'mitigations' contains an element not of type 'Mitigation'."
+			),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					_ = Implication("I2", "The product launch is delayed.", implications, mitigations)
+				self.assertEqual(message, str(context.exception))
+
+	def test_AddReferences(self) -> None:
+		implication = Implication("I1", "The tape-out is delayed.")
+		mitigation =  Mitigation("M1", "Order a second shuttle run.")
+		risk =        Risk("R1", "Late silicon", "The foundry delays the wafers.", Probability.Medium, Impact.High)
+
+		risk.AddImplication(implication)
+		risk.AddMitigation(mitigation)
+		self.assertEqual({"I1": implication}, risk.Implications)
+		self.assertEqual({"M1": mitigation}, risk.Mitigations)
+
+		for method, value, exception, message in (
+			(risk.AddImplication, None,        ValueError, "Parameter 'implication' is None."),
+			(risk.AddImplication, mitigation,  TypeError,  "Parameter 'implication' is not of type 'Implication'."),
+			(risk.AddImplication, implication, ValueError, "Element already has implication 'I1'."),
+			(risk.AddMitigation,  None,        ValueError, "Parameter 'mitigation' is None."),
+			(risk.AddMitigation,  implication, TypeError,  "Parameter 'mitigation' is not of type 'Mitigation'."),
+			(risk.AddMitigation,  mitigation,  ValueError, "Element already has mitigation 'M1'."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					method(value)
+				self.assertEqual(message, str(context.exception))
+
+
 class Register(Testcase):
 	def test_Register(self) -> None:
+		"""An implication and a mitigation are shared by two risks; the implications form a chain."""
 		register = RiskManagement(VERSION)
+		budget =   Implication("I3", "The budget rises.", parent=register)
+		shuttle =  Mitigation("M1", "Order a second shuttle run.", [budget], parent=register)
+		launch =   Implication("I2", "The product launch is delayed.", parent=register)
+		tapeOut =  Implication("I1", "The tape-out is delayed.", [launch], [shuttle], parent=register)
 		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.Medium, Impact.High, parent=register)
 		tools =    Risk("R2", "Tool license", "A license expires.", Probability.Low, Impact.Medium, parent=register)
+		foundry.AddImplication(tapeOut)
+		foundry.AddMitigation(shuttle)
+		tools.AddImplication(tapeOut)
 
 		self.assertIs(register, foundry.Parent)
 		self.assertIs(register, foundry.Root)
+		self.assertIs(register, budget.Root)
 		self.assertEqual({"R1": foundry, "R2": tools}, register.Risks)
-		self.assertEqual([foundry, tools], list(register.IterateElements()))
-		self.assertEqual("<RiskManagement 1.0.0: 2 risks>", repr(register))
+		self.assertEqual({"I3": budget, "I2": launch, "I1": tapeOut}, register.Implications)
+		self.assertEqual({"M1": shuttle}, register.Mitigations)
+		self.assertIs(foundry.Implications["I1"], tools.Implications["I1"])
+		self.assertEqual({"I2": launch, "I3": budget}, foundry.SecondOrderImplications)
+		self.assertEqual({"I2": launch}, tools.SecondOrderImplications)
+		self.assertEqual({"I3": budget}, foundry.Mitigations["M1"].Implications)
+		self.assertEqual([foundry, tools, budget, launch, tapeOut, shuttle], list(register.IterateElements()))
+		self.assertEqual("<RiskManagement 1.0.0: 2 risks, 3 implications, 1 mitigations>", repr(register))
 
 	def test_Iterate(self) -> None:
 		register = RiskManagement(VERSION)
+		budget =   Implication("I1", "The budget rises.", parent=register)
+		launch =   Implication("I2", "The product launch is delayed.", [budget], parent=register)
+		shuttle =  Mitigation("M1", "Order a second shuttle run.", [budget], parent=register)
+		staff =    Mitigation("M2", "Hire a contractor.", parent=register)
 		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
 		tools =    Risk("R2", "Tool license", "A license expires.", Probability.Low, Impact.Low, parent=register)
 		tools.State = RiskState.Closed
 
 		self.assertEqual([foundry, tools], list(register.IterateRisks()))
 		self.assertEqual([tools], list(register.IterateRisks(lambda risk: risk.State is RiskState.Closed)))
+		self.assertEqual([budget, launch], list(register.IterateImplications()))
+		self.assertEqual([launch], list(register.IterateImplications(lambda item: len(item.Implications) > 0)))
+		self.assertEqual([shuttle, staff], list(register.IterateMitigations()))
+		self.assertEqual([shuttle], list(register.IterateMitigations(lambda item: "I1" in item.Implications)))
 
 	def test_Duplicate(self) -> None:
 		register = RiskManagement(VERSION)
 		Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		Implication("I1", "The tape-out is delayed.", parent=register)
+		Mitigation("M1", "Order a second shuttle run.", parent=register)
 
 		with self.assertRaises(ValueError) as context:
 			_ = Risk("R1", "Tool license", "A license expires.", Probability.Low, Impact.Low, parent=register)
 		self.assertEqual("Risk 'R1' already exists in the risk register.", str(context.exception))
+
+		with self.assertRaises(ValueError) as context:
+			_ = Implication("I1", "The budget rises.", parent=register)
+		self.assertEqual("Implication 'I1' already exists in the risk register.", str(context.exception))
+
+		with self.assertRaises(ValueError) as context:
+			_ = Mitigation("M1", "Hire a contractor.", parent=register)
+		self.assertEqual("Mitigation 'M1' already exists in the risk register.", str(context.exception))
+
 		self.assertEqual("Late silicon", register.Risks["R1"].Title)
+		self.assertEqual("The tape-out is delayed.", register.Implications["I1"].Description)
+		self.assertEqual("Order a second shuttle run.", register.Mitigations["M1"].Description)
+
+	def test_ForeignReferences(self) -> None:
+		"""An element of a risk register references only implications and mitigations of the same register."""
+		register =    RiskManagement(VERSION)
+		implication = Implication("I1", "The tape-out is delayed.")
+		mitigation =  Mitigation("M1", "Order a second shuttle run.", parent=RiskManagement(VERSION))
+
+		with self.assertRaises(ValueError) as context:
+			_ = Implication("I2", "The launch is delayed.", [implication], parent=register)
+		self.assertEqual(
+			"Parameter 'implications' contains an implication outside the element's risk register.",
+			str(context.exception)
+		)
+		self.assertEqual(
+			["Got implication 'I1'.", "Add the implication to the risk register first."],
+			context.exception.__notes__
+		)
+
+		with self.assertRaises(ValueError) as context:
+			_ = Implication("I2", "The launch is delayed.", mitigations=[mitigation], parent=register)
+		self.assertEqual(
+			"Parameter 'mitigations' contains a mitigation outside the element's risk register.",
+			str(context.exception)
+		)
+
+		risk = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		with self.assertRaises(ValueError) as context:
+			risk.AddImplication(implication)
+		self.assertEqual("Parameter 'implication' is outside the element's risk register.", str(context.exception))
+
+		with self.assertRaises(ValueError) as context:
+			risk.AddMitigation(mitigation)
+		self.assertEqual("Parameter 'mitigation' is outside the element's risk register.", str(context.exception))
+
+		self.assertEqual({}, register.Implications)
+		self.assertEqual({}, risk.Implications)
+		self.assertEqual({}, risk.Mitigations)
 
 	def test_Parent(self) -> None:
-		"""A risk built without a register joins it by assigning the parent."""
-		register = RiskManagement(VERSION)
-		risk =     Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
-		risk.Parent = register
+		"""Elements built without a register join it by assigning the parent; referenced elements join first."""
+		register =    RiskManagement(VERSION)
+		mitigation =  Mitigation("M1", "Order a second shuttle run.")
+		implication = Implication("I1", "The tape-out is delayed.", mitigations=[mitigation])
+		risk =        Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
+		risk.AddImplication(implication)
+
+		with self.assertRaises(ValueError) as context:
+			risk.Parent = register
+		self.assertEqual("Risk 'R1' references an implication outside the risk register.", str(context.exception))
+		self.assertEqual(
+			["Got implication 'I1'.", "Add the implication to the risk register first."],
+			context.exception.__notes__
+		)
+
+		with self.assertRaises(ValueError) as context:
+			implication.Parent = register
+		self.assertEqual("Implication 'I1' references a mitigation outside the risk register.", str(context.exception))
+		self.assertIsNone(risk.Parent)
+		self.assertIsNone(implication.Root)
+
+		mitigation.Parent =  register
+		implication.Parent = register
+		risk.Parent =        register
 
 		self.assertIs(register, risk.Parent)
 		self.assertIs(register, risk.Root)
 		self.assertEqual({"R1": risk}, register.Risks)
+		self.assertEqual({"I1": implication}, register.Implications)
+		self.assertEqual({"M1": mitigation}, register.Mitigations)
 
 		for parent, exception, message in (
-			(None,     ValueError, "Parameter 'parent' is None."),
-			(risk,     TypeError,  "Parameter 'parent' is not of type 'RiskManagement'."),
-			(register, ValueError, "Element is already part of a risk register."),
+			(None,        ValueError, "Parameter 'parent' is None."),
+			(implication, TypeError,  "Parameter 'parent' is not of type 'RiskManagement'."),
+			(register,    ValueError, "Element is already part of a risk register."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -222,7 +404,7 @@ class Register(Testcase):
 				self.assertEqual(message, str(context.exception))
 
 		with self.assertRaises(TypeError) as context:
-			_ = Risk("R2", "Tool license", "A license expires.", Probability.Low, Impact.Low, parent=risk)
+			_ = Mitigation("M2", "Hire a contractor.", parent=risk)
 		self.assertEqual("Parameter 'parent' is not of type 'RiskManagement'.", str(context.exception))
 		self.assertEqual(["Got type 'pyEDAA.Reports.RiskManagement.Risk'."], context.exception.__notes__)
 
