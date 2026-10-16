@@ -117,10 +117,10 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 	a reference to the specification it is part of.
 	"""
 
-	_PARENT_TYPE: ClassVar[tuple[type, ...]]         #: The types a parent may have; assigned by each class having a parent.
+	_PARENT_TYPE: ClassVar[tuple[type, ...]]          #: The types a parent may have; set by each class with a parent.
 
 	_parent:      Nullable[Base]                      #: The element containing this one, or ``None``.
-	_root:        Nullable[RequirementSpecification]  #: The specification, or ``None`` while the element isn't part of one.
+	_root:        Nullable[RequirementSpecification]  #: The specification, or ``None`` while the element isn't in one.
 
 	def __init__(self, *, keyValuePairs: Nullable[Mapping[str, Any]] = None, parent: Nullable[Base] = None) -> None:
 		"""
@@ -545,7 +545,7 @@ class BaseWithName(BaseWithID):
 
 	_PARENT_TYPE: ClassVar[tuple[type, ...]] = (RequirementSpecification, )  #: The element is in a specification.
 
-	_name: str  #: The element's name.
+	_name:        str                                                        #: The element's name.
 
 	def __init__(
 		self,
@@ -855,10 +855,10 @@ class Requirement(BaseItem):
 	refines - a child requirement. The specification registers either by its ID.
 	"""
 
-	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: A requirement is in a requirement or the specification; assigned below.
+	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: In a requirement or the specification; assigned below.
 
-	_kind:       RequirementKind  #: What the requirement constrains.
-	_obligation: _Obligation      #: Whether the requirement must, should or may be met.
+	_kind:        RequirementKind             #: What the requirement constrains.
+	_obligation:  _Obligation                 #: Whether the requirement must, should or may be met.
 
 	def __init__(
 		self,
