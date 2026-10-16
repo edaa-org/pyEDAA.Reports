@@ -43,7 +43,8 @@ its regions, branch regions and MC/DC records.
   an expansion (:class:`Expansion`) as a JSON object.
 * A report states a source region as a JSON array, a tuple of numbers: a :class:`Region`, a :class:`BranchRegion` or a
   :class:`MCDCRecord` with its :class:`TestVector` objects. A region names its source range by line and column, and
-  the file by an index into the file paths of its function or expansion.
+  the file by an index into the file paths of its function or expansion; :attr:`Base.FilePath` and :attr:`Base.File`
+  look the index up.
 * A summary (:class:`Summary`) holds the counters (:class:`Counters`) llvm-cov computed for a file or the whole report.
 
 Each class of the format's model takes typed values in its constructor, so a model can be built by hand, too. A
@@ -235,6 +236,8 @@ class Base(Element[ParentType]):
 		:raises ValueError:    If parameter ``expandedFileID`` is negative.
 		:raises ValueError:    If parameter ``kind`` is ``None``.
 		:raises TypeError:     If parameter ``kind`` isn't of type :class:`RegionKind`.
+		:raises ValueError:    If parameter ``fileID``, or ``expandedFileID`` of an expansion region, is no index into the
+		                       file paths of parameter ``parent``.
 		"""
 		super().__init__(parent=parent)
 
@@ -279,6 +282,15 @@ class Base(Element[ParentType]):
 			ex = TypeError(f"Parameter 'kind' is not of type 'RegionKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
+
+		if isinstance(parent, (Function, Expansion)):
+			for name, value in (
+				("fileID", fileID), ("expandedFileID", expandedFileID if kind is RegionKind.Expansion else None)
+			):
+				if value is not None and value >= len(parent._filePaths):
+					ex = ValueError(f"Parameter '{name}' is no index into the file paths of parameter 'parent'.")
+					ex.add_note(f"Got value '{value}' for {len(parent._filePaths)} file paths.")
+					raise ex
 
 		self._lineStart =      lineStart
 		self._columnStart =    columnStart
@@ -329,6 +341,9 @@ class Base(Element[ParentType]):
 		"""
 		Read-only property to access the index of the region's file (:attr:`_fileID`).
 
+		For a region listed by a file, the index refers to the file paths of a function the report doesn't name;
+		:attr:`FilePath` is the file's path then.
+
 		:returns: The index into the file paths of the region's function or expansion; ``None`` for an MC/DC record before
 		          format version 3.0.1.
 		"""
@@ -351,6 +366,65 @@ class Base(Element[ParentType]):
 		:returns: The kind.
 		"""
 		return self._kind
+
+	@readonly
+	def FilePath(self) -> Nullable[Path]:
+		"""
+		Read-only property to return the path of the region's file.
+
+		A region of a function or expansion names its file by :attr:`FileID`, an index into the parent's file paths. A
+		region listed by a file lies in that file.
+
+		:returns: The path, as the compiler named it; ``None`` if the region belongs to no element, or for an MC/DC record
+		          of a function before format version 3.0.1, which states no file.
+		"""
+		if self._parent is None:
+			return None
+		elif isinstance(self._parent, File):
+			return self._parent._path
+		elif self._fileID is None:
+			return None
+
+		return self._parent._filePaths[self._fileID]
+
+	@readonly
+	def File(self) -> Nullable[File]:
+		"""
+		Read-only property to return the region's file, as the report lists it.
+
+		:returns: The file of :attr:`FilePath` in the report's files; ``None`` if the region isn't part of a report, or the
+		          report doesn't list the file, e.g. one excluded by ``-ignore-filename-regex``.
+		"""
+		if self._root is None or (path := self.FilePath) is None:
+			return None
+
+		return self._root._files.get(path, None)
+
+	@readonly
+	def ExpandedFilePath(self) -> Nullable[Path]:
+		"""
+		Read-only property to return the path of the file an expansion region expands to (:attr:`ExpandedFileID`).
+
+		:returns: The path, as the compiler named it; ``None`` for another kind of region, or a region belonging to no
+		          function or expansion.
+		"""
+		if self._kind is not RegionKind.Expansion or not isinstance(self._parent, (Function, Expansion)):
+			return None
+
+		return self._parent._filePaths[self._expandedFileID]
+
+	@readonly
+	def ExpandedFile(self) -> Nullable[File]:
+		"""
+		Read-only property to return the file an expansion region expands to, as the report lists it.
+
+		:returns: The file of :attr:`ExpandedFilePath` in the report's files; ``None`` if there is none, the region isn't
+		          part of a report, or the report doesn't list the file.
+		"""
+		if self._root is None or (path := self.ExpandedFilePath) is None:
+			return None
+
+		return self._root._files.get(path, None)
 
 	def IterateElements(self) -> Generator[Element, None, None]:
 		"""
@@ -1331,6 +1405,8 @@ class Expansion(Element["File"]):
 		                      :class:`Region`.
 		:raises TypeError:    If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
 		:raises ValueError:   If parameter ``targetRegions`` or ``branches`` contains a region of another element.
+		:raises ValueError:   If parameter ``sourceRegion`` is, or ``targetRegions`` or ``branches`` contains, a region of
+		                      a file ID or an expanded file ID out of range of parameter ``filePaths``.
 		"""
 		super().__init__(parent=parent)
 
@@ -1384,10 +1460,27 @@ class Expansion(Element["File"]):
 					raise ex
 				elif element._parent is not None:
 					raise ValueError(f"Parameter '{name}' contains a region of another element.")
+				elif element._fileID is not None and element._fileID >= len(self._filePaths):
+					ex = ValueError(f"Parameter '{name}' contains a region of a file ID out of range.")
+					ex.add_note(f"Got value '{element._fileID}' for {len(self._filePaths)} file paths.")
+					raise ex
+				elif element._kind is RegionKind.Expansion and element._expandedFileID >= len(self._filePaths):
+					ex = ValueError(f"Parameter '{name}' contains an expansion region of an expanded file ID out of range.")
+					ex.add_note(f"Got value '{element._expandedFileID}' for {len(self._filePaths)} file paths.")
+					raise ex
 
 				element._parent = self
 				element._root =   self._root
 				target.append(element)
+
+		if sourceRegion._fileID >= len(self._filePaths):
+			ex = ValueError(f"Parameter 'sourceRegion' is a region of a file ID out of range.")
+			ex.add_note(f"Got value '{sourceRegion._fileID}' for {len(self._filePaths)} file paths.")
+			raise ex
+		elif sourceRegion._kind is RegionKind.Expansion and sourceRegion._expandedFileID >= len(self._filePaths):
+			ex = ValueError(f"Parameter 'sourceRegion' is an expansion region of an expanded file ID out of range.")
+			ex.add_note(f"Got value '{sourceRegion._expandedFileID}' for {len(self._filePaths)} file paths.")
+			raise ex
 
 		sourceRegion._parent = self
 		sourceRegion._root =   self._root
@@ -1713,6 +1806,8 @@ class Function(Element["Report"]):
 		:raises TypeError:  If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
 		:raises TypeError:  If parameter ``mcdcRecords`` contains an element not of type :class:`MCDCRecord`.
 		:raises ValueError: If parameter ``regions``, ``branches`` or ``mcdcRecords`` contains a region of another element.
+		:raises ValueError: If parameter ``regions``, ``branches`` or ``mcdcRecords`` contains a region of a file ID or an
+		                    expanded file ID out of range of parameter ``filePaths``.
 		"""
 		super().__init__(parent=parent)
 
@@ -1779,6 +1874,16 @@ class Function(Element["Report"]):
 					raise ex
 				elif element._parent is not None:
 					raise ValueError(f"Parameter '{parameterName}' contains a region of another element.")
+				elif element._fileID is not None and element._fileID >= len(self._filePaths):
+					ex = ValueError(f"Parameter '{parameterName}' contains a region of a file ID out of range.")
+					ex.add_note(f"Got value '{element._fileID}' for {len(self._filePaths)} file paths.")
+					raise ex
+				elif element._kind is RegionKind.Expansion and element._expandedFileID >= len(self._filePaths):
+					ex = ValueError(
+						f"Parameter '{parameterName}' contains an expansion region of an expanded file ID out of range."
+					)
+					ex.add_note(f"Got value '{element._expandedFileID}' for {len(self._filePaths)} file paths.")
+					raise ex
 
 				element._parent = self
 				element._root =   self._root
@@ -1874,6 +1979,28 @@ class Function(Element["Report"]):
 		"""
 		expanded = {region._expandedFileID for region in self._regions if region._kind is RegionKind.Expansion}
 		return next((fileID for fileID in range(len(self._filePaths)) if fileID not in expanded), None)
+
+	@readonly
+	def MainFilePath(self) -> Nullable[Path]:
+		"""
+		Read-only property to return the path of the file the function is in (:attr:`MainFileID`).
+
+		:returns: The path, as the compiler named it; ``None`` if every file is expanded to.
+		"""
+		return None if (mainFileID := self.MainFileID) is None else self._filePaths[mainFileID]
+
+	@readonly
+	def MainFile(self) -> Nullable[File]:
+		"""
+		Read-only property to return the file the function is in, as the report lists it.
+
+		:returns: The file of :attr:`MainFilePath` in the report's files; ``None`` if the function isn't part of a report,
+		          every file is expanded to, or the report doesn't list the file.
+		"""
+		if self._root is None or (path := self.MainFilePath) is None:
+			return None
+
+		return self._root._files.get(path, None)
 
 	def IterateElements(self) -> Generator[Element, None, None]:
 		"""
