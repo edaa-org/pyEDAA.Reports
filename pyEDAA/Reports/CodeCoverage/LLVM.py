@@ -41,8 +41,8 @@ its regions, branch regions and MC/DC records.
 
 * A report states a segment (:class:`Segment`) as a JSON array - a tuple of numbers and flags -, a file, a function or
   an expansion (:class:`Expansion`) as a JSON object.
-* A report states a source region as a JSON array - a tuple of numbers -: a :class:`Region`, a :class:`BranchRegion` or
-  a :class:`MCDCRecord` with its :class:`TestVector` objects. A region names its source range by line and column, and
+* A report states a source region as a JSON array, a tuple of numbers: a :class:`Region`, a :class:`BranchRegion` or a
+  :class:`MCDCRecord` with its :class:`TestVector` objects. A region names its source range by line and column, and
   the file by an index into the file paths of its function or expansion.
 * A summary (:class:`Summary`) holds the counters (:class:`Counters`) llvm-cov computed for a file or the whole report.
 
@@ -1126,9 +1126,9 @@ class Expansion(metaclass=ExtendedType, slots=True):
 		:raises TypeError:    If parameter ``filePaths`` contains an element not of type :class:`~pathlib.Path`.
 		:raises ValueError:   If parameter ``sourceRegion`` is ``None``.
 		:raises TypeError:    If parameter ``sourceRegion`` isn't of type
-		                      :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Region`.
+		                      :class:`Region`.
 		:raises TypeError:    If parameter ``targetRegions`` contains an element not of type
-		                      :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Region`.
+		                      :class:`Region`.
 		:raises TypeError:    If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
 		"""
 		if filePaths is None:
@@ -1258,7 +1258,7 @@ class File(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
 		:raises ValueError: If parameter ``summary`` is ``None``.
 		:raises TypeError:  If parameter ``summary`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Summary`.
+		                    :class:`Summary`.
 		:raises TypeError:  If parameter ``segments``, ``branches``, ``mcdcRecords`` or ``expansions`` isn't iterable.
 		:raises TypeError:  If parameter ``segments`` contains an element not of type :class:`Segment`.
 		:raises TypeError:  If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
@@ -1421,7 +1421,7 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``regions`` or ``filePaths`` is ``None``.
 		:raises TypeError:  If parameter ``regions``, ``filePaths``, ``branches`` or ``mcdcRecords`` isn't iterable.
 		:raises TypeError:  If parameter ``regions`` contains an element not of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Region`.
+		                    :class:`Region`.
 		:raises TypeError:  If parameter ``filePaths`` contains an element not of type :class:`~pathlib.Path`.
 		:raises TypeError:  If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
 		:raises TypeError:  If parameter ``mcdcRecords`` contains an element not of type :class:`MCDCRecord`.
@@ -1591,11 +1591,11 @@ class Report(metaclass=ExtendedType, mixin=True):
 		:raises TypeError:  If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
 		:raises TypeError:  If parameter ``files`` or ``functions`` isn't iterable.
 		:raises TypeError:  If parameter ``files`` contains an element not of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.File`.
+		                    :class:`File`.
 		:raises TypeError:  If parameter ``functions`` contains an element not of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Function`.
+		                    :class:`Function`.
 		:raises TypeError:  If parameter ``totals`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Summary`.
+		                    :class:`Summary`.
 		"""
 		if version is not None and not isinstance(version, SemanticVersion):
 			ex = TypeError(f"Parameter 'version' is not of type 'SemanticVersion'.")
@@ -1707,11 +1707,11 @@ class Document(cc_Document, Report):
 		:raises TypeError:        If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
 		:raises TypeError:        If parameter ``files`` or ``functions`` isn't iterable.
 		:raises TypeError:        If parameter ``files`` contains an element not of type
-		                          :class:`~pyEDAA.Reports.CodeCoverage.LLVM.File`.
+		                          :class:`File`.
 		:raises TypeError:        If parameter ``functions`` contains an element not of type
-		                          :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Function`.
+		                          :class:`Function`.
 		:raises TypeError:        If parameter ``totals`` isn't of type
-		                          :class:`~pyEDAA.Reports.CodeCoverage.LLVM.Summary`.
+		                          :class:`Summary`.
 		"""
 		super().__init__(jsonReportFile)
 		Report.__init__(self, version, files, functions, totals)
