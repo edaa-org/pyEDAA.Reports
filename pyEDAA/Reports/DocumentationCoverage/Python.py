@@ -500,7 +500,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		                                       :class:`~pyTooling.Warning.WarningCollector`.
 		"""
 		if not self._directory.is_dir():
-			raise DocCoverageError(f"Package directory '{self._directory}' doesn't exist.")
+			raise DocCoverageError(f"Package directory '{self._directory.as_posix()}' doesn't exist.")
 
 		with Stopwatch() as stopwatch:
 			report = DocumentationReport(Path(self._packageName))
@@ -531,7 +531,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		else:
 			package = Item(name, ItemKind.Package, self._State(CoverageState.Empty, name, parent), parent=parent)
 
-		paths = sorted(directory.iterdir())
+		paths = sorted(directory.iterdir(), key=Path.as_posix)
 		for path in paths:
 			if path.suffix == ".py" and path.name != "__init__.py" and path.is_file():
 				self._ReadModule(path, path.stem, ItemKind.Module, package, report)
