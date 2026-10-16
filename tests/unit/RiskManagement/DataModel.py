@@ -29,8 +29,9 @@
 # ==================================================================================================================== #
 #
 #
-"""Unit tests of the risk management model: enumerations, risks, implications, mitigations and the risk register."""
-from pyEDAA.Reports.RiskManagement import Impact, Implication, Mitigation, Probability, Risk, RiskManagement, RiskState
+"""Unit tests of the risk management model: enumerations, risks, implications, mitigations, links and the register."""
+from pyEDAA.Reports.RiskManagement import Impact, Implication, Link, LinkKind, Mitigation, Probability, Risk
+from pyEDAA.Reports.RiskManagement import RiskManagement, RiskManagementError, RiskState
 from pyTooling.Versioning          import SemanticVersion
 from pyTooling.Testing             import Testcase
 
@@ -60,6 +61,10 @@ class Enumerations(Testcase):
 		self.assertIs(RiskState.Open, RiskState.DEFAULT)
 		self.assertEqual(["open", "on-hold", "closed", "solved"], [str(state) for state in RiskState])
 
+	def test_LinkKind(self) -> None:
+		self.assertIs(LinkKind.DependsOn, LinkKind.Parse("depends-on"))
+		self.assertIs(LinkKind.Related, LinkKind.Parse(None))
+
 
 class RiskManagementInstantiation(Testcase):
 	def test_Empty(self) -> None:
@@ -72,6 +77,7 @@ class RiskManagementInstantiation(Testcase):
 		self.assertEqual({}, riskManagement.Risks)
 		self.assertEqual({}, riskManagement.Implications)
 		self.assertEqual({}, riskManagement.Mitigations)
+		self.assertEqual([], riskManagement.Links)
 		self.assertEqual("pyEDAA", riskManagement["project"])
 		self.assertEqual("<RiskManagement 1.0.0: 0 risks, 0 implications, 0 mitigations>", repr(riskManagement))
 
@@ -121,6 +127,8 @@ class ElementInstantiation(Testcase):
 		self.assertEqual({}, risk.Implications)
 		self.assertEqual({}, risk.Mitigations)
 		self.assertEqual({}, risk.SecondOrderImplications)
+		self.assertEqual([], risk.OutboundLinks)
+		self.assertEqual([], risk.InboundLinks)
 		self.assertEqual(0, len(risk))
 		self.assertEqual("<Risk R1: open, probability medium, impact high>", repr(risk))
 
@@ -243,12 +251,12 @@ class ElementInstantiation(Testcase):
 		self.assertEqual({"M1": mitigation}, risk.Mitigations)
 
 		for method, value, exception, message in (
-			(risk.AddImplication, None,        ValueError, "Parameter 'implication' is None."),
-			(risk.AddImplication, mitigation,  TypeError,  "Parameter 'implication' is not of type 'Implication'."),
-			(risk.AddImplication, implication, ValueError, "Element already has implication 'I1'."),
-			(risk.AddMitigation,  None,        ValueError, "Parameter 'mitigation' is None."),
-			(risk.AddMitigation,  implication, TypeError,  "Parameter 'mitigation' is not of type 'Mitigation'."),
-			(risk.AddMitigation,  mitigation,  ValueError, "Element already has mitigation 'M1'."),
+			(risk.AddImplication, None,        ValueError,          "Parameter 'implication' is None."),
+			(risk.AddImplication, mitigation,  TypeError,           "Parameter 'implication' is not of type 'Implication'."),
+			(risk.AddImplication, implication, RiskManagementError, "Element already has implication 'I1'."),
+			(risk.AddMitigation,  None,        ValueError,          "Parameter 'mitigation' is None."),
+			(risk.AddMitigation,  implication, TypeError,           "Parameter 'mitigation' is not of type 'Mitigation'."),
+			(risk.AddMitigation,  mitigation,  RiskManagementError, "Element already has mitigation 'M1'."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -308,15 +316,15 @@ class Register(Testcase):
 		Implication("I1", "The tape-out is delayed.", parent=register)
 		Mitigation("M1", "Order a second shuttle run.", parent=register)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RiskManagementError) as context:
 			_ = Risk("R1", "Tool license", "A license expires.", Probability.Low, Impact.Low, parent=register)
 		self.assertEqual("Risk 'R1' already exists in the risk register.", str(context.exception))
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RiskManagementError) as context:
 			_ = Implication("I1", "The budget rises.", parent=register)
 		self.assertEqual("Implication 'I1' already exists in the risk register.", str(context.exception))
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RiskManagementError) as context:
 			_ = Mitigation("M1", "Hire a contractor.", parent=register)
 		self.assertEqual("Mitigation 'M1' already exists in the risk register.", str(context.exception))
 
@@ -394,9 +402,9 @@ class Register(Testcase):
 		self.assertEqual({"M1": mitigation}, register.Mitigations)
 
 		for parent, exception, message in (
-			(None,        ValueError, "Parameter 'parent' is None."),
-			(implication, TypeError,  "Parameter 'parent' is not of type 'RiskManagement'."),
-			(register,    ValueError, "Element is already part of a risk register."),
+			(None,        ValueError,          "Parameter 'parent' is None."),
+			(implication, TypeError,           "Parameter 'parent' is not of type 'RiskManagement'."),
+			(register,    RiskManagementError, "Element is already part of a risk register."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -409,7 +417,91 @@ class Register(Testcase):
 		self.assertEqual(["Got type 'pyEDAA.Reports.RiskManagement.Risk'."], context.exception.__notes__)
 
 		other = Risk("R1", "Tool license", "A license expires.", Probability.Low, Impact.Low)
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RiskManagementError) as context:
 			other.Parent = register
 		self.assertEqual("Risk 'R1' already exists in the risk register.", str(context.exception))
 		self.assertIsNone(other.Parent)
+
+
+class Links(Testcase):
+	def test_Link(self) -> None:
+		register = RiskManagement(VERSION)
+		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
+		tools =    Risk("R3", "Tool license", "A license expires.", Probability.Low, Impact.Low, parent=register)
+		causes =   Link(foundry, board, LinkKind.Causes, {"since": "v1.0.0"}, parent=register)
+		related =  Link(foundry, board, LinkKind.Related, parent=register)
+		depends =  Link(tools, foundry, LinkKind.DependsOn, parent=register)
+
+		self.assertIs(register, causes.Parent)
+		self.assertIs(register, causes.Root)
+		self.assertIs(foundry, causes.Source)
+		self.assertIs(board, causes.Destination)
+		self.assertIs(LinkKind.Causes, causes.Kind)
+		self.assertEqual("v1.0.0", causes["since"])
+		self.assertEqual("<Link R1 causes R2>", repr(causes))
+
+		self.assertEqual([causes, related], foundry.OutboundLinks)
+		self.assertEqual([depends], foundry.InboundLinks)
+		self.assertEqual([causes, related], board.InboundLinks)
+		self.assertEqual([causes, related, depends], register.Links)
+		self.assertEqual([causes, related, depends], list(register.IterateLinks()))
+		self.assertEqual([depends], list(register.IterateLinks(lambda link: link.Kind is LinkKind.DependsOn)))
+		self.assertEqual([foundry, board, tools], list(register.IterateRisks()))
+
+	def test_ParameterChecks(self) -> None:
+		foundry = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
+		board =   Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High)
+
+		for arguments, exception, message in (
+			((None,    board,   LinkKind.Causes), ValueError, "Parameter 'source' is None."),
+			(("R1",    board,   LinkKind.Causes), TypeError,  "Parameter 'source' is not of type 'Risk'."),
+			((foundry, None,    LinkKind.Causes), ValueError, "Parameter 'destination' is None."),
+			((foundry, "R2",    LinkKind.Causes), TypeError,  "Parameter 'destination' is not of type 'Risk'."),
+			((foundry, foundry, LinkKind.Causes), ValueError, "Parameter 'destination' is the source."),
+			((foundry, board,   None),            ValueError, "Parameter 'kind' is None."),
+			((foundry, board,   "causes"),        TypeError,  "Parameter 'kind' is not of type 'LinkKind'."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					_ = Link(*arguments)
+				self.assertEqual(message, str(context.exception))
+
+		self.assertEqual([], foundry.OutboundLinks)
+		self.assertEqual([], board.InboundLinks)
+
+	def test_Duplicate(self) -> None:
+		foundry = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
+		board =   Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High)
+		link =    Link(foundry, board, LinkKind.Causes)
+
+		with self.assertRaises(RiskManagementError) as context:
+			_ = Link(foundry, board, LinkKind.Causes)
+		self.assertEqual("Risk 'R1' already has a 'causes' link to risk 'R2'.", str(context.exception))
+		self.assertEqual([link], foundry.OutboundLinks)
+		self.assertEqual([link], board.InboundLinks)
+
+	def test_ForeignRisks(self) -> None:
+		"""A link of a risk register connects risks of that register; a link joins it after its risks."""
+		register = RiskManagement(VERSION)
+		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High)
+
+		with self.assertRaises(ValueError) as context:
+			_ = Link(foundry, board, LinkKind.Causes, parent=register)
+		self.assertEqual("Link's destination is outside the risk register.", str(context.exception))
+		self.assertEqual(["Got risk 'R2'.", "Add the risk to the risk register first."], context.exception.__notes__)
+		self.assertEqual([], foundry.OutboundLinks)
+		self.assertEqual([], register.Links)
+
+		link = Link(foundry, board, LinkKind.Causes)
+		with self.assertRaises(ValueError) as context:
+			link.Parent = register
+		self.assertEqual("Link's destination is outside the risk register.", str(context.exception))
+
+		board.Parent = register
+		link.Parent =  register
+
+		self.assertIs(register, link.Root)
+		self.assertEqual([link], register.Links)
+		self.assertEqual([link], foundry.OutboundLinks)
