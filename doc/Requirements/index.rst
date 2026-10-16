@@ -130,7 +130,8 @@ Links
 
 A :class:`Link` starts at an item - its source and parent - and points to another item of the same specification, its
 destination. The destination lists it as an inbound link. Its :class:`LinkKind` names the relationship: *source kind
-destination*.
+destination*. :meth:`~BaseItem.LinkTo` and :meth:`~BaseItem.LinkFrom` create an outbound or inbound link of an item,
+with the parameters of the link's constructor.
 
 .. list-table::
    :header-rows: 1

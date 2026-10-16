@@ -1171,6 +1171,85 @@ class BaseItem(BaseWithID):
 
 				yield from child.IterateDescendants(predicate)
 
+	def LinkTo(
+		self,
+		destination: BaseItem,
+		kind: LinkKind,
+		*,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> Link:
+		"""
+		Create an outbound link from this item to the given item.
+
+		:param destination:        The item the link points to.
+		:param kind:               The relationship the link states.
+		:param keyValuePairs:      Optional, the key-value pairs of the link. Default: ``None``.
+		:returns:                  The link from this item to the destination.
+		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:        If parameter ``destination`` is ``None``.
+		:raises TypeError:         If parameter ``destination`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``destination`` is this item.
+		:raises ValueError:        If parameter ``destination`` isn't part of this item's specification.
+		:raises ValueError:        If parameter ``kind`` is ``None``.
+		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises RequirementsError: If this item has a link of this kind to the destination already.
+
+		.. seealso::
+
+		   :meth:`LinkFrom`
+		      |rarr| Create an inbound link from the given item to this item.
+		"""
+		return Link(destination, kind, keyValuePairs=keyValuePairs, parent=self)
+
+	def LinkFrom(
+		self,
+		source: BaseItem,
+		kind: LinkKind,
+		*,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> Link:
+		"""
+		Create an inbound link from the given item to this item.
+
+		:param source:             The item the link starts at.
+		:param kind:               The relationship the link states.
+		:param keyValuePairs:      Optional, the key-value pairs of the link. Default: ``None``.
+		:returns:                  The link from the source to this item.
+		:raises ValueError:        If parameter ``source`` is ``None``.
+		:raises TypeError:         If parameter ``source`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``source`` is this item.
+		:raises ValueError:        If parameter ``source`` isn't part of this item's specification.
+		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:        If parameter ``kind`` is ``None``.
+		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises RequirementsError: If the source has a link of this kind to this item already.
+
+		.. seealso::
+
+		   :meth:`LinkTo`
+		      |rarr| Create an outbound link from this item to the given item.
+		"""
+		if source is None:
+			raise ValueError(f"Parameter 'source' is None.")
+		elif not isinstance(source, BaseItem):
+			ex = TypeError(f"Parameter 'source' is not of type 'BaseItem'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
+			raise ex
+		elif source is self:
+			ex = ValueError(f"Parameter 'source' is this item.")
+			ex.add_note(f"Got item '{source._id}'.")
+			raise ex
+		elif self._root is None or source._root is not self._root:
+			ex = ValueError(f"Parameter 'source' isn't part of this item's specification.")
+			ex.add_note(f"Got item '{source._id}'.")
+			raise ex
+
+		return Link(self, kind, keyValuePairs=keyValuePairs, parent=source)
+
 	def IterateOutboundLinks(self, predicate: Nullable[Callable[[Link], bool]] = None) -> Generator[Link, None, None]:
 		"""
 		Iterate all or selected links from this item.

@@ -66,6 +66,51 @@ class Links(Testcase):
 		self.assertEqual([firmware, derived], requirements["EL-1"].InboundLinks)
 		self.assertEqual([software], requirements["FW-1"].InboundLinks)
 
+	def test_LinkTo(self) -> None:
+		"""'LinkTo()' creates an outbound link with everything a link's constructor takes."""
+		specification = BuildSpecification()
+		requirements =  specification.Requirements
+		firmware =      requirements["FW-1"]
+		link =          firmware.LinkTo(requirements["EL-1"], LinkKind.CounterpartOf, keyValuePairs={"pin": "IRQ0"})
+
+		self.assertIs(requirements["FW-1"], link.Source)
+		self.assertIs(requirements["EL-1"], link.Destination)
+		self.assertIs(LinkKind.CounterpartOf, link.Kind)
+		self.assertEqual("IRQ0", link["pin"])
+		self.assertEqual([link], requirements["FW-1"].OutboundLinks)
+		self.assertEqual([link], requirements["EL-1"].InboundLinks)
+
+	def test_LinkFrom(self) -> None:
+		"""'LinkFrom()' creates an inbound link: the given item is the link's source and parent."""
+		specification = BuildSpecification()
+		requirements =  specification.Requirements
+		link =          requirements["EL-1"].LinkFrom(requirements["FW-1"], LinkKind.DerivesFrom)
+
+		self.assertIs(requirements["FW-1"], link.Source)
+		self.assertIs(requirements["FW-1"], link.Parent)
+		self.assertIs(requirements["EL-1"], link.Destination)
+		self.assertEqual([link], requirements["FW-1"].OutboundLinks)
+		self.assertEqual([link], requirements["EL-1"].InboundLinks)
+
+		with self.assertRaises(RequirementsError):
+			requirements["EL-1"].LinkFrom(requirements["FW-1"], LinkKind.DerivesFrom)
+
+	def test_LinkFrom_ParameterChecks(self) -> None:
+		specification = BuildSpecification()
+		requirements =  specification.Requirements
+		other =         Requirement("OT-1", "Other", FUNCTIONAL, parent=RequirementSpecification(VERSION))
+		for source, exception, message in (
+			(None,                 ValueError, "Parameter 'source' is None."),
+			("FW-1",               TypeError,  "Parameter 'source' is not of type 'BaseItem'."),
+			(requirements["EL-1"], ValueError, "Parameter 'source' is this item."),
+			(other,                ValueError, "Parameter 'source' isn't part of this item's specification."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					requirements["EL-1"].LinkFrom(source, LinkKind.RelatesTo)
+
+				self.assertEqual(message, str(context.exception))
+
 	def test_Predicate(self) -> None:
 		specification = BuildSpecification()
 		requirements =  specification.Requirements
