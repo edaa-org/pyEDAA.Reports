@@ -29,6 +29,8 @@
 # ==================================================================================================================== #
 #
 """Unit tests of :class:`~pyEDAA.Reports.KeyValuePairsMixin`."""
+from typing                import Iterable
+
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Testing     import Testcase
 
@@ -59,6 +61,9 @@ class KeyValuePairs(Testcase):
 		element["owner"] = "EDA²"
 		element["effort"] = 3
 		self.assertEqual({"owner": "EDA²", "effort": 3}, element.KeyValuePairs)
+		self.assertNotIsInstance(element, Iterable)
+		with self.assertRaises(TypeError):
+			_ = list(element)
 		self.assertIn("effort", element)
 
 		del element["owner"]
@@ -82,6 +87,10 @@ class KeyValuePairs(Testcase):
 				self.assertEqual(message, str(context.exception))
 
 		element = Element()
+		with self.assertRaises(ValueError) as context:
+			element[None] = "owner"
+		self.assertEqual("Parameter 'key' is None.", str(context.exception))
+
 		with self.assertRaises(TypeError) as context:
 			element[1] = "owner"
 		self.assertEqual("Parameter 'key' is not of type 'str'.", str(context.exception))

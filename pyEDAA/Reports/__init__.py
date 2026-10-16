@@ -77,7 +77,12 @@ class KeyValuePairsMixin(metaclass=ExtendedType, mixin=True):
 
 	``element[key]`` reads a value, ``element[key] = value`` creates or updates a pair, ``del element[key]`` removes it,
 	``key in element`` asks for a key, and ``len(element)`` counts the pairs.
+
+	An element isn't iterable: a data model iterates its elements by methods, and a collection parameter rejects an
+	element given in place of the collection.
 	"""
+
+	__iter__ = None  #: Not iterable, also not through ``__getitem__`` and the sequence protocol.
 
 	_keyValuePairs: dict[str, Any]  #: The key-value pairs, by key.
 
@@ -141,10 +146,13 @@ class KeyValuePairsMixin(metaclass=ExtendedType, mixin=True):
 
 		:param key:         The key.
 		:param value:       The value.
+		:raises ValueError: If parameter ``key`` is ``None``.
 		:raises TypeError:  If parameter ``key`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``key`` is empty.
 		"""
-		if not isinstance(key, str):
+		if key is None:
+			raise ValueError(f"Parameter 'key' is None.")
+		elif not isinstance(key, str):
 			ex = TypeError(f"Parameter 'key' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(key)}'.")
 			raise ex
