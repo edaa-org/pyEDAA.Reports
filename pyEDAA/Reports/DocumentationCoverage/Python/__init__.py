@@ -32,7 +32,7 @@
 Reader of Python source code for the documentation coverage model.
 
 :class:`Analyzer` reads a package's directory - every ``*.py`` file below it - into a
-:class:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport`. Each file is read once
+:class:`~pyEDAA.Reports.DocumentationCoverage.DocumentationReport`. Each file is read once
 (:class:`~pyEDAA.Reports.DocumentationCoverage.Python.Source.SourceFile`): in its declared encoding, into its syntax
 tree and its tokens, which hold the comments.
 
@@ -86,10 +86,8 @@ from pyTooling.MetaClasses                              import ExtendedType
 from pyTooling.Stopwatch                                import Stopwatch
 from pyTooling.Warning                                  import WarningCollector
 
-from pyEDAA.Reports.DocumentationCoverage               import CoverageState, DocCoverageError, ItemKind
-from pyEDAA.Reports.DocumentationCoverage               import SourceFileWarning
-from pyEDAA.Reports.DocumentationCoverage.Files         import DocumentationReport
-from pyEDAA.Reports.DocumentationCoverage.Items         import Item
+from pyEDAA.Reports.DocumentationCoverage               import CoverageState, DocCoverageError, DocumentationReport
+from pyEDAA.Reports.DocumentationCoverage               import Item, ItemKind, SourceFileWarning
 from pyEDAA.Reports.DocumentationCoverage.Python.Source import SourceFile
 
 if version_info >= (3, 12):  # pragma: no cover
@@ -259,7 +257,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		"""
 		Read every Python source file of the package into a documentation coverage report, and aggregate it.
 
-		The report's :attr:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport.AnalysisDuration` is the
+		The report's :attr:`~pyEDAA.Reports.DocumentationCoverage.DocumentationReport.AnalysisDuration` is the
 		duration of the analysis. A source file, which can't be read or parsed, is raised as a
 		:exc:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning` to the current
 		:class:`~pyTooling.Warning.WarningCollector`; its module is excluded, and the analysis continues.

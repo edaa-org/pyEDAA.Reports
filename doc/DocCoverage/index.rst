@@ -25,15 +25,15 @@ items.
 
 .. tree::
 
-   - :class:`~Files.DocumentationReport` | the report of an analysis
-     - physical hierarchy                | built from the source files analyzed
-       - :class:`~Files.Directory`       | e.g. :file:`myPackage/Units/`
-         - :class:`~Files.File`          | e.g. :file:`myPackage/Units/Length.py` - counts the items declared in it
-     - logical hierarchy                 | the documentable items - each: kind, state, file, first and last line
-       - :class:`~Items.Item`            | e.g. package ``myPackage``
-         - :class:`~Items.Item`          | e.g. module ``myPackage.Shapes``
-           - :class:`~Items.Item`        | e.g. class ``myPackage.Shapes.Circle``
-             - :class:`~Items.Item`      | e.g. field ``myPackage.Shapes.Circle._radius``
+   - :class:`DocumentationReport` | the report of an analysis
+     - physical hierarchy         | built from the source files analyzed
+       - :class:`Directory`       | e.g. :file:`myPackage/Units/`
+         - :class:`File`          | e.g. :file:`myPackage/Units/Length.py` - counts the items declared in it
+     - logical hierarchy          | the documentable items - each: kind, state, file, first and last line
+       - :class:`Item`            | e.g. package ``myPackage``
+         - :class:`Item`          | e.g. module ``myPackage.Shapes``
+           - :class:`Item`        | e.g. class ``myPackage.Shapes.Circle``
+             - :class:`Item`      | e.g. field ``myPackage.Shapes.Circle._radius``
 
 * An item's :class:`ItemKind` names the language construct, e.g. a class, a method or a VHDL entity. Languages share a
   kind where they share the construct. Each kind belongs to an :class:`ItemCategory` (see below), so the counters
@@ -46,7 +46,7 @@ items.
 * A file and a line range are optional: a reader that doesn't know them leaves them out. Such an item is counted by
   the report, but by no file.
 
-:meth:`~Files.DocumentationReport.Aggregate` computes the :class:`CoverageCounters` - total, expected, covered,
+:meth:`~DocumentationReport.Aggregate` computes the :class:`CoverageCounters` - total, expected, covered,
 uncovered, ignored and excluded items, and the coverage - of every item, file and directory, and per category in
 :attr:`~Base.Categories`. The coverage is ``1.0`` where nothing is expected.
 

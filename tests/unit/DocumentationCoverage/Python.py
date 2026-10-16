@@ -38,10 +38,8 @@ from tokenize                                           import generate_tokens
 from typing                                             import Iterable, Optional as Nullable
 from unittest                                           import skipIf
 
-from pyEDAA.Reports.DocumentationCoverage               import CoverageState, DocCoverageError, ItemKind
-from pyEDAA.Reports.DocumentationCoverage               import SourceFileWarning
-from pyEDAA.Reports.DocumentationCoverage.Files         import DocumentationReport
-from pyEDAA.Reports.DocumentationCoverage.Items         import Item
+from pyEDAA.Reports.DocumentationCoverage               import CoverageState, DocCoverageError, DocumentationReport
+from pyEDAA.Reports.DocumentationCoverage               import Item, ItemKind, SourceFileWarning
 from pyEDAA.Reports.DocumentationCoverage.Python        import Analyzer, CountedItems
 from pyEDAA.Reports.DocumentationCoverage.Python.Source import SourceFile
 from pyTooling.Warning                                  import UnhandledCriticalWarningError, WarningCollector

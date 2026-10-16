@@ -29,13 +29,11 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the documentation coverage model: kinds, states, both hierarchies, and aggregation."""
-from pathlib                                    import Path
+from pathlib                              import Path
 
-from pyEDAA.Reports.DocumentationCoverage       import CoverageCounters, CoverageState, DocCoverageError
-from pyEDAA.Reports.DocumentationCoverage       import ItemCategory, ItemKind
-from pyEDAA.Reports.DocumentationCoverage.Files import DocumentationReport, Directory, File
-from pyEDAA.Reports.DocumentationCoverage.Items import Item
-from pyTooling.Testing                          import Testcase
+from pyEDAA.Reports.DocumentationCoverage import CoverageCounters, CoverageState, Directory, DocCoverageError
+from pyEDAA.Reports.DocumentationCoverage import DocumentationReport, File, Item, ItemCategory, ItemKind
+from pyTooling.Testing                    import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -262,7 +260,7 @@ class ItemHierarchy(Testcase):
 		with self.assertRaises(TypeError) as context:
 			report.Parent = Directory(Path("other"))
 		self.assertEqual(
-			"A 'pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport' has no parent.", str(context.exception)
+			"A 'pyEDAA.Reports.DocumentationCoverage.DocumentationReport' has no parent.", str(context.exception)
 		)
 
 
