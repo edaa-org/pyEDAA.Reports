@@ -32,7 +32,7 @@
 from datetime                    import datetime, timedelta, timezone
 
 from pyEDAA.Reports.Requirements import ItemState, Label, Obligation, Requirement, RequirementKind
-from pyEDAA.Reports.Requirements import RequirementSpecification
+from pyEDAA.Reports.Requirements import RequirementSpecification, RequirementsError
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
 
@@ -160,7 +160,7 @@ class Hierarchy(Testcase):
 	def test_Duplicate(self) -> None:
 		specification = self._Specification()
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RequirementsError) as context:
 			Requirement("A.1.1", "Core rail", FUNCTIONAL, CREATED, parent=specification.Requirements["B"])
 
 		self.assertEqual("Requirement 'A.1.1' already exists in the specification.", str(context.exception))
@@ -168,14 +168,14 @@ class Hierarchy(Testcase):
 
 		c = Requirement("C", "Cooling", FUNCTIONAL, CREATED)
 		Requirement("A.2", "Fan", FUNCTIONAL, CREATED, parent=c)
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RequirementsError) as context:
 			c.Parent = specification
 
 		self.assertEqual("Requirement 'A.2' already exists in the specification.", str(context.exception))
 		self.assertNotIn("C", specification.Requirements)
 		self.assertIsNone(c.Parent)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RequirementsError) as context:
 			Requirement("A.2", "Pump", FUNCTIONAL, CREATED, parent=c)
 
 		self.assertEqual("Requirement 'C' already has a child 'A.2'.", str(context.exception))
@@ -187,7 +187,7 @@ class Hierarchy(Testcase):
 		Requirement("C.1", "Fan", FUNCTIONAL, CREATED, parent=Requirement("C.0", "Air", FUNCTIONAL, CREATED, parent=c))
 		Requirement("C.1", "Fan", FUNCTIONAL, CREATED, parent=c)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RequirementsError) as context:
 			c.Parent = specification
 
 		self.assertEqual("Requirement 'C.1' already exists in the specification.", str(context.exception))
@@ -197,7 +197,7 @@ class Hierarchy(Testcase):
 	def test_Parent_Twice(self) -> None:
 		specification = self._Specification()
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RequirementsError) as context:
 			specification.Requirements["A.2"].Parent = specification.Requirements["B"]
 
 		self.assertEqual("Requirement already has a parent.", str(context.exception))

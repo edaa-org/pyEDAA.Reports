@@ -47,7 +47,12 @@ from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import KeyValuePairsMixin, Person
+from pyEDAA.Reports        import KeyValuePairsMixin, Person, ReportException
+
+
+@export
+class RequirementsError(ReportException):
+	"""Base-exception of the requirements model."""
 
 
 @export
@@ -160,13 +165,13 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		Assigning a parent to an element without one adds the element to it, and sets the parent's specification as the
 		specification of this element and of every element below it.
 
-		:returns:           The parent, or ``None``.
-		:raises ValueError: If ``None`` is assigned.
-		:raises TypeError:  If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises TypeError:  If a parent is assigned to a :class:`RequirementSpecification`, which has no parent.
-		:raises ValueError: If the element already has a parent.
-		:raises ValueError: If the assigned parent's specification already contains an element of an ID of this element or
-		                    of an element below it.
+		:returns:                  The parent, or ``None``.
+		:raises ValueError:        If ``None`` is assigned.
+		:raises TypeError:         If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
+		:raises TypeError:         If a parent is assigned to a :class:`RequirementSpecification`, which has no parent.
+		:raises RequirementsError: If the element already has a parent.
+		:raises RequirementsError: If the assigned parent's specification already contains an element of an ID of this
+		                           element or of an element below it.
 		"""
 		return self._parent
 
@@ -181,7 +186,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 			raise ex
 
 		if self._parent is not None:
-			raise ValueError(f"{self.__class__.__name__} already has a parent.")
+			raise RequirementsError(f"{self.__class__.__name__} already has a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent
@@ -365,9 +370,9 @@ class RequirementSpecification(Base):
 		"""
 		Register a persona, label, document, layer or top-level requirement, which names the specification as its parent.
 
-		:param element:     The element.
-		:raises ValueError: If the specification already contains an element of the same class and ID, or a requirement
-		                    below a requirement has the ID of a registered one.
+		:param element:            The element.
+		:raises RequirementsError: If the specification already contains an element of the same class and ID, or a
+		                           requirement below a requirement has the ID of a registered one.
 		"""
 		if isinstance(element, BaseItem):
 			self._AddItems(element)
@@ -383,7 +388,7 @@ class RequirementSpecification(Base):
 			elements = self._layers
 
 		if element._id in elements:
-			raise ValueError(f"{element.__class__.__name__} '{element._id}' already exists in the specification.")
+			raise RequirementsError(f"{element.__class__.__name__} '{element._id}' already exists in the specification.")
 
 		elements[element._id] = element
 
@@ -393,15 +398,15 @@ class RequirementSpecification(Base):
 
 		Either all of them are registered, or none.
 
-		:param item:        The item joining the specification.
-		:raises ValueError: If an ID of these items is registered already, or used twice by them.
+		:param item:               The item joining the specification.
+		:raises RequirementsError: If an ID of these items is registered already, or used twice by them.
 		"""
 		items =   self._requirements
 		ids =     set()
 		subtree = (item, *item.IterateDescendants())
 		for element in subtree:
 			if element._id in items or element._id in ids:
-				raise ValueError(f"{element.__class__.__name__} '{element._id}' already exists in the specification.")
+				raise RequirementsError(f"{element.__class__.__name__} '{element._id}' already exists in the specification.")
 
 			ids.add(element._id)
 
@@ -455,10 +460,10 @@ class RequirementSpecification(Base):
 		E.g. an author or an owner of requirements. A person has no parent: the same person may be registered in several
 		specifications.
 
-		:param person:      The person.
-		:raises ValueError: If parameter ``person`` is ``None``.
-		:raises TypeError:  If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
-		:raises ValueError: If the specification already contains a person of this user ID.
+		:param person:             The person.
+		:raises ValueError:        If parameter ``person`` is ``None``.
+		:raises TypeError:         If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises RequirementsError: If the specification already contains a person of this user ID.
 		"""
 		if person is None:
 			raise ValueError(f"Parameter 'person' is None.")
@@ -467,7 +472,7 @@ class RequirementSpecification(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(person)}'.")
 			raise ex
 		elif person._userID in self._persons:
-			raise ValueError(f"Person '{person._userID}' already exists in the specification.")
+			raise RequirementsError(f"Person '{person._userID}' already exists in the specification.")
 
 		self._persons[person._userID] = person
 
@@ -561,24 +566,24 @@ class BaseWithName(BaseWithID):
 		"""
 		Initializes an element with its ID, name and description, and registers it in its specification.
 
-		:param identifier:    The element's ID.
-		:param name:          The element's name.
-		:param description:   Optional, the element's description. Default: ``""``.
-		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:param parent:        Optional, the specification. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RequirementSpecification`.
-		:raises ValueError:   If parameter ``identifier`` is ``None``.
-		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``identifier`` is empty.
-		:raises ValueError:   If parameter ``description`` is ``None``.
-		:raises TypeError:    If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``name`` is ``None``.
-		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``name`` is empty.
-		:raises ValueError:   If the specification already contains an element of this class and ID.
+		:param identifier:         The element's ID.
+		:param name:               The element's name.
+		:param description:        Optional, the element's description. Default: ``""``.
+		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
+		:param parent:             Optional, the specification. Default: ``None``.
+		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`RequirementSpecification`.
+		:raises ValueError:        If parameter ``identifier`` is ``None``.
+		:raises TypeError:         If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``identifier`` is empty.
+		:raises ValueError:        If parameter ``description`` is ``None``.
+		:raises TypeError:         If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``name`` is ``None``.
+		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``name`` is empty.
+		:raises RequirementsError: If the specification already contains an element of this class and ID.
 		"""
 		super().__init__(identifier, description=description, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -744,14 +749,14 @@ class BaseItem(BaseWithID):
 		Add a child item, which names this item as its parent, and register it with every item below it in the
 		specification.
 
-		:param element:     The child item.
-		:raises ValueError: If the specification already contains an item of an ID of the child or an item below it.
-		:raises ValueError: If this item isn't part of a specification, and has a child of this ID already.
+		:param element:            The child item.
+		:raises RequirementsError: If the specification already contains an item of an ID of the child or an item below it.
+		:raises RequirementsError: If this item isn't part of a specification, and has a child of this ID already.
 		"""
 		if self._root is not None:
 			self._root._AddItems(element)
 		elif element._id in self._children:
-			raise ValueError(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
+			raise RequirementsError(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
 
 		self._children[element._id] = element
 
@@ -878,39 +883,39 @@ class Requirement(BaseItem):
 		"""
 		Initializes a requirement, adds it to its parent, and registers it in its specification.
 
-		:param identifier:    The requirement's ID.
-		:param title:         The requirement's title.
-		:param kind:          What the requirement constrains.
-		:param created:       The time the requirement was created, with a time zone.
-		:param obligation:    Optional, whether the requirement must, should or may be met. Default:
-		                      :attr:`Obligation.Mandatory`.
-		:param description:   Optional, the requirement's description. Default: ``""``.
-		:param state:         Optional, the requirement's state. Default: :attr:`ItemState.Draft`.
-		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:param parent:        Optional, the requirement this one refines, or the specification. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Requirement` or
-		                      :class:`RequirementSpecification`.
-		:raises ValueError:   If parameter ``identifier`` is ``None``.
-		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``identifier`` is empty.
-		:raises ValueError:   If parameter ``description`` is ``None``.
-		:raises TypeError:    If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``title`` is ``None``.
-		:raises TypeError:    If parameter ``title`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``title`` is empty.
-		:raises ValueError:   If parameter ``created`` is ``None``.
-		:raises TypeError:    If parameter ``created`` isn't of type :class:`~datetime.datetime`.
-		:raises ValueError:   If parameter ``created`` has no time zone.
-		:raises ValueError:   If parameter ``state`` is ``None``.
-		:raises TypeError:    If parameter ``state`` isn't of type :class:`ItemState`.
-		:raises ValueError:   If parameter ``kind`` is ``None``.
-		:raises TypeError:    If parameter ``kind`` isn't of type :class:`RequirementKind`.
-		:raises ValueError:   If parameter ``obligation`` is ``None``.
-		:raises TypeError:    If parameter ``obligation`` isn't of type :class:`Obligation`.
-		:raises ValueError:   If the specification already contains a requirement of this ID.
+		:param identifier:         The requirement's ID.
+		:param title:              The requirement's title.
+		:param kind:               What the requirement constrains.
+		:param created:            The time the requirement was created, with a time zone.
+		:param obligation:         Optional, whether the requirement must, should or may be met. Default:
+		                           :attr:`Obligation.Mandatory`.
+		:param description:        Optional, the requirement's description. Default: ``""``.
+		:param state:              Optional, the requirement's state. Default: :attr:`ItemState.Draft`.
+		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
+		:param parent:             Optional, the requirement this one refines, or the specification. Default: ``None``.
+		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Requirement` or
+		                           :class:`RequirementSpecification`.
+		:raises ValueError:        If parameter ``identifier`` is ``None``.
+		:raises TypeError:         If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``identifier`` is empty.
+		:raises ValueError:        If parameter ``description`` is ``None``.
+		:raises TypeError:         If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``title`` is ``None``.
+		:raises TypeError:         If parameter ``title`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``title`` is empty.
+		:raises ValueError:        If parameter ``created`` is ``None``.
+		:raises TypeError:         If parameter ``created`` isn't of type :class:`~datetime.datetime`.
+		:raises ValueError:        If parameter ``created`` has no time zone.
+		:raises ValueError:        If parameter ``state`` is ``None``.
+		:raises TypeError:         If parameter ``state`` isn't of type :class:`ItemState`.
+		:raises ValueError:        If parameter ``kind`` is ``None``.
+		:raises TypeError:         If parameter ``kind`` isn't of type :class:`RequirementKind`.
+		:raises ValueError:        If parameter ``obligation`` is ``None``.
+		:raises TypeError:         If parameter ``obligation`` isn't of type :class:`Obligation`.
+		:raises RequirementsError: If the specification already contains a requirement of this ID.
 		"""
 		super().__init__(
 			identifier,
