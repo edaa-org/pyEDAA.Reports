@@ -30,19 +30,17 @@
 #
 #
 """Unit tests of JaCoCo's XML format: its model, its XML schema and the conversion to the common model."""
-from datetime                                    import datetime, timezone
-from pathlib                                     import Path
-from tempfile                                    import TemporaryDirectory
+from datetime                              import datetime, timezone
+from pathlib                               import Path
+from tempfile                              import TemporaryDirectory
 
-from lxml.etree                                  import fromstring
-from pyEDAA.Reports.CodeCoverage                 import Class as cc_Class, CodeCoverageError, LineCoverageStatus
-from pyEDAA.Reports.CodeCoverage                 import Method as cc_Method, Package as cc_Package, Unit
-from pyEDAA.Reports.CodeCoverage.Cobertura       import Document as CoberturaDocument
-from pyEDAA.Reports.CodeCoverage.JaCoCo          import Document, FormatVersion, Group, Package, PUBLIC_IDENTIFIER
-from pyEDAA.Reports.CodeCoverage.JaCoCo          import SCHEMAS
-from pyEDAA.Reports.CodeCoverage.JaCoCo.Classes  import Class, Line, Method, SourceFile
-from pyEDAA.Reports.CodeCoverage.JaCoCo.Elements import Counter, CounterType, SessionInfo
-from pyTooling.Testing                           import Testcase
+from lxml.etree                            import fromstring
+from pyEDAA.Reports.CodeCoverage           import Class as cc_Class, CodeCoverageError, LineCoverageStatus
+from pyEDAA.Reports.CodeCoverage           import Method as cc_Method, Package as cc_Package, Unit
+from pyEDAA.Reports.CodeCoverage.Cobertura import Document as CoberturaDocument
+from pyEDAA.Reports.CodeCoverage.JaCoCo    import Class, Counter, CounterType, Document, FormatVersion, Group, Line
+from pyEDAA.Reports.CodeCoverage.JaCoCo    import Method, Package, PUBLIC_IDENTIFIER, SCHEMAS, SessionInfo, SourceFile
+from pyTooling.Testing                     import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -363,9 +361,9 @@ class ParentRelation(Testcase):
 			(lambda: Package("p", parent="Library"),                   "'Report' or 'Group'", "str"),
 			(lambda: Class("p/A", parent=Group("Library")),            "'Package'",           f"{module}.Group"),
 			(lambda: Method("m", "()V", parent=Package("p")),          "'Class'",             f"{module}.Package"),
-			(lambda: SourceFile("A.java", parent=Class("p/A")),        "'Package'",           f"{module}.Classes.Class"),
+			(lambda: SourceFile("A.java", parent=Class("p/A")),        "'Package'",           f"{module}.Class"),
 			(lambda: Line(13, parent=Package("p")),                    "'SourceFile'",        f"{module}.Package"),
-			(lambda: Counter(CounterType.Line, 0, 1, parent=Line(3)),  "'CountersMixin'",     f"{module}.Classes.Line"),
+			(lambda: Counter(CounterType.Line, 0, 1, parent=Line(3)),  "'CountersMixin'",     f"{module}.Line"),
 			(lambda: SessionInfo("host", now, now, parent=Group("G")), "'Report'",            f"{module}.Group")
 		):
 			with self.subTest(types=types, got=got):
