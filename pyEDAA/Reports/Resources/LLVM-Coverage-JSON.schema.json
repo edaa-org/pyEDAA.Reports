@@ -1,0 +1,204 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://edaa-org.github.io/pyEDAA.Reports/Schemas/LLVM-Coverage-JSON.schema.json",
+	"title": "LLVM code coverage export (JSON)",
+	"description": "The JSON report 'llvm-cov export -format=text' writes, type 'llvm.coverage.json.export', format versions 2.0.0 to 3.1.0. Reverse-engineered from llvm-cov's 'CoverageExporterJson.cpp' (LLVM 4 to 23): 2.0.1 added 'isGapRegion' to a segment; LLVM 12 added the branch regions and LLVM 18 the MC/DC records, without a new version; 3.0.0 added the numbers of true and false decisions to an MC/DC record, 3.0.1 its 'fileID', 3.1.0 its test vectors. Fields a version added later are optional.",
+	"type": "object",
+	"required": ["version", "type", "data"],
+	"properties": {
+		"version": {"description": "Version of the report format.", "enum": ["2.0.0", "2.0.1", "3.0.0", "3.0.1", "3.1.0"]},
+		"type":    {"description": "Type of the report.", "const": "llvm.coverage.json.export"},
+		"data":    {
+			"description": "The export of the coverage mapping; llvm-cov writes one.",
+			"type": "array",
+			"items": {"$ref": "#/$defs/Export"},
+			"minItems": 1,
+			"maxItems": 1
+		}
+	},
+	"additionalProperties": false,
+	"$defs": {
+		"Count": {"type": "integer", "minimum": 0},
+		"FileID": {"description": "Index into the file names of the function or expansion.", "type": "integer", "minimum": 0},
+		"Kind": {
+			"description": "Kind of the region: code, expansion, skipped, gap, branch, MC/DC decision, MC/DC branch.",
+			"enum": [0, 1, 2, 3, 4, 5, 6]
+		},
+		"Line": {"type": "integer", "minimum": 1},
+		"Column": {"type": "integer", "minimum": 1},
+		"Filenames": {"type": "array", "items": {"type": "string"}},
+		"Segment": {
+			"description": "[line, column, count, hasCount, isRegionEntry, isGapRegion]; 2.0.0 has no 'isGapRegion'.",
+			"type": "array",
+			"prefixItems": [
+				{"$ref": "#/$defs/Line"},
+				{"$ref": "#/$defs/Column"},
+				{"$ref": "#/$defs/Count"},
+				{"type": "boolean"},
+				{"type": "boolean"},
+				{"type": "boolean"}
+			],
+			"items": false,
+			"minItems": 5
+		},
+		"Region": {
+			"description": "[lineStart, columnStart, lineEnd, columnEnd, count, fileID, expandedFileID, kind]",
+			"type": "array",
+			"prefixItems": [
+				{"$ref": "#/$defs/Line"},
+				{"$ref": "#/$defs/Column"},
+				{"$ref": "#/$defs/Line"},
+				{"$ref": "#/$defs/Column"},
+				{"$ref": "#/$defs/Count"},
+				{"$ref": "#/$defs/FileID"},
+				{"$ref": "#/$defs/FileID"},
+				{"$ref": "#/$defs/Kind"}
+			],
+			"items": false,
+			"minItems": 8
+		},
+		"Branch": {
+			"description": "[lineStart, columnStart, lineEnd, columnEnd, trueCount, falseCount, fileID, expandedFileID, kind]",
+			"type": "array",
+			"prefixItems": [
+				{"$ref": "#/$defs/Line"},
+				{"$ref": "#/$defs/Column"},
+				{"$ref": "#/$defs/Line"},
+				{"$ref": "#/$defs/Column"},
+				{"$ref": "#/$defs/Count"},
+				{"$ref": "#/$defs/Count"},
+				{"$ref": "#/$defs/FileID"},
+				{"$ref": "#/$defs/FileID"},
+				{"enum": [4, 6]}
+			],
+			"items": false,
+			"minItems": 9
+		},
+		"Conditions": {
+			"description": "Whether a pair of test vectors showed the independent effect, by condition.",
+			"type": "array",
+			"items": {"type": "boolean"}
+		},
+		"TestVector": {
+			"description": "The values of the conditions - null for one not evaluated -, and the outcome.",
+			"type": "object",
+			"required": ["conditions", "executed", "result"],
+			"properties": {
+				"conditions": {"type": "array", "items": {"type": ["boolean", "null"]}},
+				"executed":   {"type": "boolean"},
+				"result":     {"type": ["boolean", "null"]}
+			},
+			"additionalProperties": false
+		},
+		"MCDCRecord": {
+			"description": "A decision, in the shape of the format version: 2.0.1 [lineStart, columnStart, lineEnd, columnEnd, expandedFileID, kind, conditions]; 3.0.0 adds trueDecisions and falseDecisions after columnEnd, 3.0.1 fileID before expandedFileID, 3.1.0 the test vectors at the end.",
+			"type": "array",
+			"prefixItems": [
+				{"$ref": "#/$defs/Line"},
+				{"$ref": "#/$defs/Column"},
+				{"$ref": "#/$defs/Line"},
+				{"$ref": "#/$defs/Column"}
+			],
+			"oneOf": [
+				{
+					"prefixItems": [true, true, true, true, {"$ref": "#/$defs/FileID"}, {"const": 5}, {"$ref": "#/$defs/Conditions"}],
+					"items": false,
+					"minItems": 7
+				},
+				{
+					"prefixItems": [
+						true, true, true, true, {"$ref": "#/$defs/Count"}, {"$ref": "#/$defs/Count"}, {"$ref": "#/$defs/FileID"},
+						{"const": 5}, {"$ref": "#/$defs/Conditions"}
+					],
+					"items": false,
+					"minItems": 9
+				},
+				{
+					"prefixItems": [
+						true, true, true, true, {"$ref": "#/$defs/Count"}, {"$ref": "#/$defs/Count"}, {"$ref": "#/$defs/FileID"},
+						{"$ref": "#/$defs/FileID"}, {"const": 5}, {"$ref": "#/$defs/Conditions"},
+						{"type": "array", "items": {"$ref": "#/$defs/TestVector"}}
+					],
+					"items": false,
+					"minItems": 10
+				}
+			]
+		},
+		"Expansion": {
+			"description": "A macro expansion: the region it is expanded at, the regions of its function, and its branch regions.",
+			"type": "object",
+			"required": ["filenames", "source_region", "target_regions"],
+			"properties": {
+				"filenames":      {"$ref": "#/$defs/Filenames"},
+				"source_region":  {"$ref": "#/$defs/Region"},
+				"target_regions": {"type": "array", "items": {"$ref": "#/$defs/Region"}},
+				"branches":       {"type": "array", "items": {"$ref": "#/$defs/Branch"}}
+			},
+			"additionalProperties": false
+		},
+		"Counters": {
+			"type": "object",
+			"required": ["count", "covered", "percent"],
+			"properties": {
+				"count":      {"$ref": "#/$defs/Count"},
+				"covered":    {"$ref": "#/$defs/Count"},
+				"notcovered": {"$ref": "#/$defs/Count"},
+				"percent":    {"type": "number", "minimum": 0, "maximum": 100}
+			},
+			"additionalProperties": false
+		},
+		"Summary": {
+			"description": "Counters, as llvm-cov computed them; 'branches' since LLVM 12, 'mcdc' since LLVM 18.",
+			"type": "object",
+			"required": ["lines", "functions", "instantiations", "regions"],
+			"properties": {
+				"lines":          {"$ref": "#/$defs/Counters"},
+				"functions":      {"$ref": "#/$defs/Counters"},
+				"instantiations": {"$ref": "#/$defs/Counters"},
+				"regions":        {"$ref": "#/$defs/Counters"},
+				"branches":       {"$ref": "#/$defs/Counters"},
+				"mcdc":           {"$ref": "#/$defs/Counters"}
+			},
+			"additionalProperties": false
+		},
+		"File": {
+			"description": "A file; '-summary-only' leaves only its summary, '-skip-expansions' its expansions out.",
+			"type": "object",
+			"required": ["filename", "summary"],
+			"properties": {
+				"filename":     {"type": "string"},
+				"segments":     {"type": "array", "items": {"$ref": "#/$defs/Segment"}},
+				"branches":     {"type": "array", "items": {"$ref": "#/$defs/Branch"}},
+				"mcdc_records": {"type": "array", "items": {"$ref": "#/$defs/MCDCRecord"}},
+				"expansions":   {"type": "array", "items": {"$ref": "#/$defs/Expansion"}},
+				"summary":      {"$ref": "#/$defs/Summary"}
+			},
+			"additionalProperties": false
+		},
+		"Function": {
+			"description": "A function, or an instantiation of a template, by the name the profile gives it - e.g. mangled.",
+			"type": "object",
+			"required": ["name", "count", "regions", "filenames"],
+			"properties": {
+				"name":         {"type": "string"},
+				"count":        {"$ref": "#/$defs/Count"},
+				"regions":      {"type": "array", "items": {"$ref": "#/$defs/Region"}},
+				"branches":     {"type": "array", "items": {"$ref": "#/$defs/Branch"}},
+				"mcdc_records": {"type": "array", "items": {"$ref": "#/$defs/MCDCRecord"}},
+				"filenames":    {"$ref": "#/$defs/Filenames"}
+			},
+			"additionalProperties": false
+		},
+		"Export": {
+			"description": "The files, the functions - unless written with '-skip-functions' or '-summary-only' -, and the totals.",
+			"type": "object",
+			"required": ["files", "totals"],
+			"properties": {
+				"files":     {"type": "array", "items": {"$ref": "#/$defs/File"}},
+				"functions": {"type": "array", "items": {"$ref": "#/$defs/Function"}},
+				"totals":    {"$ref": "#/$defs/Summary"}
+			},
+			"additionalProperties": false
+		}
+	}
+}
