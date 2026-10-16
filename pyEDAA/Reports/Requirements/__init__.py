@@ -725,9 +725,9 @@ class BaseItem(BaseWithID):
 		self,
 		identifier: str,
 		title: str,
-		created: datetime,
-		*,
 		description: str = "",
+		created: Nullable[datetime] = None,
+		*,
 		state: ItemState = ItemState.Draft,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[BaseItem | RequirementSpecification] = None
@@ -737,8 +737,9 @@ class BaseItem(BaseWithID):
 
 		:param identifier:    The item's ID.
 		:param title:         The item's title.
-		:param created:       The time the item was created, with a time zone.
 		:param description:   Optional, the item's description. Default: ``""``.
+		:param created:       Optional, the time the item was created; without a time zone, it is a local time. Default:
+		                      ``None``, the current time.
 		:param state:         Optional, the item's state. Default: :attr:`ItemState.Draft`.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the parent item or the specification. Default: ``None``.
@@ -754,9 +755,7 @@ class BaseItem(BaseWithID):
 		:raises ValueError:   If parameter ``title`` is ``None``.
 		:raises TypeError:    If parameter ``title`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``title`` is empty.
-		:raises ValueError:   If parameter ``created`` is ``None``.
 		:raises TypeError:    If parameter ``created`` isn't of type :class:`~datetime.datetime`.
-		:raises ValueError:   If parameter ``created`` has no time zone.
 		:raises ValueError:   If parameter ``state`` is ``None``.
 		:raises TypeError:    If parameter ``state`` isn't of type :class:`ItemState`.
 		"""
@@ -772,14 +771,10 @@ class BaseItem(BaseWithID):
 			raise ValueError(f"Parameter 'title' is empty.")
 
 		if created is None:
-			raise ValueError(f"Parameter 'created' is None.")
+			created = datetime.now()
 		elif not isinstance(created, datetime):
 			ex = TypeError(f"Parameter 'created' is not of type 'datetime'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(created)}'.")
-			raise ex
-		elif created.utcoffset() is None:
-			ex = ValueError(f"Parameter 'created' has no time zone.")
-			ex.add_note(f"Got value '{created.isoformat()}'.")
 			raise ex
 
 		if state is None:
@@ -824,7 +819,7 @@ class BaseItem(BaseWithID):
 		"""
 		Read-only property to access the time the item was created (:attr:`_created`).
 
-		:returns: The time, with a time zone.
+		:returns: The time; without a time zone, it is a local time.
 		"""
 		return self._created
 
@@ -912,10 +907,10 @@ class Requirement(BaseItem):
 		identifier: str,
 		title: str,
 		kind: RequirementKind,
-		created: datetime,
+		description: str = "",
+		created: Nullable[datetime] = None,
 		*,
 		obligation: Obligation = Obligation.Mandatory,
-		description: str = "",
 		state: ItemState = ItemState.Draft,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[Requirement | RequirementSpecification] = None
@@ -926,10 +921,11 @@ class Requirement(BaseItem):
 		:param identifier:         The requirement's ID.
 		:param title:              The requirement's title.
 		:param kind:               What the requirement constrains.
-		:param created:            The time the requirement was created, with a time zone.
+		:param description:        Optional, the requirement's description. Default: ``""``.
+		:param created:            Optional, the time the requirement was created; without a time zone, it is a local
+		                           time. Default: ``None``, the current time.
 		:param obligation:         Optional, whether the requirement must, should or may be met. Default:
 		                           :attr:`Obligation.Mandatory`.
-		:param description:        Optional, the requirement's description. Default: ``""``.
 		:param state:              Optional, the requirement's state. Default: :attr:`ItemState.Draft`.
 		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
 		:param parent:             Optional, the requirement this one refines, or the specification. Default: ``None``.
@@ -946,9 +942,7 @@ class Requirement(BaseItem):
 		:raises ValueError:        If parameter ``title`` is ``None``.
 		:raises TypeError:         If parameter ``title`` isn't of type :class:`str`.
 		:raises ValueError:        If parameter ``title`` is empty.
-		:raises ValueError:        If parameter ``created`` is ``None``.
 		:raises TypeError:         If parameter ``created`` isn't of type :class:`~datetime.datetime`.
-		:raises ValueError:        If parameter ``created`` has no time zone.
 		:raises ValueError:        If parameter ``state`` is ``None``.
 		:raises TypeError:         If parameter ``state`` isn't of type :class:`ItemState`.
 		:raises ValueError:        If parameter ``kind`` is ``None``.
@@ -960,8 +954,8 @@ class Requirement(BaseItem):
 		super().__init__(
 			identifier,
 			title,
+			description,
 			created,
-			description=description,
 			state=state,
 			keyValuePairs=keyValuePairs,
 			parent=parent

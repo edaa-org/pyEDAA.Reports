@@ -65,7 +65,7 @@ class Enumerations(Testcase):
 
 class Instantiation(Testcase):
 	def test_Requirement(self) -> None:
-		requirement = Requirement("REQ-1", "Supply voltage", RequirementKind.Environmental, CREATED)
+		requirement = Requirement("REQ-1", "Supply voltage", RequirementKind.Environmental, created=CREATED)
 
 		self.assertEqual("REQ-1", requirement.ID)
 		self.assertEqual("Supply voltage", requirement.Title)
@@ -79,8 +79,19 @@ class Instantiation(Testcase):
 		self.assertEqual({}, requirement.Children)
 		self.assertEqual(0, len(requirement))
 
+	def test_Created(self) -> None:
+		"""Without a creation time, a requirement is created now; a time without a time zone is a local time."""
+		before =  datetime.now()
+		current = Requirement("REQ-1", "Supply voltage", FUNCTIONAL)
+		after =   datetime.now()
+		local =   Requirement("REQ-2", "Supply current", FUNCTIONAL, "Below 2 A.", datetime(2026, 3, 1, 9, 30))
+
+		self.assertTrue(before <= current.Created <= after)
+		self.assertEqual(datetime(2026, 3, 1, 9, 30), local.Created)
+		self.assertEqual("Below 2 A.", local.Description)
+
 	def test_State(self) -> None:
-		requirement =       Requirement("REQ-1", "Supply voltage", FUNCTIONAL, CREATED)
+		requirement =       Requirement("REQ-1", "Supply voltage", FUNCTIONAL)
 		requirement.State = ItemState.Verified
 
 		self.assertIs(ItemState.Verified, requirement.State)
@@ -104,11 +115,11 @@ class Hierarchy(Testcase):
 		``B``.
 		"""
 		specification = RequirementSpecification(VERSION, "Board")
-		a =             Requirement("A", "Power", FUNCTIONAL, CREATED, parent=specification)
-		a1 =            Requirement("A.1", "Rails", FUNCTIONAL, CREATED, parent=a)
-		Requirement("A.1.1", "Core rail", RequirementKind.Performance, CREATED, parent=a1)
-		Requirement("A.2", "Sequencing", FUNCTIONAL, CREATED, parent=a)
-		Requirement("B", "Housing", RequirementKind.Constraint, CREATED, parent=specification)
+		a =             Requirement("A", "Power", FUNCTIONAL, parent=specification)
+		a1 =            Requirement("A.1", "Rails", FUNCTIONAL, parent=a)
+		Requirement("A.1.1", "Core rail", RequirementKind.Performance, parent=a1)
+		Requirement("A.2", "Sequencing", FUNCTIONAL, parent=a)
+		Requirement("B", "Housing", RequirementKind.Constraint, parent=specification)
 
 		return specification
 
@@ -148,9 +159,9 @@ class Hierarchy(Testcase):
 	def test_Parent(self) -> None:
 		"""A subtree built without a specification joins it, when its top requirement gets a parent."""
 		specification = self._Specification()
-		c =             Requirement("C", "Cooling", FUNCTIONAL, CREATED)
-		c1 =            Requirement("C.1", "Fan", FUNCTIONAL, CREATED, parent=c)
-		Requirement("C.1.1", "Fan control", FUNCTIONAL, CREATED, parent=c1)
+		c =             Requirement("C", "Cooling", FUNCTIONAL)
+		c1 =            Requirement("C.1", "Fan", FUNCTIONAL, parent=c)
+		Requirement("C.1.1", "Fan control", FUNCTIONAL, parent=c1)
 		c.Parent = specification.Requirements["B"]
 
 		self.assertEqual(["A", "A.1", "A.1.1", "A.2", "B", "C", "C.1", "C.1.1"], list(specification.Requirements))
@@ -161,13 +172,13 @@ class Hierarchy(Testcase):
 		specification = self._Specification()
 
 		with self.assertRaises(RequirementsError) as context:
-			Requirement("A.1.1", "Core rail", FUNCTIONAL, CREATED, parent=specification.Requirements["B"])
+			Requirement("A.1.1", "Core rail", FUNCTIONAL, parent=specification.Requirements["B"])
 
 		self.assertEqual("Requirement 'A.1.1' already exists in the specification.", str(context.exception))
 		self.assertEqual({}, specification.Requirements["B"].Children)
 
-		c = Requirement("C", "Cooling", FUNCTIONAL, CREATED)
-		Requirement("A.2", "Fan", FUNCTIONAL, CREATED, parent=c)
+		c = Requirement("C", "Cooling", FUNCTIONAL)
+		Requirement("A.2", "Fan", FUNCTIONAL, parent=c)
 		with self.assertRaises(RequirementsError) as context:
 			c.Parent = specification
 
@@ -176,16 +187,16 @@ class Hierarchy(Testcase):
 		self.assertIsNone(c.Parent)
 
 		with self.assertRaises(RequirementsError) as context:
-			Requirement("A.2", "Pump", FUNCTIONAL, CREATED, parent=c)
+			Requirement("A.2", "Pump", FUNCTIONAL, parent=c)
 
 		self.assertEqual("Requirement 'C' already has a child 'A.2'.", str(context.exception))
 
 	def test_Duplicate_Subtree(self) -> None:
 		"""A subtree using an ID twice is rejected as a whole."""
 		specification = self._Specification()
-		c =             Requirement("C", "Cooling", FUNCTIONAL, CREATED)
-		Requirement("C.1", "Fan", FUNCTIONAL, CREATED, parent=Requirement("C.0", "Air", FUNCTIONAL, CREATED, parent=c))
-		Requirement("C.1", "Fan", FUNCTIONAL, CREATED, parent=c)
+		c =             Requirement("C", "Cooling", FUNCTIONAL)
+		Requirement("C.1", "Fan", FUNCTIONAL, parent=Requirement("C.0", "Air", FUNCTIONAL, parent=c))
+		Requirement("C.1", "Fan", FUNCTIONAL, parent=c)
 
 		with self.assertRaises(RequirementsError) as context:
 			c.Parent = specification
@@ -205,17 +216,15 @@ class Hierarchy(Testcase):
 
 class ParameterChecks(Testcase):
 	def test_Requirement(self) -> None:
-		naive = datetime(2026, 3, 1, 9, 30)
 		for arguments, exception, message in (
-			((None, "Title", FUNCTIONAL, CREATED),   ValueError, "Parameter 'identifier' is None."),
-			(("REQ-1", None, FUNCTIONAL, CREATED),   ValueError, "Parameter 'title' is None."),
-			(("REQ-1", 1, FUNCTIONAL, CREATED),      TypeError,  "Parameter 'title' is not of type 'str'."),
-			(("REQ-1", "", FUNCTIONAL, CREATED),     ValueError, "Parameter 'title' is empty."),
-			(("REQ-1", "Title", FUNCTIONAL, None),   ValueError, "Parameter 'created' is None."),
-			(("REQ-1", "Title", FUNCTIONAL, "2026"), TypeError,  "Parameter 'created' is not of type 'datetime'."),
-			(("REQ-1", "Title", FUNCTIONAL, naive),  ValueError, "Parameter 'created' has no time zone."),
-			(("REQ-1", "Title", None, CREATED),      ValueError, "Parameter 'kind' is None."),
-			(("REQ-1", "Title", "func", CREATED),    TypeError,  "Parameter 'kind' is not of type 'RequirementKind'."),
+			((None, "Title", FUNCTIONAL),           ValueError, "Parameter 'identifier' is None."),
+			(("REQ-1", None, FUNCTIONAL),           ValueError, "Parameter 'title' is None."),
+			(("REQ-1", 1, FUNCTIONAL),              TypeError,  "Parameter 'title' is not of type 'str'."),
+			(("REQ-1", "", FUNCTIONAL),             ValueError, "Parameter 'title' is empty."),
+			(("REQ-1", "Title", FUNCTIONAL, None),  ValueError, "Parameter 'description' is None."),
+			(("REQ-1", "Title", FUNCTIONAL, "", 1), TypeError,  "Parameter 'created' is not of type 'datetime'."),
+			(("REQ-1", "Title", None),              ValueError, "Parameter 'kind' is None."),
+			(("REQ-1", "Title", "func"),            TypeError,  "Parameter 'kind' is not of type 'RequirementKind'."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -233,6 +242,6 @@ class ParameterChecks(Testcase):
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
-					_ = Requirement("REQ-1", "Title", FUNCTIONAL, CREATED, **keywordArguments)
+					_ = Requirement("REQ-1", "Title", FUNCTIONAL, **keywordArguments)
 
 				self.assertEqual(message, str(context.exception))

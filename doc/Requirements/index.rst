@@ -50,10 +50,10 @@ Every element carries key-value pairs for the information the model has no field
 Requirements
 ************
 
-A :class:`Requirement` has an ID, a title, a description, a creation time and a :class:`RequirementKind`, which names
-what it constrains: e.g. a function, its performance, a quality, safety or security, an interface, the environment, a
-design constraint or a regulation. Its :class:`Obligation` answers whether it is mandatory or optional, by the levels
-of ISO/IEC/IEEE 29148 and RFC 2119:
+A :class:`Requirement` has an ID, a title, a description, a creation time - the current time, unless given - and a
+:class:`RequirementKind`, which names what it constrains: e.g. a function, its performance, a quality, safety or
+security, an interface, the environment, a design constraint or a regulation. Its :class:`Obligation` answers whether
+it is mandatory or optional, by the levels of ISO/IEC/IEEE 29148 and RFC 2119:
 
 .. list-table::
    :header-rows: 1
@@ -84,15 +84,13 @@ optional predicate to select the requirements:
 
 .. code-block:: Python
 
-   from datetime import datetime, timezone
    from pyTooling.Versioning import SemanticVersion
    from pyEDAA.Reports.Requirements import Requirement, RequirementKind, RequirementSpecification
 
    specification = RequirementSpecification(SemanticVersion(1, 0, 0), "Board")
 
-   created = datetime(2026, 3, 1, tzinfo=timezone.utc)
-   power = Requirement("EL-1", "Power supply", RequirementKind.Functional, created, parent=specification)
-   Requirement("EL-1.1", "Core rail", RequirementKind.Performance, created, parent=power)
+   power = Requirement("EL-1", "Power supply", RequirementKind.Functional, parent=specification)
+   Requirement("EL-1.1", "Core rail", RequirementKind.Performance, "0.9 V, 5 A.", parent=power)
 
    for requirement in specification.IterateRequirements(lambda r: r.Kind is RequirementKind.Performance):
      print(f"{requirement.ID}: {requirement.Title}")
