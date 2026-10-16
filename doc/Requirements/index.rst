@@ -29,6 +29,7 @@ Every element carries key-value pairs for the information the model has no field
      - :class:`Requirement`            | e.g. ``EL-1`` - kind, obligation, state, layer, personas, labels, documents
        - :class:`Requirement`          | e.g. ``EL-1.1`` - a child requirement refining it
        - :class:`Link`                 | e.g. ``FW-1`` is the counterpart of ``EL-1``
+       - :class:`HistoryEvent`         | e.g. opened, split, closed
      - :class:`SpecificationItem`      | e.g. ``DES-1`` - a specification item, which specifies requirements
        - :class:`SpecificationItem`    | e.g. ``DES-1.1`` - a child item detailing it
 
@@ -115,10 +116,10 @@ Specification Items
 *******************
 
 A :class:`SpecificationItem` mirrors a requirement - with an ID, a title, a state, a layer, persons, personas, labels,
-documents, child items and links - and states how the system meets requirements, e.g. a design decision or an interface
-description. Specification items and requirements are in an N:M relation: :attr:`SpecificationItem.Requirements` lists
-the requirements an item specifies, :attr:`Requirement.SpecificationItems` the items specifying a requirement.
-:meth:`SpecificationItem.AddRequirement` maintains both sides.
+documents, child items, links and a history - and states how the system meets requirements, e.g. a design decision or an
+interface description. Specification items and requirements are in an N:M relation:
+:attr:`SpecificationItem.Requirements` lists the requirements an item specifies, :attr:`Requirement.SpecificationItems`
+the items specifying a requirement. :meth:`SpecificationItem.AddRequirement` maintains both sides.
 :meth:`~RequirementSpecification.IterateSpecificationItems` iterates every specification item, with an optional
 predicate.
 
@@ -160,3 +161,15 @@ parameters of the link's constructor.
 A source has one link of a kind to a destination. :meth:`~BaseItem.IterateOutboundLinks` and
 :meth:`~BaseItem.IterateInboundLinks` take an optional predicate, e.g. to follow the counterparts of a requirement
 through the layers.
+
+
+.. _REQ/History:
+
+History
+*******
+
+An item's :attr:`~BaseItem.History` lists the events of its life cycle in chronological order: an event can't be
+earlier than the item's creation or its last event; a time without a time zone is a local time. A
+:class:`HistoryEvent` has an :class:`EventKind` - e.g. opened, modified, approved, split, merged, closed or
+obsoleted -, a time, optionally the person causing it, and the other items involved: a split names the items a
+requirement was split into, a merge the items it was merged with.
