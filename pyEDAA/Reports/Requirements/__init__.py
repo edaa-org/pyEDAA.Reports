@@ -54,10 +54,10 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 	a reference to the specification it is part of.
 	"""
 
-	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: The types a parent may have; assigned by each class having a parent.
+	_PARENT_TYPE: ClassVar[tuple[type, ...]]         #: The types a parent may have; assigned by each class having a parent.
 
-	_parent: Nullable[Base]                      #: The element containing this one, or ``None``.
-	_root:   Nullable[RequirementSpecification]  #: The specification, or ``None`` while the element isn't part of one.
+	_parent:      Nullable[Base]                      #: The element containing this one, or ``None``.
+	_root:        Nullable[RequirementSpecification]  #: The specification, or ``None`` while the element isn't part of one.
 
 	def __init__(self, *, keyValuePairs: Nullable[Mapping[str, Any]] = None, parent: Nullable[Base] = None) -> None:
 		"""
