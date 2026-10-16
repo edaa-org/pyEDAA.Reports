@@ -29,17 +29,16 @@
 # ==================================================================================================================== #
 #
 """Unit tests of Aldec's UCDB XML format: its model, its XML schema and the conversion to the common model."""
-from pathlib                                         import Path
-from tempfile                                        import TemporaryDirectory
+from pathlib                               import Path
+from tempfile                              import TemporaryDirectory
 
-from lxml.etree                                      import fromstring
-from pyEDAA.Reports.CodeCoverage                     import CodeCoverageError, LineCoverageStatus
-from pyEDAA.Reports.CodeCoverage.AldecUCDB           import Document, Report, SCHEMA, Statement
-from pyEDAA.Reports.CodeCoverage.AldecUCDB.Elements  import AttributesMixin, Command, CoverType, HistoryNode
-from pyEDAA.Reports.CodeCoverage.AldecUCDB.Elements  import HistoryNodeKind, Language, NAMESPACE, ScopeType
-from pyEDAA.Reports.CodeCoverage.AldecUCDB.Scopes    import Bin, BinFlags, Scope, SourceLocation
-from pyEDAA.Reports.CodeCoverage.Cobertura           import Document as CoberturaDocument
-from pyTooling.Testing                               import Testcase
+from lxml.etree                            import fromstring
+from pyEDAA.Reports.CodeCoverage           import CodeCoverageError, LineCoverageStatus
+from pyEDAA.Reports.CodeCoverage.AldecUCDB import AttributesMixin, Bin, BinFlags, Command, CoverType, Document
+from pyEDAA.Reports.CodeCoverage.AldecUCDB import HistoryNode, HistoryNodeKind, Language, NAMESPACE, Report, SCHEMA
+from pyEDAA.Reports.CodeCoverage.AldecUCDB import Scope, ScopeType, SourceLocation, Statement
+from pyEDAA.Reports.CodeCoverage.Cobertura import Document as CoberturaDocument
+from pyTooling.Testing                     import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -214,12 +213,12 @@ class ParentRelation(Testcase):
 		scope =  Scope("top", ScopeType.Instance, Language.Verilog, 1, 0, source)
 		for create, types, got in (
 			(lambda: HistoryNode("t", Path("t.acdb"), HistoryNodeKind.Test, parent=scope),
-			 "'Report' or 'HistoryNode'", f"{module}.Scopes.Scope"),
+			 "'Report' or 'HistoryNode'", f"{module}.Scope"),
 			(lambda: Scope("s", ScopeType.Instance, Language.Verilog, 1, 0, source, parent=test),
-			 "'Report' or 'Scope'", f"{module}.Elements.HistoryNode"),
+			 "'Report' or 'Scope'", f"{module}.HistoryNode"),
 			(lambda: Bin("", CoverType.StatementBin, BinFlags.Is32Bit, 0, source, parent=test),
-			 "'Scope'", f"{module}.Elements.HistoryNode"),
-			(lambda: Command(4, 0, "", 1, parent=scope), "'Report'", f"{module}.Scopes.Scope")
+			 "'Scope'", f"{module}.HistoryNode"),
+			(lambda: Command(4, 0, "", 1, parent=scope), "'Report'", f"{module}.Scope")
 		):
 			with self.subTest(types=types, got=got):
 				with self.assertRaises(TypeError) as context:
