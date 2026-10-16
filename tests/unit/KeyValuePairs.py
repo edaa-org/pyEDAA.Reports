@@ -29,8 +29,6 @@
 # ==================================================================================================================== #
 #
 """Unit tests of :class:`~pyEDAA.Reports.KeyValuePairsMixin`."""
-from typing                import Iterable
-
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Testing     import Testcase
 
@@ -61,9 +59,7 @@ class KeyValuePairs(Testcase):
 		element["owner"] = "EDA²"
 		element["effort"] = 3
 		self.assertEqual({"owner": "EDA²", "effort": 3}, element.KeyValuePairs)
-		self.assertNotIsInstance(element, Iterable)
-		with self.assertRaises(TypeError):
-			_ = list(element)
+		self.assertEqual(["owner", "effort"], list(element))
 		self.assertIn("effort", element)
 
 		del element["owner"]

@@ -44,7 +44,7 @@ __documentation_url__ = "https://edaa-org.github.io/pyEDAA.Reports"
 __issue_tracker_url__ = "https://GitHub.com/edaa-org/pyEDAA.Reports/issues"
 
 from enum                  import Enum
-from typing                import Any, Mapping, Optional as Nullable
+from typing                import Any, Iterator, Mapping, Optional as Nullable
 
 from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
@@ -76,13 +76,11 @@ class KeyValuePairsMixin(metaclass=ExtendedType, mixin=True):
 	A mixin-class adding key-value pairs to an element of a data model, accessed with the dictionary syntax.
 
 	``element[key]`` reads a value, ``element[key] = value`` creates or updates a pair, ``del element[key]`` removes it,
-	``key in element`` asks for a key, and ``len(element)`` counts the pairs.
+	``key in element`` asks for a key, ``len(element)`` counts the pairs, and iterating yields the keys.
 
-	An element isn't iterable: a data model iterates its elements by methods, and a collection parameter rejects an
-	element given in place of the collection.
+	A data model iterates its elements by methods, not by iterating an element. As every element is iterable, a
+	collection parameter of a data model rejects an element given in place of the collection explicitly.
 	"""
-
-	__iter__ = None  #: Not iterable, also not through ``__getitem__`` and the sequence protocol.
 
 	_keyValuePairs: dict[str, Any]  #: The key-value pairs, by key.
 
@@ -178,6 +176,14 @@ class KeyValuePairsMixin(metaclass=ExtendedType, mixin=True):
 		:returns:   ``True``, if the element has a pair of that key.
 		"""
 		return key in self._keyValuePairs
+
+	def __iter__(self) -> Iterator[str]:
+		"""
+		Iterate the keys of the key-value pairs.
+
+		:returns: An iterator of the keys.
+		"""
+		return iter(self._keyValuePairs)
 
 
 @export
