@@ -441,7 +441,8 @@ class Tree(Testcase):
 		))
 		self.assertTrue(all(element.Root is document for element in (file, segment, branch, region, testVector)))
 
-		expansion = Expansion([], Region(20, 9, 20, 20, 2, 0, 1, RegionKind.Expansion), [], parent=file)
+		filePaths = [Path("/project/src/Statistics.c"), Path("/project/include/Statistics.h")]
+		expansion = Expansion(filePaths, Region(20, 9, 20, 20, 2, 0, 1, RegionKind.Expansion), [], parent=file)
 		target = Region(6, 30, 8, 2, 3, 1, 0, RegionKind.Code, parent=expansion)
 		self.assertEqual(([expansion], [target], document), (file.Expansions, expansion.TargetRegions, target.Root))
 
@@ -462,7 +463,7 @@ class Tree(Testcase):
 
 		region = Region(3, 33, 3, 60, 2, 0, 0, RegionKind.Code)
 		summary = _summary()
-		_ = Function("Square", 2, [region], [])
+		_ = Function("Square", 2, [region], [Path("/project/src/Statistics.c")])
 		_ = File(Path("/project/src/Shapes.cpp"), summary)
 		for create, message in (
 			(lambda: Function("Average", 1, [region], []), "Parameter 'regions' contains a region of another element."),
@@ -473,6 +474,82 @@ class Tree(Testcase):
 			(lambda: Document(Path("coverage.json"), files=[file]), "Parameter 'files' contains a file of another report."),
 			(lambda: Document(Path("coverage.json"), files=[File(Path("a.c"), _summary()), File(Path("a.c"), _summary())]),
 			 "Parameter 'files' contains two files of the same path."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(ValueError) as context:
+					_ = create()
+
+				self.assertEqual(message, str(context.exception))
+
+
+class FileReferences(Testcase):
+	"""A region's file ID and a function's main file are looked up by properties; nobody looks up an ID by hand."""
+
+	def test_Parsed(self) -> None:
+		document = Document(Path("tests/data/CodeCoverage/LLVM/coverage-3.1.0.json"), analyzeAndConvert=True)
+		statistics = document.Files[Path("/project/src/Statistics.c")]
+		header =     document.Files[Path("/project/include/Statistics.h")]
+		functions =  {function.Name: function for function in document.Functions}
+
+		clamp = functions["Clamp"]
+		self.assertEqual((statistics, statistics), (clamp.MainFile, clamp.Regions[0].File))
+		self.assertTrue(all(region.FilePath == clamp.FilePaths[region.FileID] for region in clamp.Regions))
+		expansionRegion = next(region for region in clamp.Regions if region.Kind is RegionKind.Expansion)
+		self.assertEqual((Path("/project/src/Statistics.c"), statistics), (
+			expansionRegion.ExpandedFilePath, expansionRegion.ExpandedFile
+		))
+		codeRegion = next(region for region in clamp.Regions if region.Kind is RegionKind.Code)
+		self.assertEqual((None, None), (codeRegion.ExpandedFilePath, codeRegion.ExpandedFile))
+
+		average = functions["Statistics.c:Average"]
+		self.assertEqual((Path("/project/include/Statistics.h"), header), (average.MainFilePath, average.MainFile))
+		self.assertIs(statistics, functions["InRange"].MCDCRecords[0].File)
+
+		self.assertTrue(all(branch.File is statistics for branch in statistics.Branches), "A file lists its own regions.")
+		expansion = statistics.Expansions[0]
+		self.assertIs(statistics, expansion.SourceRegion.File)
+
+	def test_Unresolved(self) -> None:
+		"""A region of no element, a file the report doesn't list, and an MC/DC record of format 2.0.1 have no file."""
+		region = Region(3, 33, 3, 60, 2, 0, 0, RegionKind.Code)
+		self.assertEqual((None, None, None), (region.FilePath, region.File, region.ExpandedFilePath))
+
+		function = Function("Square", 2, [region], [Path("/project/src/Statistics.c")])
+		self.assertEqual((Path("/project/src/Statistics.c"), None), (region.FilePath, region.File))
+
+		_ = Document(Path("coverage.json"), functions=[function])
+		self.assertEqual((Path("/project/src/Statistics.c"), None, None), (region.FilePath, region.File, function.MainFile))
+
+		record = MCDCRecord(9, 7, 9, 22, None, 0, RegionKind.MCDCDecision, [True], parent=function)
+		self.assertEqual((None, None), (record.FilePath, record.File))
+
+	def test_OutOfRange(self) -> None:
+		"""A file ID is checked against the file paths, when the region joins a function or expansion."""
+		function = Function("Square", 2, [], [Path("/project/src/Statistics.c")])
+
+		with self.assertRaises(ValueError) as context:
+			_ = Region(3, 33, 3, 60, 2, 1, 0, RegionKind.Code, parent=function)
+		self.assertEqual(
+			"Parameter 'fileID' is no index into the file paths of parameter 'parent'.", str(context.exception)
+		)
+		self.assertEqual(["Got value '1' for 1 file paths."], context.exception.__notes__)
+
+		with self.assertRaises(ValueError) as context:
+			_ = Region(20, 9, 20, 20, 2, 0, 1, RegionKind.Expansion, parent=function)
+		self.assertEqual(
+			"Parameter 'expandedFileID' is no index into the file paths of parameter 'parent'.", str(context.exception)
+		)
+
+		for create, message in (
+			(lambda: Function("f", 1, [Region(3, 33, 3, 60, 2, 1, 0, RegionKind.Code)], [Path("a.c")]),
+			 "Parameter 'regions' contains a region of a file ID out of range."),
+			(lambda: Function("f", 1, [Region(20, 9, 20, 20, 2, 0, 1, RegionKind.Expansion)], [Path("a.c")]),
+			 "Parameter 'regions' contains an expansion region of an expanded file ID out of range."),
+			(lambda: Expansion([Path("a.c")], Region(20, 9, 20, 20, 2, 0, 1, RegionKind.Expansion), []),
+			 "Parameter 'sourceRegion' is an expansion region of an expanded file ID out of range."),
+			(lambda: Expansion([Path("a.c")], Region(20, 9, 20, 20, 2, 0, 0, RegionKind.Code), [], [
+				BranchRegion(9, 7, 9, 12, 1, 2, 1, 0, RegionKind.Branch)
+			]), "Parameter 'branches' contains a region of a file ID out of range."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(ValueError) as context:

@@ -991,6 +991,13 @@ Every element knows the element containing it (``Parent``) and the report (``Roo
 elements given to its constructor; an element created with a ``parent`` is added to the parent's collection. When a
 file or function joins the report, the report becomes the root of every element below it.
 
+A region names its file by an index into the file paths of its function or expansion. Properties look it up:
+:attr:`~pyEDAA.Reports.CodeCoverage.LLVM.Base.FilePath` returns the path,
+:attr:`~pyEDAA.Reports.CodeCoverage.LLVM.Base.File` the report's :class:`~pyEDAA.Reports.CodeCoverage.LLVM.File` of
+that path; an expansion region's :attr:`~pyEDAA.Reports.CodeCoverage.LLVM.Base.ExpandedFile` and a function's
+:attr:`~pyEDAA.Reports.CodeCoverage.LLVM.Function.MainFile` likewise. A file ID is checked when the region joins a
+function or expansion, so the lookup needs no separate resolution run.
+
 :meth:`~pyEDAA.Reports.CodeCoverage.LLVM.Document.ToCoverageSummary` converts it to the common model:
 
 * A file's path is relative to the directory common to all files, which becomes the report's source directory.
