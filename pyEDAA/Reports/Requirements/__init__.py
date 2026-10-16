@@ -34,13 +34,15 @@ Abstract data model of requirements management.
 A :class:`RequirementSpecification` is the root: it registers the persons, personas, labels, documents and layers its
 requirements refer to, and every requirement by its ID.
 
-A :class:`Requirement` has a title, a description, a creation time, a state, a kind and an obligation. A requirement
-contains child requirements, which refine it.
+A :class:`Requirement` has a title, a description, a creation time, a state, a kind and an obligation. It names its
+authors and owners (:class:`~pyEDAA.Reports.Person`), the personas it is about (:class:`Persona`), its labels
+(:class:`Label`), the documents attached to it (:class:`Document`), and the layer it belongs to (:class:`Layer`) - all
+registered in the same specification. A requirement contains child requirements, which refine it.
 """
 from __future__            import annotations
 
 from datetime              import datetime
-from typing                import Any, Callable, ClassVar, Generator, Mapping, Optional as Nullable, Self
+from typing                import Any, Callable, ClassVar, Generator, Iterable, Mapping, Optional as Nullable, Self
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
 from pyTooling.Decorators  import export, readonly
@@ -707,19 +709,57 @@ class Layer(BaseWithName):
 	firmware, and this one in the software.
 	"""
 
+	def IterateRequirements(
+		self,
+		predicate: Nullable[Callable[[Requirement], bool]] = None
+	) -> Generator[Requirement, None, None]:
+		"""
+		Iterate all or selected requirements of this layer, in the order the specification registered them.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip requirements in the generator.
+
+		:param predicate: Optional, filter function accepting a requirement and returning a boolean. Default: ``None``.
+		:returns:         A generator of the layer's requirements; an empty one, while the layer isn't part of a
+		                  specification.
+		"""
+		if self._root is None:
+			return
+
+		if predicate is None:
+			for requirement in self._root._requirements.values():
+				if requirement._layer is self:
+					yield requirement
+		else:
+			for requirement in self._root._requirements.values():
+				if requirement._layer is self and predicate(requirement):
+					yield requirement
+
+
+# A class with a property named like a class - ``Layer`` - can't name that class in the annotation of a field: the class
+# body's namespace, where annotations are evaluated, binds the name to the property.
+_Layer = Layer
+
 
 @export
 class BaseItem(BaseWithID):
 	"""
-	Base-class of the items of a specification - requirements -: a title, a creation time, a state, and its child items.
+	Base-class of the items of a specification - requirements -: a title, a creation time, a state, the layer, the
+	persons, personas, labels and documents it refers to, and its child items.
 
-	A child item has the class of its parent; its ID is unique in the specification, too.
+	An item refers only to persons, personas, labels, documents and layers of its own specification, so it must be part of
+	one to refer to any. A child item has the class of its parent; its ID is unique in the specification, too.
 	"""
 
-	_title:    str              #: The item's title.
-	_created:  datetime         #: The time the item was created.
-	_state:    ItemState        #: The item's state in its life cycle.
-	_children: dict[str, Self]  #: The child items, by ID.
+	_title:       str                  #: The item's title.
+	_created:     datetime             #: The time the item was created.
+	_state:       ItemState            #: The item's state in its life cycle.
+	_layer:       Nullable[_Layer]     #: The layer the item belongs to, or ``None``.
+	_authors:     dict[str, Person]    #: The authors of the item, by user ID.
+	_owners:      dict[str, Person]    #: The owners of the item, by user ID.
+	_personas:    dict[str, Persona]   #: The personas the item is about, by ID.
+	_labels:      dict[str, Label]     #: The labels of the item, by ID.
+	_attachments: dict[str, Document]  #: The documents attached to the item, by ID.
+	_children:    dict[str, Self]      #: The child items, by ID.
 
 	def __init__(
 		self,
@@ -729,11 +769,18 @@ class BaseItem(BaseWithID):
 		created: Nullable[datetime] = None,
 		*,
 		state: ItemState = ItemState.Draft,
+		layer: Nullable[Layer] = None,
+		authors: Nullable[Iterable[Person]] = None,
+		owners: Nullable[Iterable[Person]] = None,
+		personas: Nullable[Iterable[Persona]] = None,
+		labels: Nullable[Iterable[Label]] = None,
+		attachments: Nullable[Iterable[Document]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[BaseItem | RequirementSpecification] = None
 	) -> None:
 		"""
-		Initializes an item with its title, creation time and state.
+		Initializes an item with its title, creation time, state, layer, and the persons, personas, labels and documents it
+		refers to.
 
 		:param identifier:    The item's ID.
 		:param title:         The item's title.
@@ -741,6 +788,12 @@ class BaseItem(BaseWithID):
 		:param created:       Optional, the time the item was created; without a time zone, it is a local time. Default:
 		                      ``None``, the current time.
 		:param state:         Optional, the item's state. Default: :attr:`ItemState.Draft`.
+		:param layer:         Optional, the layer the item belongs to. Default: ``None``.
+		:param authors:       Optional, the authors of the item. Default: ``None``.
+		:param owners:        Optional, the owners of the item. Default: ``None``.
+		:param personas:      Optional, the personas the item is about. Default: ``None``.
+		:param labels:        Optional, the labels of the item. Default: ``None``.
+		:param attachments:   Optional, the documents attached to the item. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the parent item or the specification. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
@@ -758,6 +811,18 @@ class BaseItem(BaseWithID):
 		:raises TypeError:    If parameter ``created`` isn't of type :class:`~datetime.datetime`.
 		:raises ValueError:   If parameter ``state`` is ``None``.
 		:raises TypeError:    If parameter ``state`` isn't of type :class:`ItemState`.
+		:raises TypeError:    If parameter ``layer`` isn't of type :class:`Layer`.
+		:raises ValueError:   If parameter ``layer`` isn't part of the item's specification.
+		:raises TypeError:    If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` isn't
+		                      iterable, or is a single element.
+		:raises TypeError:    If parameter ``authors`` or ``owners`` contains an element not of type
+		                      :class:`~pyEDAA.Reports.Person`.
+		:raises TypeError:    If parameter ``personas``, ``labels`` or ``attachments`` contains an element not of type
+		                      :class:`Persona`, :class:`Label` or :class:`Document`.
+		:raises ValueError:   If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` contains an
+		                      element, which isn't part of the item's specification.
+		:raises ValueError:   If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` contains an
+		                      element twice.
 		"""
 		super().__init__(identifier, description=description, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -784,10 +849,68 @@ class BaseItem(BaseWithID):
 			ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
 			raise ex
 
-		self._title =    title
-		self._created =  created
-		self._state =    state
-		self._children = {}
+		if layer is not None:
+			if not isinstance(layer, Layer):
+				ex = TypeError(f"Parameter 'layer' is not of type 'Layer'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(layer)}'.")
+				raise ex
+			elif self._root is None or layer._root is not self._root:
+				ex = ValueError(f"Parameter 'layer' isn't part of the item's specification.")
+				ex.add_note(f"Got layer '{layer._id}'.")
+				raise ex
+
+		self._title =       title
+		self._created =     created
+		self._state =       state
+		self._layer =       layer
+		self._authors =     {}
+		self._owners =      {}
+		self._personas =    {}
+		self._labels =      {}
+		self._attachments = {}
+		self._children =    {}
+
+		for parameterName, references, referenceType, container in (
+			("authors",     authors,     Person,   self._authors),
+			("owners",      owners,      Person,   self._owners),
+			("personas",    personas,    Persona,  self._personas),
+			("labels",      labels,      Label,    self._labels),
+			("attachments", attachments, Document, self._attachments),
+		):
+			if references is None:
+				continue
+			elif not isinstance(references, Iterable):
+				ex = TypeError(f"Parameter '{parameterName}' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(references)}'.")
+				raise ex
+			elif isinstance(references, KeyValuePairsMixin):
+				ex = TypeError(f"Parameter '{parameterName}' is a single element, not an iterable of elements.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(references)}'.")
+				raise ex
+
+			for reference in references:
+				if not isinstance(reference, referenceType):
+					ex = TypeError(f"Parameter '{parameterName}' contains an element not of type '{referenceType.__name__}'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(reference)}'.")
+					raise ex
+
+				if referenceType is Person:
+					key =        reference._userID
+					registered = self._root is not None and self._root._persons.get(key) is reference
+				else:
+					key =        reference._id
+					registered = self._root is not None and reference._root is self._root
+
+				if not registered:
+					ex = ValueError(f"Parameter '{parameterName}' contains an element not part of the item's specification.")
+					ex.add_note(f"Got {referenceType.__name__.lower()} '{key}'.")
+					raise ex
+				elif key in container:
+					ex = ValueError(f"Parameter '{parameterName}' contains an element twice.")
+					ex.add_note(f"Got {referenceType.__name__.lower()} '{key}'.")
+					raise ex
+
+				container[key] = reference
 
 	def _AddElement(self, element: Self) -> None:
 		"""
@@ -844,6 +967,62 @@ class BaseItem(BaseWithID):
 			raise ex
 
 		self._state = state
+
+	@readonly
+	def Layer(self) -> Nullable[Layer]:
+		"""
+		Read-only property to access the layer the item belongs to (:attr:`_layer`).
+
+		:returns: The layer, or ``None``.
+		"""
+		return self._layer
+
+	@readonly
+	def Authors(self) -> dict[str, Person]:
+		"""
+		Read-only property to access the authors of the item (:attr:`_authors`).
+
+		:returns: The authors, by user ID.
+		"""
+		return self._authors
+
+	@readonly
+	def Owners(self) -> dict[str, Person]:
+		"""
+		Read-only property to access the owners of the item (:attr:`_owners`).
+
+		:returns: The owners, by user ID.
+		"""
+		return self._owners
+
+	@readonly
+	def Personas(self) -> dict[str, Persona]:
+		"""
+		Read-only property to access the personas the item is about (:attr:`_personas`).
+
+		E.g. the role of a user story: "As a reviewer, I want ...".
+
+		:returns: The personas, by ID.
+		"""
+		return self._personas
+
+	@readonly
+	def Labels(self) -> dict[str, Label]:
+		"""
+		Read-only property to access the labels of the item (:attr:`_labels`).
+
+		:returns: The labels, by ID.
+		"""
+		return self._labels
+
+	@readonly
+	def Attachments(self) -> dict[str, Document]:
+		"""
+		Read-only property to access the documents attached to the item (:attr:`_attachments`).
+
+		:returns: The documents, by ID.
+		"""
+		return self._attachments
 
 	@readonly
 	def Children(self) -> dict[str, Self]:
@@ -917,6 +1096,12 @@ class Requirement(BaseItem):
 		*,
 		obligation: Obligation = Obligation.Mandatory,
 		state: ItemState = ItemState.Draft,
+		layer: Nullable[Layer] = None,
+		authors: Nullable[Iterable[Person]] = None,
+		owners: Nullable[Iterable[Person]] = None,
+		personas: Nullable[Iterable[Persona]] = None,
+		labels: Nullable[Iterable[Label]] = None,
+		attachments: Nullable[Iterable[Document]] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		parent: Nullable[Requirement | RequirementSpecification] = None
 	) -> None:
@@ -927,11 +1112,17 @@ class Requirement(BaseItem):
 		:param title:              The requirement's title.
 		:param kind:               What the requirement constrains.
 		:param description:        Optional, the requirement's description. Default: ``""``.
-		:param created:            Optional, the time the requirement was created; without a time zone, it is a local
-		                           time. Default: ``None``, the current time.
+		:param created:            Optional, the time the requirement was created; without a time zone, it is a local time.
+		                           Default: ``None``, the current time.
 		:param obligation:         Optional, whether the requirement must, should or may be met. Default:
 		                           :attr:`Obligation.Mandatory`.
 		:param state:              Optional, the requirement's state. Default: :attr:`ItemState.Draft`.
+		:param layer:              Optional, the layer the requirement belongs to. Default: ``None``.
+		:param authors:            Optional, the authors of the requirement. Default: ``None``.
+		:param owners:             Optional, the owners of the requirement. Default: ``None``.
+		:param personas:           Optional, the personas the requirement is about. Default: ``None``.
+		:param labels:             Optional, the labels of the requirement. Default: ``None``.
+		:param attachments:        Optional, the documents attached to the requirement. Default: ``None``.
 		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
 		:param parent:             Optional, the requirement this one refines, or the specification. Default: ``None``.
 		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
@@ -950,6 +1141,18 @@ class Requirement(BaseItem):
 		:raises TypeError:         If parameter ``created`` isn't of type :class:`~datetime.datetime`.
 		:raises ValueError:        If parameter ``state`` is ``None``.
 		:raises TypeError:         If parameter ``state`` isn't of type :class:`ItemState`.
+		:raises TypeError:         If parameter ``layer`` isn't of type :class:`Layer`.
+		:raises ValueError:        If parameter ``layer`` isn't part of the requirement's specification.
+		:raises TypeError:         If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` isn't
+		                           iterable, or is a single element.
+		:raises TypeError:         If parameter ``authors`` or ``owners`` contains an element not of type
+		                           :class:`~pyEDAA.Reports.Person`.
+		:raises TypeError:         If parameter ``personas``, ``labels`` or ``attachments`` contains an element not of type
+		                           :class:`Persona`, :class:`Label` or :class:`Document`.
+		:raises ValueError:        If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                           contains an element, which isn't part of the requirement's specification.
+		:raises ValueError:        If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                           contains an element twice.
 		:raises ValueError:        If parameter ``kind`` is ``None``.
 		:raises TypeError:         If parameter ``kind`` isn't of type :class:`RequirementKind`.
 		:raises ValueError:        If parameter ``obligation`` is ``None``.
@@ -962,6 +1165,12 @@ class Requirement(BaseItem):
 			description,
 			created,
 			state=state,
+			layer=layer,
+			authors=authors,
+			owners=owners,
+			personas=personas,
+			labels=labels,
+			attachments=attachments,
 			keyValuePairs=keyValuePairs,
 			parent=parent
 		)
