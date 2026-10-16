@@ -43,22 +43,20 @@ these identifiers, and every item but a module or package is of kind
    :mod:`pyEDAA.Reports.DocumentationCoverage.Python`
       |rarr| The reader of Python source files, which counts fields and variables too.
 """
-from __future__                                 import annotations
+from __future__                           import annotations
 
-from datetime                                   import timedelta
-from pathlib                                    import Path
-from typing                                     import Optional as Nullable
+from datetime                             import timedelta
+from pathlib                              import Path
+from typing                               import Optional as Nullable
 
-from docstr_coverage                            import analyze, ResultCollection
-from docstr_coverage.result_collection          import ExpectedDocstring
-from pyTooling.Common                           import getFullyQualifiedName
-from pyTooling.Decorators                       import export, readonly
-from pyTooling.MetaClasses                      import ExtendedType
-from pyTooling.Stopwatch                        import Stopwatch
+from docstr_coverage                      import analyze, ResultCollection
+from docstr_coverage.result_collection    import ExpectedDocstring
+from pyTooling.Common                     import getFullyQualifiedName
+from pyTooling.Decorators                 import export, readonly
+from pyTooling.MetaClasses                import ExtendedType
+from pyTooling.Stopwatch                  import Stopwatch
 
-from pyEDAA.Reports.DocumentationCoverage       import CoverageState, DocCoverageError, ItemKind
-from pyEDAA.Reports.DocumentationCoverage.Files import DocumentationReport
-from pyEDAA.Reports.DocumentationCoverage.Items import Item
+from pyEDAA.Reports.DocumentationCoverage import CoverageState, DocCoverageError, DocumentationReport, Item, ItemKind
 
 
 @export
@@ -189,7 +187,7 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 		"""
 		Convert docstr_coverage's analysis to a documentation coverage report, aggregate it, and measure the duration.
 
-		The report's :attr:`~pyEDAA.Reports.DocumentationCoverage.Files.DocumentationReport.AnalysisDuration` is the
+		The report's :attr:`~pyEDAA.Reports.DocumentationCoverage.DocumentationReport.AnalysisDuration` is the
 		duration of docstr_coverage's analysis.
 
 		A source file is a module, an ``__init__.py`` the package of its directory, and a directory without

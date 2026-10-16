@@ -29,23 +29,20 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the reader of Python source code for the documentation coverage model."""
-from datetime                                           import timedelta
-from pathlib                                            import Path
-from sys                                                import version_info
-from tempfile                                           import TemporaryDirectory
-from textwrap                                           import dedent
-from tokenize                                           import generate_tokens
-from typing                                             import Iterable, Optional as Nullable
-from unittest                                           import skipIf
+from datetime                                    import timedelta
+from pathlib                                     import Path
+from sys                                         import version_info
+from tempfile                                    import TemporaryDirectory
+from textwrap                                    import dedent
+from tokenize                                    import generate_tokens
+from typing                                      import Iterable, Optional as Nullable
+from unittest                                    import skipIf
 
-from pyEDAA.Reports.DocumentationCoverage               import CoverageState, DocCoverageError, ItemKind
-from pyEDAA.Reports.DocumentationCoverage               import SourceFileWarning
-from pyEDAA.Reports.DocumentationCoverage.Files         import DocumentationReport
-from pyEDAA.Reports.DocumentationCoverage.Items         import Item
-from pyEDAA.Reports.DocumentationCoverage.Python        import Analyzer, CountedItems
-from pyEDAA.Reports.DocumentationCoverage.Python.Source import SourceFile
-from pyTooling.Warning                                  import UnhandledCriticalWarningError, WarningCollector
-from pyTooling.Testing                                  import Testcase
+from pyEDAA.Reports.DocumentationCoverage        import CoverageState, DocCoverageError, DocumentationReport
+from pyEDAA.Reports.DocumentationCoverage        import Item, ItemKind, SourceFileWarning
+from pyEDAA.Reports.DocumentationCoverage.Python import Analyzer, CountedItems, SourceFile
+from pyTooling.Warning                           import UnhandledCriticalWarningError, WarningCollector
+from pyTooling.Testing                           import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover
