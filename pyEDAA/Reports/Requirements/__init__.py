@@ -1573,6 +1573,7 @@ class Link(Base):
 
 	_PARENT_TYPE: ClassVar[tuple[type, ...]] = (BaseItem, )  #: A link is in its source item.
 
+	_source:      BaseItem                                   #: The item the link starts at: its parent.
 	_destination: BaseItem                                   #: The item the link points to.
 	_kind:        LinkKind                                   #: The relationship the link states.
 
@@ -1631,6 +1632,7 @@ class Link(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
+		self._source =      parent
 		self._destination = destination
 		self._kind =        kind
 
@@ -1639,11 +1641,11 @@ class Link(Base):
 	@readonly
 	def Source(self) -> BaseItem:
 		"""
-		Read-only property to access the item the link starts at: its parent (:attr:`_parent`).
+		Read-only property to access the item the link starts at: its parent (:attr:`_source`).
 
 		:returns: The source item.
 		"""
-		return self._parent
+		return self._source
 
 	@readonly
 	def Destination(self) -> BaseItem:
