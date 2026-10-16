@@ -835,7 +835,7 @@ class Section(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``testName`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``sourceFile`` is ``None``.
 		:raises TypeError:  If parameter ``sourceFile`` isn't of type :class:`~pathlib.Path`.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.LCOV.Tracefile`.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Tracefile`.
 		"""
 		if testName is None:
 			raise ValueError(f"Parameter 'testName' is None.")
