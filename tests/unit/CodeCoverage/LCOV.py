@@ -30,14 +30,14 @@
 #
 #
 """Unit tests of lcov's tracefile format: its model, its line parser and the conversion to the common model."""
-from pathlib                                  import Path
-from tempfile                                 import TemporaryDirectory
-from typing                                   import Callable
+from pathlib                          import Path
+from tempfile                         import TemporaryDirectory
+from typing                           import Callable
 
-from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.LCOV         import RECORD_SYNTAX, Document
-from pyEDAA.Reports.CodeCoverage.LCOV.Records import Branch, Condition, Function as lcov_Function, Line, Section
-from pyTooling.Testing                        import Testcase
+from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, Function, LineCoverageStatus, SourceFile
+from pyEDAA.Reports.CodeCoverage.LCOV import RECORD_SYNTAX, Branch, Condition, Document
+from pyEDAA.Reports.CodeCoverage.LCOV import Function as lcov_Function, Line, Section
+from pyTooling.Testing                import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover
