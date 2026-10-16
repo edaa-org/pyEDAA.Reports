@@ -30,8 +30,12 @@
 #
 #
 """Unit tests of the risk management model: enumerations, risks, implications, mitigations, links and the register."""
-from pyEDAA.Reports.RiskManagement import Impact, Implication, Link, LinkKind, Mitigation, Probability, Risk
-from pyEDAA.Reports.RiskManagement import RiskManagement, RiskManagementError, RiskState
+from datetime                      import datetime, timezone
+
+from pyEDAA.Reports                import Person
+from pyEDAA.Reports.RiskManagement import Impact, Implication, Link, LinkKind, Mitigation, MitigationKind
+from pyEDAA.Reports.RiskManagement import MitigationState, Probability, Risk, RiskLevel, RiskManagement
+from pyEDAA.Reports.RiskManagement import RiskManagementError, RiskState
 from pyTooling.Versioning          import SemanticVersion
 from pyTooling.Testing             import Testcase
 
@@ -65,6 +69,24 @@ class Enumerations(Testcase):
 		self.assertIs(LinkKind.DependsOn, LinkKind.Parse("depends-on"))
 		self.assertIs(LinkKind.Related, LinkKind.Parse(None))
 
+	def test_Rank(self) -> None:
+		self.assertEqual([1, 2, 3, 4], [probability.Rank for probability in Probability])
+		self.assertEqual([1, 2, 3, 4], [impact.Rank for impact in Impact])
+
+	def test_RiskLevel(self) -> None:
+		self.assertIs(RiskLevel.Critical, RiskLevel.Parse("critical"))
+		self.assertEqual(["low", "medium", "high", "critical"], [str(level) for level in RiskLevel])
+
+	def test_MitigationKind(self) -> None:
+		self.assertIs(MitigationKind.Contingency, MitigationKind.Parse("contingency"))
+		self.assertIs(MitigationKind.Prevent, MitigationKind.Parse(None))
+
+	def test_MitigationState(self) -> None:
+		self.assertIs(MitigationState.OnHold, MitigationState.Parse("on-hold"))
+		self.assertIs(MitigationState.Abandoned, MitigationState.Parse("abandoned"))
+		self.assertIs(MitigationState.Planned, MitigationState.Parse(None))
+		self.assertEqual(["on-hold", "planned", "active", "done", "abandoned"], [str(state) for state in MitigationState])
+
 
 class RiskManagementInstantiation(Testcase):
 	def test_Empty(self) -> None:
@@ -78,6 +100,7 @@ class RiskManagementInstantiation(Testcase):
 		self.assertEqual({}, riskManagement.Implications)
 		self.assertEqual({}, riskManagement.Mitigations)
 		self.assertEqual([], riskManagement.Links)
+		self.assertEqual({}, riskManagement.Persons)
 		self.assertEqual("pyEDAA", riskManagement["project"])
 		self.assertEqual("<RiskManagement 1.0.0: 0 risks, 0 implications, 0 mitigations>", repr(riskManagement))
 
@@ -129,8 +152,12 @@ class ElementInstantiation(Testcase):
 		self.assertEqual({}, risk.SecondOrderImplications)
 		self.assertEqual([], risk.OutboundLinks)
 		self.assertEqual([], risk.InboundLinks)
+		self.assertIsNone(risk.Owner)
+		self.assertIsNone(risk.NextReview)
+		self.assertEqual(6, risk.Score)
+		self.assertIs(RiskLevel.Medium, risk.Level)
 		self.assertEqual(0, len(risk))
-		self.assertEqual("<Risk R1: open, probability medium, impact high>", repr(risk))
+		self.assertEqual("<Risk R1: open, probability medium, impact high, level medium>", repr(risk))
 
 	def test_Risk_Assessment(self) -> None:
 		"""Probability, impact and state are reassessed by assignment."""
@@ -201,7 +228,9 @@ class ElementInstantiation(Testcase):
 		self.assertEqual("M1", mitigation.ID)
 		self.assertEqual("Order a second shuttle run.", mitigation.Description)
 		self.assertEqual({"I1": sideEffect}, mitigation.Implications)
-		self.assertEqual("<Mitigation M1: 1 implications>", repr(mitigation))
+		self.assertIs(MitigationKind.Prevent, mitigation.Kind)
+		self.assertIs(MitigationState.Planned, mitigation.State)
+		self.assertEqual("<Mitigation M1: prevent, planned, 1 implications>", repr(mitigation))
 
 	def test_References_ParameterChecks(self) -> None:
 		implication = Implication("I1", "The tape-out is delayed.")
@@ -505,3 +534,143 @@ class Links(Testcase):
 		self.assertIs(register, link.Root)
 		self.assertEqual([link], register.Links)
 		self.assertEqual([link], foundry.OutboundLinks)
+
+
+class Assessment(Testcase):
+	def test_Level(self) -> None:
+		"""The level of each cell of the risk matrix."""
+		for probability, impact, score, level in (
+			(Probability.Low,      Impact.Low,      1,  RiskLevel.Low),
+			(Probability.Medium,   Impact.Low,      2,  RiskLevel.Low),
+			(Probability.Low,      Impact.High,     3,  RiskLevel.Low),
+			(Probability.Occurred, Impact.Low,      4,  RiskLevel.Medium),
+			(Probability.Medium,   Impact.Medium,   4,  RiskLevel.Medium),
+			(Probability.High,     Impact.Medium,   6,  RiskLevel.Medium),
+			(Probability.Medium,   Impact.Critical, 8,  RiskLevel.High),
+			(Probability.High,     Impact.High,     9,  RiskLevel.High),
+			(Probability.Occurred, Impact.High,     12, RiskLevel.Critical),
+			(Probability.Occurred, Impact.Critical, 16, RiskLevel.Critical),
+		):
+			with self.subTest(probability=probability, impact=impact):
+				risk = Risk("R1", "Late silicon", "The foundry is late.", probability, impact)
+				self.assertEqual(score, risk.Score)
+				self.assertIs(level, risk.Level)
+
+	def test_Owner(self) -> None:
+		"""The owner of a risk in a risk register is a person of that register; one person in several registers."""
+		paebbels = Person("paebbels", "Patrick Lehmann", "paebbels@example.com")
+		register = RiskManagement(VERSION)
+		other =    RiskManagement(VERSION)
+		register.AddPerson(paebbels)
+		other.AddPerson(paebbels)
+
+		risk = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		risk.Owner = paebbels
+		self.assertIs(paebbels, risk.Owner)
+		self.assertEqual({"paebbels": paebbels}, register.Persons)
+
+		board = Risk("R3", "Late board", "The board waits.", Probability.Low, Impact.Low, owner=paebbels, parent=other)
+		self.assertIs(paebbels, board.Owner)
+
+		risk.Owner = None
+		self.assertIsNone(risk.Owner)
+
+		stranger = Person("stranger", "Somebody Else")
+		for value, exception, message in (
+			("paebbels", TypeError,  "Parameter 'value' is not of type 'Person'."),
+			(stranger,   ValueError, "Parameter 'value' isn't a person of the risk register."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					risk.Owner = value
+				self.assertEqual(message, str(context.exception))
+
+		for keywords, exception, message in (
+			({"owner": "paebbels"},                   TypeError,  "Parameter 'owner' is not of type 'Person'."),
+			({"owner": stranger, "parent": register}, ValueError, "Parameter 'owner' isn't a person of the risk register."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					_ = Risk("R2", "Tool license", "A license expires.", Probability.Low, Impact.Low, **keywords)
+				self.assertEqual(message, str(context.exception))
+
+		standalone = Risk("R2", "Tool license", "A license expires.", Probability.Low, Impact.Low, owner=stranger)
+		with self.assertRaises(ValueError) as context:
+			standalone.Parent = register
+		self.assertEqual("Risk 'R2' has an owner outside the risk register.", str(context.exception))
+		self.assertEqual(
+			["Got person 'stranger'.", "Add the person to the risk register first."],
+			context.exception.__notes__
+		)
+
+		register.AddPerson(stranger)
+		standalone.Parent = register
+		self.assertIs(register, standalone.Root)
+
+	def test_AddPerson(self) -> None:
+		register = RiskManagement(VERSION)
+		register.AddPerson(Person("paebbels", "Patrick Lehmann"))
+
+		for person, exception, message in (
+			(None,                                  ValueError,          "Parameter 'person' is None."),
+			("paebbels",                            TypeError,           "Parameter 'person' is not of type 'Person'."),
+			(Person("paebbels", "Patrick Lehmann"), RiskManagementError,
+				"Person 'paebbels' already exists in the risk register."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					register.AddPerson(person)
+				self.assertEqual(message, str(context.exception))
+
+	def test_NextReview(self) -> None:
+		"""A review date without a time zone is a local time."""
+		review = datetime(2026, 11, 2, 9, 0, tzinfo=timezone.utc)
+		local =  datetime(2026, 11, 2, 9)
+		risk =   Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, nextReview=review)
+		self.assertEqual(review, risk.NextReview)
+
+		risk.NextReview = local
+		self.assertEqual(local, risk.NextReview)
+
+		risk.NextReview = None
+		self.assertIsNone(risk.NextReview)
+
+		risk = Risk("R2", "Late board", "The PCB is late.", Probability.Low, Impact.Medium, nextReview=local)
+		self.assertEqual(local, risk.NextReview)
+
+		with self.assertRaises(TypeError) as context:
+			risk.NextReview = "2026-11-02"
+		self.assertEqual("Parameter 'value' is not of type 'datetime'.", str(context.exception))
+
+		with self.assertRaises(TypeError) as context:
+			_ = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, nextReview="2026-11-02")
+		self.assertEqual("Parameter 'nextReview' is not of type 'datetime'.", str(context.exception))
+
+	def test_Mitigation(self) -> None:
+		mitigation = Mitigation("M1", "Rent a tester.", kind=MitigationKind.Contingency, state=MitigationState.Active)
+
+		self.assertIs(MitigationKind.Contingency, mitigation.Kind)
+		self.assertIs(MitigationState.Active, mitigation.State)
+
+		mitigation.State = MitigationState.Done
+		self.assertIs(MitigationState.Done, mitigation.State)
+
+		for keywords, exception, message in (
+			({"kind": None},      ValueError, "Parameter 'kind' is None."),
+			({"kind": "avoid"},   TypeError,  "Parameter 'kind' is not of type 'MitigationKind'."),
+			({"state": None},     ValueError, "Parameter 'state' is None."),
+			({"state": "active"}, TypeError,  "Parameter 'state' is not of type 'MitigationState'."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					_ = Mitigation("M1", "Rent a tester.", **keywords)
+				self.assertEqual(message, str(context.exception))
+
+		for value, exception, message in (
+			(None,   ValueError, "Parameter 'value' is None."),
+			("done", TypeError,  "Parameter 'value' is not of type 'MitigationState'."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					mitigation.State = value
+				self.assertEqual(message, str(context.exception))
