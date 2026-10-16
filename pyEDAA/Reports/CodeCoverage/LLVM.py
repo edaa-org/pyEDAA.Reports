@@ -48,7 +48,8 @@ its regions, branch regions and MC/DC records.
 
 Each class of the format's model takes typed values in its constructor, so a model can be built by hand, too. A
 classmethod ``Parse`` reads the class' JSON element and calls the constructor; :meth:`Document.Convert` parses a
-report's files, functions and totals with it.
+report's files, functions and totals with it. Every element (:class:`Element`) knows the element containing it and the
+report's root.
 
 :meth:`Document.ToCoverageSummary` converts the model to the common model of :mod:`pyEDAA.Reports.CodeCoverage`:
 
@@ -81,13 +82,13 @@ from enum                        import Enum
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from re                          import match
-from typing                      import Any, Iterable, Optional as Nullable, Self
+from typing                      import Any, ClassVar, Generator, Generic, Iterable, Optional as Nullable, Self, TypeVar
 
 from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
-from pyTooling.MetaClasses       import ExtendedType
+from pyTooling.MetaClasses       import ExtendedType, abstractmethod
 from pyTooling.Stopwatch         import Stopwatch
 from pyTooling.Versioning        import SemanticVersion
 
@@ -105,6 +106,8 @@ SCHEMA = "LLVM-Coverage-JSON.schema.json"  #: The JSON Schema a report is valida
 # field: the class body's namespace, where annotations are evaluated, binds the name to the property.
 _Path = Path
 
+ParentType = TypeVar("ParentType")
+
 
 @export
 class RegionKind(Enum):
@@ -120,7 +123,70 @@ class RegionKind(Enum):
 
 
 @export
-class Base(metaclass=ExtendedType, slots=True):
+class Element(Generic[ParentType], metaclass=ExtendedType, slots=True):
+	"""
+	Base-class of every element of the format's model: a reference to the element containing it, and to the report's
+	root.
+
+	A container connects the elements given to its constructor; an element created with a ``parent`` is added to the
+	parent's collection. When a file or function joins a report, the report becomes the root of every element below it.
+	"""
+
+	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: The types a parent may have; assigned below the classes.
+
+	_parent: Nullable[ParentType]  #: The element containing this one, or ``None``.
+	_root:   Nullable[Report]      #: The report's root, or ``None`` while the element isn't part of a report.
+
+	def __init__(self, *, parent: Nullable[ParentType] = None) -> None:
+		"""
+		Initialize an element with its parent and the parent's root.
+
+		The parent doesn't list the element yet: the class adds it to the parent's collection, after setting its fields.
+
+		:param parent:     Optional, the element containing this one. Default: ``None``.
+		:raises TypeError: If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
+		"""
+		if parent is None:
+			self._parent = None
+			self._root =   None
+		elif not isinstance(parent, self._PARENT_TYPE):
+			typeNames = " or ".join(f"'{parentType.__name__}'" for parentType in self._PARENT_TYPE)
+			ex = TypeError(f"Parameter 'parent' is not of type {typeNames}.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
+			raise ex
+		else:
+			self._parent = parent
+			self._root =   parent._root
+
+	@readonly
+	def Parent(self) -> Nullable[ParentType]:
+		"""
+		Read-only property to access the element containing this one (:attr:`_parent`).
+
+		:returns: The parent, or ``None`` if the element belongs to none.
+		"""
+		return self._parent
+
+	@readonly
+	def Root(self) -> Nullable[Report]:
+		"""
+		Read-only property to access the report's root (:attr:`_root`).
+
+		:returns: The report, or ``None`` while the element isn't part of a report.
+		"""
+		return self._root
+
+	@abstractmethod
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate every element below this one, depth-first.
+
+		:returns: A generator of the elements below this one.
+		"""
+
+
+@export
+class Base(Element[ParentType]):
 	"""
 	Base-class of the source regions: a source range, the file it is in, the file it expands to, and its kind.
 	"""
@@ -141,7 +207,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		columnEnd: int,
 		fileID: Nullable[int],
 		expandedFileID: int,
-		kind: RegionKind
+		kind: RegionKind,
+		*,
+		parent: Nullable[ParentType] = None
 	) -> None:
 		"""
 		Initialize the source range, the region's files and its kind.
@@ -154,6 +222,8 @@ class Base(metaclass=ExtendedType, slots=True):
 		                       stated.
 		:param expandedFileID: Index of the file an expansion region expands to.
 		:param kind:           The kind of the region.
+		:param parent:         Optional, the element containing the region. Default: ``None``.
+		:raises TypeError:     If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		:raises ValueError:    If parameter ``lineStart``, ``columnStart``, ``lineEnd`` or ``columnEnd`` is ``None``.
 		:raises TypeError:     If parameter ``lineStart``, ``columnStart``, ``lineEnd`` or ``columnEnd`` isn't of type
 		                       :class:`int`.
@@ -166,6 +236,8 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises ValueError:    If parameter ``kind`` is ``None``.
 		:raises TypeError:     If parameter ``kind`` isn't of type :class:`RegionKind`.
 		"""
+		super().__init__(parent=parent)
+
 		for name, position in (
 			("lineStart", lineStart), ("columnStart", columnStart), ("lineEnd", lineEnd), ("columnEnd", columnEnd)
 		):
@@ -280,9 +352,17 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 		return self._kind
 
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate every element below the region: none.
+
+		:returns: An empty generator.
+		"""
+		yield from ()
+
 
 @export
-class Region(Base):
+class Region(Base["Function | Expansion"]):
 	"""
 	A region of a function or an expansion: a source range with a count.
 
@@ -300,10 +380,12 @@ class Region(Base):
 		count: int,
 		fileID: int,
 		expandedFileID: int,
-		kind: RegionKind
+		kind: RegionKind,
+		*,
+		parent: Nullable[Function | Expansion] = None
 	) -> None:
 		"""
-		Initialize a region.
+		Initialize a region, and add it to the regions of its function or to the target regions of its expansion.
 
 		:param lineStart:      Line the region starts at.
 		:param columnStart:    Column the region starts at.
@@ -313,12 +395,14 @@ class Region(Base):
 		:param fileID:         Index of the region's file in the file paths of its function or expansion.
 		:param expandedFileID: Index of the file an expansion region expands to.
 		:param kind:           The kind of the region.
+		:param parent:         Optional, the function or expansion the region belongs to. Default: ``None``.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`Function` or :class:`Expansion`.
 		:raises ValueError:    If parameter ``fileID`` is ``None``.
 		:raises ValueError:    If parameter ``count`` is ``None``.
 		:raises TypeError:     If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``count`` is negative.
 		"""
-		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind)
+		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind, parent=parent)
 
 		if fileID is None:
 			raise ValueError(f"Parameter 'fileID' is None.")
@@ -336,15 +420,19 @@ class Region(Base):
 
 		self._count = count
 
+		if parent is not None:
+			(parent._regions if isinstance(parent, Function) else parent._targetRegions).append(self)
+
 	@classmethod
-	def Parse(cls, region: list[Any]) -> Self:
+	def Parse(cls, region: list[Any], *, parent: Nullable[Function | Expansion] = None) -> Self:
 		"""
 		Parse a region from its JSON array.
 
 		:param region: The JSON array of the region.
+		:param parent: Optional, the function or expansion the region belongs to. Default: ``None``.
 		:returns:      The region.
 		"""
-		return cls(*region[:7], RegionKind(region[7]))
+		return cls(*region[:7], RegionKind(region[7]), parent=parent)
 
 	@readonly
 	def Count(self) -> int:
@@ -357,7 +445,7 @@ class Region(Base):
 
 
 @export
-class BranchRegion(Base):
+class BranchRegion(Base["File | Function | Expansion"]):
 	"""
 	A branch region: a condition with the counts of its true and false outcome.
 
@@ -378,10 +466,12 @@ class BranchRegion(Base):
 		falseCount: int,
 		fileID: int,
 		expandedFileID: int,
-		kind: RegionKind
+		kind: RegionKind,
+		*,
+		parent: Nullable[File | Function | Expansion] = None
 	) -> None:
 		"""
-		Initialize a branch region.
+		Initialize a branch region, and add it to the branch regions of its file, function or expansion.
 
 		:param lineStart:      Line the branch region starts at.
 		:param columnStart:    Column the branch region starts at.
@@ -392,12 +482,15 @@ class BranchRegion(Base):
 		:param fileID:         Index of the branch region's file in the file paths of its function or expansion.
 		:param expandedFileID: Index of the file an expansion region expands to; ``0`` for a branch region.
 		:param kind:           The kind of the region: a branch, or a condition measured for MC/DC.
+		:param parent:         Optional, the file, function or expansion the branch region belongs to. Default: ``None``.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`File`, :class:`Function` or
+		                       :class:`Expansion`.
 		:raises ValueError:    If parameter ``fileID`` is ``None``.
 		:raises ValueError:    If parameter ``trueCount`` or ``falseCount`` is ``None``.
 		:raises TypeError:     If parameter ``trueCount`` or ``falseCount`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``trueCount`` or ``falseCount`` is negative.
 		"""
-		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind)
+		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind, parent=parent)
 
 		if fileID is None:
 			raise ValueError(f"Parameter 'fileID' is None.")
@@ -417,15 +510,19 @@ class BranchRegion(Base):
 		self._trueCount =  trueCount
 		self._falseCount = falseCount
 
+		if parent is not None:
+			parent._branches.append(self)
+
 	@classmethod
-	def Parse(cls, branch: list[Any]) -> Self:
+	def Parse(cls, branch: list[Any], *, parent: Nullable[File | Function | Expansion] = None) -> Self:
 		"""
 		Parse a branch region from its JSON array.
 
 		:param branch: The JSON array of the branch region.
+		:param parent: Optional, the file, function or expansion the branch region belongs to. Default: ``None``.
 		:returns:      The branch region.
 		"""
-		return cls(*branch[:8], RegionKind(branch[8]))
+		return cls(*branch[:8], RegionKind(branch[8]), parent=parent)
 
 	@readonly
 	def TrueCount(self) -> int:
@@ -447,7 +544,7 @@ class BranchRegion(Base):
 
 
 @export
-class TestVector(metaclass=ExtendedType, slots=True):
+class TestVector(Element["MCDCRecord"]):
 	"""
 	A test vector of an MC/DC decision - in format version 3.1.0 -: the values of its conditions, and the outcome.
 	"""
@@ -456,13 +553,22 @@ class TestVector(metaclass=ExtendedType, slots=True):
 	_executed:   bool                  #: Whether the test vector was executed.
 	_result:     Nullable[bool]        #: The outcome of the decision.
 
-	def __init__(self, conditions: Iterable[Nullable[bool]], executed: bool, result: Nullable[bool]) -> None:
+	def __init__(
+		self,
+		conditions: Iterable[Nullable[bool]],
+		executed: bool,
+		result: Nullable[bool],
+		*,
+		parent: Nullable[MCDCRecord] = None
+	) -> None:
 		"""
-		Initialize a test vector.
+		Initialize a test vector, and add it to the test vectors of its MC/DC record.
 
 		:param conditions:  The values of the conditions; ``None`` for a condition not evaluated.
 		:param executed:    Whether the test vector was executed.
 		:param result:      The outcome of the decision.
+		:param parent:      Optional, the MC/DC record the test vector belongs to. Default: ``None``.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`MCDCRecord`.
 		:raises ValueError: If parameter ``conditions`` is ``None``.
 		:raises TypeError:  If parameter ``conditions`` isn't iterable.
 		:raises TypeError:  If parameter ``conditions`` contains an element not of type :class:`bool`, other than ``None``.
@@ -470,6 +576,8 @@ class TestVector(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``executed`` isn't of type :class:`bool`.
 		:raises TypeError:  If parameter ``result`` isn't of type :class:`bool`.
 		"""
+		super().__init__(parent=parent)
+
 		if conditions is None:
 			raise ValueError(f"Parameter 'conditions' is None.")
 		elif not isinstance(conditions, Iterable):
@@ -501,15 +609,19 @@ class TestVector(metaclass=ExtendedType, slots=True):
 
 			self._conditions.append(condition)
 
+		if parent is not None:
+			parent._testVectors.append(self)
+
 	@classmethod
-	def Parse(cls, testVector: dict[str, Any]) -> Self:
+	def Parse(cls, testVector: dict[str, Any], *, parent: Nullable[MCDCRecord] = None) -> Self:
 		"""
 		Parse a test vector from its JSON object.
 
 		:param testVector: The JSON object of the test vector.
+		:param parent:     Optional, the MC/DC record the test vector belongs to. Default: ``None``.
 		:returns:          The test vector.
 		"""
-		return cls(testVector["conditions"], testVector["executed"], testVector["result"])
+		return cls(testVector["conditions"], testVector["executed"], testVector["result"], parent=parent)
 
 	@readonly
 	def Conditions(self) -> list[Nullable[bool]]:
@@ -539,9 +651,17 @@ class TestVector(metaclass=ExtendedType, slots=True):
 		"""
 		return self._result
 
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate every element below the test vector: none.
+
+		:returns: An empty generator.
+		"""
+		yield from ()
+
 
 @export
-class MCDCRecord(Base):
+class MCDCRecord(Base["File | Function"]):
 	"""
 	An MC/DC record: a decision of conditions, and for each condition, whether a pair of test vectors showed its
 	independent effect on the outcome.
@@ -568,10 +688,12 @@ class MCDCRecord(Base):
 		conditions: Iterable[bool],
 		trueDecisions: Nullable[int] = None,
 		falseDecisions: Nullable[int] = None,
-		testVectors: Nullable[Iterable[TestVector]] = None
+		testVectors: Nullable[Iterable[TestVector]] = None,
+		*,
+		parent: Nullable[File | Function] = None
 	) -> None:
 		"""
-		Initialize an MC/DC record.
+		Initialize an MC/DC record, and add it to the MC/DC records of its file or function.
 
 		:param lineStart:      Line the decision starts at.
 		:param columnStart:    Column the decision starts at.
@@ -585,6 +707,8 @@ class MCDCRecord(Base):
 		:param trueDecisions:  Optional, number of executed test vectors with the outcome true. Default: ``None``.
 		:param falseDecisions: Optional, number of executed test vectors with the outcome false. Default: ``None``.
 		:param testVectors:    Optional, the test vectors. Default: none.
+		:param parent:         Optional, the file or function the MC/DC record belongs to. Default: ``None``.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`File` or :class:`Function`.
 		:raises TypeError:     If parameter ``trueDecisions`` or ``falseDecisions`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``trueDecisions`` or ``falseDecisions`` is negative.
 		:raises ValueError:    If parameter ``conditions`` is ``None``.
@@ -592,8 +716,9 @@ class MCDCRecord(Base):
 		:raises TypeError:     If parameter ``conditions`` contains an element not of type :class:`bool`.
 		:raises TypeError:     If parameter ``testVectors`` isn't iterable.
 		:raises TypeError:     If parameter ``testVectors`` contains an element not of type :class:`TestVector`.
+		:raises ValueError:    If parameter ``testVectors`` contains a test vector of another MC/DC record.
 		"""
-		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind)
+		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind, parent=parent)
 
 		for name, value in (("trueDecisions", trueDecisions), ("falseDecisions", falseDecisions)):
 			if value is None:
@@ -638,25 +763,33 @@ class MCDCRecord(Base):
 					ex = TypeError(f"Parameter 'testVectors' contains an element not of type 'TestVector'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(testVector)}'.")
 					raise ex
+				elif testVector._parent is not None:
+					raise ValueError(f"Parameter 'testVectors' contains a test vector of another MC/DC record.")
 
+				testVector._parent = self
+				testVector._root =   self._root
 				self._testVectors.append(testVector)
 
+		if parent is not None:
+			parent._mcdcRecords.append(self)
+
 	@classmethod
-	def Parse(cls, record: list[Any]) -> Self:
+	def Parse(cls, record: list[Any], *, parent: Nullable[File | Function] = None) -> Self:
 		"""
 		Parse an MC/DC record from its JSON array, in the shape of its format version.
 
 		:param record: The JSON array of the MC/DC record.
+		:param parent: Optional, the file or function the MC/DC record belongs to. Default: ``None``.
 		:returns:      The MC/DC record.
 		"""
 		if len(record) == 7:
-			return cls(*record[:4], None, record[4], RegionKind(record[5]), record[6])
+			return cls(*record[:4], None, record[4], RegionKind(record[5]), record[6], parent=parent)
 		elif len(record) == 9:
-			return cls(*record[:4], None, record[6], RegionKind(record[7]), record[8], record[4], record[5])
+			return cls(*record[:4], None, record[6], RegionKind(record[7]), record[8], record[4], record[5], parent=parent)
 
 		return cls(
 			*record[:4], record[6], record[7], RegionKind(record[8]), record[9], record[4], record[5],
-			[TestVector.Parse(testVector) for testVector in record[10]] if len(record) > 10 else None
+			[TestVector.Parse(testVector) for testVector in record[10]] if len(record) > 10 else None, parent=parent
 		)
 
 	@readonly
@@ -696,13 +829,22 @@ class MCDCRecord(Base):
 		"""
 		return self._testVectors
 
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate the test vectors of the MC/DC record.
+
+		:returns: A generator of the test vectors.
+		"""
+		yield from self._testVectors
+
 
 @export
-class Counters(metaclass=ExtendedType, slots=True):
+class Counters(Element["Summary"]):
 	"""
 	The counters of one kind of a summary: how many there are, and how many are covered.
 
-	A summary counts lines, functions, regions, branches and MC/DC conditions.
+	A summary counts lines, functions, regions, branches and MC/DC conditions. The summary given the counters becomes
+	their parent.
 	"""
 
 	_count:      int            #: Number of lines, functions, regions, branches or MC/DC conditions.
@@ -727,6 +869,8 @@ class Counters(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``percent`` isn't of type :class:`float` or :class:`int`.
 		:raises ValueError: If parameter ``percent`` is out of range 0..100.
 		"""
+		super().__init__()
+
 		for name, value in (("count", count), ("covered", covered)):
 			if value is None:
 				raise ValueError(f"Parameter '{name}' is None.")
@@ -811,14 +955,22 @@ class Counters(metaclass=ExtendedType, slots=True):
 		"""
 		return self._percent
 
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate every element below the counters: none.
+
+		:returns: An empty generator.
+		"""
+		yield from ()
+
 
 @export
-class Summary(metaclass=ExtendedType, slots=True):
+class Summary(Element["File | Report"]):
 	"""
 	A ``summary``: the counters llvm-cov computed for a file or the whole report.
 
 	llvm-cov counts a file's lines, regions and branches per function, and merges a function's instantiations by taking
-	the best one.
+	the best one. The file or report given the summary becomes its parent.
 	"""
 
 	_lines:          Counters            #: The counters of lines.
@@ -849,7 +1001,11 @@ class Summary(metaclass=ExtendedType, slots=True):
 		:raises ValueError:    If parameter ``lines``, ``functions``, ``instantiations`` or ``regions`` is ``None``.
 		:raises TypeError:     If parameter ``lines``, ``functions``, ``instantiations``, ``regions``, ``branches`` or
 		                       ``mcdc`` isn't of type :class:`Counters`.
+		:raises ValueError:    If parameter ``lines``, ``functions``, ``instantiations``, ``regions``, ``branches`` or
+		                       ``mcdc`` are the counters of another summary.
 		"""
+		super().__init__()
+
 		for name, counters in (
 			("lines", lines), ("functions", functions), ("instantiations", instantiations), ("regions", regions)
 		):
@@ -865,6 +1021,17 @@ class Summary(metaclass=ExtendedType, slots=True):
 				ex = TypeError(f"Parameter '{name}' is not of type 'Counters'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(counters)}'.")
 				raise ex
+
+		for name, counters in (
+			("lines", lines), ("functions", functions), ("instantiations", instantiations), ("regions", regions),
+			("branches", branches), ("mcdc", mcdc)
+		):
+			if counters is None:
+				continue
+			elif counters._parent is not None:
+				raise ValueError(f"Parameter '{name}' are the counters of another summary.")
+
+			counters._parent = self
 
 		self._lines =          lines
 		self._functions =      functions
@@ -945,12 +1112,22 @@ class Summary(metaclass=ExtendedType, slots=True):
 		"""
 		return self._mcdc
 
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate the counters of the summary.
+
+		:returns: A generator of the counters; without the counters not stated.
+		"""
+		for counters in (self._lines, self._functions, self._instantiations, self._regions, self._branches, self._mcdc):
+			if counters is not None:
+				yield counters
+
 
 _Summary = Summary
 
 
 @export
-class Segment(metaclass=ExtendedType, slots=True):
+class Segment(Element["File"]):
 	"""
 	A segment of a file: from a position on, the code has a count - until the next segment.
 
@@ -972,10 +1149,12 @@ class Segment(metaclass=ExtendedType, slots=True):
 		count: int,
 		hasCount: bool,
 		isRegionEntry: bool,
-		isGapRegion: bool = False
+		isGapRegion: bool = False,
+		*,
+		parent: Nullable[File] = None
 	) -> None:
 		"""
-		Initialize a segment.
+		Initialize a segment, and add it to the segments of its file.
 
 		:param line:          Line the segment starts at.
 		:param column:        Column the segment starts at.
@@ -983,6 +1162,8 @@ class Segment(metaclass=ExtendedType, slots=True):
 		:param hasCount:      Whether the code from here on has a count.
 		:param isRegionEntry: Whether a region starts here.
 		:param isGapRegion:   Optional, whether a gap region starts here. Default: ``False``.
+		:param parent:        Optional, the file the segment belongs to. Default: ``None``.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`File`.
 		:raises ValueError:   If parameter ``line`` or ``column`` is ``None``.
 		:raises TypeError:    If parameter ``line`` or ``column`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``line`` or ``column`` is less than 1.
@@ -992,6 +1173,8 @@ class Segment(metaclass=ExtendedType, slots=True):
 		:raises ValueError:   If parameter ``hasCount``, ``isRegionEntry`` or ``isGapRegion`` is ``None``.
 		:raises TypeError:    If parameter ``hasCount``, ``isRegionEntry`` or ``isGapRegion`` isn't of type :class:`bool`.
 		"""
+		super().__init__(parent=parent)
+
 		for name, position in (("line", line), ("column", column)):
 			if position is None:
 				raise ValueError(f"Parameter '{name}' is None.")
@@ -1030,15 +1213,19 @@ class Segment(metaclass=ExtendedType, slots=True):
 		self._isRegionEntry = isRegionEntry
 		self._isGapRegion =   isGapRegion
 
+		if parent is not None:
+			parent._segments.append(self)
+
 	@classmethod
-	def Parse(cls, segment: list[Any]) -> Self:
+	def Parse(cls, segment: list[Any], *, parent: Nullable[File] = None) -> Self:
 		"""
 		Parse a segment from its JSON array.
 
 		:param segment: The JSON array of the segment.
+		:param parent:  Optional, the file the segment belongs to. Default: ``None``.
 		:returns:       The segment.
 		"""
-		return cls(*segment[:5], segment[5] if len(segment) > 5 else False)
+		return cls(*segment[:5], segment[5] if len(segment) > 5 else False, parent=parent)
 
 	@readonly
 	def Line(self) -> int:
@@ -1094,9 +1281,17 @@ class Segment(metaclass=ExtendedType, slots=True):
 		"""
 		return self._isGapRegion
 
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate every element below the segment: none.
+
+		:returns: An empty generator.
+		"""
+		yield from ()
+
 
 @export
-class Expansion(metaclass=ExtendedType, slots=True):
+class Expansion(Element["File"]):
 	"""
 	A macro expansion in a file: the region it is expanded at, the regions of the function it is in, and its branches.
 	"""
@@ -1111,28 +1306,40 @@ class Expansion(metaclass=ExtendedType, slots=True):
 		filePaths: Iterable[Path],
 		sourceRegion: Region,
 		targetRegions: Iterable[Region],
-		branches: Nullable[Iterable[BranchRegion]] = None
+		branches: Nullable[Iterable[BranchRegion]] = None,
+		*,
+		parent: Nullable[File] = None
 	) -> None:
 		"""
-		Initialize an expansion.
+		Initialize an expansion, and add it to the expansions of its file.
 
 		:param filePaths:     The paths of the files, which the file IDs of the regions index.
 		:param sourceRegion:  The region the macro is expanded at.
 		:param targetRegions: The regions of the function the expansion is in.
 		:param branches:      Optional, the branch regions in the expansion, and in the expansions nested in it. Default:
 		                      none.
+		:param parent:        Optional, the file the expansion belongs to. Default: ``None``.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`File`.
 		:raises ValueError:   If parameter ``filePaths`` or ``targetRegions`` is ``None``.
 		:raises TypeError:    If parameter ``filePaths``, ``targetRegions`` or ``branches`` isn't iterable.
 		:raises TypeError:    If parameter ``filePaths`` contains an element not of type :class:`~pathlib.Path`.
 		:raises ValueError:   If parameter ``sourceRegion`` is ``None``.
 		:raises TypeError:    If parameter ``sourceRegion`` isn't of type
 		                      :class:`Region`.
+		:raises ValueError:   If parameter ``sourceRegion`` is a region of another element.
 		:raises TypeError:    If parameter ``targetRegions`` contains an element not of type
 		                      :class:`Region`.
 		:raises TypeError:    If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
+		:raises ValueError:   If parameter ``targetRegions`` or ``branches`` contains a region of another element.
 		"""
+		super().__init__(parent=parent)
+
 		if filePaths is None:
 			raise ValueError(f"Parameter 'filePaths' is None.")
+		elif not isinstance(filePaths, Iterable):
+			ex = TypeError(f"Parameter 'filePaths' is not iterable.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(filePaths)}'.")
+			raise ex
 
 		if sourceRegion is None:
 			raise ValueError(f"Parameter 'sourceRegion' is None.")
@@ -1140,6 +1347,8 @@ class Expansion(metaclass=ExtendedType, slots=True):
 			ex = TypeError(f"Parameter 'sourceRegion' is not of type 'Region'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(sourceRegion)}'.")
 			raise ex
+		elif sourceRegion._parent is not None:
+			raise ValueError(f"Parameter 'sourceRegion' is a region of another element.")
 
 		if targetRegions is None:
 			raise ValueError(f"Parameter 'targetRegions' is None.")
@@ -1149,8 +1358,16 @@ class Expansion(metaclass=ExtendedType, slots=True):
 		self._targetRegions = []
 		self._branches =      []
 
+		for filePath in filePaths:
+			if not isinstance(filePath, Path):
+				ex = TypeError(f"Parameter 'filePaths' contains an element not of type 'Path'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(filePath)}'.")
+				raise ex
+
+			self._filePaths.append(filePath)
+
 		for name, elements, elementType, target in (
-			("filePaths", filePaths, Path, self._filePaths), ("targetRegions", targetRegions, Region, self._targetRegions),
+			("targetRegions", targetRegions, Region, self._targetRegions),
 			("branches", branches, BranchRegion, self._branches)
 		):
 			if elements is None:
@@ -1165,22 +1382,34 @@ class Expansion(metaclass=ExtendedType, slots=True):
 					ex = TypeError(f"Parameter '{name}' contains an element not of type '{elementType.__name__}'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(element)}'.")
 					raise ex
+				elif element._parent is not None:
+					raise ValueError(f"Parameter '{name}' contains a region of another element.")
 
+				element._parent = self
+				element._root =   self._root
 				target.append(element)
 
+		sourceRegion._parent = self
+		sourceRegion._root =   self._root
+
+		if parent is not None:
+			parent._expansions.append(self)
+
 	@classmethod
-	def Parse(cls, expansion: dict[str, Any]) -> Self:
+	def Parse(cls, expansion: dict[str, Any], *, parent: Nullable[File] = None) -> Self:
 		"""
 		Parse an expansion from its JSON object.
 
 		:param expansion: The JSON object of the expansion.
+		:param parent:    Optional, the file the expansion belongs to. Default: ``None``.
 		:returns:         The expansion.
 		"""
 		return cls(
 			[Path(filename.replace("\\", "/")) for filename in expansion["filenames"]],
 			Region.Parse(expansion["source_region"]),
 			[Region.Parse(region) for region in expansion["target_regions"]],
-			[BranchRegion.Parse(branch) for branch in expansion.get("branches", [])]
+			[BranchRegion.Parse(branch) for branch in expansion.get("branches", [])],
+			parent=parent
 		)
 
 	@readonly
@@ -1220,9 +1449,19 @@ class Expansion(metaclass=ExtendedType, slots=True):
 		"""
 		return self._branches
 
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate the source region, the target regions and the branch regions of the expansion.
+
+		:returns: A generator of the regions.
+		"""
+		yield self._sourceRegion
+		yield from self._targetRegions
+		yield from self._branches
+
 
 @export
-class File(metaclass=ExtendedType, slots=True):
+class File(Element["Report"]):
 	"""
 	A file: its segments, branch regions, MC/DC records and expansions, and its summary.
 
@@ -1243,10 +1482,12 @@ class File(metaclass=ExtendedType, slots=True):
 		segments: Nullable[Iterable[Segment]] = None,
 		branches: Nullable[Iterable[BranchRegion]] = None,
 		mcdcRecords: Nullable[Iterable[MCDCRecord]] = None,
-		expansions: Nullable[Iterable[Expansion]] = None
+		expansions: Nullable[Iterable[Expansion]] = None,
+		*,
+		parent: Nullable[Report] = None
 	) -> None:
 		"""
-		Initialize a file.
+		Initialize a file, and add it to the files of its report.
 
 		:param path:        The file's path, as the compiler named it.
 		:param summary:     The counters llvm-cov computed.
@@ -1254,22 +1495,34 @@ class File(metaclass=ExtendedType, slots=True):
 		:param branches:    Optional, the branch regions of the file's functions. Default: none.
 		:param mcdcRecords: Optional, the MC/DC records of the file's functions. Default: none.
 		:param expansions:  Optional, the macro expansions in the file. Default: none.
+		:param parent:      Optional, the report the file belongs to. Default: ``None``.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report`.
 		:raises ValueError: If parameter ``path`` is ``None``.
 		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError: If parameter ``parent`` has a file of the same path.
 		:raises ValueError: If parameter ``summary`` is ``None``.
 		:raises TypeError:  If parameter ``summary`` isn't of type
 		                    :class:`Summary`.
+		:raises ValueError: If parameter ``summary`` is the summary of another element.
 		:raises TypeError:  If parameter ``segments``, ``branches``, ``mcdcRecords`` or ``expansions`` isn't iterable.
 		:raises TypeError:  If parameter ``segments`` contains an element not of type :class:`Segment`.
 		:raises TypeError:  If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
 		:raises TypeError:  If parameter ``mcdcRecords`` contains an element not of type :class:`MCDCRecord`.
 		:raises TypeError:  If parameter ``expansions`` contains an element not of type :class:`Expansion`.
+		:raises ValueError: If parameter ``segments``, ``branches``, ``mcdcRecords`` or ``expansions`` contains an
+		                    element of another element.
 		"""
+		super().__init__(parent=parent)
+
 		if path is None:
 			raise ValueError(f"Parameter 'path' is None.")
 		elif not isinstance(path, Path):
 			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
+			raise ex
+		elif parent is not None and path in parent._files:
+			ex = ValueError(f"Parameter 'parent' has a file of the same path.")
+			ex.add_note(f"Got value '{path.as_posix()}'.")
 			raise ex
 
 		if summary is None:
@@ -1278,6 +1531,8 @@ class File(metaclass=ExtendedType, slots=True):
 			ex = TypeError(f"Parameter 'summary' is not of type 'Summary'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(summary)}'.")
 			raise ex
+		elif summary._parent is not None:
+			raise ValueError(f"Parameter 'summary' is the summary of another element.")
 
 		self._path =        path
 		self._segments =    []
@@ -1303,16 +1558,32 @@ class File(metaclass=ExtendedType, slots=True):
 					ex = TypeError(f"Parameter '{name}' contains an element not of type '{elementType.__name__}'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(element)}'.")
 					raise ex
+				elif element._parent is not None:
+					raise ValueError(f"Parameter '{name}' contains an element of another element.")
+
+				element._parent = self
+				element._root =   self._root
+				for below in element.IterateElements():
+					below._root = self._root
 
 				target.append(element)
 
+		summary._parent = self
+		summary._root =   self._root
+		for counters in summary.IterateElements():
+			counters._root = self._root
+
+		if parent is not None:
+			parent._files[path] = self
+
 	@classmethod
-	def Parse(cls, file: dict[str, Any]) -> Self:
+	def Parse(cls, file: dict[str, Any], *, parent: Nullable[Report] = None) -> Self:
 		"""
 		Parse a file from its JSON object.
 
-		:param file: The JSON object of the file.
-		:returns:    The file.
+		:param file:   The JSON object of the file.
+		:param parent: Optional, the report the file belongs to. Default: ``None``.
+		:returns:      The file.
 		"""
 		return cls(
 			Path(file["filename"].replace("\\", "/")),
@@ -1320,7 +1591,8 @@ class File(metaclass=ExtendedType, slots=True):
 			[Segment.Parse(segment) for segment in file.get("segments", [])],
 			[BranchRegion.Parse(branch) for branch in file.get("branches", [])],
 			[MCDCRecord.Parse(record) for record in file.get("mcdc_records", [])],
-			[Expansion.Parse(expansion) for expansion in file.get("expansions", [])]
+			[Expansion.Parse(expansion) for expansion in file.get("expansions", [])],
+			parent=parent
 		)
 
 	@readonly
@@ -1379,9 +1651,20 @@ class File(metaclass=ExtendedType, slots=True):
 		"""
 		return self._summary
 
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate the segments, branch regions, MC/DC records and expansions of the file, each followed by the elements below
+		it, then the summary and its counters.
+
+		:returns: A generator of the elements below the file.
+		"""
+		for element in (*self._segments, *self._branches, *self._mcdcRecords, *self._expansions, self._summary):
+			yield element
+			yield from element.IterateElements()
+
 
 @export
-class Function(metaclass=ExtendedType, slots=True):
+class Function(Element["Report"]):
 	"""
 	A function - an instantiation of a template is a function of its own -: how often it was called, its regions, branch
 	regions and MC/DC records, and the files they are in.
@@ -1401,10 +1684,12 @@ class Function(metaclass=ExtendedType, slots=True):
 		regions: Iterable[Region],
 		filePaths: Iterable[Path],
 		branches: Nullable[Iterable[BranchRegion]] = None,
-		mcdcRecords: Nullable[Iterable[MCDCRecord]] = None
+		mcdcRecords: Nullable[Iterable[MCDCRecord]] = None,
+		*,
+		parent: Nullable[Report] = None
 	) -> None:
 		"""
-		Initialize a function.
+		Initialize a function, and add it to the functions of its report.
 
 		:param name:        The function's name, as the profile names it - e.g. mangled.
 		:param count:       How often the function was called.
@@ -1412,6 +1697,8 @@ class Function(metaclass=ExtendedType, slots=True):
 		:param filePaths:   The paths of the files, which the file IDs of the regions index.
 		:param branches:    Optional, the branch regions. Default: none.
 		:param mcdcRecords: Optional, the MC/DC records. Default: none.
+		:param parent:      Optional, the report the function belongs to. Default: ``None``.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report`.
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``name`` is empty.
@@ -1425,7 +1712,10 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``filePaths`` contains an element not of type :class:`~pathlib.Path`.
 		:raises TypeError:  If parameter ``branches`` contains an element not of type :class:`BranchRegion`.
 		:raises TypeError:  If parameter ``mcdcRecords`` contains an element not of type :class:`MCDCRecord`.
+		:raises ValueError: If parameter ``regions``, ``branches`` or ``mcdcRecords`` contains a region of another element.
 		"""
+		super().__init__(parent=parent)
+
 		if name is None:
 			raise ValueError(f"Parameter 'name' is None.")
 		elif not isinstance(name, str):
@@ -1451,6 +1741,10 @@ class Function(metaclass=ExtendedType, slots=True):
 
 		if filePaths is None:
 			raise ValueError(f"Parameter 'filePaths' is None.")
+		elif not isinstance(filePaths, Iterable):
+			ex = TypeError(f"Parameter 'filePaths' is not iterable.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(filePaths)}'.")
+			raise ex
 
 		self._name =        name
 		self._count =       count
@@ -1459,9 +1753,16 @@ class Function(metaclass=ExtendedType, slots=True):
 		self._mcdcRecords = []
 		self._filePaths =   []
 
+		for filePath in filePaths:
+			if not isinstance(filePath, Path):
+				ex = TypeError(f"Parameter 'filePaths' contains an element not of type 'Path'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(filePath)}'.")
+				raise ex
+
+			self._filePaths.append(filePath)
+
 		for parameterName, elements, elementType, target in (
-			("regions", regions, Region, self._regions), ("filePaths", filePaths, Path, self._filePaths),
-			("branches", branches, BranchRegion, self._branches),
+			("regions", regions, Region, self._regions), ("branches", branches, BranchRegion, self._branches),
 			("mcdcRecords", mcdcRecords, MCDCRecord, self._mcdcRecords)
 		):
 			if elements is None:
@@ -1476,15 +1777,26 @@ class Function(metaclass=ExtendedType, slots=True):
 					ex = TypeError(f"Parameter '{parameterName}' contains an element not of type '{elementType.__name__}'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(element)}'.")
 					raise ex
+				elif element._parent is not None:
+					raise ValueError(f"Parameter '{parameterName}' contains a region of another element.")
+
+				element._parent = self
+				element._root =   self._root
+				for below in element.IterateElements():
+					below._root = self._root
 
 				target.append(element)
 
+		if parent is not None:
+			parent._functions.append(self)
+
 	@classmethod
-	def Parse(cls, function: dict[str, Any]) -> Self:
+	def Parse(cls, function: dict[str, Any], *, parent: Nullable[Report] = None) -> Self:
 		"""
 		Parse a function from its JSON object.
 
 		:param function: The JSON object of the function.
+		:param parent:   Optional, the report the function belongs to. Default: ``None``.
 		:returns:        The function.
 		"""
 		return cls(
@@ -1493,7 +1805,8 @@ class Function(metaclass=ExtendedType, slots=True):
 			[Region.Parse(region) for region in function["regions"]],
 			[Path(filename.replace("\\", "/")) for filename in function["filenames"]],
 			[BranchRegion.Parse(branch) for branch in function.get("branches", [])],
-			[MCDCRecord.Parse(record) for record in function.get("mcdc_records", [])]
+			[MCDCRecord.Parse(record) for record in function.get("mcdc_records", [])],
+			parent=parent
 		)
 
 	@readonly
@@ -1562,13 +1875,26 @@ class Function(metaclass=ExtendedType, slots=True):
 		expanded = {region._expandedFileID for region in self._regions if region._kind is RegionKind.Expansion}
 		return next((fileID for fileID in range(len(self._filePaths)) if fileID not in expanded), None)
 
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate the regions, branch regions and MC/DC records of the function, each followed by the elements below it.
+
+		:returns: A generator of the elements below the function.
+		"""
+		for element in (*self._regions, *self._branches, *self._mcdcRecords):
+			yield element
+			yield from element.IterateElements()
+
 
 @export
 class Report(metaclass=ExtendedType, mixin=True):
 	"""
 	The report's root: the format version, the files, the functions, and the totals.
+
+	It is the root of every element below it.
 	"""
 
+	_root:      Report                     #: The report's root: the report itself.
 	_version:   Nullable[SemanticVersion]  #: Version of the report format.
 	_files:     dict[Path, File]           #: The files, by path.
 	_functions: list[Function]             #: The functions.
@@ -1592,10 +1918,13 @@ class Report(metaclass=ExtendedType, mixin=True):
 		:raises TypeError:  If parameter ``files`` or ``functions`` isn't iterable.
 		:raises TypeError:  If parameter ``files`` contains an element not of type
 		                    :class:`File`.
+		:raises ValueError: If parameter ``files`` contains two files of the same path.
 		:raises TypeError:  If parameter ``functions`` contains an element not of type
 		                    :class:`Function`.
+		:raises ValueError: If parameter ``files`` or ``functions`` contains an element of another report.
 		:raises TypeError:  If parameter ``totals`` isn't of type
 		                    :class:`Summary`.
+		:raises ValueError: If parameter ``totals`` is the summary of another element.
 		"""
 		if version is not None and not isinstance(version, SemanticVersion):
 			ex = TypeError(f"Parameter 'version' is not of type 'SemanticVersion'.")
@@ -1606,7 +1935,10 @@ class Report(metaclass=ExtendedType, mixin=True):
 			ex = TypeError(f"Parameter 'totals' is not of type 'Summary'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(totals)}'.")
 			raise ex
+		elif totals is not None and totals._parent is not None:
+			raise ValueError(f"Parameter 'totals' is the summary of another element.")
 
+		self._root =      self
 		self._version =   version
 		self._files =     {}
 		self._functions = []
@@ -1623,6 +1955,17 @@ class Report(metaclass=ExtendedType, mixin=True):
 					ex = TypeError(f"Parameter 'files' contains an element not of type 'File'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 					raise ex
+				elif file._parent is not None:
+					raise ValueError(f"Parameter 'files' contains a file of another report.")
+				elif file._path in self._files:
+					ex = ValueError(f"Parameter 'files' contains two files of the same path.")
+					ex.add_note(f"Got value '{file._path.as_posix()}'.")
+					raise ex
+
+				file._parent = self
+				file._root =   self
+				for element in file.IterateElements():
+					element._root = self
 
 				self._files[file._path] = file
 
@@ -1637,8 +1980,21 @@ class Report(metaclass=ExtendedType, mixin=True):
 					ex = TypeError(f"Parameter 'functions' contains an element not of type 'Function'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(function)}'.")
 					raise ex
+				elif function._parent is not None:
+					raise ValueError(f"Parameter 'functions' contains a function of another report.")
+
+				function._parent = self
+				function._root =   self
+				for element in function.IterateElements():
+					element._root = self
 
 				self._functions.append(function)
+
+		if totals is not None:
+			totals._parent = self
+			totals._root =   self
+			for counters in totals.IterateElements():
+				counters._root = self
 
 	@readonly
 	def Version(self) -> Nullable[SemanticVersion]:
@@ -1675,6 +2031,32 @@ class Report(metaclass=ExtendedType, mixin=True):
 		:returns: The totals; ``None`` before the report was converted.
 		"""
 		return self._totals
+
+	def IterateElements(self) -> Generator[Element, None, None]:
+		"""
+		Iterate the files, the functions and the totals, each followed by the elements below it.
+
+		:returns: A generator of every element below the report's root.
+		"""
+		for element in (*self._files.values(), *self._functions):
+			yield element
+			yield from element.IterateElements()
+
+		if self._totals is not None:
+			yield self._totals
+			yield from self._totals.IterateElements()
+
+
+TestVector._PARENT_TYPE =   (MCDCRecord, )
+Region._PARENT_TYPE =       (Function, Expansion)
+BranchRegion._PARENT_TYPE = (File, Function, Expansion)
+MCDCRecord._PARENT_TYPE =   (File, Function)
+Counters._PARENT_TYPE =     (Summary, )
+Summary._PARENT_TYPE =      (File, Report)
+Segment._PARENT_TYPE =      (File, )
+Expansion._PARENT_TYPE =    (File, )
+File._PARENT_TYPE =         (Report, )
+Function._PARENT_TYPE =     (Report, )
 
 
 @export
@@ -1776,12 +2158,19 @@ class Document(cc_Document, Report):
 			data =            self._jsonDocument["data"][0]
 			self._version =   SemanticVersion.Parse(self._jsonDocument["version"])
 			self._files =     {}
-			self._functions = [Function.Parse(function) for function in data.get("functions", [])]
+			self._functions = []
 			self._totals =    Summary.Parse(data["totals"])
 
+			self._totals._parent = self
+			self._totals._root =   self
+			for counters in self._totals.IterateElements():
+				counters._root = self
+
 			for record in data["files"]:
-				file =                    File.Parse(record)
-				self._files[file._path] = file
+				File.Parse(record, parent=self)
+
+			for function in data.get("functions", []):
+				Function.Parse(function, parent=self)
 
 		self._conversionDuration = sw.Duration
 

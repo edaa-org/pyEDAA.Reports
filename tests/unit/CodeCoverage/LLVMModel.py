@@ -125,10 +125,10 @@ class Construction(Testcase):
 		self.assertEqual((None, None), (summary.Branches, summary.MCDC))
 
 		branches = Counters(2, 1, 50, 1)
-		summary = Summary(lines, lines, lines, lines, branches, branches)
+		summary = Summary(lines, _counters(1, 1), _counters(1, 1), _counters(), branches, Counters(2, 1, 50, 1))
 
 		self.assertIs(lines, summary.Lines)
-		self.assertEqual((branches, branches, 1), (summary.Branches, summary.MCDC, summary.MCDC.NotCovered))
+		self.assertEqual((branches, 1), (summary.Branches, summary.MCDC.NotCovered))
 
 	def test_File(self) -> None:
 		summary = _summary()
@@ -138,7 +138,7 @@ class Construction(Testcase):
 		self.assertEqual(([], [], [], []), (file.Segments, file.Branches, file.MCDCRecords, file.Expansions))
 
 		segment = Segment(3, 33, 2, True, True)
-		file = File(Path("Statistics.c"), summary, segments=(segment, ))
+		file = File(Path("Statistics.c"), _summary(), segments=(segment, ))
 		self.assertEqual([segment], file.Segments)
 
 	def test_Function(self) -> None:
@@ -379,3 +379,103 @@ class Parse(Testcase):
 		self.assertEqual(("2.0.1", [Path("/project/src/Statistics.c")], [], 0), (
 			report.Version, list(report.Files), report.Functions, report.Totals.Lines.Count
 		))
+
+
+class Tree(Testcase):
+	"""Every element knows the element containing it, and the report's root."""
+
+	def test_Parsed(self) -> None:
+		document = Document(Path("tests/data/CodeCoverage/LLVM/coverage-3.1.0.json"), analyzeAndConvert=True)
+
+		elements = list(document.IterateElements())
+		self.assertEqual(
+			{BranchRegion, Counters, Expansion, File, Function, MCDCRecord, MCDCTestVector, Region, Segment, Summary},
+			{type(element) for element in elements}
+		)
+		self.assertTrue(all(element.Root is document for element in elements))
+
+		file = document.Files[Path("/project/src/Statistics.c")]
+		expansion = file.Expansions[0]
+		self.assertIs(document, file.Parent)
+		self.assertTrue(all(element.Parent is file for element in (*file.Segments, *file.Branches, expansion)))
+		self.assertIs(file, file.Summary.Parent)
+		self.assertIs(file.Summary, file.Summary.Lines.Parent)
+		self.assertIs(expansion, expansion.SourceRegion.Parent)
+		self.assertTrue(all(region.Parent is expansion for region in (*expansion.TargetRegions, *expansion.Branches)))
+
+		function = document.Functions[0]
+		self.assertIs(document, function.Parent)
+		self.assertTrue(all(region.Parent is function for region in (*function.Regions, *function.Branches)))
+		record = next(record for function in document.Functions for record in function.MCDCRecords)
+		self.assertIs(record, record.TestVectors[0].Parent)
+		self.assertIs(document, document.Totals.Parent)
+
+	def test_BottomUp(self) -> None:
+		"""A container connects the elements given to it; joining the report sets the root of every element below."""
+		region = Region(3, 33, 3, 60, 2, 0, 0, RegionKind.Code)
+		function = Function("Square", 2, [region], [Path("/project/src/Statistics.c")])
+		self.assertIs(function, region.Parent)
+		self.assertIsNone(region.Root)
+
+		segment = Segment(3, 33, 2, True, True)
+		file = File(Path("/project/src/Statistics.c"), _summary(), segments=[segment])
+		document = Document(Path("coverage.json"), files=[file], functions=[function], totals=_summary())
+
+		self.assertEqual((function, document, file, document), (region.Parent, region.Root, segment.Parent, segment.Root))
+		self.assertIs(document, document.Totals.Functions.Root)
+
+	def test_TopDown(self) -> None:
+		"""An element created with a parent is added to the parent's collection, and takes the parent's root."""
+		document = Document(Path("coverage.json"))
+		file = File(Path("/project/src/Statistics.c"), _summary(), parent=document)
+		segment = Segment(3, 33, 2, True, True, parent=file)
+		branch = BranchRegion(9, 7, 9, 12, 1, 2, 0, 0, RegionKind.Branch, parent=file)
+		function = Function("Square", 2, [], [Path("/project/src/Statistics.c")], parent=document)
+		region = Region(3, 33, 3, 60, 2, 0, 0, RegionKind.Code, parent=function)
+		record = MCDCRecord(9, 7, 9, 22, 0, 0, RegionKind.MCDCDecision, [True], parent=function)
+		testVector = MCDCTestVector([True], True, True, parent=record)
+
+		self.assertEqual({Path("/project/src/Statistics.c"): file}, document.Files)
+		self.assertEqual(([segment], [branch], [function], [region], [record], [testVector]), (
+			file.Segments, file.Branches, document.Functions, function.Regions, function.MCDCRecords, record.TestVectors
+		))
+		self.assertTrue(all(element.Root is document for element in (file, segment, branch, region, testVector)))
+
+		expansion = Expansion([], Region(20, 9, 20, 20, 2, 0, 1, RegionKind.Expansion), [], parent=file)
+		target = Region(6, 30, 8, 2, 3, 1, 0, RegionKind.Code, parent=expansion)
+		self.assertEqual(([expansion], [target], document), (file.Expansions, expansion.TargetRegions, target.Root))
+
+	def test_ParentChecks(self) -> None:
+		document = Document(Path("coverage.json"))
+		file = File(Path("/project/src/Statistics.c"), _summary(), parent=document)
+
+		for create, message in (
+			(lambda: Segment(3, 33, 2, True, True, parent=document), "Parameter 'parent' is not of type 'File'."),
+			(lambda: Region(3, 33, 3, 60, 2, 0, 0, RegionKind.Code, parent=file),
+			 "Parameter 'parent' is not of type 'Function' or 'Expansion'."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(TypeError) as context:
+					_ = create()
+
+				self.assertEqual(message, str(context.exception))
+
+		region = Region(3, 33, 3, 60, 2, 0, 0, RegionKind.Code)
+		summary = _summary()
+		_ = Function("Square", 2, [region], [])
+		_ = File(Path("/project/src/Shapes.cpp"), summary)
+		for create, message in (
+			(lambda: Function("Average", 1, [region], []), "Parameter 'regions' contains a region of another element."),
+			(lambda: File(Path("/project/src/Statistics.c"), _summary(), parent=document),
+			 "Parameter 'parent' has a file of the same path."),
+			(lambda: File(Path("/project/src/Statistics.h"), summary),
+			 "Parameter 'summary' is the summary of another element."),
+			(lambda: Document(Path("coverage.json"), files=[file]), "Parameter 'files' contains a file of another report."),
+			(lambda: Document(Path("coverage.json"), files=[File(Path("a.c"), _summary()), File(Path("a.c"), _summary())]),
+			 "Parameter 'files' contains two files of the same path."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(ValueError) as context:
+					_ = create()
+
+				self.assertEqual(message, str(context.exception))
