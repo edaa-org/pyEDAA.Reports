@@ -57,7 +57,12 @@ class Root(Testcase):
 		self.assertEqual({}, specification.Labels)
 		self.assertEqual({}, specification.Documents)
 		self.assertEqual({}, specification.Layers)
-		self.assertEqual([], list(specification.IterateElements()))
+		self.assertEqual([], list(specification.IteratePersons()))
+		self.assertEqual([], list(specification.IteratePersonas()))
+		self.assertEqual([], list(specification.IterateLabels()))
+		self.assertEqual([], list(specification.IterateDocuments()))
+		self.assertEqual([], list(specification.IterateLayers()))
+		self.assertEqual([], list(specification.IterateRequirements()))
 		self.assertEqual(0, len(specification))
 
 	def test_Unnamed(self) -> None:
@@ -109,7 +114,8 @@ class Persons(Testcase):
 
 		self.assertEqual({"alice": alice}, board.Persons)
 		self.assertIs(alice, system.Persons["alice"])
-		self.assertEqual([], list(board.IterateElements()))
+		self.assertEqual([alice], list(board.IteratePersons()))
+		self.assertEqual([], list(board.IteratePersons(lambda person: person.Name == "Bob")))
 
 	def test_Duplicate(self) -> None:
 		specification = RequirementSpecification(VERSION, "Board")
@@ -160,9 +166,22 @@ class Registries(Testcase):
 				self.assertIs(specification, element.Parent)
 				self.assertIs(specification, element.Root)
 				self.assertEqual({"id": element}, dictionary)
-				self.assertEqual([], list(element.IterateElements()))
 
-		self.assertEqual(4, len(list(specification.IterateElements())))
+	def test_Iterate(self) -> None:
+		"""Personas, labels, documents and layers are iterated in the order they were added: all, or selected ones."""
+		specification = RequirementSpecification(VERSION, "Board")
+		for elementClass, iterate in (
+			(Persona,  specification.IteratePersonas),
+			(Label,    specification.IterateLabels),
+			(Document, specification.IterateDocuments),
+			(Layer,    specification.IterateLayers),
+		):
+			with self.subTest(elementClass=elementClass.__name__):
+				first =  elementClass("a", "First", parent=specification)
+				second = elementClass("b", "Second", parent=specification)
+
+				self.assertEqual([first, second], list(iterate()))
+				self.assertEqual([second], list(iterate(lambda element: element.Name == "Second")))
 
 	def test_Standalone(self) -> None:
 		persona = Persona("alice", "Alice")

@@ -44,7 +44,7 @@ from typing                import Any, Callable, ClassVar, Generator, Mapping, O
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
 from pyTooling.Decorators  import export, readonly
-from pyTooling.MetaClasses import ExtendedType, abstractmethod
+from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
 from pyEDAA.Reports        import KeyValuePairsMixin, Person, ReportException
@@ -191,8 +191,6 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		parent._AddElement(self)
 		self._parent = parent
 		self._root =   parent._root
-		for element in self.IterateElements():
-			element._root = parent._root
 
 	@readonly
 	def Root(self) -> Nullable[RequirementSpecification]:
@@ -205,14 +203,6 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:returns: The specification, or ``None`` while the element isn't part of one.
 		"""
 		return self._root
-
-	@abstractmethod
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate every element below this one, depth-first.
-
-		:returns: A generator of the elements below this one.
-		"""
 
 
 @export
@@ -394,7 +384,7 @@ class RequirementSpecification(Base):
 
 	def _AddItems(self, item: BaseItem) -> None:
 		"""
-		Register an item and every item below it by their IDs.
+		Register an item and every item below it by their IDs, and set the specification as their specification.
 
 		Either all of them are registered, or none.
 
@@ -411,20 +401,8 @@ class RequirementSpecification(Base):
 			ids.add(element._id)
 
 		for element in subtree:
+			element._root =     self
 			items[element._id] = element
-
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the personas, labels, documents and layers, then the top-level requirements, each followed by the elements
-		below it.
-
-		:returns: A generator of every element below the specification.
-		"""
-		yield from (*self._personas.values(), *self._labels.values(), *self._documents.values(), *self._layers.values())
-		for requirement in self._requirements.values():
-			if requirement._parent is self:
-				yield requirement
-				yield from requirement.IterateElements()
 
 	@readonly
 	def Name(self) -> Nullable[str]:
@@ -452,6 +430,22 @@ class RequirementSpecification(Base):
 		:returns: The persons, by user ID.
 		"""
 		return self._persons
+
+	def IteratePersons(self, predicate: Nullable[Callable[[Person], bool]] = None) -> Generator[Person, None, None]:
+		"""
+		Iterate all or selected persons.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip persons in the generator.
+
+		:param predicate: Optional, filter function accepting a person and returning a boolean. Default: ``None``.
+		:returns:         A generator of the persons, in the order they were added.
+		"""
+		if predicate is None:
+			yield from self._persons.values()
+		else:
+			for person in self._persons.values():
+				if predicate(person):
+					yield person
 
 	def AddPerson(self, person: Person) -> None:
 		"""
@@ -485,6 +479,22 @@ class RequirementSpecification(Base):
 		"""
 		return self._personas
 
+	def IteratePersonas(self, predicate: Nullable[Callable[[Persona], bool]] = None) -> Generator[Persona, None, None]:
+		"""
+		Iterate all or selected personas.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip personas in the generator.
+
+		:param predicate: Optional, filter function accepting a persona and returning a boolean. Default: ``None``.
+		:returns:         A generator of the personas, in the order they were added.
+		"""
+		if predicate is None:
+			yield from self._personas.values()
+		else:
+			for persona in self._personas.values():
+				if predicate(persona):
+					yield persona
+
 	@readonly
 	def Labels(self) -> dict[str, Label]:
 		"""
@@ -493,6 +503,22 @@ class RequirementSpecification(Base):
 		:returns: The labels, by ID.
 		"""
 		return self._labels
+
+	def IterateLabels(self, predicate: Nullable[Callable[[Label], bool]] = None) -> Generator[Label, None, None]:
+		"""
+		Iterate all or selected labels.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip labels in the generator.
+
+		:param predicate: Optional, filter function accepting a label and returning a boolean. Default: ``None``.
+		:returns:         A generator of the labels, in the order they were added.
+		"""
+		if predicate is None:
+			yield from self._labels.values()
+		else:
+			for label in self._labels.values():
+				if predicate(label):
+					yield label
 
 	@readonly
 	def Documents(self) -> dict[str, Document]:
@@ -503,6 +529,22 @@ class RequirementSpecification(Base):
 		"""
 		return self._documents
 
+	def IterateDocuments(self, predicate: Nullable[Callable[[Document], bool]] = None) -> Generator[Document, None, None]:
+		"""
+		Iterate all or selected documents.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip documents in the generator.
+
+		:param predicate: Optional, filter function accepting a document and returning a boolean. Default: ``None``.
+		:returns:         A generator of the documents, in the order they were added.
+		"""
+		if predicate is None:
+			yield from self._documents.values()
+		else:
+			for document in self._documents.values():
+				if predicate(document):
+					yield document
+
 	@readonly
 	def Layers(self) -> dict[str, Layer]:
 		"""
@@ -511,6 +553,22 @@ class RequirementSpecification(Base):
 		:returns: The layers, by ID.
 		"""
 		return self._layers
+
+	def IterateLayers(self, predicate: Nullable[Callable[[Layer], bool]] = None) -> Generator[Layer, None, None]:
+		"""
+		Iterate all or selected layers.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip layers in the generator.
+
+		:param predicate: Optional, filter function accepting a layer and returning a boolean. Default: ``None``.
+		:returns:         A generator of the layers, in the order they were added.
+		"""
+		if predicate is None:
+			yield from self._layers.values()
+		else:
+			for layer in self._layers.values():
+				if predicate(layer):
+					yield layer
 
 	@readonly
 	def Requirements(self) -> dict[str, Requirement]:
@@ -609,14 +667,6 @@ class BaseWithName(BaseWithID):
 		:returns: The name.
 		"""
 		return self._name
-
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the elements below this one, which are none.
-
-		:returns: An empty generator.
-		"""
-		yield from ()
 
 
 @export
@@ -759,16 +809,6 @@ class BaseItem(BaseWithID):
 			raise RequirementsError(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
 
 		self._children[element._id] = element
-
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the child items, each followed by the elements below it.
-
-		:returns: A generator of the elements below this item.
-		"""
-		for child in self._children.values():
-			yield child
-			yield from child.IterateElements()
 
 	@readonly
 	def Title(self) -> str:

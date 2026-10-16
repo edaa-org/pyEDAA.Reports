@@ -130,7 +130,7 @@ class Hierarchy(Testcase):
 
 		self.assertEqual(["A.1", "A.1.1", "A.2"], [item.ID for item in a.IterateDescendants()])
 		self.assertEqual([], list(specification.Requirements["B"].IterateDescendants()))
-		self.assertEqual(["A", "A.1", "A.1.1", "A.2", "B"], [item.ID for item in specification.IterateElements()])
+		self.assertEqual(["A", "A.1", "A.1.1", "A.2", "B"], [item.ID for item in specification.IterateRequirements()])
 
 	def test_Predicate(self) -> None:
 		specification = self._Specification()

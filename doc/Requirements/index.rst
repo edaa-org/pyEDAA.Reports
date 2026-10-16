@@ -31,7 +31,9 @@ Every element carries key-value pairs for the information the model has no field
 
 * The :class:`RequirementSpecification` registers every person by user ID, and every persona, label, document and layer,
   and every requirement - also the child requirements - by its ID. An ID is unique among the elements of a class; a
-  duplicate is rejected.
+  duplicate raises a :exc:`RequirementsError`. Each registry is a dictionary property, e.g.
+  :attr:`~RequirementSpecification.Labels`, with an iterator taking an optional predicate, e.g.
+  :meth:`~RequirementSpecification.IterateLabels`.
 * The root's :attr:`~RequirementSpecification.Version` is the version of the specification itself; its name is
   optional.
 * A :class:`Persona` is a role a user of the system acts in, e.g. an administrator, a reviewer or a quality inspector.
