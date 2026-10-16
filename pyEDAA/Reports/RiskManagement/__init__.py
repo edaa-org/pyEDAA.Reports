@@ -43,18 +43,23 @@ like a risk.
 Risks relate to each other by a :class:`Link`: from a source risk to a destination risk, of a :class:`LinkKind`, e.g.
 one risk causing another.
 
+A risk's :attr:`~Risk.Score` - the rank of its probability times the rank of its impact - classifies it by a
+:class:`RiskLevel`. A risk names its owner - a :class:`~pyEDAA.Reports.Person` the register refers to - and the date of
+its next review; a mitigation states its :class:`MitigationKind` and its :class:`MitigationState`.
+
 Every element has key-value pairs (:class:`~pyEDAA.Reports.KeyValuePairsMixin`) for data the model doesn't name.
 """
 from __future__            import annotations
 
-from typing                import Any, Callable, Generator, Iterable, Mapping, Optional as Nullable
+from datetime              import datetime
+from typing                import Any, Callable, ClassVar, Generator, Iterable, Mapping, Optional as Nullable
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import KeyValuePairsMixin, ReportException
+from pyEDAA.Reports        import KeyValuePairsMixin, Person, ReportException
 
 
 @export
@@ -73,6 +78,22 @@ class Probability(StringEnum):
 	High =     "high"      #: Very likely to occur.
 	Occurred = "occurred"  #: Occurred: the risk is active and causes heavy effects.
 
+	__RANKS: ClassVar[dict[str, int]] = {
+		Low:      1,
+		Medium:   2,
+		High:     3,
+		Occurred: 4,
+	}  #: The rank of each probability, by the probability's value.
+
+	@readonly
+	def Rank(self) -> int:
+		"""
+		Read-only property to return the probability's rank on its ordinal scale.
+
+		:returns: The rank in range 1..4; ``1`` is the lowest probability.
+		"""
+		return self.__RANKS[self]
+
 
 @export
 class Impact(StringEnum):
@@ -84,6 +105,42 @@ class Impact(StringEnum):
 	Medium =   "medium"    #: A delay of multiple days.
 	High =     "high"      #: A delay of a few weeks.
 	Critical = "critical"  #: A delay of multiple weeks.
+
+	__RANKS: ClassVar[dict[str, int]] = {
+		Low:      1,
+		Medium:   2,
+		High:     3,
+		Critical: 4,
+	}  #: The rank of each impact, by the impact's value.
+
+	@readonly
+	def Rank(self) -> int:
+		"""
+		Read-only property to return the impact's rank on its ordinal scale.
+
+		:returns: The rank in range 1..4; ``1`` is the lowest impact.
+		"""
+		return self.__RANKS[self]
+
+
+@export
+class RiskLevel(StringEnum):
+	"""
+	The level of a risk, classified by its score: the rank of its probability times the rank of its impact.
+
+	.. code-block:: text
+
+	                         Impact:  low  medium  high  critical
+	   Probability: low                 1       2     3         4
+	                medium              2       4     6         8
+	                high                3       6     9        12
+	                occurred            4       8    12        16
+	"""
+
+	Low =      "low"       #: A score of 1 to 3.
+	Medium =   "medium"    #: A score of 4 to 6.
+	High =     "high"      #: A score of 8 or 9.
+	Critical = "critical"  #: A score of 12 to 16.
 
 
 @export
@@ -116,6 +173,34 @@ class LinkKind(StringEnum):
 	Related =    "related"     #: The source relates to the destination in another way.
 
 	DEFAULT =    Related       #: The relationship of a link, which states no other.
+
+
+@export
+class MitigationKind(StringEnum):
+	"""
+	The way a mitigation reduces a risk or an implication.
+	"""
+
+	Avoid =       "avoid"        #: Removes the cause, so the risk can't occur.
+	Prevent =     "prevent"      #: Reduces the probability the risk occurs.
+	Contingency = "contingency"  #: Reduces the impact: a plan applied, when the risk occurs.
+	Transfer =    "transfer"     #: Moves the impact to a third party, e.g. by a contract or an insurance.
+
+	DEFAULT =     Prevent        #: The way of a mitigation, which states no other.
+
+
+@export
+class MitigationState(StringEnum):
+	"""
+	The state of a mitigation: whether it is applied.
+	"""
+
+	Planned =   "planned"    #: Decided, but not started.
+	Active =    "active"     #: Being applied.
+	Done =      "done"       #: Applied completely.
+	Abandoned = "abandoned"  #: Not applied anymore, e.g. too expensive or without effect.
+
+	DEFAULT =   Planned      #: The state of a newly decided mitigation.
 
 
 @export
@@ -210,8 +295,8 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 @export
 class RiskManagement(Base):
 	"""
-	The risk register: every risk, implication and mitigation, each by its ID, the links between the risks, the
-	register's version and its optional name.
+	The risk register: every risk, implication and mitigation, each by its ID, the links between the risks, the persons
+	it refers to, the register's version and its optional name.
 
 	It is its own root, and has no parent. An element joins it by naming it as its parent, in the element's constructor
 	or by :attr:`~Base.Parent`.
@@ -223,6 +308,7 @@ class RiskManagement(Base):
 	_implications: dict[str, Implication]  #: The implications, by ID.
 	_mitigations:  dict[str, Mitigation]   #: The mitigations, by ID.
 	_links:        list[Link]              #: The links between the risks, in the order they were added.
+	_persons:      dict[str, Person]       #: The persons the register refers to, e.g. as risk owners, by user ID.
 
 	def __init__(
 		self,
@@ -268,6 +354,7 @@ class RiskManagement(Base):
 		self._implications = {}
 		self._mitigations =  {}
 		self._links =        []
+		self._persons =      {}
 
 	@Base.Parent.setter
 	def Parent(self, parent: None) -> None:
@@ -286,6 +373,8 @@ class RiskManagement(Base):
 		                             Add the referenced elements to the risk register first.
 		:raises ValueError:          If the element is a link from or to a risk, which isn't part of the risk register. |br|
 		                             Add the risks to the risk register first.
+		:raises ValueError:          If the element is a risk, whose owner isn't a person of the risk register. |br|
+		                             Add the person to the risk register first.
 		"""
 		if isinstance(element, Link):
 			for role, risk in (
@@ -327,6 +416,13 @@ class RiskManagement(Base):
 					ex.add_note(f"Got mitigation '{mitigation._id}'.")
 					ex.add_note(f"Add the mitigation to the risk register first.")
 					raise ex
+
+		if isinstance(element, Risk) and element._owner is not None:
+			if self._persons.get(element._owner._userID) is not element._owner:
+				ex = ValueError(f"Risk '{element._id}' has an owner outside the risk register.")
+				ex.add_note(f"Got person '{element._owner._userID}'.")
+				ex.add_note(f"Add the person to the risk register first.")
+				raise ex
 
 		elements[element._id] = element
 
@@ -383,6 +479,39 @@ class RiskManagement(Base):
 		:returns: The links, in the order they were added.
 		"""
 		return self._links
+
+	@readonly
+	def Persons(self) -> dict[str, Person]:
+		"""
+		Read-only property to access the persons the risk register refers to (:attr:`_persons`).
+
+		A risk's owner is one of them.
+
+		:returns: The persons, by user ID.
+		"""
+		return self._persons
+
+	def AddPerson(self, person: Person) -> None:
+		"""
+		Add a person the risk register refers to.
+
+		A risk's owner must be added first. The same person may be added to several risk registers.
+
+		:param person:               The person.
+		:raises ValueError:          If parameter ``person`` is ``None``.
+		:raises TypeError:           If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises RiskManagementError: If the risk register already contains a person of the same user ID.
+		"""
+		if person is None:
+			raise ValueError(f"Parameter 'person' is None.")
+		elif not isinstance(person, Person):
+			ex = TypeError(f"Parameter 'person' is not of type 'Person'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(person)}'.")
+			raise ex
+		elif person._userID in self._persons:
+			raise RiskManagementError(f"Person '{person._userID}' already exists in the risk register.")
+
+		self._persons[person._userID] = person
 
 	def IterateRisks(self, predicate: Nullable[Callable[[Risk], bool]] = None) -> Generator[Risk, None, None]:
 		"""
@@ -806,11 +935,16 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 	its side effects: the consequences of applying it.
 	"""
 
+	_kind:  MitigationKind   #: The way the mitigation reduces a risk or an implication.
+	_state: MitigationState  #: Whether the mitigation is applied.
+
 	def __init__(
 		self,
 		identifier: str,
 		description: str,
 		implications: Nullable[Iterable[Implication]] = None,
+		kind: MitigationKind = MitigationKind.Prevent,
+		state: MitigationState = MitigationState.Planned,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
@@ -821,6 +955,9 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 		:param identifier:           The mitigation's ID, unique among the mitigations of a risk register.
 		:param description:          The mitigation's description.
 		:param implications:         Optional, the side effects of applying the mitigation. Default: ``None``.
+		:param kind:                 Optional, the way the mitigation reduces a risk or an implication.
+		                             Default: ``MitigationKind.Prevent``.
+		:param state:                Optional, whether the mitigation is applied. Default: ``MitigationState.Planned``.
 		:param keyValuePairs:        Optional, the key-value pairs. Default: ``None``.
 		:param parent:               Optional, the risk register containing the mitigation. Default: ``None``.
 		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
@@ -840,23 +977,76 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 		:raises ValueError:          If parameter ``implications`` contains an implication, which isn't part of the risk
 		                             register. |br|
 		                             Add the implication to the risk register first.
+		:raises ValueError:          If parameter ``kind`` is ``None``.
+		:raises TypeError:           If parameter ``kind`` isn't of type :class:`MitigationKind`.
+		:raises ValueError:          If parameter ``state`` is ``None``.
+		:raises TypeError:           If parameter ``state`` isn't of type :class:`MitigationState`.
 		:raises RiskManagementError: If the risk register already contains a mitigation of this ID.
 		"""
 		super().__init__(identifier, description, keyValuePairs, parent=parent)
 		ImplicationsMixin.__init__(self, implications)
 
+		if kind is None:
+			raise ValueError(f"Parameter 'kind' is None.")
+		elif not isinstance(kind, MitigationKind):
+			ex = TypeError(f"Parameter 'kind' is not of type 'MitigationKind'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
+			raise ex
+
+		if state is None:
+			raise ValueError(f"Parameter 'state' is None.")
+		elif not isinstance(state, MitigationState):
+			ex = TypeError(f"Parameter 'state' is not of type 'MitigationState'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
+			raise ex
+
+		self._kind =  kind
+		self._state = state
+
 		if parent is not None:
 			parent._AddElement(self)
+
+	@readonly
+	def Kind(self) -> MitigationKind:
+		"""
+		Read-only property to access the way the mitigation reduces a risk or an implication (:attr:`_kind`).
+
+		:returns: The mitigation's kind.
+		"""
+		return self._kind
+
+	@property
+	def State(self) -> MitigationState:
+		"""
+		Property to access whether the mitigation is applied (:attr:`_state`).
+
+		:returns:           The mitigation's state.
+		:raises ValueError: If ``None`` is assigned.
+		:raises TypeError:  If the assigned value isn't of type :class:`MitigationState`.
+		"""
+		return self._state
+
+	@State.setter
+	def State(self, value: MitigationState) -> None:
+		if value is None:
+			raise ValueError(f"Parameter 'value' is None.")
+		elif not isinstance(value, MitigationState):
+			ex = TypeError(f"Parameter 'value' is not of type 'MitigationState'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+			raise ex
+
+		self._state = value
 
 	def __repr__(self) -> str:
 		"""
 		Return a representation of the mitigation for debugging.
 
-		A mitigation ``M1`` with 1 side effect reads ``<Mitigation M1: 1 implications>``.
+		A planned, preventing mitigation ``M1`` with 1 side effect reads ``<Mitigation M1: prevent, planned,
+		1 implications>``.
 
-		:returns: The mitigation's ID and its number of implications.
+		:returns: The mitigation's ID, kind, state and number of implications.
 		"""
-		return f"<Mitigation {self._id}: {len(self._implications)} implications>"
+		return f"<Mitigation {self._id}: {self._kind}, {self._state}, {len(self._implications)} implications>"
 
 
 # A class with a property named like a class - ``Probability``, ``Impact`` - can't name that class in the annotation of
@@ -868,19 +1058,21 @@ _Impact =      Impact
 @export
 class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 	"""
-	A risk: its title and description, the probability it occurs, its impact, its state, the implications and
-	mitigations it references, and its links to other risks.
+	A risk: its title and description, the probability it occurs, its impact, its state, its owner, the date of its next
+	review, the implications and mitigations it references, and its links to other risks.
 
 	The implications of a risk are its first-order implications. Their implications and the side effects of the risk's
 	mitigations are its second-order implications (:attr:`SecondOrderImplications`).
 	"""
 
-	_title:         str           #: The risk's title.
-	_probability:   _Probability  #: The probability the risk occurs.
-	_impact:        _Impact       #: The impact of the risk, if it occurs.
-	_state:         RiskState     #: The state of the risk in its life cycle.
-	_outboundLinks: list[Link]    #: The links from this risk to other risks, in the order they were added.
-	_inboundLinks:  list[Link]    #: The links from other risks to this risk, in the order they were added.
+	_title:         str                 #: The risk's title.
+	_probability:   _Probability        #: The probability the risk occurs.
+	_impact:        _Impact             #: The impact of the risk, if it occurs.
+	_state:         RiskState           #: The state of the risk in its life cycle.
+	_owner:         Nullable[Person]    #: The person responsible for the risk, if named.
+	_nextReview:    Nullable[datetime]  #: The date of the risk's next review, if scheduled.
+	_outboundLinks: list[Link]          #: The links from this risk to other risks, in the order they were added.
+	_inboundLinks:  list[Link]          #: The links from other risks to this risk, in the order they were added.
 
 	def __init__(
 		self,
@@ -892,6 +1084,8 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		state: RiskState = RiskState.Open,
 		implications: Nullable[Iterable[Implication]] = None,
 		mitigations: Nullable[Iterable[Mitigation]] = None,
+		owner: Nullable[Person] = None,
+		nextReview: Nullable[datetime] = None,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
@@ -907,6 +1101,10 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:param state:                Optional, the state of the risk. Default: ``RiskState.Open``.
 		:param implications:         Optional, the first-order implications of the risk. Default: ``None``.
 		:param mitigations:          Optional, the mitigations of the risk. Default: ``None``.
+		:param owner:                Optional, the person responsible for the risk; a person of the risk register.
+		                             Default: ``None``.
+		:param nextReview:           Optional, the date of the risk's next review; without a time zone, it is a local time.
+		                             Default: ``None``.
 		:param keyValuePairs:        Optional, the key-value pairs. Default: ``None``.
 		:param parent:               Optional, the risk register containing the risk. Default: ``None``.
 		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
@@ -942,6 +1140,10 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:raises TypeError:           If parameter ``impact`` isn't of type :class:`Impact`.
 		:raises ValueError:          If parameter ``state`` is ``None``.
 		:raises TypeError:           If parameter ``state`` isn't of type :class:`RiskState`.
+		:raises TypeError:           If parameter ``owner`` isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises ValueError:          If parameter ``owner`` isn't a person of the risk register. |br|
+		                             Add the person to the risk register first.
+		:raises TypeError:           If parameter ``nextReview`` isn't of type :class:`~datetime.datetime`.
 		:raises RiskManagementError: If the risk register already contains a risk of this ID.
 		"""
 		super().__init__(identifier, description, keyValuePairs, parent=parent)
@@ -978,10 +1180,28 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 			ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
 			raise ex
 
+		if owner is not None:
+			if not isinstance(owner, Person):
+				ex = TypeError(f"Parameter 'owner' is not of type 'Person'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(owner)}'.")
+				raise ex
+			elif self._root is not None and self._root._persons.get(owner._userID) is not owner:
+				ex = ValueError(f"Parameter 'owner' isn't a person of the risk register.")
+				ex.add_note(f"Got person '{owner._userID}'.")
+				ex.add_note(f"Add the person to the risk register first.")
+				raise ex
+
+		if nextReview is not None and not isinstance(nextReview, datetime):
+			ex = TypeError(f"Parameter 'nextReview' is not of type 'datetime'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(nextReview)}'.")
+			raise ex
+
 		self._title =         title
 		self._probability =   probability
 		self._impact =        impact
 		self._state =         state
+		self._owner =         owner
+		self._nextReview =    nextReview
 		self._outboundLinks = []
 		self._inboundLinks =  []
 
@@ -1063,6 +1283,80 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 
 		self._state = value
 
+	@property
+	def Owner(self) -> Nullable[Person]:
+		"""
+		Property to access the person responsible for the risk (:attr:`_owner`).
+
+		The owner of a risk in a risk register is a person of that register (:attr:`RiskManagement.Persons`).
+
+		:returns:           The owner, or ``None`` if none is named.
+		:raises TypeError:  If the assigned value isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises ValueError: If the assigned value isn't a person of the risk register. |br|
+		                    Add the person to the risk register first.
+		"""
+		return self._owner
+
+	@Owner.setter
+	def Owner(self, value: Nullable[Person]) -> None:
+		if value is not None:
+			if not isinstance(value, Person):
+				ex = TypeError(f"Parameter 'value' is not of type 'Person'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
+			elif self._root is not None and self._root._persons.get(value._userID) is not value:
+				ex = ValueError(f"Parameter 'value' isn't a person of the risk register.")
+				ex.add_note(f"Got person '{value._userID}'.")
+				ex.add_note(f"Add the person to the risk register first.")
+				raise ex
+
+		self._owner = value
+
+	@property
+	def NextReview(self) -> Nullable[datetime]:
+		"""
+		Property to access the date of the risk's next review (:attr:`_nextReview`).
+
+		:returns:          The date, or ``None`` if no review is scheduled; without a time zone, it is a local time.
+		:raises TypeError: If the assigned value isn't of type :class:`~datetime.datetime`.
+		"""
+		return self._nextReview
+
+	@NextReview.setter
+	def NextReview(self, value: Nullable[datetime]) -> None:
+		if value is not None and not isinstance(value, datetime):
+			ex = TypeError(f"Parameter 'value' is not of type 'datetime'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+			raise ex
+
+		self._nextReview = value
+
+	@readonly
+	def Score(self) -> int:
+		"""
+		Read-only property to return the risk's score: the rank of its probability times the rank of its impact.
+
+		:returns: The score in range 1..16.
+		"""
+		return self._probability.Rank * self._impact.Rank
+
+	@readonly
+	def Level(self) -> RiskLevel:
+		"""
+		Read-only property to return the risk's level, classified by its :attr:`Score` (see :class:`RiskLevel`).
+
+		:returns: The risk's level.
+		"""
+		score = self.Score
+		if score >= 12:
+			return RiskLevel.Critical
+		elif score >= 8:
+			return RiskLevel.High
+		elif score >= 4:
+			return RiskLevel.Medium
+
+		return RiskLevel.Low
+
 	@readonly
 	def SecondOrderImplications(self) -> dict[str, Implication]:
 		"""
@@ -1102,11 +1396,13 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		Return a representation of the risk for debugging.
 
 		An open risk ``R1`` of medium probability and high impact reads ``<Risk R1: open, probability medium,
-		impact high>``.
+		impact high, level medium>``.
 
-		:returns: The risk's ID, state, probability and impact.
+		:returns: The risk's ID, state, probability, impact and level.
 		"""
-		return f"<Risk {self._id}: {self._state}, probability {self._probability}, impact {self._impact}>"
+		return (
+			f"<Risk {self._id}: {self._state}, probability {self._probability}, impact {self._impact}, level {self.Level}>"
+		)
 
 
 @export
