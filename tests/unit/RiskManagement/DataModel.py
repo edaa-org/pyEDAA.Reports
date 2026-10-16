@@ -31,7 +31,7 @@
 #
 """Unit tests of the risk management model: enumerations, risks, implications, mitigations, links and the register."""
 from pyEDAA.Reports.RiskManagement import Impact, Implication, Link, LinkKind, Mitigation, Probability, Risk
-from pyEDAA.Reports.RiskManagement import RiskManagement, RiskState
+from pyEDAA.Reports.RiskManagement import RiskManagement, RiskManagementError, RiskState
 from pyTooling.Versioning          import SemanticVersion
 from pyTooling.Testing             import Testcase
 
@@ -251,12 +251,12 @@ class ElementInstantiation(Testcase):
 		self.assertEqual({"M1": mitigation}, risk.Mitigations)
 
 		for method, value, exception, message in (
-			(risk.AddImplication, None,        ValueError, "Parameter 'implication' is None."),
-			(risk.AddImplication, mitigation,  TypeError,  "Parameter 'implication' is not of type 'Implication'."),
-			(risk.AddImplication, implication, ValueError, "Element already has implication 'I1'."),
-			(risk.AddMitigation,  None,        ValueError, "Parameter 'mitigation' is None."),
-			(risk.AddMitigation,  implication, TypeError,  "Parameter 'mitigation' is not of type 'Mitigation'."),
-			(risk.AddMitigation,  mitigation,  ValueError, "Element already has mitigation 'M1'."),
+			(risk.AddImplication, None,        ValueError,          "Parameter 'implication' is None."),
+			(risk.AddImplication, mitigation,  TypeError,           "Parameter 'implication' is not of type 'Implication'."),
+			(risk.AddImplication, implication, RiskManagementError, "Element already has implication 'I1'."),
+			(risk.AddMitigation,  None,        ValueError,          "Parameter 'mitigation' is None."),
+			(risk.AddMitigation,  implication, TypeError,           "Parameter 'mitigation' is not of type 'Mitigation'."),
+			(risk.AddMitigation,  mitigation,  RiskManagementError, "Element already has mitigation 'M1'."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -316,15 +316,15 @@ class Register(Testcase):
 		Implication("I1", "The tape-out is delayed.", parent=register)
 		Mitigation("M1", "Order a second shuttle run.", parent=register)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RiskManagementError) as context:
 			_ = Risk("R1", "Tool license", "A license expires.", Probability.Low, Impact.Low, parent=register)
 		self.assertEqual("Risk 'R1' already exists in the risk register.", str(context.exception))
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RiskManagementError) as context:
 			_ = Implication("I1", "The budget rises.", parent=register)
 		self.assertEqual("Implication 'I1' already exists in the risk register.", str(context.exception))
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RiskManagementError) as context:
 			_ = Mitigation("M1", "Hire a contractor.", parent=register)
 		self.assertEqual("Mitigation 'M1' already exists in the risk register.", str(context.exception))
 
@@ -402,9 +402,9 @@ class Register(Testcase):
 		self.assertEqual({"M1": mitigation}, register.Mitigations)
 
 		for parent, exception, message in (
-			(None,        ValueError, "Parameter 'parent' is None."),
-			(implication, TypeError,  "Parameter 'parent' is not of type 'RiskManagement'."),
-			(register,    ValueError, "Element is already part of a risk register."),
+			(None,        ValueError,          "Parameter 'parent' is None."),
+			(implication, TypeError,           "Parameter 'parent' is not of type 'RiskManagement'."),
+			(register,    RiskManagementError, "Element is already part of a risk register."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -417,7 +417,7 @@ class Register(Testcase):
 		self.assertEqual(["Got type 'pyEDAA.Reports.RiskManagement.Risk'."], context.exception.__notes__)
 
 		other = Risk("R1", "Tool license", "A license expires.", Probability.Low, Impact.Low)
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RiskManagementError) as context:
 			other.Parent = register
 		self.assertEqual("Risk 'R1' already exists in the risk register.", str(context.exception))
 		self.assertIsNone(other.Parent)
@@ -475,7 +475,7 @@ class Links(Testcase):
 		board =   Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High)
 		link =    Link(foundry, board, LinkKind.Causes)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(RiskManagementError) as context:
 			_ = Link(foundry, board, LinkKind.Causes)
 		self.assertEqual("Risk 'R1' already has a 'causes' link to risk 'R2'.", str(context.exception))
 		self.assertEqual([link], foundry.OutboundLinks)

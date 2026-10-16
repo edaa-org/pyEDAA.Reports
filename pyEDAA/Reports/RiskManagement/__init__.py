@@ -54,7 +54,12 @@ from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import KeyValuePairsMixin
+from pyEDAA.Reports        import KeyValuePairsMixin, ReportException
+
+
+@export
+class RiskManagementError(ReportException):
+	"""Base-exception of the risk management model."""
 
 
 @export
@@ -162,14 +167,14 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 
 		Assigning a risk register adds this element to it, and sets the register's root as the root of this element.
 
-		:returns:           The parent, or ``None``.
-		:raises ValueError: If ``None`` is assigned.
-		:raises TypeError:  If the assigned parent isn't of type :class:`RiskManagement`.
-		:raises TypeError:  If a parent is assigned to a :class:`RiskManagement`, which has no parent.
-		:raises ValueError: If the element is already part of a risk register.
-		:raises ValueError: If the risk register already contains an element of the same kind and ID.
-		:raises ValueError: If the element references an element, which isn't part of the risk register. |br|
-		                    Add the referenced elements to the risk register first.
+		:returns:                    The parent, or ``None``.
+		:raises ValueError:          If ``None`` is assigned.
+		:raises TypeError:           If the assigned parent isn't of type :class:`RiskManagement`.
+		:raises TypeError:           If a parent is assigned to a :class:`RiskManagement`, which has no parent.
+		:raises RiskManagementError: If the element is already part of a risk register.
+		:raises RiskManagementError: If the risk register already contains an element of the same kind and ID.
+		:raises ValueError:          If the element references an element, which isn't part of the risk register. |br|
+		                             Add the referenced elements to the risk register first.
 		"""
 		return self._parent
 
@@ -182,7 +187,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 		elif self._parent is not None:
-			ex = ValueError(f"Element is already part of a risk register.")
+			ex = RiskManagementError(f"Element is already part of a risk register.")
 			ex.add_note(f"Got element '{self!r}'.")
 			raise ex
 
@@ -274,13 +279,13 @@ class RiskManagement(Base):
 		"""
 		Add a risk, an implication, a mitigation or a link, which names the risk register as its parent.
 
-		:param element:     The risk, implication, mitigation or link.
-		:raises ValueError: If the risk register already contains an element of the same kind and ID.
-		:raises ValueError: If the element references an implication or a mitigation, which isn't part of the risk
-		                    register. |br|
-		                    Add the referenced elements to the risk register first.
-		:raises ValueError: If the element is a link from or to a risk, which isn't part of the risk register. |br|
-		                    Add the risks to the risk register first.
+		:param element:              The risk, implication, mitigation or link.
+		:raises RiskManagementError: If the risk register already contains an element of the same kind and ID.
+		:raises ValueError:          If the element references an implication or a mitigation, which isn't part of the risk
+		                             register. |br|
+		                             Add the referenced elements to the risk register first.
+		:raises ValueError:          If the element is a link from or to a risk, which isn't part of the risk register. |br|
+		                             Add the risks to the risk register first.
 		"""
 		if isinstance(element, Link):
 			for role, risk in (
@@ -306,7 +311,7 @@ class RiskManagement(Base):
 			elements = self._mitigations
 
 		if element._id in elements:
-			raise ValueError(f"{kind} '{element._id}' already exists in the risk register.")
+			raise RiskManagementError(f"{kind} '{element._id}' already exists in the risk register.")
 
 		for implication in element._implications.values():
 			if implication._root is not self:
@@ -607,12 +612,12 @@ class ImplicationsMixin(metaclass=ExtendedType, mixin=True):
 		"""
 		Add an implication.
 
-		:param implication: The implication.
-		:raises ValueError: If parameter ``implication`` is ``None``.
-		:raises TypeError:  If parameter ``implication`` isn't of type :class:`Implication`.
-		:raises ValueError: If the element already has an implication of the same ID.
-		:raises ValueError: If the implication isn't part of the element's risk register. |br|
-		                    Add the implication to the risk register first.
+		:param implication:          The implication.
+		:raises ValueError:          If parameter ``implication`` is ``None``.
+		:raises TypeError:           If parameter ``implication`` isn't of type :class:`Implication`.
+		:raises RiskManagementError: If the element already has an implication of the same ID.
+		:raises ValueError:          If the implication isn't part of the element's risk register. |br|
+		                             Add the implication to the risk register first.
 		"""
 		if implication is None:
 			raise ValueError(f"Parameter 'implication' is None.")
@@ -621,7 +626,7 @@ class ImplicationsMixin(metaclass=ExtendedType, mixin=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(implication)}'.")
 			raise ex
 		elif implication._id in self._implications:
-			raise ValueError(f"Element already has implication '{implication._id}'.")
+			raise RiskManagementError(f"Element already has implication '{implication._id}'.")
 		elif self._root is not None and implication._root is not self._root:
 			ex = ValueError(f"Parameter 'implication' is outside the element's risk register.")
 			ex.add_note(f"Got implication '{implication._id}'.")
@@ -695,12 +700,12 @@ class MitigationsMixin(metaclass=ExtendedType, mixin=True):
 		"""
 		Add a mitigation.
 
-		:param mitigation:  The mitigation.
-		:raises ValueError: If parameter ``mitigation`` is ``None``.
-		:raises TypeError:  If parameter ``mitigation`` isn't of type :class:`Mitigation`.
-		:raises ValueError: If the element already has a mitigation of the same ID.
-		:raises ValueError: If the mitigation isn't part of the element's risk register. |br|
-		                    Add the mitigation to the risk register first.
+		:param mitigation:           The mitigation.
+		:raises ValueError:          If parameter ``mitigation`` is ``None``.
+		:raises TypeError:           If parameter ``mitigation`` isn't of type :class:`Mitigation`.
+		:raises RiskManagementError: If the element already has a mitigation of the same ID.
+		:raises ValueError:          If the mitigation isn't part of the element's risk register. |br|
+		                             Add the mitigation to the risk register first.
 		"""
 		if mitigation is None:
 			raise ValueError(f"Parameter 'mitigation' is None.")
@@ -709,7 +714,7 @@ class MitigationsMixin(metaclass=ExtendedType, mixin=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(mitigation)}'.")
 			raise ex
 		elif mitigation._id in self._mitigations:
-			raise ValueError(f"Element already has mitigation '{mitigation._id}'.")
+			raise RiskManagementError(f"Element already has mitigation '{mitigation._id}'.")
 		elif self._root is not None and mitigation._root is not self._root:
 			ex = ValueError(f"Parameter 'mitigation' is outside the element's risk register.")
 			ex.add_note(f"Got mitigation '{mitigation._id}'.")
@@ -741,37 +746,37 @@ class Implication(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		Initializes an implication, and adds it to its risk register.
 
-		:param identifier:    The implication's ID, unique among the implications of a risk register.
-		:param description:   The implication's description.
-		:param implications:  Optional, the implications of this implication. Default: ``None``.
-		:param mitigations:   Optional, the mitigations of this implication. Default: ``None``.
-		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:param parent:        Optional, the risk register containing the implication. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RiskManagement`.
-		:raises ValueError:   If parameter ``identifier`` is ``None``.
-		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``identifier`` is empty.
-		:raises ValueError:   If parameter ``description`` is ``None``.
-		:raises TypeError:    If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``description`` is empty.
-		:raises TypeError:    If parameter ``implications`` isn't iterable.
-		:raises TypeError:    If parameter ``implications`` is a single element, not an iterable.
-		:raises TypeError:    If parameter ``implications`` contains an element not of type :class:`Implication`.
-		:raises ValueError:   If parameter ``implications`` contains two implications of the same ID.
-		:raises ValueError:   If parameter ``implications`` contains an implication, which isn't part of the risk
-		                      register. |br|
-		                      Add the implication to the risk register first.
-		:raises TypeError:    If parameter ``mitigations`` isn't iterable.
-		:raises TypeError:    If parameter ``mitigations`` is a single element, not an iterable.
-		:raises TypeError:    If parameter ``mitigations`` contains an element not of type :class:`Mitigation`.
-		:raises ValueError:   If parameter ``mitigations`` contains two mitigations of the same ID.
-		:raises ValueError:   If parameter ``mitigations`` contains a mitigation, which isn't part of the risk
-		                      register. |br|
-		                      Add the mitigation to the risk register first.
-		:raises ValueError:   If the risk register already contains an implication of this ID.
+		:param identifier:           The implication's ID, unique among the implications of a risk register.
+		:param description:          The implication's description.
+		:param implications:         Optional, the implications of this implication. Default: ``None``.
+		:param mitigations:          Optional, the mitigations of this implication. Default: ``None``.
+		:param keyValuePairs:        Optional, the key-value pairs. Default: ``None``.
+		:param parent:               Optional, the risk register containing the implication. Default: ``None``.
+		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:           If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:          If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:           If parameter ``parent`` isn't of type :class:`RiskManagement`.
+		:raises ValueError:          If parameter ``identifier`` is ``None``.
+		:raises TypeError:           If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:          If parameter ``identifier`` is empty.
+		:raises ValueError:          If parameter ``description`` is ``None``.
+		:raises TypeError:           If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:          If parameter ``description`` is empty.
+		:raises TypeError:           If parameter ``implications`` isn't iterable.
+		:raises TypeError:           If parameter ``implications`` is a single element, not an iterable.
+		:raises TypeError:           If parameter ``implications`` contains an element not of type :class:`Implication`.
+		:raises ValueError:          If parameter ``implications`` contains two implications of the same ID.
+		:raises ValueError:          If parameter ``implications`` contains an implication, which isn't part of the risk
+		                             register. |br|
+		                             Add the implication to the risk register first.
+		:raises TypeError:           If parameter ``mitigations`` isn't iterable.
+		:raises TypeError:           If parameter ``mitigations`` is a single element, not an iterable.
+		:raises TypeError:           If parameter ``mitigations`` contains an element not of type :class:`Mitigation`.
+		:raises ValueError:          If parameter ``mitigations`` contains two mitigations of the same ID.
+		:raises ValueError:          If parameter ``mitigations`` contains a mitigation, which isn't part of the risk
+		                             register. |br|
+		                             Add the mitigation to the risk register first.
+		:raises RiskManagementError: If the risk register already contains an implication of this ID.
 		"""
 		super().__init__(identifier, description, keyValuePairs, parent=parent)
 		ImplicationsMixin.__init__(self, implications)
@@ -813,29 +818,29 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 		"""
 		Initializes a mitigation, and adds it to its risk register.
 
-		:param identifier:    The mitigation's ID, unique among the mitigations of a risk register.
-		:param description:   The mitigation's description.
-		:param implications:  Optional, the side effects of applying the mitigation. Default: ``None``.
-		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:param parent:        Optional, the risk register containing the mitigation. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RiskManagement`.
-		:raises ValueError:   If parameter ``identifier`` is ``None``.
-		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``identifier`` is empty.
-		:raises ValueError:   If parameter ``description`` is ``None``.
-		:raises TypeError:    If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``description`` is empty.
-		:raises TypeError:    If parameter ``implications`` isn't iterable.
-		:raises TypeError:    If parameter ``implications`` is a single element, not an iterable.
-		:raises TypeError:    If parameter ``implications`` contains an element not of type :class:`Implication`.
-		:raises ValueError:   If parameter ``implications`` contains two implications of the same ID.
-		:raises ValueError:   If parameter ``implications`` contains an implication, which isn't part of the risk
-		                      register. |br|
-		                      Add the implication to the risk register first.
-		:raises ValueError:   If the risk register already contains a mitigation of this ID.
+		:param identifier:           The mitigation's ID, unique among the mitigations of a risk register.
+		:param description:          The mitigation's description.
+		:param implications:         Optional, the side effects of applying the mitigation. Default: ``None``.
+		:param keyValuePairs:        Optional, the key-value pairs. Default: ``None``.
+		:param parent:               Optional, the risk register containing the mitigation. Default: ``None``.
+		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:           If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:          If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:           If parameter ``parent`` isn't of type :class:`RiskManagement`.
+		:raises ValueError:          If parameter ``identifier`` is ``None``.
+		:raises TypeError:           If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:          If parameter ``identifier`` is empty.
+		:raises ValueError:          If parameter ``description`` is ``None``.
+		:raises TypeError:           If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:          If parameter ``description`` is empty.
+		:raises TypeError:           If parameter ``implications`` isn't iterable.
+		:raises TypeError:           If parameter ``implications`` is a single element, not an iterable.
+		:raises TypeError:           If parameter ``implications`` contains an element not of type :class:`Implication`.
+		:raises ValueError:          If parameter ``implications`` contains two implications of the same ID.
+		:raises ValueError:          If parameter ``implications`` contains an implication, which isn't part of the risk
+		                             register. |br|
+		                             Add the implication to the risk register first.
+		:raises RiskManagementError: If the risk register already contains a mitigation of this ID.
 		"""
 		super().__init__(identifier, description, keyValuePairs, parent=parent)
 		ImplicationsMixin.__init__(self, implications)
@@ -894,50 +899,50 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		Initializes a risk, and adds it to its risk register.
 
-		:param identifier:    The risk's ID, unique among the risks of a risk register.
-		:param title:         The risk's title.
-		:param description:   The risk's description.
-		:param probability:   The probability the risk occurs.
-		:param impact:        The impact of the risk, if it occurs.
-		:param state:         Optional, the state of the risk. Default: ``RiskState.Open``.
-		:param implications:  Optional, the first-order implications of the risk. Default: ``None``.
-		:param mitigations:   Optional, the mitigations of the risk. Default: ``None``.
-		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:param parent:        Optional, the risk register containing the risk. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RiskManagement`.
-		:raises ValueError:   If parameter ``identifier`` is ``None``.
-		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``identifier`` is empty.
-		:raises ValueError:   If parameter ``description`` is ``None``.
-		:raises TypeError:    If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``description`` is empty.
-		:raises TypeError:    If parameter ``implications`` isn't iterable.
-		:raises TypeError:    If parameter ``implications`` is a single element, not an iterable.
-		:raises TypeError:    If parameter ``implications`` contains an element not of type :class:`Implication`.
-		:raises ValueError:   If parameter ``implications`` contains two implications of the same ID.
-		:raises ValueError:   If parameter ``implications`` contains an implication, which isn't part of the risk
-		                      register. |br|
-		                      Add the implication to the risk register first.
-		:raises TypeError:    If parameter ``mitigations`` isn't iterable.
-		:raises TypeError:    If parameter ``mitigations`` is a single element, not an iterable.
-		:raises TypeError:    If parameter ``mitigations`` contains an element not of type :class:`Mitigation`.
-		:raises ValueError:   If parameter ``mitigations`` contains two mitigations of the same ID.
-		:raises ValueError:   If parameter ``mitigations`` contains a mitigation, which isn't part of the risk
-		                      register. |br|
-		                      Add the mitigation to the risk register first.
-		:raises ValueError:   If parameter ``title`` is ``None``.
-		:raises TypeError:    If parameter ``title`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``title`` is empty.
-		:raises ValueError:   If parameter ``probability`` is ``None``.
-		:raises TypeError:    If parameter ``probability`` isn't of type :class:`Probability`.
-		:raises ValueError:   If parameter ``impact`` is ``None``.
-		:raises TypeError:    If parameter ``impact`` isn't of type :class:`Impact`.
-		:raises ValueError:   If parameter ``state`` is ``None``.
-		:raises TypeError:    If parameter ``state`` isn't of type :class:`RiskState`.
-		:raises ValueError:   If the risk register already contains a risk of this ID.
+		:param identifier:           The risk's ID, unique among the risks of a risk register.
+		:param title:                The risk's title.
+		:param description:          The risk's description.
+		:param probability:          The probability the risk occurs.
+		:param impact:               The impact of the risk, if it occurs.
+		:param state:                Optional, the state of the risk. Default: ``RiskState.Open``.
+		:param implications:         Optional, the first-order implications of the risk. Default: ``None``.
+		:param mitigations:          Optional, the mitigations of the risk. Default: ``None``.
+		:param keyValuePairs:        Optional, the key-value pairs. Default: ``None``.
+		:param parent:               Optional, the risk register containing the risk. Default: ``None``.
+		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:           If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:          If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:           If parameter ``parent`` isn't of type :class:`RiskManagement`.
+		:raises ValueError:          If parameter ``identifier`` is ``None``.
+		:raises TypeError:           If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:          If parameter ``identifier`` is empty.
+		:raises ValueError:          If parameter ``description`` is ``None``.
+		:raises TypeError:           If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:          If parameter ``description`` is empty.
+		:raises TypeError:           If parameter ``implications`` isn't iterable.
+		:raises TypeError:           If parameter ``implications`` is a single element, not an iterable.
+		:raises TypeError:           If parameter ``implications`` contains an element not of type :class:`Implication`.
+		:raises ValueError:          If parameter ``implications`` contains two implications of the same ID.
+		:raises ValueError:          If parameter ``implications`` contains an implication, which isn't part of the risk
+		                             register. |br|
+		                             Add the implication to the risk register first.
+		:raises TypeError:           If parameter ``mitigations`` isn't iterable.
+		:raises TypeError:           If parameter ``mitigations`` is a single element, not an iterable.
+		:raises TypeError:           If parameter ``mitigations`` contains an element not of type :class:`Mitigation`.
+		:raises ValueError:          If parameter ``mitigations`` contains two mitigations of the same ID.
+		:raises ValueError:          If parameter ``mitigations`` contains a mitigation, which isn't part of the risk
+		                             register. |br|
+		                             Add the mitigation to the risk register first.
+		:raises ValueError:          If parameter ``title`` is ``None``.
+		:raises TypeError:           If parameter ``title`` isn't of type :class:`str`.
+		:raises ValueError:          If parameter ``title`` is empty.
+		:raises ValueError:          If parameter ``probability`` is ``None``.
+		:raises TypeError:           If parameter ``probability`` isn't of type :class:`Probability`.
+		:raises ValueError:          If parameter ``impact`` is ``None``.
+		:raises TypeError:           If parameter ``impact`` isn't of type :class:`Impact`.
+		:raises ValueError:          If parameter ``state`` is ``None``.
+		:raises TypeError:           If parameter ``state`` isn't of type :class:`RiskState`.
+		:raises RiskManagementError: If the risk register already contains a risk of this ID.
 		"""
 		super().__init__(identifier, description, keyValuePairs, parent=parent)
 		ImplicationsMixin.__init__(self, implications)
@@ -1129,25 +1134,25 @@ class Link(Base):
 		"""
 		Initializes a link from a source risk to a destination risk, and adds it to its risk register and to both risks.
 
-		:param source:        The risk the link starts at.
-		:param destination:   The risk the link ends at.
-		:param kind:          The relationship the link states.
-		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:param parent:        Optional, the risk register containing the link. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RiskManagement`.
-		:raises ValueError:   If parameter ``source`` is ``None``.
-		:raises TypeError:    If parameter ``source`` isn't of type :class:`Risk`.
-		:raises ValueError:   If parameter ``destination`` is ``None``.
-		:raises TypeError:    If parameter ``destination`` isn't of type :class:`Risk`.
-		:raises ValueError:   If parameter ``destination`` is the source.
-		:raises ValueError:   If parameter ``kind`` is ``None``.
-		:raises TypeError:    If parameter ``kind`` isn't of type :class:`LinkKind`.
-		:raises ValueError:   If the source already has a link of this kind to the destination.
-		:raises ValueError:   If the source or the destination isn't part of the risk register. |br|
-		                      Add the risks to the risk register first.
+		:param source:               The risk the link starts at.
+		:param destination:          The risk the link ends at.
+		:param kind:                 The relationship the link states.
+		:param keyValuePairs:        Optional, the key-value pairs. Default: ``None``.
+		:param parent:               Optional, the risk register containing the link. Default: ``None``.
+		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:           If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:          If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:           If parameter ``parent`` isn't of type :class:`RiskManagement`.
+		:raises ValueError:          If parameter ``source`` is ``None``.
+		:raises TypeError:           If parameter ``source`` isn't of type :class:`Risk`.
+		:raises ValueError:          If parameter ``destination`` is ``None``.
+		:raises TypeError:           If parameter ``destination`` isn't of type :class:`Risk`.
+		:raises ValueError:          If parameter ``destination`` is the source.
+		:raises ValueError:          If parameter ``kind`` is ``None``.
+		:raises TypeError:           If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises RiskManagementError: If the source already has a link of this kind to the destination.
+		:raises ValueError:          If the source or the destination isn't part of the risk register. |br|
+		                             Add the risks to the risk register first.
 		"""
 		super().__init__(keyValuePairs, parent=parent)
 
@@ -1178,7 +1183,7 @@ class Link(Base):
 
 		for link in source._outboundLinks:
 			if link._destination is destination and link._kind is kind:
-				raise ValueError(f"Risk '{source._id}' already has a '{kind}' link to risk '{destination._id}'.")
+				raise RiskManagementError(f"Risk '{source._id}' already has a '{kind}' link to risk '{destination._id}'.")
 
 		self._source =      source
 		self._destination = destination

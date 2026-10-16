@@ -42,7 +42,7 @@ references its implications and mitigations, so several risks can share one.
   *amplifies*, *depends on*, *duplicates*. Both risks list it: :attr:`Risk.OutboundLinks` and
   :attr:`Risk.InboundLinks`. A source has at most one link of a kind to a destination.
 * An element joins the register by naming it as its parent, in its constructor or by :attr:`~Base.Parent`. An ID is
-  unique among the elements of its kind; a second element of the same ID is rejected.
+  unique among the elements of its kind; a second element of the same ID raises a :exc:`RiskManagementError`.
 * An element of the register references only implications and mitigations of the same register, and a link connects
   risks of the same register: referenced elements join the register first.
 * Every element - the register too - has key-value pairs for data the model doesn't name, e.g. an owner:
