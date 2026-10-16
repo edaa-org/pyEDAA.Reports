@@ -33,8 +33,8 @@ Reader of Python source code for the documentation coverage model.
 
 :class:`Analyzer` reads a package's directory - every ``*.py`` file below it - into a
 :class:`~pyEDAA.Reports.DocumentationCoverage.DocumentationReport`. Each file is read once (:class:`SourceFile`): in its
-declared encoding, into its syntax tree and its tokens. The tokens hold the comments, which document a field or variable
-for Sphinx' autodoc, or excuse a missing doc-string for docstr_coverage.
+declared encoding, into its lines, its syntax tree and its tokens. The tokens hold the comments, which document a field
+or variable for Sphinx' autodoc, or excuse a missing doc-string for docstr_coverage.
 
 .. rubric:: Items
 
