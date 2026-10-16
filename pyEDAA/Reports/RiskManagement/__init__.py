@@ -190,26 +190,35 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 @export
 class RiskManagement(Base):
 	"""
-	The risk register: every risk by its ID, and the register's version.
+	The risk register: every risk by its ID, the register's version and its optional name.
 
 	It is its own root, and has no parent. An element joins it by naming it as its parent, in the element's constructor
 	or by :attr:`~Base.Parent`.
 	"""
 
 	_version: SemanticVersion  #: The version of the risk register.
+	_name:    Nullable[str]    #: The name of the risk register, if given.
 	_risks:   dict[str, Risk]  #: The risks, by ID.
 
-	def __init__(self, version: SemanticVersion, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> None:
+	def __init__(
+		self,
+		version: SemanticVersion,
+		name: Nullable[str] = None,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None
+	) -> None:
 		"""
 		Initializes an empty risk register of a version.
 
 		:param version:       The version of the risk register.
+		:param name:          Optional, the name of the risk register, e.g. the project's name. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
 		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
 		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:   If parameter ``version`` is ``None``.
 		:raises TypeError:    If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
+		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:   If parameter ``name`` is empty.
 		"""
 		super().__init__(keyValuePairs)
 
@@ -220,8 +229,17 @@ class RiskManagement(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(version)}'.")
 			raise ex
 
+		if name is not None:
+			if not isinstance(name, str):
+				ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
+				raise ex
+			elif name == "":
+				raise ValueError(f"Parameter 'name' is empty.")
+
 		self._root =    self
 		self._version = version
+		self._name =    name
 		self._risks =   {}
 
 	@Base.Parent.setter
@@ -258,6 +276,15 @@ class RiskManagement(Base):
 		:returns: The version.
 		"""
 		return self._version
+
+	@readonly
+	def Name(self) -> Nullable[str]:
+		"""
+		Read-only property to access the name of the risk register (:attr:`_name`).
+
+		:returns: The name, or ``None`` if none is given.
+		"""
+		return self._name
 
 	@readonly
 	def Risks(self) -> dict[str, Risk]:

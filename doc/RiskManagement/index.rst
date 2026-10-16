@@ -20,7 +20,7 @@ The risk management model of :mod:`pyEDAA.Reports.RiskManagement` is a risk regi
 
 .. tree::
 
-   - :class:`RiskManagement`  | the risk register - version, key-value pairs
+   - :class:`RiskManagement`  | the risk register - version, name, key-value pairs
      - :class:`Risk`          | e.g. ``R1`` - title, description, probability, impact, state
 
 * A risk's :class:`Probability` says how likely it occurs: from *low* (identified, but sleeping) to *occurred* (the
@@ -40,7 +40,7 @@ The risk management model of :mod:`pyEDAA.Reports.RiskManagement` is a risk regi
    from pyTooling.Versioning import SemanticVersion
    from pyEDAA.Reports.RiskManagement import Impact, Probability, Risk, RiskManagement, RiskState
 
-   register = RiskManagement(SemanticVersion(1, 0, 0))
+   register = RiskManagement(SemanticVersion(1, 0, 0), "Wafer tape-out")
    foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.Medium, Impact.High, parent=register)
    tools =    Risk("R2", "Tool license", "A license expires.", Probability.Low, Impact.Medium, parent=register)
    foundry["owner"] = "Paebbels"

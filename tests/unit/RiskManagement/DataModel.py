@@ -63,9 +63,10 @@ class Enumerations(Testcase):
 
 class RiskManagementInstantiation(Testcase):
 	def test_Empty(self) -> None:
-		riskManagement = RiskManagement(VERSION, {"project": "pyEDAA"})
+		riskManagement = RiskManagement(VERSION, keyValuePairs={"project": "pyEDAA"})
 
 		self.assertIs(VERSION, riskManagement.Version)
+		self.assertIsNone(riskManagement.Name)
 		self.assertIsNone(riskManagement.Parent)
 		self.assertIs(riskManagement, riskManagement.Root)
 		self.assertEqual({}, riskManagement.Risks)
@@ -82,6 +83,19 @@ class RiskManagementInstantiation(Testcase):
 			_ = RiskManagement("1.0.0")
 		self.assertEqual("Parameter 'version' is not of type 'SemanticVersion'.", str(context.exception))
 		self.assertEqual(["Got type 'str'."], context.exception.__notes__)
+
+	def test_Name(self) -> None:
+		riskManagement = RiskManagement(VERSION, "pyEDAA.Reports")
+		self.assertEqual("pyEDAA.Reports", riskManagement.Name)
+
+		with self.assertRaises(TypeError) as context:
+			_ = RiskManagement(VERSION, 1)
+		self.assertEqual("Parameter 'name' is not of type 'str'.", str(context.exception))
+		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
+
+		with self.assertRaises(ValueError) as context:
+			_ = RiskManagement(VERSION, "")
+		self.assertEqual("Parameter 'name' is empty.", str(context.exception))
 
 	def test_NoParent(self) -> None:
 		riskManagement = RiskManagement(VERSION)
