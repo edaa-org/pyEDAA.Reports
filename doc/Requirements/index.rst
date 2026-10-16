@@ -28,10 +28,12 @@ Every element carries key-value pairs for the information the model has no field
      - :class:`Layer`                  | e.g. electrical, FPGA firmware or software
      - :class:`Requirement`            | e.g. ``EL-1`` - kind, obligation, state, layer, personas, labels, documents
        - :class:`Requirement`          | e.g. ``EL-1.1`` - a child requirement refining it
+     - :class:`SpecificationItem`      | e.g. ``DES-1`` - a specification item, which specifies requirements
+       - :class:`SpecificationItem`    | e.g. ``DES-1.1`` - a child item detailing it
 
 * The :class:`RequirementSpecification` registers every person by user ID, and every persona, label, document and layer,
-  and every requirement - also the child requirements - by its ID. An ID is unique among the elements of a class; a
-  duplicate raises a :exc:`RequirementsError`. Each registry is a dictionary property, e.g.
+  every requirement and every specification item - also the child items - by its ID. An ID is unique among the elements
+  of a class; a duplicate raises a :exc:`RequirementsError`. Each registry is a dictionary property, e.g.
   :attr:`~RequirementSpecification.Labels`, with an iterator taking an optional predicate, e.g.
   :meth:`~RequirementSpecification.IterateLabels`.
 * The root's :attr:`~RequirementSpecification.Version` is the version of the specification itself; its name is
@@ -104,3 +106,17 @@ optional predicate to select the requirements:
 
    for requirement in specification.IterateRequirements(lambda r: r.Kind is RequirementKind.Performance):
      print(f"{requirement.ID}: {requirement.Title}")
+
+
+.. _REQ/Specifications:
+
+Specification Items
+*******************
+
+A :class:`SpecificationItem` mirrors a requirement - with an ID, a title, a state, a layer, persons, personas, labels,
+documents and child items - and states how the system meets requirements, e.g. a design decision or an interface
+description. Specification items and requirements are in an N:M relation: :attr:`SpecificationItem.Requirements` lists
+the requirements an item specifies, :attr:`Requirement.SpecificationItems` the items specifying a requirement.
+:meth:`SpecificationItem.AddRequirement` maintains both sides.
+:meth:`~RequirementSpecification.IterateSpecificationItems` iterates every specification item, with an optional
+predicate.

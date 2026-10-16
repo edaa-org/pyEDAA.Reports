@@ -32,12 +32,15 @@
 Abstract data model of requirements management.
 
 A :class:`RequirementSpecification` is the root: it registers the persons, personas, labels, documents and layers its
-requirements refer to, and every requirement by its ID.
+items refer to, and every requirement and specification item by its ID.
 
 A :class:`Requirement` has a title, a description, a creation time, a state, a kind and an obligation. It names its
 authors and owners (:class:`~pyEDAA.Reports.Person`), the personas it is about (:class:`Persona`), its labels
 (:class:`Label`), the documents attached to it (:class:`Document`), and the layer it belongs to (:class:`Layer`) - all
 registered in the same specification. A requirement contains child requirements, which refine it.
+
+A :class:`SpecificationItem` mirrors a requirement: it states how the system meets requirements. Specification items and
+requirements are in an N:M relation.
 """
 from __future__            import annotations
 
@@ -286,23 +289,25 @@ class BaseWithID(Base):
 @export
 class RequirementSpecification(Base):
 	"""
-	The root of the requirements model: the requirements of a system, and the personas, labels, documents and layers they
-	refer to.
+	The root of the requirements model: the requirements and specification items of a system, and the personas, labels,
+	documents and layers they refer to.
 
-	It registers every requirement by its ID - also a child requirement -, and is its own specification.
+	It registers every requirement and every specification item by its ID - also a child item -, and is its own
+	specification.
 
 	Persons have no parent: the specification registers the persons its items refer to by their user IDs, and a person may
 	be registered in several specifications.
 	"""
 
-	_name:         Nullable[str]           #: The specification's name, or ``None``.
-	_version:      SemanticVersion         #: The version of the specification.
-	_persons:      dict[str, Person]       #: The persons, by user ID.
-	_personas:     dict[str, Persona]      #: The personas, by ID.
-	_labels:       dict[str, Label]        #: The labels, by ID.
-	_documents:    dict[str, Document]     #: The documents, by ID.
-	_layers:       dict[str, Layer]        #: The layers, by ID.
-	_requirements: dict[str, Requirement]  #: Every requirement, by ID, in the order they were added.
+	_name:               Nullable[str]                 #: The specification's name, or ``None``.
+	_version:            SemanticVersion               #: The version of the specification.
+	_persons:            dict[str, Person]             #: The persons, by user ID.
+	_personas:           dict[str, Persona]            #: The personas, by ID.
+	_labels:             dict[str, Label]              #: The labels, by ID.
+	_documents:          dict[str, Document]           #: The documents, by ID.
+	_layers:             dict[str, Layer]              #: The layers, by ID.
+	_requirements:       dict[str, Requirement]        #: Every requirement, by ID, in the order they were added.
+	_specificationItems: dict[str, SpecificationItem]  #: Every specification item, by ID, in the order they were added.
 
 	def __init__(
 		self,
@@ -342,15 +347,16 @@ class RequirementSpecification(Base):
 			elif name == "":
 				raise ValueError(f"Parameter 'name' is empty.")
 
-		self._root =         self
-		self._name =         name
-		self._version =      version
-		self._persons =      {}
-		self._personas =     {}
-		self._labels =       {}
-		self._documents =    {}
-		self._layers =       {}
-		self._requirements = {}
+		self._root =               self
+		self._name =               name
+		self._version =            version
+		self._persons =            {}
+		self._personas =           {}
+		self._labels =             {}
+		self._documents =          {}
+		self._layers =             {}
+		self._requirements =       {}
+		self._specificationItems = {}
 
 	@Base.Parent.setter
 	def Parent(self, parent: None) -> None:
@@ -360,11 +366,12 @@ class RequirementSpecification(Base):
 
 	def _AddElement(self, element: BaseWithID) -> None:
 		"""
-		Register a persona, label, document, layer or top-level requirement, which names the specification as its parent.
+		Register a persona, label, document, layer, top-level requirement or top-level specification item, which names the
+		specification as its parent.
 
 		:param element:            The element.
-		:raises RequirementsError: If the specification already contains an element of the same class and ID, or a
-		                           requirement below a requirement has the ID of a registered one.
+		:raises RequirementsError: If the specification already contains an element of the same class and ID, or an item
+		                           below a requirement or specification item has the ID of a registered one.
 		"""
 		if isinstance(element, BaseItem):
 			self._AddItems(element)
@@ -393,7 +400,7 @@ class RequirementSpecification(Base):
 		:param item:               The item joining the specification.
 		:raises RequirementsError: If an ID of these items is registered already, or used twice by them.
 		"""
-		items =   self._requirements
+		items =   self._requirements if isinstance(item, Requirement) else self._specificationItems
 		ids =     set()
 		subtree = (item, *item.IterateDescendants())
 		for element in subtree:
@@ -581,6 +588,15 @@ class RequirementSpecification(Base):
 		"""
 		return self._requirements
 
+	@readonly
+	def SpecificationItems(self) -> dict[str, SpecificationItem]:
+		"""
+		Read-only property to access every specification item (:attr:`_specificationItems`), also the child items.
+
+		:returns: The specification items, by ID, in the order they were added.
+		"""
+		return self._specificationItems
+
 	def IterateRequirements(
 		self,
 		predicate: Nullable[Callable[[Requirement], bool]] = None
@@ -599,6 +615,26 @@ class RequirementSpecification(Base):
 			for requirement in self._requirements.values():
 				if predicate(requirement):
 					yield requirement
+
+	def IterateSpecificationItems(
+		self,
+		predicate: Nullable[Callable[[SpecificationItem], bool]] = None
+	) -> Generator[SpecificationItem, None, None]:
+		"""
+		Iterate all or selected specification items, also the child items, in the order they were added.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip items in the generator.
+
+		:param predicate: Optional, filter function accepting a specification item and returning a boolean. Default:
+		                  ``None``.
+		:returns:         A generator of the specification items.
+		"""
+		if predicate is None:
+			yield from self._specificationItems.values()
+		else:
+			for specification in self._specificationItems.values():
+				if predicate(specification):
+					yield specification
 
 
 @export
@@ -734,6 +770,32 @@ class Layer(BaseWithName):
 				if requirement._layer is self and predicate(requirement):
 					yield requirement
 
+	def IterateSpecificationItems(
+		self,
+		predicate: Nullable[Callable[[SpecificationItem], bool]] = None
+	) -> Generator[SpecificationItem, None, None]:
+		"""
+		Iterate all or selected specification items of this layer, in the order the specification registered them.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip items in the generator.
+
+		:param predicate: Optional, filter function accepting a specification item and returning a boolean. Default:
+		                  ``None``.
+		:returns:         A generator of the layer's specification items; an empty one, while the layer isn't part of a
+		                  specification.
+		"""
+		if self._root is None:
+			return
+
+		if predicate is None:
+			for specification in self._root._specificationItems.values():
+				if specification._layer is self:
+					yield specification
+		else:
+			for specification in self._root._specificationItems.values():
+				if specification._layer is self and predicate(specification):
+					yield specification
+
 
 # A class with a property named like a class - ``Layer`` - can't name that class in the annotation of a field: the class
 # body's namespace, where annotations are evaluated, binds the name to the property.
@@ -743,8 +805,8 @@ _Layer = Layer
 @export
 class BaseItem(BaseWithID):
 	"""
-	Base-class of the items of a specification - requirements -: a title, a creation time, a state, the layer, the
-	persons, personas, labels and documents it refers to, and its child items.
+	Base-class of the items of a specification - requirements and specification items -: a title, a creation time, a
+	state, the layer, the persons, personas, labels and documents it refers to, and its child items.
 
 	An item refers only to persons, personas, labels, documents and layers of its own specification, so it must be part of
 	one to refer to any. A child item has the class of its parent; its ID is unique in the specification, too.
@@ -1081,10 +1143,11 @@ class Requirement(BaseItem):
 	refines - a child requirement. The specification registers either by its ID.
 	"""
 
-	_PARENT_TYPE: ClassVar[tuple[type, ...]]  #: In a requirement or the specification; assigned below.
+	_PARENT_TYPE:        ClassVar[tuple[type, ...]]    #: In a requirement or the specification; assigned below.
 
-	_kind:        RequirementKind             #: What the requirement constrains.
-	_obligation:  _Obligation                 #: Whether the requirement must, should or may be met.
+	_kind:               RequirementKind               #: What the requirement constrains.
+	_obligation:         _Obligation                   #: Whether the requirement must, should or may be met.
+	_specificationItems: dict[str, SpecificationItem]  #: The specification items specifying this requirement, by ID.
 
 	def __init__(
 		self,
@@ -1189,8 +1252,9 @@ class Requirement(BaseItem):
 			ex.add_note(f"Got type '{getFullyQualifiedName(obligation)}'.")
 			raise ex
 
-		self._kind =       kind
-		self._obligation = obligation
+		self._kind =               kind
+		self._obligation =         obligation
+		self._specificationItems = {}
 
 		if parent is not None:
 			parent._AddElement(self)
@@ -1213,5 +1277,195 @@ class Requirement(BaseItem):
 		"""
 		return self._obligation
 
+	@readonly
+	def SpecificationItems(self) -> dict[str, SpecificationItem]:
+		"""
+		Read-only property to access the specification items specifying this requirement (:attr:`_specificationItems`).
+
+		The relation is maintained by :meth:`SpecificationItem.AddRequirement`.
+
+		:returns: The specification items, by ID.
+		"""
+		return self._specificationItems
+
 
 Requirement._PARENT_TYPE = (Requirement, RequirementSpecification)
+
+
+@export
+class SpecificationItem(BaseItem):
+	"""
+	A specification item: how the system meets requirements.
+
+	E.g. a design decision, an architecture or an interface description. It mirrors a requirement - with an ID, a title, a
+	state, a layer, persons, personas, labels, documents and child items -, and specifies any number of requirements; a
+	requirement is specified by any number of specification items.
+
+	Its parent is the :class:`RequirementSpecification` for a top-level item, or the :class:`SpecificationItem` it
+	details. The specification registers either by its ID.
+	"""
+
+	_PARENT_TYPE:  ClassVar[tuple[type, ...]]  #: An item is in an item or the specification; assigned below the class.
+
+	_requirements: dict[str, Requirement]      #: The requirements this item specifies, by ID.
+
+	def __init__(
+		self,
+		identifier: str,
+		title: str,
+		description: str = "",
+		created: Nullable[datetime] = None,
+		*,
+		requirements: Nullable[Iterable[Requirement]] = None,
+		state: ItemState = ItemState.Draft,
+		layer: Nullable[Layer] = None,
+		authors: Nullable[Iterable[Person]] = None,
+		owners: Nullable[Iterable[Person]] = None,
+		personas: Nullable[Iterable[Persona]] = None,
+		labels: Nullable[Iterable[Label]] = None,
+		attachments: Nullable[Iterable[Document]] = None,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		parent: Nullable[SpecificationItem | RequirementSpecification] = None
+	) -> None:
+		"""
+		Initializes a specification item, adds it to its parent, registers it in its specification, and relates it to the
+		requirements it specifies.
+
+		:param identifier:         The item's ID.
+		:param title:              The item's title.
+		:param description:        Optional, the item's description. Default: ``""``.
+		:param created:            Optional, the time the item was created; without a time zone, it is a local time.
+		                           Default: ``None``, the current time.
+		:param requirements:       Optional, the requirements the item specifies. Default: ``None``.
+		:param state:              Optional, the item's state. Default: :attr:`ItemState.Draft`.
+		:param layer:              Optional, the layer the item belongs to. Default: ``None``.
+		:param authors:            Optional, the authors of the item. Default: ``None``.
+		:param owners:             Optional, the owners of the item. Default: ``None``.
+		:param personas:           Optional, the personas the item is about. Default: ``None``.
+		:param labels:             Optional, the labels of the item. Default: ``None``.
+		:param attachments:        Optional, the documents attached to the item. Default: ``None``.
+		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
+		:param parent:             Optional, the specification item this one details, or the specification. Default:
+		                           ``None``.
+		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`SpecificationItem` or
+		                           :class:`RequirementSpecification`.
+		:raises ValueError:        If parameter ``identifier`` is ``None``.
+		:raises TypeError:         If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``identifier`` is empty.
+		:raises ValueError:        If parameter ``description`` is ``None``.
+		:raises TypeError:         If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``title`` is ``None``.
+		:raises TypeError:         If parameter ``title`` isn't of type :class:`str`.
+		:raises ValueError:        If parameter ``title`` is empty.
+		:raises TypeError:         If parameter ``created`` isn't of type :class:`~datetime.datetime`.
+		:raises ValueError:        If parameter ``state`` is ``None``.
+		:raises TypeError:         If parameter ``state`` isn't of type :class:`ItemState`.
+		:raises TypeError:         If parameter ``layer`` isn't of type :class:`Layer`.
+		:raises ValueError:        If parameter ``layer`` isn't part of the item's specification.
+		:raises TypeError:         If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` isn't
+		                           iterable, or is a single element.
+		:raises TypeError:         If parameter ``authors`` or ``owners`` contains an element not of type
+		                           :class:`~pyEDAA.Reports.Person`.
+		:raises TypeError:         If parameter ``personas``, ``labels`` or ``attachments`` contains an element not of type
+		                           :class:`Persona`, :class:`Label` or :class:`Document`.
+		:raises ValueError:        If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                           contains an element, which isn't part of the item's specification.
+		:raises ValueError:        If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                           contains an element twice.
+		:raises TypeError:         If parameter ``requirements`` isn't iterable, or is a single element.
+		:raises TypeError:         If parameter ``requirements`` contains an element not of type :class:`Requirement`.
+		:raises ValueError:        If parameter ``requirements`` contains a requirement, which isn't part of the item's
+		                           specification.
+		:raises ValueError:        If parameter ``requirements`` contains a requirement twice.
+		:raises RequirementsError: If the specification already contains a specification item of this ID.
+		"""
+		super().__init__(
+			identifier,
+			title,
+			description,
+			created,
+			state=state,
+			layer=layer,
+			authors=authors,
+			owners=owners,
+			personas=personas,
+			labels=labels,
+			attachments=attachments,
+			keyValuePairs=keyValuePairs,
+			parent=parent
+		)
+
+		self._requirements = {}
+
+		if requirements is not None:
+			if not isinstance(requirements, Iterable):
+				ex = TypeError(f"Parameter 'requirements' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(requirements)}'.")
+				raise ex
+			elif isinstance(requirements, KeyValuePairsMixin):
+				ex = TypeError(f"Parameter 'requirements' is a single element, not an iterable of elements.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(requirements)}'.")
+				raise ex
+
+			for requirement in requirements:
+				if not isinstance(requirement, Requirement):
+					ex = TypeError(f"Parameter 'requirements' contains an element not of type 'Requirement'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(requirement)}'.")
+					raise ex
+				elif self._root is None or requirement._root is not self._root:
+					ex = ValueError(f"Parameter 'requirements' contains a requirement not part of the item's specification.")
+					ex.add_note(f"Got requirement '{requirement._id}'.")
+					raise ex
+				elif requirement._id in self._requirements:
+					ex = ValueError(f"Parameter 'requirements' contains a requirement twice.")
+					ex.add_note(f"Got requirement '{requirement._id}'.")
+					raise ex
+
+				self._requirements[requirement._id] = requirement
+
+		if parent is not None:
+			parent._AddElement(self)
+
+		for requirement in self._requirements.values():
+			requirement._specificationItems[identifier] = self
+
+	@readonly
+	def Requirements(self) -> dict[str, Requirement]:
+		"""
+		Read-only property to access the requirements this item specifies (:attr:`_requirements`).
+
+		:returns: The requirements, by ID.
+		"""
+		return self._requirements
+
+	def AddRequirement(self, requirement: Requirement) -> None:
+		"""
+		Relate this item to a requirement it specifies: the item lists the requirement, and the requirement lists the item.
+
+		:param requirement:        The requirement.
+		:raises ValueError:        If parameter ``requirement`` is ``None``.
+		:raises TypeError:         If parameter ``requirement`` isn't of type :class:`Requirement`.
+		:raises ValueError:        If parameter ``requirement`` isn't part of the item's specification.
+		:raises RequirementsError: If the item specifies the requirement already.
+		"""
+		if requirement is None:
+			raise ValueError(f"Parameter 'requirement' is None.")
+		elif not isinstance(requirement, Requirement):
+			ex = TypeError(f"Parameter 'requirement' is not of type 'Requirement'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(requirement)}'.")
+			raise ex
+		elif self._root is None or requirement._root is not self._root:
+			ex = ValueError(f"Parameter 'requirement' isn't part of the item's specification.")
+			ex.add_note(f"Got requirement '{requirement._id}'.")
+			raise ex
+		elif requirement._id in self._requirements:
+			raise RequirementsError(f"Specification item '{self._id}' specifies requirement '{requirement._id}' already.")
+
+		self._requirements[requirement._id] =       requirement
+		requirement._specificationItems[self._id] = self
+
+
+SpecificationItem._PARENT_TYPE = (SpecificationItem, RequirementSpecification)
