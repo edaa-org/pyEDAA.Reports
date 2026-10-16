@@ -468,9 +468,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		parent._AddElement(self)
 		self._parent = parent
-		self._root =   parent._root
-		for element in self.IterateElements():
-			element._root = parent._root
+		self._SetRoot(parent._root)
 
 	@readonly
 	def Root(self) -> Nullable[DocumentationReport]:
@@ -547,6 +545,16 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		:returns: A generator of the elements below this one.
 		"""
+
+	def _SetRoot(self, root: Nullable[DocumentationReport]) -> None:
+		"""
+		Set the analysis' root of this element.
+
+		A class containing elements overrides it, to set the root of those too.
+
+		:param root: The root, or ``None`` while the element isn't part of an analysis.
+		"""
+		self._root = root
 
 	@abstractmethod
 	def Aggregate(self) -> None:
@@ -681,6 +689,19 @@ class Directory(BaseWithPath):
 		for child in (*self._directories.values(), *self._files.values()):
 			yield child
 			yield from child.IterateElements()
+
+	def _SetRoot(self, root: Nullable[DocumentationReport]) -> None:
+		"""
+		Set the analysis' root of this directory, and of the directories and files below it.
+
+		:param root: The root, or ``None`` while the directory isn't part of an analysis.
+		"""
+		self._root = root
+		for directory in self._directories.values():
+			directory._SetRoot(root)
+
+		for file in self._files.values():
+			file._SetRoot(root)
 
 	@readonly
 	def Directories(self) -> dict[Path, Directory]:
@@ -1101,6 +1122,16 @@ class Item(Base):
 		for item in self._items:
 			yield item
 			yield from item.IterateElements()
+
+	def _SetRoot(self, root: Nullable[DocumentationReport]) -> None:
+		"""
+		Set the analysis' root of this item, and of the items below it.
+
+		:param root: The root, or ``None`` while the item isn't part of an analysis.
+		"""
+		self._root = root
+		for item in self._items:
+			item._SetRoot(root)
 
 	@readonly
 	def Name(self) -> str:
