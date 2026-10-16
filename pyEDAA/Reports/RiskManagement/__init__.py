@@ -40,6 +40,9 @@ The implications form a chain: an implication can have implications of its own, 
 implications too: its side effects. Both are the second-order implications of a risk. An implication can be mitigated
 like a risk.
 
+Risks relate to each other by a :class:`Link`: from a source risk to a destination risk, of a :class:`LinkKind`, e.g.
+one risk causing another.
+
 Every element has key-value pairs (:class:`~pyEDAA.Reports.KeyValuePairsMixin`) for data the model doesn't name.
 """
 from __future__            import annotations
@@ -93,6 +96,21 @@ class RiskState(StringEnum):
 	Solved =  "solved"   #: Removed by its mitigations: it can't occur anymore.
 
 	DEFAULT = Open       #: The state of a newly identified risk.
+
+
+@export
+class LinkKind(StringEnum):
+	"""
+	The relationship a :class:`Link` states from its source risk to its destination risk.
+	"""
+
+	Causes =     "causes"      #: The source, if it occurs, causes the destination to occur.
+	Amplifies =  "amplifies"   #: The source, if it occurs, raises the probability or the impact of the destination.
+	DependsOn =  "depends-on"  #: The source can only occur, if the destination occurred.
+	Duplicates = "duplicates"  #: The source describes the same risk as the destination.
+	Related =    "related"     #: The source relates to the destination in another way.
+
+	DEFAULT =    Related       #: The relationship of a link, which states no other.
 
 
 @export
@@ -187,8 +205,8 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 @export
 class RiskManagement(Base):
 	"""
-	The risk register: every risk, implication and mitigation, each by its ID, the register's version and its
-	optional name.
+	The risk register: every risk, implication and mitigation, each by its ID, the links between the risks, the
+	register's version and its optional name.
 
 	It is its own root, and has no parent. An element joins it by naming it as its parent, in the element's constructor
 	or by :attr:`~Base.Parent`.
@@ -199,6 +217,7 @@ class RiskManagement(Base):
 	_risks:        dict[str, Risk]         #: The risks, by ID.
 	_implications: dict[str, Implication]  #: The implications, by ID.
 	_mitigations:  dict[str, Mitigation]   #: The mitigations, by ID.
+	_links:        list[Link]              #: The links between the risks, in the order they were added.
 
 	def __init__(
 		self,
@@ -243,6 +262,7 @@ class RiskManagement(Base):
 		self._risks =        {}
 		self._implications = {}
 		self._mitigations =  {}
+		self._links =        []
 
 	@Base.Parent.setter
 	def Parent(self, parent: None) -> None:
@@ -250,17 +270,32 @@ class RiskManagement(Base):
 		ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 		raise ex
 
-	def _AddElement(self, element: BaseWithID) -> None:
+	def _AddElement(self, element: BaseWithID | Link) -> None:
 		"""
-		Add a risk, an implication or a mitigation, which names the risk register as its parent.
+		Add a risk, an implication, a mitigation or a link, which names the risk register as its parent.
 
-		:param element:     The risk, implication or mitigation.
+		:param element:     The risk, implication, mitigation or link.
 		:raises ValueError: If the risk register already contains an element of the same kind and ID.
 		:raises ValueError: If the element references an implication or a mitigation, which isn't part of the risk
 		                    register. |br|
 		                    Add the referenced elements to the risk register first.
+		:raises ValueError: If the element is a link from or to a risk, which isn't part of the risk register. |br|
+		                    Add the risks to the risk register first.
 		"""
-		if isinstance(element, Risk):
+		if isinstance(element, Link):
+			for role, risk in (
+				("source",      element._source),
+				("destination", element._destination)
+			):
+				if risk._root is not self:
+					ex = ValueError(f"Link's {role} is outside the risk register.")
+					ex.add_note(f"Got risk '{risk._id}'.")
+					ex.add_note(f"Add the risk to the risk register first.")
+					raise ex
+
+			self._links.append(element)
+			return
+		elif isinstance(element, Risk):
 			kind =     "Risk"
 			elements = self._risks
 		elif isinstance(element, Implication):
@@ -335,6 +370,15 @@ class RiskManagement(Base):
 		"""
 		return self._mitigations
 
+	@readonly
+	def Links(self) -> list[Link]:
+		"""
+		Read-only property to access the links between the risks (:attr:`_links`).
+
+		:returns: The links, in the order they were added.
+		"""
+		return self._links
+
 	def IterateRisks(self, predicate: Nullable[Callable[[Risk], bool]] = None) -> Generator[Risk, None, None]:
 		"""
 		Iterate all or selected risks.
@@ -388,6 +432,22 @@ class RiskManagement(Base):
 			for mitigation in self._mitigations.values():
 				if predicate(mitigation):
 					yield mitigation
+
+	def IterateLinks(self, predicate: Nullable[Callable[[Link], bool]] = None) -> Generator[Link, None, None]:
+		"""
+		Iterate all or selected links between the risks.
+
+		If parameter ``predicate`` is not None, the given filter function is used to skip links in the generator.
+
+		:param predicate: Optional, filter function accepting any link and returning a boolean.
+		:returns:         A generator of the links, in the order they were added.
+		"""
+		if predicate is None:
+			yield from self._links
+		else:
+			for link in self._links:
+				if predicate(link):
+					yield link
 
 	def __repr__(self) -> str:
 		"""
@@ -803,17 +863,19 @@ _Impact =      Impact
 @export
 class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 	"""
-	A risk: its title and description, the probability it occurs, its impact, its state, and the implications and
-	mitigations it references.
+	A risk: its title and description, the probability it occurs, its impact, its state, the implications and
+	mitigations it references, and its links to other risks.
 
 	The implications of a risk are its first-order implications. Their implications and the side effects of the risk's
 	mitigations are its second-order implications (:attr:`SecondOrderImplications`).
 	"""
 
-	_title:       str           #: The risk's title.
-	_probability: _Probability  #: The probability the risk occurs.
-	_impact:      _Impact       #: The impact of the risk, if it occurs.
-	_state:       RiskState     #: The state of the risk in its life cycle.
+	_title:         str           #: The risk's title.
+	_probability:   _Probability  #: The probability the risk occurs.
+	_impact:        _Impact       #: The impact of the risk, if it occurs.
+	_state:         RiskState     #: The state of the risk in its life cycle.
+	_outboundLinks: list[Link]    #: The links from this risk to other risks, in the order they were added.
+	_inboundLinks:  list[Link]    #: The links from other risks to this risk, in the order they were added.
 
 	def __init__(
 		self,
@@ -911,10 +973,12 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 			ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
 			raise ex
 
-		self._title =       title
-		self._probability = probability
-		self._impact =      impact
-		self._state =       state
+		self._title =         title
+		self._probability =   probability
+		self._impact =        impact
+		self._state =         state
+		self._outboundLinks = []
+		self._inboundLinks =  []
 
 		if parent is not None:
 			parent._AddElement(self)
@@ -1010,6 +1074,24 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 
 		return implications
 
+	@readonly
+	def OutboundLinks(self) -> list[Link]:
+		"""
+		Read-only property to access the links from this risk to other risks (:attr:`_outboundLinks`).
+
+		:returns: The links, in the order they were added.
+		"""
+		return self._outboundLinks
+
+	@readonly
+	def InboundLinks(self) -> list[Link]:
+		"""
+		Read-only property to access the links from other risks to this risk (:attr:`_inboundLinks`).
+
+		:returns: The links, in the order they were added.
+		"""
+		return self._inboundLinks
+
 	def __repr__(self) -> str:
 		"""
 		Return a representation of the risk for debugging.
@@ -1020,3 +1102,128 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:returns: The risk's ID, state, probability and impact.
 		"""
 		return f"<Risk {self._id}: {self._state}, probability {self._probability}, impact {self._impact}>"
+
+
+@export
+class Link(Base):
+	"""
+	A link from a source risk to a destination risk, and the relationship it states.
+
+	The link is listed by both risks: as an outbound link of its source, as an inbound link of its destination. A link
+	of a risk register connects risks of that register.
+	"""
+
+	_source:      Risk      #: The risk the link starts at.
+	_destination: Risk      #: The risk the link ends at.
+	_kind:        LinkKind  #: The relationship the link states.
+
+	def __init__(
+		self,
+		source: Risk,
+		destination: Risk,
+		kind: LinkKind,
+		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		*,
+		parent: Nullable[RiskManagement] = None
+	) -> None:
+		"""
+		Initializes a link from a source risk to a destination risk, and adds it to its risk register and to both risks.
+
+		:param source:        The risk the link starts at.
+		:param destination:   The risk the link ends at.
+		:param kind:          The relationship the link states.
+		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
+		:param parent:        Optional, the risk register containing the link. Default: ``None``.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RiskManagement`.
+		:raises ValueError:   If parameter ``source`` is ``None``.
+		:raises TypeError:    If parameter ``source`` isn't of type :class:`Risk`.
+		:raises ValueError:   If parameter ``destination`` is ``None``.
+		:raises TypeError:    If parameter ``destination`` isn't of type :class:`Risk`.
+		:raises ValueError:   If parameter ``destination`` is the source.
+		:raises ValueError:   If parameter ``kind`` is ``None``.
+		:raises TypeError:    If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises ValueError:   If the source already has a link of this kind to the destination.
+		:raises ValueError:   If the source or the destination isn't part of the risk register. |br|
+		                      Add the risks to the risk register first.
+		"""
+		super().__init__(keyValuePairs, parent=parent)
+
+		if source is None:
+			raise ValueError(f"Parameter 'source' is None.")
+		elif not isinstance(source, Risk):
+			ex = TypeError(f"Parameter 'source' is not of type 'Risk'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
+			raise ex
+
+		if destination is None:
+			raise ValueError(f"Parameter 'destination' is None.")
+		elif not isinstance(destination, Risk):
+			ex = TypeError(f"Parameter 'destination' is not of type 'Risk'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(destination)}'.")
+			raise ex
+		elif destination is source:
+			ex = ValueError(f"Parameter 'destination' is the source.")
+			ex.add_note(f"Got risk '{destination._id}'.")
+			raise ex
+
+		if kind is None:
+			raise ValueError(f"Parameter 'kind' is None.")
+		elif not isinstance(kind, LinkKind):
+			ex = TypeError(f"Parameter 'kind' is not of type 'LinkKind'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
+			raise ex
+
+		for link in source._outboundLinks:
+			if link._destination is destination and link._kind is kind:
+				raise ValueError(f"Risk '{source._id}' already has a '{kind}' link to risk '{destination._id}'.")
+
+		self._source =      source
+		self._destination = destination
+		self._kind =        kind
+
+		if parent is not None:
+			parent._AddElement(self)
+
+		source._outboundLinks.append(self)
+		destination._inboundLinks.append(self)
+
+
+	@readonly
+	def Source(self) -> Risk:
+		"""
+		Read-only property to access the risk the link starts at (:attr:`_source`).
+
+		:returns: The source risk.
+		"""
+		return self._source
+
+	@readonly
+	def Destination(self) -> Risk:
+		"""
+		Read-only property to access the risk the link ends at (:attr:`_destination`).
+
+		:returns: The destination risk.
+		"""
+		return self._destination
+
+	@readonly
+	def Kind(self) -> LinkKind:
+		"""
+		Read-only property to access the relationship the link states (:attr:`_kind`).
+
+		:returns: The link's kind.
+		"""
+		return self._kind
+
+	def __repr__(self) -> str:
+		"""
+		Return a representation of the link for debugging.
+
+		A link stating risk ``R1`` causes risk ``R2`` reads ``<Link R1 causes R2>``.
+
+		:returns: The IDs of the source and the destination, and the link's kind.
+		"""
+		return f"<Link {self._source._id} {self._kind} {self._destination._id}>"

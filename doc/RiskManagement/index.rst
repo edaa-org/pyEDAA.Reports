@@ -25,6 +25,7 @@ references its implications and mitigations, so several risks can share one.
      - :class:`Risk`          | e.g. ``R1`` - title, description, probability, impact, state
      - :class:`Implication`   | e.g. ``I1`` - a consequence, if a risk occurs
      - :class:`Mitigation`    | e.g. ``M1`` - a measure reducing a risk or an implication
+     - :class:`Link`          | e.g. ``R1`` causes ``R2`` - source, destination, kind
 
 * A risk's :class:`Probability` says how likely it occurs: from *low* (identified, but sleeping) to *occurred* (the
   risk is active and causes heavy effects). Its :class:`Impact` says how much delay it causes, if it occurs: from
@@ -37,19 +38,23 @@ references its implications and mitigations, so several risks can share one.
   second-order implication, and its side effects are visible in the register.
 * A risk's second-order implications (:attr:`Risk.SecondOrderImplications`) are the implications of its implications
   and the side effects of its mitigations.
+* A :class:`Link` relates two risks: from its source to its destination, of a :class:`LinkKind` - e.g. *causes*,
+  *amplifies*, *depends on*, *duplicates*. Both risks list it: :attr:`Risk.OutboundLinks` and
+  :attr:`Risk.InboundLinks`. A source has at most one link of a kind to a destination.
 * An element joins the register by naming it as its parent, in its constructor or by :attr:`~Base.Parent`. An ID is
   unique among the elements of its kind; a second element of the same ID is rejected.
-* An element of the register references only implications and mitigations of the same register: referenced elements
-  join the register first.
+* An element of the register references only implications and mitigations of the same register, and a link connects
+  risks of the same register: referenced elements join the register first.
 * Every element - the register too - has key-value pairs for data the model doesn't name, e.g. an owner:
   ``risk["owner"] = "Paebbels"``.
-* The register iterates its risks, implications and mitigations, optionally filtered by a predicate, e.g.
+* The register iterates its risks, implications, mitigations and links, optionally filtered by a predicate, e.g.
   :meth:`RiskManagement.IterateRisks`.
 
 .. code-block:: Python
 
    from pyTooling.Versioning import SemanticVersion
-   from pyEDAA.Reports.RiskManagement import Impact, Implication, Mitigation, Probability, Risk, RiskManagement
+   from pyEDAA.Reports.RiskManagement import Impact, Implication, Link, LinkKind, Mitigation, Probability, Risk
+   from pyEDAA.Reports.RiskManagement import RiskManagement
 
    register = RiskManagement(SemanticVersion(1, 0, 0), "Wafer tape-out")
    budget =   Implication("I3", "The budget rises.", parent=register)
@@ -61,6 +66,9 @@ references its implications and mitigations, so several risks can share one.
      implications=[tapeOut], mitigations=[shuttle], parent=register
    )
    foundry["owner"] = "Paebbels"
+   board = Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
+   Link(foundry, board, LinkKind.Causes, parent=register)
 
    for risk in register.IterateRisks(lambda risk: risk.Impact in (Impact.High, Impact.Critical)):
-     print(f"{risk.ID}: {risk.Title} -> {', '.join(risk.SecondOrderImplications)}")
+     causes = [link.Destination.ID for link in risk.OutboundLinks if link.Kind is LinkKind.Causes]
+     print(f"{risk.ID}: {risk.Title} -> {', '.join(risk.SecondOrderImplications)}; causes {', '.join(causes)}")
