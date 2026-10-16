@@ -346,8 +346,9 @@ class Tree(Testcase):
 
 	def test_AttachSubtree(self) -> None:
 		directory = Directory("src")
+		subdirectory = Directory("sub", parent=directory)
 		line = Line(1, PartiallyCovered, 1, (Branch(Covered), Branch(Uncovered)))
-		file = File("a.py", lines=(line, ), parent=directory)
+		file = File("a.py", lines=(line, ), parent=subdirectory)
 		unit = Package("src")
 		Module("a", file=file, parent=unit)
 		self.assertIsNone(file.Lines[1].Root)
@@ -358,7 +359,7 @@ class Tree(Testcase):
 
 		self.assertIs(directory, summary.Directories["src"])
 		self.assertIs(unit, summary.Units["src"])
-		for element in (directory, file, file.Lines[1], file.Lines[1].Branches[1], unit, unit.Units["a"]):
+		for element in (directory, subdirectory, file, file.Lines[1], file.Lines[1].Branches[1], unit, unit.Units["a"]):
 			with self.subTest(element=repr(element)):
 				self.assertIs(summary, element.Root)
 

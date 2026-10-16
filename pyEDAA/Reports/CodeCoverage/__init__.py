@@ -161,9 +161,7 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		parent._AddElement(self)
 		self._parent = parent
-		self._root =   parent._root
-		for element in self.IterateElements():
-			element._root = parent._root
+		self._SetRoot(parent._root)
 
 	@readonly
 	def Root(self) -> Nullable[CoverageSummary]:
@@ -183,6 +181,16 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		:returns: A generator of the elements below this one.
 		"""
+
+	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
+		"""
+		Set the report's root of this element.
+
+		A class with child elements extends it to set the root of its children too.
+
+		:param root: The report's root, or ``None`` while the element isn't part of a report.
+		"""
+		self._root = root
 
 
 @export
@@ -552,6 +560,19 @@ class Directory(BaseWithPath):
 			yield child
 			yield from child.IterateElements()
 
+	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
+		"""
+		Set the report's root of this directory, and of the directories and files in it.
+
+		:param root: The report's root, or ``None`` while the directory isn't part of a report.
+		"""
+		super()._SetRoot(root)
+		for directory in self._directories.values():
+			directory._SetRoot(root)
+
+		for file in self._files.values():
+			file._SetRoot(root)
+
 	@readonly
 	def Directories(self) -> dict[str, Directory]:
 		"""
@@ -849,9 +870,7 @@ class File(BaseWithPath):
 
 				fileLines[lineNumber] = line
 				line._parent = self
-				line._root =   self._root
-				for branch in line._branches:
-					branch._root = self._root
+				line._SetRoot(self._root)
 
 			self._lines =          fileLines
 			self._lastLineNumber = lastLineNumber
@@ -886,6 +905,16 @@ class File(BaseWithPath):
 		for line in self.IterateLines():
 			yield line
 			yield from line.IterateElements()
+
+	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
+		"""
+		Set the report's root of this file, and of its lines.
+
+		:param root: The report's root, or ``None`` while the file isn't part of a report.
+		"""
+		super()._SetRoot(root)
+		for line in self.IterateLines():
+			line._SetRoot(root)
 
 	@readonly
 	def Lines(self) -> list[Nullable[Line]]:
@@ -1105,6 +1134,16 @@ class Line(BaseWithStatus):
 		:returns: A generator of the branches.
 		"""
 		yield from self._branches
+
+	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
+		"""
+		Set the report's root of this line, and of its branches.
+
+		:param root: The report's root, or ``None`` while the line isn't part of a report.
+		"""
+		super()._SetRoot(root)
+		for branch in self._branches:
+			branch._SetRoot(root)
 
 	@readonly
 	def LineNumber(self) -> int:
@@ -1346,6 +1385,16 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		for unit in self._units.values():
 			yield unit
 			yield from unit.IterateElements()
+
+	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
+		"""
+		Set the report's root of this unit, and of the units it contains.
+
+		:param root: The report's root, or ``None`` while the unit isn't part of a report.
+		"""
+		super()._SetRoot(root)
+		for unit in self._units.values():
+			unit._SetRoot(root)
 
 	@readonly
 	def Name(self) -> str:
