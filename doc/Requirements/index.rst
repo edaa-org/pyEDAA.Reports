@@ -26,7 +26,7 @@ Every element carries key-value pairs for the information the model has no field
      - :class:`Label`                  | e.g. a product variant
      - :class:`Document`               | e.g. a datasheet - attached to items
      - :class:`Layer`                  | e.g. electrical, FPGA firmware or software
-     - :class:`Requirement`            | e.g. ``EL-1`` - kind, obligation, state
+     - :class:`Requirement`            | e.g. ``EL-1`` - kind, obligation, state, layer, personas, labels, documents
        - :class:`Requirement`          | e.g. ``EL-1.1`` - a child requirement refining it
 
 * The :class:`RequirementSpecification` registers every person by user ID, and every persona, label, document and layer,
@@ -43,6 +43,7 @@ Every element carries key-value pairs for the information the model has no field
 * Every element knows the element containing it - :attr:`~Base.Parent` - and its specification - :attr:`~Base.Root`.
   Assigning a parent, in the constructor or later, adds the element to it and passes the specification on to the
   elements below it.
+* An item refers only to personas, labels, documents and layers of its own specification.
 
 
 .. _REQ/Requirements:
@@ -77,6 +78,10 @@ Its :class:`ItemState` follows its life cycle from ``placeholder`` over ``draft`
 released and changes no more, e.g. in a baseline. At any time, a requirement can be ``rejected`` or become
 ``obsolete``.
 
+A requirement belongs to at most one :class:`Layer`: the requirements of one engineering discipline, e.g. electrical,
+mechanical, FPGA firmware or software. A layer partitions the requirements; a selection across layers - e.g. the
+requirements of a product variant - is a :class:`Label`, or a predicate.
+
 A requirement contains child requirements, which refine it. :meth:`~BaseItem.IterateChildren` iterates the children,
 :meth:`~BaseItem.IterateDescendants` the children and grandchildren, depth-first.
 :meth:`~RequirementSpecification.IterateRequirements` iterates every requirement of the specification. Each takes an
@@ -85,12 +90,17 @@ optional predicate to select the requirements:
 .. code-block:: Python
 
    from pyTooling.Versioning import SemanticVersion
-   from pyEDAA.Reports.Requirements import Requirement, RequirementKind, RequirementSpecification
+   from pyEDAA.Reports import Person
+   from pyEDAA.Reports.Requirements import Layer, Requirement, RequirementKind, RequirementSpecification
 
    specification = RequirementSpecification(SemanticVersion(1, 0, 0), "Board")
+   alice = Person("alice", "Alice", "alice@example.com")
+   specification.AddPerson(alice)
+   electrical = Layer("el", "Electrical", parent=specification)
 
-   power = Requirement("EL-1", "Power supply", RequirementKind.Functional, parent=specification)
-   Requirement("EL-1.1", "Core rail", RequirementKind.Performance, "0.9 V, 5 A.", parent=power)
+   power = Requirement("EL-1", "Power supply", RequirementKind.Functional, layer=electrical, authors=[alice],
+                       parent=specification)
+   Requirement("EL-1.1", "Core rail", RequirementKind.Performance, "0.9 V, 5 A.", layer=electrical, parent=power)
 
    for requirement in specification.IterateRequirements(lambda r: r.Kind is RequirementKind.Performance):
      print(f"{requirement.ID}: {requirement.Title}")
