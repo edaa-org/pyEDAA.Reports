@@ -80,7 +80,7 @@ from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractclass, abstractmethod
 
-from pyEDAA.Reports        import DuplicateElementError, ReportException
+from pyEDAA.Reports        import AlreadyInHierarchyError, DuplicateElementError, ReportException
 
 
 @export
@@ -89,8 +89,8 @@ class CodeCoverageError(ReportException):
 
 
 @export
-class AlreadyInHierarchyError(CodeCoverageError):
-	"""The exception is raised when an element is added to an element, but it's already part of another element."""
+class AlreadyInCoverageReportError(CodeCoverageError, AlreadyInHierarchyError):
+	"""The exception is raised when an element is added to an element, but it already has a parent."""
 
 
 @export

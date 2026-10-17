@@ -31,11 +31,12 @@
 """Unit tests of the requirements model: requirements, their hierarchy, and iterating them."""
 from datetime                    import datetime, timedelta, timezone
 
-from pyEDAA.Reports              import DuplicateElementError
-from pyEDAA.Reports.Requirements import AlreadyInHierarchyError, DuplicateDocumentError, DuplicateLabelError
+from pyEDAA.Reports              import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
+from pyEDAA.Reports.Requirements import AlreadyInSpecificationError, DuplicateDocumentError, DuplicateLabelError
 from pyEDAA.Reports.Requirements import DuplicateLayerError, DuplicateLinkError, DuplicatePersonaError
 from pyEDAA.Reports.Requirements import DuplicatePersonError, DuplicateRequirementError, DuplicateSpecificationItemError
-from pyEDAA.Reports.Requirements import ItemState, Label, Obligation, Requirement, RequirementKind
+from pyEDAA.Reports.Requirements import ItemState, Label, NotInSameSpecificationError, Obligation, Requirement
+from pyEDAA.Reports.Requirements import RequirementKind
 from pyEDAA.Reports.Requirements import RequirementSpecification, RequirementsError
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
@@ -212,7 +213,7 @@ class Hierarchy(Testcase):
 	def test_Parent_Twice(self) -> None:
 		specification = self._Specification()
 
-		with self.assertRaises(AlreadyInHierarchyError) as context:
+		with self.assertRaises(AlreadyInSpecificationError) as context:
 			specification.Requirements["A.2"].Parent = specification.Requirements["B"]
 
 		self.assertEqual("Requirement already has a parent.", str(context.exception))
@@ -226,6 +227,13 @@ class Hierarchy(Testcase):
 			with self.subTest(exception=exception.__name__):
 				self.assertTrue(issubclass(exception, DuplicateElementError))
 				self.assertTrue(issubclass(exception, RequirementsError))
+
+	def test_HierarchyErrors(self) -> None:
+		"""The hierarchy errors derive from the common bases and from 'RequirementsError'."""
+		self.assertTrue(issubclass(AlreadyInSpecificationError, AlreadyInHierarchyError))
+		self.assertTrue(issubclass(AlreadyInSpecificationError, RequirementsError))
+		self.assertTrue(issubclass(NotInSameSpecificationError, NotInSameHierarchyError))
+		self.assertTrue(issubclass(NotInSameSpecificationError, RequirementsError))
 
 
 class ParameterChecks(Testcase):

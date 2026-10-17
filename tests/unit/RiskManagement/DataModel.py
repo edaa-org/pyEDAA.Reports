@@ -32,11 +32,12 @@
 """Unit tests of the risk management model: enumerations, risks, implications, mitigations, links and the register."""
 from datetime                      import datetime, timezone
 
-from pyEDAA.Reports                import DuplicateElementError, Person
-from pyEDAA.Reports.RiskManagement import AlreadyInHierarchyError, DuplicateImplicationError, DuplicateLinkError
+from pyEDAA.Reports                import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
+from pyEDAA.Reports                import Person
+from pyEDAA.Reports.RiskManagement import AlreadyInRiskRegisterError, DuplicateImplicationError, DuplicateLinkError
 from pyEDAA.Reports.RiskManagement import DuplicateMitigationError, DuplicatePersonError, DuplicateRiskError, Impact
 from pyEDAA.Reports.RiskManagement import Implication, Link, LinkKind, Mitigation, MitigationKind, MitigationState
-from pyEDAA.Reports.RiskManagement import NotInSameRiskRegister, Probability, Risk, RiskLevel, RiskManagement
+from pyEDAA.Reports.RiskManagement import NotInSameRiskRegisterError, Probability, Risk, RiskLevel, RiskManagement
 from pyEDAA.Reports.RiskManagement import RiskManagementError, RiskState
 from pyTooling.Versioning          import SemanticVersion
 from pyTooling.Testing             import Testcase
@@ -374,13 +375,20 @@ class Register(Testcase):
 				self.assertTrue(issubclass(exception, DuplicateElementError))
 				self.assertTrue(issubclass(exception, RiskManagementError))
 
+	def test_HierarchyErrors(self) -> None:
+		"""The hierarchy errors derive from the common bases and from 'RiskManagementError'."""
+		self.assertTrue(issubclass(AlreadyInRiskRegisterError, AlreadyInHierarchyError))
+		self.assertTrue(issubclass(AlreadyInRiskRegisterError, RiskManagementError))
+		self.assertTrue(issubclass(NotInSameRiskRegisterError, NotInSameHierarchyError))
+		self.assertTrue(issubclass(NotInSameRiskRegisterError, RiskManagementError))
+
 	def test_ForeignReferences(self) -> None:
 		"""An element of a risk register references only implications and mitigations of the same register."""
 		register =    RiskManagement(VERSION)
 		implication = Implication("I1", "The tape-out is delayed.")
 		mitigation =  Mitigation("M1", "Order a second shuttle run.", parent=RiskManagement(VERSION))
 
-		with self.assertRaises(NotInSameRiskRegister) as context:
+		with self.assertRaises(NotInSameRiskRegisterError) as context:
 			_ = Implication("I2", "The launch is delayed.", [implication], parent=register)
 		self.assertEqual(
 			"Parameter 'implications' contains an implication outside the element's risk register.",
@@ -391,7 +399,7 @@ class Register(Testcase):
 			context.exception.__notes__
 		)
 
-		with self.assertRaises(NotInSameRiskRegister) as context:
+		with self.assertRaises(NotInSameRiskRegisterError) as context:
 			_ = Implication("I2", "The launch is delayed.", mitigations=[mitigation], parent=register)
 		self.assertEqual(
 			"Parameter 'mitigations' contains a mitigation outside the element's risk register.",
@@ -399,11 +407,11 @@ class Register(Testcase):
 		)
 
 		risk = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
-		with self.assertRaises(NotInSameRiskRegister) as context:
+		with self.assertRaises(NotInSameRiskRegisterError) as context:
 			risk.AddImplication(implication)
 		self.assertEqual("Parameter 'implication' is outside the element's risk register.", str(context.exception))
 
-		with self.assertRaises(NotInSameRiskRegister) as context:
+		with self.assertRaises(NotInSameRiskRegisterError) as context:
 			risk.AddMitigation(mitigation)
 		self.assertEqual("Parameter 'mitigation' is outside the element's risk register.", str(context.exception))
 
@@ -419,7 +427,7 @@ class Register(Testcase):
 		risk =        Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
 		risk.AddImplication(implication)
 
-		with self.assertRaises(NotInSameRiskRegister) as context:
+		with self.assertRaises(NotInSameRiskRegisterError) as context:
 			risk.Parent = register
 		self.assertEqual("Risk 'R1' references an implication outside the risk register.", str(context.exception))
 		self.assertEqual(
@@ -427,7 +435,7 @@ class Register(Testcase):
 			context.exception.__notes__
 		)
 
-		with self.assertRaises(NotInSameRiskRegister) as context:
+		with self.assertRaises(NotInSameRiskRegisterError) as context:
 			implication.Parent = register
 		self.assertEqual("Implication 'I1' references a mitigation outside the risk register.", str(context.exception))
 		self.assertIsNone(risk.Parent)
@@ -444,9 +452,9 @@ class Register(Testcase):
 		self.assertEqual({"M1": mitigation}, register.Mitigations)
 
 		for parent, exception, message in (
-			(None,        ValueError,              "Parameter 'parent' is None."),
-			(implication, TypeError,               "Parameter 'parent' is not of type 'RiskManagement'."),
-			(register,    AlreadyInHierarchyError, "Element is already part of a risk register."),
+			(None,        ValueError,                 "Parameter 'parent' is None."),
+			(implication, TypeError,                  "Parameter 'parent' is not of type 'RiskManagement'."),
+			(register,    AlreadyInRiskRegisterError, "Element is already part of a risk register."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -538,18 +546,19 @@ class Links(Testcase):
 		other =    Risk("R4", "Late mask", "The mask shop is late.", Probability.Low, Impact.High, parent=second)
 
 		for source, destination, kind, exception, message in (
-			(None,    board,   LinkKind.Causes, ValueError,            "Parameter 'source' is None."),
-			("R1",    board,   LinkKind.Causes, TypeError,             "Parameter 'source' is not of type 'Risk'."),
-			(alone,   board,   LinkKind.Causes, NotInSameRiskRegister, "Parameter 'source' isn't part of a risk register."),
-			(foundry, None,    LinkKind.Causes, ValueError,            "Parameter 'destination' is None."),
-			(foundry, "R2",    LinkKind.Causes, TypeError,             "Parameter 'destination' is not of type 'Risk'."),
-			(foundry, foundry, LinkKind.Causes, ValueError,            "Parameter 'destination' is the source."),
-			(foundry, alone,   LinkKind.Causes, NotInSameRiskRegister,
+			(None,    board,   LinkKind.Causes, ValueError,                 "Parameter 'source' is None."),
+			("R1",    board,   LinkKind.Causes, TypeError,                  "Parameter 'source' is not of type 'Risk'."),
+			(alone,   board,   LinkKind.Causes, NotInSameRiskRegisterError,
+				"Parameter 'source' isn't part of a risk register."),
+			(foundry, None,    LinkKind.Causes, ValueError,                 "Parameter 'destination' is None."),
+			(foundry, "R2",    LinkKind.Causes, TypeError,                  "Parameter 'destination' is not of type 'Risk'."),
+			(foundry, foundry, LinkKind.Causes, ValueError,                 "Parameter 'destination' is the source."),
+			(foundry, alone,   LinkKind.Causes, NotInSameRiskRegisterError,
 				"Parameter 'destination' isn't part of the source's risk register."),
-			(foundry, other,   LinkKind.Causes, NotInSameRiskRegister,
+			(foundry, other,   LinkKind.Causes, NotInSameRiskRegisterError,
 				"Parameter 'destination' isn't part of the source's risk register."),
-			(foundry, board,   None,            ValueError,            "Parameter 'kind' is None."),
-			(foundry, board,   "causes",        TypeError,             "Parameter 'kind' is not of type 'LinkKind'."),
+			(foundry, board,   None,            ValueError,                 "Parameter 'kind' is None."),
+			(foundry, board,   "causes",        TypeError,                  "Parameter 'kind' is not of type 'LinkKind'."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -617,8 +626,8 @@ class Assessment(Testcase):
 
 		stranger = Person("stranger", "Somebody Else")
 		for value, exception, message in (
-			("paebbels", TypeError,             "Parameter 'value' is not of type 'Person'."),
-			(stranger,   NotInSameRiskRegister, "Parameter 'value' isn't a person of the risk register."),
+			("paebbels", TypeError,                  "Parameter 'value' is not of type 'Person'."),
+			(stranger,   NotInSameRiskRegisterError, "Parameter 'value' isn't a person of the risk register."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -626,8 +635,9 @@ class Assessment(Testcase):
 				self.assertEqual(message, str(context.exception))
 
 		for keywords, exception, message in (
-			({"owner": "paebbels"},                   TypeError,             "Parameter 'owner' is not of type 'Person'."),
-			({"owner": stranger, "parent": register}, NotInSameRiskRegister,
+			({"owner": "paebbels"},                   TypeError,
+				"Parameter 'owner' is not of type 'Person'."),
+			({"owner": stranger, "parent": register}, NotInSameRiskRegisterError,
 				"Parameter 'owner' isn't a person of the risk register."),
 		):
 			with self.subTest(message=message):
@@ -636,7 +646,7 @@ class Assessment(Testcase):
 				self.assertEqual(message, str(context.exception))
 
 		standalone = Risk("R2", "Tool license", "A license expires.", Probability.Low, Impact.Low, owner=stranger)
-		with self.assertRaises(NotInSameRiskRegister) as context:
+		with self.assertRaises(NotInSameRiskRegisterError) as context:
 			standalone.Parent = register
 		self.assertEqual("Risk 'R2' has an owner outside the risk register.", str(context.exception))
 		self.assertEqual(

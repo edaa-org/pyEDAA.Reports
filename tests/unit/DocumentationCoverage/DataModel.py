@@ -31,8 +31,9 @@
 """Unit tests of the documentation coverage model: kinds, states, both hierarchies, and aggregation."""
 from pathlib                              import Path
 
-from pyEDAA.Reports                       import DuplicateElementError
-from pyEDAA.Reports.DocumentationCoverage import CoverageCounters, CoverageState, Directory, DocCoverageError
+from pyEDAA.Reports                       import AlreadyInHierarchyError, DuplicateElementError
+from pyEDAA.Reports.DocumentationCoverage import AlreadyInDocumentationReportError, CoverageCounters, CoverageState
+from pyEDAA.Reports.DocumentationCoverage import Directory, DocCoverageError
 from pyEDAA.Reports.DocumentationCoverage import DocumentationReport, DuplicateDirectoryError, DuplicateFileError, File
 from pyEDAA.Reports.DocumentationCoverage import Item, ItemCategory, ItemKind
 from pyTooling.Testing                    import Testcase
@@ -359,6 +360,11 @@ class Files(Testcase):
 			with self.subTest(exception=exception.__name__):
 				self.assertTrue(issubclass(exception, DuplicateElementError))
 				self.assertTrue(issubclass(exception, DocCoverageError))
+
+	def test_HierarchyError(self) -> None:
+		"""'AlreadyInDocumentationReportError' derives from the common base and from 'DocCoverageError'."""
+		self.assertTrue(issubclass(AlreadyInDocumentationReportError, AlreadyInHierarchyError))
+		self.assertTrue(issubclass(AlreadyInDocumentationReportError, DocCoverageError))
 
 	def test_Name(self) -> None:
 		self.assertEqual(Path("Units"), Directory(Path("Units")).Name)

@@ -47,9 +47,11 @@ Every element carries key-value pairs for the information the model has no field
   several specifications.
 * Every element knows the element containing it - :attr:`~Base.Parent` - and its specification - :attr:`~Base.Root`.
   Assigning a parent, in the constructor or later, adds the element to it and passes the specification on to the
-  elements below it. An element, which already has a parent, raises an :exc:`AlreadyInHierarchyError`.
+  elements below it. An element, which already has a parent, raises an :exc:`AlreadyInSpecificationError` - an
+  :exc:`~pyEDAA.Reports.AlreadyInHierarchyError`.
 * An item refers only to personas, labels, documents and layers of its own specification. An element or person of
-  another specification raises a :exc:`NotInSameSpecification`: it is valid, but not part of the specification.
+  another specification raises a :exc:`NotInSameSpecificationError` - a :exc:`~pyEDAA.Reports.NotInSameHierarchyError`:
+  it is valid, but not part of the specification.
 
 
 .. _REQ/Requirements:

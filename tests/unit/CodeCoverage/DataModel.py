@@ -32,8 +32,9 @@
 """Unit tests of the code coverage data model: lines, branches, files, directories, units and their counters."""
 from pathlib                     import Path
 
-from pyEDAA.Reports              import DuplicateElementError
-from pyEDAA.Reports.CodeCoverage import Branch, Class, CodeCoverageError, CoverageSummary, Directory
+from pyEDAA.Reports              import AlreadyInHierarchyError, DuplicateElementError
+from pyEDAA.Reports.CodeCoverage import AlreadyInCoverageReportError, Branch, Class, CodeCoverageError, CoverageSummary
+from pyEDAA.Reports.CodeCoverage import Directory
 from pyEDAA.Reports.CodeCoverage import DuplicateDirectoryError, DuplicateFileError, DuplicateLineError
 from pyEDAA.Reports.CodeCoverage import DuplicateUnitError, File, Function, Line, LineCoverageStatus, Method, Module
 from pyEDAA.Reports.CodeCoverage import Package, SourceFile
@@ -341,6 +342,11 @@ class Units(Testcase):
 			with self.subTest(exception=exception.__name__):
 				self.assertTrue(issubclass(exception, DuplicateElementError))
 				self.assertTrue(issubclass(exception, CodeCoverageError))
+
+	def test_HierarchyError(self) -> None:
+		"""'AlreadyInCoverageReportError' derives from the common base and from 'CodeCoverageError'."""
+		self.assertTrue(issubclass(AlreadyInCoverageReportError, AlreadyInHierarchyError))
+		self.assertTrue(issubclass(AlreadyInCoverageReportError, CodeCoverageError))
 
 
 class Tree(Testcase):

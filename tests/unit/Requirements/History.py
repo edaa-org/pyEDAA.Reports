@@ -33,7 +33,7 @@ from datetime                    import datetime, timedelta, timezone
 
 from pyEDAA.Reports              import Person
 from pyEDAA.Reports.Requirements import EventKind, HistoryEvent, ItemState, Persona, Requirement, RequirementKind
-from pyEDAA.Reports.Requirements import DuplicateRequirementError, NotInSameSpecification, RequirementSpecification
+from pyEDAA.Reports.Requirements import DuplicateRequirementError, NotInSameSpecificationError, RequirementSpecification
 from pyEDAA.Reports.Requirements import RequirementsError
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
@@ -156,7 +156,7 @@ class History(Testcase):
 				"Parameter 'person' is not of type 'Person'."),
 			(EventKind.Opened, CREATED, {"person": Persona("a", "A")},     TypeError,
 				"Parameter 'person' is not of type 'Person'."),
-			(EventKind.Opened, CREATED, {"person": Person("a", "A")},      NotInSameSpecification,
+			(EventKind.Opened, CREATED, {"person": Person("a", "A")},      NotInSameSpecificationError,
 				"Parameter 'person' isn't part of the item's specification."),
 			(EventKind.Merged, CREATED, {"involved": 1},                   TypeError,
 				"Parameter 'involved' is not iterable."),
@@ -164,7 +164,7 @@ class History(Testcase):
 				"Parameter 'involved' is a single element, not an iterable of elements."),
 			(EventKind.Merged, CREATED, {"involved": ["REQ-1"]},           TypeError,
 				"Parameter 'involved' contains an element not of type 'BaseItem'."),
-			(EventKind.Merged, CREATED, {"involved": [foreign]},           NotInSameSpecification,
+			(EventKind.Merged, CREATED, {"involved": [foreign]},           NotInSameSpecificationError,
 				"Parameter 'involved' contains an item not part of the item's specification."),
 			(EventKind.Merged, CREATED, {"involved": [requirement] * 2},   DuplicateRequirementError,
 				"Parameter 'involved' contains an item twice."),

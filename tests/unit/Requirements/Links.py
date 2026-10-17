@@ -29,8 +29,8 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the requirements model: links between items."""
-from pyEDAA.Reports.Requirements import DuplicateLinkError, Link, LinkKind, NotInSameSpecification, Requirement
-from pyEDAA.Reports.Requirements import RequirementSpecification, SpecificationItem
+from pyEDAA.Reports.Requirements import DuplicateLinkError, Link, LinkKind, NotInSameSpecificationError
+from pyEDAA.Reports.Requirements import Requirement, RequirementSpecification, SpecificationItem
 from pyTooling.Testing           import Testcase
 
 from .                           import BuildSpecification, FUNCTIONAL, VERSION
@@ -98,10 +98,10 @@ class Links(Testcase):
 		requirements =  specification.Requirements
 		other =         Requirement("OT-1", "Other", FUNCTIONAL, parent=RequirementSpecification(VERSION))
 		for source, exception, message in (
-			(None,                 ValueError,             "Parameter 'source' is None."),
-			("FW-1",               TypeError,              "Parameter 'source' is not of type 'BaseItem'."),
-			(requirements["EL-1"], ValueError,             "Parameter 'destination' is the source."),
-			(other,                NotInSameSpecification,
+			(None,                 ValueError,                  "Parameter 'source' is None."),
+			("FW-1",               TypeError,                   "Parameter 'source' is not of type 'BaseItem'."),
+			(requirements["EL-1"], ValueError,                  "Parameter 'destination' is the source."),
+			(other,                NotInSameSpecificationError,
 				"Parameter 'destination' isn't part of the source's specification."),
 		):
 			with self.subTest(message=message):
@@ -152,18 +152,19 @@ class Links(Testcase):
 		firmware =      requirements["FW-1"]
 		alone =         Requirement("REQ-2", "Title", FUNCTIONAL)
 		for source, destination, kind, exception, message in (
-			(None,       electrical, LinkKind.RelatesTo, ValueError,             "Parameter 'source' is None."),
+			(None,       electrical, LinkKind.RelatesTo, ValueError,                  "Parameter 'source' is None."),
 			(system,     electrical, LinkKind.RelatesTo, TypeError,
 				"Parameter 'source' is not of type 'BaseItem'."),
-			(alone,      electrical, LinkKind.RelatesTo, NotInSameSpecification,
+			(alone,      electrical, LinkKind.RelatesTo, NotInSameSpecificationError,
 				"Parameter 'source' isn't part of a specification."),
-			(firmware,   None,       LinkKind.RelatesTo, ValueError,             "Parameter 'destination' is None."),
+			(firmware,   None,       LinkKind.RelatesTo, ValueError,                  "Parameter 'destination' is None."),
 			(firmware,   "EL-1",     LinkKind.RelatesTo, TypeError,
 				"Parameter 'destination' is not of type 'BaseItem'."),
-			(firmware,   firmware,   LinkKind.RelatesTo, ValueError,             "Parameter 'destination' is the source."),
-			(firmware,   other,      LinkKind.RelatesTo, NotInSameSpecification,
+			(firmware,   firmware,   LinkKind.RelatesTo, ValueError,
+				"Parameter 'destination' is the source."),
+			(firmware,   other,      LinkKind.RelatesTo, NotInSameSpecificationError,
 				"Parameter 'destination' isn't part of the source's specification."),
-			(firmware,   electrical, None,               ValueError,             "Parameter 'kind' is None."),
+			(firmware,   electrical, None,               ValueError,                  "Parameter 'kind' is None."),
 			(firmware,   electrical, "relates-to",       TypeError,
 				"Parameter 'kind' is not of type 'LinkKind'."),
 		):

@@ -30,8 +30,9 @@
 #
 """Unit tests of the requirements model: the specification, and its persons, personas, labels, documents and layers."""
 from pyEDAA.Reports              import Person
-from pyEDAA.Reports.Requirements import AlreadyInHierarchyError, Document, DuplicateDocumentError, DuplicatePersonaError
-from pyEDAA.Reports.Requirements import DuplicatePersonError, Label, Layer, Persona, RequirementSpecification
+from pyEDAA.Reports.Requirements import AlreadyInSpecificationError, Document, DuplicateDocumentError
+from pyEDAA.Reports.Requirements import DuplicatePersonaError, DuplicatePersonError, Label, Layer, Persona
+from pyEDAA.Reports.Requirements import RequirementSpecification
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
 
@@ -205,7 +206,7 @@ class Registries(Testcase):
 		specification = RequirementSpecification(VERSION, "Board")
 		label =         Label("asic", "ASIC variant", parent=specification)
 
-		with self.assertRaises(AlreadyInHierarchyError) as context:
+		with self.assertRaises(AlreadyInSpecificationError) as context:
 			label.Parent = RequirementSpecification(VERSION, "System")
 
 		self.assertEqual("Label already has a parent.", str(context.exception))

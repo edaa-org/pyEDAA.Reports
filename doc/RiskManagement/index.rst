@@ -56,11 +56,12 @@ references its implications and mitigations, so several risks can share one.
 * An element joins the register by naming it as its parent, in its constructor or by :attr:`~Base.Parent`. An ID is
   unique among the elements of its kind; a second element of the same ID raises a duplicate error of its kind, e.g.
   :exc:`DuplicateRiskError` - each a :exc:`~pyEDAA.Reports.DuplicateElementError` and a :exc:`RiskManagementError`. An
-  element already part of a register raises an :exc:`AlreadyInHierarchyError`.
+  element already part of a register raises an :exc:`AlreadyInRiskRegisterError` - an
+  :exc:`~pyEDAA.Reports.AlreadyInHierarchyError`.
 * An element of the register references only implications and mitigations of the same register, and a link connects
   risks of the same register: referenced elements and linked risks join the register first. Otherwise a
-  :exc:`NotInSameRiskRegister` is raised: the element is valid, but not part of the register. A risk's owner is a person
-  of the register too.
+  :exc:`NotInSameRiskRegisterError` - a :exc:`~pyEDAA.Reports.NotInSameHierarchyError` - is raised: the element is
+  valid, but not part of the register. A risk's owner is a person of the register too.
 * Every element - the register too - has key-value pairs for data the model doesn't name, e.g. a ticket:
   ``risk["ticket"] = "#42"``.
 * The register iterates its risks, implications, mitigations and links, optionally filtered by a predicate, e.g.

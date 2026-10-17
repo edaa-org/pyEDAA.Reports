@@ -68,12 +68,17 @@ from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Warning     import CriticalWarning
 
-from pyEDAA.Reports        import DuplicateElementError, ReportException
+from pyEDAA.Reports        import AlreadyInHierarchyError, DuplicateElementError, ReportException
 
 
 @export
 class DocCoverageError(ReportException):
 	"""Base-exception of the documentation coverage data model and its readers."""
+
+
+@export
+class AlreadyInDocumentationReportError(DocCoverageError, AlreadyInHierarchyError):
+	"""The exception is raised when an element is added to an element, but it already has a parent."""
 
 
 @export
