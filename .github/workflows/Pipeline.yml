@@ -16,10 +16,10 @@ permissions:
 
 jobs:
   Prepare:
-    uses: pyTooling/Actions/.github/workflows/PrepareJob.yml@r8
+    uses: pyTooling/Actions/.github/workflows/PrepareJob.yml@r9
 
   ConfigParams:
-    uses: pyTooling/Actions/.github/workflows/ExtractConfiguration.yml@r8
+    uses: pyTooling/Actions/.github/workflows/ExtractConfiguration.yml@r9
 
   Example-Java:
     uses: ./.github/workflows/Example-Java.yml
@@ -43,22 +43,22 @@ jobs:
     uses: ./.github/workflows/Example-VHDL.yml
 
   UnitTestingParams:
-    uses: pyTooling/Actions/.github/workflows/Parameters.yml@r8
+    uses: pyTooling/Actions/.github/workflows/Parameters.yml@r9
     with:
       package_namespace:   'pyEDAA'
       package_name:        'Reports'
-      python_version_list: '3.11 3.12 3.13 3.14 pypy-3.11'
-      disable_list:        'mingw64:* ubuntu:pypy-3.11 ubuntu-arm:pypy-3.11 windows:pypy-3.11 windows-arm:pypy-3.11'
+      python_version_list: '3.11 3.12 3.13 3.14 3.15 pypy-3.11'
+      disable_list:        'ubuntu:pypy-3.11 ubuntu-arm:pypy-3.11 windows:pypy-3.11 windows-arm:pypy-3.11'
 
   AppTestingParams:
-    uses: pyTooling/Actions/.github/workflows/Parameters.yml@r8
+    uses: pyTooling/Actions/.github/workflows/Parameters.yml@r9
     with:
       name: pyEDAA.Reports
       python_version_list: ""   # use latest Python version
-      disable_list:        'mingw64:* ucrt64:*'
+      disable_list:        'ucrt64:*'
 
   UnitTesting:
-    uses: pyTooling/Actions/.github/workflows/UnitTesting.yml@r8
+    uses: pyTooling/Actions/.github/workflows/UnitTesting.yml@r9
     needs:
       - ConfigParams
       - UnitTestingParams
@@ -72,7 +72,7 @@ jobs:
       coverage_sqlite_artifact: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).codecoverage_sqlite }}
 
   StaticTypeCheck:
-    uses: pyTooling/Actions/.github/workflows/StaticTypeCheck.yml@r8
+    uses: pyTooling/Actions/.github/workflows/StaticTypeCheck.yml@r9
     needs:
       - ConfigParams
       - UnitTestingParams
@@ -82,7 +82,7 @@ jobs:
       html_artifact:  ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).statictyping_html }}
 
   CodeQuality:
-    uses: pyTooling/Actions/.github/workflows/CheckCodeQuality.yml@r8
+    uses: pyTooling/Actions/.github/workflows/CheckCodeQuality.yml@r9
     needs:
       - UnitTestingParams
     with:
@@ -93,7 +93,7 @@ jobs:
       artifact:          CodeQuality
 
   DocCoverage:
-    uses: pyTooling/Actions/.github/workflows/CheckDocumentation.yml@r8
+    uses: pyTooling/Actions/.github/workflows/CheckDocumentation.yml@r9
     needs:
       - UnitTestingParams
     with:
@@ -101,7 +101,7 @@ jobs:
       directory:      ${{ needs.UnitTestingParams.outputs.package_directory }}
 
   Package:
-    uses: pyTooling/Actions/.github/workflows/Package.yml@r8
+    uses: pyTooling/Actions/.github/workflows/Package.yml@r9
     needs:
       - UnitTestingParams
     with:
@@ -109,7 +109,7 @@ jobs:
       artifact:       ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
 
   AppTesting:
-    uses: pyTooling/Actions/.github/workflows/ApplicationTesting.yml@r8
+    uses: pyTooling/Actions/.github/workflows/ApplicationTesting.yml@r9
     needs:
       - AppTestingParams
       - UnitTestingParams
@@ -127,7 +127,7 @@ jobs:
       apptest_xml_artifact: ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).apptesting_xml }}
 
   PublishCoverageResults:
-    uses: pyTooling/Actions/.github/workflows/PublishCoverageResults.yml@r8
+    uses: pyTooling/Actions/.github/workflows/PublishCoverageResults.yml@r9
     needs:
       - ConfigParams
       - UnitTestingParams
@@ -145,7 +145,7 @@ jobs:
       CODACY_TOKEN:  ${{ secrets.CODACY_TOKEN }}
 
   PublishTestResults:
-    uses: pyTooling/Actions/.github/workflows/PublishTestResults.yml@r8
+    uses: pyTooling/Actions/.github/workflows/PublishTestResults.yml@r9
     needs:
       - ConfigParams
       - UnitTestingParams
@@ -161,7 +161,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   Documentation:
-    uses: pyTooling/Actions/.github/workflows/SphinxDocumentation.yml@r8
+    uses: pyTooling/Actions/.github/workflows/SphinxDocumentation.yml@r9
     needs:
       - UnitTestingParams
       - ConfigParams
@@ -176,7 +176,7 @@ jobs:
       latex_artifact:         ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).documentation_latex }}
 
   IntermediateCleanUp:
-    uses: pyTooling/Actions/.github/workflows/CleanupArtifacts.yml@r8
+    uses: pyTooling/Actions/.github/workflows/CleanupArtifacts.yml@r9
     needs:
       - UnitTestingParams
       - PublishCoverageResults
@@ -189,7 +189,7 @@ jobs:
         codecoverage_sqlite:-*
 
   PDFDocumentation:
-    uses: pyTooling/Actions/.github/workflows/LaTeXDocumentation.yml@r8
+    uses: pyTooling/Actions/.github/workflows/LaTeXDocumentation.yml@r9
     needs:
       - UnitTestingParams
       - Documentation
@@ -200,7 +200,7 @@ jobs:
       can-fail:       'true'
 
   PublishToGitHubPages:
-    uses: pyTooling/Actions/.github/workflows/PublishToGitHubPages.yml@r8
+    uses: pyTooling/Actions/.github/workflows/PublishToGitHubPages.yml@r9
     needs:
       - Prepare
       - UnitTestingParams
@@ -215,7 +215,7 @@ jobs:
       typing:   ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).statictyping_html }}
 
   TriggerTaggedRelease:
-    uses: pyTooling/Actions/.github/workflows/TagReleaseCommit.yml@r8
+    uses: pyTooling/Actions/.github/workflows/TagReleaseCommit.yml@r9
     needs:
       - Prepare
       - UnitTesting
@@ -232,12 +232,13 @@ jobs:
       contents: write  # required for create tag
       actions:  write  # required for trigger workflow
     with:
-      version:  ${{ needs.Prepare.outputs.version }}
-      auto_tag: ${{ needs.Prepare.outputs.is_release_commit }}
+      version:        ${{ needs.Prepare.outputs.version }}
+      auto_tag:       ${{ needs.Prepare.outputs.is_release_commit }}
+      pypi_compliant: ${{ needs.Package.outputs.pypi_compliant }}
     secrets: inherit
 
   ReleasePage:
-    uses: pyTooling/Actions/.github/workflows/PublishReleaseNotes.yml@r8
+    uses: pyTooling/Actions/.github/workflows/PublishReleaseNotes.yml@r9
     needs:
       - Prepare
       - UnitTesting
@@ -253,24 +254,33 @@ jobs:
       contents: write
       actions:  write
     with:
-      tag: ${{ needs.Prepare.outputs.version }}
+      tag:        ${{ needs.Prepare.outputs.version }}
+      prerelease: ${{ needs.Prepare.outputs.is_prerelease == 'true' }}
+      latest:     ${{ needs.Prepare.outputs.is_prerelease != 'true' }}
     secrets: inherit
 
   PublishOnPyPI:
-    uses: pyTooling/Actions/.github/workflows/PublishOnPyPI.yml@r8
+    uses: pyTooling/Actions/.github/workflows/PublishOnPyPI.yml@r9
     needs:
+      - Prepare
       - UnitTestingParams
+      - Package
       - ReleasePage
-    if: needs.Prepare.outputs.is_release_tag == 'true'
+    if: >-
+      ${{ !failure() && !cancelled()
+       && needs.Package.result == 'success'
+       && needs.Prepare.outputs.is_release_tag == 'true'
+      }}
     with:
       python_version: ${{ needs.UnitTestingParams.outputs.python_version }}
       requirements:   '-r dist/requirements.txt'
       artifact:       ${{ fromJson(needs.UnitTestingParams.outputs.artifact_names).package_all }}
+      pypi_compliant: ${{ needs.Package.outputs.pypi_compliant }}
     secrets:
       PYPI_TOKEN:     ${{ secrets.PYPI_TOKEN }}
 
   ArtifactCleanUp:
-    uses: pyTooling/Actions/.github/workflows/CleanupArtifacts.yml@r8
+    uses: pyTooling/Actions/.github/workflows/CleanupArtifacts.yml@r9
     needs:
       - Prepare
       - UnitTestingParams
