@@ -31,8 +31,10 @@
 """Unit tests of the documentation coverage model: kinds, states, both hierarchies, and aggregation."""
 from pathlib                              import Path
 
+from pyEDAA.Reports                       import DuplicateElementError
 from pyEDAA.Reports.DocumentationCoverage import CoverageCounters, CoverageState, Directory, DocCoverageError
-from pyEDAA.Reports.DocumentationCoverage import DocumentationReport, File, Item, ItemCategory, ItemKind
+from pyEDAA.Reports.DocumentationCoverage import DocumentationReport, DuplicateDirectoryError, DuplicateFileError, File
+from pyEDAA.Reports.DocumentationCoverage import Item, ItemCategory, ItemKind
 from pyTooling.Testing                    import Testcase
 
 
@@ -343,9 +345,20 @@ class Files(Testcase):
 		directory = Directory(Path("myPackage"))
 		File(Path("Shapes.py"), parent=directory)
 
-		with self.assertRaises(DocCoverageError) as context:
+		with self.assertRaises(DuplicateDirectoryError) as context:
 			_ = Directory(Path("Shapes.py"), parent=directory)
 		self.assertEqual("Directory 'myPackage' already contains 'Shapes.py'.", str(context.exception))
+
+		with self.assertRaises(DuplicateFileError) as context:
+			_ = File(Path("Shapes.py"), parent=directory)
+		self.assertEqual("Directory 'myPackage' already contains 'Shapes.py'.", str(context.exception))
+
+	def test_DuplicateErrors(self) -> None:
+		"""Every duplicate error is a 'DuplicateElementError' and a 'DocCoverageError'."""
+		for exception in (DuplicateDirectoryError, DuplicateFileError):
+			with self.subTest(exception=exception.__name__):
+				self.assertTrue(issubclass(exception, DuplicateElementError))
+				self.assertTrue(issubclass(exception, DocCoverageError))
 
 	def test_Name(self) -> None:
 		self.assertEqual(Path("Units"), Directory(Path("Units")).Name)

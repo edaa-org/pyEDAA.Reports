@@ -68,12 +68,22 @@ from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Warning     import CriticalWarning
 
-from pyEDAA.Reports        import ReportException
+from pyEDAA.Reports        import DuplicateElementError, ReportException
 
 
 @export
 class DocCoverageError(ReportException):
 	"""Base-exception of the documentation coverage data model and its readers."""
+
+
+@export
+class DuplicateDirectoryError(DocCoverageError, DuplicateElementError):
+	"""The exception is raised when a directory already contains a directory or a file of the same name."""
+
+
+@export
+class DuplicateFileError(DocCoverageError, DuplicateElementError):
+	"""The exception is raised when a directory or a report already contains a file or a directory of the same name."""
 
 
 @export
@@ -448,11 +458,12 @@ class Base(metaclass=ExtendedType, slots=True):
 		Assigning a parent adds this element to it, and sets the parent's root as the root of this element and of every
 		element below it.
 
-		:returns:                 The parent, or ``None``.
-		:raises ValueError:       If ``None`` is assigned.
-		:raises TypeError:        If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises TypeError:        If a parent is assigned to a :class:`DocumentationReport`, which has no parent.
-		:raises DocCoverageError: If the assigned parent is a directory, which already contains an element of this name.
+		:returns:                      The parent, or ``None``.
+		:raises ValueError:            If ``None`` is assigned.
+		:raises TypeError:             If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
+		:raises TypeError:             If a parent is assigned to a :class:`DocumentationReport`, which has no parent.
+		:raises DuplicateElementError: If the assigned parent is a directory, which already contains an element of this
+		                               name.
 		"""
 		return self._parent
 
@@ -640,14 +651,14 @@ class Directory(BaseWithPath):
 		"""
 		Initializes a directory, and adds it to its parent directory.
 
-		:param name:              Name of the directory: a path of one component.
-		:param parent:            Optional, the directory containing this one. Default: ``None``.
-		:raises TypeError:        If parameter ``parent`` isn't of type :class:`Directory`.
-		:raises ValueError:       If parameter ``name`` is ``None``.
-		:raises TypeError:        If parameter ``name`` isn't of type :class:`~pathlib.Path`.
-		:raises ValueError:       If parameter ``name`` is empty or ``.``.
-		:raises ValueError:       If parameter ``name`` has more than one component.
-		:raises DocCoverageError: If the parent directory already contains a file or directory of this name.
+		:param name:                     Name of the directory: a path of one component.
+		:param parent:                   Optional, the directory containing this one. Default: ``None``.
+		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Directory`.
+		:raises ValueError:              If parameter ``name`` is ``None``.
+		:raises TypeError:               If parameter ``name`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:              If parameter ``name`` is empty or ``.``.
+		:raises ValueError:              If parameter ``name`` has more than one component.
+		:raises DuplicateDirectoryError: If the parent directory already contains a file or directory of this name.
 		"""
 		super().__init__(name, parent=parent)
 
@@ -661,16 +672,20 @@ class Directory(BaseWithPath):
 		"""
 		Add a directory or file, which names this directory as its parent.
 
-		:param element:           The directory or file.
-		:raises DocCoverageError: If this directory already contains a file or directory of this name.
+		:param element:                The directory or file.
+		:raises DuplicateElementError: If this directory already contains a file or directory of this name.
 		"""
-		if element._name in self._directories or element._name in self._files:
-			raise DocCoverageError(f"Directory '{self.Path.as_posix()}' already contains '{element._name.as_posix()}'.")
-
 		if isinstance(element, Directory):
-			self._directories[element._name] = element
+			elements =  self._directories
+			exception = DuplicateDirectoryError
 		else:
-			self._files[element._name] = element
+			elements =  self._files
+			exception = DuplicateFileError
+
+		if element._name in self._directories or element._name in self._files:
+			raise exception(f"Directory '{self.Path.as_posix()}' already contains '{element._name.as_posix()}'.")
+
+		elements[element._name] = element
 
 	def _SetRoot(self, root: Nullable[DocumentationReport]) -> None:
 		"""
@@ -826,8 +841,8 @@ class DocumentationReport(Directory):
 		"""
 		Add a top-level item, a directory or a file, which names the report as its parent.
 
-		:param element:           The item, directory or file.
-		:raises DocCoverageError: If the report already contains a file or directory of this name.
+		:param element:                The item, directory or file.
+		:raises DuplicateElementError: If the report already contains a file or directory of this name.
 		"""
 		if isinstance(element, BaseWithPath):
 			super()._AddElement(element)
@@ -895,14 +910,14 @@ class File(BaseWithPath):
 		"""
 		Initializes a source file, and adds it to its directory.
 
-		:param name:              Name of the file: a path of one component.
-		:param parent:            Optional, the directory containing the file. Default: ``None``.
-		:raises TypeError:        If parameter ``parent`` isn't of type :class:`Directory`.
-		:raises ValueError:       If parameter ``name`` is ``None``.
-		:raises TypeError:        If parameter ``name`` isn't of type :class:`~pathlib.Path`.
-		:raises ValueError:       If parameter ``name`` is empty or ``.``.
-		:raises ValueError:       If parameter ``name`` has more than one component.
-		:raises DocCoverageError: If the directory already contains a file or directory of this name.
+		:param name:                Name of the file: a path of one component.
+		:param parent:              Optional, the directory containing the file. Default: ``None``.
+		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Directory`.
+		:raises ValueError:         If parameter ``name`` is ``None``.
+		:raises TypeError:          If parameter ``name`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:         If parameter ``name`` is empty or ``.``.
+		:raises ValueError:         If parameter ``name`` has more than one component.
+		:raises DuplicateFileError: If the directory already contains a file or directory of this name.
 		"""
 		super().__init__(name, parent=parent)
 
