@@ -394,6 +394,19 @@ class Tree(Testcase):
 			with self.subTest(element=repr(element)):
 				self.assertIs(summary, element.Root)
 
+	def test_ParentTwice(self) -> None:
+		"""An element, which already has a parent, isn't moved to another parent."""
+		source = Directory("src")
+		tests =  Directory("tests")
+		file =   File("a.py", parent=source)
+
+		with self.assertRaises(AlreadyInCoverageReportError) as context:
+			file.Parent = tests
+
+		self.assertEqual("File already has a parent.", str(context.exception))
+		self.assertIs(source, file.Parent)
+		self.assertEqual({}, tests.Files)
+
 	def test_ParentType(self) -> None:
 		for create, expected in (
 			(lambda: Branch(Covered, parent=File("a.py")),      "Line"),

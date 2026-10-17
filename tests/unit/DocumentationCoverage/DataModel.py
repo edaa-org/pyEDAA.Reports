@@ -260,6 +260,19 @@ class ItemHierarchy(Testcase):
 		self.assertIs(report, module.Root)
 		self.assertEqual([package], report.Items)
 
+	def test_ParentTwice(self) -> None:
+		"""An item, which already has a parent, isn't moved to another parent."""
+		package = Item("myPackage", ItemKind.Package, DOCUMENTED)
+		other =   Item("otherPackage", ItemKind.Package, DOCUMENTED)
+		module =  Item("Shapes", ItemKind.Module, DOCUMENTED, parent=package)
+
+		with self.assertRaises(AlreadyInDocumentationReportError) as context:
+			module.Parent = other
+
+		self.assertEqual("Item already has a parent.", str(context.exception))
+		self.assertIs(package, module.Parent)
+		self.assertEqual([], other.Items)
+
 		with self.assertRaises(ValueError) as context:
 			module.Parent = None
 		self.assertEqual("Parameter 'parent' is None.", str(context.exception))

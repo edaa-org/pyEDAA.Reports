@@ -463,13 +463,17 @@ class Base(metaclass=ExtendedType, slots=True):
 		Assigning a parent adds this element to it, and sets the parent's root as the root of this element and of every
 		element below it.
 
-		:returns:                        The parent, or ``None``.
-		:raises ValueError:              If ``None`` is assigned.
-		:raises TypeError:               If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises TypeError:               If a parent is assigned to a :class:`DocumentationReport`, which has no parent.
-		:raises DuplicateDirectoryError: If the assigned parent is a directory, which already contains a directory of this
-		                                 name.
-		:raises DuplicateFileError:      If the assigned parent is a directory, which already contains a file of this name.
+		:returns:                                  The parent, or ``None``.
+		:raises ValueError:                        If ``None`` is assigned.
+		:raises TypeError:                         If the assigned parent isn't of a type this class declares in
+		                                           :attr:`_PARENT_TYPE`.
+		:raises TypeError:                         If a parent is assigned to a :class:`DocumentationReport`, which has no
+		                                           parent.
+		:raises AlreadyInDocumentationReportError: If the element already has a parent.
+		:raises DuplicateDirectoryError:           If the assigned parent is a directory, which already contains a directory
+		                                           of this name.
+		:raises DuplicateFileError:                If the assigned parent is a directory, which already contains a file of
+		                                           this name.
 		"""
 		return self._parent
 
@@ -482,6 +486,8 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex = TypeError(f"Parameter 'parent' is not of type {typeNames}.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
+		elif self._parent is not None:
+			raise AlreadyInDocumentationReportError(f"{self.__class__.__name__} already has a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent
