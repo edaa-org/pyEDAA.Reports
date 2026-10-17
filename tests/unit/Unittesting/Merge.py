@@ -38,7 +38,7 @@ from pyEDAA.Reports.Unittesting.JUnit import Document, JUnitReaderMode
 
 
 class PyTooling(ut_TestCase):
-	_outputDirectory = Path("tests/output/Merge_PyTooling")
+	_outputDirectory = Path("tests/output/Merge")
 
 	@classmethod
 	def setUpClass(cls):
