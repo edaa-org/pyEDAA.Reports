@@ -54,7 +54,9 @@ references its implications and mitigations, so several risks can share one.
   :attr:`RiskManagement.Links`. A source has at most one link of a kind to a destination. :meth:`Risk.LinkTo` and
   :meth:`Risk.LinkFrom` create an outbound or inbound link of a risk, with the parameters of the link's constructor.
 * An element joins the register by naming it as its parent, in its constructor or by :attr:`~Base.Parent`. An ID is
-  unique among the elements of its kind; a second element of the same ID raises a :exc:`RiskManagementError`.
+  unique among the elements of its kind; a second element of the same ID raises a duplicate error of its kind, e.g.
+  :exc:`DuplicateRiskError` - each a :exc:`~pyEDAA.Reports.DuplicateElementError` and a :exc:`RiskManagementError`. An
+  element already part of a register raises an :exc:`AlreadyInHierarchyError`.
 * An element of the register references only implications and mitigations of the same register, and a link connects
   risks of the same register: referenced elements and linked risks join the register first. Otherwise a
   :exc:`NotInSameRiskRegister` is raised: the element is valid, but not part of the register. A risk's owner is a person

@@ -29,8 +29,8 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the requirements model: links between items."""
-from pyEDAA.Reports.Requirements import Link, LinkKind, Requirement, RequirementSpecification, RequirementsError
-from pyEDAA.Reports.Requirements import SpecificationItem
+from pyEDAA.Reports.Requirements import DuplicateLinkError, Link, LinkKind, NotInSameSpecification, Requirement
+from pyEDAA.Reports.Requirements import RequirementSpecification, SpecificationItem
 from pyTooling.Testing           import Testcase
 
 from .                           import BuildSpecification, FUNCTIONAL, VERSION
@@ -90,7 +90,7 @@ class Links(Testcase):
 		self.assertEqual([link], requirements["FW-1"].OutboundLinks)
 		self.assertEqual([link], requirements["EL-1"].InboundLinks)
 
-		with self.assertRaises(RequirementsError):
+		with self.assertRaises(DuplicateLinkError):
 			requirements["EL-1"].LinkFrom(requirements["FW-1"], LinkKind.DerivesFrom)
 
 	def test_LinkFrom_ParameterChecks(self) -> None:
@@ -98,10 +98,11 @@ class Links(Testcase):
 		requirements =  specification.Requirements
 		other =         Requirement("OT-1", "Other", FUNCTIONAL, parent=RequirementSpecification(VERSION))
 		for source, exception, message in (
-			(None,                 ValueError, "Parameter 'source' is None."),
-			("FW-1",               TypeError,  "Parameter 'source' is not of type 'BaseItem'."),
-			(requirements["EL-1"], ValueError, "Parameter 'destination' is the source."),
-			(other,                ValueError, "Parameter 'destination' isn't part of the source's specification."),
+			(None,                 ValueError,             "Parameter 'source' is None."),
+			("FW-1",               TypeError,              "Parameter 'source' is not of type 'BaseItem'."),
+			(requirements["EL-1"], ValueError,             "Parameter 'destination' is the source."),
+			(other,                NotInSameSpecification,
+				"Parameter 'destination' isn't part of the source's specification."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -135,7 +136,7 @@ class Links(Testcase):
 		Link(requirements["FW-1"], requirements["EL-1"], LinkKind.CounterpartOf)
 		Link(requirements["FW-1"], requirements["EL-1"], LinkKind.DependsOn)
 
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(DuplicateLinkError) as context:
 			Link(requirements["FW-1"], requirements["EL-1"], LinkKind.CounterpartOf)
 
 		self.assertEqual("Requirement 'FW-1' has a 'counterpart-of' link already.", str(context.exception))
@@ -151,16 +152,20 @@ class Links(Testcase):
 		firmware =      requirements["FW-1"]
 		alone =         Requirement("REQ-2", "Title", FUNCTIONAL)
 		for source, destination, kind, exception, message in (
-			(None,       electrical, LinkKind.RelatesTo, ValueError, "Parameter 'source' is None."),
-			(system,     electrical, LinkKind.RelatesTo, TypeError,  "Parameter 'source' is not of type 'BaseItem'."),
-			(alone,      electrical, LinkKind.RelatesTo, ValueError, "Parameter 'source' isn't part of a specification."),
-			(firmware,   None,       LinkKind.RelatesTo, ValueError, "Parameter 'destination' is None."),
-			(firmware,   "EL-1",     LinkKind.RelatesTo, TypeError,  "Parameter 'destination' is not of type 'BaseItem'."),
-			(firmware,   firmware,   LinkKind.RelatesTo, ValueError, "Parameter 'destination' is the source."),
-			(firmware,   other,      LinkKind.RelatesTo, ValueError,
+			(None,       electrical, LinkKind.RelatesTo, ValueError,             "Parameter 'source' is None."),
+			(system,     electrical, LinkKind.RelatesTo, TypeError,
+				"Parameter 'source' is not of type 'BaseItem'."),
+			(alone,      electrical, LinkKind.RelatesTo, NotInSameSpecification,
+				"Parameter 'source' isn't part of a specification."),
+			(firmware,   None,       LinkKind.RelatesTo, ValueError,             "Parameter 'destination' is None."),
+			(firmware,   "EL-1",     LinkKind.RelatesTo, TypeError,
+				"Parameter 'destination' is not of type 'BaseItem'."),
+			(firmware,   firmware,   LinkKind.RelatesTo, ValueError,             "Parameter 'destination' is the source."),
+			(firmware,   other,      LinkKind.RelatesTo, NotInSameSpecification,
 				"Parameter 'destination' isn't part of the source's specification."),
-			(firmware,   electrical, None,               ValueError, "Parameter 'kind' is None."),
-			(firmware,   electrical, "relates-to",       TypeError,  "Parameter 'kind' is not of type 'LinkKind'."),
+			(firmware,   electrical, None,               ValueError,             "Parameter 'kind' is None."),
+			(firmware,   electrical, "relates-to",       TypeError,
+				"Parameter 'kind' is not of type 'LinkKind'."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:

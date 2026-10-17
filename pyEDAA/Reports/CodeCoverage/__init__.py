@@ -80,12 +80,37 @@ from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractclass, abstractmethod
 
-from pyEDAA.Reports        import ReportException
+from pyEDAA.Reports        import DuplicateElementError, ReportException
 
 
 @export
 class CodeCoverageError(ReportException):
 	"""Base-exception of the code coverage data model and its report formats."""
+
+
+@export
+class AlreadyInHierarchyError(CodeCoverageError):
+	"""The exception is raised when an element is added to an element, but it's already part of another element."""
+
+
+@export
+class DuplicateDirectoryError(CodeCoverageError, DuplicateElementError):
+	"""The exception is raised when a directory already contains a directory or a file of the same name."""
+
+
+@export
+class DuplicateFileError(CodeCoverageError, DuplicateElementError):
+	"""The exception is raised when a directory or a report already contains a file or a directory of the same name."""
+
+
+@export
+class DuplicateUnitError(CodeCoverageError, DuplicateElementError):
+	"""The exception is raised when a unit or the report's root already contains a unit of the same name."""
+
+
+@export
+class DuplicateLineError(CodeCoverageError, DuplicateElementError):
+	"""The exception is raised when a file already has a line of the same number."""
 
 
 @export
@@ -141,11 +166,14 @@ class Base(metaclass=ExtendedType, slots=True):
 		Assigning a parent adds this element to it, and sets the parent's root as the root of this element and of every
 		element below it.
 
-		:returns:                  The parent, or ``None``.
-		:raises ValueError:        If ``None`` is assigned.
-		:raises TypeError:         If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises TypeError:         If a parent is assigned to a :class:`CoverageSummary`, which has no parent.
-		:raises CodeCoverageError: If the assigned parent already contains an element of this name or line number.
+		:returns:                        The parent, or ``None``.
+		:raises ValueError:              If ``None`` is assigned.
+		:raises TypeError:               If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
+		:raises TypeError:               If a parent is assigned to a :class:`CoverageSummary`, which has no parent.
+		:raises DuplicateDirectoryError: If the assigned parent already contains a directory of this name.
+		:raises DuplicateFileError:      If the assigned parent already contains a file of this name.
+		:raises DuplicateUnitError:      If the assigned parent already contains a unit of this name.
+		:raises DuplicateLineError:      If the assigned parent already contains a line of this line number.
 		"""
 		return self._parent
 
@@ -511,13 +539,13 @@ class Directory(BaseWithPath):
 		"""
 		Initialize a directory, and add it to its parent directory.
 
-		:param name:               Name of the directory.
-		:param parent:             Optional, the directory containing this one. Default: ``None``.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Directory`.
-		:raises ValueError:        If parameter ``name`` is ``None``.
-		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``name`` is empty.
-		:raises CodeCoverageError: If the parent directory already contains a file or directory of this name.
+		:param name:                     Name of the directory.
+		:param parent:                   Optional, the directory containing this one. Default: ``None``.
+		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Directory`.
+		:raises ValueError:              If parameter ``name`` is ``None``.
+		:raises TypeError:               If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:              If parameter ``name`` is empty.
+		:raises DuplicateDirectoryError: If the parent directory already contains a file or directory of this name.
 		"""
 		super().__init__(name, parent=parent)
 
@@ -531,16 +559,21 @@ class Directory(BaseWithPath):
 		"""
 		Add a directory or file, which names this directory as its parent.
 
-		:param element:            The directory or file.
-		:raises CodeCoverageError: If this directory already contains a file or directory of this name.
+		:param element:                  The directory or file.
+		:raises DuplicateDirectoryError: If this directory already contains a directory of this name.
+		:raises DuplicateFileError:      If this directory already contains a file of this name.
 		"""
-		if element._name in self._directories or element._name in self._files:
-			raise CodeCoverageError(f"Directory '{self.Path.as_posix()}' already contains '{element._name}'.")
-
 		if isinstance(element, Directory):
-			self._directories[element._name] = element
+			elements =  self._directories
+			exception = DuplicateDirectoryError
 		else:
-			self._files[element._name] = element
+			elements =  self._files
+			exception = DuplicateFileError
+
+		if element._name in self._directories or element._name in self._files:
+			raise exception(f"Directory '{self.Path.as_posix()}' already contains '{element._name}'.")
+
+		elements[element._name] = element
 
 	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
 		"""
@@ -723,14 +756,15 @@ class CoverageSummary(Directory):
 		"""
 		Add a top-level unit, directory or file, which names the report's root as its parent.
 
-		:param element:            The unit, directory or file.
-		:raises CodeCoverageError: If the root already contains a unit of this name.
-		:raises CodeCoverageError: If the root already contains a file or directory of this name.
+		:param element:                  The unit, directory or file.
+		:raises DuplicateUnitError:      If the root already contains a unit of this name.
+		:raises DuplicateDirectoryError: If the root already contains a directory of this name.
+		:raises DuplicateFileError:      If the root already contains a file of this name.
 		"""
 		if not isinstance(element, Unit):
 			super()._AddElement(element)
 		elif element._name in self._units:
-			raise CodeCoverageError(f"Unit '{element._name}' is added twice to '{self._name}'.")
+			raise DuplicateUnitError(f"Unit '{element._name}' is added twice to '{self._name}'.")
 		else:
 			self._units[element._name] = element
 
@@ -807,17 +841,17 @@ class File(BaseWithPath):
 		"""
 		Initialize a source file, and add it to its directory.
 
-		:param name:               Name of the file.
-		:param lines:              Optional, the executable lines. Default: ``None``.
-		:param parent:             Optional, the directory containing the file. Default: ``None``.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Directory`.
-		:raises ValueError:        If parameter ``name`` is ``None``.
-		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``name`` is empty.
-		:raises CodeCoverageError: If the directory already contains a file or directory of this name.
-		:raises TypeError:         If parameter ``lines`` isn't iterable.
-		:raises TypeError:         If parameter ``lines`` contains an element not of type :class:`Line`.
-		:raises CodeCoverageError: If two lines have the same number.
+		:param name:                Name of the file.
+		:param lines:               Optional, the executable lines. Default: ``None``.
+		:param parent:              Optional, the directory containing the file. Default: ``None``.
+		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Directory`.
+		:raises ValueError:         If parameter ``name`` is ``None``.
+		:raises TypeError:          If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:         If parameter ``name`` is empty.
+		:raises DuplicateFileError: If the directory already contains a file or directory of this name.
+		:raises TypeError:          If parameter ``lines`` isn't iterable.
+		:raises TypeError:          If parameter ``lines`` contains an element not of type :class:`Line`.
+		:raises DuplicateLineError: If two lines have the same number.
 		"""
 		super().__init__(name, parent=parent)
 
@@ -851,7 +885,7 @@ class File(BaseWithPath):
 			for line in lineList:
 				lineNumber = line._lineNumber
 				if fileLines[lineNumber] is not None:
-					raise CodeCoverageError(f"Line {lineNumber} of file '{self.Path.as_posix()}' is added twice.")
+					raise DuplicateLineError(f"Line {lineNumber} of file '{self.Path.as_posix()}' is added twice.")
 
 				fileLines[lineNumber] = line
 				line._parent = self
@@ -864,8 +898,8 @@ class File(BaseWithPath):
 		"""
 		Add a line, which names this file as its parent.
 
-		:param line:               The line.
-		:raises CodeCoverageError: If the file already has a line of this number.
+		:param line:                The line.
+		:raises DuplicateLineError: If the file already has a line of this number.
 		"""
 		lineNumber = line._lineNumber
 		if (gap := lineNumber - len(self._lines)) >= 0:
@@ -876,7 +910,7 @@ class File(BaseWithPath):
 		elif self._lines[lineNumber] is None:
 			self._lines[lineNumber] = line
 		else:
-			raise CodeCoverageError(f"Line {lineNumber} of file '{self.Path.as_posix()}' is added twice.")
+			raise DuplicateLineError(f"Line {lineNumber} of file '{self.Path.as_posix()}' is added twice.")
 
 		if lineNumber > self._lastLineNumber:
 			self._lastLineNumber = lineNumber
@@ -1040,23 +1074,23 @@ class Line(BaseWithStatus):
 		"""
 		Initialize a line's coverage, and add it to its file.
 
-		:param lineNumber:         Line number, counted from 1.
-		:param status:             Coverage state of the line.
-		:param coverageCount:      Optional, how often the line ran, if the report says. Default: ``None``.
-		:param branches:           Optional, the branches starting at this line. Default: ``None``.
-		:param parent:             Optional, the file the line is in. Default: ``None``.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`File`.
-		:raises ValueError:        If parameter ``status`` is ``None``.
-		:raises TypeError:         If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
-		:raises TypeError:         If parameter ``coverageCount`` isn't of type :class:`int`.
-		:raises ValueError:        If parameter ``coverageCount`` is negative.
-		:raises ValueError:        If parameter ``coverageCount`` contradicts parameter ``status``.
-		:raises ValueError:        If parameter ``lineNumber`` is ``None``.
-		:raises TypeError:         If parameter ``lineNumber`` isn't of type :class:`int`.
-		:raises ValueError:        If parameter ``lineNumber`` is less than 1.
-		:raises CodeCoverageError: If the file already has a line of this number.
-		:raises TypeError:         If parameter ``branches`` isn't iterable.
-		:raises TypeError:         If parameter ``branches`` contains an element not of type :class:`Branch`.
+		:param lineNumber:          Line number, counted from 1.
+		:param status:              Coverage state of the line.
+		:param coverageCount:       Optional, how often the line ran, if the report says. Default: ``None``.
+		:param branches:            Optional, the branches starting at this line. Default: ``None``.
+		:param parent:              Optional, the file the line is in. Default: ``None``.
+		:raises TypeError:          If parameter ``parent`` isn't of type :class:`File`.
+		:raises ValueError:         If parameter ``status`` is ``None``.
+		:raises TypeError:          If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
+		:raises TypeError:          If parameter ``coverageCount`` isn't of type :class:`int`.
+		:raises ValueError:         If parameter ``coverageCount`` is negative.
+		:raises ValueError:         If parameter ``coverageCount`` contradicts parameter ``status``.
+		:raises ValueError:         If parameter ``lineNumber`` is ``None``.
+		:raises TypeError:          If parameter ``lineNumber`` isn't of type :class:`int`.
+		:raises ValueError:         If parameter ``lineNumber`` is less than 1.
+		:raises DuplicateLineError: If the file already has a line of this number.
+		:raises TypeError:          If parameter ``branches`` isn't iterable.
+		:raises TypeError:          If parameter ``branches`` contains an element not of type :class:`Branch`.
 		"""
 		super().__init__(status, coverageCount, parent=parent)
 
@@ -1250,29 +1284,29 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		"""
 		Initialize a unit, and add it to its file and to the unit or report containing it.
 
-		:param name:               Name of the unit.
-		:param file:               Optional, the source file the unit is in. Default: ``None``.
-		:param startLine:          Optional, the unit's first line. Default: ``None``.
-		:param endLine:            Optional, the unit's last line. Default: ``None``.
-		:param status:             Optional, whether the unit was called. Default: :attr:`LineCoverageStatus.Unknown`.
-		:param coverageCount:      Optional, how often the unit was called. Default: ``None``.
-		:param parent:             Optional, the unit or report containing this unit. Default: ``None``.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Unit` or :class:`CoverageSummary`.
-		:raises ValueError:        If parameter ``status`` is ``None``.
-		:raises TypeError:         If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
-		:raises TypeError:         If parameter ``coverageCount`` isn't of type :class:`int`.
-		:raises ValueError:        If parameter ``coverageCount`` is negative.
-		:raises ValueError:        If parameter ``coverageCount`` contradicts parameter ``status``.
-		:raises ValueError:        If parameter ``name`` is ``None``.
-		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``name`` is empty.
-		:raises TypeError:         If parameter ``file`` isn't of type :class:`File`.
-		:raises TypeError:         If parameter ``startLine`` isn't of type :class:`Line`.
-		:raises ValueError:        If parameter ``startLine`` isn't a line of parameter ``file``.
-		:raises TypeError:         If parameter ``endLine`` isn't of type :class:`Line`.
-		:raises ValueError:        If parameter ``endLine`` isn't a line of parameter ``file``.
-		:raises ValueError:        If parameter ``endLine`` is before parameter ``startLine``.
-		:raises CodeCoverageError: If the parent already contains a unit of this name.
+		:param name:                Name of the unit.
+		:param file:                Optional, the source file the unit is in. Default: ``None``.
+		:param startLine:           Optional, the unit's first line. Default: ``None``.
+		:param endLine:             Optional, the unit's last line. Default: ``None``.
+		:param status:              Optional, whether the unit was called. Default: :attr:`LineCoverageStatus.Unknown`.
+		:param coverageCount:       Optional, how often the unit was called. Default: ``None``.
+		:param parent:              Optional, the unit or report containing this unit. Default: ``None``.
+		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Unit` or :class:`CoverageSummary`.
+		:raises ValueError:         If parameter ``status`` is ``None``.
+		:raises TypeError:          If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
+		:raises TypeError:          If parameter ``coverageCount`` isn't of type :class:`int`.
+		:raises ValueError:         If parameter ``coverageCount`` is negative.
+		:raises ValueError:         If parameter ``coverageCount`` contradicts parameter ``status``.
+		:raises ValueError:         If parameter ``name`` is ``None``.
+		:raises TypeError:          If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:         If parameter ``name`` is empty.
+		:raises TypeError:          If parameter ``file`` isn't of type :class:`File`.
+		:raises TypeError:          If parameter ``startLine`` isn't of type :class:`Line`.
+		:raises ValueError:         If parameter ``startLine`` isn't a line of parameter ``file``.
+		:raises TypeError:          If parameter ``endLine`` isn't of type :class:`Line`.
+		:raises ValueError:         If parameter ``endLine`` isn't a line of parameter ``file``.
+		:raises ValueError:         If parameter ``endLine`` is before parameter ``startLine``.
+		:raises DuplicateUnitError: If the parent already contains a unit of this name.
 		"""
 		super().__init__(status, coverageCount, parent=parent)
 		CoverageCountersMixin.__init__(self)
@@ -1327,11 +1361,11 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		"""
 		Add a unit, which names this unit as its parent.
 
-		:param unit:               The unit.
-		:raises CodeCoverageError: If this unit already contains a unit of this name.
+		:param unit:                The unit.
+		:raises DuplicateUnitError: If this unit already contains a unit of this name.
 		"""
 		if unit._name in self._units:
-			raise CodeCoverageError(f"Unit '{unit._name}' is added twice to '{self._name}'.")
+			raise DuplicateUnitError(f"Unit '{unit._name}' is added twice to '{self._name}'.")
 
 		self._units[unit._name] = unit
 

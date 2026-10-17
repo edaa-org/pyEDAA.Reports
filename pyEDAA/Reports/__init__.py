@@ -58,6 +58,17 @@ class ReportException(ExceptionBase):
 
 
 @export
+class DuplicateElementError(ReportException):
+	"""
+	The exception is raised when an element is added to a data model, which already contains an element of the same kind
+	and key.
+
+	Each data model raises a subclass per element kind, which derives from this class and from the data model's own
+	base-exception.
+	"""
+
+
+@export
 class Severity(Enum):
 	Unknown = 0
 	Debug = 5

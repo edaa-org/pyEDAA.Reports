@@ -30,8 +30,8 @@
 #
 """Unit tests of the requirements model: the persons, personas, labels, documents and layers an item refers to."""
 from pyEDAA.Reports              import Person
-from pyEDAA.Reports.Requirements import Document, ItemState, Label, Layer, Obligation, Persona, Requirement
-from pyEDAA.Reports.Requirements import RequirementKind, RequirementSpecification
+from pyEDAA.Reports.Requirements import Document, DuplicatePersonError, ItemState, Label, Layer, NotInSameSpecification
+from pyEDAA.Reports.Requirements import Obligation, Persona, Requirement, RequirementKind, RequirementSpecification
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
 
@@ -118,7 +118,7 @@ class ParameterChecks(Testcase):
 		for keywordArguments, exception, message, notes in (
 			({"layer": reviewer},                  TypeError,
 				"Parameter 'layer' is not of type 'Layer'.", ["Got type 'pyEDAA.Reports.Requirements.Persona'."]),
-			({"layer": Layer("el", "El")},         ValueError,
+			({"layer": Layer("el", "El")},         NotInSameSpecification,
 				"Parameter 'layer' isn't part of the item's specification.", ["Got layer 'el'."]),
 			({"labels": 1},                        TypeError,
 				"Parameter 'labels' is not iterable.", ["Got type 'int'."]),
@@ -140,14 +140,14 @@ class ParameterChecks(Testcase):
 			({"attachments": [reviewer]},          TypeError,
 				"Parameter 'attachments' contains an element not of type 'Document'.",
 				["Got type 'pyEDAA.Reports.Requirements.Persona'."]),
-			({"authors": [alice, bob]},            ValueError,
+			({"authors": [alice, bob]},            NotInSameSpecification,
 				"Parameter 'authors' contains an element not part of the item's specification.", ["Got person 'bob'."]),
-			({"owners": [Person("alice", "Alice")]}, ValueError,
+			({"owners": [Person("alice", "Alice")]}, NotInSameSpecification,
 				"Parameter 'owners' contains an element not part of the item's specification.", ["Got person 'alice'."]),
-			({"personas": [foreign]},              ValueError,
+			({"personas": [foreign]},              NotInSameSpecification,
 				"Parameter 'personas' contains an element not part of the item's specification.",
 				["Got persona 'tester'."]),
-			({"owners": [alice, alice]},           ValueError,
+			({"owners": [alice, alice]},           DuplicatePersonError,
 				"Parameter 'owners' contains an element twice.", ["Got person 'alice'."]),
 		):
 			with self.subTest(message=message):
@@ -165,7 +165,7 @@ class ParameterChecks(Testcase):
 		alice =         Person("alice", "Alice")
 		specification.AddPerson(alice)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(NotInSameSpecification) as context:
 			_ = Requirement("REQ-1", "Title", FUNCTIONAL, authors=[alice])
 
 		self.assertEqual(

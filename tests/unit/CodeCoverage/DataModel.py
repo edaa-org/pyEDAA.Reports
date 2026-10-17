@@ -32,8 +32,11 @@
 """Unit tests of the code coverage data model: lines, branches, files, directories, units and their counters."""
 from pathlib                     import Path
 
-from pyEDAA.Reports.CodeCoverage import Branch, Class, CodeCoverageError, CoverageSummary, Directory, File, Function
-from pyEDAA.Reports.CodeCoverage import Line, LineCoverageStatus, Method, Module, Package, SourceFile
+from pyEDAA.Reports              import DuplicateElementError
+from pyEDAA.Reports.CodeCoverage import Branch, Class, CodeCoverageError, CoverageSummary, Directory
+from pyEDAA.Reports.CodeCoverage import DuplicateDirectoryError, DuplicateFileError, DuplicateLineError
+from pyEDAA.Reports.CodeCoverage import DuplicateUnitError, File, Function, Line, LineCoverageStatus, Method, Module
+from pyEDAA.Reports.CodeCoverage import Package, SourceFile
 from pyTooling.Testing           import Testcase
 
 
@@ -155,7 +158,7 @@ class Hierarchy(Testcase):
 		directory = Directory("src")
 		_ = File("Counter.vhdl", parent=directory)
 
-		with self.assertRaises(CodeCoverageError) as context:
+		with self.assertRaises(DuplicateDirectoryError) as context:
 			_ = Directory("Counter.vhdl", parent=directory)
 
 		self.assertEqual("Directory 'src' already contains 'Counter.vhdl'.", str(context.exception))
@@ -163,7 +166,7 @@ class Hierarchy(Testcase):
 	def test_DuplicateLine(self) -> None:
 		file = File("Counter.vhdl", lines=(Line(3, Covered), ))
 
-		with self.assertRaises(CodeCoverageError) as context:
+		with self.assertRaises(DuplicateLineError) as context:
 			_ = Line(3, Uncovered, parent=file)
 
 		self.assertEqual("Line 3 of file 'Counter.vhdl' is added twice.", str(context.exception))
@@ -208,7 +211,7 @@ class Hierarchy(Testcase):
 				self.assertEqual(message, str(context.exception))
 
 	def test_DuplicateLine_Parameter(self) -> None:
-		with self.assertRaises(CodeCoverageError) as context:
+		with self.assertRaises(DuplicateLineError) as context:
 			_ = File("Counter.vhdl", lines=(Line(3, Covered), Line(3, Uncovered)))
 
 		self.assertEqual("Line 3 of file 'Counter.vhdl' is added twice.", str(context.exception))
@@ -318,10 +321,26 @@ class Units(Testcase):
 		summary = CoverageSummary("report")
 		Package("src", parent=summary)
 
-		with self.assertRaises(CodeCoverageError) as context:
+		with self.assertRaises(DuplicateUnitError) as context:
 			_ = Package("src", parent=summary)
 
 		self.assertEqual("Unit 'src' is added twice to 'report'.", str(context.exception))
+
+	def test_DuplicateFile(self) -> None:
+		summary = CoverageSummary("report")
+		_ =       File("Counter.vhdl", parent=summary)
+
+		with self.assertRaises(DuplicateFileError) as context:
+			_ = File("Counter.vhdl", parent=summary)
+
+		self.assertEqual("Directory '.' already contains 'Counter.vhdl'.", str(context.exception))
+
+	def test_DuplicateErrors(self) -> None:
+		"""Every duplicate error is a 'DuplicateElementError' and a 'CodeCoverageError'."""
+		for exception in (DuplicateDirectoryError, DuplicateFileError, DuplicateUnitError, DuplicateLineError):
+			with self.subTest(exception=exception.__name__):
+				self.assertTrue(issubclass(exception, DuplicateElementError))
+				self.assertTrue(issubclass(exception, CodeCoverageError))
 
 
 class Tree(Testcase):
