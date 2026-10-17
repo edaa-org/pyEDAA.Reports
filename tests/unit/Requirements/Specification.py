@@ -30,7 +30,8 @@
 #
 """Unit tests of the requirements model: the specification, and its persons, personas, labels, documents and layers."""
 from pyEDAA.Reports              import Person
-from pyEDAA.Reports.Requirements import Document, Label, Layer, Persona, RequirementSpecification, RequirementsError
+from pyEDAA.Reports.Requirements import AlreadyInHierarchyError, Document, DuplicateDocumentError, DuplicatePersonaError
+from pyEDAA.Reports.Requirements import DuplicatePersonError, Label, Layer, Persona, RequirementSpecification
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
 
@@ -124,7 +125,7 @@ class Persons(Testcase):
 
 		for person in (alice, Person("alice", "Alice Doe")):
 			with self.subTest(person=person):
-				with self.assertRaises(RequirementsError) as context:
+				with self.assertRaises(DuplicatePersonError) as context:
 					specification.AddPerson(person)
 
 				self.assertEqual("Person 'alice' already exists in the specification.", str(context.exception))
@@ -204,7 +205,7 @@ class Registries(Testcase):
 		specification = RequirementSpecification(VERSION, "Board")
 		label =         Label("asic", "ASIC variant", parent=specification)
 
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(AlreadyInHierarchyError) as context:
 			label.Parent = RequirementSpecification(VERSION, "System")
 
 		self.assertEqual("Label already has a parent.", str(context.exception))
@@ -215,7 +216,7 @@ class Registries(Testcase):
 		Persona("fw", "Firmware engineer", parent=specification)
 		Layer("fw", "FPGA firmware", parent=specification)
 
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(DuplicatePersonaError) as context:
 			Persona("fw", "Firmware architect", parent=specification)
 
 		self.assertEqual("Persona 'fw' already exists in the specification.", str(context.exception))
@@ -223,7 +224,7 @@ class Registries(Testcase):
 
 		Document("manual", "Board manual", parent=specification)
 		document = Document("manual", "Firmware manual")
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(DuplicateDocumentError) as context:
 			document.Parent = specification
 
 		self.assertEqual("Document 'manual' already exists in the specification.", str(context.exception))

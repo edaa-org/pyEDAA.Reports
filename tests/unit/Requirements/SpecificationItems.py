@@ -29,8 +29,8 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the requirements model: specification items, and their N:M relation to requirements."""
-from pyEDAA.Reports.Requirements import Layer, Requirement, RequirementSpecification, RequirementsError
-from pyEDAA.Reports.Requirements import SpecificationItem
+from pyEDAA.Reports.Requirements import DuplicateRequirementError, DuplicateSpecificationItemError, Layer
+from pyEDAA.Reports.Requirements import NotInSameSpecification, Requirement, RequirementSpecification, SpecificationItem
 from pyTooling.Testing           import Testcase
 
 from .                           import BuildSpecification, FUNCTIONAL, VERSION
@@ -81,7 +81,7 @@ class SpecificationItems(Testcase):
 		self.assertEqual(["SW-1", "FW-1"], list(hardware.Requirements))
 		self.assertEqual(["DES-1", "DES-2"], list(requirements["SW-1"].SpecificationItems))
 
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(DuplicateRequirementError) as context:
 			hardware.AddRequirement(requirements["FW-1"])
 
 		self.assertEqual("Specification item 'DES-1' specifies requirement 'FW-1' already.", str(context.exception))
@@ -91,7 +91,7 @@ class SpecificationItems(Testcase):
 		specification = BuildSpecification()
 		SpecificationItem("EL-1", "Interrupt pin", parent=specification)
 
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(DuplicateSpecificationItemError) as context:
 			SpecificationItem("EL-1", "Interrupt pin", parent=specification)
 
 		self.assertEqual("SpecificationItem 'EL-1' already exists in the specification.", str(context.exception))
@@ -108,10 +108,10 @@ class SpecificationItems(Testcase):
 				["Got type 'pyEDAA.Reports.Requirements.Requirement'."]),
 			(["EL-1"],                                 TypeError,
 				"Parameter 'requirements' contains an element not of type 'Requirement'.", ["Got type 'str'."]),
-			([other],                                  ValueError,
+			([other],                                  NotInSameSpecification,
 				"Parameter 'requirements' contains a requirement not part of the item's specification.",
 				["Got requirement 'REQ-1'."]),
-			([specification.Requirements["EL-1"]] * 2, ValueError,
+			([specification.Requirements["EL-1"]] * 2, DuplicateRequirementError,
 				"Parameter 'requirements' contains a requirement twice.", ["Got requirement 'EL-1'."]),
 		):
 			with self.subTest(message=message):
@@ -126,9 +126,9 @@ class SpecificationItems(Testcase):
 
 		design = SpecificationItem("DES-1", "Title", parent=specification)
 		for requirement, exception, message in (
-			(None,   ValueError, "Parameter 'requirement' is None."),
-			("EL-1", TypeError,  "Parameter 'requirement' is not of type 'Requirement'."),
-			(other,  ValueError, "Parameter 'requirement' isn't part of the item's specification."),
+			(None,   ValueError,             "Parameter 'requirement' is None."),
+			("EL-1", TypeError,              "Parameter 'requirement' is not of type 'Requirement'."),
+			(other,  NotInSameSpecification, "Parameter 'requirement' isn't part of the item's specification."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:

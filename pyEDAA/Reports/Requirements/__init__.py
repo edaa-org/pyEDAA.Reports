@@ -56,12 +56,67 @@ from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import KeyValuePairsMixin, Person, ReportException
+from pyEDAA.Reports        import DuplicateElementError, KeyValuePairsMixin, Person, ReportException
 
 
 @export
 class RequirementsError(ReportException):
 	"""Base-exception of the requirements model."""
+
+
+@export
+class NotInSameSpecification(RequirementsError):
+	"""
+	The exception is raised when an element is used together with an element or a person of another specification.
+
+	The element or person itself is valid, only its ownership is wrong: add it to the specification first. E.g. a link
+	from a requirement to a requirement of another specification.
+	"""
+
+
+@export
+class AlreadyInHierarchyError(RequirementsError):
+	"""The exception is raised when an element is added to a specification or an item, but it already has a parent."""
+
+
+@export
+class DuplicatePersonaError(RequirementsError, DuplicateElementError):
+	"""The exception is raised when a specification or an item already contains a persona of the same ID."""
+
+
+@export
+class DuplicateLabelError(RequirementsError, DuplicateElementError):
+	"""The exception is raised when a specification or an item already contains a label of the same ID."""
+
+
+@export
+class DuplicateDocumentError(RequirementsError, DuplicateElementError):
+	"""The exception is raised when a specification or an item already contains a document of the same ID."""
+
+
+@export
+class DuplicateLayerError(RequirementsError, DuplicateElementError):
+	"""The exception is raised when a specification already contains a layer of the same ID."""
+
+
+@export
+class DuplicatePersonError(RequirementsError, DuplicateElementError):
+	"""The exception is raised when a specification or an item already contains a person of the same user ID."""
+
+
+@export
+class DuplicateRequirementError(RequirementsError, DuplicateElementError):
+	"""The exception is raised when a specification or an item already contains a requirement of the same ID."""
+
+
+@export
+class DuplicateSpecificationItemError(RequirementsError, DuplicateElementError):
+	"""The exception is raised when a specification or an item already contains a specification item of the same ID."""
+
+
+@export
+class DuplicateLinkError(RequirementsError, DuplicateElementError):
+	"""The exception is raised when an item already has a link of the same kind to the same destination."""
 
 
 @export
@@ -192,13 +247,14 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		Assigning a parent to an element without one adds the element to it, and sets the parent's specification as the
 		specification of this element and of every element below it.
 
-		:returns:                  The parent, or ``None``.
-		:raises ValueError:        If ``None`` is assigned.
-		:raises TypeError:         If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises TypeError:         If a parent is assigned to a :class:`RequirementSpecification`, which has no parent.
-		:raises RequirementsError: If the element already has a parent.
-		:raises RequirementsError: If the assigned parent's specification already contains an element of an ID of this
-		                           element or of an element below it.
+		:returns:                        The parent, or ``None``.
+		:raises ValueError:              If ``None`` is assigned.
+		:raises TypeError:               If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
+		:raises TypeError:               If a parent is assigned to a :class:`RequirementSpecification`, which has no
+		                                 parent.
+		:raises AlreadyInHierarchyError: If the element already has a parent.
+		:raises DuplicateElementError:   If the assigned parent's specification already contains an element of an ID of this
+		                                 element or of an element below it.
 		"""
 		return self._parent
 
@@ -213,7 +269,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 			raise ex
 
 		if self._parent is not None:
-			raise RequirementsError(f"{self.__class__.__name__} already has a parent.")
+			raise AlreadyInHierarchyError(f"{self.__class__.__name__} already has a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent
@@ -239,6 +295,8 @@ class BaseWithID(Base):
 
 	The ID is unique among the elements of the same class in a specification.
 	"""
+
+	_DUPLICATE_ERROR: ClassVar[type[RequirementsError]]  #: The error a second element of an ID raises; set by each class.
 
 	_id:          str  #: The element's ID.
 	_description: str  #: The element's description, or ``""``.
@@ -391,9 +449,9 @@ class RequirementSpecification(Base):
 		Register a persona, label, document, layer, top-level requirement or top-level specification item, which names the
 		specification as its parent.
 
-		:param element:            The element.
-		:raises RequirementsError: If the specification already contains an element of the same class and ID, or an item
-		                           below a requirement or specification item has the ID of a registered one.
+		:param element:                The element.
+		:raises DuplicateElementError: If the specification already contains an element of the same class and ID, or an item
+		                               below a requirement or specification item has the ID of a registered one.
 		"""
 		if isinstance(element, BaseItem):
 			self._AddItems(element)
@@ -409,7 +467,9 @@ class RequirementSpecification(Base):
 			elements = self._layers
 
 		if element._id in elements:
-			raise RequirementsError(f"{element.__class__.__name__} '{element._id}' already exists in the specification.")
+			raise element._DUPLICATE_ERROR(
+				f"{element.__class__.__name__} '{element._id}' already exists in the specification."
+			)
 
 		elements[element._id] = element
 
@@ -420,15 +480,17 @@ class RequirementSpecification(Base):
 
 		Either all of them are registered, or none.
 
-		:param item:               The item joining the specification.
-		:raises RequirementsError: If an ID of these items is registered already, or used twice by them.
+		:param item:                   The item joining the specification.
+		:raises DuplicateElementError: If an ID of these items is registered already, or used twice by them.
 		"""
 		items =   self._requirements if isinstance(item, Requirement) else self._specificationItems
 		ids =     set()
 		subtree = (item, *item.IterateDescendants())
 		for element in subtree:
 			if element._id in items or element._id in ids:
-				raise RequirementsError(f"{element.__class__.__name__} '{element._id}' already exists in the specification.")
+				raise element._DUPLICATE_ERROR(
+					f"{element.__class__.__name__} '{element._id}' already exists in the specification."
+				)
 
 			ids.add(element._id)
 
@@ -488,10 +550,10 @@ class RequirementSpecification(Base):
 		E.g. an author or an owner of requirements. A person has no parent: the same person may be registered in several
 		specifications.
 
-		:param person:             The person.
-		:raises ValueError:        If parameter ``person`` is ``None``.
-		:raises TypeError:         If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
-		:raises RequirementsError: If the specification already contains a person of this user ID.
+		:param person:                The person.
+		:raises ValueError:           If parameter ``person`` is ``None``.
+		:raises TypeError:            If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises DuplicatePersonError: If the specification already contains a person of this user ID.
 		"""
 		if person is None:
 			raise ValueError(f"Parameter 'person' is None.")
@@ -500,7 +562,7 @@ class RequirementSpecification(Base):
 			ex.add_note(f"Got type '{getFullyQualifiedName(person)}'.")
 			raise ex
 		elif person._userID in self._persons:
-			raise RequirementsError(f"Person '{person._userID}' already exists in the specification.")
+			raise DuplicatePersonError(f"Person '{person._userID}' already exists in the specification.")
 
 		self._persons[person._userID] = person
 
@@ -687,24 +749,24 @@ class BaseWithName(BaseWithID):
 		"""
 		Initializes an element with its ID, name and description, and registers it in its specification.
 
-		:param identifier:         The element's ID.
-		:param name:               The element's name.
-		:param description:        Optional, the element's description. Default: ``""``.
-		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
-		:param parent:             Optional, the specification. Default: ``None``.
-		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`RequirementSpecification`.
-		:raises ValueError:        If parameter ``identifier`` is ``None``.
-		:raises TypeError:         If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``identifier`` is empty.
-		:raises ValueError:        If parameter ``description`` is ``None``.
-		:raises TypeError:         If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``name`` is ``None``.
-		:raises TypeError:         If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``name`` is empty.
-		:raises RequirementsError: If the specification already contains an element of this class and ID.
+		:param identifier:             The element's ID.
+		:param name:                   The element's name.
+		:param description:            Optional, the element's description. Default: ``""``.
+		:param keyValuePairs:          Optional, the key-value pairs. Default: ``None``.
+		:param parent:                 Optional, the specification. Default: ``None``.
+		:raises TypeError:             If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:             If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:            If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:             If parameter ``parent`` isn't of type :class:`RequirementSpecification`.
+		:raises ValueError:            If parameter ``identifier`` is ``None``.
+		:raises TypeError:             If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:            If parameter ``identifier`` is empty.
+		:raises ValueError:            If parameter ``description`` is ``None``.
+		:raises TypeError:             If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:            If parameter ``name`` is ``None``.
+		:raises TypeError:             If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:            If parameter ``name`` is empty.
+		:raises DuplicateElementError: If the specification already contains an element of this class and ID.
 		"""
 		super().__init__(identifier, description=description, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -741,6 +803,8 @@ class Persona(BaseWithName):
 	:class:`~pyEDAA.Reports.Person`.
 	"""
 
+	_DUPLICATE_ERROR = DuplicatePersonaError  #: The error a second persona of an ID raises.
+
 
 @export
 class Label(BaseWithName):
@@ -750,6 +814,8 @@ class Label(BaseWithName):
 	E.g. a product variant, a release or a customer.
 	"""
 
+	_DUPLICATE_ERROR = DuplicateLabelError  #: The error a second label of an ID raises.
+
 
 @export
 class Document(BaseWithName):
@@ -758,6 +824,8 @@ class Document(BaseWithName):
 
 	E.g. a datasheet, a schematic or a standard.
 	"""
+
+	_DUPLICATE_ERROR = DuplicateDocumentError  #: The error a second document of an ID raises.
 
 
 @export
@@ -770,6 +838,8 @@ class Layer(BaseWithName):
 	firmware, and this one in the software; links of kind :attr:`LinkKind.CounterpartOf` or :attr:`LinkKind.DerivesFrom`
 	state it.
 	"""
+
+	_DUPLICATE_ERROR = DuplicateLayerError  #: The error a second layer of an ID raises.
 
 	def IterateRequirements(
 		self,
@@ -876,50 +946,50 @@ class BaseItem(BaseWithID):
 		Initializes an item with its title, creation time, state, layer, and the persons, personas, labels and documents it
 		refers to.
 
-		:param identifier:    The item's ID.
-		:param title:         The item's title.
-		:param description:   Optional, the item's description. Default: ``""``.
-		:param created:       Optional, the time the item was created; without a time zone, it is a local time. Default:
-		                      ``None``, the current time.
-		:param rationale:     Optional, why the item exists or is as it is. Default: ``""``.
-		:param state:         Optional, the item's state. Default: :attr:`ItemState.Draft`.
-		:param layer:         Optional, the layer the item belongs to. Default: ``None``.
-		:param authors:       Optional, the authors of the item. Default: ``None``.
-		:param owners:        Optional, the owners of the item. Default: ``None``.
-		:param personas:      Optional, the personas the item is about. Default: ``None``.
-		:param labels:        Optional, the labels of the item. Default: ``None``.
-		:param attachments:   Optional, the documents attached to the item. Default: ``None``.
-		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:param parent:        Optional, the parent item or the specification. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises ValueError:   If parameter ``identifier`` is ``None``.
-		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``identifier`` is empty.
-		:raises ValueError:   If parameter ``description`` is ``None``.
-		:raises TypeError:    If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``title`` is ``None``.
-		:raises TypeError:    If parameter ``title`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``title`` is empty.
-		:raises ValueError:   If parameter ``rationale`` is ``None``.
-		:raises TypeError:    If parameter ``rationale`` isn't of type :class:`str`.
-		:raises TypeError:    If parameter ``created`` isn't of type :class:`~datetime.datetime`.
-		:raises ValueError:   If parameter ``state`` is ``None``.
-		:raises TypeError:    If parameter ``state`` isn't of type :class:`ItemState`.
-		:raises TypeError:    If parameter ``layer`` isn't of type :class:`Layer`.
-		:raises ValueError:   If parameter ``layer`` isn't part of the item's specification.
-		:raises TypeError:    If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` isn't
-		                      iterable, or is a single element.
-		:raises TypeError:    If parameter ``authors`` or ``owners`` contains an element not of type
-		                      :class:`~pyEDAA.Reports.Person`.
-		:raises TypeError:    If parameter ``personas``, ``labels`` or ``attachments`` contains an element not of type
-		                      :class:`Persona`, :class:`Label` or :class:`Document`.
-		:raises ValueError:   If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` contains an
-		                      element, which isn't part of the item's specification.
-		:raises ValueError:   If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` contains an
-		                      element twice.
+		:param identifier:              The item's ID.
+		:param title:                   The item's title.
+		:param description:             Optional, the item's description. Default: ``""``.
+		:param created:                 Optional, the time the item was created; without a time zone, it is a local time.
+		                                Default: ``None``, the current time.
+		:param rationale:               Optional, why the item exists or is as it is. Default: ``""``.
+		:param state:                   Optional, the item's state. Default: :attr:`ItemState.Draft`.
+		:param layer:                   Optional, the layer the item belongs to. Default: ``None``.
+		:param authors:                 Optional, the authors of the item. Default: ``None``.
+		:param owners:                  Optional, the owners of the item. Default: ``None``.
+		:param personas:                Optional, the personas the item is about. Default: ``None``.
+		:param labels:                  Optional, the labels of the item. Default: ``None``.
+		:param attachments:             Optional, the documents attached to the item. Default: ``None``.
+		:param keyValuePairs:           Optional, the key-value pairs. Default: ``None``.
+		:param parent:                  Optional, the parent item or the specification. Default: ``None``.
+		:raises TypeError:              If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:              If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:             If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:              If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
+		:raises ValueError:             If parameter ``identifier`` is ``None``.
+		:raises TypeError:              If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:             If parameter ``identifier`` is empty.
+		:raises ValueError:             If parameter ``description`` is ``None``.
+		:raises TypeError:              If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:             If parameter ``title`` is ``None``.
+		:raises TypeError:              If parameter ``title`` isn't of type :class:`str`.
+		:raises ValueError:             If parameter ``title`` is empty.
+		:raises ValueError:             If parameter ``rationale`` is ``None``.
+		:raises TypeError:              If parameter ``rationale`` isn't of type :class:`str`.
+		:raises TypeError:              If parameter ``created`` isn't of type :class:`~datetime.datetime`.
+		:raises ValueError:             If parameter ``state`` is ``None``.
+		:raises TypeError:              If parameter ``state`` isn't of type :class:`ItemState`.
+		:raises TypeError:              If parameter ``layer`` isn't of type :class:`Layer`.
+		:raises NotInSameSpecification: If parameter ``layer`` isn't part of the item's specification.
+		:raises TypeError:              If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                                isn't iterable, or is a single element.
+		:raises TypeError:              If parameter ``authors`` or ``owners`` contains an element not of type
+		                                :class:`~pyEDAA.Reports.Person`.
+		:raises TypeError:              If parameter ``personas``, ``labels`` or ``attachments`` contains an element not of
+		                                type :class:`Persona`, :class:`Label` or :class:`Document`.
+		:raises NotInSameSpecification: If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                                contains an element, which isn't part of the item's specification.
+		:raises DuplicateElementError:  If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                                contains an element twice.
 		"""
 		super().__init__(identifier, description=description, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -959,7 +1029,7 @@ class BaseItem(BaseWithID):
 				ex.add_note(f"Got type '{getFullyQualifiedName(layer)}'.")
 				raise ex
 			elif self._root is None or layer._root is not self._root:
-				ex = ValueError(f"Parameter 'layer' isn't part of the item's specification.")
+				ex = NotInSameSpecification(f"Parameter 'layer' isn't part of the item's specification.")
 				ex.add_note(f"Got layer '{layer._id}'.")
 				raise ex
 
@@ -978,12 +1048,12 @@ class BaseItem(BaseWithID):
 		self._inboundLinks =  []
 		self._history =       []
 
-		for parameterName, references, referenceType, container in (
-			("authors",     authors,     Person,   self._authors),
-			("owners",      owners,      Person,   self._owners),
-			("personas",    personas,    Persona,  self._personas),
-			("labels",      labels,      Label,    self._labels),
-			("attachments", attachments, Document, self._attachments),
+		for parameterName, references, referenceType, container, duplicateError in (
+			("authors",     authors,     Person,   self._authors,     DuplicatePersonError),
+			("owners",      owners,      Person,   self._owners,      DuplicatePersonError),
+			("personas",    personas,    Persona,  self._personas,    DuplicatePersonaError),
+			("labels",      labels,      Label,    self._labels,      DuplicateLabelError),
+			("attachments", attachments, Document, self._attachments, DuplicateDocumentError),
 		):
 			if references is None:
 				continue
@@ -1010,11 +1080,13 @@ class BaseItem(BaseWithID):
 					registered = self._root is not None and reference._root is self._root
 
 				if not registered:
-					ex = ValueError(f"Parameter '{parameterName}' contains an element not part of the item's specification.")
+					ex = NotInSameSpecification(
+						f"Parameter '{parameterName}' contains an element not part of the item's specification."
+					)
 					ex.add_note(f"Got {referenceType.__name__.lower()} '{key}'.")
 					raise ex
 				elif key in container:
-					ex = ValueError(f"Parameter '{parameterName}' contains an element twice.")
+					ex = duplicateError(f"Parameter '{parameterName}' contains an element twice.")
 					ex.add_note(f"Got {referenceType.__name__.lower()} '{key}'.")
 					raise ex
 
@@ -1026,10 +1098,11 @@ class BaseItem(BaseWithID):
 
 		A child item is registered with every item below it in the specification.
 
-		:param element:            The child item or history event.
-		:raises RequirementsError: If the specification already contains an item of an ID of the child or an item below it.
-		:raises RequirementsError: If this item isn't part of a specification, and has a child of this ID already.
-		:raises RequirementsError: If the history event is earlier than the item's creation or its last event.
+		:param element:                The child item or history event.
+		:raises DuplicateElementError: If the specification already contains an item of an ID of the child or an item below
+		                               it.
+		:raises DuplicateElementError: If this item isn't part of a specification, and has a child of this ID already.
+		:raises RequirementsError:     If the history event is earlier than the item's creation or its last event.
 		"""
 		if isinstance(element, HistoryEvent):
 			previous = self._history[-1]._timestamp if len(self._history) > 0 else self._created
@@ -1043,7 +1116,7 @@ class BaseItem(BaseWithID):
 			if self._root is not None:
 				self._root._AddItems(element)
 			elif element._id in self._children:
-				raise RequirementsError(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
+				raise element._DUPLICATE_ERROR(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
 
 			self._children[element._id] = element
 
@@ -1236,21 +1309,21 @@ class BaseItem(BaseWithID):
 		"""
 		Create an outbound link from this item to the given item.
 
-		:param destination:        The item the link points to.
-		:param kind:               The relationship the link states.
-		:param keyValuePairs:      Optional, the key-value pairs of the link. Default: ``None``.
-		:returns:                  The link from this item to the destination.
-		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
-		:raises ValueError:        If this item isn't part of a specification.
-		:raises ValueError:        If parameter ``destination`` is ``None``.
-		:raises TypeError:         If parameter ``destination`` isn't of type :class:`BaseItem`.
-		:raises ValueError:        If parameter ``destination`` is this item.
-		:raises ValueError:        If parameter ``destination`` isn't part of this item's specification.
-		:raises ValueError:        If parameter ``kind`` is ``None``.
-		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
-		:raises RequirementsError: If this item has a link of this kind to the destination already.
+		:param destination:             The item the link points to.
+		:param kind:                    The relationship the link states.
+		:param keyValuePairs:           Optional, the key-value pairs of the link. Default: ``None``.
+		:returns:                       The link from this item to the destination.
+		:raises TypeError:              If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:              If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:             If parameter ``keyValuePairs`` contains an empty key.
+		:raises NotInSameSpecification: If this item isn't part of a specification.
+		:raises ValueError:             If parameter ``destination`` is ``None``.
+		:raises TypeError:              If parameter ``destination`` isn't of type :class:`BaseItem`.
+		:raises ValueError:             If parameter ``destination`` is this item.
+		:raises NotInSameSpecification: If parameter ``destination`` isn't part of this item's specification.
+		:raises ValueError:             If parameter ``kind`` is ``None``.
+		:raises TypeError:              If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises DuplicateLinkError:     If this item has a link of this kind to the destination already.
 
 		.. seealso::
 
@@ -1269,21 +1342,21 @@ class BaseItem(BaseWithID):
 		"""
 		Create an inbound link from the given item to this item.
 
-		:param source:             The item the link starts at.
-		:param kind:               The relationship the link states.
-		:param keyValuePairs:      Optional, the key-value pairs of the link. Default: ``None``.
-		:returns:                  The link from the source to this item.
-		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
-		:raises ValueError:        If parameter ``source`` is ``None``.
-		:raises TypeError:         If parameter ``source`` isn't of type :class:`BaseItem`.
-		:raises ValueError:        If parameter ``source`` isn't part of a specification.
-		:raises ValueError:        If parameter ``source`` is this item.
-		:raises ValueError:        If this item isn't part of the source's specification.
-		:raises ValueError:        If parameter ``kind`` is ``None``.
-		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
-		:raises RequirementsError: If the source has a link of this kind to this item already.
+		:param source:                  The item the link starts at.
+		:param kind:                    The relationship the link states.
+		:param keyValuePairs:           Optional, the key-value pairs of the link. Default: ``None``.
+		:returns:                       The link from the source to this item.
+		:raises TypeError:              If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:              If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:             If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:             If parameter ``source`` is ``None``.
+		:raises TypeError:              If parameter ``source`` isn't of type :class:`BaseItem`.
+		:raises NotInSameSpecification: If parameter ``source`` isn't part of a specification.
+		:raises ValueError:             If parameter ``source`` is this item.
+		:raises NotInSameSpecification: If this item isn't part of the source's specification.
+		:raises ValueError:             If parameter ``kind`` is ``None``.
+		:raises TypeError:              If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises DuplicateLinkError:     If the source has a link of this kind to this item already.
 
 		.. seealso::
 
@@ -1436,67 +1509,69 @@ class Requirement(BaseItem):
 		"""
 		Initializes a requirement, adds it to its parent, and registers it in its specification.
 
-		:param identifier:          The requirement's ID.
-		:param title:               The requirement's title.
-		:param kind:                What the requirement constrains.
-		:param description:         Optional, the requirement's description. Default: ``""``.
-		:param created:             Optional, the time the requirement was created; without a time zone, it is a local
-		                            time. Default: ``None``, the current time.
-		:param obligation:          Optional, whether the requirement must, should or may be met. Default:
-		                            :attr:`Obligation.Mandatory`.
-		:param verificationMethods: Optional, the methods verifying the requirement. Default:
-		                            :attr:`VerificationMethod.Unknown`.
-		:param acceptanceCriteria:  Optional, the criteria the verification accepts the requirement by. Default: ``None``.
-		:param rationale:           Optional, why the requirement exists or is as it is. Default: ``""``.
-		:param state:               Optional, the requirement's state. Default: :attr:`ItemState.Draft`.
-		:param layer:               Optional, the layer the requirement belongs to. Default: ``None``.
-		:param authors:             Optional, the authors of the requirement. Default: ``None``.
-		:param owners:              Optional, the owners of the requirement. Default: ``None``.
-		:param personas:            Optional, the personas the requirement is about. Default: ``None``.
-		:param labels:              Optional, the labels of the requirement. Default: ``None``.
-		:param attachments:         Optional, the documents attached to the requirement. Default: ``None``.
-		:param keyValuePairs:       Optional, the key-value pairs. Default: ``None``.
-		:param parent:              Optional, the requirement this one refines, or the specification. Default: ``None``.
-		:raises TypeError:          If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:          If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:         If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Requirement` or
-		                            :class:`RequirementSpecification`.
-		:raises ValueError:         If parameter ``identifier`` is ``None``.
-		:raises TypeError:          If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:         If parameter ``identifier`` is empty.
-		:raises ValueError:         If parameter ``description`` is ``None``.
-		:raises TypeError:          If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:         If parameter ``title`` is ``None``.
-		:raises TypeError:          If parameter ``title`` isn't of type :class:`str`.
-		:raises ValueError:         If parameter ``title`` is empty.
-		:raises ValueError:         If parameter ``rationale`` is ``None``.
-		:raises TypeError:          If parameter ``rationale`` isn't of type :class:`str`.
-		:raises TypeError:          If parameter ``created`` isn't of type :class:`~datetime.datetime`.
-		:raises ValueError:         If parameter ``state`` is ``None``.
-		:raises TypeError:          If parameter ``state`` isn't of type :class:`ItemState`.
-		:raises TypeError:          If parameter ``layer`` isn't of type :class:`Layer`.
-		:raises ValueError:         If parameter ``layer`` isn't part of the requirement's specification.
-		:raises TypeError:          If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` isn't
-		                            iterable, or is a single element.
-		:raises TypeError:          If parameter ``authors`` or ``owners`` contains an element not of type
-		                            :class:`~pyEDAA.Reports.Person`.
-		:raises TypeError:          If parameter ``personas``, ``labels`` or ``attachments`` contains an element not of type
-		                            :class:`Persona`, :class:`Label` or :class:`Document`.
-		:raises ValueError:         If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
-		                            contains an element, which isn't part of the requirement's specification.
-		:raises ValueError:         If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
-		                            contains an element twice.
-		:raises ValueError:         If parameter ``kind`` is ``None``.
-		:raises TypeError:          If parameter ``kind`` isn't of type :class:`RequirementKind`.
-		:raises ValueError:         If parameter ``obligation`` is ``None``.
-		:raises TypeError:          If parameter ``obligation`` isn't of type :class:`Obligation`.
-		:raises ValueError:         If parameter ``verificationMethods`` is ``None``.
-		:raises TypeError:          If parameter ``verificationMethods`` isn't of type :class:`VerificationMethod`.
-		:raises TypeError:          If parameter ``acceptanceCriteria`` isn't iterable, or is a single string.
-		:raises TypeError:          If parameter ``acceptanceCriteria`` contains an element not of type :class:`str`.
-		:raises ValueError:         If parameter ``acceptanceCriteria`` contains an empty criterion.
-		:raises RequirementsError:  If the specification already contains a requirement of this ID.
+		:param identifier:                 The requirement's ID.
+		:param title:                      The requirement's title.
+		:param kind:                       What the requirement constrains.
+		:param description:                Optional, the requirement's description. Default: ``""``.
+		:param created:                    Optional, the time the requirement was created; without a time zone, it is a
+		                                   local time. Default: ``None``, the current time.
+		:param obligation:                 Optional, whether the requirement must, should or may be met. Default:
+		                                   :attr:`Obligation.Mandatory`.
+		:param verificationMethods:        Optional, the methods verifying the requirement. Default:
+		                                   :attr:`VerificationMethod.Unknown`.
+		:param acceptanceCriteria:         Optional, the criteria the verification accepts the requirement by. Default:
+		                                   ``None``.
+		:param rationale:                  Optional, why the requirement exists or is as it is. Default: ``""``.
+		:param state:                      Optional, the requirement's state. Default: :attr:`ItemState.Draft`.
+		:param layer:                      Optional, the layer the requirement belongs to. Default: ``None``.
+		:param authors:                    Optional, the authors of the requirement. Default: ``None``.
+		:param owners:                     Optional, the owners of the requirement. Default: ``None``.
+		:param personas:                   Optional, the personas the requirement is about. Default: ``None``.
+		:param labels:                     Optional, the labels of the requirement. Default: ``None``.
+		:param attachments:                Optional, the documents attached to the requirement. Default: ``None``.
+		:param keyValuePairs:              Optional, the key-value pairs. Default: ``None``.
+		:param parent:                     Optional, the requirement this one refines, or the specification. Default:
+		                                   ``None``.
+		:raises TypeError:                 If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:                 If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:                If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:                 If parameter ``parent`` isn't of type :class:`Requirement` or
+		                                   :class:`RequirementSpecification`.
+		:raises ValueError:                If parameter ``identifier`` is ``None``.
+		:raises TypeError:                 If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:                If parameter ``identifier`` is empty.
+		:raises ValueError:                If parameter ``description`` is ``None``.
+		:raises TypeError:                 If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:                If parameter ``title`` is ``None``.
+		:raises TypeError:                 If parameter ``title`` isn't of type :class:`str`.
+		:raises ValueError:                If parameter ``title`` is empty.
+		:raises ValueError:                If parameter ``rationale`` is ``None``.
+		:raises TypeError:                 If parameter ``rationale`` isn't of type :class:`str`.
+		:raises TypeError:                 If parameter ``created`` isn't of type :class:`~datetime.datetime`.
+		:raises ValueError:                If parameter ``state`` is ``None``.
+		:raises TypeError:                 If parameter ``state`` isn't of type :class:`ItemState`.
+		:raises TypeError:                 If parameter ``layer`` isn't of type :class:`Layer`.
+		:raises NotInSameSpecification:    If parameter ``layer`` isn't part of the requirement's specification.
+		:raises TypeError:                 If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                                   isn't iterable, or is a single element.
+		:raises TypeError:                 If parameter ``authors`` or ``owners`` contains an element not of type
+		                                   :class:`~pyEDAA.Reports.Person`.
+		:raises TypeError:                 If parameter ``personas``, ``labels`` or ``attachments`` contains an element not
+		                                   of type :class:`Persona`, :class:`Label` or :class:`Document`.
+		:raises NotInSameSpecification:    If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                                   contains an element, which isn't part of the requirement's specification.
+		:raises DuplicateElementError:     If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
+		                                   contains an element twice.
+		:raises ValueError:                If parameter ``kind`` is ``None``.
+		:raises TypeError:                 If parameter ``kind`` isn't of type :class:`RequirementKind`.
+		:raises ValueError:                If parameter ``obligation`` is ``None``.
+		:raises TypeError:                 If parameter ``obligation`` isn't of type :class:`Obligation`.
+		:raises ValueError:                If parameter ``verificationMethods`` is ``None``.
+		:raises TypeError:                 If parameter ``verificationMethods`` isn't of type :class:`VerificationMethod`.
+		:raises TypeError:                 If parameter ``acceptanceCriteria`` isn't iterable, or is a single string.
+		:raises TypeError:                 If parameter ``acceptanceCriteria`` contains an element not of type :class:`str`.
+		:raises ValueError:                If parameter ``acceptanceCriteria`` contains an empty criterion.
+		:raises DuplicateRequirementError: If the specification already contains a requirement of this ID.
 		"""
 		super().__init__(
 			identifier,
@@ -1613,7 +1688,8 @@ class Requirement(BaseItem):
 		return self._specificationItems
 
 
-Requirement._PARENT_TYPE = (Requirement, RequirementSpecification)
+Requirement._PARENT_TYPE =     (Requirement, RequirementSpecification)
+Requirement._DUPLICATE_ERROR = DuplicateRequirementError
 
 
 @export
@@ -1656,59 +1732,61 @@ class SpecificationItem(BaseItem):
 		Initializes a specification item, adds it to its parent, registers it in its specification, and relates it to the
 		requirements it specifies.
 
-		:param identifier:         The item's ID.
-		:param title:              The item's title.
-		:param description:        Optional, the item's description. Default: ``""``.
-		:param created:            Optional, the time the item was created; without a time zone, it is a local time.
-		                           Default: ``None``, the current time.
-		:param requirements:       Optional, the requirements the item specifies. Default: ``None``.
-		:param rationale:          Optional, why the item exists or is as it is. Default: ``""``.
-		:param state:              Optional, the item's state. Default: :attr:`ItemState.Draft`.
-		:param layer:              Optional, the layer the item belongs to. Default: ``None``.
-		:param authors:            Optional, the authors of the item. Default: ``None``.
-		:param owners:             Optional, the owners of the item. Default: ``None``.
-		:param personas:           Optional, the personas the item is about. Default: ``None``.
-		:param labels:             Optional, the labels of the item. Default: ``None``.
-		:param attachments:        Optional, the documents attached to the item. Default: ``None``.
-		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
-		:param parent:             Optional, the specification item this one details, or the specification. Default:
-		                           ``None``.
-		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`SpecificationItem` or
-		                           :class:`RequirementSpecification`.
-		:raises ValueError:        If parameter ``identifier`` is ``None``.
-		:raises TypeError:         If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``identifier`` is empty.
-		:raises ValueError:        If parameter ``description`` is ``None``.
-		:raises TypeError:         If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``title`` is ``None``.
-		:raises TypeError:         If parameter ``title`` isn't of type :class:`str`.
-		:raises ValueError:        If parameter ``title`` is empty.
-		:raises ValueError:        If parameter ``rationale`` is ``None``.
-		:raises TypeError:         If parameter ``rationale`` isn't of type :class:`str`.
-		:raises TypeError:         If parameter ``created`` isn't of type :class:`~datetime.datetime`.
-		:raises ValueError:        If parameter ``state`` is ``None``.
-		:raises TypeError:         If parameter ``state`` isn't of type :class:`ItemState`.
-		:raises TypeError:         If parameter ``layer`` isn't of type :class:`Layer`.
-		:raises ValueError:        If parameter ``layer`` isn't part of the item's specification.
-		:raises TypeError:         If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments`` isn't
-		                           iterable, or is a single element.
-		:raises TypeError:         If parameter ``authors`` or ``owners`` contains an element not of type
-		                           :class:`~pyEDAA.Reports.Person`.
-		:raises TypeError:         If parameter ``personas``, ``labels`` or ``attachments`` contains an element not of type
-		                           :class:`Persona`, :class:`Label` or :class:`Document`.
-		:raises ValueError:        If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
-		                           contains an element, which isn't part of the item's specification.
-		:raises ValueError:        If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
-		                           contains an element twice.
-		:raises TypeError:         If parameter ``requirements`` isn't iterable, or is a single element.
-		:raises TypeError:         If parameter ``requirements`` contains an element not of type :class:`Requirement`.
-		:raises ValueError:        If parameter ``requirements`` contains a requirement, which isn't part of the item's
-		                           specification.
-		:raises ValueError:        If parameter ``requirements`` contains a requirement twice.
-		:raises RequirementsError: If the specification already contains a specification item of this ID.
+		:param identifier:                       The item's ID.
+		:param title:                            The item's title.
+		:param description:                      Optional, the item's description. Default: ``""``.
+		:param created:                          Optional, the time the item was created; without a time zone, it is a local
+		                                         time. Default: ``None``, the current time.
+		:param requirements:                     Optional, the requirements the item specifies. Default: ``None``.
+		:param rationale:                        Optional, why the item exists or is as it is. Default: ``""``.
+		:param state:                            Optional, the item's state. Default: :attr:`ItemState.Draft`.
+		:param layer:                            Optional, the layer the item belongs to. Default: ``None``.
+		:param authors:                          Optional, the authors of the item. Default: ``None``.
+		:param owners:                           Optional, the owners of the item. Default: ``None``.
+		:param personas:                         Optional, the personas the item is about. Default: ``None``.
+		:param labels:                           Optional, the labels of the item. Default: ``None``.
+		:param attachments:                      Optional, the documents attached to the item. Default: ``None``.
+		:param keyValuePairs:                    Optional, the key-value pairs. Default: ``None``.
+		:param parent:                           Optional, the specification item this one details, or the specification.
+		                                         Default: ``None``.
+		:raises TypeError:                       If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:                       If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:                      If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:                       If parameter ``parent`` isn't of type :class:`SpecificationItem` or
+		                                         :class:`RequirementSpecification`.
+		:raises ValueError:                      If parameter ``identifier`` is ``None``.
+		:raises TypeError:                       If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:                      If parameter ``identifier`` is empty.
+		:raises ValueError:                      If parameter ``description`` is ``None``.
+		:raises TypeError:                       If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:                      If parameter ``title`` is ``None``.
+		:raises TypeError:                       If parameter ``title`` isn't of type :class:`str`.
+		:raises ValueError:                      If parameter ``title`` is empty.
+		:raises ValueError:                      If parameter ``rationale`` is ``None``.
+		:raises TypeError:                       If parameter ``rationale`` isn't of type :class:`str`.
+		:raises TypeError:                       If parameter ``created`` isn't of type :class:`~datetime.datetime`.
+		:raises ValueError:                      If parameter ``state`` is ``None``.
+		:raises TypeError:                       If parameter ``state`` isn't of type :class:`ItemState`.
+		:raises TypeError:                       If parameter ``layer`` isn't of type :class:`Layer`.
+		:raises NotInSameSpecification:          If parameter ``layer`` isn't part of the item's specification.
+		:raises TypeError:                       If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
+		                                         ``attachments`` isn't iterable, or is a single element.
+		:raises TypeError:                       If parameter ``authors`` or ``owners`` contains an element not of type
+		                                         :class:`~pyEDAA.Reports.Person`.
+		:raises TypeError:                       If parameter ``personas``, ``labels`` or ``attachments`` contains an
+		                                         element not of type :class:`Persona`, :class:`Label` or :class:`Document`.
+		:raises NotInSameSpecification:          If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
+		                                         ``attachments`` contains an element, which isn't part of the item's
+		                                         specification.
+		:raises DuplicateElementError:           If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
+		                                         ``attachments`` contains an element twice.
+		:raises TypeError:                       If parameter ``requirements`` isn't iterable, or is a single element.
+		:raises TypeError:                       If parameter ``requirements`` contains an element not of type
+		                                         :class:`Requirement`.
+		:raises NotInSameSpecification:          If parameter ``requirements`` contains a requirement, which isn't part of
+		                                         the item's specification.
+		:raises DuplicateRequirementError:       If parameter ``requirements`` contains a requirement twice.
+		:raises DuplicateSpecificationItemError: If the specification already contains a specification item of this ID.
 		"""
 		super().__init__(
 			identifier,
@@ -1745,11 +1823,13 @@ class SpecificationItem(BaseItem):
 					ex.add_note(f"Got type '{getFullyQualifiedName(requirement)}'.")
 					raise ex
 				elif self._root is None or requirement._root is not self._root:
-					ex = ValueError(f"Parameter 'requirements' contains a requirement not part of the item's specification.")
+					ex = NotInSameSpecification(
+						f"Parameter 'requirements' contains a requirement not part of the item's specification."
+					)
 					ex.add_note(f"Got requirement '{requirement._id}'.")
 					raise ex
 				elif requirement._id in self._requirements:
-					ex = ValueError(f"Parameter 'requirements' contains a requirement twice.")
+					ex = DuplicateRequirementError(f"Parameter 'requirements' contains a requirement twice.")
 					ex.add_note(f"Got requirement '{requirement._id}'.")
 					raise ex
 
@@ -1774,11 +1854,11 @@ class SpecificationItem(BaseItem):
 		"""
 		Relate this item to a requirement it specifies: the item lists the requirement, and the requirement lists the item.
 
-		:param requirement:        The requirement.
-		:raises ValueError:        If parameter ``requirement`` is ``None``.
-		:raises TypeError:         If parameter ``requirement`` isn't of type :class:`Requirement`.
-		:raises ValueError:        If parameter ``requirement`` isn't part of the item's specification.
-		:raises RequirementsError: If the item specifies the requirement already.
+		:param requirement:                The requirement.
+		:raises ValueError:                If parameter ``requirement`` is ``None``.
+		:raises TypeError:                 If parameter ``requirement`` isn't of type :class:`Requirement`.
+		:raises NotInSameSpecification:    If parameter ``requirement`` isn't part of the item's specification.
+		:raises DuplicateRequirementError: If the item specifies the requirement already.
 		"""
 		if requirement is None:
 			raise ValueError(f"Parameter 'requirement' is None.")
@@ -1787,17 +1867,20 @@ class SpecificationItem(BaseItem):
 			ex.add_note(f"Got type '{getFullyQualifiedName(requirement)}'.")
 			raise ex
 		elif self._root is None or requirement._root is not self._root:
-			ex = ValueError(f"Parameter 'requirement' isn't part of the item's specification.")
+			ex = NotInSameSpecification(f"Parameter 'requirement' isn't part of the item's specification.")
 			ex.add_note(f"Got requirement '{requirement._id}'.")
 			raise ex
 		elif requirement._id in self._requirements:
-			raise RequirementsError(f"Specification item '{self._id}' specifies requirement '{requirement._id}' already.")
+			raise DuplicateRequirementError(
+				f"Specification item '{self._id}' specifies requirement '{requirement._id}' already."
+			)
 
 		self._requirements[requirement._id] =       requirement
 		requirement._specificationItems[self._id] = self
 
 
-SpecificationItem._PARENT_TYPE = (SpecificationItem, RequirementSpecification)
+SpecificationItem._PARENT_TYPE =     (SpecificationItem, RequirementSpecification)
+SpecificationItem._DUPLICATE_ERROR = DuplicateSpecificationItemError
 
 
 @export
@@ -1845,23 +1928,23 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		"""
 		Initializes a link, and adds it to its source and its destination.
 
-		:param source:             The item the link starts at.
-		:param destination:        The item the link points to.
-		:param kind:               The relationship the link states.
-		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
-		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
-		:raises ValueError:        If parameter ``source`` is ``None``.
-		:raises TypeError:         If parameter ``source`` isn't of type :class:`BaseItem`.
-		:raises ValueError:        If parameter ``source`` isn't part of a specification.
-		:raises ValueError:        If parameter ``destination`` is ``None``.
-		:raises TypeError:         If parameter ``destination`` isn't of type :class:`BaseItem`.
-		:raises ValueError:        If parameter ``destination`` is the source.
-		:raises ValueError:        If parameter ``destination`` isn't part of the source's specification.
-		:raises ValueError:        If parameter ``kind`` is ``None``.
-		:raises TypeError:         If parameter ``kind`` isn't of type :class:`LinkKind`.
-		:raises RequirementsError: If the source has a link of this kind to this destination already.
+		:param source:                  The item the link starts at.
+		:param destination:             The item the link points to.
+		:param kind:                    The relationship the link states.
+		:param keyValuePairs:           Optional, the key-value pairs. Default: ``None``.
+		:raises TypeError:              If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:              If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:             If parameter ``keyValuePairs`` contains an empty key.
+		:raises ValueError:             If parameter ``source`` is ``None``.
+		:raises TypeError:              If parameter ``source`` isn't of type :class:`BaseItem`.
+		:raises NotInSameSpecification: If parameter ``source`` isn't part of a specification.
+		:raises ValueError:             If parameter ``destination`` is ``None``.
+		:raises TypeError:              If parameter ``destination`` isn't of type :class:`BaseItem`.
+		:raises ValueError:             If parameter ``destination`` is the source.
+		:raises NotInSameSpecification: If parameter ``destination`` isn't part of the source's specification.
+		:raises ValueError:             If parameter ``kind`` is ``None``.
+		:raises TypeError:              If parameter ``kind`` isn't of type :class:`LinkKind`.
+		:raises DuplicateLinkError:     If the source has a link of this kind to this destination already.
 		"""
 		super().__init__(keyValuePairs)
 
@@ -1872,7 +1955,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
 			raise ex
 		elif source._root is None:
-			ex = ValueError(f"Parameter 'source' isn't part of a specification.")
+			ex = NotInSameSpecification(f"Parameter 'source' isn't part of a specification.")
 			ex.add_note(f"Got item '{source._id}'.")
 			raise ex
 
@@ -1887,7 +1970,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got item '{destination._id}'.")
 			raise ex
 		elif destination._root is not source._root:
-			ex = ValueError(f"Parameter 'destination' isn't part of the source's specification.")
+			ex = NotInSameSpecification(f"Parameter 'destination' isn't part of the source's specification.")
 			ex.add_note(f"Got item '{destination._id}'.")
 			raise ex
 
@@ -1900,7 +1983,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 
 		for link in source._outboundLinks:
 			if link._destination is destination and link._kind is kind:
-				ex = RequirementsError(f"{source.__class__.__name__} '{source._id}' has a '{kind}' link already.")
+				ex = DuplicateLinkError(f"{source.__class__.__name__} '{source._id}' has a '{kind}' link already.")
 				ex.add_note(f"Got destination '{destination._id}'.")
 				raise ex
 
@@ -1993,31 +2076,32 @@ class HistoryEvent(Base):
 		"""
 		Initializes a history event, and adds it to the history of its item.
 
-		:param kind:               The kind of the event.
-		:param timestamp:          The time of the event; without a time zone, it is a local time.
-		:param person:             Optional, the person causing the event. Default: ``None``.
-		:param involved:           Optional, the other items involved. Default: ``None``.
-		:param description:        Optional, the event's description. Default: ``""``.
-		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
-		:param parent:             Optional, the item the event happened to. Default: ``None``.
-		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:         If parameter ``parent`` isn't of type :class:`BaseItem`.
-		:raises ValueError:        If parameter ``kind`` is ``None``.
-		:raises TypeError:         If parameter ``kind`` isn't of type :class:`EventKind`.
-		:raises ValueError:        If parameter ``timestamp`` is ``None``.
-		:raises TypeError:         If parameter ``timestamp`` isn't of type :class:`~datetime.datetime`.
-		:raises TypeError:         If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
-		:raises ValueError:        If parameter ``person`` isn't part of the item's specification.
-		:raises TypeError:         If parameter ``involved`` isn't iterable, or is a single element.
-		:raises TypeError:         If parameter ``involved`` contains an element not of type :class:`BaseItem`.
-		:raises ValueError:        If parameter ``involved`` contains an item, which isn't part of the item's specification.
-		:raises ValueError:        If parameter ``involved`` contains an item twice.
-		:raises ValueError:        If parameter ``involved`` names no item for a split or a merge.
-		:raises ValueError:        If parameter ``description`` is ``None``.
-		:raises TypeError:         If parameter ``description`` isn't of type :class:`str`.
-		:raises RequirementsError: If parameter ``timestamp`` is earlier than the item's creation or its last event.
+		:param kind:                    The kind of the event.
+		:param timestamp:               The time of the event; without a time zone, it is a local time.
+		:param person:                  Optional, the person causing the event. Default: ``None``.
+		:param involved:                Optional, the other items involved. Default: ``None``.
+		:param description:             Optional, the event's description. Default: ``""``.
+		:param keyValuePairs:           Optional, the key-value pairs. Default: ``None``.
+		:param parent:                  Optional, the item the event happened to. Default: ``None``.
+		:raises TypeError:              If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:              If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:             If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:              If parameter ``parent`` isn't of type :class:`BaseItem`.
+		:raises ValueError:             If parameter ``kind`` is ``None``.
+		:raises TypeError:              If parameter ``kind`` isn't of type :class:`EventKind`.
+		:raises ValueError:             If parameter ``timestamp`` is ``None``.
+		:raises TypeError:              If parameter ``timestamp`` isn't of type :class:`~datetime.datetime`.
+		:raises TypeError:              If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises NotInSameSpecification: If parameter ``person`` isn't part of the item's specification.
+		:raises TypeError:              If parameter ``involved`` isn't iterable, or is a single element.
+		:raises TypeError:              If parameter ``involved`` contains an element not of type :class:`BaseItem`.
+		:raises NotInSameSpecification: If parameter ``involved`` contains an item, which isn't part of the item's
+		                                specification.
+		:raises DuplicateElementError:  If parameter ``involved`` contains an item twice.
+		:raises ValueError:             If parameter ``involved`` names no item for a split or a merge.
+		:raises ValueError:             If parameter ``description`` is ``None``.
+		:raises TypeError:              If parameter ``description`` isn't of type :class:`str`.
+		:raises RequirementsError:      If parameter ``timestamp`` is earlier than the item's creation or its last event.
 		"""
 		super().__init__(keyValuePairs=keyValuePairs, parent=parent)
 
@@ -2041,7 +2125,7 @@ class HistoryEvent(Base):
 				ex.add_note(f"Got type '{getFullyQualifiedName(person)}'.")
 				raise ex
 			elif self._root is None or self._root._persons.get(person._userID) is not person:
-				ex = ValueError(f"Parameter 'person' isn't part of the item's specification.")
+				ex = NotInSameSpecification(f"Parameter 'person' isn't part of the item's specification.")
 				ex.add_note(f"Got person '{person._userID}'.")
 				raise ex
 
@@ -2062,11 +2146,11 @@ class HistoryEvent(Base):
 					ex.add_note(f"Got type '{getFullyQualifiedName(item)}'.")
 					raise ex
 				elif self._root is None or item._root is not self._root:
-					ex = ValueError(f"Parameter 'involved' contains an item not part of the item's specification.")
+					ex = NotInSameSpecification(f"Parameter 'involved' contains an item not part of the item's specification.")
 					ex.add_note(f"Got item '{item._id}'.")
 					raise ex
 				elif item in self._involved:
-					ex = ValueError(f"Parameter 'involved' contains an item twice.")
+					ex = item._DUPLICATE_ERROR(f"Parameter 'involved' contains an item twice.")
 					ex.add_note(f"Got item '{item._id}'.")
 					raise ex
 

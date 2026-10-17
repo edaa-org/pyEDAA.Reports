@@ -31,6 +31,10 @@
 """Unit tests of the requirements model: requirements, their hierarchy, and iterating them."""
 from datetime                    import datetime, timedelta, timezone
 
+from pyEDAA.Reports              import DuplicateElementError
+from pyEDAA.Reports.Requirements import AlreadyInHierarchyError, DuplicateDocumentError, DuplicateLabelError
+from pyEDAA.Reports.Requirements import DuplicateLayerError, DuplicateLinkError, DuplicatePersonaError
+from pyEDAA.Reports.Requirements import DuplicatePersonError, DuplicateRequirementError, DuplicateSpecificationItemError
 from pyEDAA.Reports.Requirements import ItemState, Label, Obligation, Requirement, RequirementKind
 from pyEDAA.Reports.Requirements import RequirementSpecification, RequirementsError
 from pyTooling.Versioning        import SemanticVersion
@@ -171,7 +175,7 @@ class Hierarchy(Testcase):
 	def test_Duplicate(self) -> None:
 		specification = self._Specification()
 
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(DuplicateRequirementError) as context:
 			Requirement("A.1.1", "Core rail", FUNCTIONAL, parent=specification.Requirements["B"])
 
 		self.assertEqual("Requirement 'A.1.1' already exists in the specification.", str(context.exception))
@@ -179,14 +183,14 @@ class Hierarchy(Testcase):
 
 		c = Requirement("C", "Cooling", FUNCTIONAL)
 		Requirement("A.2", "Fan", FUNCTIONAL, parent=c)
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(DuplicateRequirementError) as context:
 			c.Parent = specification
 
 		self.assertEqual("Requirement 'A.2' already exists in the specification.", str(context.exception))
 		self.assertNotIn("C", specification.Requirements)
 		self.assertIsNone(c.Parent)
 
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(DuplicateRequirementError) as context:
 			Requirement("A.2", "Pump", FUNCTIONAL, parent=c)
 
 		self.assertEqual("Requirement 'C' already has a child 'A.2'.", str(context.exception))
@@ -198,7 +202,7 @@ class Hierarchy(Testcase):
 		Requirement("C.1", "Fan", FUNCTIONAL, parent=Requirement("C.0", "Air", FUNCTIONAL, parent=c))
 		Requirement("C.1", "Fan", FUNCTIONAL, parent=c)
 
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(DuplicateRequirementError) as context:
 			c.Parent = specification
 
 		self.assertEqual("Requirement 'C.1' already exists in the specification.", str(context.exception))
@@ -208,10 +212,20 @@ class Hierarchy(Testcase):
 	def test_Parent_Twice(self) -> None:
 		specification = self._Specification()
 
-		with self.assertRaises(RequirementsError) as context:
+		with self.assertRaises(AlreadyInHierarchyError) as context:
 			specification.Requirements["A.2"].Parent = specification.Requirements["B"]
 
 		self.assertEqual("Requirement already has a parent.", str(context.exception))
+
+	def test_DuplicateErrors(self) -> None:
+		"""Every duplicate error is a 'DuplicateElementError' and a 'RequirementsError'."""
+		for exception in (
+			DuplicatePersonaError, DuplicateLabelError, DuplicateDocumentError, DuplicateLayerError, DuplicatePersonError,
+			DuplicateRequirementError, DuplicateSpecificationItemError, DuplicateLinkError
+		):
+			with self.subTest(exception=exception.__name__):
+				self.assertTrue(issubclass(exception, DuplicateElementError))
+				self.assertTrue(issubclass(exception, RequirementsError))
 
 
 class ParameterChecks(Testcase):
