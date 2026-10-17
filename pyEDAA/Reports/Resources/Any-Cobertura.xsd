@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:annotation>
+		<xs:documentation>
+			Any Cobertura XML code coverage report: the structure of Cobertura's DTD 'coverage-04.dtd', read leniently.
+
+			Tools writing the format add attributes of their own - e.g. coverage.py's 'missing-branches' on a line - and leave
+			out some of the DTD's required ones, so only what a reader needs is required: a class' 'filename', a line's
+			'number' and 'hits'. Other attributes are allowed on every element. 'Cobertura-04.xsd' is the DTD's strict
+			translation.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:simpleType name="Rate">
+		<xs:restriction base="xs:decimal">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:attributeGroup name="Rates">
+		<xs:attribute name="line-rate"   type="Rate"/>
+		<xs:attribute name="branch-rate" type="Rate"/>
+		<xs:attribute name="complexity"  type="xs:decimal"/>
+		<xs:anyAttribute processContents="lax"/>
+	</xs:attributeGroup>
+
+	<xs:element name="coverage">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="sources" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="source" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="packages">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element ref="package" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="lines-covered"    type="xs:nonNegativeInteger"/>
+			<xs:attribute name="lines-valid"      type="xs:nonNegativeInteger"/>
+			<xs:attribute name="branches-covered" type="xs:nonNegativeInteger"/>
+			<xs:attribute name="branches-valid"   type="xs:nonNegativeInteger"/>
+			<xs:attribute name="version"          type="xs:string"/>
+			<xs:attribute name="timestamp"        type="xs:string"/>
+			<xs:attributeGroup ref="Rates"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="package">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="classes">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element ref="class" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+			<xs:attributeGroup ref="Rates"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="class">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="methods" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element ref="method" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element ref="lines"/>
+			</xs:sequence>
+			<xs:attribute name="name"     type="xs:string"/>
+			<xs:attribute name="filename" type="xs:string" use="required"/>
+			<xs:attributeGroup ref="Rates"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="method">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="lines"/>
+			</xs:sequence>
+			<xs:attribute name="name"      type="xs:string" use="required"/>
+			<xs:attribute name="signature" type="xs:string"/>
+			<xs:attributeGroup ref="Rates"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="lines">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="line" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="line">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="conditions" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="condition" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="number"   type="xs:nonNegativeInteger" use="required"/>
+									<xs:attribute name="type"     type="xs:string"/>
+									<xs:attribute name="coverage" type="xs:string"/>
+									<xs:anyAttribute processContents="lax"/>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="number"             type="xs:positiveInteger"    use="required"/>
+			<xs:attribute name="hits"               type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="branch"             type="xs:boolean"/>
+			<xs:attribute name="condition-coverage" type="ConditionCoverage"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:simpleType name="ConditionCoverage">
+		<xs:annotation>
+			<xs:documentation>Percentage and count of taken branches, e.g. '50% (1/2)'.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="\d+(\.\d+)?% \(\d+/\d+\)"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

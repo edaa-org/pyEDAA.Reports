@@ -58,7 +58,13 @@ exclude_patterns = [
 	"_build",
 	"_theme",
 	"Thumbs.db",
-	".DS_Store"
+	".DS_Store",
+# Fragments included by Unittesting/index.rst
+	"Unittesting/DataModel.rst",
+	"Unittesting/Features.rst",
+	"Unittesting/JUnitDataModel.rst",
+	"Unittesting/OpenTestReportingDataModel.rst",
+	"Unittesting/OSVVMDataModel.rst"
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -115,6 +121,18 @@ modindex_common_prefix = [
 ]
 
 # ==============================================================================
+# Nitpicky mode
+# ==============================================================================
+# Types, which no intersphinx inventory lists.
+nitpick_ignore = [
+	("py:class", "ast.expr"),
+	("py:class", "ast.stmt"),
+	("py:class", "tokenize.TokenInfo"),
+	("py:class", "docstr_coverage.result_collection.ResultCollection"),
+]
+
+
+# ==============================================================================
 # Options for LaTeX / PDF output
 # ==============================================================================
 latex_engine = "lualatex"
@@ -168,12 +186,13 @@ extensions = [
 	"sphinx.ext.viewcode",
 # SphinxContrib extensions
 	"sphinxcontrib.mermaid",
+	"sphinxcontrib.autoprogram",
 # Other extensions
 	"sphinx_design",
 	"sphinx_copybutton",
 	"sphinx_autodoc_typehints",
 	"autoapi.sphinx",
-	"sphinx_reports",
+	"pyTooling.Sphinx",
 # User defined extensions
 ]
 
@@ -254,15 +273,15 @@ todo_link_only = True
 
 
 # ==============================================================================
-# sphinx-reports
+# pyTooling.Sphinx - reports of domain 'report'
 # ==============================================================================
-report_unittest_testsuites = {
+pyTooling_Unittest_Testsuites = {
 	"src": {
 		"name":        f"{project}",
 		"xml_report":  "../report/unit/unittest.xml",
 	}
 }
-report_codecov_packages = {
+pyTooling_CodeCoverage_Packages = {
 	"src": {
 		"name":        f"{project}",
 		"json_report": "../report/coverage/coverage.json",
@@ -270,7 +289,7 @@ report_codecov_packages = {
 		"levels":      "default"
 	}
 }
-report_doccov_packages = {
+pyTooling_DocCoverage_Packages = {
 	"src": {
 		"name":       f"{project}",
 		"directory":  f"../{directoryName}",
@@ -278,6 +297,20 @@ report_doccov_packages = {
 		"levels":     "default"
 	}
 }
+
+
+# ==============================================================================
+# pyTooling.Sphinx - dependency tables
+# ==============================================================================
+pyTooling_Dependency_Requirements = {
+	"package":       {"file": "../requirements.txt"},
+	"unittest":      {"file": "../tests/unit/requirements.txt"},
+	"apptest":       {"file": "../tests/app/requirements.txt"},
+	"typing":        {"file": "../tests/typing/requirements.txt"},
+	"documentation": {"file": "requirements.txt"},
+	"publishing":    {"file": "../dist/requirements.txt"},
+}
+pyTooling_Dependency_PackageOverrides = "Dependency.PackageOverrides.yaml"
 
 
 # ==============================================================================

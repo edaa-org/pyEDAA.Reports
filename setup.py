@@ -33,33 +33,40 @@ from pathlib             import Path
 
 from setuptools          import setup
 from pyTooling.Packaging import DescribePythonPackageHostedOnGitHub, DEFAULT_CLASSIFIERS
+from pyTooling.Warning   import WarningCollector
 
 gitHubNamespace =        "pyEDAA"
 packageName =            "pyEDAA.Reports"
 packageDirectory =       packageName.replace(".", "/")
 packageInformationFile = Path(f"{packageDirectory}/__init__.py")
 
-setup(
-	**DescribePythonPackageHostedOnGitHub(
-		packageName=packageName,
-		description="Various report abstract data models and report format converters.",
-		gitHubNamespace=gitHubNamespace,
-		unittestRequirementsFile=Path("tests/requirements.txt"),
-		sourceFileWithVersion=packageInformationFile,
-		classifiers=list(DEFAULT_CLASSIFIERS) + [
-			"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
-		],
-		developmentStatus="beta",
-		pythonVersions=("3.11", "3.12", "3.13", "3.14"),
-		consoleScripts={
-			"pyedaa-reports": "pyEDAA.Reports.CLI:main"
-		},
-		dataFiles={
-			packageName: [
-				"py.typed",
-				"Resources/*.xsd"
-			]
-		},
-		debug=True
+with WarningCollector() as warnings:
+	setup(
+		**DescribePythonPackageHostedOnGitHub(
+			packageName=packageName,
+			description="Various report abstract data models and report format converters.",
+			gitHubNamespace=gitHubNamespace,
+			unittestRequirementsFile=Path("tests/requirements.txt"),
+			sourceFileWithVersion=packageInformationFile,
+			classifiers=list(DEFAULT_CLASSIFIERS) + [
+				"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+			],
+			developmentStatus="beta",
+			pythonVersions=("3.11", "3.12", "3.13", "3.14", "3.15"),
+			consoleScripts={
+				"pyedaa-reports": "pyEDAA.Reports.CLI:main"
+			},
+			dataFiles={
+				packageName: [
+					"py.typed",
+					"Resources/*.xsd",
+					"Resources/*.schema.json",
+					"Resources/OpenTestReporting/*.xsd"
+				]
+			},
+			debug=True
+		)
 	)
-)
+
+for warning in warnings:
+	print(f"[setup.py] WARNING: {warning}")

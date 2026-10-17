@@ -1,0 +1,73 @@
+# ==================================================================================================================== #
+# Authors:                                                                                                             #
+#   Patrick Lehmann                                                                                                    #
+#                                                                                                                      #
+# License:                                                                                                             #
+# ==================================================================================================================== #
+# Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
+#                                                                                                                      #
+# Licensed under the Apache License, Version 2.0 (the "License");                                                      #
+# you may not use this file except in compliance with the License.                                                     #
+# You may obtain a copy of the License at                                                                              #
+#                                                                                                                      #
+#   http://www.apache.org/licenses/LICENSE-2.0                                                                         #
+#                                                                                                                      #
+# Unless required by applicable law or agreed to in writing, software                                                  #
+# distributed under the License is distributed on an "AS IS" BASIS,                                                    #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                             #
+# See the License for the specific language governing permissions and                                                  #
+# limitations under the License.                                                                                       #
+#                                                                                                                      #
+# SPDX-License-Identifier: Apache-2.0                                                                                  #
+# ==================================================================================================================== #
+name: Example VHDL
+
+on:
+  workflow_call:
+
+jobs:
+  VHDL-GHDL:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: ⏬ Checkout repository
+        uses: actions/checkout@v7
+
+      - name: 🔧 Install GHDL (mcode backend)
+        uses: ghdl/setup-ghdl@v1
+        with:
+          backend: mcode
+
+      - name: ✅ Simulate the testbench twice with statement coverage
+        run: ./examples/VHDL/Counter/GHDL.sh
+
+      - name: List generated reports
+        run: ls -lAh examples/VHDL/Counter/*.json examples/VHDL/Counter/*.info
+
+      - name: 📤 Upload code coverage files as artifact
+        uses: pyTooling/upload-artifact@v7
+        with:
+          name: VHDL-GHDL
+          path: |
+            examples/VHDL/Counter/coverage-*.json
+            examples/VHDL/Counter/coverage.info
+
+  VHDL-NVC:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: ⏬ Checkout repository
+        uses: actions/checkout@v7
+
+      - name: 🔧 Install NVC
+        uses: nickg/setup-nvc@v1
+
+      - name: ✅ Simulate the testbench twice with statement and branch coverage
+        run: ./examples/VHDL/Counter/NVC.sh
+
+      - name: List generated reports
+        run: ls -lAh examples/VHDL/Counter/cobertura.xml
+
+      - name: 📤 Upload code coverage file as artifact
+        uses: pyTooling/upload-artifact@v7
+        with:
+          name: VHDL-NVC
+          path: examples/VHDL/Counter/cobertura.xml

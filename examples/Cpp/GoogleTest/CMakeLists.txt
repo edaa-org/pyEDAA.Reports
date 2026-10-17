@@ -15,6 +15,10 @@ file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.[ch]pp)
 add_library(app STATIC ${SRC_FILES})
 target_include_directories(app PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
+# Code coverage of the library (gcov)
+target_compile_options(app PRIVATE --coverage)
+target_link_options(app INTERFACE --coverage)
+
 # GoogleTest
 add_subdirectory(./lib/googletest)
 

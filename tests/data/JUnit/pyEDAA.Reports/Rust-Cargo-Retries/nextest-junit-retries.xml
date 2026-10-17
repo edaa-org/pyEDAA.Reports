@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="nextest-run" tests="6" skipped="1" failures="2" errors="0" uuid="dbb0bd9a-ae83-4112-8907-e0911bb5b69c" timestamp="2026-10-08T11:54:18.103+00:00" time="0.011">
+    <testsuite name="@setup-script:prepare" tests="1" skipped="0" errors="0" failures="0">
+        <properties>
+            <property name="command" value="true"/>
+            <property name="args" value=""/>
+        </properties>
+        <testcase name="prepare" classname="@setup-script:prepare" timestamp="2026-10-08T11:54:18.103+00:00" time="0.003">
+            <system-out>(stdout not captured)</system-out>
+            <system-err>(stderr not captured)</system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="retries" tests="5" skipped="1" errors="0" failures="2">
+        <testcase name="tests::ignored" classname="retries" time="0.000">
+            <skipped message="Skipped: test does not match the run-ignored option"/>
+        </testcase>
+        <testcase name="tests::passing" classname="retries" timestamp="2026-10-08T11:54:18.106+00:00" time="0.003"/>
+        <testcase name="tests::flaky_failing" classname="retries" timestamp="2026-10-08T11:54:18.111+00:00" time="0.003">
+            <failure message="test passed on attempt 2/2 but is configured to fail when flaky" type="flaky failure"/>
+            <flakyFailure timestamp="2026-10-08T11:54:18.106+00:00" time="0.003" message="thread &apos;tests::flaky_failing&apos; (567013) panicked at src/lib.rs:24:9" type="test failure with exit code 101">thread &apos;tests::flaky_failing&apos; (567013) panicked at src/lib.rs:24:9:
+first attempt fails
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+                <system-out>
+running 1 test
+test tests::flaky_failing ... FAILED
+
+failures:
+
+failures:
+    tests::flaky_failing
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+</system-out>
+                <system-err>
+thread &apos;tests::flaky_failing&apos; (567013) panicked at src/lib.rs:24:9:
+first attempt fails
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</system-err>
+            </flakyFailure>
+        </testcase>
+        <testcase name="tests::flaky" classname="retries" timestamp="2026-10-08T11:54:18.111+00:00" time="0.003">
+            <flakyFailure timestamp="2026-10-08T11:54:18.106+00:00" time="0.003" message="thread &apos;tests::flaky&apos; (567014) panicked at src/lib.rs:18:9" type="test failure with exit code 101">thread &apos;tests::flaky&apos; (567014) panicked at src/lib.rs:18:9:
+first attempt fails
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+                <system-out>
+running 1 test
+test tests::flaky ... FAILED
+
+failures:
+
+failures:
+    tests::flaky
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+</system-out>
+                <system-err>
+thread &apos;tests::flaky&apos; (567014) panicked at src/lib.rs:18:9:
+first attempt fails
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</system-err>
+            </flakyFailure>
+        </testcase>
+        <testcase name="tests::failing" classname="retries" timestamp="2026-10-08T11:54:18.106+00:00" time="0.003">
+            <failure message="thread &apos;tests::failing&apos; (567011) panicked at src/lib.rs:30:9" type="test failure with exit code 101">thread &apos;tests::failing&apos; (567011) panicked at src/lib.rs:30:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+            <rerunFailure timestamp="2026-10-08T11:54:18.111+00:00" time="0.003" message="thread &apos;tests::failing&apos; (567020) panicked at src/lib.rs:30:9" type="test failure with exit code 101">thread &apos;tests::failing&apos; (567020) panicked at src/lib.rs:30:9:
+assertion `left == right` failed
+  left: 2
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+                <system-out>
+running 1 test
+test tests::failing ... FAILED
+
+failures:
+
+failures:
+    tests::failing
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+</system-out>
+                <system-err>
+thread &apos;tests::failing&apos; (567020) panicked at src/lib.rs:30:9:
+assertion `left == right` failed
+  left: 2
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</system-err>
+            </rerunFailure>
+            <system-out>
+running 1 test
+test tests::failing ... FAILED
+
+failures:
+
+failures:
+    tests::failing
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err>
+thread &apos;tests::failing&apos; (567011) panicked at src/lib.rs:30:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</system-err>
+        </testcase>
+    </testsuite>
+</testsuites>

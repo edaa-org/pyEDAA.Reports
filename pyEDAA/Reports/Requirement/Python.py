@@ -28,6 +28,8 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
+from __future__ import annotations
+
 from pathlib import Path
 from re      import compile as re_compile
 

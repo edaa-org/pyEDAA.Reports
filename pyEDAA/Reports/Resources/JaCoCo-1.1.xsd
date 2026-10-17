@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:annotation>
+		<xs:documentation>
+			JaCoCo XML code coverage report, version 1.1: a translation of JaCoCo's DTD 'report.dtd' to XML Schema.
+
+			The DTD's public identifier is '-//JACOCO//DTD Report 1.1//EN'. Elements, attributes, their order and which are
+			required follow the DTD; no other attribute is allowed. Where the DTD's CDATA holds a number, the attribute has a
+			numeric type: a count, a line number, a time stamp in milliseconds since the epoch.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:simpleType name="CounterType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="INSTRUCTION"/>
+			<xs:enumeration value="BRANCH"/>
+			<xs:enumeration value="LINE"/>
+			<xs:enumeration value="COMPLEXITY"/>
+			<xs:enumeration value="METHOD"/>
+			<xs:enumeration value="CLASS"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:element name="report">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="sessioninfo" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:choice>
+					<xs:element ref="group"   minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="package" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:choice>
+				<xs:element ref="counter" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="sessioninfo">
+		<xs:complexType>
+			<xs:attribute name="id"    type="xs:string"             use="required"/>
+			<xs:attribute name="start" type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="dump"  type="xs:nonNegativeInteger" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="group">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice>
+					<xs:element ref="group"   minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="package" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:choice>
+				<xs:element ref="counter" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="package">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice minOccurs="0" maxOccurs="unbounded">
+					<xs:element ref="class"/>
+					<xs:element ref="sourcefile"/>
+				</xs:choice>
+				<xs:element ref="counter" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="class">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="method"  minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="counter" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="name"           type="xs:string" use="required"/>
+			<xs:attribute name="sourcefilename" type="xs:string" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="method">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="counter" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string"          use="required"/>
+			<xs:attribute name="desc" type="xs:string"          use="required"/>
+			<xs:attribute name="line" type="xs:positiveInteger" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="sourcefile">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="line"    minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="counter" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="line">
+		<xs:complexType>
+			<xs:attribute name="nr" type="xs:positiveInteger"    use="required"/>
+			<xs:attribute name="mi" type="xs:nonNegativeInteger" use="optional"/>
+			<xs:attribute name="ci" type="xs:nonNegativeInteger" use="optional"/>
+			<xs:attribute name="mb" type="xs:nonNegativeInteger" use="optional"/>
+			<xs:attribute name="cb" type="xs:nonNegativeInteger" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="counter">
+		<xs:complexType>
+			<xs:attribute name="type"    type="CounterType"           use="required"/>
+			<xs:attribute name="missed"  type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="covered" type="xs:nonNegativeInteger" use="required"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

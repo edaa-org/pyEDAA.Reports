@@ -1,0 +1,113 @@
+# ==================================================================================================================== #
+# Authors:                                                                                                             #
+#   Patrick Lehmann                                                                                                    #
+#                                                                                                                      #
+# License:                                                                                                             #
+# ==================================================================================================================== #
+# Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
+#                                                                                                                      #
+# Licensed under the Apache License, Version 2.0 (the "License");                                                      #
+# you may not use this file except in compliance with the License.                                                     #
+# You may obtain a copy of the License at                                                                              #
+#                                                                                                                      #
+#   http://www.apache.org/licenses/LICENSE-2.0                                                                         #
+#                                                                                                                      #
+# Unless required by applicable law or agreed to in writing, software                                                  #
+# distributed under the License is distributed on an "AS IS" BASIS,                                                    #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                             #
+# See the License for the specific language governing permissions and                                                  #
+# limitations under the License.                                                                                       #
+#                                                                                                                      #
+# SPDX-License-Identifier: Apache-2.0                                                                                  #
+# ==================================================================================================================== #
+name: Example .NET
+
+on:
+  workflow_call:
+
+jobs:
+  CSharp-xUnit:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: ⏬ Checkout repository
+        uses: actions/checkout@v7
+
+      - name: 🔧 Set up .NET SDK 10.0
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: 🛠 Restore packages and tools, build the solution
+        run: |
+          cd examples/CSharp/xUnit
+
+          dotnet restore --locked-mode
+          dotnet tool restore
+          dotnet build --no-restore
+
+      - name: ✅ Run unit tests with coverlet
+        run: |
+          cd examples/CSharp/xUnit
+
+          exitCode=0
+          dotnet test --no-build --results-directory TestResults/coverlet \
+            --logger "trx;LogFileName=MyLibrary.Tests.trx" --logger "junit;LogFileName=MyLibrary.Tests.junit.xml" \
+            --collect "XPlat Code Coverage" --settings coverlet.runsettings || exitCode=$?
+          if [[ ${exitCode} -ne 1 ]]; then
+            printf -- '::error title=%s::%s\n' "dotnet test" "Expected exit code 1 (failed tests), got ${exitCode}."
+            exit 1
+          fi
+
+      - name: ✅ Run unit tests with Microsoft's code coverage collector
+        run: |
+          cd examples/CSharp/xUnit
+
+          exitCode=0
+          dotnet test --no-build --results-directory TestResults/Microsoft \
+            --collect "Code Coverage;Format=cobertura" || exitCode=$?
+          if [[ ${exitCode} -ne 1 ]]; then
+            printf -- '::error title=%s::%s\n' "dotnet test" "Expected exit code 1 (failed tests), got ${exitCode}."
+            exit 1
+          fi
+
+      - name: 📊 Collect the reports, convert coverlet's Cobertura report with ReportGenerator
+        run: |
+          cd examples/CSharp/xUnit
+
+          mkdir -p reports coverage/coverlet coverage/Microsoft.CodeCoverage
+          if ! cp TestResults/coverlet/MyLibrary.Tests.{trx,junit.xml} reports/; then
+            printf -- '::error title=%s::%s\n' "Reports" "TRX or JUnit XML report not found in 'TestResults/coverlet'."
+            exit 1
+          fi
+          # Each collector writes into a directory named by a GUID.
+          if ! cp TestResults/coverlet/*-*-*-*-*/coverage.* coverage/coverlet/; then
+            printf -- '::error title=%s::%s\n' "coverlet" "Coverage reports not found in 'TestResults/coverlet'."
+            exit 1
+          fi
+          if ! cp TestResults/Microsoft/*-*-*-*-*/*.cobertura.xml \
+                  coverage/Microsoft.CodeCoverage/coverage.cobertura.xml; then
+            printf -- '::error title=%s::%s\n' "Microsoft" "Cobertura report not found in 'TestResults/Microsoft'."
+            exit 1
+          fi
+
+          if ! dotnet tool run reportgenerator -reports:coverage/coverlet/coverage.cobertura.xml \
+               -targetdir:coverage/ReportGenerator "-reporttypes:Cobertura;lcov"; then
+            printf -- '::error title=%s::%s\n' "ReportGenerator" "Converting coverlet's Cobertura report failed."
+            exit 1
+          fi
+
+      - name: List generated reports
+        run: |
+          ls -lAh examples/CSharp/xUnit/reports/ examples/CSharp/xUnit/coverage/*/
+
+      - name: 📤 Upload TRX and JUnit XML files as artifact
+        uses: pyTooling/upload-artifact@v7
+        with:
+          name: CSharp-xUnit
+          path: examples/CSharp/xUnit/reports/
+
+      - name: 📤 Upload code coverage files as artifact
+        uses: pyTooling/upload-artifact@v7
+        with:
+          name: CSharp-xUnit-Coverage
+          path: examples/CSharp/xUnit/coverage/

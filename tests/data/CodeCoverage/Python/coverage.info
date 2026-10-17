@@ -1,0 +1,71 @@
+SF:myPackage/Shapes.py
+DA:2,1
+DA:5,1
+DA:6,1
+DA:7,1
+DA:8,0
+DA:9,1
+DA:11,1
+DA:12,1
+DA:15,1
+DA:16,1
+DA:17,1
+DA:18,1
+DA:20,1
+DA:21,1
+DA:23,1
+DA:24,1
+DA:25,0
+DA:26,1
+LF:18
+LH:16
+FN:6,9,Circle.__init__
+FNDA:1,Circle.__init__
+FN:11,12,Circle.Area
+FNDA:1,Circle.Area
+FN:16,18,Rectangle.__init__
+FNDA:1,Rectangle.__init__
+FN:20,21,Rectangle.Area
+FNDA:1,Rectangle.Area
+FN:23,26,Rectangle.IsSquare
+FNDA:1,Rectangle.IsSquare
+FNF:5
+FNH:5
+BRDA:7,0,jump to line 8,0
+BRDA:7,0,jump to line 9,1
+BRDA:24,0,jump to line 25,0
+BRDA:24,0,jump to line 26,1
+BRF:4
+BRH:2
+end_of_record
+SF:myPackage/Units/Length.py
+DA:4,1
+DA:10,1
+DA:11,1
+DA:12,1
+DA:13,1
+DA:14,0
+DA:15,0
+DA:17,0
+LF:8
+LH:5
+FN:4,17,ToMeters
+FNDA:1,ToMeters
+FNF:1
+FNH:1
+BRDA:10,0,jump to line 11,1
+BRDA:10,0,jump to line 12,1
+BRDA:12,0,jump to line 13,1
+BRDA:12,0,jump to line 14,0
+BRDA:14,0,jump to line 15,-
+BRDA:14,0,jump to line 17,-
+BRF:6
+BRH:3
+end_of_record
+SF:myPackage/Units/__init__.py
+end_of_record
+SF:myPackage/__init__.py
+DA:2,1
+LF:1
+LH:1
+end_of_record

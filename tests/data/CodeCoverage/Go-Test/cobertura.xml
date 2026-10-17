@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
+<coverage line-rate="0.71428573" branch-rate="0" version="" timestamp="1791457511425" lines-covered="20" lines-valid="28" branches-covered="0" branches-valid="0" complexity="0">
+  <sources>
+    <source>/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Go/testing</source>
+  </sources>
+  <packages>
+    <package name="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/counter" line-rate="0.8695652" branch-rate="0" complexity="0">
+      <classes>
+        <class name="-" filename="counter/counter.go" line-rate="1" branch-rate="0" complexity="0">
+          <methods>
+            <method name="New" signature="" line-rate="1" branch-rate="0" complexity="0">
+              <lines>
+                <line number="15" hits="9"></line>
+                <line number="16" hits="9"></line>
+                <line number="17" hits="9"></line>
+              </lines>
+            </method>
+          </methods>
+          <lines>
+            <line number="15" hits="9"></line>
+            <line number="16" hits="9"></line>
+            <line number="17" hits="9"></line>
+          </lines>
+        </class>
+        <class name="Counter" filename="counter/counter.go" line-rate="0.85" branch-rate="0" complexity="0">
+          <methods>
+            <method name="Value" signature="" line-rate="1" branch-rate="0" complexity="0">
+              <lines>
+                <line number="20" hits="7"></line>
+                <line number="21" hits="7"></line>
+                <line number="22" hits="7"></line>
+              </lines>
+            </method>
+            <method name="Increment" signature="" line-rate="1" branch-rate="0" complexity="0">
+              <lines>
+                <line number="25" hits="6"></line>
+                <line number="26" hits="6"></line>
+                <line number="27" hits="6"></line>
+                <line number="28" hits="6"></line>
+                <line number="29" hits="6"></line>
+                <line number="30" hits="6"></line>
+                <line number="31" hits="6"></line>
+              </lines>
+            </method>
+            <method name="Decrement" signature="" line-rate="1" branch-rate="0" complexity="0">
+              <lines>
+                <line number="34" hits="2"></line>
+                <line number="35" hits="3"></line>
+                <line number="36" hits="1"></line>
+                <line number="37" hits="1"></line>
+                <line number="38" hits="1"></line>
+                <line number="39" hits="1"></line>
+                <line number="40" hits="1"></line>
+              </lines>
+            </method>
+            <method name="Reset" signature="" line-rate="0" branch-rate="0" complexity="0">
+              <lines>
+                <line number="44" hits="0"></line>
+                <line number="45" hits="0"></line>
+                <line number="46" hits="0"></line>
+              </lines>
+            </method>
+          </methods>
+          <lines>
+            <line number="20" hits="7"></line>
+            <line number="21" hits="7"></line>
+            <line number="22" hits="7"></line>
+            <line number="25" hits="6"></line>
+            <line number="26" hits="6"></line>
+            <line number="27" hits="6"></line>
+            <line number="28" hits="6"></line>
+            <line number="29" hits="6"></line>
+            <line number="30" hits="6"></line>
+            <line number="31" hits="6"></line>
+            <line number="34" hits="2"></line>
+            <line number="35" hits="3"></line>
+            <line number="36" hits="1"></line>
+            <line number="37" hits="1"></line>
+            <line number="38" hits="1"></line>
+            <line number="39" hits="1"></line>
+            <line number="40" hits="1"></line>
+            <line number="44" hits="0"></line>
+            <line number="45" hits="0"></line>
+            <line number="46" hits="0"></line>
+          </lines>
+        </class>
+      </classes>
+    </package>
+    <package name="github.com/edaa-org/pyEDAA.Reports/examples/Go/testing/version" line-rate="0" branch-rate="0" complexity="0">
+      <classes>
+        <class name="-" filename="version/version.go" line-rate="0" branch-rate="0" complexity="0">
+          <methods>
+            <method name="String" signature="" line-rate="0" branch-rate="0" complexity="0">
+              <lines>
+                <line number="7" hits="0"></line>
+                <line number="8" hits="0"></line>
+                <line number="9" hits="0"></line>
+                <line number="10" hits="0"></line>
+                <line number="11" hits="0"></line>
+              </lines>
+            </method>
+          </methods>
+          <lines>
+            <line number="7" hits="0"></line>
+            <line number="8" hits="0"></line>
+            <line number="9" hits="0"></line>
+            <line number="10" hits="0"></line>
+            <line number="11" hits="0"></line>
+          </lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>

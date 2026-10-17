@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
+<coverage version="nvc 1.23.0" line-rate="0.000000" branch-rate="1.000000" complexity="0.0" lines-valid="1" lines-covered="0" branches-valid="0" branches-covered="0" timestamp="1791499953">
+<sources>
+<source>.</source>
+</sources>
+<packages>
+<package name="WORK" line-rate="0.000000" branch-rate="1.000000" complexity="0.0">
+<classes>
+<class name="COUNTER(RTL)" filename="src/Counter.vhdl" line-rate="0.000000" branch-rate="1.000000" complexity="0.0" >
+<methods/>
+<lines>
+<line number="24" hits="0" branch="false"/>
+</lines>
+</class>
+<class name="COUNTER_TB(SIM)" filename="tb/Counter_tb.vhdl" line-rate="1.000000" branch-rate="1.000000" complexity="0.0" >
+<methods/>
+<lines>
+</lines>
+</class>
+</classes>
+</package>
+</packages>
+</coverage>

@@ -1,0 +1,272 @@
+<?xml version="1.0"?>
+<!DOCTYPE  coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
+<coverage lines-covered="58" lines-valid="69" line-rate="0.8405797101449275" branches-covered="0" branches-valid="0" branch-rate="0" complexity="0" version="1.9" timestamp="1791457535">
+    <sources>
+        <source>/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/Rust/Cargo</source>
+    </sources>
+    <packages>
+        <package name="src/lib.rs" line-rate="0.8405797101449275" branch-rate="0" complexity="0">
+            <classes>
+                <class name="lib" filename="src/lib.rs" line-rate="0.8405797101449275" branch-rate="0" complexity="0">
+                    <methods>
+                        <method name="&lt;counter::Counter&gt;::decrement" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="34" hits="7"/>
+                                <line number="35" hits="7"/>
+                                <line number="36" hits="5"/>
+                                <line number="37" hits="2"/>
+                                <line number="39" hits="5"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::decrement" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="34" hits="7"/>
+                                <line number="35" hits="7"/>
+                                <line number="36" hits="5"/>
+                                <line number="37" hits="2"/>
+                                <line number="39" hits="5"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::reset" signature="" line-rate="0" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="52" hits="0"/>
+                                <line number="53" hits="0"/>
+                                <line number="54" hits="0"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::try_decrement" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="42" hits="11"/>
+                                <line number="43" hits="11"/>
+                                <line number="44" hits="11"/>
+                                <line number="45" hits="5"/>
+                                <line number="46" hits="6"/>
+                                <line number="47" hits="6"/>
+                                <line number="48" hits="6"/>
+                                <line number="49" hits="11"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::reset" signature="" line-rate="0" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="126" hits="0"/>
+                                <line number="127" hits="0"/>
+                                <line number="128" hits="0"/>
+                                <line number="129" hits="0"/>
+                                <line number="130" hits="0"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::failing_result" signature="" line-rate="0.75" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="105" hits="1"/>
+                                <line number="106" hits="1"/>
+                                <line number="107" hits="0"/>
+                                <line number="108" hits="1"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::value" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="20" hits="6"/>
+                                <line number="21" hits="6"/>
+                                <line number="22" hits="6"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::decrement" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="76" hits="1"/>
+                                <line number="77" hits="1"/>
+                                <line number="78" hits="1"/>
+                                <line number="79" hits="1"/>
+                                <line number="80" hits="1"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::increment" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="25" hits="5"/>
+                                <line number="26" hits="5"/>
+                                <line number="27" hits="5"/>
+                                <line number="28" hits="5"/>
+                                <line number="29" hits="5"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::try_decrement_underflow" signature="" line-rate="0.8" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="89" hits="1"/>
+                                <line number="90" hits="1"/>
+                                <line number="91" hits="1"/>
+                                <line number="92" hits="0"/>
+                                <line number="94" hits="1"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::not_panicking" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="119" hits="1"/>
+                                <line number="120" hits="1"/>
+                                <line number="121" hits="1"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::try_decrement" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="42" hits="11"/>
+                                <line number="43" hits="11"/>
+                                <line number="44" hits="11"/>
+                                <line number="45" hits="5"/>
+                                <line number="46" hits="6"/>
+                                <line number="47" hits="6"/>
+                                <line number="48" hits="6"/>
+                                <line number="49" hits="11"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::value" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="20" hits="6"/>
+                                <line number="21" hits="6"/>
+                                <line number="22" hits="6"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::reset" signature="" line-rate="0" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="52" hits="0"/>
+                                <line number="53" hits="0"/>
+                                <line number="54" hits="0"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::increment" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="25" hits="5"/>
+                                <line number="26" hits="5"/>
+                                <line number="27" hits="5"/>
+                                <line number="28" hits="5"/>
+                                <line number="29" hits="5"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::failing" signature="" line-rate="0.75" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="98" hits="1"/>
+                                <line number="99" hits="1"/>
+                                <line number="100" hits="1"/>
+                                <line number="101" hits="0"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::decrement_underflow" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="84" hits="1"/>
+                                <line number="85" hits="1"/>
+                                <line number="86" hits="1"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::panicking" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="112" hits="1"/>
+                                <line number="113" hits="1"/>
+                                <line number="114" hits="1"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::new" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="15" hits="12"/>
+                                <line number="16" hits="12"/>
+                                <line number="17" hits="12"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::increment" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="69" hits="1"/>
+                                <line number="70" hits="1"/>
+                                <line number="71" hits="1"/>
+                                <line number="72" hits="1"/>
+                                <line number="73" hits="1"/>
+                            </lines>
+                        </method>
+                        <method name="&lt;counter::Counter&gt;::new" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="15" hits="12"/>
+                                <line number="16" hits="12"/>
+                                <line number="17" hits="12"/>
+                            </lines>
+                        </method>
+                        <method name="counter::tests::init" signature="" line-rate="1" branch-rate="0" complexity="0">
+                            <lines>
+                                <line number="62" hits="1"/>
+                                <line number="63" hits="1"/>
+                                <line number="64" hits="1"/>
+                                <line number="65" hits="1"/>
+                                <line number="66" hits="1"/>
+                            </lines>
+                        </method>
+                    </methods>
+                    <lines>
+                        <line number="15" hits="12"/>
+                        <line number="16" hits="12"/>
+                        <line number="17" hits="12"/>
+                        <line number="20" hits="6"/>
+                        <line number="21" hits="6"/>
+                        <line number="22" hits="6"/>
+                        <line number="25" hits="5"/>
+                        <line number="26" hits="5"/>
+                        <line number="27" hits="5"/>
+                        <line number="28" hits="5"/>
+                        <line number="29" hits="5"/>
+                        <line number="34" hits="7"/>
+                        <line number="35" hits="7"/>
+                        <line number="36" hits="5"/>
+                        <line number="37" hits="2"/>
+                        <line number="39" hits="5"/>
+                        <line number="42" hits="11"/>
+                        <line number="43" hits="11"/>
+                        <line number="44" hits="11"/>
+                        <line number="45" hits="5"/>
+                        <line number="46" hits="6"/>
+                        <line number="47" hits="6"/>
+                        <line number="48" hits="6"/>
+                        <line number="49" hits="11"/>
+                        <line number="52" hits="0"/>
+                        <line number="53" hits="0"/>
+                        <line number="54" hits="0"/>
+                        <line number="62" hits="1"/>
+                        <line number="63" hits="1"/>
+                        <line number="64" hits="1"/>
+                        <line number="65" hits="1"/>
+                        <line number="66" hits="1"/>
+                        <line number="69" hits="1"/>
+                        <line number="70" hits="1"/>
+                        <line number="71" hits="1"/>
+                        <line number="72" hits="1"/>
+                        <line number="73" hits="1"/>
+                        <line number="76" hits="1"/>
+                        <line number="77" hits="1"/>
+                        <line number="78" hits="1"/>
+                        <line number="79" hits="1"/>
+                        <line number="80" hits="1"/>
+                        <line number="84" hits="1"/>
+                        <line number="85" hits="1"/>
+                        <line number="86" hits="1"/>
+                        <line number="89" hits="1"/>
+                        <line number="90" hits="1"/>
+                        <line number="91" hits="1"/>
+                        <line number="92" hits="0"/>
+                        <line number="94" hits="1"/>
+                        <line number="98" hits="1"/>
+                        <line number="99" hits="1"/>
+                        <line number="100" hits="1"/>
+                        <line number="101" hits="0"/>
+                        <line number="105" hits="1"/>
+                        <line number="106" hits="1"/>
+                        <line number="107" hits="0"/>
+                        <line number="108" hits="1"/>
+                        <line number="112" hits="1"/>
+                        <line number="113" hits="1"/>
+                        <line number="114" hits="1"/>
+                        <line number="119" hits="1"/>
+                        <line number="120" hits="1"/>
+                        <line number="121" hits="1"/>
+                        <line number="126" hits="0"/>
+                        <line number="127" hits="0"/>
+                        <line number="128" hits="0"/>
+                        <line number="129" hits="0"/>
+                        <line number="130" hits="0"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+    </packages>
+</coverage>

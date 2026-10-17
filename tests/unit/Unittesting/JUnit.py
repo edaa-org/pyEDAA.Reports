@@ -30,12 +30,14 @@
 #
 from datetime import timedelta, datetime
 from pathlib  import Path
-from unittest import TestCase as py_TestCase
+from unittest import TestCase as py_TestCase, mock
+
+from lxml.etree                       import XMLSchemaParseError
 
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary
 from pyEDAA.Reports.Unittesting       import Testsuite as ut_Testsuite, Testcase as ut_Testcase
-from pyEDAA.Reports.Unittesting.JUnit import UnittestException
+from pyEDAA.Reports.Unittesting.JUnit import UnittestError
 from pyEDAA.Reports.Unittesting.JUnit import Testcase, Testclass, Testsuite, TestsuiteSummary, Document as JUnitDocument
 
 
@@ -44,7 +46,7 @@ class Instantiation(py_TestCase):
 		tc = Testcase("tc")
 
 		self.assertEqual("tc", tc.Name)
-		with self.assertRaises(UnittestException):
+		with self.assertRaises(UnittestError):
 			_ = tc.Classname
 		self.assertEqual(TestcaseStatus.Unknown, tc.Status)
 		self.assertIsNone(tc.Duration)
@@ -451,6 +453,27 @@ class Document(py_TestCase):
 		self.assertEqual(junitExampleFile, doc.Path)
 		self.assertGreater(doc.AnalysisDuration, zeroTime)
 		self.assertGreater(doc.ModelConversionDuration, zeroTime)
+
+	def test_Unreadable(self) -> None:
+		"""A directory can't be read as a file."""
+		directory = Path("tests/data")
+		with self.assertRaises(UnittestError) as context:
+			_ = JUnitDocument(directory, analyzeAndConvert=True)
+
+		self.assertEqual(f"Couldn't read JUnit XML file '{directory}'.", str(context.exception))
+		self.assertIsInstance(context.exception.__cause__, OSError)
+
+	def test_Analyze_SchemaParseError(self) -> None:
+		"""The error parsing the XML schema is the cause of the raised exception."""
+		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")
+		doc = JUnitDocument(junitExampleFile)
+
+		with mock.patch("pyEDAA.Reports.Unittesting.JUnit.XMLSchema", side_effect=XMLSchemaParseError("broken")):
+			with self.assertRaises(UnittestError) as context:
+				doc.Analyze()
+
+		self.assertEqual("Error while parsing XML Schema 'Any-JUnit.xsd'.", str(context.exception))
+		self.assertIsInstance(context.exception.__cause__, XMLSchemaParseError)
 
 	def test_ReadWrite(self) -> None:
 		junitExampleFile = Path("tests/data/JUnit/pyAttributes/pytest.pyAttributes.xml")

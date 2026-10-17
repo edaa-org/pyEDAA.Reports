@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CoverageSession>
+  <Summary numSequencePoints="24" visitedSequencePoints="21" numBranchPoints="6" visitedBranchPoints="5" sequenceCoverage="87.5" branchCoverage="83.33" maxCyclomaticComplexity="13" minCyclomaticComplexity="13" visitedClasses="3" numClasses="3" visitedMethods="9" numMethods="10" />
+  <Modules>
+    <Module hash="4128C9E4-C225-49C0-B64E-DA6F3DFD3B19">
+      <ModulePath>MyLibrary.dll</ModulePath>
+      <ModuleTime>2026-10-08T11:09:27</ModuleTime>
+      <ModuleName>MyLibrary</ModuleName>
+      <Files>
+        <File uid="1" fullPath="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Calculator.cs" />
+        <File uid="2" fullPath="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Counter.cs" />
+      </Files>
+      <Classes>
+        <Class>
+          <Summary numSequencePoints="10" visitedSequencePoints="10" numBranchPoints="2" visitedBranchPoints="2" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="2" minCyclomaticComplexity="1" visitedClasses="1" numClasses="1" visitedMethods="5" numMethods="5" />
+          <FullName>MyLibrary.Calculator</FullName>
+          <Methods>
+            <Method cyclomaticComplexity="1" nPathComplexity="1" sequenceCoverage="100" branchCoverage="100" isConstructor="False" isGetter="False" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="1" visitedSequencePoints="1" numBranchPoints="0" visitedBranchPoints="0" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="1" minCyclomaticComplexity="1" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Int32 MyLibrary.Calculator::Add(System.Int32,System.Int32)</Name>
+              <FileRef uid="1" />
+              <SequencePoints>
+                <SequencePoint vc="1" uspid="5" ordinal="0" sl="5" sc="1" el="5" ec="2" bec="0" bev="0" fileid="1" />
+              </SequencePoints>
+              <BranchPoints />
+              <MethodPoint vc="1" uspid="0" p8:type="SequencePoint" ordinal="0" offset="0" sc="0" sl="5" ec="1" el="5" bec="0" bev="0" fileid="1" xmlns:p8="xsi" />
+            </Method>
+            <Method cyclomaticComplexity="1" nPathComplexity="1" sequenceCoverage="100" branchCoverage="100" isConstructor="False" isGetter="False" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="1" visitedSequencePoints="1" numBranchPoints="0" visitedBranchPoints="0" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="1" minCyclomaticComplexity="1" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Int32 MyLibrary.Calculator::Divide(System.Int32,System.Int32)</Name>
+              <FileRef uid="1" />
+              <SequencePoints>
+                <SequencePoint vc="1" uspid="7" ordinal="0" sl="7" sc="1" el="7" ec="2" bec="0" bev="0" fileid="1" />
+              </SequencePoints>
+              <BranchPoints />
+              <MethodPoint vc="1" uspid="0" p8:type="SequencePoint" ordinal="1" offset="1" sc="0" sl="7" ec="1" el="7" bec="0" bev="0" fileid="1" xmlns:p8="xsi" />
+            </Method>
+            <Method cyclomaticComplexity="2" nPathComplexity="2" sequenceCoverage="100" branchCoverage="100" isConstructor="False" isGetter="False" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="6" visitedSequencePoints="6" numBranchPoints="2" visitedBranchPoints="2" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="2" minCyclomaticComplexity="2" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Int32 MyLibrary.Calculator::Absolute(System.Int32)</Name>
+              <FileRef uid="1" />
+              <SequencePoints>
+                <SequencePoint vc="3" uspid="10" ordinal="0" sl="10" sc="1" el="10" ec="2" bec="0" bev="0" fileid="1" />
+                <SequencePoint vc="3" uspid="11" ordinal="1" sl="11" sc="1" el="11" ec="2" bec="2" bev="2" fileid="1" />
+                <SequencePoint vc="2" uspid="12" ordinal="2" sl="12" sc="1" el="12" ec="2" bec="0" bev="0" fileid="1" />
+                <SequencePoint vc="2" uspid="13" ordinal="3" sl="13" sc="1" el="13" ec="2" bec="0" bev="0" fileid="1" />
+                <SequencePoint vc="1" uspid="16" ordinal="4" sl="16" sc="1" el="16" ec="2" bec="0" bev="0" fileid="1" />
+                <SequencePoint vc="3" uspid="17" ordinal="5" sl="17" sc="1" el="17" ec="2" bec="0" bev="0" fileid="1" />
+              </SequencePoints>
+              <BranchPoints>
+                <BranchPoint vc="2" uspid="11" ordinal="0" path="0" offset="7" offsetend="9" sl="11" fileid="1" />
+                <BranchPoint vc="1" uspid="11" ordinal="1" path="1" offset="7" offsetend="15" sl="11" fileid="1" />
+              </BranchPoints>
+              <MethodPoint vc="6" uspid="0" p8:type="SequencePoint" ordinal="2" offset="2" sc="0" sl="10" ec="1" el="17" bec="0" bev="0" fileid="1" xmlns:p8="xsi" />
+            </Method>
+            <Method cyclomaticComplexity="1" nPathComplexity="1" sequenceCoverage="100" branchCoverage="100" isConstructor="False" isGetter="False" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="1" visitedSequencePoints="1" numBranchPoints="0" visitedBranchPoints="0" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="1" minCyclomaticComplexity="1" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Boolean MyLibrary.Calculator::IsEven(System.Int32)</Name>
+              <FileRef uid="1" />
+              <SequencePoints>
+                <SequencePoint vc="1" uspid="20" ordinal="0" sl="20" sc="1" el="20" ec="2" bec="0" bev="0" fileid="1" />
+              </SequencePoints>
+              <BranchPoints />
+              <MethodPoint vc="1" uspid="0" p8:type="SequencePoint" ordinal="3" offset="3" sc="0" sl="20" ec="1" el="20" bec="0" bev="0" fileid="1" xmlns:p8="xsi" />
+            </Method>
+            <Method cyclomaticComplexity="1" nPathComplexity="1" sequenceCoverage="100" branchCoverage="100" isConstructor="False" isGetter="False" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="1" visitedSequencePoints="1" numBranchPoints="0" visitedBranchPoints="0" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="1" minCyclomaticComplexity="1" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Int32 MyLibrary.Calculator::SumOfPositives(System.Collections.Generic.IEnumerable`1&lt;System.Int32&gt;)</Name>
+              <FileRef uid="1" />
+              <SequencePoints>
+                <SequencePoint vc="4" uspid="22" ordinal="0" sl="22" sc="1" el="22" ec="2" bec="0" bev="0" fileid="1" />
+              </SequencePoints>
+              <BranchPoints />
+              <MethodPoint vc="1" uspid="0" p8:type="SequencePoint" ordinal="4" offset="4" sc="0" sl="22" ec="1" el="22" bec="0" bev="0" fileid="1" xmlns:p8="xsi" />
+            </Method>
+          </Methods>
+        </Class>
+        <Class>
+          <Summary numSequencePoints="9" visitedSequencePoints="6" numBranchPoints="2" visitedBranchPoints="1" sequenceCoverage="66.66" branchCoverage="50" maxCyclomaticComplexity="2" minCyclomaticComplexity="1" visitedClasses="1" numClasses="1" visitedMethods="3" numMethods="4" />
+          <FullName>MyLibrary.Counter</FullName>
+          <Methods>
+            <Method cyclomaticComplexity="1" nPathComplexity="1" sequenceCoverage="100" branchCoverage="100" isConstructor="False" isGetter="True" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="1" visitedSequencePoints="1" numBranchPoints="0" visitedBranchPoints="0" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="1" minCyclomaticComplexity="1" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Int32 MyLibrary.Counter::get_Value()</Name>
+              <FileRef uid="2" />
+              <SequencePoints>
+                <SequencePoint vc="13" uspid="5" ordinal="0" sl="5" sc="1" el="5" ec="2" bec="0" bev="0" fileid="2" />
+              </SequencePoints>
+              <BranchPoints />
+              <MethodPoint vc="1" uspid="0" p8:type="SequencePoint" ordinal="0" offset="0" sc="0" sl="5" ec="1" el="5" bec="0" bev="0" fileid="2" xmlns:p8="xsi" />
+            </Method>
+            <Method cyclomaticComplexity="1" nPathComplexity="1" sequenceCoverage="100" branchCoverage="100" isConstructor="False" isGetter="False" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="1" visitedSequencePoints="1" numBranchPoints="0" visitedBranchPoints="0" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="1" minCyclomaticComplexity="1" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Void MyLibrary.Counter::Increment()</Name>
+              <FileRef uid="2" />
+              <SequencePoints>
+                <SequencePoint vc="3" uspid="7" ordinal="0" sl="7" sc="1" el="7" ec="2" bec="0" bev="0" fileid="2" />
+              </SequencePoints>
+              <BranchPoints />
+              <MethodPoint vc="1" uspid="0" p8:type="SequencePoint" ordinal="1" offset="1" sc="0" sl="7" ec="1" el="7" bec="0" bev="0" fileid="2" xmlns:p8="xsi" />
+            </Method>
+            <Method cyclomaticComplexity="2" nPathComplexity="2" sequenceCoverage="66.66" branchCoverage="50" isConstructor="False" isGetter="False" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="6" visitedSequencePoints="4" numBranchPoints="2" visitedBranchPoints="1" sequenceCoverage="66.66" branchCoverage="50" maxCyclomaticComplexity="2" minCyclomaticComplexity="2" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Void MyLibrary.Counter::Decrement()</Name>
+              <FileRef uid="2" />
+              <SequencePoints>
+                <SequencePoint vc="1" uspid="10" ordinal="0" sl="10" sc="1" el="10" ec="2" bec="0" bev="0" fileid="2" />
+                <SequencePoint vc="1" uspid="11" ordinal="1" sl="11" sc="1" el="11" ec="2" bec="2" bev="1" fileid="2" />
+                <SequencePoint vc="0" uspid="12" ordinal="2" sl="12" sc="1" el="12" ec="2" bec="0" bev="0" fileid="2" />
+                <SequencePoint vc="0" uspid="13" ordinal="3" sl="13" sc="1" el="13" ec="2" bec="0" bev="0" fileid="2" />
+                <SequencePoint vc="1" uspid="16" ordinal="4" sl="16" sc="1" el="16" ec="2" bec="0" bev="0" fileid="2" />
+                <SequencePoint vc="1" uspid="17" ordinal="5" sl="17" sc="1" el="17" ec="2" bec="0" bev="0" fileid="2" />
+              </SequencePoints>
+              <BranchPoints>
+                <BranchPoint vc="0" uspid="11" ordinal="0" path="0" offset="12" offsetend="14" sl="11" fileid="2" />
+                <BranchPoint vc="1" uspid="11" ordinal="1" path="1" offset="12" offsetend="26" sl="11" fileid="2" />
+              </BranchPoints>
+              <MethodPoint vc="4" uspid="0" p8:type="SequencePoint" ordinal="2" offset="2" sc="0" sl="10" ec="1" el="17" bec="0" bev="0" fileid="2" xmlns:p8="xsi" />
+            </Method>
+            <Method cyclomaticComplexity="1" nPathComplexity="1" sequenceCoverage="0" branchCoverage="100" isConstructor="False" isGetter="False" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="1" visitedSequencePoints="0" numBranchPoints="0" visitedBranchPoints="0" sequenceCoverage="0" branchCoverage="100" maxCyclomaticComplexity="1" minCyclomaticComplexity="1" visitedClasses="0" numClasses="0" visitedMethods="0" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Void MyLibrary.Counter::Reset()</Name>
+              <FileRef uid="2" />
+              <SequencePoints>
+                <SequencePoint vc="0" uspid="26" ordinal="0" sl="26" sc="1" el="26" ec="2" bec="0" bev="0" fileid="2" />
+              </SequencePoints>
+              <BranchPoints />
+              <MethodPoint vc="0" uspid="0" p8:type="SequencePoint" ordinal="3" offset="3" sc="0" sl="26" ec="1" el="26" bec="0" bev="0" fileid="2" xmlns:p8="xsi" />
+            </Method>
+          </Methods>
+        </Class>
+        <Class>
+          <Summary numSequencePoints="5" visitedSequencePoints="5" numBranchPoints="2" visitedBranchPoints="2" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="2" minCyclomaticComplexity="2" visitedClasses="1" numClasses="1" visitedMethods="1" numMethods="1" />
+          <FullName>MyLibrary.Counter/&lt;IncrementAsync&gt;d__6</FullName>
+          <Methods>
+            <Method cyclomaticComplexity="2" nPathComplexity="2" sequenceCoverage="100" branchCoverage="100" isConstructor="False" isGetter="False" isSetter="False" isStatic="True">
+              <Summary numSequencePoints="5" visitedSequencePoints="5" numBranchPoints="2" visitedBranchPoints="2" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="2" minCyclomaticComplexity="2" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
+              <MetadataToken />
+              <Name>System.Void MyLibrary.Counter/&lt;IncrementAsync&gt;d__6::MoveNext()</Name>
+              <FileRef uid="2" />
+              <SequencePoints>
+                <SequencePoint vc="1" uspid="20" ordinal="0" sl="20" sc="1" el="20" ec="2" bec="0" bev="0" fileid="2" />
+                <SequencePoint vc="1" uspid="21" ordinal="1" sl="21" sc="1" el="21" ec="2" bec="2" bev="2" fileid="2" />
+                <SequencePoint vc="1" uspid="22" ordinal="2" sl="22" sc="1" el="22" ec="2" bec="0" bev="0" fileid="2" />
+                <SequencePoint vc="1" uspid="23" ordinal="3" sl="23" sc="1" el="23" ec="2" bec="0" bev="0" fileid="2" />
+                <SequencePoint vc="1" uspid="24" ordinal="4" sl="24" sc="1" el="24" ec="2" bec="0" bev="0" fileid="2" />
+              </SequencePoints>
+              <BranchPoints>
+                <BranchPoint vc="1" uspid="21" ordinal="0" path="0" offset="36" offsetend="38" sl="21" fileid="2" />
+                <BranchPoint vc="1" uspid="21" ordinal="1" path="1" offset="36" offsetend="103" sl="21" fileid="2" />
+              </BranchPoints>
+              <MethodPoint vc="5" uspid="0" p8:type="SequencePoint" ordinal="0" offset="0" sc="0" sl="20" ec="1" el="24" bec="0" bev="0" fileid="2" xmlns:p8="xsi" />
+            </Method>
+          </Methods>
+        </Class>
+      </Classes>
+    </Module>
+  </Modules>
+</CoverageSession>

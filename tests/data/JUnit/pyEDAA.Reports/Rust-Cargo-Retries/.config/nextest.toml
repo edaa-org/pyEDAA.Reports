@@ -1,0 +1,20 @@
+experimental = ["setup-scripts"]
+
+[scripts.setup.prepare]
+command = "true"
+
+[profile.ci]
+fail-fast = false
+retries = 1
+
+[[profile.ci.overrides]]
+filter = "test(flaky_failing)"
+flaky-result = "fail"
+
+[[profile.ci.scripts]]
+filter = "all()"
+setup = "prepare"
+
+[profile.ci.junit]
+path = "junit.xml"
+report-skipped = "ignored"

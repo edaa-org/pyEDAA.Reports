@@ -50,15 +50,22 @@ OUTPUT_DIRECTORY = Path("tests/output/AppJUnitDialects")
 #: The command line spells a dialect ``<dialect>-JUnit``, and its vocabulary is not the one the documents use:
 #: ``Ant-JUnit4`` and ``GoogleTest-JUnit`` are not accepted there.
 COMMANDLINE_NAMES: Dict[str, str] = {
-	"Ant-JUnit4":       "Ant-JUnit",
-	"Any-JUnit":        "Any-JUnit",
-	"CTest-JUnit":      "CTest-JUnit",
-	"GoogleTest-JUnit": "gtest-JUnit",
-	"pyTest-JUnit":     "pyTest-JUnit",
+	"Ant-JUnit4":          "Ant-JUnit",
+	"Any-JUnit":           "Any-JUnit",
+	"Catch2-JUnit":        "Catch2-JUnit",
+	"CTest-JUnit":         "CTest-JUnit",
+	"GoJUnitReport-JUnit": "GoJUnitReport-JUnit",
+	"GoogleTest-JUnit":    "gtest-JUnit",
+	"nextest-JUnit":       "nextest-JUnit",
+	"pyTest-JUnit":        "pyTest-JUnit",
+	"TestLogger-JUnit":    "TestLogger-JUnit",
 }
 
 #: Dialects the command line can write. ``Any-JUnit`` is readable but has no branch in ``_output``.
-WRITABLE = ("Ant-JUnit4", "CTest-JUnit", "GoogleTest-JUnit", "pyTest-JUnit")
+WRITABLE = (
+	"Ant-JUnit4", "Catch2-JUnit", "CTest-JUnit", "GoJUnitReport-JUnit", "GoogleTest-JUnit", "nextest-JUnit",
+	"pyTest-JUnit", "TestLogger-JUnit"
+)
 
 #: (source, target) -> why the conversion cannot work, mirroring the unit-level table.
 FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
@@ -66,14 +73,50 @@ FORMAT_LIMITS: Dict[Tuple[str, str], str] = {
 		"CTest-JUnit requires 'timestamp' on <testsuite>, which pytest does not write on <testsuites>.",
 	("pyTest-JUnit", "GoogleTest-JUnit"):
 		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which pytest does not write.",
+	("Catch2-JUnit", "CTest-JUnit"):
+		"CTest-JUnit requires 'timestamp' on its <testsuite> root, which Catch2 does not write on <testsuites>.",
+	("Catch2-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which Catch2 does not write.",
+	("Catch2-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which Catch2 does not write.",
+	("pyTest-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which pytest does not write.",
+	("nextest-JUnit", "Ant-JUnit4"):
+		"Ant + JUnit4 holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "CTest-JUnit"):
+		"CTest-JUnit holds exactly one test suite; nextest writes one per test binary.",
+	("nextest-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuite>, which nextest does not write.",
+	("nextest-JUnit", "pyTest-JUnit"):
+		"pyTest-JUnit requires 'hostname' and 'timestamp' on <testsuite>, which nextest does not write.",
 	("Any-JUnit", "Ant-JUnit4"):
 		"Ant + JUnit4 holds exactly one test suite; the OSVVM report has many.",
+	("Any-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "CTest-JUnit"):
 		"CTest-JUnit holds exactly one test suite; the OSVVM report has many.",
 	("Any-JUnit", "GoogleTest-JUnit"):
 		"GoogleTest-JUnit requires 'timestamp' down to <testcase>; the OSVVM report has none.",
 	("Any-JUnit", "pyTest-JUnit"):
 		"pyTest-JUnit requires 'timestamp' on <testsuite>; the OSVVM report has none.",
+	("GoJUnitReport-JUnit", "Ant-JUnit4"):
+		"Ant + JUnit4 holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "Catch2-JUnit"):
+		"Catch2-JUnit holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "CTest-JUnit"):
+		"CTest-JUnit holds exactly one test suite; go-junit-report writes one per Go package.",
+	("GoJUnitReport-JUnit", "GoogleTest-JUnit"):
+		"GoogleTest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
+	("GoJUnitReport-JUnit", "nextest-JUnit"):
+		"nextest-JUnit requires 'timestamp' on <testsuites>, which go-junit-report does not write.",
+	("nextest-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires 'timestamp' on <testsuite>, which nextest does not write.",
+	("GoJUnitReport-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires test cases in each <testsuite>; go-junit-report writes a package without tests too.",
+	("Any-JUnit", "TestLogger-JUnit"):
+		"TestLogger-JUnit requires 'timestamp' on <testsuite>; the OSVVM report has none.",
 }
 
 
@@ -167,30 +210,58 @@ class ConversionMixin:
 	def test_ToAntJUnit4(self) -> None:
 		self._roundTripThroughTheCommandLine("Ant-JUnit4")
 
+	def test_ToCatch2JUnit(self) -> None:
+		self._roundTripThroughTheCommandLine("Catch2-JUnit")
+
 	def test_ToCTestJUnit(self) -> None:
 		self._roundTripThroughTheCommandLine("CTest-JUnit")
+
+	def test_ToGoJUnitReport(self) -> None:
+		self._roundTripThroughTheCommandLine("GoJUnitReport-JUnit")
 
 	def test_ToGoogleTestJUnit(self) -> None:
 		self._roundTripThroughTheCommandLine("GoogleTest-JUnit")
 
+	def test_ToNextestJUnit(self) -> None:
+		self._roundTripThroughTheCommandLine("nextest-JUnit")
+
 	def test_ToPyTestJUnit(self) -> None:
 		self._roundTripThroughTheCommandLine("pyTest-JUnit")
+
+	def test_ToTestLoggerJUnit(self) -> None:
+		self._roundTripThroughTheCommandLine("TestLogger-JUnit")
 
 
 class FromAntJUnit4(ConversionMixin, ApplicationTestcase):
 	_dialectName = "Ant-JUnit4"
 
 
+class FromCatch2JUnit(ConversionMixin, ApplicationTestcase):
+	_dialectName = "Catch2-JUnit"
+
+
 class FromCTestJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "CTest-JUnit"
+
+
+class FromGoJUnitReport(ConversionMixin, ApplicationTestcase):
+	_dialectName = "GoJUnitReport-JUnit"
 
 
 class FromGoogleTestJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "GoogleTest-JUnit"
 
 
+class FromNextestJUnit(ConversionMixin, ApplicationTestcase):
+	_dialectName = "nextest-JUnit"
+
+
 class FromPyTestJUnit(ConversionMixin, ApplicationTestcase):
 	_dialectName = "pyTest-JUnit"
+
+
+class FromTestLoggerJUnit(ConversionMixin, ApplicationTestcase):
+	_dialectName = "TestLogger-JUnit"
 
 
 class FromAnyJUnit(ConversionMixin, ApplicationTestcase):
@@ -213,7 +284,7 @@ class TheCommandLineVocabulary(ApplicationTestcase):
 		return f"{result.stdout}\n{result.stderr}"
 
 	def test_TheDocumentedAntNameIsRejected(self) -> None:
-		"""``Ant-JUnit4`` is how the schema and the reports name it; the command line splits on '-' and sees 'junit4'."""
+		"""``Ant-JUnit4`` is how the schema and the reports name it; the command line's format is ``Ant-JUnit``."""
 		self.assertIn("Unsupported", self._merge("Ant-JUnit4"))
 
 	def test_TheDocumentedGoogleTestNameIsRejected(self) -> None:
@@ -221,11 +292,11 @@ class TheCommandLineVocabulary(ApplicationTestcase):
 		self.assertIn("Unsupported", self._merge("GoogleTest-JUnit"))
 
 	def test_AnyJUnitCannotBeWritten(self) -> None:
-		"""It can be read, but ``_output`` has no branch for it."""
+		"""It can be read, but :class:`~pyEDAA.Reports.CLI.Unittesting.OutputFormat` has no member for it."""
 		reference = DIALECTS["pyTest-JUnit"].ReferenceFiles[0]
 		result = self.RunEntrypoint(
 			"unittest", f"--merge=pyTest-JUnit:{reference}", f"--output=Any-JUnit:{OUTPUT_DIRECTORY / 'any.xml'}",
 			timeout=60.0
 		)
 
-		self.assertIn("Unsupported JUnit XML dialect for writing", f"{result.stdout}\n{result.stderr}")
+		self.assertIn("Unsupported unit testing report format for output", f"{result.stdout}\n{result.stderr}")

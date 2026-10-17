@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="nextest-run" tests="12" skipped="0" failures="4" errors="0" uuid="8c42a7f8-ce32-4ba2-aaf1-ce7c6cd97e8d" timestamp="2026-10-08T11:05:35.662+00:00" time="0.036">
+    <testsuite name="counter::sequence" tests="3" skipped="0" errors="0" failures="0">
+        <testcase name="printing_test" classname="counter::sequence" timestamp="2026-10-08T11:05:35.662+00:00" time="0.004">
+            <system-out>
+running 1 test
+Output written to stdout by a passing test.
+test printing_test ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err>Output written to stderr by a passing test.
+</system-err>
+        </testcase>
+        <testcase name="count_up_and_down" classname="counter::sequence" timestamp="2026-10-08T11:05:35.662+00:00" time="0.004">
+            <system-out>
+running 1 test
+test count_up_and_down ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err></system-err>
+        </testcase>
+        <testcase name="underflow" classname="counter::sequence" timestamp="2026-10-08T11:05:35.662+00:00" time="0.035">
+            <system-out>
+running 1 test
+test underflow ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err></system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="counter" tests="9" skipped="0" errors="0" failures="4">
+        <testcase name="tests::decrement_underflow" classname="counter" timestamp="2026-10-08T11:05:35.662+00:00" time="0.004">
+            <system-out>
+running 1 test
+test tests::decrement_underflow - should panic ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err>
+thread &apos;tests::decrement_underflow&apos; (554407) panicked at src/lib.rs:37:31:
+counter underflow
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</system-err>
+        </testcase>
+        <testcase name="tests::increment" classname="counter" timestamp="2026-10-08T11:05:35.662+00:00" time="0.004">
+            <system-out>
+running 1 test
+test tests::increment ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err></system-err>
+        </testcase>
+        <testcase name="tests::init" classname="counter" timestamp="2026-10-08T11:05:35.662+00:00" time="0.004">
+            <system-out>
+running 1 test
+test tests::init ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err></system-err>
+        </testcase>
+        <testcase name="tests::not_panicking" classname="counter" timestamp="2026-10-08T11:05:35.662+00:00" time="0.004">
+            <failure message="note: test did not panic as expected at src/lib.rs:119:5" type="test failure with exit code 101">note: test did not panic as expected at src/lib.rs:119:5</failure>
+            <system-out>
+running 1 test
+test tests::not_panicking - should panic ... FAILED
+
+failures:
+
+---- tests::not_panicking stdout ----
+note: test did not panic as expected at src/lib.rs:119:5
+
+failures:
+    tests::not_panicking
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err></system-err>
+        </testcase>
+        <testcase name="tests::failing_result" classname="counter" timestamp="2026-10-08T11:05:35.662+00:00" time="0.004">
+            <failure message="Error: Underflow" type="test failure with exit code 101">Error: Underflow</failure>
+            <system-out>
+running 1 test
+test tests::failing_result ... FAILED
+
+failures:
+
+failures:
+    tests::failing_result
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err>Error: Underflow
+</system-err>
+        </testcase>
+        <testcase name="tests::failing" classname="counter" timestamp="2026-10-08T11:05:35.662+00:00" time="0.004">
+            <failure message="thread &apos;tests::failing&apos; (554412) panicked at src/lib.rs:100:9" type="test failure with exit code 101">thread &apos;tests::failing&apos; (554412) panicked at src/lib.rs:100:9:
+assertion `left == right` failed
+  left: 1
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+            <system-out>
+running 1 test
+test tests::failing ... FAILED
+
+failures:
+
+failures:
+    tests::failing
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err>
+thread &apos;tests::failing&apos; (554412) panicked at src/lib.rs:100:9:
+assertion `left == right` failed
+  left: 1
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</system-err>
+        </testcase>
+        <testcase name="tests::decrement" classname="counter" timestamp="2026-10-08T11:05:35.662+00:00" time="0.004">
+            <system-out>
+running 1 test
+test tests::decrement ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err></system-err>
+        </testcase>
+        <testcase name="tests::panicking" classname="counter" timestamp="2026-10-08T11:05:35.662+00:00" time="0.005">
+            <failure message="thread &apos;tests::panicking&apos; (554411) panicked at src/lib.rs:37:31" type="test failure with exit code 101">thread &apos;tests::panicking&apos; (554411) panicked at src/lib.rs:37:31:
+counter underflow
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+            <system-out>
+running 1 test
+test tests::panicking ... FAILED
+
+failures:
+
+failures:
+    tests::panicking
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err>
+thread &apos;tests::panicking&apos; (554411) panicked at src/lib.rs:37:31:
+counter underflow
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</system-err>
+        </testcase>
+        <testcase name="tests::try_decrement_underflow" classname="counter" timestamp="2026-10-08T11:05:35.662+00:00" time="0.035">
+            <system-out>
+running 1 test
+test tests::try_decrement_underflow ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err></system-err>
+        </testcase>
+    </testsuite>
+</testsuites>

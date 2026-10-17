@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright 2012 Accellera Systems Initiative, Inc.
+	Copyright 2020 NVIDIA Corporation
+	Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	  http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+	SPDX-License-Identifier: Apache-2.0
+
+	Modified by EDA²: derived from 'ucis/UCIS.xsd' of https://github.com/accellera-official/fc4sc, commit 31b9339a. The
+	four changes made there in 2020 are reverted to the schema of the UCIS 1.0 standard (section 9.14). The definitions
+	are reformatted and grouped by coverage kind, the comments are replaced, the documentation is added.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="UCIS" targetNamespace="UCIS"
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:annotation>
+		<xs:documentation>
+			XML interchange format of the Accellera Unified Coverage Interoperability Standard (UCIS), version 1.0.
+
+			The schema of chapter 9 'XML Interchange Format' of the standard (June 2012), section 9.14: namespace 'UCIS', root
+			element 'UCIS', the same complex types, elements, attributes, their order, occurrences, types and defaults. Where
+			the chapter's tables and examples contradict this schema - e.g. an example's 'branchStatement', or a
+			'coverpointBin' with a 'name' -, this schema decides.
+		</xs:documentation>
+	</xs:annotation>
+
+	<!-- Common types -->
+	<xs:complexType name="NAME_VALUE">
+		<xs:sequence>
+			<xs:element name="name"  type="xs:string"/>
+			<xs:element name="value" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="USER_ATTR" mixed="true">
+		<xs:attribute name="key"  type="xs:string" use="required"/>
+		<xs:attribute name="type"                  use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="int"/>
+					<xs:enumeration value="float"/>
+					<xs:enumeration value="double"/>
+					<xs:enumeration value="str"/>
+					<xs:enumeration value="bits"/>
+					<xs:enumeration value="int64"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="len"  type="xs:integer"/>
+	</xs:complexType>
+
+	<xs:complexType name="BIN_CONTENTS">
+		<xs:sequence>
+			<xs:element name="historyNodeId" type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="nameComponent" type="xs:string"/>
+		<xs:attribute name="typeComponent" type="xs:string"/>
+		<xs:attribute name="coverageCount" type="xs:nonNegativeInteger" use="required"/>
+	</xs:complexType>
+
+	<xs:attributeGroup name="binAttributes">
+		<xs:attribute name="alias"             type="xs:string"/>
+		<xs:attribute name="coverageCountGoal" type="xs:nonNegativeInteger"/>
+		<xs:attribute name="excluded"          type="xs:boolean"            default="false"/>
+		<xs:attribute name="excludedReason"    type="xs:string"/>
+		<xs:attribute name="weight"            type="xs:nonNegativeInteger" default="1"/>
+	</xs:attributeGroup>
+
+	<xs:complexType name="BIN">
+		<xs:sequence>
+			<xs:element name="contents" type="BIN_CONTENTS"/>
+			<xs:element name="userAttr" type="USER_ATTR"    minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="binAttributes"/>
+	</xs:complexType>
+
+	<xs:attributeGroup name="objAttributes">
+		<xs:attribute name="alias"          type="xs:string"/>
+		<xs:attribute name="excluded"       type="xs:boolean"            default="false"/>
+		<xs:attribute name="excludedReason" type="xs:string"/>
+		<xs:attribute name="weight"         type="xs:nonNegativeInteger" default="1"/>
+	</xs:attributeGroup>
+
+	<xs:attributeGroup name="metricAttributes">
+		<xs:attribute name="metricMode" type="xs:string"/>
+		<xs:attribute name="weight"     type="xs:nonNegativeInteger" default="1"/>
+	</xs:attributeGroup>
+
+	<xs:complexType name="METRIC_MODE">
+		<xs:sequence>
+			<xs:element name="userAttr" type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="metricMode" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="SOURCE_FILE">
+		<xs:attribute name="fileName" type="xs:string"          use="required"/>
+		<xs:attribute name="id"       type="xs:positiveInteger" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="LINE_ID">
+		<xs:attribute name="file" type="xs:positiveInteger" use="required"/>
+		<xs:attribute name="line" type="xs:positiveInteger" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="STATEMENT_ID">
+		<xs:attribute name="file"        type="xs:positiveInteger" use="required"/>
+		<xs:attribute name="line"        type="xs:positiveInteger" use="required"/>
+		<xs:attribute name="inlineCount" type="xs:positiveInteger" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="DIMENSION">
+		<xs:attribute name="left"   type="xs:integer" use="required"/>
+		<xs:attribute name="right"  type="xs:integer" use="required"/>
+		<xs:attribute name="downto" type="xs:boolean" use="required"/>
+	</xs:complexType>
+
+	<!-- History nodes -->
+	<xs:complexType name="HISTORY_NODE">
+		<xs:sequence>
+			<xs:element name="userAttr" type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="historyNodeId"     type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="parentId"          type="xs:nonNegativeInteger"/>
+		<xs:attribute name="logicalName"       type="xs:string"             use="required"/>
+		<xs:attribute name="physicalName"      type="xs:string"/>
+		<xs:attribute name="kind"              type="xs:string"/>
+		<xs:attribute name="testStatus"        type="xs:boolean"            use="required"/>
+		<xs:attribute name="simtime"           type="xs:double"/>
+		<xs:attribute name="timeunit"          type="xs:string"/>
+		<xs:attribute name="runCwd"            type="xs:string"/>
+		<xs:attribute name="cpuTime"           type="xs:double"/>
+		<xs:attribute name="seed"              type="xs:string"/>
+		<xs:attribute name="cmd"               type="xs:string"/>
+		<xs:attribute name="args"              type="xs:string"/>
+		<xs:attribute name="compulsory"        type="xs:string"/>
+		<xs:attribute name="date"              type="xs:dateTime"           use="required"/>
+		<xs:attribute name="userName"          type="xs:string"/>
+		<xs:attribute name="cost"              type="xs:decimal"/>
+		<xs:attribute name="toolCategory"      type="xs:string"             use="required"/>
+		<xs:attribute name="ucisVersion"       type="xs:string"             use="required"/>
+		<xs:attribute name="vendorId"          type="xs:string"             use="required"/>
+		<xs:attribute name="vendorTool"        type="xs:string"             use="required"/>
+		<xs:attribute name="vendorToolVersion" type="xs:string"             use="required"/>
+		<xs:attribute name="sameTests"         type="xs:nonNegativeInteger"/>
+		<xs:attribute name="comment"           type="xs:string"/>
+	</xs:complexType>
+
+	<!-- Toggle coverage -->
+	<xs:complexType name="TOGGLE">
+		<xs:sequence>
+			<xs:element name="bin" type="BIN"/>
+		</xs:sequence>
+		<xs:attribute name="from" type="xs:string" use="required"/>
+		<xs:attribute name="to"   type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="TOGGLE_BIT">
+		<xs:sequence>
+			<xs:element name="index"    type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="toggle"   type="TOGGLE"                minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="userAttr" type="USER_ATTR"             minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="key"  type="xs:string" use="required"/>
+		<xs:attributeGroup ref="objAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="TOGGLE_OBJECT">
+		<xs:sequence>
+			<xs:element name="dimension" type="DIMENSION"    minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="id"        type="STATEMENT_ID"/>
+			<xs:element name="toggleBit" type="TOGGLE_BIT"   minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"  type="USER_ATTR"    minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name"          type="xs:string" use="required"/>
+		<xs:attribute name="key"           type="xs:string" use="required"/>
+		<xs:attribute name="type"          type="xs:string"/>
+		<xs:attribute name="portDirection" type="xs:string"/>
+		<xs:attributeGroup ref="objAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="TOGGLE_COVERAGE">
+		<xs:sequence>
+			<xs:element name="toggleObject" type="TOGGLE_OBJECT" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="metricMode"   type="METRIC_MODE"   minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"     type="USER_ATTR"     minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="metricAttributes"/>
+	</xs:complexType>
+
+	<!-- Statement and block coverage -->
+	<xs:complexType name="STATEMENT">
+		<xs:sequence>
+			<xs:element name="id"       type="STATEMENT_ID"/>
+			<xs:element name="bin"      type="BIN"/>
+			<xs:element name="userAttr" type="USER_ATTR"    minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="objAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="BLOCK">
+		<xs:sequence>
+			<xs:element name="statementId"       type="STATEMENT_ID" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="hierarchicalBlock" type="BLOCK"        minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="blockBin"          type="BIN"/>
+			<xs:element name="blockId"           type="STATEMENT_ID"/>
+			<xs:element name="userAttr"          type="USER_ATTR"    minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="parentProcess" type="xs:string"/>
+		<xs:attributeGroup ref="objAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="PROCESS_BLOCK">
+		<xs:sequence>
+			<xs:element name="block"    type="BLOCK"     minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr" type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="processType" type="xs:string" use="required"/>
+		<xs:attributeGroup ref="objAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="BLOCK_COVERAGE">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="process"   type="PROCESS_BLOCK" minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element name="block"     type="BLOCK"         minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element name="statement" type="STATEMENT"     minOccurs="1" maxOccurs="unbounded"/>
+			</xs:choice>
+			<xs:element name="userAttr" type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="metricAttributes"/>
+	</xs:complexType>
+
+	<!-- Condition and expression coverage -->
+	<xs:complexType name="EXPR">
+		<xs:sequence>
+			<xs:element name="id"               type="STATEMENT_ID"/>
+			<xs:element name="subExpr"          type="xs:string"    minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="bin"              type="BIN"          minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="hierarchicalExpr" type="EXPR"         minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"         type="USER_ATTR"    minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name"          type="xs:string"             use="required"/>
+		<xs:attribute name="key"           type="xs:string"             use="required"/>
+		<xs:attribute name="exprString"    type="xs:string"             use="required"/>
+		<xs:attribute name="index"         type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="width"         type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="statementType" type="xs:string"/>
+		<xs:attributeGroup ref="objAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="CONDITION_COVERAGE">
+		<xs:sequence>
+			<xs:element name="expr"     type="EXPR"      minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr" type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="metricAttributes"/>
+	</xs:complexType>
+
+	<!-- Branch coverage -->
+	<xs:complexType name="BRANCH">
+		<xs:sequence>
+			<xs:element name="id"           type="STATEMENT_ID"/>
+			<xs:element name="nestedBranch" type="BRANCH_STATEMENT" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="branchBin"    type="BIN"/>
+			<xs:element name="userAttr"     type="USER_ATTR"        minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="BRANCH_STATEMENT">
+		<xs:sequence>
+			<xs:element name="id"       type="STATEMENT_ID"/>
+			<xs:element name="branch"   type="BRANCH"       minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr" type="USER_ATTR"    minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="branchExpr"    type="xs:string"/>
+		<xs:attribute name="statementType" type="xs:string" use="required"/>
+		<xs:attributeGroup ref="objAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="BRANCH_COVERAGE">
+		<xs:sequence>
+			<xs:element name="statement" type="BRANCH_STATEMENT" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"  type="USER_ATTR"        minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="metricAttributes"/>
+	</xs:complexType>
+
+	<!-- FSM coverage -->
+	<xs:complexType name="FSM_STATE">
+		<xs:sequence>
+			<xs:element name="stateBin" type="BIN"/>
+			<xs:element name="userAttr" type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="stateName"  type="xs:string"/>
+		<xs:attribute name="stateValue" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="FSM_TRANSITION">
+		<xs:sequence>
+			<xs:element name="state"         type="xs:string" minOccurs="2" maxOccurs="unbounded"/>
+			<xs:element name="transitionBin" type="BIN"/>
+			<xs:element name="userAttr"      type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="FSM">
+		<xs:sequence>
+			<xs:element name="state"           type="FSM_STATE"      minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="stateTransition" type="FSM_TRANSITION" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"        type="USER_ATTR"      minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name"  type="xs:string"/>
+		<xs:attribute name="type"  type="xs:string"/>
+		<xs:attribute name="width" type="xs:positiveInteger"/>
+		<xs:attributeGroup ref="objAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="FSM_COVERAGE">
+		<xs:sequence>
+			<xs:element name="fsm"      type="FSM"       minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr" type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="metricAttributes"/>
+	</xs:complexType>
+
+	<!-- Assertion coverage -->
+	<xs:complexType name="ASSERTION">
+		<xs:sequence>
+			<xs:element name="coverBin"      type="BIN"       minOccurs="0" maxOccurs="1"/>
+			<xs:element name="passBin"       type="BIN"       minOccurs="0" maxOccurs="1"/>
+			<xs:element name="failBin"       type="BIN"       minOccurs="0" maxOccurs="1"/>
+			<xs:element name="vacuousBin"    type="BIN"       minOccurs="0" maxOccurs="1"/>
+			<xs:element name="disabledBin"   type="BIN"       minOccurs="0" maxOccurs="1"/>
+			<xs:element name="attemptBin"    type="BIN"       minOccurs="0" maxOccurs="1"/>
+			<xs:element name="activeBin"     type="BIN"       minOccurs="0" maxOccurs="1"/>
+			<xs:element name="peakActiveBin" type="BIN"       minOccurs="0" maxOccurs="1"/>
+			<xs:element name="userAttr"      type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name"          type="xs:string" use="required"/>
+		<xs:attribute name="assertionKind" type="xs:string" use="required"/>
+		<xs:attributeGroup ref="objAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="ASSERTION_COVERAGE">
+		<xs:sequence>
+			<xs:element name="assertion" type="ASSERTION" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"  type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="metricAttributes"/>
+	</xs:complexType>
+
+	<!-- Covergroup coverage -->
+	<xs:complexType name="SEQUENCE">
+		<xs:sequence>
+			<xs:element name="contents" type="BIN_CONTENTS"/>
+			<xs:element name="seqValue" type="xs:integer"   minOccurs="1" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="RANGE_VALUE">
+		<xs:sequence>
+			<xs:element name="contents" type="BIN_CONTENTS"/>
+		</xs:sequence>
+		<xs:attribute name="from" type="xs:integer" use="required"/>
+		<xs:attribute name="to"   type="xs:integer" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="COVERPOINT_BIN">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element name="range"    type="RANGE_VALUE" minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element name="sequence" type="SEQUENCE"    minOccurs="1" maxOccurs="unbounded"/>
+			</xs:choice>
+			<xs:element name="userAttr" type="USER_ATTR" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="alias" type="xs:string"/>
+		<xs:attribute name="type"  type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="CROSS_BIN">
+		<xs:sequence>
+			<xs:element name="index"    type="xs:integer"   minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="contents" type="BIN_CONTENTS"/>
+			<xs:element name="userAttr" type="USER_ATTR"    minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="type"  type="xs:string" default="default"/>
+		<xs:attribute name="alias" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="CROSS_OPTIONS">
+		<xs:attribute name="weight"                  type="xs:nonNegativeInteger" default="1"/>
+		<xs:attribute name="goal"                    type="xs:nonNegativeInteger" default="100"/>
+		<xs:attribute name="comment"                 type="xs:string"             default=""/>
+		<xs:attribute name="at_least"                type="xs:nonNegativeInteger" default="1"/>
+		<xs:attribute name="cross_num_print_missing" type="xs:nonNegativeInteger" default="0"/>
+	</xs:complexType>
+
+	<xs:complexType name="CROSS">
+		<xs:sequence>
+			<xs:element name="options"   type="CROSS_OPTIONS"/>
+			<xs:element name="crossExpr" type="xs:string"     minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="crossBin"  type="CROSS_BIN"     minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"  type="USER_ATTR"     minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name"  type="xs:string" use="required"/>
+		<xs:attribute name="key"   type="xs:string" use="required"/>
+		<xs:attribute name="alias" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="COVERPOINT_OPTIONS">
+		<xs:attribute name="weight"         type="xs:nonNegativeInteger" default="1"/>
+		<xs:attribute name="goal"           type="xs:nonNegativeInteger" default="100"/>
+		<xs:attribute name="comment"        type="xs:string"             default=""/>
+		<xs:attribute name="at_least"       type="xs:nonNegativeInteger" default="1"/>
+		<xs:attribute name="detect_overlap" type="xs:boolean"            default="false"/>
+		<xs:attribute name="auto_bin_max"   type="xs:nonNegativeInteger" default="64"/>
+	</xs:complexType>
+
+	<xs:complexType name="COVERPOINT">
+		<xs:sequence>
+			<xs:element name="options"       type="COVERPOINT_OPTIONS"/>
+			<xs:element name="coverpointBin" type="COVERPOINT_BIN"     minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"      type="USER_ATTR"          minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name"       type="xs:string" use="required"/>
+		<xs:attribute name="key"        type="xs:string" use="required"/>
+		<xs:attribute name="alias"      type="xs:string"/>
+		<xs:attribute name="exprString" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="CG_ID">
+		<xs:sequence>
+			<xs:element name="cginstSourceId" type="STATEMENT_ID"/>
+			<xs:element name="cgSourceId"     type="STATEMENT_ID"/>
+		</xs:sequence>
+		<xs:attribute name="cgName"     type="xs:string" use="required"/>
+		<xs:attribute name="moduleName" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:complexType name="CGINST_OPTIONS">
+		<xs:attribute name="weight"                  type="xs:nonNegativeInteger" default="1"/>
+		<xs:attribute name="goal"                    type="xs:nonNegativeInteger" default="100"/>
+		<xs:attribute name="comment"                 type="xs:string"             default=""/>
+		<xs:attribute name="at_least"                type="xs:nonNegativeInteger" default="1"/>
+		<xs:attribute name="detect_overlap"          type="xs:boolean"            default="false"/>
+		<xs:attribute name="auto_bin_max"            type="xs:nonNegativeInteger" default="64"/>
+		<xs:attribute name="cross_num_print_missing" type="xs:nonNegativeInteger" default="0"/>
+		<xs:attribute name="per_instance"            type="xs:boolean"            default="false"/>
+		<xs:attribute name="merge_instances"         type="xs:boolean"            default="false"/>
+	</xs:complexType>
+
+	<xs:complexType name="CGINSTANCE">
+		<xs:sequence>
+			<xs:element name="options"    type="CGINST_OPTIONS"/>
+			<xs:element name="cgId"       type="CG_ID"/>
+			<xs:element name="cgParms"    type="NAME_VALUE"     minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="coverpoint" type="COVERPOINT"     minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="cross"      type="CROSS"          minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"   type="USER_ATTR"      minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name"           type="xs:string"  use="required"/>
+		<xs:attribute name="key"            type="xs:string"  use="required"/>
+		<xs:attribute name="alias"          type="xs:string"/>
+		<xs:attribute name="excluded"       type="xs:boolean" default="false"/>
+		<xs:attribute name="excludedReason" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="COVERGROUP_COVERAGE">
+		<xs:sequence>
+			<xs:element name="cgInstance" type="CGINSTANCE" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"   type="USER_ATTR"  minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="metricAttributes"/>
+	</xs:complexType>
+
+	<!-- Instances -->
+	<xs:complexType name="INSTANCE_COVERAGE">
+		<xs:sequence>
+			<xs:element name="designParameter"    type="NAME_VALUE"          minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="id"                 type="STATEMENT_ID"/>
+			<xs:element name="toggleCoverage"     type="TOGGLE_COVERAGE"     minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="blockCoverage"      type="BLOCK_COVERAGE"      minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="conditionCoverage"  type="CONDITION_COVERAGE"  minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="branchCoverage"     type="BRANCH_COVERAGE"     minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="fsmCoverage"        type="FSM_COVERAGE"        minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="assertionCoverage"  type="ASSERTION_COVERAGE"  minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="covergroupCoverage" type="COVERGROUP_COVERAGE" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="userAttr"           type="USER_ATTR"           minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name"             type="xs:string"  use="required"/>
+		<xs:attribute name="key"              type="xs:string"  use="required"/>
+		<xs:attribute name="instanceId"       type="xs:integer"/>
+		<xs:attribute name="alias"            type="xs:string"/>
+		<xs:attribute name="moduleName"       type="xs:string"/>
+		<xs:attribute name="parentInstanceId" type="xs:integer"/>
+	</xs:complexType>
+
+	<!-- Root -->
+	<xs:element name="UCIS">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="sourceFiles"       type="SOURCE_FILE"       minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element name="historyNodes"      type="HISTORY_NODE"      minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element name="instanceCoverages" type="INSTANCE_COVERAGE" minOccurs="1" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="ucisVersion" type="xs:string"   use="required"/>
+			<xs:attribute name="writtenBy"   type="xs:string"   use="required"/>
+			<xs:attribute name="writtenTime" type="xs:dateTime" use="required"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

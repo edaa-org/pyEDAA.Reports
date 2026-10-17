@@ -11,8 +11,7 @@
 #                                                                                                                      #
 # License:                                                                                                             #
 # ==================================================================================================================== #
-# Copyright 2024-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
-# Copyright 2023-2023 Patrick Lehmann - Bötzingen, Germany                                                             #
+# Copyright 2026-2026 Electronic Design Automation Abstraction (EDA²)                                                  #
 #                                                                                                                      #
 # Licensed under the Apache License, Version 2.0 (the "License");                                                      #
 # you may not use this file except in compliance with the License.                                                     #
@@ -30,644 +29,873 @@
 # ==================================================================================================================== #
 #
 """
-**Abstract code documentation coverage data model for Python code.**
+Reader of Python source code for the documentation coverage model.
+
+:class:`Analyzer` reads a package's directory - every ``*.py`` file below it - into a
+:class:`~pyEDAA.Reports.DocumentationCoverage.DocumentationReport`. Each file is read once (:class:`SourceFile`): in its
+declared encoding, into its lines, its syntax tree and its tokens. The tokens hold the comments, which document a field
+or variable for Sphinx' autodoc, or excuse a missing doc-string for docstr_coverage.
+
+.. rubric:: Items
+
+* A package - a directory - and a module - a file - are items; a package's doc-string is its ``__init__.py``'s. A
+  directory without ``__init__.py`` is a namespace package, which has nothing to document.
+* Classes, functions, methods, constructors (``__init__``), destructors (``__del__``) and properties are items, wherever
+  they are declared, also in a function's body.
+* A class' fields are the names its body assigns or annotates - class variables and enumeration members too -, and its
+  ``type`` statements, also inside an ``if`` or ``try`` statement. A name assigned several times is one item.
+* A module's variables are the same statements in the module's body, e.g. constants, type aliases and type variables.
+* Imports, augmented assignments, assignments to an attribute (``self._x = ...``), names assigned in a function's body,
+  and the fields of a class declared in a function's body are no items.
+
+.. rubric:: Documentation
+
+* A module, class or callable is documented by a non-empty doc-string. A comment of docstr_coverage directly above its
+  declaration excuses a missing doc-string: ``# docstr-coverage: inherited`` and
+  ``# docstr-coverage: excused `reason```.
+* A field or variable is documented, where Sphinx' autodoc finds its documentation: a ``#:`` comment behind the
+  statement - behind a closing bracket, not behind an opening one -, ``#:`` comment lines directly above it, or a string
+  literal directly after it. The documentation must not be empty.
+
+.. rubric:: Ignored and excluded items
+
+* Ignored: a property's setter and deleter, an ``@overload`` stub, a field or variable named with a leading and a
+  trailing underscore (``__all__``, ``_value_``), and an item of a protected or private name, if :class:`CountedItems`
+  doesn't select these names.
+* Excluded: an item, whose qualified name matches one of :attr:`Analyzer.ExcludePatterns`, and the items it contains;
+  the fields or variables, if :class:`CountedItems` doesn't select them; a module, which can't be read or parsed
+  (:exc:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning`).
 """
+from __future__                           import annotations
+
+from ast                                  import AnnAssign, Assign, AST, AsyncFunctionDef, Attribute, Call, ClassDef
+from ast                                  import Constant, Expr, FunctionDef, If, List, Module, Name, Starred, Subscript
+from ast                                  import Try, Tuple, expr, get_docstring, parse, stmt
+from datetime                             import timedelta
+from enum                                 import Flag
+from io                                   import StringIO
 from pathlib                              import Path
-from typing                               import Optional as Nullable, Iterable, Dict, Union, Tuple, List
+from re                                   import Pattern, compile as re_compile
+from re                                   import error as RegularExpressionError
+from sys                                  import version_info
+from tokenize                             import COMMENT, ENDMARKER, NAME, NEWLINE, NL, NUMBER, OP, STRING
+from tokenize                             import TokenError, TokenInfo, generate_tokens, open as tokenize_open
+from typing                               import ClassVar, Iterable, Optional as Nullable
 
-from docstr_coverage                     import analyze, ResultCollection
-from docstr_coverage.result_collection   import FileCount
-
+from pyTooling.Common                     import getFullyQualifiedName
 from pyTooling.Decorators                 import export, readonly
 from pyTooling.MetaClasses                import ExtendedType
+from pyTooling.Stopwatch                  import Stopwatch
+from pyTooling.Warning                    import WarningCollector
 
-from pyEDAA.Reports.DocumentationCoverage import Class, Module, Package, CoverageState, DocCoverageException
+from pyEDAA.Reports.DocumentationCoverage import CoverageState, DocCoverageError, DocumentationReport, Item, ItemKind
+from pyEDAA.Reports.DocumentationCoverage import SourceFileWarning
+
+if version_info >= (3, 12):  # pragma: no cover
+	from ast                                import TypeAlias
 
 
-@export
-class Coverage(metaclass=ExtendedType, mixin=True):
-	"""
-	This base-class for :class:`ClassCoverage` and :class:`AggregatedCoverage` represents a basic set of documentation coverage metrics.
-
-	Besides the *total* number of coverable items, it distinguishes items as *excluded*, *ignored*, and *expected*. |br|
-	Expected items are further distinguished into *covered* and *uncovered* items. |br|
-	If no item is expected, then *coverage* is always 100 |%|.
-
-	All coverable items
-	  total = excluded + ignored + expected
-
-	All expected items
-	  expected = covered + uncovered
-
-	Coverage [0.00..1.00]
-	  coverage = covered / expected
-	"""
-	_total:     int
-	_excluded:  int
-	_ignored:   int
-	_expected:  int
-	_covered:   int
-	_uncovered: int
-
-	_coverage:  float
-
-	def __init__(self) -> None:
-		self._total =     0
-		self._excluded =  0
-		self._ignored =   0
-		self._expected =  0
-		self._covered =   0
-		self._uncovered = 0
-
-		self._coverage = -1.0
-
-	@readonly
-	def Total(self) -> int:
-		"""
-		Read-only property to access the total number of documentable items.
-
-		:returns: Total number of items.
-		"""
-		return self._total
-
-	@readonly
-	def Excluded(self) -> int:
-		"""
-		Read-only property to access the number of items excluded from the analysis.
-
-		:returns: Number of excluded items.
-		"""
-		return self._excluded
-
-	@readonly
-	def Ignored(self) -> int:
-		"""
-		Read-only property to access the number of items ignored by the analysis.
-
-		:returns: Number of ignored items.
-		"""
-		return self._ignored
-
-	@readonly
-	def Expected(self) -> int:
-		"""
-		Read-only property to access the number of items expected to be documented.
-
-		:returns: Number of expected items.
-		"""
-		return self._expected
-
-	@readonly
-	def Covered(self) -> int:
-		"""
-		Read-only property to access the number of documented items.
-
-		:returns: Number of covered items.
-		"""
-		return self._covered
-
-	@readonly
-	def Uncovered(self) -> int:
-		"""
-		Read-only property to access the number of undocumented items.
-
-		:returns: Number of uncovered items.
-		"""
-		return self._uncovered
-
-	@readonly
-	def Coverage(self) -> float:
-		"""
-		Read-only property to access the ratio of covered to expected items.
-
-		:returns: Documentation coverage in the range 0.0 to 1.0.
-		"""
-		return self._coverage
-
-	def CalculateCoverage(self) -> None:
-		self._uncovered = self._expected - self._covered
-		if self._expected != 0:
-			self._coverage = self._covered / self._expected
-		else:
-			self._coverage = 1.0
-
-	def _CountCoverage(self, iterator: Iterable[CoverageState]) -> Tuple[int, int, int, int, int]:
-		total =    0
-		excluded = 0
-		ignored =  0
-		expected = 0
-		covered =  0
-		for coverageState in iterator:
-			if coverageState is CoverageState.Unknown:
-				raise Exception(f"")
-
-			total += 1
-
-			if CoverageState.Excluded in coverageState:
-				excluded += 1
-			elif CoverageState.Ignored in coverageState:
-				ignored += 1
-
-			expected += 1
-			if CoverageState.Covered in coverageState:
-				covered += 1
-
-		return total, excluded, ignored, expected, covered
+# A class with a property named like a class - ``Path`` - can't name that class in the annotation of a field: the class
+# body's namespace, where annotations are evaluated, binds the name to the property.
+_Path = Path
 
 
 @export
-class AggregatedCoverage(Coverage, mixin=True):
+class SourceFile(metaclass=ExtendedType, slots=True):
 	"""
-	This base-class for :class:`ModuleCoverage` and :class:`PackageCoverage` represents an extended set of documentation coverage metrics, especially with aggregated metrics.
-
-	As inherited from :class:`~Coverage`, it provides the *total* number of coverable items, which are distinguished into
-	*excluded*, *ignored*, and *expected* items. |br|
-	Expected items are further distinguished into *covered* and *uncovered* items. |br|
-	If no item is expected, then *coverage* and *aggregated coverage* are always 100 |%|.
-
-	In addition, all previously mentioned metrics are collected as *aggregated...*, too. |br|
-
-	All coverable items
-	  total = excluded + ignored + expected
-
-	All expected items
-	  expected = covered + uncovered
-
-	Coverage [0.00..1.00]
-	  coverage = covered / expected
+	A Python source file, read once: its lines, its syntax tree, and its tokens, which hold the comments.
 	"""
-	_file:                Path
 
-	_aggregatedTotal:     int
-	_aggregatedExcluded:  int
-	_aggregatedIgnored:   int
-	_aggregatedExpected:  int
-	_aggregatedCovered:   int
-	_aggregatedUncovered: int
+	_COMMENT:   ClassVar[Pattern[str]] = re_compile(r"^\s*#: ?(.*)\r?\n?$")                              #: ``#:`` line.
+	_INHERITED: ClassVar[Pattern[str]] = re_compile(r"#\s*docstr-coverage\s*:\s*inherit(ed)?\s*")        #: Inherited.
+	_EXCUSED:   ClassVar[Pattern[str]] = re_compile(r"#\s*docstr-coverage\s*:\s*excuse(d)?\s* `.*`\s*")  #: Excused.
 
-	_aggregatedCoverage:  float
+	_path:            _Path                       #: Path to the source file.
+	_lines:           list[str]                   #: The source's lines, without line endings.
+	_tree:            Module                      #: The source's syntax tree.
+	_tokens:          list[TokenInfo]             #: The source's tokens.
+	_parsingDuration: Nullable[timedelta]         #: Duration of reading and parsing the file, if measured.
+	_positions:       dict[tuple[int, int], int]  #: The index of the token starting at a line and column.
+	_lineStarts:      dict[int, int]              #: The index of the first token starting in a line.
+	_closings:        dict[int, int]              #: The index of the closing bracket of an opening bracket.
 
-	def __init__(self, file: Path) -> None:
-		super().__init__()
-		self._file = file
+	def __init__(
+		self,
+		path: Path,
+		lines: list[str],
+		tree: Module,
+		tokens: list[TokenInfo],
+		*,
+		parsingDuration: Nullable[timedelta] = None
+	) -> None:
+		"""
+		Initializes a read source file, and indexes its tokens.
+
+		:param path:            Path to the source file.
+		:param lines:           The source's lines, without line endings.
+		:param tree:            The source's syntax tree.
+		:param tokens:          The source's tokens.
+		:param parsingDuration: Optional, the duration of reading and parsing the file. Default: ``None``.
+		:raises ValueError:     If parameter ``path`` is ``None``.
+		:raises TypeError:      If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:     If parameter ``lines`` is ``None``.
+		:raises TypeError:      If parameter ``lines`` isn't of type :class:`list`.
+		:raises ValueError:     If parameter ``tree`` is ``None``.
+		:raises TypeError:      If parameter ``tree`` isn't of type :class:`ast.Module`.
+		:raises ValueError:     If parameter ``tokens`` is ``None``.
+		:raises TypeError:      If parameter ``tokens`` isn't of type :class:`list`.
+		:raises TypeError:      If parameter ``parsingDuration`` isn't of type :class:`~datetime.timedelta`.
+		"""
+		for parameterName, value, expectedType in (
+			("path",   path,   Path),
+			("lines",  lines,  list),
+			("tree",   tree,   Module),
+			("tokens", tokens, list)
+		):
+			if value is None:
+				raise ValueError(f"Parameter '{parameterName}' is None.")
+			elif not isinstance(value, expectedType):
+				ex = TypeError(f"Parameter '{parameterName}' is not of type '{expectedType.__name__}'.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
+				raise ex
+
+		if parsingDuration is not None and not isinstance(parsingDuration, timedelta):
+			ex = TypeError(f"Parameter 'parsingDuration' is not of type 'timedelta'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(parsingDuration)}'.")
+			raise ex
+
+		self._path =            path
+		self._lines =           lines
+		self._tree =            tree
+		self._tokens =          tokens
+		self._parsingDuration = parsingDuration
+		self._positions =       {}
+		self._lineStarts =      {}
+		self._closings =        {}
+
+		openings: list[int] = []
+		for index, token in enumerate(tokens):
+			self._positions[token.start] = index
+			self._lineStarts.setdefault(token.start[0], index)
+			if token.type == OP:
+				if token.string in ("(", "[", "{"):
+					openings.append(index)
+				elif token.string in (")", "]", "}") and len(openings) > 0:
+					self._closings[openings.pop()] = index
+
+	@classmethod
+	def Read(cls, path: Path) -> SourceFile:
+		"""
+		Read a source file in its declared encoding, and parse it, measuring the duration of both.
+
+		:param path:                The source file.
+		:returns:                   The read source file.
+		:raises ValueError:         If parameter ``path`` is ``None``.
+		:raises TypeError:          If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises OSError:            If the file can't be read.
+		:raises SyntaxError:        If the file declares an unknown encoding, or isn't valid Python.
+		:raises UnicodeDecodeError: If the file isn't encoded as it declares.
+		:raises ValueError:         If the source contains a null byte (Python 3.11).
+		:raises TokenError:         If the source ends inside a statement.
+		"""
+		if path is None:
+			raise ValueError(f"Parameter 'path' is None.")
+		elif not isinstance(path, Path):
+			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
+			raise ex
+
+		with Stopwatch() as stopwatch:
+			with tokenize_open(path) as file:
+				source = file.read()
+
+			tree = parse(source, filename=str(path))
+			tokens = list(generate_tokens(StringIO(source).readline))
+
+		return cls(path, source.split("\n"), tree, tokens, parsingDuration=timedelta(seconds=stopwatch.Duration))
 
 	@readonly
-	def File(self) -> Path:
+	def Path(self) -> Path:
 		"""
-		Read-only property to access the file this coverage was computed from.
+		Read-only property to access the path to the source file (:attr:`_path`).
 
-		:returns: Path to the analyzed file.
+		:returns: The path.
 		"""
-		return self._file
-
-	@readonly
-	def AggregatedTotal(self) -> int:
-		"""
-		Read-only property to access the total number of documentable items, including all children.
-
-		:returns: Aggregated total number of items.
-		"""
-		return self._aggregatedTotal
+		return self._path
 
 	@readonly
-	def AggregatedExcluded(self) -> int:
+	def Lines(self) -> list[str]:
 		"""
-		Read-only property to access the number of excluded items, including all children.
+		Read-only property to access the source's lines (:attr:`_lines`).
 
-		:returns: Aggregated number of excluded items.
+		:returns: The lines, without line endings.
 		"""
-		return self._aggregatedExcluded
-
-	@readonly
-	def AggregatedIgnored(self) -> int:
-		"""
-		Read-only property to access the number of ignored items, including all children.
-
-		:returns: Aggregated number of ignored items.
-		"""
-		return self._aggregatedIgnored
+		return self._lines
 
 	@readonly
-	def AggregatedExpected(self) -> int:
+	def Tree(self) -> Module:
 		"""
-		Read-only property to access the number of expected items, including all children.
+		Read-only property to access the source's syntax tree (:attr:`_tree`).
 
-		:returns: Aggregated number of expected items.
+		:returns: The syntax tree.
 		"""
-		return self._aggregatedExpected
-
-	@readonly
-	def AggregatedCovered(self) -> int:
-		"""
-		Read-only property to access the number of documented items, including all children.
-
-		:returns: Aggregated number of covered items.
-		"""
-		return self._aggregatedCovered
+		return self._tree
 
 	@readonly
-	def AggregatedUncovered(self) -> int:
+	def ParsingDuration(self) -> Nullable[timedelta]:
 		"""
-		Read-only property to access the number of undocumented items, including all children.
+		Read-only property to access the duration of reading, tokenizing and parsing the file (:attr:`_parsingDuration`).
 
-		:returns: Aggregated number of uncovered items.
+		:returns: The duration, or ``None`` if it wasn't measured.
 		"""
-		return self._aggregatedUncovered
+		return self._parsingDuration
 
-	@readonly
-	def AggregatedCoverage(self) -> float:
+	def DocumentationState(self, node: Module | ClassDef | FunctionDef | AsyncFunctionDef) -> CoverageState:
 		"""
-		Read-only property to access the coverage ratio, including all children.
+		Return how a module, class or function is documented: by a non-empty doc-string, or excused by a comment.
 
-		:returns: Aggregated documentation coverage in the range 0.0 to 1.0.
+		docstr_coverage's comment, which excuses a class or function, is the first comment above its declaration,
+		skipping blank lines and the lines of decorators.
+
+		:param node: The module, class or function.
+		:returns:    The documentation state of the declaration.
 		"""
-		return self._aggregatedCoverage
+		docString = get_docstring(node)
+		if docString is not None and docString.strip() != "":
+			return CoverageState.Documented | CoverageState.Covered
+		elif isinstance(node, Module):
+			return CoverageState.Undocumented
 
-	def Aggregate(self) -> None:
-		if self._aggregatedExpected != 0:
-			self._aggregatedCoverage = self._aggregatedCovered / self._aggregatedExpected
-		else:
-			self._aggregatedCoverage = 1.0
+		index = self._lineStarts.get(node.lineno, 0) - 1
+		while index >= 0:
+			token = self._tokens[index]
+			if token.type in (NL, NEWLINE) or (token.type == NAME and token.string == "class") or \
+					token.line.strip().startswith("@"):
+				index -= 1
+			elif token.type != COMMENT:
+				break
+			elif self._INHERITED.match(token.string) is not None:
+				return CoverageState.Inherited | CoverageState.Covered
+			elif self._EXCUSED.match(token.string) is not None:
+				return CoverageState.Excused | CoverageState.Covered
+			else:
+				break
+
+		return CoverageState.Undocumented
+
+	def HasDocumentationComment(self, statement: stmt) -> bool:
+		"""
+		Return whether an assignment is documented by a non-empty ``#:`` comment, where Sphinx' autodoc finds it.
+
+		Like autodoc, the comment behind the statement is looked up first - a comment behind an opening bracket belongs to
+		the value -, then the ``#:`` comment lines directly above the statement.
+
+		:param statement: The assignment.
+		:returns:         ``True``, if a comment documents the assignment.
+		"""
+		line = self._lines[statement.lineno - 1]
+		column = len(line.encode("utf-8")[:statement.col_offset].decode("utf-8", errors="replace"))
+
+		if (index := self._positions.get((statement.lineno, column), None)) is not None:
+			token = self._tokens[index]
+			while not (token.type == OP and token.string == "=") and token.type not in (NEWLINE, COMMENT, ENDMARKER):
+				index += 1
+				token = self._tokens[index]
+
+			if token.type == OP and token.string == "=":
+				index += 1
+				token = self._tokens[index]
+				while token.type in (OP, NAME, NUMBER, STRING) and not (token.type == OP and token.string == ";"):
+					index = self._closings.get(index, index) + 1
+					token = self._tokens[index]
+
+			if token.type == COMMENT and (match := self._COMMENT.match(token.string)) is not None:
+				return match[1].strip() != ""
+
+		if line[:column].strip() != "":
+			return False
+
+		for lineIndex in range(statement.lineno - 2, -1, -1):
+			if (match := self._COMMENT.match(self._lines[lineIndex])) is None:
+				return False
+			elif match[1].strip() != "":
+				return True
+
+		return False
 
 
 @export
-class ClassCoverage(Class, Coverage):
+class CountedItems(Flag):
 	"""
-	This class represents the class documentation coverage for Python classes.
+	The items an analysis counts, besides the packages, modules, classes and callables of a public name.
+
+	A protected name has one leading underscore; a private name two, but not two trailing ones like a dunder name. An
+	item of a name, which isn't selected, is ignored. Fields and variables, which aren't selected, are excluded.
 	"""
-	_fields:  Dict[str, CoverageState]
-	_methods: Dict[str, CoverageState]
-	_classes: Dict[str, "ClassCoverage"]
 
-	def __init__(self, name: str, parent: Union["PackageCoverage", "ClassCoverage", None] = None) -> None:
-		super().__init__(name, parent)
-		Coverage.__init__(self)
+	Fields =    1                                         #: The fields of a class.
+	Variables = 2                                         #: The variables of a module.
+	Protected = 4                                         #: Items of a protected name, e.g. ``_x``.
+	Private =   8                                         #: Items of a private, name-mangled name, e.g. ``__x``.
 
-		if parent is not None:
-			parent._classes[name] = self
+	Default =   Fields | Variables | Protected | Private  #: All items.
 
-		self._fields =  {}
-		self._methods = {}
-		self._classes = {}
 
-	@readonly
-	def Fields(self) -> Dict[str, CoverageState]:
-		"""
-		Read-only property to access the coverage states of the class' fields.
-
-		:returns: Dictionary of field names and their coverage states.
-		"""
-		return self._fields
-
-	@readonly
-	def Methods(self) -> Dict[str, CoverageState]:
-		"""
-		Read-only property to access the coverage states of the class' methods.
-
-		:returns: Dictionary of method names and their coverage states.
-		"""
-		return self._methods
-
-	@readonly
-	def Classes(self) -> Dict[str, "ClassCoverage"]:
-		"""
-		Read-only property to access the class' nested classes.
-
-		:returns: Dictionary of class names and their coverage.
-		"""
-		return self._classes
-
-	def CalculateCoverage(self) -> None:
-		for cls in self._classes.values():
-			cls.CalculateCoverage()
-
-		self._total, self._excluded, self._ignored, self._expected, self._covered = \
-			self._CountCoverage(zip(
-				self._fields.values(),
-				self._methods.values()
-			))
-
-		super().CalculateCoverage()
-
-	def __str__(self) -> str:
-		return f"<ClassCoverage - tot:{self._total}, ex:{self._excluded}, ig:{self._ignored}, exp:{self._expected}, cov:{self._covered}, un:{self._uncovered} => {self._coverage:.1%}>"
+# A class with a property named like a class - ``CountedItems`` - can't name that class in the annotation of a field:
+# the class body's namespace, where annotations are evaluated, binds the name to the property.
+_CountedItems = CountedItems
 
 
 @export
-class ModuleCoverage(Module, AggregatedCoverage):
+class Analyzer(metaclass=ExtendedType, slots=True):
 	"""
-	This class represents the module documentation coverage for Python modules.
+	Reads the documentation coverage of a Python package from its source files.
+
+	A package's or module's lines are its file's, so their items name no lines.
+
+	.. rubric:: Example
+
+	.. code-block:: Python
+
+	   from pathlib import Path
+	   from pyEDAA.Reports.DocumentationCoverage.Python import Analyzer, CountedItems
+	   from pyTooling.Warning import WarningCollector
+
+	   with WarningCollector() as warnings:
+	     counted = CountedItems.Fields | CountedItems.Variables
+	     report = Analyzer("myPackage", Path("src/myPackage"), countedItems=counted).Analyze()
+
+	   print(f"{report.Counters.Covered}/{report.Counters.Expected}: {report.Counters.Coverage:.1%}")
 	"""
-	_variables: Dict[str, CoverageState]
-	_functions: Dict[str, CoverageState]
-	_classes:   Dict[str, ClassCoverage]
 
-	def __init__(self, name: str, file: Path, parent: Nullable["PackageCoverage"] = None) -> None:
-		super().__init__(name, parent)
-		AggregatedCoverage.__init__(self, file)
+	_packageName:     str                 #: Name of the package.
+	_directory:       Path                #: The package's directory.
+	_countedItems:    _CountedItems       #: The items the analysis counts.
+	_excludePatterns: list[Pattern[str]]  #: The patterns of qualified names, whose items are excluded.
 
-		if parent is not None:
-			parent._modules[name] = self
-
-		self._file =      file
-		self._variables = {}
-		self._functions = {}
-		self._classes =   {}
-
-	@readonly
-	def Variables(self) -> Dict[str, CoverageState]:
+	def __init__(
+		self,
+		packageName: str,
+		directory: Path,
+		*,
+		countedItems: CountedItems = CountedItems.Default,
+		excludePatterns: Nullable[Iterable[str]] = None
+	) -> None:
 		"""
-		Read-only property to access the coverage states of the module's variables.
+		Initializes the analysis of a package.
 
-		:returns: Dictionary of variable names and their coverage states.
+		:param packageName:     Name of the package, which is the name of the top-level item, e.g. ``myPackage``.
+		:param directory:       The package's directory.
+		:param countedItems:    Optional, the items the analysis counts. Default: all of them.
+		:param excludePatterns: Optional, regular expressions matching the whole qualified name of an item to exclude,
+		                        e.g. ``myPackage\\.CLI``; the items it contains are excluded too. Default: none.
+		:raises ValueError:     If parameter ``packageName`` is ``None``.
+		:raises TypeError:      If parameter ``packageName`` isn't of type :class:`str`.
+		:raises ValueError:     If parameter ``packageName`` is empty.
+		:raises ValueError:     If parameter ``directory`` is ``None``.
+		:raises TypeError:      If parameter ``directory`` isn't of type :class:`~pathlib.Path`.
+		:raises ValueError:     If parameter ``countedItems`` is ``None``.
+		:raises TypeError:      If parameter ``countedItems`` isn't of type :class:`CountedItems`.
+		:raises TypeError:      If parameter ``excludePatterns`` isn't iterable.
+		:raises TypeError:      If parameter ``excludePatterns`` contains an element not of type :class:`str`.
+		:raises ValueError:     If parameter ``excludePatterns`` contains an invalid regular expression.
 		"""
-		return self._variables
+		if packageName is None:
+			raise ValueError(f"Parameter 'packageName' is None.")
+		elif not isinstance(packageName, str):
+			ex = TypeError(f"Parameter 'packageName' is not of type 'str'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(packageName)}'.")
+			raise ex
+		elif packageName == "":
+			raise ValueError(f"Parameter 'packageName' is empty.")
 
-	@readonly
-	def Functions(self) -> Dict[str, CoverageState]:
-		"""
-		Read-only property to access the coverage states of the module's functions.
+		if directory is None:
+			raise ValueError(f"Parameter 'directory' is None.")
+		elif not isinstance(directory, Path):
+			ex = TypeError(f"Parameter 'directory' is not of type 'Path'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(directory)}'.")
+			raise ex
 
-		:returns: Dictionary of function names and their coverage states.
-		"""
-		return self._functions
+		if countedItems is None:
+			raise ValueError(f"Parameter 'countedItems' is None.")
+		elif not isinstance(countedItems, CountedItems):
+			ex = TypeError(f"Parameter 'countedItems' is not of type 'CountedItems'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(countedItems)}'.")
+			raise ex
 
-	@readonly
-	def Classes(self) -> Dict[str, ClassCoverage]:
-		"""
-		Read-only property to access the module's classes.
+		self._packageName =     packageName
+		self._directory =       directory
+		self._countedItems =    countedItems
+		self._excludePatterns = []
 
-		:returns: Dictionary of class names and their coverage.
-		"""
-		return self._classes
+		if excludePatterns is not None:
+			if not isinstance(excludePatterns, Iterable):
+				ex = TypeError(f"Parameter 'excludePatterns' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(excludePatterns)}'.")
+				raise ex
 
-	def CalculateCoverage(self) -> None:
-		for cls in self._classes.values():
-			cls.CalculateCoverage()
+			for excludePattern in excludePatterns:
+				if not isinstance(excludePattern, str):
+					ex = TypeError(f"Parameter 'excludePatterns' contains an element not of type 'str'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(excludePattern)}'.")
+					raise ex
 
-		self._total, self._excluded, self._ignored, self._expected, self._covered = \
-			self._CountCoverage(zip(
-				self._variables.values(),
-				self._functions.values()
-			))
-
-		super().CalculateCoverage()
-
-	def Aggregate(self) -> None:
-		self._aggregatedTotal =     self._total
-		self._aggregatedExcluded =  self._excluded
-		self._aggregatedIgnored =   self._ignored
-		self._aggregatedExpected =  self._expected
-		self._aggregatedCovered =   self._covered
-		self._aggregatedUncovered = self._uncovered
-
-		for cls in self._classes.values():
-			self._aggregatedTotal +=     cls._total
-			self._aggregatedExcluded +=  cls._excluded
-			self._aggregatedIgnored +=   cls._ignored
-			self._aggregatedExpected +=  cls._expected
-			self._aggregatedCovered +=   cls._covered
-			self._aggregatedUncovered += cls._uncovered
-
-		super().Aggregate()
-
-	def __str__(self) -> str:
-		return f"<ModuleCoverage - tot:{self._total}|{self._aggregatedTotal}, ex:{self._excluded}|{self._aggregatedExcluded}, ig:{self._ignored}|{self._aggregatedIgnored}, exp:{self._expected}|{self._aggregatedExpected}, cov:{self._covered}|{self._aggregatedCovered}, un:{self._uncovered}|{self._aggregatedUncovered} => {self._coverage:.1%}|{self._aggregatedCoverage:.1%}>"
-
-
-@export
-class PackageCoverage(Package, AggregatedCoverage):
-	"""
-	This class represents the package documentation coverage for Python packages.
-	"""
-	_fileCount: int
-	_variables: Dict[str, CoverageState]
-	_functions: Dict[str, CoverageState]
-	_classes:   Dict[str, ClassCoverage]
-	_modules:   Dict[str, ModuleCoverage]
-	_packages:  Dict[str, "PackageCoverage"]
-
-	def __init__(self, name: str, file: Path, parent: Nullable["PackageCoverage"] = None) -> None:
-		super().__init__(name, parent)
-		AggregatedCoverage.__init__(self, file)
-
-		if parent is not None:
-			parent._packages[name] = self
-
-		self._file =      file
-		self._fileCount = 1
-		self._variables = {}
-		self._functions = {}
-		self._classes =   {}
-		self._modules =   {}
-		self._packages =  {}
-
-	@readonly
-	def FileCount(self) -> int:
-		"""
-		Read-only property to access the number of Python files in this package.
-
-		:returns: Number of files.
-		"""
-		return self._fileCount
-
-	@readonly
-	def Variables(self) -> Dict[str, CoverageState]:
-		"""
-		Read-only property to access the coverage states of the package's variables.
-
-		:returns: Dictionary of variable names and their coverage states.
-		"""
-		return self._variables
-
-	@readonly
-	def Functions(self) -> Dict[str, CoverageState]:
-		"""
-		Read-only property to access the coverage states of the package's functions.
-
-		:returns: Dictionary of function names and their coverage states.
-		"""
-		return self._functions
-
-	@readonly
-	def Classes(self) -> Dict[str, ClassCoverage]:
-		"""
-		Read-only property to access the package's classes.
-
-		:returns: Dictionary of class names and their coverage.
-		"""
-		return self._classes
-
-	@readonly
-	def Modules(self) -> Dict[str, ModuleCoverage]:
-		"""
-		Read-only property to access the package's modules.
-
-		:returns: Dictionary of module names and their coverage.
-		"""
-		return self._modules
-
-	@readonly
-	def Packages(self) -> Dict[str, "PackageCoverage"]:
-		"""
-		Read-only property to access the package's sub-packages.
-
-		:returns: Dictionary of package names and their coverage.
-		"""
-		return self._packages
-
-	def __getitem__(self, key: str) -> Union["PackageCoverage", ModuleCoverage]:
-		try:
-			return self._modules[key]
-		except KeyError:
-			return self._packages[key]
-
-	def CalculateCoverage(self) -> None:
-		for cls in self._classes.values():
-			cls.CalculateCoverage()
-
-		for mod in self._modules.values():
-			mod.CalculateCoverage()
-
-		for pkg in self._packages.values():
-			pkg.CalculateCoverage()
-
-		self._total, self._excluded, self._ignored, self._expected, self._covered = \
-			self._CountCoverage(zip(
-				self._variables.values(),
-				self._functions.values()
-			))
-
-		super().CalculateCoverage()
-
-	def Aggregate(self) -> None:
-		self._fileCount =           len(self._modules) + 1
-		self._aggregatedTotal =     self._total
-		self._aggregatedExcluded =  self._excluded
-		self._aggregatedIgnored =   self._ignored
-		self._aggregatedExpected =  self._expected
-		self._aggregatedCovered =   self._covered
-		self._aggregatedUncovered = self._uncovered
-
-		for pkg in self._packages.values():
-			pkg.Aggregate()
-			self._fileCount +=           pkg._fileCount
-			self._aggregatedTotal +=     pkg._total
-			self._aggregatedExcluded +=  pkg._excluded
-			self._aggregatedIgnored +=   pkg._ignored
-			self._aggregatedExpected +=  pkg._expected
-			self._aggregatedCovered +=   pkg._covered
-			self._aggregatedUncovered += pkg._uncovered
-
-		for mod in self._modules.values():
-			mod.Aggregate()
-			self._aggregatedTotal +=     mod._total
-			self._aggregatedExcluded +=  mod._excluded
-			self._aggregatedIgnored +=   mod._ignored
-			self._aggregatedExpected +=  mod._expected
-			self._aggregatedCovered +=   mod._covered
-			self._aggregatedUncovered += mod._uncovered
-
-		super().Aggregate()
-
-	def __str__(self) -> str:
-		return f"<PackageCoverage - tot:{self._total}|{self._aggregatedTotal}, ex:{self._excluded}|{self._aggregatedExcluded}, ig:{self._ignored}|{self._aggregatedIgnored}, exp:{self._expected}|{self._aggregatedExpected}, cov:{self._covered}|{self._aggregatedCovered}, un:{self._uncovered}|{self._aggregatedUncovered} => {self._coverage:.1%}|{self._aggregatedCoverage:.1%}>"
-
-
-@export
-class DocStrCoverageError(DocCoverageException):
-	pass
-
-
-@export
-class DocStrCoverage(metaclass=ExtendedType):
-	"""
-	A wrapper class for the docstr_coverage package and it's analyzer producing a documentation coverage model.
-	"""
-	_packageName:     str
-	_searchDirectory: Path
-	_moduleFiles:     List[Path]
-	_coverageReport:  ResultCollection
-
-	def __init__(self, packageName: str, directory: Path) -> None:
-		if not directory.exists():
-			raise DocStrCoverageError(f"Package source directory '{directory}' does not exist.") from FileNotFoundError(f"Directory '{directory}' does not exist.")
-
-		self._searchDirectory = directory
-		self._packageName = packageName
-		self._moduleFiles = [file for file in directory.glob("**/*.py")]
-
-	@readonly
-	def SearchDirectories(self) -> Path:
-		"""
-		Read-only property to access the directory the analysis searches for Python files.
-
-		:returns: Path to the search directory.
-		"""
-		return self._searchDirectory
+				try:
+					self._excludePatterns.append(re_compile(excludePattern))
+				except RegularExpressionError as cause:
+					ex = ValueError(f"Parameter 'excludePatterns' contains an invalid regular expression.")
+					ex.add_note(f"Got pattern '{excludePattern}'.")
+					raise ex from cause
 
 	@readonly
 	def PackageName(self) -> str:
 		"""
-		Read-only property to access the name of the analyzed package.
+		Read-only property to access the name of the package (:attr:`_packageName`).
 
-		:returns: Name of the package.
+		:returns: The package's name.
 		"""
 		return self._packageName
 
 	@readonly
-	def ModuleFiles(self) -> List[Path]:
+	def Directory(self) -> Path:
 		"""
-		Read-only property to access the Python files found in the search directory.
+		Read-only property to access the package's directory (:attr:`_directory`).
 
-		:returns: List of module file paths.
+		:returns: The directory.
 		"""
-		return self._moduleFiles
+		return self._directory
 
 	@readonly
-	def CoverageReport(self) -> ResultCollection:
+	def CountedItems(self) -> CountedItems:
 		"""
-		Read-only property to access the raw report produced by ``docstr_coverage``.
+		Read-only property to access the items the analysis counts (:attr:`_countedItems`).
 
-		:returns: The analyzer's result collection.
+		:returns: The counted items.
 		"""
-		return self._coverageReport
+		return self._countedItems
 
-	def Analyze(self) -> ResultCollection:
-		self._coverageReport: ResultCollection = analyze(self._moduleFiles, show_progress=False)
-		return self._coverageReport
+	@readonly
+	def ExcludePatterns(self) -> list[Pattern[str]]:
+		"""
+		Read-only property to access the patterns of qualified names, whose items are excluded (:attr:`_excludePatterns`).
 
-	def Convert(self) -> PackageCoverage:
-		rootPackageCoverage = PackageCoverage(self._packageName, self._searchDirectory / "__init__.py")
+		:returns: The compiled regular expressions.
+		"""
+		return self._excludePatterns
 
-		for key, value in self._coverageReport.files():
-			path: Path = key.relative_to(self._searchDirectory)
-			perFileResult: FileCount = value.count_aggregate()
+	def Analyze(self) -> DocumentationReport:
+		"""
+		Read every Python source file of the package into a documentation coverage report, and aggregate it.
 
-			moduleName = path.stem
-			modulePath = path.parent.parts
+		The report's :attr:`~pyEDAA.Reports.DocumentationCoverage.DocumentationReport.AnalysisDuration` is the
+		duration of the analysis. A source file, which can't be read or parsed, is raised as a
+		:exc:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning` to the current
+		:class:`~pyTooling.Warning.WarningCollector`; its module is excluded, and the analysis continues.
 
-			currentCoverageObject: AggregatedCoverage = rootPackageCoverage
-			for packageName in modulePath:
-				try:
-					currentCoverageObject = currentCoverageObject[packageName]
-				except KeyError:
-					currentCoverageObject = PackageCoverage(packageName, path, currentCoverageObject)
+		:returns:                              The report; its top-level item is the package.
+		:raises DocCoverageError:              If the package's directory doesn't exist.
+		:raises UnhandledCriticalWarningError: If a source file can't be analyzed, and no warning
+		                                       collector collects the warning. |br|
+		                                       Add a with-statement using
+		                                       :class:`~pyTooling.Warning.WarningCollector`.
+		"""
+		if not self._directory.is_dir():
+			raise DocCoverageError(f"Package directory '{self._directory.as_posix()}' doesn't exist.")
 
-			if moduleName != "__init__":
-				currentCoverageObject = ModuleCoverage(moduleName, path, currentCoverageObject)
+		with Stopwatch() as stopwatch:
+			report = DocumentationReport(Path(self._packageName))
+			self._ReadPackage(self._directory, self._packageName, report, report)
+			report.Aggregate()
 
-			currentCoverageObject._expected = perFileResult.needed
-			currentCoverageObject._covered = perFileResult.found
-			currentCoverageObject._uncovered = perFileResult.missing
+		report._analysisDuration = timedelta(seconds=stopwatch.Duration)
 
-			if currentCoverageObject._expected != 0:
-				currentCoverageObject._coverage = currentCoverageObject._covered / currentCoverageObject._expected
+		return report
+
+	def _ReadPackage(
+		self,
+		directory: Path,
+		name: str,
+		parent: Item | DocumentationReport,
+		report: DocumentationReport
+	) -> None:
+		"""
+		Read a package's ``__init__.py``, its modules, then its sub-packages, each sorted by name.
+
+		:param directory: The package's directory.
+		:param name:      The package's name.
+		:param parent:    The package containing this one, or the report.
+		:param report:    The report.
+		"""
+		if (directory / "__init__.py").is_file():
+			package = self._ReadModule(directory / "__init__.py", name, ItemKind.Package, parent, report)
+		else:
+			package = Item(name, ItemKind.Package, self._State(CoverageState.Empty, name, parent), parent=parent)
+
+		paths = sorted(directory.iterdir(), key=Path.as_posix)
+		for path in paths:
+			if path.suffix == ".py" and path.name != "__init__.py" and path.is_file():
+				self._ReadModule(path, path.stem, ItemKind.Module, package, report)
+
+		for path in paths:
+			if path.is_dir() and next(path.rglob("*.py"), None) is not None:
+				self._ReadPackage(path, path.name, package, report)
+
+	def _ReadModule(
+		self,
+		path: Path,
+		name: str,
+		kind: ItemKind,
+		parent: Item | DocumentationReport,
+		report: DocumentationReport
+	) -> Item:
+		"""
+		Read a module, or a package's ``__init__.py``, and the items declared in it.
+
+		:param path:                           The source file.
+		:param name:                           The module's or package's name.
+		:param kind:                           The kind of the module's item.
+		:param parent:                         The package containing the module, or the report.
+		:param report:                         The report.
+		:returns:                              The module's or package's item.
+		:raises UnhandledCriticalWarningError: If the source file can't be analyzed, and no warning
+		                                       collector collects the warning.
+		"""
+		file = report.GetOrAddFile(path.relative_to(self._directory))
+		try:
+			sourceFile = SourceFile.Read(path)
+		except (OSError, SyntaxError, TokenError, ValueError) as ex:
+			WarningCollector.Raise(SourceFileWarning(f"Source file '{file.Path.as_posix()}' can't be analyzed."), ex)
+			return Item(name, kind, CoverageState.Excluded, file=file, parent=parent)
+
+		if len(sourceFile.Tree.body) == 0:
+			documentation = CoverageState.Empty
+		else:
+			documentation = sourceFile.DocumentationState(sourceFile.Tree)
+
+		module = Item(name, kind, self._State(documentation, name, parent), file=file, parent=parent)
+		self._ReadBody(sourceFile, sourceFile.Tree.body, module, False)
+
+		return module
+
+	def _ReadBody(self, sourceFile: SourceFile, body: list[stmt], parent: Item, inFunction: bool) -> None:
+		"""
+		Read the items declared in a module's, class' or function's body, in the order of their first declaration.
+
+		Classes and functions are read wherever they are declared. Fields and variables are read from a module's or class'
+		body and the ``if`` and ``try`` statements in it, but not from a function's body or a class declared in it. An
+		assignment to a field in the class' ``__init__`` documents the field, if commented.
+
+		:param sourceFile: The source file.
+		:param body:       The statements of the body.
+		:param parent:     The module's, class' or function's item.
+		:param inFunction: Whether the body is a function's, or is declared in a function's body.
+		"""
+		order:      list[stmt | str] = []
+		first:      dict[str, stmt] =  {}
+		documented: dict[str, bool] =  {}
+		previous:   Nullable[AST] =    None
+
+		def visit(statements: list[stmt], readAttributes: bool, selfName: str) -> None:
+			"""
+			Nested function for recursion.
+
+			The statement before an expression is tracked as Sphinx' autodoc does: a string after an assignment documents
+			it; the condition of an ``if`` statement is the statement before its first block.
+
+			:param statements:     The statements of a block.
+			:param readAttributes: Whether the block's fields or variables are read.
+			:param selfName:       Empty for a module's or class' body. In the body of a class' ``__init__``: the name of
+			                       its first parameter, whose attributes document the class' fields.
+			"""
+			nonlocal previous
+			for statement in statements:
+				if isinstance(statement, (ClassDef, FunctionDef, AsyncFunctionDef)):
+					if selfName == "":
+						order.append(statement)
+				elif readAttributes and len(names := self._TargetNames(statement, False, selfName)) > 0:
+					hasComment = sourceFile.HasDocumentationComment(statement)
+					for name in names:
+						if selfName == "" and name not in first:
+							order.append(name)
+							first[name] =      statement
+							documented[name] = False
+
+						if name in documented:
+							documented[name] = documented[name] or hasComment
+				elif isinstance(statement, Expr) and isinstance(statement.value, Constant) and \
+						isinstance(statement.value.value, str) and statement.value.value.strip() != "":
+					for name in self._TargetNames(previous, True, selfName):
+						if name in documented:
+							documented[name] = True
+				elif isinstance(statement, If):
+					previous = statement.test
+					visit(statement.body, readAttributes, selfName)
+					visit(statement.orelse, readAttributes, selfName)
+				elif isinstance(statement, Try):
+					visit(statement.body, readAttributes, selfName)
+					visit(statement.orelse, readAttributes, selfName)
+					for handler in statement.handlers:
+						visit(handler.body, False, selfName)
+
+					visit(statement.finalbody, False, selfName)
+				else:
+					for block in ("body", "orelse", "finalbody"):
+						visit(getattr(statement, block, []), False, selfName)
+
+					for clause in (*getattr(statement, "handlers", []), *getattr(statement, "cases", [])):
+						visit(clause.body, False, selfName)
+
+				previous = statement
+
+		isContainer = parent._kind in (ItemKind.Package, ItemKind.Module, ItemKind.Class, ItemKind.Enumeration)
+		visit(body, isContainer and not inFunction, "")
+
+		if parent._kind in (ItemKind.Class, ItemKind.Enumeration) and not inFunction:
+			for entry in [entry for entry in order if isinstance(entry, (FunctionDef, AsyncFunctionDef))]:
+				if entry.name == "__init__" and len(parameters := (*entry.args.posonlyargs, *entry.args.args)) > 0:
+					previous = entry
+					visit(entry.body, True, parameters[0].arg)
+
+		for entry in order:
+			if isinstance(entry, ClassDef):
+				self._ReadClass(sourceFile, entry, parent, inFunction)
+			elif isinstance(entry, (FunctionDef, AsyncFunctionDef)):
+				self._ReadFunction(sourceFile, entry, parent)
 			else:
-				currentCoverageObject._coverage = 1.0
+				self._ReadAttribute(entry, first[entry], documented[entry], parent)
 
-			if currentCoverageObject._uncovered != currentCoverageObject._expected - currentCoverageObject._covered:
-				currentCoverageObject._coverage = -2.0
+	def _ReadClass(self, sourceFile: SourceFile, statement: ClassDef, parent: Item, inFunction: bool) -> None:
+		"""
+		Read a class, and the items declared in its body.
 
-		return rootPackageCoverage
+		A class deriving from a class named ``...Enum`` or ``...Flag`` is an enumeration.
 
+		:param sourceFile: The source file.
+		:param statement:  The class' declaration.
+		:param parent:     The item containing the class.
+		:param inFunction: Whether the class is declared in a function's body.
+		"""
+		if any(self._BaseName(base).endswith(("Enum", "Flag")) for base in statement.bases):
+			kind = ItemKind.Enumeration
+		else:
+			kind = ItemKind.Class
+
+		item = Item(
+			statement.name,
+			kind,
+			self._State(sourceFile.DocumentationState(statement), statement.name, parent),
+			file=parent._file,
+			startLine=self._FirstLine(statement),
+			endLine=statement.end_lineno,
+			parent=parent
+		)
+		self._ReadBody(sourceFile, statement.body, item, inFunction)
+
+	def _ReadFunction(self, sourceFile: SourceFile, statement: FunctionDef | AsyncFunctionDef, parent: Item) -> None:
+		"""
+		Read a function, method, constructor or property, and the classes and functions declared in its body.
+
+		A property's setter and deleter and an ``@overload`` stub are ignored.
+
+		:param sourceFile: The source file.
+		:param statement:  The function's declaration.
+		:param parent:     The item containing the function.
+		"""
+		decorators = {self._BaseName(decorator) for decorator in statement.decorator_list}
+		isAccessor = any(
+			isinstance(decorator, Attribute) and decorator.attr in ("setter", "deleter")
+			for decorator in statement.decorator_list
+		)
+		isMember = parent._kind in (ItemKind.Class, ItemKind.Enumeration)
+
+		if isAccessor or (isMember and not decorators.isdisjoint(("property", "readonly", "cached_property", "getter"))):
+			kind = ItemKind.Property
+		elif isMember and statement.name == "__init__":
+			kind = ItemKind.Constructor
+		elif isMember and statement.name == "__del__":
+			kind = ItemKind.Destructor
+		elif isMember:
+			kind = ItemKind.Method
+		else:
+			kind = ItemKind.Function
+
+		item = Item(
+			statement.name,
+			kind,
+			self._State(
+				sourceFile.DocumentationState(statement),
+				statement.name,
+				parent,
+				ignored=isAccessor or "overload" in decorators
+			),
+			file=parent._file,
+			startLine=self._FirstLine(statement),
+			endLine=statement.end_lineno,
+			parent=parent
+		)
+		self._ReadBody(sourceFile, statement.body, item, True)
+
+	def _ReadAttribute(self, name: str, statement: stmt, documented: bool, parent: Item) -> None:
+		"""
+		Read a field of a class or a variable of a module, declared first by a statement.
+
+		A variable assigned a call of ``TypeVar``, ``ParamSpec`` or ``TypeVarTuple`` is a type variable, of ``NewType`` a
+		type; a variable annotated ``Final`` or named in upper case is a constant.
+
+		:param name:       The field's or variable's name.
+		:param statement:  The first statement assigning or annotating the name.
+		:param documented: Whether a statement assigning or annotating the name documents it.
+		:param parent:     The class' or module's item.
+		"""
+		isField = parent._kind in (ItemKind.Class, ItemKind.Enumeration)
+		annotationName = self._BaseName(statement.annotation) if isinstance(statement, AnnAssign) else ""
+		callName = self._BaseName(statement.value.func) if isinstance(getattr(statement, "value", None), Call) else ""
+
+		if (version_info >= (3, 12) and isinstance(statement, TypeAlias)) or annotationName == "TypeAlias":
+			kind = ItemKind.TypeAlias
+		elif isField and parent._kind is ItemKind.Enumeration and isinstance(statement, Assign):
+			kind = ItemKind.EnumerationMember
+		elif isField:
+			kind = ItemKind.Field
+		elif callName in ("TypeVar", "ParamSpec", "TypeVarTuple"):
+			kind = ItemKind.TypeVariable
+		elif callName == "NewType":
+			kind = ItemKind.Type
+		elif annotationName == "Final" or name.isupper():
+			kind = ItemKind.Constant
+		else:
+			kind = ItemKind.Variable
+
+		Item(
+			name,
+			kind,
+			self._State(
+				CoverageState.Documented | CoverageState.Covered if documented else CoverageState.Undocumented,
+				name,
+				parent,
+				ignored=name.startswith("_") and name.endswith("_"),
+				excluded=(CountedItems.Fields if isField else CountedItems.Variables) not in self._countedItems
+			),
+			file=parent._file,
+			startLine=statement.lineno,
+			endLine=statement.end_lineno,
+			parent=parent
+		)
+
+	def _State(
+		self,
+		documentation: CoverageState,
+		name: str,
+		parent: Item | DocumentationReport,
+		*,
+		ignored: bool = False,
+		excluded: bool = False
+	) -> CoverageState:
+		"""
+		Return an item's coverage state: how it is documented, and whether it is excluded or ignored.
+
+		An item is excluded, if its qualified name, or the qualified name of an item containing it, matches an exclude
+		pattern. It is ignored, if its name is protected or private, and :class:`CountedItems` doesn't select such names.
+
+		:param documentation: How the item is documented.
+		:param name:          The item's name.
+		:param parent:        The item's parent.
+		:param ignored:       Optional, whether the reader's rules ignore the item. Default: ``False``.
+		:param excluded:      Optional, whether the options exclude the item. Default: ``False``.
+		:returns:             The coverage state.
+		"""
+		names = f"{parent.QualifiedName}.{name}".split(".") if isinstance(parent, Item) else name.split(".")
+		if excluded or any(
+			pattern.fullmatch(".".join(names[:length])) is not None
+			for pattern in self._excludePatterns for length in range(1, len(names) + 1)
+		):
+			return documentation | CoverageState.Excluded
+		elif ignored or (
+			name.startswith("_") and not name.startswith("__") and CountedItems.Protected not in self._countedItems
+		) or (
+			name.startswith("__") and not name.endswith("__") and CountedItems.Private not in self._countedItems
+		):
+			return documentation | CoverageState.Ignored
+
+		return documentation
+
+	@staticmethod
+	def _TargetNames(statement: Nullable[AST], firstTargetOnly: bool, selfName: str) -> list[str]:
+		"""
+		Return the names an assignment, an annotation or a ``type`` statement declares, as Sphinx' autodoc reads them.
+
+		In a module's or class' body, a name target declares a name. In the body of a class' ``__init__``, an attribute
+		of its first parameter - ``self._x`` - declares the attribute's name.
+
+		:param statement:       The statement; any other statement or ``None`` declares no name.
+		:param firstTargetOnly: Whether only the first target of a chained assignment counts.
+		:param selfName:        Empty for a module's or class' body; the name of ``__init__``'s first parameter in its body.
+		:returns:               The names; none, if a target declares no name, e.g. a subscript.
+		"""
+		if isinstance(statement, Assign):
+			targets = statement.targets[:1] if firstTargetOnly else statement.targets
+		elif isinstance(statement, AnnAssign):
+			targets = [statement.target]
+		elif version_info >= (3, 12) and isinstance(statement, TypeAlias):
+			targets = [statement.name]
+		else:
+			return []
+
+		def targetName(target: expr) -> str:
+			"""
+			Nested function returning the name a target - neither a tuple nor a list - declares.
+
+			:param target: The target.
+			:returns:      The name; empty, if the target declares none.
+			"""
+			if isinstance(target, Name) and (selfName == "" or target.id == selfName):
+				return target.id
+			elif isinstance(target, Attribute) and selfName != "" and isinstance(target.value, Name) and \
+					target.value.id == selfName:
+				return target.attr
+
+			return ""
+
+		names: list[str] = []
+		for target in targets:
+			if isinstance(target, (Tuple, List)):
+				for element in target.elts:
+					if (name := targetName(element.value if isinstance(element, Starred) else element)) != "":
+						names.append(name)
+			elif (name := targetName(target)) != "":
+				names.append(name)
+			else:
+				return []
+
+		return names
+
+	@staticmethod
+	def _BaseName(expression: expr) -> str:
+		"""
+		Return the name an expression is based on: of a name, an attribute, a subscripted or a called expression.
+
+		``typing.ClassVar[int]`` is based on ``ClassVar``, ``functools.cached_property`` on ``cached_property``.
+
+		:param expression: The expression.
+		:returns:          The name; empty, if the expression isn't based on a name.
+		"""
+		if isinstance(expression, Name):
+			return expression.id
+		elif isinstance(expression, Attribute):
+			return expression.attr
+		elif isinstance(expression, Subscript):
+			return Analyzer._BaseName(expression.value)
+		elif isinstance(expression, Call):
+			return Analyzer._BaseName(expression.func)
+
+		return ""
+
+	@staticmethod
+	def _FirstLine(statement: ClassDef | FunctionDef | AsyncFunctionDef) -> int:
+		"""
+		Return a declaration's first line: its first decorator's, if it has decorators.
+
+		:param statement: The declaration.
+		:returns:         The line number.
+		"""
+		return statement.decorator_list[0].lineno if len(statement.decorator_list) > 0 else statement.lineno

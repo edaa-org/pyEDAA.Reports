@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TestReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TestReport-v0.1.xsd" timestamp="2026-10-06T01:38:27.672990+00:00" duration="0.005801" tests="6" failures="2" errors="0" skipped="2">
+	<Testsuite name="tests">
+		<Summary>Test code of the example project.</Summary>
+		<Description>Test code of the example project.</Description>
+		<Testsuite name="unit">
+			<Summary>Unit tests of the example project.</Summary>
+			<Description>Unit tests of the example project.</Description>
+			<Testsuite name="Arithmetic">
+				<Summary>Unit tests for the arithmetic operations.</Summary>
+				<Description>Unit tests for the arithmetic operations.</Description>
+				<Testsuite name="Addition">
+					<Title>Addition of integers</Title>
+					<Summary>Add two integers.</Summary>
+					<Description>Add two integers.
+
+Every testcase adds two small integers and checks the sum.</Description>
+					<Testcase name="OnePlusOne" status="passed" duration="0.004088" nodeID="tests/unit/Arithmetic.py::Addition::OnePlusOne">
+						<Title>One plus one is two.</Title>
+						<Summary>One plus one is two.</Summary>
+						<Description>One plus one is two.
+
+The simplest addition there is.</Description>
+					</Testcase>
+					<Testcase name="OnePlusTwo" status="failed" duration="0.000387" nodeID="tests/unit/Arithmetic.py::Addition::OnePlusTwo">
+						<Title>One plus two is four.</Title>
+						<Summary>One plus two is four - a deliberately failing testcase.</Summary>
+						<Description>One plus two is four - a deliberately failing testcase.</Description>
+						<Message>self = &lt;tests.unit.Arithmetic.Addition testMethod=OnePlusTwo&gt;
+
+    @testcase("One plus two is four.")
+    def OnePlusTwo(self) -&gt; None:
+    	"""One plus two is four - a deliberately failing testcase."""
+    	print("adding 1 and 2", file=sys.stderr)
+&gt;   	self.assertEqual(4, 1 + 2)
+E    AssertionError: 4 != 3
+
+tests/unit/Arithmetic.py:30: AssertionError</Message>
+					</Testcase>
+					<Testcase name="Negative" status="passed" duration="0.000292" nodeID="tests/unit/Arithmetic.py::Addition::Negative">
+						<Title>Negative</Title>
+					</Testcase>
+				</Testsuite>
+				<Testsuite name="Division">
+					<Title>Division of integers</Title>
+					<Summary>Divide two integers.</Summary>
+					<Description>Divide two integers.</Description>
+					<Testcase name="ByZero" status="failed" duration="0.000342" nodeID="tests/unit/Arithmetic.py::Division::ByZero">
+						<Title>Dividing by zero raises an error.</Title>
+						<Summary>Dividing by zero is an error, not a failure.</Summary>
+						<Description>Dividing by zero is an error, not a failure.</Description>
+						<Message>self = &lt;tests.unit.Arithmetic.Division testMethod=ByZero&gt;
+
+    @testcase("Dividing by zero raises an error.")
+    def ByZero(self) -&gt; None:
+    	"""Dividing by zero is an error, not a failure."""
+&gt;   	_ = 1 // 0
+         ^^^^^^
+E    ZeroDivisionError: division by zero
+
+tests/unit/Arithmetic.py:44: ZeroDivisionError</Message>
+					</Testcase>
+					<Testcase name="ByFraction" status="skipped" duration="0.000308" nodeID="tests/unit/Arithmetic.py::Division::ByFraction">
+						<Title>Dividing by a fraction.</Title>
+						<Summary>Skipped until fractions exist.</Summary>
+						<Description>Skipped until fractions exist.</Description>
+					</Testcase>
+					<Testcase name="RoundsUp" status="skipped" duration="0.000386" nodeID="tests/unit/Arithmetic.py::Division::RoundsUp">
+						<Title>Integer division rounds up.</Title>
+						<Summary>Integer division rounds down, so this is expected to fail.</Summary>
+						<Description>Integer division rounds down, so this is expected to fail.</Description>
+					</Testcase>
+				</Testsuite>
+			</Testsuite>
+		</Testsuite>
+	</Testsuite>
+</TestReport>

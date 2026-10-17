@@ -21,3 +21,6 @@ updates:
       - Dependencies
     schedule:
       interval: "weekly"
+    ignore:
+      # The Rust toolchain version is set by hand.
+      - dependency-name: "dtolnay/rust-toolchain"

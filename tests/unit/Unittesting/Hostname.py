@@ -34,7 +34,7 @@ from pathlib  import Path
 from unittest import TestCase as ut_TestCase
 
 from pyEDAA.Reports.Unittesting                       import MergedTestsuiteSummary, Testsuite, TestsuiteSummary
-from pyEDAA.Reports.Unittesting                       import UnittestException
+from pyEDAA.Reports.Unittesting                       import UnittestError
 from pyEDAA.Reports.Unittesting.JUnit                 import Document, JUnitReaderMode
 from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntDocument
 from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestDocument
@@ -168,7 +168,7 @@ class RequiredAttributes(ut_TestCase):
 		summary = TestsuiteSummary("summary", testsuites=(Testsuite("suite"),))
 		outputFile = self._outputDirectory / name
 
-		with self.assertRaises(UnittestException) as context:
+		with self.assertRaises(UnittestError) as context:
 			documentClass.FromTestsuiteSummary(outputFile, summary).Write(regenerate=True, overwrite=True)
 
 		self.assertIn("requires a timestamp", str(context.exception))

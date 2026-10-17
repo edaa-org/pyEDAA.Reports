@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xsd:schema
+	version="0.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			Schema description for JUnit-like unit test summary files written by go-junit-report v2
+			(https://github.com/jstemmer/go-junit-report). Derived from the structs 'Testsuites', 'Testsuite', 'Testcase',
+			'Property', 'Result' and 'Output' in 'junit/junit.go' (v2.1.0), which Go's 'encoding/xml' writes in field
+			order, and from the function 'CreateFromReport' filling them.
+		</xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:simpleType name="preservingstring">
+		<xsd:restriction base="xsd:string">
+			<xsd:whiteSpace value="preserve"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="result">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				The result of a test (struct 'Result'): its output lines as CDATA.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="preservingstring">
+				<xsd:attribute name="message" type="xsd:string" use="required" />
+				<xsd:attribute name="type" type="xsd:string" use="optional" />
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="output">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Output of a test or a package (struct 'Output') as CDATA.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="preservingstring" />
+		</xsd:simpleContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="property">
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="value" type="xsd:string" use="required" />
+	</xsd:complexType>
+
+	<xsd:complexType name="properties">
+		<xsd:sequence>
+			<xsd:element name="property" type="property" minOccurs="1" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="testcase">
+		<xsd:sequence>
+			<xsd:element name="skipped" type="result" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">A skipped test, message 'Skipped'.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="error" type="result" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						A build error, a runtime error of the test binary, or a test without a result; messages 'Build error',
+						'Runtime error', 'No test result found'.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="failure" type="result" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">A failed test, message 'Failed'.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="system-out" type="output" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">The output of a passed test.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="system-err" type="output" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						Declared by 'junit.go', not written by 'CreateFromReport'.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="classname" type="xsd:string" use="required" />
+		<xsd:attribute name="time" type="xsd:decimal" use="optional" />
+		<xsd:attribute name="status" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">Declared by 'junit.go', not written by 'CreateFromReport'.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuite">
+		<xsd:sequence>
+			<xsd:element name="properties" type="properties" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						Properties given by the options '-p' and '-go-version', and the property 'coverage.statements.pct'.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="testcase" type="testcase" minOccurs="0" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">A test, a subtest or an example.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="system-out" type="output" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						Output of the package not belonging to a test, e.g. a panic's stack trace.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="system-err" type="output" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">
+						Declared by 'junit.go', not written by 'CreateFromReport'.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">
+					The package's import path; empty if the package's result line wasn't recognized.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="tests" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="failures" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="errors" type="xsd:nonNegativeInteger" use="required" />
+		<xsd:attribute name="id" type="xsd:nonNegativeInteger" use="required">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">Index of the test suite in the report, starting at 0.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="disabled" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="hostname" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">The host go-junit-report ran on.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="package" type="xsd:string" use="optional" />
+		<xsd:attribute name="skipped" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="time" type="xsd:decimal" use="required" />
+		<xsd:attribute name="timestamp" type="xsd:dateTime" use="optional">
+			<xsd:annotation>
+				<xsd:documentation xml:lang="en">The time go-junit-report read the package's result.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="file" type="xsd:string" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="testsuites">
+		<xsd:sequence>
+			<xsd:element name="testsuite" type="testsuite" minOccurs="0" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">A Go package.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="optional" />
+		<xsd:attribute name="time" type="xsd:decimal" use="optional" />
+		<xsd:attribute name="tests" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="errors" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="failures" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="skipped" type="xsd:nonNegativeInteger" use="optional" />
+		<xsd:attribute name="disabled" type="xsd:nonNegativeInteger" use="optional" />
+	</xsd:complexType>
+
+	<xsd:element name="testsuites" type="testsuites">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+				All packages of a 'go test' run. A counter is omitted when it is 0.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+</xsd:schema>

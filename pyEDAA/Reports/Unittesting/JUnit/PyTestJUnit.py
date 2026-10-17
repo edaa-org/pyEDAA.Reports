@@ -32,14 +32,16 @@
 """
 Reader for JUnit unit testing summary files in XML format.
 """
+from __future__           import annotations
+
 from pathlib              import Path
-from time                 import perf_counter_ns
 from typing               import Optional as Nullable, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
 from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
-from pyTooling.Decorators import export, InheritDocString
+from pyTooling.Decorators import export, InheritDocString, DocStringMergeStrategy
+from pyTooling.Stopwatch  import Stopwatch
 
-from pyEDAA.Reports.Unittesting       import UnittestException, TestsuiteKind
+from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
 from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, Testsuite as ju_Testsuite
@@ -52,7 +54,7 @@ TestsuiteAggregateReturnType = Tuple[int, int, int, int, int]
 
 
 @export
-@InheritDocString(ju_Testcase, merge=True)
+@InheritDocString(ju_Testcase, DocStringMergeStrategy.BaseLast)
 class Testcase(ju_Testcase):
 	"""
 	This is a derived implementation for the pyTest JUnit dialect.
@@ -60,7 +62,7 @@ class Testcase(ju_Testcase):
 
 
 @export
-@InheritDocString(ju_Testclass, merge=True)
+@InheritDocString(ju_Testclass, DocStringMergeStrategy.BaseLast)
 class Testclass(ju_Testclass):
 	"""
 	This is a derived implementation for the pyTest JUnit dialect.
@@ -68,14 +70,14 @@ class Testclass(ju_Testclass):
 
 
 @export
-@InheritDocString(ju_Testsuite, merge=True)
+@InheritDocString(ju_Testsuite, DocStringMergeStrategy.BaseLast)
 class Testsuite(ju_Testsuite):
 	"""
 	This is a derived implementation for the pyTest JUnit dialect.
 	"""
 
 	@classmethod
-	def FromTestsuite(cls, testsuite: ut_Testsuite) -> "Testsuite":
+	def FromTestsuite(cls, testsuite: ut_Testsuite) -> Testsuite:
 		"""
 		Convert a test suite of the unified test entity data model to the JUnit specific data model's test suite object
 		adhering to the pyTest JUnit dialect.
@@ -100,7 +102,7 @@ class Testsuite(ju_Testsuite):
 		for tc in testsuite.IterateTestcases():
 			ts = tc._parent
 			if ts is None:
-				raise UnittestException(f"Testcase '{tc._name}' is not part of a hierarchy.")
+				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
 
 			classname = ts._name
 			ts = ts._parent
@@ -119,14 +121,14 @@ class Testsuite(ju_Testsuite):
 
 
 @export
-@InheritDocString(ju_TestsuiteSummary, merge=True)
+@InheritDocString(ju_TestsuiteSummary, DocStringMergeStrategy.BaseLast)
 class TestsuiteSummary(ju_TestsuiteSummary):
 	"""
 	This is a derived implementation for the pyTest JUnit dialect.
 	"""
 
 	@classmethod
-	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> "TestsuiteSummary":
+	def FromTestsuiteSummary(cls, testsuiteSummary: ut_TestsuiteSummary) -> TestsuiteSummary:
 		"""
 		Convert a test suite summary of the unified test entity data model to the JUnit specific data model's test suite
 		summary object adhering to the pyTest JUnit dialect.
@@ -139,7 +141,7 @@ class TestsuiteSummary(ju_TestsuiteSummary):
 			startTime=testsuiteSummary._startTime,
 			duration=testsuiteSummary._totalDuration,
 			status=testsuiteSummary._status,
-			testsuites=(ut_Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
+			testsuites=(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
 		)
 
 
@@ -159,23 +161,6 @@ class Document(ju_Document):
 	_TESTCLASS: ClassVar[Type[Testclass]] = Testclass
 	_TESTSUITE: ClassVar[Type[Testsuite]] = Testsuite
 
-	@classmethod
-	def FromTestsuiteSummary(cls, xmlReportFile: Path, testsuiteSummary: ut_TestsuiteSummary):
-		doc = cls(xmlReportFile)
-		doc._name = testsuiteSummary._name
-		doc._startTime = testsuiteSummary._startTime
-		doc._duration = testsuiteSummary._totalDuration
-		doc._status = testsuiteSummary._status
-		doc._tests = testsuiteSummary._tests
-		doc._skipped = testsuiteSummary._skipped
-		doc._errored = testsuiteSummary._errored
-		doc._failed = testsuiteSummary._failed
-		doc._passed = testsuiteSummary._passed
-
-		doc.AddTestsuites(Testsuite.FromTestsuite(testsuite) for testsuite in testsuiteSummary._testsuites.values())
-
-		return doc
-
 	def Analyze(self) -> None:
 		"""
 		Analyze the XML file, parse the content into an XML data structure and validate the data structure using an XML
@@ -194,33 +179,34 @@ class Document(ju_Document):
 		"""
 		Write the data model as XML into a file adhering to the pyTest dialect.
 
-		:param path:               Optional path to the XMl file, if internal path shouldn't be used.
-		:param overwrite:          If true, overwrite an existing file.
-		:param regenerate:         If true, regenerate the XML structure from data model.
-		:raises UnittestException: If the file cannot be overwritten.
-		:raises UnittestException: If the internal XML data structure wasn't generated.
-		:raises UnittestException: If the file cannot be opened or written.
+		:param path:           Optional, path to the XML file, if internal path shouldn't be used.
+		:param overwrite:      Optional, if true, overwrite an existing file.
+		:param regenerate:     Optional, if true, regenerate the XML structure from data model.
+		:raises UnittestError: If the file cannot be overwritten.
+		:raises UnittestError: If the internal XML data structure wasn't generated.
+		:raises UnittestError: If the file cannot be opened or written.
 		"""
 		if path is None:
 			path = self._path
 
 		if not overwrite and path.exists():
-			raise UnittestException(f"JUnit XML file '{path}' can not be overwritten.") \
+			raise UnittestError(f"JUnit XML file '{path}' can not be overwritten.") \
 				from FileExistsError(f"File '{path}' already exists.")
 
 		if regenerate:
 			self.Generate(overwrite=True)
 
 		if self._xmlDocument is None:
-			ex = UnittestException(f"Internal XML document tree is empty and needs to be generated before write is possible.")
+			ex = UnittestError(f"Internal XML document tree is empty and needs to be generated before write is possible.")
 			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
 			raise ex
 
+		content = tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True)
 		try:
 			with path.open("wb") as file:
-				file.write(tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True))
-		except Exception as ex:
-			raise UnittestException(f"JUnit XML file '{path}' can not be written.") from ex
+				file.write(content)
+		except OSError as ex:
+			raise UnittestError(f"JUnit XML file '{path}' can not be written.") from ex
 
 	def Convert(self) -> None:
 		"""
@@ -232,32 +218,32 @@ class Document(ju_Document):
 
 		   The time spend for model conversion will be made available via property :data:`ModelConversionDuration`.
 
-		:raises UnittestException: If XML was not read and parsed before.
+		:raises UnittestError: If XML was not read and parsed before.
 		"""
 		if self._xmlDocument is None:
-			ex = UnittestException(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
+			ex = UnittestError(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
 			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
-		startConversion = perf_counter_ns()
-		rootElement: _Element = self._xmlDocument.getroot()
+		with Stopwatch() as sw:
+			rootElement: _Element = self._xmlDocument.getroot()
 
-		self._name = self._ConvertName(rootElement, optional=True)
-		self._startTime =self._ConvertTimestamp(rootElement, optional=True)
-		self._duration = self._ConvertTime(rootElement, optional=True)
+			self._name = self._ConvertName(rootElement, optional=True)
+			self._startTime =self._ConvertTimestamp(rootElement, optional=True)
+			self._duration = self._ConvertTime(rootElement, optional=True)
 
-		# tests = rootElement.getAttribute("tests")
-		# skipped = rootElement.getAttribute("skipped")
-		# errors = rootElement.getAttribute("errors")
-		# failures = rootElement.getAttribute("failures")
-		# assertions = rootElement.getAttribute("assertions")
+			# tests = rootElement.getAttribute("tests")
+			# skipped = rootElement.getAttribute("skipped")
+			# errors = rootElement.getAttribute("errors")
+			# failures = rootElement.getAttribute("failures")
+			# assertions = rootElement.getAttribute("assertions")
 
-		for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
-			self._ConvertTestsuite(self, rootNode)
+			for rootNode in rootElement.iterchildren(tag="testsuite"):  # type: _Element
+				self._ConvertTestsuite(self, rootNode)
 
-		self.Aggregate()
-		endConversation = perf_counter_ns()
-		self._modelConversion = (endConversation - startConversion) / 1e9
+			self.Aggregate()
+
+		self._modelConversion = sw.Duration
 
 	def _ConvertTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
 		"""
@@ -284,11 +270,11 @@ class Document(ju_Document):
 
 		This method generates the XML root element (``<testsuites>``) and recursively calls other generated methods.
 
-		:param overwrite:          Overwrite the internal XML data structure.
-		:raises UnittestException: If overwrite is false and the internal XML data structure is not empty.
+		:param overwrite:      Optional, overwrite the internal XML data structure.
+		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
 		"""
 		if not overwrite and self._xmlDocument is not None:
-			raise UnittestException(f"Internal XML document is populated with data.")
+			raise UnittestError(f"Internal XML document is populated with data.")
 
 		rootElement = Element("testsuites")
 		rootElement.attrib["name"] = self._name
@@ -354,11 +340,4 @@ class Document(ju_Document):
 		if testcase._assertionCount is not None:
 			testcaseElement.attrib["assertions"] = f"{testcase._assertionCount}"
 
-		if testcase._status is TestcaseStatus.Passed:
-			pass
-		elif testcase._status is TestcaseStatus.Failed:
-			failureElement = SubElement(testcaseElement, "failure")
-		elif testcase._status is TestcaseStatus.Skipped:
-			skippedElement = SubElement(testcaseElement, "skipped")
-		else:
-			errorElement = SubElement(testcaseElement, "error")
+		self._GenerateTestcaseChildren(testcase, testcaseElement)

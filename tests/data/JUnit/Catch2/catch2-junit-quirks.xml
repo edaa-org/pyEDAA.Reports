@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="quirks" errors="0" failures="4" skipped="0" tests="8" hostname="tbd" time="0.001" timestamp="2026-10-08T11:53:56Z">
+    <properties>
+      <property name="random-seed" value="197319374"/>
+    </properties>
+    <testcase classname="quirks.global" name="Output" time="0.000" status="run">
+      <system-out>
+Hello Catch2
+      </system-out>
+    </testcase>
+    <testcase classname="quirks.global" name="MayFail" time="0.000" status="run">
+      <skipped message="TEST_CASE tagged with !mayfail"/>
+      <failure message="1 == 2" type="CHECK">
+FAILED:
+  CHECK( 1 == 2 )
+at Quirks.test.cpp:19
+      </failure>
+    </testcase>
+    <testcase classname="quirks.global" name="ShouldFail" time="0.000" status="run"/>
+    <testcase classname="quirks.global" name="Nested" time="0.000" status="run"/>
+    <testcase classname="quirks.global" name="Nested/Inner" time="0.000" status="run">
+      <failure message="1 == 2" type="CHECK">
+FAILED:
+  CHECK( 1 == 2 )
+at Quirks.test.cpp:32
+      </failure>
+    </testcase>
+    <testcase classname="quirks.global" name="ExplicitFailure" time="0.000" status="run">
+      <failure type="FAIL">
+FAILED:
+Explicit failure.
+at Quirks.test.cpp:38
+      </failure>
+    </testcase>
+    <testcase classname="quirks.global" name="TwoFailures" time="0.000" status="run">
+      <failure message="1 == 2" type="CHECK">
+FAILED:
+  CHECK( 1 == 2 )
+at Quirks.test.cpp:43
+      </failure>
+    </testcase>
+    <testcase classname="quirks.Namespace.Fixture" name="NamespacedFixture" time="0.000" status="run"/>
+    <system-out>
+Hello Catch2
+    </system-out>
+    <system-err/>
+  </testsuite>
+</testsuites>

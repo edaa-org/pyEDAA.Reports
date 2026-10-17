@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
+<coverage version="nvc 1.23.0" line-rate="0.791667" branch-rate="0.444444" complexity="0.0" lines-valid="24" lines-covered="19" branches-valid="9" branches-covered="4" timestamp="1791497563">
+<sources>
+<source>.</source>
+</sources>
+<packages>
+<package name="WORK" line-rate="0.791667" branch-rate="0.444444" complexity="0.0">
+<classes>
+<class name="COUNTER(RTL)" filename="src/Counter.vhdl" line-rate="0.857143" branch-rate="0.750000" complexity="0.0" >
+<methods/>
+<lines>
+<line number="25" hits="52" branch="true" condition-coverage="100 %">
+<conditions>
+<condition number="0" type="jump" coverage="100 %"/>
+</conditions>
+</line>
+<line number="26" hits="25" branch="true" condition-coverage="100 %">
+<conditions>
+<condition number="0" type="jump" coverage="100 %"/>
+</conditions>
+</line>
+<line number="27" hits="1" branch="false"/>
+<line number="28" hits="0" branch="true" condition-coverage="100 %">
+<conditions>
+<condition number="0" type="jump" coverage="100 %"/>
+</conditions>
+</line>
+<line number="29" hits="17" branch="false"/>
+<line number="34" hits="20" branch="false"/>
+<line number="35" hits="40" branch="true" condition-coverage="50 %">
+<conditions>
+<condition number="0" type="jump" coverage="50 %"/>
+</conditions>
+</line>
+</lines>
+</class>
+<class name="COUNTER_TB(SIM)" filename="tb/Counter_tb.vhdl" line-rate="0.764706" branch-rate="0.200000" complexity="0.0" >
+<methods/>
+<lines>
+<line number="26" hits="104" branch="true" condition-coverage="100 %">
+<conditions>
+<condition number="0" type="jump" coverage="100 %"/>
+</conditions>
+</line>
+<line number="42" hits="2" branch="false"/>
+<line number="43" hits="23" branch="false"/>
+<line number="44" hits="23" branch="false"/>
+<line number="45" hits="0" branch="true" condition-coverage="0 %">
+<conditions>
+<condition number="0" type="jump" coverage="0 %"/>
+</conditions>
+</line>
+<line number="46" hits="5" branch="false"/>
+<line number="47" hits="5" branch="false"/>
+<line number="48" hits="0" branch="true" condition-coverage="0 %">
+<conditions>
+<condition number="0" type="jump" coverage="0 %"/>
+</conditions>
+</line>
+<line number="49" hits="12" branch="false"/>
+<line number="50" hits="0" branch="true" condition-coverage="0 %">
+<conditions>
+<condition number="0" type="jump" coverage="0 %"/>
+</conditions>
+</line>
+<line number="52" hits="1" branch="false"/>
+<line number="56" hits="2" branch="false"/>
+<line number="58" hits="2" branch="false"/>
+<line number="59" hits="2" branch="false"/>
+<line number="60" hits="2" branch="false"/>
+<line number="65" hits="52" branch="true" condition-coverage="50 %">
+<conditions>
+<condition number="0" type="jump" coverage="50 %"/>
+</conditions>
+</line>
+<line number="66" hits="0" branch="false"/>
+</lines>
+</class>
+</classes>
+</package>
+</packages>
+</coverage>

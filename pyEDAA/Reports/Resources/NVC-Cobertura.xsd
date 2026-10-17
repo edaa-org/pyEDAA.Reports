@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:annotation>
+		<xs:documentation>
+			Cobertura XML code coverage report as written by NVC 1.23 ('nvc --cover-export --format=cobertura'):
+			reverse-engineered from NVC's 'src/cov/cov-export.c'.
+
+			NVC names Cobertura's DTD 'coverage-04.dtd' in a document type declaration. It writes every attribute the DTD
+			requires, one package named after the top-level's library, a class per design unit named 'ENTITY(ARCHITECTURE)',
+			never a method, and on a branching line one condition. A rate has six decimals, every 'complexity' is '0.0', the
+			timestamp is in seconds. A line's 'condition-coverage' and its condition's 'coverage' are '0 %', '50 %' or
+			'100 %': the directions of the line's branches taken, none, one or both. XML Schema 1.0 can't require them on a
+			branching line only. No other element or attribute is allowed.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:simpleType name="Rate">
+		<xs:annotation>
+			<xs:documentation>A rate in range 0..1, six decimals, e.g. '0.687500'.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:pattern value="[01]\.\d{6}"/>
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Complexity">
+		<xs:annotation>
+			<xs:documentation>NVC doesn't compute a complexity.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:pattern value="0\.0"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Version">
+		<xs:annotation>
+			<xs:documentation>NVC's name and version, e.g. 'nvc 1.23.0' or 'nvc 1.24-devel'.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="nvc \d+\.\d+(\.\d+)?(-devel)?"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Timestamp">
+		<xs:annotation>
+			<xs:documentation>Seconds since the epoch.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:nonNegativeInteger">
+			<xs:pattern value="\d{1,10}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="DesignUnit">
+		<xs:annotation>
+			<xs:documentation>A design unit: entity and architecture, e.g. 'COUNTER(RTL)'.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[^(]+\(.+\)"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Boolean">
+		<xs:annotation>
+			<xs:documentation>Whether the line branches: 'true' or 'false'.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:boolean">
+			<xs:pattern value="true|false"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Percentage">
+		<xs:annotation>
+			<xs:documentation>Directions taken of the line's branches: '0 %', '50 %' or '100 %'.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="0 %"/>
+			<xs:enumeration value="50 %"/>
+			<xs:enumeration value="100 %"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:attributeGroup name="Rates">
+		<xs:attribute name="line-rate"   type="Rate"       use="required"/>
+		<xs:attribute name="branch-rate" type="Rate"       use="required"/>
+		<xs:attribute name="complexity"  type="Complexity" use="required"/>
+	</xs:attributeGroup>
+
+	<xs:element name="coverage">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="sources">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="source" type="xs:string" fixed="."/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="packages">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element ref="package"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="version"          type="Version"               use="required"/>
+			<xs:attribute name="timestamp"        type="Timestamp"             use="required"/>
+			<xs:attribute name="lines-valid"      type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="lines-covered"    type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="branches-valid"   type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="branches-covered" type="xs:nonNegativeInteger" use="required"/>
+			<xs:attributeGroup ref="Rates"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="package">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="classes">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element ref="class" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:token" use="required"/>
+			<xs:attributeGroup ref="Rates"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="class">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="methods">
+					<xs:complexType/>
+				</xs:element>
+				<xs:element name="lines">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element ref="line" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="name"     type="DesignUnit" use="required"/>
+			<xs:attribute name="filename" type="xs:string"  use="required"/>
+			<xs:attributeGroup ref="Rates"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="line">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="conditions" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="condition">
+								<xs:complexType>
+									<xs:attribute name="number"   type="xs:nonNegativeInteger" use="required" fixed="0"/>
+									<xs:attribute name="type"     type="xs:string"             use="required" fixed="jump"/>
+									<xs:attribute name="coverage" type="Percentage"            use="required"/>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="number"             type="xs:positiveInteger"    use="required"/>
+			<xs:attribute name="hits"               type="xs:nonNegativeInteger" use="required"/>
+			<xs:attribute name="branch"             type="Boolean"               use="required"/>
+			<xs:attribute name="condition-coverage" type="Percentage"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

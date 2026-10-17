@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="my.pack.OtherClassTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-08T10:41:52.405Z" hostname="dffa20ef8728" time="0.01">
+  <properties/>
+  <testcase name="testReturnThree" classname="my.pack.OtherClassTest" time="0.01"/>
+  <system-out><![CDATA[Output on STDOUT.
+]]></system-out>
+  <system-err><![CDATA[Output on STDERR.
+]]></system-err>
+</testsuite>

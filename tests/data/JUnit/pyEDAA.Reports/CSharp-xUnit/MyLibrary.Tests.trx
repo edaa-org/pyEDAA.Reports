@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="0da8d99b-7a14-4e6a-bb1d-2e7625ca5720" name="@dffa20ef8728 2026-10-08 11:09:27" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-08T11:09:27.5985716+00:00" queuing="2026-10-08T11:09:27.5985716+00:00" start="2026-10-08T11:09:26.1848289+00:00" finish="2026-10-08T11:09:27.7323723+00:00" />
+  <TestSettings name="default" id="c3964d2a-1f9d-4e7c-9f5d-9450e339aa63">
+    <Deployment runDeploymentRoot="_dffa20ef8728_2026-10-08_11_09_27" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="cbdfcaa1-1cea-4233-9139-5f3da9462114" testId="1de947dc-261b-bd9c-9a22-722b2250cb86" testName="MyLibrary.Tests.CounterTests.Increment" computerName="dffa20ef8728" duration="00:00:00.0010000" startTime="2026-10-08T11:09:27.5492786+00:00" endTime="2026-10-08T11:09:27.5506590+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cbdfcaa1-1cea-4233-9139-5f3da9462114">
+      <Output>
+        <StdOut>Counter value: 1</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c3924c3a-2cd9-49da-a8c8-0f22a92885d6" testId="beadd45d-be00-3bc1-59d6-e520d2e2a039" testName="MyLibrary.Tests.CalculatorTests.SumOfPositives" computerName="dffa20ef8728" duration="00:00:00.0010000" startTime="2026-10-08T11:09:27.5529138+00:00" endTime="2026-10-08T11:09:27.5544928+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c3924c3a-2cd9-49da-a8c8-0f22a92885d6" />
+    <UnitTestResult executionId="77372a3b-3ae5-4bc2-a83f-576c9668b0e1" testId="c227cb92-a240-849d-5ffd-de973891e007" testName="MyLibrary.Tests.CalculatorTests.Absolute(value: 3, expected: 3)" computerName="dffa20ef8728" duration="00:00:00.0010000" startTime="2026-10-08T11:09:27.5519766+00:00" endTime="2026-10-08T11:09:27.5522820+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="77372a3b-3ae5-4bc2-a83f-576c9668b0e1" />
+    <UnitTestResult executionId="238807ca-9aa5-4535-ade0-092c4f073339" testId="e4c2dc91-3fbe-de13-40ed-9b9620c92fa9" testName="MyLibrary.Tests.CalculatorTests.Add" computerName="dffa20ef8728" duration="00:00:00.0180000" startTime="2026-10-08T11:09:27.4919297+00:00" endTime="2026-10-08T11:09:27.5232451+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="238807ca-9aa5-4535-ade0-092c4f073339" />
+    <UnitTestResult executionId="9117d46e-3592-4793-be3d-1c27275f29d8" testId="9a7e197a-b7e6-920d-e62a-5139ca449ef0" testName="MyLibrary.Tests.CounterTests.Decrement" computerName="dffa20ef8728" duration="00:00:00.0180000" startTime="2026-10-08T11:09:27.4919250+00:00" endTime="2026-10-08T11:09:27.5232555+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9117d46e-3592-4793-be3d-1c27275f29d8" />
+    <UnitTestResult executionId="6b97586d-1a9f-4825-ac3c-9ae1703d6d10" testId="89a00d5f-ca3e-8c70-b3c5-169d1203c76e" testName="MyLibrary.Tests.CalculatorTests.Absolute(value: -3, expected: 3)" computerName="dffa20ef8728" duration="00:00:00.0010000" startTime="2026-10-08T11:09:27.5525257+00:00" endTime="2026-10-08T11:09:27.5525735+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6b97586d-1a9f-4825-ac3c-9ae1703d6d10" />
+    <UnitTestResult executionId="6044c36f-6692-48a9-9936-ac1dc47b9097" testId="953a543a-e019-aef8-a439-cf6635f64b22" testName="MyLibrary.Tests.CounterTests.IncrementAsync" computerName="dffa20ef8728" duration="00:00:00.0050000" startTime="2026-10-08T11:09:27.5312608+00:00" endTime="2026-10-08T11:09:27.5415433+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6044c36f-6692-48a9-9936-ac1dc47b9097" />
+    <UnitTestResult executionId="ec7c8efc-ed5d-4763-a69d-ff2a24a51224" testId="b5289173-50d1-7459-9804-b51e99ae01c1" testName="MyLibrary.Tests.CalculatorTests.Absolute(value: -4, expected: 5)" computerName="dffa20ef8728" duration="00:00:00.0040000" startTime="2026-10-08T11:09:27.5319686+00:00" endTime="2026-10-08T11:09:27.5513175+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ec7c8efc-ed5d-4763-a69d-ff2a24a51224">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Equal() Failure: Values differ
+Expected: 5
+Actual:   4</Message>
+          <StackTrace>   at MyLibrary.Tests.CalculatorTests.Absolute(Int32 value, Int32 expected) in /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs:line 25
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9783a038-be1a-4ab4-94d0-4abb2d034e0b" testId="d4ca1b19-d87e-977e-89b0-73698174c1e8" testName="MyLibrary.Tests.CalculatorTests.IsEven" computerName="dffa20ef8728" duration="00:00:00.0010000" startTime="2026-10-08T11:09:27.5582223+00:00" endTime="2026-10-08T11:09:27.5589228+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9783a038-be1a-4ab4-94d0-4abb2d034e0b">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.True() Failure
+Expected: True
+Actual:   False</Message>
+          <StackTrace>   at MyLibrary.Tests.CalculatorTests.IsEven() in /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs:line 13
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c71f6f91-16b0-4c12-8bce-f9a57e1b6e56" testId="be505468-ff10-06ac-54fb-52a94dd2fb01" testName="MyLibrary.Tests.CalculatorTests.DivideByZero" computerName="dffa20ef8728" duration="00:00:00.0010000" startTime="2026-10-08T11:09:27.5551839+00:00" endTime="2026-10-08T11:09:27.5559741+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c71f6f91-16b0-4c12-8bce-f9a57e1b6e56">
+      <Output>
+        <ErrorInfo>
+          <Message>System.DivideByZeroException : Attempted to divide by zero.</Message>
+          <StackTrace>   at MyLibrary.Calculator.Divide(Int32 dividend, Int32 divisor) in /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Calculator.cs:line 7
+   at MyLibrary.Tests.CalculatorTests.DivideByZero() in /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs:line 16
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5f74c2b6-a98d-454c-816f-4cc624280adb" testId="ed9f4a1a-9c23-882f-4938-1a4fc7d0516f" testName="MyLibrary.Tests.CalculatorTests.Multiply" computerName="dffa20ef8728" duration="00:00:00.0010000" startTime="2026-10-08T11:09:27.5570160+00:00" endTime="2026-10-08T11:09:27.5576951+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5f74c2b6-a98d-454c-816f-4cc624280adb">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiplication isn't implemented yet.</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="MyLibrary.Tests.CounterTests.Increment" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="1de947dc-261b-bd9c-9a22-722b2250cb86">
+      <Execution id="cbdfcaa1-1cea-4233-9139-5f3da9462114" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CounterTests" name="Increment" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CalculatorTests.DivideByZero" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="be505468-ff10-06ac-54fb-52a94dd2fb01">
+      <Execution id="c71f6f91-16b0-4c12-8bce-f9a57e1b6e56" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CalculatorTests" name="DivideByZero" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CounterTests.Decrement" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="9a7e197a-b7e6-920d-e62a-5139ca449ef0">
+      <Execution id="9117d46e-3592-4793-be3d-1c27275f29d8" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CounterTests" name="Decrement" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CounterTests.IncrementAsync" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="953a543a-e019-aef8-a439-cf6635f64b22">
+      <Execution id="6044c36f-6692-48a9-9936-ac1dc47b9097" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CounterTests" name="IncrementAsync" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CalculatorTests.SumOfPositives" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="beadd45d-be00-3bc1-59d6-e520d2e2a039">
+      <Execution id="c3924c3a-2cd9-49da-a8c8-0f22a92885d6" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CalculatorTests" name="SumOfPositives" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CalculatorTests.IsEven" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="d4ca1b19-d87e-977e-89b0-73698174c1e8">
+      <Execution id="9783a038-be1a-4ab4-94d0-4abb2d034e0b" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CalculatorTests" name="IsEven" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CalculatorTests.Absolute(value: 3, expected: 3)" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="c227cb92-a240-849d-5ffd-de973891e007">
+      <Execution id="77372a3b-3ae5-4bc2-a83f-576c9668b0e1" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CalculatorTests" name="Absolute" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CalculatorTests.Multiply" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="ed9f4a1a-9c23-882f-4938-1a4fc7d0516f">
+      <Execution id="5f74c2b6-a98d-454c-816f-4cc624280adb" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CalculatorTests" name="Multiply" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CalculatorTests.Absolute(value: -4, expected: 5)" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="b5289173-50d1-7459-9804-b51e99ae01c1">
+      <Execution id="ec7c8efc-ed5d-4763-a69d-ff2a24a51224" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CalculatorTests" name="Absolute" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CalculatorTests.Absolute(value: -3, expected: 3)" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="89a00d5f-ca3e-8c70-b3c5-169d1203c76e">
+      <Execution id="6b97586d-1a9f-4825-ac3c-9ae1703d6d10" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CalculatorTests" name="Absolute" />
+    </UnitTest>
+    <UnitTest name="MyLibrary.Tests.CalculatorTests.Add" storage="/home/runner/work/pyedaa.reports/pyedaa.reports/examples/csharp/xunit/test/mylibrary.tests/bin/debug/net10.0/mylibrary.tests.dll" id="e4c2dc91-3fbe-de13-40ed-9b9620c92fa9">
+      <Execution id="238807ca-9aa5-4535-ade0-092c4f073339" />
+      <TestMethod codeBase="/home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/bin/Debug/net10.0/MyLibrary.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="MyLibrary.Tests.CalculatorTests" name="Add" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="1de947dc-261b-bd9c-9a22-722b2250cb86" executionId="cbdfcaa1-1cea-4233-9139-5f3da9462114" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="beadd45d-be00-3bc1-59d6-e520d2e2a039" executionId="c3924c3a-2cd9-49da-a8c8-0f22a92885d6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c227cb92-a240-849d-5ffd-de973891e007" executionId="77372a3b-3ae5-4bc2-a83f-576c9668b0e1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e4c2dc91-3fbe-de13-40ed-9b9620c92fa9" executionId="238807ca-9aa5-4535-ade0-092c4f073339" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9a7e197a-b7e6-920d-e62a-5139ca449ef0" executionId="9117d46e-3592-4793-be3d-1c27275f29d8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="89a00d5f-ca3e-8c70-b3c5-169d1203c76e" executionId="6b97586d-1a9f-4825-ac3c-9ae1703d6d10" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="953a543a-e019-aef8-a439-cf6635f64b22" executionId="6044c36f-6692-48a9-9936-ac1dc47b9097" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b5289173-50d1-7459-9804-b51e99ae01c1" executionId="ec7c8efc-ed5d-4763-a69d-ff2a24a51224" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d4ca1b19-d87e-977e-89b0-73698174c1e8" executionId="9783a038-be1a-4ab4-94d0-4abb2d034e0b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="be505468-ff10-06ac-54fb-52a94dd2fb01" executionId="c71f6f91-16b0-4c12-8bce-f9a57e1b6e56" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ed9f4a1a-9c23-882f-4938-1a4fc7d0516f" executionId="5f74c2b6-a98d-454c-816f-4cc624280adb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="11" executed="10" passed="7" failed="3" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0+05679a7ab5 (64-bit .NET 10.0.12)
+[xUnit.net 00:00:00.16]   Discovering: MyLibrary.Tests
+[xUnit.net 00:00:00.35]   Discovered:  MyLibrary.Tests
+[xUnit.net 00:00:00.50]   Starting:    MyLibrary.Tests
+[xUnit.net 00:00:00.67]       Assert.Equal() Failure: Values differ
+[xUnit.net 00:00:00.67]       Expected: 5
+[xUnit.net 00:00:00.67]       Actual:   4
+[xUnit.net 00:00:00.67]       Stack Trace:
+[xUnit.net 00:00:00.67]         /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs(25,0): at MyLibrary.Tests.CalculatorTests.Absolute(Int32 value, Int32 expected)
+[xUnit.net 00:00:00.67]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.67]            at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.67]       System.DivideByZeroException : Attempted to divide by zero.
+[xUnit.net 00:00:00.67]       Stack Trace:
+[xUnit.net 00:00:00.67]         /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/src/MyLibrary/Calculator.cs(7,0): at MyLibrary.Calculator.Divide(Int32 dividend, Int32 divisor)
+[xUnit.net 00:00:00.67]         /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs(16,0): at MyLibrary.Tests.CalculatorTests.DivideByZero()
+[xUnit.net 00:00:00.67]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.67]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.68]       Multiplication isn't implemented yet.
+[xUnit.net 00:00:00.68]       Assert.True() Failure
+[xUnit.net 00:00:00.68]       Expected: True
+[xUnit.net 00:00:00.68]       Actual:   False
+[xUnit.net 00:00:00.68]       Stack Trace:
+[xUnit.net 00:00:00.68]         /home/runner/work/pyEDAA.Reports/pyEDAA.Reports/examples/CSharp/xUnit/test/MyLibrary.Tests/CalculatorTests.cs(13,0): at MyLibrary.Tests.CalculatorTests.IsEven()
+[xUnit.net 00:00:00.68]            at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+[xUnit.net 00:00:00.68]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.69]   Finished:    MyLibrary.Tests (ID = '1c041eee642c55a0eccc6aef877d6c7952a02f17a98c4bd0e3792528545a69dc')
+Test 'MyLibrary.Tests.CalculatorTests.Multiply' was skipped in the test run.
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="dffa20ef8728" outcome="Error" timestamp="2026-10-08T11:09:27.5572199+00:00">
+        <Text>[xUnit.net 00:00:00.67]     MyLibrary.Tests.CalculatorTests.Absolute(value: -4, expected: 5) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="dffa20ef8728" outcome="Error" timestamp="2026-10-08T11:09:27.5636576+00:00">
+        <Text>[xUnit.net 00:00:00.67]     MyLibrary.Tests.CalculatorTests.DivideByZero [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="dffa20ef8728" outcome="Warning" timestamp="2026-10-08T11:09:27.6215565+00:00">
+        <Text>[xUnit.net 00:00:00.68]     MyLibrary.Tests.CalculatorTests.Multiply [SKIP]</Text>
+      </RunInfo>
+      <RunInfo computerName="dffa20ef8728" outcome="Error" timestamp="2026-10-08T11:09:27.6216083+00:00">
+        <Text>[xUnit.net 00:00:00.68]     MyLibrary.Tests.CalculatorTests.IsEven [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+    <CollectorDataEntries>
+      <Collector agentName="dffa20ef8728" uri="datacollector://microsoft/CoverletCodeCoverage/1.0" collectorDisplayName="XPlat code coverage">
+        <UriAttachments>
+          <UriAttachment>
+            <A href="dffa20ef8728/coverage.cobertura.xml"></A>
+          </UriAttachment>
+          <UriAttachment>
+            <A href="dffa20ef8728/coverage.info"></A>
+          </UriAttachment>
+          <UriAttachment>
+            <A href="dffa20ef8728/coverage.opencover.xml"></A>
+          </UriAttachment>
+          <UriAttachment>
+            <A href="dffa20ef8728/coverage.json"></A>
+          </UriAttachment>
+        </UriAttachments>
+      </Collector>
+    </CollectorDataEntries>
+  </ResultSummary>
+</TestRun>

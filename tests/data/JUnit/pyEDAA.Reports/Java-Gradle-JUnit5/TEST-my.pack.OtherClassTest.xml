@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="my.pack.OtherClassTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-08T10:56:04.350Z" hostname="dffa20ef8728" time="0.006">
+  <properties/>
+  <testcase name="testReturnThree()" classname="my.pack.OtherClassTest" time="0.003">
+    <properties>
+      <property name="stdout" value="Output on STDOUT.&#10;"/>
+      <property name="stderr" value="Output on STDERR.&#10;"/>
+    </properties>
+  </testcase>
+  <system-out><![CDATA[Output on STDOUT.
+]]></system-out>
+  <system-err><![CDATA[Output on STDERR.
+]]></system-err>
+</testsuite>

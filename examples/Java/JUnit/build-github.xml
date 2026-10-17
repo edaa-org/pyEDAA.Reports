@@ -12,18 +12,27 @@
 		<mkdir dir="${build}" />
 	</target>
 
+	<property name="lib" location="${build}/lib" />
+	<property name="maven" value="https://repo1.maven.org/maven2" />
+
+	<target name="resolve" depends="init" description="download JUnit 4 and Hamcrest from Maven Central">
+		<mkdir dir="${lib}" />
+		<get src="${maven}/junit/junit/4.13.2/junit-4.13.2.jar" dest="${lib}" skipexisting="true" />
+		<get src="${maven}/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar" dest="${lib}" skipexisting="true" />
+		<checksum file="${lib}/junit-4.13.2.jar" algorithm="SHA-256" property="8e495b634469d64fb8acfa3495a065cbacc8a0fff55ce1e31007be4c16dc57d3" verifyproperty="junit.ok" />
+		<checksum file="${lib}/hamcrest-core-1.3.jar" algorithm="SHA-256" property="66fdef91e9739348df7a096aa384a5685f4e875584cce89386a7a47251c4d8e9" verifyproperty="hamcrest.ok" />
+		<fail message="Checksum mismatch of a downloaded JAR file.">
+			<condition>
+				<not><and><istrue value="${junit.ok}" /><istrue value="${hamcrest.ok}" /></and></not>
+			</condition>
+		</fail>
+	</target>
+
 	<path id="path.junit">
-		<fileset dir="/usr/share/">
-			<include name="gradle-*/lib/junit-*.jar"/>
-			<include name="gradle-*/lib/hamcrest-core-*.jar"/>
-		</fileset>
+		<fileset dir="${lib}" includes="*.jar" erroronmissingdir="false" />
 	</path>
 
-	<pathconvert property="path.junit.str" refid="path.junit"/>
-
-	<echo>JUnit Classpath is ${path.junit.str}</echo>
-
-	<target name="compile" depends="init" description="compile the source">
+	<target name="compile" depends="resolve" description="compile the source">
 		<javac destdir="${build}" includeantruntime="false">
 			<src path="${src}" />
 			<src path="${test}" />
