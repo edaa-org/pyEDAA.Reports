@@ -185,6 +185,16 @@ class Element(Generic[ParentType], metaclass=ExtendedType, slots=True):
 		:returns: A generator of the elements below this one.
 		"""
 
+	def _SetRoot(self, root: Nullable[Report]) -> None:
+		"""
+		Set the report's root of the element.
+
+		A class containing elements overrides it, to set the root of those too.
+
+		:param root: The report's root, or ``None`` while the element isn't part of a report.
+		"""
+		self._root = root
+
 
 @export
 class Base(Element[ParentType]):
@@ -911,6 +921,16 @@ class MCDCRecord(Base["File | Function"]):
 		"""
 		yield from self._testVectors
 
+	def _SetRoot(self, root: Nullable[Report]) -> None:
+		"""
+		Set the report's root of the MC/DC record, and of its test vectors.
+
+		:param root: The report's root, or ``None`` while the element isn't part of a report.
+		"""
+		self._root = root
+		for testVector in self._testVectors:
+			testVector._SetRoot(root)
+
 
 @export
 class Counters(Element["Summary"]):
@@ -1195,6 +1215,17 @@ class Summary(Element["File | Report"]):
 		for counters in (self._lines, self._functions, self._instantiations, self._regions, self._branches, self._mcdc):
 			if counters is not None:
 				yield counters
+
+	def _SetRoot(self, root: Nullable[Report]) -> None:
+		"""
+		Set the report's root of the summary, and of its counters.
+
+		:param root: The report's root, or ``None`` while the element isn't part of a report.
+		"""
+		self._root = root
+		for counters in (self._lines, self._functions, self._instantiations, self._regions, self._branches, self._mcdc):
+			if counters is not None:
+				counters._SetRoot(root)
 
 
 _Summary = Summary
@@ -1552,6 +1583,16 @@ class Expansion(Element["File"]):
 		yield from self._targetRegions
 		yield from self._branches
 
+	def _SetRoot(self, root: Nullable[Report]) -> None:
+		"""
+		Set the report's root of the expansion, and of its source region, target regions and branch regions.
+
+		:param root: The report's root, or ``None`` while the element isn't part of a report.
+		"""
+		self._root = root
+		for region in (self._sourceRegion, *self._targetRegions, *self._branches):
+			region._SetRoot(root)
+
 
 @export
 class File(Element["Report"]):
@@ -1655,16 +1696,12 @@ class File(Element["Report"]):
 					raise ValueError(f"Parameter '{name}' contains an element of another element.")
 
 				element._parent = self
-				element._root =   self._root
-				for below in element.IterateElements():
-					below._root = self._root
+				element._SetRoot(self._root)
 
 				target.append(element)
 
 		summary._parent = self
-		summary._root =   self._root
-		for counters in summary.IterateElements():
-			counters._root = self._root
+		summary._SetRoot(self._root)
 
 		if parent is not None:
 			parent._files[path] = self
@@ -1754,6 +1791,16 @@ class File(Element["Report"]):
 		for element in (*self._segments, *self._branches, *self._mcdcRecords, *self._expansions, self._summary):
 			yield element
 			yield from element.IterateElements()
+
+	def _SetRoot(self, root: Nullable[Report]) -> None:
+		"""
+		Set the report's root of the file, and of its segments, branch regions, MC/DC records, expansions and summary.
+
+		:param root: The report's root, or ``None`` while the element isn't part of a report.
+		"""
+		self._root = root
+		for element in (*self._segments, *self._branches, *self._mcdcRecords, *self._expansions, self._summary):
+			element._SetRoot(root)
 
 
 @export
@@ -1886,9 +1933,7 @@ class Function(Element["Report"]):
 					raise ex
 
 				element._parent = self
-				element._root =   self._root
-				for below in element.IterateElements():
-					below._root = self._root
+				element._SetRoot(self._root)
 
 				target.append(element)
 
@@ -2012,6 +2057,16 @@ class Function(Element["Report"]):
 			yield element
 			yield from element.IterateElements()
 
+	def _SetRoot(self, root: Nullable[Report]) -> None:
+		"""
+		Set the report's root of the function, and of its regions, branch regions and MC/DC records.
+
+		:param root: The report's root, or ``None`` while the element isn't part of a report.
+		"""
+		self._root = root
+		for element in (*self._regions, *self._branches, *self._mcdcRecords):
+			element._SetRoot(root)
+
 
 @export
 class Report(metaclass=ExtendedType, mixin=True):
@@ -2090,9 +2145,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 					raise ex
 
 				file._parent = self
-				file._root =   self
-				for element in file.IterateElements():
-					element._root = self
+				file._SetRoot(self)
 
 				self._files[file._path] = file
 
@@ -2111,17 +2164,13 @@ class Report(metaclass=ExtendedType, mixin=True):
 					raise ValueError(f"Parameter 'functions' contains a function of another report.")
 
 				function._parent = self
-				function._root =   self
-				for element in function.IterateElements():
-					element._root = self
+				function._SetRoot(self)
 
 				self._functions.append(function)
 
 		if totals is not None:
 			totals._parent = self
-			totals._root =   self
-			for counters in totals.IterateElements():
-				counters._root = self
+			totals._SetRoot(self)
 
 	@readonly
 	def Version(self) -> Nullable[SemanticVersion]:
@@ -2289,9 +2338,7 @@ class Document(cc_Document, Report):
 			self._totals =    Summary.Parse(data["totals"])
 
 			self._totals._parent = self
-			self._totals._root =   self
-			for counters in self._totals.IterateElements():
-				counters._root = self
+			self._totals._SetRoot(self)
 
 			for record in data["files"]:
 				File.Parse(record, parent=self)

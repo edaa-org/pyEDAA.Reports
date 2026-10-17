@@ -424,6 +424,22 @@ class Tree(Testcase):
 		self.assertEqual((function, document, file, document), (region.Parent, region.Root, segment.Parent, segment.Root))
 		self.assertIs(document, document.Totals.Functions.Root)
 
+	def test_BottomUp_Nested(self) -> None:
+		"""Joining the report sets the root of the elements two levels below a file or function, too."""
+		filePaths =  [Path("/project/src/Statistics.c"), Path("/project/include/Statistics.h")]
+		testVector = MCDCTestVector([True], True, True)
+		record =     MCDCRecord(9, 7, 9, 22, 0, 0, RegionKind.MCDCDecision, [True], testVectors=[testVector])
+		function =   Function("Square", 2, [], filePaths[:1], mcdcRecords=[record])
+		target =     Region(6, 30, 8, 2, 3, 1, 0, RegionKind.Code)
+		expansion =  Expansion(filePaths, Region(20, 9, 20, 20, 2, 0, 1, RegionKind.Expansion), [target])
+		file =       File(filePaths[0], _summary(), expansions=[expansion])
+		self.assertTrue(all(element.Root is None for element in (testVector, target, file.Summary.Lines)))
+
+		document = Document(Path("coverage.json"), files=[file], functions=[function])
+		self.assertTrue(all(element.Root is document for element in (
+			record, testVector, expansion, expansion.SourceRegion, target, file.Summary, file.Summary.Lines
+		)))
+
 	def test_TopDown(self) -> None:
 		"""An element created with a parent is added to the parent's collection, and takes the parent's root."""
 		document = Document(Path("coverage.json"))
