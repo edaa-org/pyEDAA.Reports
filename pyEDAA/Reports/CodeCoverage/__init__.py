@@ -74,7 +74,7 @@ from __future__            import annotations
 from datetime              import timedelta
 from enum                  import Enum
 from pathlib               import Path
-from typing                import ClassVar, Generator, Iterable, Optional as Nullable
+from typing                import Callable, ClassVar, Generator, Iterable, Optional as Nullable
 
 from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
@@ -173,14 +173,6 @@ class Base(metaclass=ExtendedType, slots=True):
 		:returns: The root, or ``None`` while the element isn't part of a report.
 		"""
 		return self._root
-
-	@abstractmethod
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate every element below this one, depth-first.
-
-		:returns: A generator of the elements below this one.
-		"""
 
 	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
 		"""
@@ -550,16 +542,6 @@ class Directory(BaseWithPath):
 		else:
 			self._files[element._name] = element
 
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the directories and files in this directory, each followed by the elements below it.
-
-		:returns: A generator of the elements below this directory.
-		"""
-		for child in (*self._directories.values(), *self._files.values()):
-			yield child
-			yield from child.IterateElements()
-
 	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
 		"""
 		Set the report's root of this directory, and of the directories and files in it.
@@ -642,17 +624,27 @@ class Directory(BaseWithPath):
 
 		return file
 
-	def IterateFiles(self) -> Generator[File, None, None]:
+	def IterateFiles(self, predicate: Nullable[Callable[[File], bool]] = None) -> Generator[File, None, None]:
 		"""
-		Iterate the source files in this directory and below, sorted by name, a directory's files before its directories'.
+		Iterate all or selected source files in this directory and below.
 
-		:returns: A generator of the files.
+		A directory's files come before its directories' files, each in the order they were added. If parameter
+		``predicate`` is not None, the given filter function is used to skip files in the generator.
+
+		:param predicate: Optional, filter function accepting any file and returning a boolean. Default: ``None``.
+		:returns:         A generator of the files.
 		"""
-		for name in sorted(self._files):
-			yield self._files[name]
+		if predicate is None:
+			yield from self._files.values()
+			for directory in self._directories.values():
+				yield from directory.IterateFiles()
+		else:
+			for file in self._files.values():
+				if predicate(file):
+					yield file
 
-		for name in sorted(self._directories):
-			yield from self._directories[name].IterateFiles()
+			for directory in self._directories.values():
+				yield from directory.IterateFiles(predicate)
 
 	def Aggregate(self) -> None:
 		"""
@@ -742,17 +734,6 @@ class CoverageSummary(Directory):
 		else:
 			self._units[element._name] = element
 
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the elements of the physical hierarchy, then those of the logical hierarchy.
-
-		:returns: A generator of every element below the report's root.
-		"""
-		yield from super().IterateElements()
-		for unit in self._units.values():
-			yield unit
-			yield from unit.IterateElements()
-
 	@readonly
 	def Path(self) -> Path:
 		"""
@@ -785,14 +766,18 @@ class CoverageSummary(Directory):
 		"""
 		return self._units
 
-	def IterateUnits(self) -> Generator[Unit, None, None]:
+	def IterateUnits(self, predicate: Nullable[Callable[[Unit], bool]] = None) -> Generator[Unit, None, None]:
 		"""
-		Iterate the units of the logical hierarchy, a unit before its units, each level sorted by name.
+		Iterate all or selected units of the logical hierarchy.
 
-		:returns: A generator of the units.
+		A unit comes before its units, each level in the order the units were added. If parameter ``predicate`` is not None,
+		the given filter function is used to skip units in the generator. A skipped unit's units are still iterated.
+
+		:param predicate: Optional, filter function accepting any unit and returning a boolean. Default: ``None``.
+		:returns:         A generator of the units.
 		"""
-		for name in sorted(self._units):
-			yield from self._units[name].IterateUnits()
+		for unit in self._units.values():
+			yield from unit.IterateUnits(predicate)
 
 	def Aggregate(self) -> None:
 		"""
@@ -895,16 +880,6 @@ class File(BaseWithPath):
 
 		if lineNumber > self._lastLineNumber:
 			self._lastLineNumber = lineNumber
-
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the lines of this file, each followed by its branches.
-
-		:returns: A generator of the elements below this file.
-		"""
-		for line in self.IterateLines():
-			yield line
-			yield from line.IterateElements()
 
 	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
 		"""
@@ -1127,14 +1102,6 @@ class Line(BaseWithStatus):
 		"""
 		self._branches.append(branch)
 
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the branches of this line.
-
-		:returns: A generator of the branches.
-		"""
-		yield from self._branches
-
 	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
 		"""
 		Set the report's root of this line, and of its branches.
@@ -1238,14 +1205,6 @@ class Branch(BaseWithStatus):
 
 		if parent is not None:
 			parent._AddElement(self)
-
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the elements below this branch: none, a branch is a leaf.
-
-		:returns: An empty generator.
-		"""
-		yield from ()
 
 	@readonly
 	def Target(self) -> Nullable[Line]:
@@ -1376,16 +1335,6 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 
 		self._units[unit._name] = unit
 
-	def IterateElements(self) -> Generator[Base, None, None]:
-		"""
-		Iterate the units this unit contains, each followed by the units below it.
-
-		:returns: A generator of the units below this one.
-		"""
-		for unit in self._units.values():
-			yield unit
-			yield from unit.IterateElements()
-
 	def _SetRoot(self, root: Nullable[CoverageSummary]) -> None:
 		"""
 		Set the report's root of this unit, and of the units it contains.
@@ -1465,15 +1414,27 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		if self._file is not None and self._startLine is not None and self._endLine is not None:
 			yield from self._file.IterateLines(self._startLine, self._endLine)
 
-	def IterateUnits(self) -> Generator[Unit, None, None]:
+	def IterateUnits(self, predicate: Nullable[Callable[[Unit], bool]] = None) -> Generator[Unit, None, None]:
 		"""
-		Iterate this unit, then the units it contains, each level sorted by name.
+		Iterate this unit and the units it contains, all or selected ones.
 
-		:returns: A generator of the units.
+		This unit comes first, then the units it contains, each level in the order the units were added. If parameter
+		``predicate`` is not None, the given filter function is used to skip units in the generator. A skipped unit's units
+		are still iterated.
+
+		:param predicate: Optional, filter function accepting any unit and returning a boolean. Default: ``None``.
+		:returns:         A generator of the units.
 		"""
-		yield self
-		for name in sorted(self._units):
-			yield from self._units[name].IterateUnits()
+		if predicate is None:
+			yield self
+			for unit in self._units.values():
+				yield from unit.IterateUnits()
+		else:
+			if predicate(self):
+				yield self
+
+			for unit in self._units.values():
+				yield from unit.IterateUnits(predicate)
 
 	def Aggregate(self) -> None:
 		"""

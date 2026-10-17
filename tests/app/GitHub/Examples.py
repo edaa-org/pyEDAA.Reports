@@ -1155,8 +1155,8 @@ class VHDLGHDL(TestCase):
 
 	def test_Runs(self) -> None:
 		for run, expected in (
-			("Count", [("src/Counter.vhdl", 6, 5), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 13)]),
-			("Reset", [("src/Counter.vhdl", 6, 6), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 12)])
+			("Count", [("tb/Counter_tb.vhdl", 15, 13), ("src/Counter.vhdl", 6, 5), ("src/Utilities/Functions.vhdl", 6, 5)]),
+			("Reset", [("tb/Counter_tb.vhdl", 15, 12), ("src/Counter.vhdl", 6, 6), ("src/Utilities/Functions.vhdl", 6, 5)])
 		):
 			with self.subTest(run=run):
 				report = GHDLDocument(Path(f"tests/data/CodeCoverage/VHDL-GHDL/coverage-{run}.json"), analyzeAndConvert=True)
@@ -1177,7 +1177,7 @@ class VHDLGHDL(TestCase):
 
 		self.assertEqual((27, 25), (summary.TotalLines, summary.CoveredLines))
 		self.assertEqual(
-			[("src/Counter.vhdl", 6, 6), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 14)],
+			[("tb/Counter_tb.vhdl", 15, 14), ("src/Counter.vhdl", 6, 6), ("src/Utilities/Functions.vhdl", 6, 5)],
 			[(file.Path.as_posix(), file.TotalLines, file.CoveredLines) for file in summary.IterateFiles()]
 		)
 

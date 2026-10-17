@@ -221,6 +221,10 @@ class Hierarchy(Testcase):
 		self.assertEqual(
 			["z.c", "src/a.c", "src/c.c", "src/b/x.c"], [file.Path.as_posix() for file in summary.IterateFiles()]
 		)
+		self.assertEqual(
+			["src/a.c", "src/b/x.c"],
+			[file.Path.as_posix() for file in summary.IterateFiles(lambda file: file.Name in ("a.c", "x.c"))]
+		)
 		self.assertEqual(4, summary.FileCount)
 
 	def test_Aggregate(self) -> None:
@@ -271,6 +275,8 @@ class Units(Testcase):
 
 		self.assertEqual("src.a.Shape.Area", method.QualifiedName)
 		self.assertEqual([package, module, klass, method, function], list(summary.IterateUnits()))
+		self.assertEqual([klass, method], list(summary.IterateUnits(lambda unit: unit.StartLine is not None)))
+		self.assertEqual([klass, method], list(module.IterateUnits(lambda unit: unit.StartLine is not None)))
 		self.assertEqual([module, klass, method, function], fileA.Units)
 		self.assertEqual(
 			(lines[2], lines[3], 4, Covered), (method.StartLine, method.EndLine, method.CoverageCount, method.Status)

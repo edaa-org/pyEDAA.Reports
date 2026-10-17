@@ -466,7 +466,7 @@ class Conversion(Testcase):
 		"""The computed counters agree with gcov's own summary, except for the lines of a template."""
 		summary = Document(STREAM, analyzeAndConvert=True).ToCoverageSummary()
 
-		self.assertEqual(["Main.cpp", "Statistics.c", "Containers/Stack.hpp"], [
+		self.assertEqual(["Statistics.c", "Main.cpp", "Containers/Stack.hpp"], [
 			file.Path.as_posix() for file in summary.IterateFiles()
 		])
 		# gcov: 'Lines executed:100.00% of 20' - it counts the 2 lines of the template once per instantiation

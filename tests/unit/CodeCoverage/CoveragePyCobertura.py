@@ -248,7 +248,7 @@ class Conversion(Testcase):
 		summary = Document(REPORT, analyzeAndConvert=True).ToCoverageSummary()
 
 		units = {unit.QualifiedName: unit for unit in summary.IterateUnits()}
-		self.assertEqual(["Shapes", "Units", "Units.Length", "Units.__init__", "__init__"], list(units))
+		self.assertEqual(["Shapes", "__init__", "Units", "Units.Length", "Units.__init__"], list(units))
 		for name, unitClass in (("Shapes", Module), ("Units", Package), ("Units.Length", Module)):
 			with self.subTest(name=name):
 				self.assertIsInstance(units[name], unitClass)

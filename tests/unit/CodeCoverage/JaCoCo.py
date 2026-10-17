@@ -503,7 +503,7 @@ class Conversion(Testcase):
 	def test_Units(self) -> None:
 		units = _units(CLI)
 
-		self.assertEqual(["Main", "shapes", "util"], [name for name in units if "." not in name])
+		self.assertEqual(["Main", "util", "shapes"], [name for name in units if "." not in name])
 		for name, unitClass in (
 			("shapes", cc_Package), ("shapes.Circle", cc_Class), ("shapes.Circle$Unit", cc_Class),
 			("shapes.Circle.<init>(D)V", cc_Method), ("shapes.Circle.lambda$area$0(D)D", cc_Method), ("Main", cc_Class)
@@ -562,9 +562,13 @@ class Conversion(Testcase):
 		withGroups = Document(GROUPS, analyzeAndConvert=True).ToCoverageSummary()
 		without =    Document(CLI, analyzeAndConvert=True).ToCoverageSummary()
 
-		self.assertEqual([file.Path for file in without.IterateFiles()], [file.Path for file in withGroups.IterateFiles()])
-		self.assertEqual([unit.QualifiedName for unit in without.IterateUnits()],
-		                 [unit.QualifiedName for unit in withGroups.IterateUnits()])
+		self.assertEqual(
+			sorted(file.Path for file in without.IterateFiles()), sorted(file.Path for file in withGroups.IterateFiles())
+		)
+		self.assertEqual(
+			sorted(unit.QualifiedName for unit in without.IterateUnits()),
+			sorted(unit.QualifiedName for unit in withGroups.IterateUnits())
+		)
 
 	def test_Name(self) -> None:
 		"""The common model's root is named after the report, or after the file, if the report's name is empty."""
