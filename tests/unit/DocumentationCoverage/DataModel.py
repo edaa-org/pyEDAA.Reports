@@ -243,6 +243,7 @@ class ItemHierarchy(Testcase):
 		package.Parent = report
 
 		self.assertIs(report, package.Parent)
+		self.assertIs(report, package.Root)
 		self.assertIs(report, module.Root)
 		self.assertEqual([package], report.Items)
 
@@ -278,6 +279,25 @@ class Files(Testcase):
 		self.assertEqual(Path("Length.py"), file.Name)
 		self.assertEqual("<File Units/Length.py: 0 items, 100.0%>", repr(file))
 		self.assertEqual("<Directory Units: 1 files, 100.0%>", repr(report.Directories[Path("Units")]))
+
+	def test_ParentSetter(self) -> None:
+		report =   DocumentationReport(Path("myPackage"))
+		units =    Directory(Path("Units"))
+		length =   units.GetOrAddFile(Path("Length.py"))
+		imperial = units.GetOrAddFile(Path("Imperial/Mile.py"))
+
+		self.assertIsNone(length.Root)
+		self.assertIsNone(imperial.Root)
+
+		units.Parent = report
+
+		self.assertIs(report, units.Parent)
+		self.assertIs(units, report.Directories[Path("Units")])
+		self.assertIs(report, units.Root)
+		self.assertIs(report, units.Directories[Path("Imperial")].Root)
+		self.assertIs(report, length.Root)
+		self.assertIs(report, imperial.Root)
+		self.assertEqual(Path("Units/Imperial/Mile.py"), imperial.Path)
 
 	def test_IterateFiles(self) -> None:
 		report = DocumentationReport(Path("myPackage"))
