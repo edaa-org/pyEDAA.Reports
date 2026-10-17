@@ -385,28 +385,40 @@ class Tree(Testcase):
 	"""Every element knows the element containing it, and the report's root."""
 
 	def test_Parsed(self) -> None:
+		"""Each collection of a parsed report holds elements of its own type, and each element has the document as root."""
 		document = Document(Path("tests/data/CodeCoverage/LLVM/coverage-3.1.0.json"), analyzeAndConvert=True)
 
 		files =      list(document.Files.values())
+		functions =  document.Functions
 		expansions = [expansion for file in files for expansion in file.Expansions]
 		summaries =  [document.Totals, *(file.Summary for file in files)]
-		records =    [record for element in (*files, *document.Functions) for record in element.MCDCRecords]
-		elements =   [
-			*files, *document.Functions, *expansions, *summaries, *records,
-			*(segment for file in files for segment in file.Segments),
-			*(branch for element in (*files, *document.Functions, *expansions) for branch in element.Branches),
-			*(region for function in document.Functions for region in function.Regions),
-			*(region for expansion in expansions for region in (expansion.SourceRegion, *expansion.TargetRegions)),
-			*(testVector for record in records for testVector in record.TestVectors),
-			*(counters for summary in summaries for counters in (
-				summary.Lines, summary.Functions, summary.Instantiations, summary.Regions, summary.Branches, summary.MCDC
-			) if counters is not None)
-		]
-		self.assertEqual(
-			{BranchRegion, Counters, Expansion, File, Function, MCDCRecord, MCDCTestVector, Region, Segment, Summary},
-			{type(element) for element in elements}
-		)
-		self.assertTrue(all(element.Root is document for element in elements))
+		records =    [record for element in (*files, *functions) for record in element.MCDCRecords]
+		for name, elementType, elements in (
+			("files",          File,           files),
+			("functions",      Function,       functions),
+			("expansions",     Expansion,      expansions),
+			("summaries",      Summary,        summaries),
+			("MC/DC records",  MCDCRecord,     records),
+			("segments",       Segment,        [segment for file in files for segment in file.Segments]),
+			("branch regions", BranchRegion,   [
+				branch for element in (*files, *functions, *expansions) for branch in element.Branches
+			]),
+			("regions",        Region,         [
+				*(region for function in functions for region in function.Regions),
+				*(region for expansion in expansions for region in (expansion.SourceRegion, *expansion.TargetRegions))
+			]),
+			("test vectors",   MCDCTestVector, [testVector for record in records for testVector in record.TestVectors]),
+			("counters",       Counters,       [
+				counters for summary in summaries for counters in (
+					summary.Lines, summary.Functions, summary.Instantiations, summary.Regions, summary.Branches, summary.MCDC
+				) if counters is not None
+			])
+		):
+			with self.subTest(elements=name):
+				self.assertGreater(len(elements), 0)
+				for element in elements:
+					self.assertIsInstance(element, elementType)
+					self.assertIs(document, element.Root)
 
 		file = document.Files[Path("/project/src/Statistics.c")]
 		expansion = file.Expansions[0]
