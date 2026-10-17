@@ -499,8 +499,8 @@ class Writer(Testcase):
 				root.TotalLines, root.CoveredLines, root.TotalBranches, root.CoveredBranches, root.ExcludedLines
 			))
 		self.assertEqual(
-			["myPackage", "myPackage.Shapes", "myPackage.Shapes.Distance", "myPackage.Shapes.Circle",
-			 "myPackage.Shapes.Circle.Area", "top.py", "top.py.main"],
+			["top.py", "top.py.main", "myPackage", "myPackage.Shapes", "myPackage.Shapes.Distance", "myPackage.Shapes.Circle",
+			 "myPackage.Shapes.Circle.Area"],
 			[unit.QualifiedName for unit in written.IterateUnits()]
 		)
 

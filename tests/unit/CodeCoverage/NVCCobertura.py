@@ -244,7 +244,7 @@ class Conversion(Testcase):
 		self.assertEqual((3, 2, 2), (summary.TotalLines, summary.TotalBranches, summary.CoveredBranches))
 
 		units = {unit.QualifiedName: unit for unit in summary.IterateUnits()}
-		self.assertEqual(["WORK", "WORK.UNIT", "WORK.UNIT.ONE", "WORK.UNIT.TWO"], list(units))
+		self.assertEqual(["WORK", "WORK.UNIT", "WORK.UNIT.TWO", "WORK.UNIT.ONE"], list(units))
 		self.assertEqual(
 			(5, 14), (units["WORK.UNIT.TWO"].StartLine.LineNumber, units["WORK.UNIT.TWO"].EndLine.LineNumber)
 		)

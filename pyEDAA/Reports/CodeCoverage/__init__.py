@@ -628,25 +628,23 @@ class Directory(BaseWithPath):
 		"""
 		Iterate all or selected source files in this directory and below.
 
-		The files are sorted by name, a directory's files before its directories'. If parameter ``predicate`` is not None,
-		the given filter function is used to skip files in the generator.
+		A directory's files come before its directories' files, each in the order they were added. If parameter
+		``predicate`` is not None, the given filter function is used to skip files in the generator.
 
 		:param predicate: Optional, filter function accepting any file and returning a boolean. Default: ``None``.
 		:returns:         A generator of the files.
 		"""
 		if predicate is None:
-			for name in sorted(self._files):
-				yield self._files[name]
-
-			for name in sorted(self._directories):
-				yield from self._directories[name].IterateFiles()
+			yield from self._files.values()
+			for directory in self._directories.values():
+				yield from directory.IterateFiles()
 		else:
-			for name in sorted(self._files):
-				if predicate(file := self._files[name]):
+			for file in self._files.values():
+				if predicate(file):
 					yield file
 
-			for name in sorted(self._directories):
-				yield from self._directories[name].IterateFiles(predicate)
+			for directory in self._directories.values():
+				yield from directory.IterateFiles(predicate)
 
 	def Aggregate(self) -> None:
 		"""
@@ -772,14 +770,14 @@ class CoverageSummary(Directory):
 		"""
 		Iterate all or selected units of the logical hierarchy.
 
-		A unit comes before its units, each level sorted by name. If parameter ``predicate`` is not None, the given filter
-		function is used to skip units in the generator. A skipped unit's units are still iterated.
+		A unit comes before its units, each level in the order the units were added. If parameter ``predicate`` is not None,
+		the given filter function is used to skip units in the generator. A skipped unit's units are still iterated.
 
 		:param predicate: Optional, filter function accepting any unit and returning a boolean. Default: ``None``.
 		:returns:         A generator of the units.
 		"""
-		for name in sorted(self._units):
-			yield from self._units[name].IterateUnits(predicate)
+		for unit in self._units.values():
+			yield from unit.IterateUnits(predicate)
 
 	def Aggregate(self) -> None:
 		"""
@@ -1420,22 +1418,23 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		"""
 		Iterate this unit and the units it contains, all or selected ones.
 
-		This unit comes first, then the units it contains, each level sorted by name. If parameter ``predicate`` is not
-		None, the given filter function is used to skip units in the generator. A skipped unit's units are still iterated.
+		This unit comes first, then the units it contains, each level in the order the units were added. If parameter
+		``predicate`` is not None, the given filter function is used to skip units in the generator. A skipped unit's units
+		are still iterated.
 
 		:param predicate: Optional, filter function accepting any unit and returning a boolean. Default: ``None``.
 		:returns:         A generator of the units.
 		"""
 		if predicate is None:
 			yield self
-			for name in sorted(self._units):
-				yield from self._units[name].IterateUnits()
+			for unit in self._units.values():
+				yield from unit.IterateUnits()
 		else:
 			if predicate(self):
 				yield self
 
-			for name in sorted(self._units):
-				yield from self._units[name].IterateUnits(predicate)
+			for unit in self._units.values():
+				yield from unit.IterateUnits(predicate)
 
 	def Aggregate(self) -> None:
 		"""

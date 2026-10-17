@@ -304,7 +304,7 @@ class Conversion(Testcase):
 			summary.TotalBranches
 		))
 		self.assertEqual(
-			[("src/Counter.vhdl", 6, 5), ("src/Utilities/Functions.vhdl", 6, 5), ("tb/Counter_tb.vhdl", 15, 13)],
+			[("tb/Counter_tb.vhdl", 15, 13), ("src/Counter.vhdl", 6, 5), ("src/Utilities/Functions.vhdl", 6, 5)],
 			[(file.Path.as_posix(), file.TotalLines, file.CoveredLines) for file in summary.IterateFiles()]
 		)
 

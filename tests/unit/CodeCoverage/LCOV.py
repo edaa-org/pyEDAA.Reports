@@ -457,7 +457,7 @@ class Conversion(Testcase):
 
 		self.assertEqual((11, 9, 2), (summary.TotalLines, summary.CoveredLines, summary.FileCount))
 		self.assertEqual(
-			["Classify.vhdl", "Classify.vhdl.file", "Testbench.vhdl", "Testbench.vhdl.file"],
+			["Testbench.vhdl", "Testbench.vhdl.file", "Classify.vhdl", "Classify.vhdl.file"],
 			[unit.QualifiedName for unit in summary.IterateUnits()]
 		)
 		classify = summary.Units["Classify.vhdl"]
@@ -529,8 +529,8 @@ class Conversion(Testcase):
 		summary = Document(GCC, analyzeAndConvert=True).ToCoverageSummary()
 
 		self.assertEqual(
-			["Clamp.h", "Clamp.h.Clamp", "Classify.c", "Classify.c.InRange", "Classify.c.Sign", "Classify.c.Twice",
-			 "Classify.c.main"],
+			["Clamp.h", "Clamp.h.Clamp", "Classify.c", "Classify.c.InRange", "Classify.c.Twice", "Classify.c.main",
+			 "Classify.c.Sign"],
 			[unit.QualifiedName for unit in summary.IterateUnits()]
 		)
 		classify = summary.Units["Classify.c"]
