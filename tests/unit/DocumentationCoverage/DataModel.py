@@ -233,7 +233,17 @@ class ItemHierarchy(Testcase):
 			_ = module["Diameter"]
 		self.assertEqual("\"Item 'myPackage.Shapes' contains no item 'Diameter'.\"", str(context.exception))
 
-		self.assertEqual([module, getter, setter], list(package.IterateElements()))
+	def test_IterateDescendants(self) -> None:
+		package = Item("myPackage", ItemKind.Package, DOCUMENTED)
+		module =  Item("Shapes", ItemKind.Module, DOCUMENTED, parent=package)
+		circle =  Item("Circle", ItemKind.Class, DOCUMENTED, parent=module)
+		getter =  Item("Radius", ItemKind.Property, DOCUMENTED, parent=circle)
+		square =  Item("Square", ItemKind.Class, UNDOCUMENTED, parent=module)
+
+		self.assertEqual([module, circle, getter, square], list(package.IterateDescendants()))
+		self.assertEqual([circle, square], list(package.IterateDescendants(lambda item: item.Kind is ItemKind.Class)))
+		self.assertEqual([getter], list(package.IterateDescendants(lambda item: item.Kind is ItemKind.Property)))
+		self.assertEqual([], list(getter.IterateDescendants()))
 
 	def test_ParentSetter(self) -> None:
 		report = DocumentationReport(Path("myPackage"))

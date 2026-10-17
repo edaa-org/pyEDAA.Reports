@@ -82,7 +82,7 @@ class Regression(Testcase):
 			key for key, lines in ModuleAnalyzer.for_file(str(FIXTURE), "Attributes").find_attr_docs().items()
 			if any(line.strip() != "" for line in lines)
 		}
-		items = [item for item in module.IterateElements() if item.Kind in ATTRIBUTES]
+		items = list(module.IterateDescendants(lambda item: item.Kind in ATTRIBUTES))
 		for item in items:
 			scope = item.Parent.QualifiedName.removeprefix("Attributes.Attributes").removeprefix(".")
 			with self.subTest(item=item.QualifiedName):
