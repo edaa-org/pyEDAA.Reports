@@ -83,13 +83,13 @@ from enum                        import Enum
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from re                          import match
-from typing                      import Any, ClassVar, Generator, Generic, Iterable, Optional as Nullable, Self, TypeVar
+from typing                      import Any, ClassVar, Generic, Iterable, Optional as Nullable, Self, TypeVar
 
 from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
-from pyTooling.MetaClasses       import ExtendedType, abstractmethod
+from pyTooling.MetaClasses       import ExtendedType
 from pyTooling.Stopwatch         import Stopwatch
 from pyTooling.Versioning        import SemanticVersion
 
@@ -176,14 +176,6 @@ class Element(Generic[ParentType], metaclass=ExtendedType, slots=True):
 		:returns: The report, or ``None`` while the element isn't part of a report.
 		"""
 		return self._root
-
-	@abstractmethod
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate every element below this one, depth-first.
-
-		:returns: A generator of the elements below this one.
-		"""
 
 	def _SetRoot(self, root: Nullable[Report]) -> None:
 		"""
@@ -435,14 +427,6 @@ class Base(Element[ParentType]):
 			return None
 
 		return self._root._files.get(path, None)
-
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate every element below the region: none.
-
-		:returns: An empty generator.
-		"""
-		yield from ()
 
 
 @export
@@ -735,14 +719,6 @@ class TestVector(Element["MCDCRecord"]):
 		"""
 		return self._result
 
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate every element below the test vector: none.
-
-		:returns: An empty generator.
-		"""
-		yield from ()
-
 
 @export
 class MCDCRecord(Base["File | Function"]):
@@ -913,14 +889,6 @@ class MCDCRecord(Base["File | Function"]):
 		"""
 		return self._testVectors
 
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate the test vectors of the MC/DC record.
-
-		:returns: A generator of the test vectors.
-		"""
-		yield from self._testVectors
-
 	def _SetRoot(self, root: Nullable[Report]) -> None:
 		"""
 		Set the report's root of the MC/DC record, and of its test vectors.
@@ -1048,14 +1016,6 @@ class Counters(Element["Summary"]):
 		:returns: The coverage in percent.
 		"""
 		return self._percent
-
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate every element below the counters: none.
-
-		:returns: An empty generator.
-		"""
-		yield from ()
 
 
 @export
@@ -1205,16 +1165,6 @@ class Summary(Element["File | Report"]):
 		:returns: The counters, or ``None`` before LLVM 18.
 		"""
 		return self._mcdc
-
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate the counters of the summary.
-
-		:returns: A generator of the counters; without the counters not stated.
-		"""
-		for counters in (self._lines, self._functions, self._instantiations, self._regions, self._branches, self._mcdc):
-			if counters is not None:
-				yield counters
 
 	def _SetRoot(self, root: Nullable[Report]) -> None:
 		"""
@@ -1385,14 +1335,6 @@ class Segment(Element["File"]):
 		:returns: ``True`` for a gap region; ``False`` in format version 2.0.0.
 		"""
 		return self._isGapRegion
-
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate every element below the segment: none.
-
-		:returns: An empty generator.
-		"""
-		yield from ()
 
 
 @export
@@ -1572,16 +1514,6 @@ class Expansion(Element["File"]):
 		:returns: The branch regions; empty before LLVM 12.
 		"""
 		return self._branches
-
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate the source region, the target regions and the branch regions of the expansion.
-
-		:returns: A generator of the regions.
-		"""
-		yield self._sourceRegion
-		yield from self._targetRegions
-		yield from self._branches
 
 	def _SetRoot(self, root: Nullable[Report]) -> None:
 		"""
@@ -1780,17 +1712,6 @@ class File(Element["Report"]):
 		:returns: The summary.
 		"""
 		return self._summary
-
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate the segments, branch regions, MC/DC records and expansions of the file, each followed by the elements below
-		it, then the summary and its counters.
-
-		:returns: A generator of the elements below the file.
-		"""
-		for element in (*self._segments, *self._branches, *self._mcdcRecords, *self._expansions, self._summary):
-			yield element
-			yield from element.IterateElements()
 
 	def _SetRoot(self, root: Nullable[Report]) -> None:
 		"""
@@ -2047,16 +1968,6 @@ class Function(Element["Report"]):
 
 		return self._root._files.get(path, None)
 
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate the regions, branch regions and MC/DC records of the function, each followed by the elements below it.
-
-		:returns: A generator of the elements below the function.
-		"""
-		for element in (*self._regions, *self._branches, *self._mcdcRecords):
-			yield element
-			yield from element.IterateElements()
-
 	def _SetRoot(self, root: Nullable[Report]) -> None:
 		"""
 		Set the report's root of the function, and of its regions, branch regions and MC/DC records.
@@ -2207,20 +2118,6 @@ class Report(metaclass=ExtendedType, mixin=True):
 		:returns: The totals; ``None`` before the report was converted.
 		"""
 		return self._totals
-
-	def IterateElements(self) -> Generator[Element, None, None]:
-		"""
-		Iterate the files, the functions and the totals, each followed by the elements below it.
-
-		:returns: A generator of every element below the report's root.
-		"""
-		for element in (*self._files.values(), *self._functions):
-			yield element
-			yield from element.IterateElements()
-
-		if self._totals is not None:
-			yield self._totals
-			yield from self._totals.IterateElements()
 
 
 TestVector._PARENT_TYPE =   (MCDCRecord, )
