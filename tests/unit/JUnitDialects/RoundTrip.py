@@ -65,7 +65,8 @@ class RoundTripMixin:
 		"""
 		dialect = self.Dialect
 		summary = readReference(dialect, referenceFile)
-		outputFile = writeAs(dialect, summary, OUTPUT_DIRECTORY / dialect.Name / referenceFile.name)
+		# One file per testcase: pytest-xdist workers run the testcases of this class in parallel.
+		outputFile = writeAs(dialect, summary, OUTPUT_DIRECTORY / dialect.Name / self._testMethodName / referenceFile.name)
 		rereadSummary = readReference(dialect, outputFile)
 
 		return summary, outputFile, rereadSummary
