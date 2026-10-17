@@ -34,6 +34,7 @@ from json                             import dumps
 from pathlib                          import Path
 from tempfile                         import TemporaryDirectory
 
+from pyEDAA.Reports.CodeCoverage      import AlreadyInHierarchyError, DuplicateFileError
 from pyEDAA.Reports.CodeCoverage.LLVM import BranchRegion, Counters, Document, Expansion, File, Function, MCDCRecord
 from pyEDAA.Reports.CodeCoverage.LLVM import Region, RegionKind, Segment, Summary, TestVector as MCDCTestVector
 from pyTooling.Testing                import Testcase
@@ -481,18 +482,20 @@ class Tree(Testcase):
 		summary = _summary()
 		_ = Function("Square", 2, [region], [Path("/project/src/Statistics.c")])
 		_ = File(Path("/project/src/Shapes.cpp"), summary)
-		for create, message in (
-			(lambda: Function("Average", 1, [region], []), "Parameter 'regions' contains a region of another element."),
-			(lambda: File(Path("/project/src/Statistics.c"), _summary(), parent=document),
+		for create, exception, message in (
+			(lambda: Function("Average", 1, [region], []), AlreadyInHierarchyError,
+			 "Parameter 'regions' contains a region of another element."),
+			(lambda: File(Path("/project/src/Statistics.c"), _summary(), parent=document), DuplicateFileError,
 			 "Parameter 'parent' has a file of the same path."),
-			(lambda: File(Path("/project/src/Statistics.h"), summary),
+			(lambda: File(Path("/project/src/Statistics.h"), summary), AlreadyInHierarchyError,
 			 "Parameter 'summary' is the summary of another element."),
-			(lambda: Document(Path("coverage.json"), files=[file]), "Parameter 'files' contains a file of another report."),
+			(lambda: Document(Path("coverage.json"), files=[file]), AlreadyInHierarchyError,
+			 "Parameter 'files' contains a file of another report."),
 			(lambda: Document(Path("coverage.json"), files=[File(Path("a.c"), _summary()), File(Path("a.c"), _summary())]),
-			 "Parameter 'files' contains two files of the same path."),
+			 DuplicateFileError, "Parameter 'files' contains two files of the same path."),
 		):
 			with self.subTest(message=message):
-				with self.assertRaises(ValueError) as context:
+				with self.assertRaises(exception) as context:
 					_ = create()
 
 				self.assertEqual(message, str(context.exception))
