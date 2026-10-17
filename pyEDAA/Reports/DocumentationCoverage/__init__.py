@@ -769,17 +769,15 @@ class Directory(BaseWithPath):
 
 	def IterateFiles(self) -> Generator[File, None, None]:
 		"""
-		Iterate the source files in this directory and below, sorted by name, a directory's files before its directories'.
+		Iterate the source files in this directory and below.
 
-		Names are compared case-sensitively on every platform.
+		A directory's files come before its directories' files, each in the order they were added.
 
 		:returns: A generator of the files.
 		"""
-		for name in sorted(self._files, key=Path.as_posix):
-			yield self._files[name]
-
-		for name in sorted(self._directories, key=Path.as_posix):
-			yield from self._directories[name].IterateFiles()
+		yield from self._files.values()
+		for directory in self._directories.values():
+			yield from directory.IterateFiles()
 
 	def Aggregate(self) -> None:
 		"""
