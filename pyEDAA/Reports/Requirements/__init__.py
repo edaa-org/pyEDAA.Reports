@@ -1029,14 +1029,14 @@ class BaseItem(BaseWithID):
 		:param element:            The child item or history event.
 		:raises RequirementsError: If the specification already contains an item of an ID of the child or an item below it.
 		:raises RequirementsError: If this item isn't part of a specification, and has a child of this ID already.
-		:raises ValueError:        If the history event is earlier than the item's creation or its last event.
+		:raises RequirementsError: If the history event is earlier than the item's creation or its last event.
 		"""
 		if isinstance(element, HistoryEvent):
 			previous = self._history[-1]._timestamp if len(self._history) > 0 else self._created
 			if element._timestamp.astimezone() < previous.astimezone():
-				ex = ValueError(f"History event is earlier than the item's creation or its last event.")
+				ex = RequirementsError(f"History event is earlier than the item's creation or its last event.")
 				ex.add_note(f"Got '{element._timestamp.isoformat()}' after '{previous.isoformat()}'.")
-				raise ex
+				raise ex from ValueError(f"Parameter 'timestamp' is earlier than '{previous.isoformat()}'.")
 
 			self._history.append(element)
 		else:
@@ -1993,31 +1993,31 @@ class HistoryEvent(Base):
 		"""
 		Initializes a history event, and adds it to the history of its item.
 
-		:param kind:          The kind of the event.
-		:param timestamp:     The time of the event; without a time zone, it is a local time.
-		:param person:        Optional, the person causing the event. Default: ``None``.
-		:param involved:      Optional, the other items involved. Default: ``None``.
-		:param description:   Optional, the event's description. Default: ``""``.
-		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:param parent:        Optional, the item the event happened to. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`BaseItem`.
-		:raises ValueError:   If parameter ``kind`` is ``None``.
-		:raises TypeError:    If parameter ``kind`` isn't of type :class:`EventKind`.
-		:raises ValueError:   If parameter ``timestamp`` is ``None``.
-		:raises TypeError:    If parameter ``timestamp`` isn't of type :class:`~datetime.datetime`.
-		:raises TypeError:    If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
-		:raises ValueError:   If parameter ``person`` isn't part of the item's specification.
-		:raises TypeError:    If parameter ``involved`` isn't iterable, or is a single element.
-		:raises TypeError:    If parameter ``involved`` contains an element not of type :class:`BaseItem`.
-		:raises ValueError:   If parameter ``involved`` contains an item, which isn't part of the item's specification.
-		:raises ValueError:   If parameter ``involved`` contains an item twice.
-		:raises ValueError:   If parameter ``involved`` names no item for a split or a merge.
-		:raises ValueError:   If parameter ``description`` is ``None``.
-		:raises TypeError:    If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``timestamp`` is earlier than the item's creation or its last event.
+		:param kind:               The kind of the event.
+		:param timestamp:          The time of the event; without a time zone, it is a local time.
+		:param person:             Optional, the person causing the event. Default: ``None``.
+		:param involved:           Optional, the other items involved. Default: ``None``.
+		:param description:        Optional, the event's description. Default: ``""``.
+		:param keyValuePairs:      Optional, the key-value pairs. Default: ``None``.
+		:param parent:             Optional, the item the event happened to. Default: ``None``.
+		:raises TypeError:         If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:         If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:        If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:         If parameter ``parent`` isn't of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``kind`` is ``None``.
+		:raises TypeError:         If parameter ``kind`` isn't of type :class:`EventKind`.
+		:raises ValueError:        If parameter ``timestamp`` is ``None``.
+		:raises TypeError:         If parameter ``timestamp`` isn't of type :class:`~datetime.datetime`.
+		:raises TypeError:         If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises ValueError:        If parameter ``person`` isn't part of the item's specification.
+		:raises TypeError:         If parameter ``involved`` isn't iterable, or is a single element.
+		:raises TypeError:         If parameter ``involved`` contains an element not of type :class:`BaseItem`.
+		:raises ValueError:        If parameter ``involved`` contains an item, which isn't part of the item's specification.
+		:raises ValueError:        If parameter ``involved`` contains an item twice.
+		:raises ValueError:        If parameter ``involved`` names no item for a split or a merge.
+		:raises ValueError:        If parameter ``description`` is ``None``.
+		:raises TypeError:         If parameter ``description`` isn't of type :class:`str`.
+		:raises RequirementsError: If parameter ``timestamp`` is earlier than the item's creation or its last event.
 		"""
 		super().__init__(keyValuePairs=keyValuePairs, parent=parent)
 
