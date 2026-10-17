@@ -30,7 +30,8 @@
 #
 """Unit tests of the requirements model: specification items, and their N:M relation to requirements."""
 from pyEDAA.Reports.Requirements import DuplicateRequirementError, DuplicateSpecificationItemError, Layer
-from pyEDAA.Reports.Requirements import NotInSameSpecification, Requirement, RequirementSpecification, SpecificationItem
+from pyEDAA.Reports.Requirements import NotInSameSpecificationError, Requirement, RequirementSpecification
+from pyEDAA.Reports.Requirements import SpecificationItem
 from pyTooling.Testing           import Testcase
 
 from .                           import BuildSpecification, FUNCTIONAL, VERSION
@@ -108,7 +109,7 @@ class SpecificationItems(Testcase):
 				["Got type 'pyEDAA.Reports.Requirements.Requirement'."]),
 			(["EL-1"],                                 TypeError,
 				"Parameter 'requirements' contains an element not of type 'Requirement'.", ["Got type 'str'."]),
-			([other],                                  NotInSameSpecification,
+			([other],                                  NotInSameSpecificationError,
 				"Parameter 'requirements' contains a requirement not part of the item's specification.",
 				["Got requirement 'REQ-1'."]),
 			([specification.Requirements["EL-1"]] * 2, DuplicateRequirementError,
@@ -126,9 +127,9 @@ class SpecificationItems(Testcase):
 
 		design = SpecificationItem("DES-1", "Title", parent=specification)
 		for requirement, exception, message in (
-			(None,   ValueError,             "Parameter 'requirement' is None."),
-			("EL-1", TypeError,              "Parameter 'requirement' is not of type 'Requirement'."),
-			(other,  NotInSameSpecification, "Parameter 'requirement' isn't part of the item's specification."),
+			(None,   ValueError,                  "Parameter 'requirement' is None."),
+			("EL-1", TypeError,                   "Parameter 'requirement' is not of type 'Requirement'."),
+			(other,  NotInSameSpecificationError, "Parameter 'requirement' isn't part of the item's specification."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:

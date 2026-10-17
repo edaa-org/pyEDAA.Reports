@@ -80,7 +80,7 @@ from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractclass, abstractmethod
 
-from pyEDAA.Reports        import DuplicateElementError, ReportException
+from pyEDAA.Reports        import AlreadyInHierarchyError, DuplicateElementError, ReportException
 
 
 @export
@@ -89,8 +89,8 @@ class CodeCoverageError(ReportException):
 
 
 @export
-class AlreadyInHierarchyError(CodeCoverageError):
-	"""The exception is raised when an element is added to an element, but it's already part of another element."""
+class AlreadyInCoverageReportError(CodeCoverageError, AlreadyInHierarchyError):
+	"""The exception is raised when an element is added to an element, but it already has a parent."""
 
 
 @export
@@ -166,14 +166,16 @@ class Base(metaclass=ExtendedType, slots=True):
 		Assigning a parent adds this element to it, and sets the parent's root as the root of this element and of every
 		element below it.
 
-		:returns:                        The parent, or ``None``.
-		:raises ValueError:              If ``None`` is assigned.
-		:raises TypeError:               If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises TypeError:               If a parent is assigned to a :class:`CoverageSummary`, which has no parent.
-		:raises DuplicateDirectoryError: If the assigned parent already contains a directory of this name.
-		:raises DuplicateFileError:      If the assigned parent already contains a file of this name.
-		:raises DuplicateUnitError:      If the assigned parent already contains a unit of this name.
-		:raises DuplicateLineError:      If the assigned parent already contains a line of this line number.
+		:returns:                             The parent, or ``None``.
+		:raises ValueError:                   If ``None`` is assigned.
+		:raises TypeError:                    If the assigned parent isn't of a type this class declares in
+		                                      :attr:`_PARENT_TYPE`.
+		:raises TypeError:                    If a parent is assigned to a :class:`CoverageSummary`, which has no parent.
+		:raises AlreadyInCoverageReportError: If the element already has a parent.
+		:raises DuplicateDirectoryError:      If the assigned parent already contains a directory of this name.
+		:raises DuplicateFileError:           If the assigned parent already contains a file of this name.
+		:raises DuplicateUnitError:           If the assigned parent already contains a unit of this name.
+		:raises DuplicateLineError:           If the assigned parent already contains a line of this line number.
 		"""
 		return self._parent
 
@@ -186,6 +188,8 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex = TypeError(f"Parameter 'parent' is not of type {typeNames}.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
+		elif self._parent is not None:
+			raise AlreadyInCoverageReportError(f"{self.__class__.__name__} already has a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent

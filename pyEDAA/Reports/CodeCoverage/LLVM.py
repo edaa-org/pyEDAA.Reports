@@ -94,8 +94,8 @@ from pyTooling.Stopwatch         import Stopwatch
 from pyTooling.Versioning        import SemanticVersion
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import AlreadyInHierarchyError, Branch as cc_Branch, CodeCoverageError, CoverageSummary
-from pyEDAA.Reports.CodeCoverage import DuplicateFileError
+from pyEDAA.Reports.CodeCoverage import AlreadyInCoverageReportError, Branch as cc_Branch, CodeCoverageError
+from pyEDAA.Reports.CodeCoverage import CoverageSummary, DuplicateFileError
 from pyEDAA.Reports.CodeCoverage import Document as cc_Document, File as cc_File, Function as cc_Function
 from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus, SourceFile as cc_SourceFile
 
@@ -756,38 +756,38 @@ class MCDCRecord(Base["File | Function"]):
 		"""
 		Initialize an MC/DC record, and add it to the MC/DC records of its file or function.
 
-		:param lineStart:                Line the decision starts at.
-		:param columnStart:              Column the decision starts at.
-		:param lineEnd:                  Line the decision ends at.
-		:param columnEnd:                Column the decision ends at.
-		:param fileID:                   Index of the decision's file in the file paths of its function or
-		                                 expansion; ``None``, if not stated.
-		:param expandedFileID:           Index of the file an expansion region expands to; ``0`` for an MC/DC
-		                                 record.
-		:param kind:                     The kind of the region: an MC/DC decision.
-		:param conditions:               Whether a pair of test vectors showed the independent effect, by
-		                                 condition.
-		:param trueDecisions:            Optional, number of executed test vectors with the outcome true.
-		                                 Default: ``None``.
-		:param falseDecisions:           Optional, number of executed test vectors with the outcome false.
-		                                 Default: ``None``.
-		:param testVectors:              Optional, the test vectors. Default: none.
-		:param parent:                   Optional, the file or function the MC/DC record belongs to. Default:
-		                                 ``None``.
-		:raises TypeError:               If parameter ``parent`` isn't of type :class:`File` or
-		                                 :class:`Function`.
-		:raises TypeError:               If parameter ``trueDecisions`` or ``falseDecisions`` isn't of type
-		                                 :class:`int`.
-		:raises ValueError:              If parameter ``trueDecisions`` or ``falseDecisions`` is negative.
-		:raises ValueError:              If parameter ``conditions`` is ``None``.
-		:raises TypeError:               If parameter ``conditions`` isn't iterable.
-		:raises TypeError:               If parameter ``conditions`` contains an element not of type
-		                                 :class:`bool`.
-		:raises TypeError:               If parameter ``testVectors`` isn't iterable.
-		:raises TypeError:               If parameter ``testVectors`` contains an element not of type
-		                                 :class:`TestVector`.
-		:raises AlreadyInHierarchyError: If parameter ``testVectors`` contains a test vector of another MC/DC
-		                                 record.
+		:param lineStart:                     Line the decision starts at.
+		:param columnStart:                   Column the decision starts at.
+		:param lineEnd:                       Line the decision ends at.
+		:param columnEnd:                     Column the decision ends at.
+		:param fileID:                        Index of the decision's file in the file paths of its function or
+		                                      expansion; ``None``, if not stated.
+		:param expandedFileID:                Index of the file an expansion region expands to; ``0`` for an MC/DC
+		                                      record.
+		:param kind:                          The kind of the region: an MC/DC decision.
+		:param conditions:                    Whether a pair of test vectors showed the independent effect, by
+		                                      condition.
+		:param trueDecisions:                 Optional, number of executed test vectors with the outcome true.
+		                                      Default: ``None``.
+		:param falseDecisions:                Optional, number of executed test vectors with the outcome false.
+		                                      Default: ``None``.
+		:param testVectors:                   Optional, the test vectors. Default: none.
+		:param parent:                        Optional, the file or function the MC/DC record belongs to. Default:
+		                                      ``None``.
+		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`File` or
+		                                      :class:`Function`.
+		:raises TypeError:                    If parameter ``trueDecisions`` or ``falseDecisions`` isn't of type
+		                                      :class:`int`.
+		:raises ValueError:                   If parameter ``trueDecisions`` or ``falseDecisions`` is negative.
+		:raises ValueError:                   If parameter ``conditions`` is ``None``.
+		:raises TypeError:                    If parameter ``conditions`` isn't iterable.
+		:raises TypeError:                    If parameter ``conditions`` contains an element not of type
+		                                      :class:`bool`.
+		:raises TypeError:                    If parameter ``testVectors`` isn't iterable.
+		:raises TypeError:                    If parameter ``testVectors`` contains an element not of type
+		                                      :class:`TestVector`.
+		:raises AlreadyInCoverageReportError: If parameter ``testVectors`` contains a test vector of another MC/DC
+		                                      record.
 		"""
 		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind, parent=parent)
 
@@ -835,7 +835,7 @@ class MCDCRecord(Base["File | Function"]):
 					ex.add_note(f"Got type '{getFullyQualifiedName(testVector)}'.")
 					raise ex
 				elif testVector._parent is not None:
-					raise AlreadyInHierarchyError(f"Parameter 'testVectors' contains a test vector of another MC/DC record.")
+					raise AlreadyInCoverageReportError(f"Parameter 'testVectors' contains a test vector of another MC/DC record.")
 
 				testVector._parent = self
 				testVector._root =   self._root
@@ -1057,19 +1057,19 @@ class Summary(Element["File | Report"]):
 		"""
 		Initialize a summary.
 
-		:param lines:                    The counters of lines.
-		:param functions:                The counters of functions, a function's instantiations counted once.
-		:param instantiations:           The counters of function instantiations.
-		:param regions:                  The counters of code regions.
-		:param branches:                 Optional, the counters of branch outcomes. Default: ``None``.
-		:param mcdc:                     Optional, the counters of MC/DC conditions. Default: ``None``.
-		:raises ValueError:              If parameter ``lines``, ``functions``, ``instantiations`` or
-		                                 ``regions`` is ``None``.
-		:raises TypeError:               If parameter ``lines``, ``functions``, ``instantiations``,
-		                                 ``regions``, ``branches`` or ``mcdc`` isn't of type :class:`Counters`.
-		:raises AlreadyInHierarchyError: If parameter ``lines``, ``functions``, ``instantiations``,
-		                                 ``regions``, ``branches`` or ``mcdc`` are the counters of another
-		                                 summary.
+		:param lines:                         The counters of lines.
+		:param functions:                     The counters of functions, a function's instantiations counted once.
+		:param instantiations:                The counters of function instantiations.
+		:param regions:                       The counters of code regions.
+		:param branches:                      Optional, the counters of branch outcomes. Default: ``None``.
+		:param mcdc:                          Optional, the counters of MC/DC conditions. Default: ``None``.
+		:raises ValueError:                   If parameter ``lines``, ``functions``, ``instantiations`` or
+		                                      ``regions`` is ``None``.
+		:raises TypeError:                    If parameter ``lines``, ``functions``, ``instantiations``,
+		                                      ``regions``, ``branches`` or ``mcdc`` isn't of type :class:`Counters`.
+		:raises AlreadyInCoverageReportError: If parameter ``lines``, ``functions``, ``instantiations``,
+		                                      ``regions``, ``branches`` or ``mcdc`` are the counters of another
+		                                      summary.
 		"""
 		super().__init__()
 
@@ -1096,7 +1096,7 @@ class Summary(Element["File | Report"]):
 			if counters is None:
 				continue
 			elif counters._parent is not None:
-				raise AlreadyInHierarchyError(f"Parameter '{name}' are the counters of another summary.")
+				raise AlreadyInCoverageReportError(f"Parameter '{name}' are the counters of another summary.")
 
 			counters._parent = self
 
@@ -1373,30 +1373,30 @@ class Expansion(Element["File"]):
 		"""
 		Initialize an expansion, and add it to the expansions of its file.
 
-		:param filePaths:                The paths of the files, which the file IDs of the regions index.
-		:param sourceRegion:             The region the macro is expanded at.
-		:param targetRegions:            The regions of the function the expansion is in.
-		:param branches:                 Optional, the branch regions in the expansion, and in the expansions
-		                                 nested in it. Default: none.
-		:param parent:                   Optional, the file the expansion belongs to. Default: ``None``.
-		:raises TypeError:               If parameter ``parent`` isn't of type :class:`File`.
-		:raises ValueError:              If parameter ``filePaths`` or ``targetRegions`` is ``None``.
-		:raises TypeError:               If parameter ``filePaths``, ``targetRegions`` or ``branches`` isn't
-		                                 iterable.
-		:raises TypeError:               If parameter ``filePaths`` contains an element not of type
-		                                 :class:`~pathlib.Path`.
-		:raises ValueError:              If parameter ``sourceRegion`` is ``None``.
-		:raises TypeError:               If parameter ``sourceRegion`` isn't of type :class:`Region`.
-		:raises AlreadyInHierarchyError: If parameter ``sourceRegion`` is a region of another element.
-		:raises TypeError:               If parameter ``targetRegions`` contains an element not of type
-		                                 :class:`Region`.
-		:raises TypeError:               If parameter ``branches`` contains an element not of type
-		                                 :class:`BranchRegion`.
-		:raises AlreadyInHierarchyError: If parameter ``targetRegions`` or ``branches`` contains a region of
-		                                 another element.
-		:raises ValueError:              If parameter ``sourceRegion`` is, or ``targetRegions`` or ``branches``
-		                                 contains, a region of a file ID or an expanded file ID out of range of
-		                                 parameter ``filePaths``.
+		:param filePaths:                     The paths of the files, which the file IDs of the regions index.
+		:param sourceRegion:                  The region the macro is expanded at.
+		:param targetRegions:                 The regions of the function the expansion is in.
+		:param branches:                      Optional, the branch regions in the expansion, and in the expansions
+		                                      nested in it. Default: none.
+		:param parent:                        Optional, the file the expansion belongs to. Default: ``None``.
+		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`File`.
+		:raises ValueError:                   If parameter ``filePaths`` or ``targetRegions`` is ``None``.
+		:raises TypeError:                    If parameter ``filePaths``, ``targetRegions`` or ``branches`` isn't
+		                                      iterable.
+		:raises TypeError:                    If parameter ``filePaths`` contains an element not of type
+		                                      :class:`~pathlib.Path`.
+		:raises ValueError:                   If parameter ``sourceRegion`` is ``None``.
+		:raises TypeError:                    If parameter ``sourceRegion`` isn't of type :class:`Region`.
+		:raises AlreadyInCoverageReportError: If parameter ``sourceRegion`` is a region of another element.
+		:raises TypeError:                    If parameter ``targetRegions`` contains an element not of type
+		                                      :class:`Region`.
+		:raises TypeError:                    If parameter ``branches`` contains an element not of type
+		                                      :class:`BranchRegion`.
+		:raises AlreadyInCoverageReportError: If parameter ``targetRegions`` or ``branches`` contains a region of
+		                                      another element.
+		:raises ValueError:                   If parameter ``sourceRegion`` is, or ``targetRegions`` or ``branches``
+		                                      contains, a region of a file ID or an expanded file ID out of range of
+		                                      parameter ``filePaths``.
 		"""
 		super().__init__(parent=parent)
 
@@ -1414,7 +1414,7 @@ class Expansion(Element["File"]):
 			ex.add_note(f"Got type '{getFullyQualifiedName(sourceRegion)}'.")
 			raise ex
 		elif sourceRegion._parent is not None:
-			raise AlreadyInHierarchyError(f"Parameter 'sourceRegion' is a region of another element.")
+			raise AlreadyInCoverageReportError(f"Parameter 'sourceRegion' is a region of another element.")
 
 		if targetRegions is None:
 			raise ValueError(f"Parameter 'targetRegions' is None.")
@@ -1449,7 +1449,7 @@ class Expansion(Element["File"]):
 					ex.add_note(f"Got type '{getFullyQualifiedName(element)}'.")
 					raise ex
 				elif element._parent is not None:
-					raise AlreadyInHierarchyError(f"Parameter '{name}' contains a region of another element.")
+					raise AlreadyInCoverageReportError(f"Parameter '{name}' contains a region of another element.")
 				elif element._fileID is not None and element._fileID >= len(self._filePaths):
 					ex = ValueError(f"Parameter '{name}' contains a region of a file ID out of range.")
 					ex.add_note(f"Got value '{element._fileID}' for {len(self._filePaths)} file paths.")
@@ -1572,32 +1572,32 @@ class File(Element["Report"]):
 		"""
 		Initialize a file, and add it to the files of its report.
 
-		:param path:                     The file's path, as the compiler named it.
-		:param summary:                  The counters llvm-cov computed.
-		:param segments:                 Optional, the segments, by position. Default: none.
-		:param branches:                 Optional, the branch regions of the file's functions. Default: none.
-		:param mcdcRecords:              Optional, the MC/DC records of the file's functions. Default: none.
-		:param expansions:               Optional, the macro expansions in the file. Default: none.
-		:param parent:                   Optional, the report the file belongs to. Default: ``None``.
-		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Report`.
-		:raises ValueError:              If parameter ``path`` is ``None``.
-		:raises TypeError:               If parameter ``path`` isn't of type :class:`~pathlib.Path`.
-		:raises DuplicateFileError:      If parameter ``parent`` has a file of the same path.
-		:raises ValueError:              If parameter ``summary`` is ``None``.
-		:raises TypeError:               If parameter ``summary`` isn't of type :class:`Summary`.
-		:raises AlreadyInHierarchyError: If parameter ``summary`` is the summary of another element.
-		:raises TypeError:               If parameter ``segments``, ``branches``, ``mcdcRecords`` or
-		                                 ``expansions`` isn't iterable.
-		:raises TypeError:               If parameter ``segments`` contains an element not of type
-		                                 :class:`Segment`.
-		:raises TypeError:               If parameter ``branches`` contains an element not of type
-		                                 :class:`BranchRegion`.
-		:raises TypeError:               If parameter ``mcdcRecords`` contains an element not of type
-		                                 :class:`MCDCRecord`.
-		:raises TypeError:               If parameter ``expansions`` contains an element not of type
-		                                 :class:`Expansion`.
-		:raises AlreadyInHierarchyError: If parameter ``segments``, ``branches``, ``mcdcRecords`` or
-		                                 ``expansions`` contains an element of another element.
+		:param path:                          The file's path, as the compiler named it.
+		:param summary:                       The counters llvm-cov computed.
+		:param segments:                      Optional, the segments, by position. Default: none.
+		:param branches:                      Optional, the branch regions of the file's functions. Default: none.
+		:param mcdcRecords:                   Optional, the MC/DC records of the file's functions. Default: none.
+		:param expansions:                    Optional, the macro expansions in the file. Default: none.
+		:param parent:                        Optional, the report the file belongs to. Default: ``None``.
+		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`Report`.
+		:raises ValueError:                   If parameter ``path`` is ``None``.
+		:raises TypeError:                    If parameter ``path`` isn't of type :class:`~pathlib.Path`.
+		:raises DuplicateFileError:           If parameter ``parent`` has a file of the same path.
+		:raises ValueError:                   If parameter ``summary`` is ``None``.
+		:raises TypeError:                    If parameter ``summary`` isn't of type :class:`Summary`.
+		:raises AlreadyInCoverageReportError: If parameter ``summary`` is the summary of another element.
+		:raises TypeError:                    If parameter ``segments``, ``branches``, ``mcdcRecords`` or
+		                                      ``expansions`` isn't iterable.
+		:raises TypeError:                    If parameter ``segments`` contains an element not of type
+		                                      :class:`Segment`.
+		:raises TypeError:                    If parameter ``branches`` contains an element not of type
+		                                      :class:`BranchRegion`.
+		:raises TypeError:                    If parameter ``mcdcRecords`` contains an element not of type
+		                                      :class:`MCDCRecord`.
+		:raises TypeError:                    If parameter ``expansions`` contains an element not of type
+		                                      :class:`Expansion`.
+		:raises AlreadyInCoverageReportError: If parameter ``segments``, ``branches``, ``mcdcRecords`` or
+		                                      ``expansions`` contains an element of another element.
 		"""
 		super().__init__(parent=parent)
 
@@ -1619,7 +1619,7 @@ class File(Element["Report"]):
 			ex.add_note(f"Got type '{getFullyQualifiedName(summary)}'.")
 			raise ex
 		elif summary._parent is not None:
-			raise AlreadyInHierarchyError(f"Parameter 'summary' is the summary of another element.")
+			raise AlreadyInCoverageReportError(f"Parameter 'summary' is the summary of another element.")
 
 		self._path =        path
 		self._segments =    []
@@ -1646,7 +1646,7 @@ class File(Element["Report"]):
 					ex.add_note(f"Got type '{getFullyQualifiedName(element)}'.")
 					raise ex
 				elif element._parent is not None:
-					raise AlreadyInHierarchyError(f"Parameter '{name}' contains an element of another element.")
+					raise AlreadyInCoverageReportError(f"Parameter '{name}' contains an element of another element.")
 
 				element._parent = self
 				element._SetRoot(self._root)
@@ -1773,36 +1773,36 @@ class Function(Element["Report"]):
 		"""
 		Initialize a function, and add it to the functions of its report.
 
-		:param name:                     The function's name, as the profile names it - e.g. mangled.
-		:param count:                    How often the function was called.
-		:param regions:                  The regions.
-		:param filePaths:                The paths of the files, which the file IDs of the regions index.
-		:param branches:                 Optional, the branch regions. Default: none.
-		:param mcdcRecords:              Optional, the MC/DC records. Default: none.
-		:param parent:                   Optional, the report the function belongs to. Default: ``None``.
-		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Report`.
-		:raises ValueError:              If parameter ``name`` is ``None``.
-		:raises TypeError:               If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:              If parameter ``name`` is empty.
-		:raises ValueError:              If parameter ``count`` is ``None``.
-		:raises TypeError:               If parameter ``count`` isn't of type :class:`int`.
-		:raises ValueError:              If parameter ``count`` is negative.
-		:raises ValueError:              If parameter ``regions`` or ``filePaths`` is ``None``.
-		:raises TypeError:               If parameter ``regions``, ``filePaths``, ``branches`` or
-		                                 ``mcdcRecords`` isn't iterable.
-		:raises TypeError:               If parameter ``regions`` contains an element not of type
-		                                 :class:`Region`.
-		:raises TypeError:               If parameter ``filePaths`` contains an element not of type
-		                                 :class:`~pathlib.Path`.
-		:raises TypeError:               If parameter ``branches`` contains an element not of type
-		                                 :class:`BranchRegion`.
-		:raises TypeError:               If parameter ``mcdcRecords`` contains an element not of type
-		                                 :class:`MCDCRecord`.
-		:raises AlreadyInHierarchyError: If parameter ``regions``, ``branches`` or ``mcdcRecords`` contains a
-		                                 region of another element.
-		:raises ValueError:              If parameter ``regions``, ``branches`` or ``mcdcRecords`` contains a
-		                                 region of a file ID or an expanded file ID out of range of parameter
-		                                 ``filePaths``.
+		:param name:                          The function's name, as the profile names it - e.g. mangled.
+		:param count:                         How often the function was called.
+		:param regions:                       The regions.
+		:param filePaths:                     The paths of the files, which the file IDs of the regions index.
+		:param branches:                      Optional, the branch regions. Default: none.
+		:param mcdcRecords:                   Optional, the MC/DC records. Default: none.
+		:param parent:                        Optional, the report the function belongs to. Default: ``None``.
+		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`Report`.
+		:raises ValueError:                   If parameter ``name`` is ``None``.
+		:raises TypeError:                    If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:                   If parameter ``name`` is empty.
+		:raises ValueError:                   If parameter ``count`` is ``None``.
+		:raises TypeError:                    If parameter ``count`` isn't of type :class:`int`.
+		:raises ValueError:                   If parameter ``count`` is negative.
+		:raises ValueError:                   If parameter ``regions`` or ``filePaths`` is ``None``.
+		:raises TypeError:                    If parameter ``regions``, ``filePaths``, ``branches`` or
+		                                      ``mcdcRecords`` isn't iterable.
+		:raises TypeError:                    If parameter ``regions`` contains an element not of type
+		                                      :class:`Region`.
+		:raises TypeError:                    If parameter ``filePaths`` contains an element not of type
+		                                      :class:`~pathlib.Path`.
+		:raises TypeError:                    If parameter ``branches`` contains an element not of type
+		                                      :class:`BranchRegion`.
+		:raises TypeError:                    If parameter ``mcdcRecords`` contains an element not of type
+		                                      :class:`MCDCRecord`.
+		:raises AlreadyInCoverageReportError: If parameter ``regions``, ``branches`` or ``mcdcRecords`` contains a
+		                                      region of another element.
+		:raises ValueError:                   If parameter ``regions``, ``branches`` or ``mcdcRecords`` contains a
+		                                      region of a file ID or an expanded file ID out of range of parameter
+		                                      ``filePaths``.
 		"""
 		super().__init__(parent=parent)
 
@@ -1868,7 +1868,7 @@ class Function(Element["Report"]):
 					ex.add_note(f"Got type '{getFullyQualifiedName(element)}'.")
 					raise ex
 				elif element._parent is not None:
-					raise AlreadyInHierarchyError(f"Parameter '{parameterName}' contains a region of another element.")
+					raise AlreadyInCoverageReportError(f"Parameter '{parameterName}' contains a region of another element.")
 				elif element._fileID is not None and element._fileID >= len(self._filePaths):
 					ex = ValueError(f"Parameter '{parameterName}' contains a region of a file ID out of range.")
 					ex.add_note(f"Got value '{element._fileID}' for {len(self._filePaths)} file paths.")
@@ -2030,21 +2030,21 @@ class Report(metaclass=ExtendedType, mixin=True):
 		"""
 		Initialize a report; empty, without parameters.
 
-		:param version:                  Optional, version of the report format. Default: ``None``.
-		:param files:                    Optional, the files. Default: none.
-		:param functions:                Optional, the functions. Default: none.
-		:param totals:                   Optional, the counters of the whole report. Default: ``None``.
-		:raises TypeError:               If parameter ``version`` isn't of type
-		                                 :class:`~pyTooling.Versioning.SemanticVersion`.
-		:raises TypeError:               If parameter ``files`` or ``functions`` isn't iterable.
-		:raises TypeError:               If parameter ``files`` contains an element not of type :class:`File`.
-		:raises DuplicateFileError:      If parameter ``files`` contains two files of the same path.
-		:raises TypeError:               If parameter ``functions`` contains an element not of type
-		                                 :class:`Function`.
-		:raises AlreadyInHierarchyError: If parameter ``files`` or ``functions`` contains an element of another
-		                                 report.
-		:raises TypeError:               If parameter ``totals`` isn't of type :class:`Summary`.
-		:raises AlreadyInHierarchyError: If parameter ``totals`` is the summary of another element.
+		:param version:                       Optional, version of the report format. Default: ``None``.
+		:param files:                         Optional, the files. Default: none.
+		:param functions:                     Optional, the functions. Default: none.
+		:param totals:                        Optional, the counters of the whole report. Default: ``None``.
+		:raises TypeError:                    If parameter ``version`` isn't of type
+		                                      :class:`~pyTooling.Versioning.SemanticVersion`.
+		:raises TypeError:                    If parameter ``files`` or ``functions`` isn't iterable.
+		:raises TypeError:                    If parameter ``files`` contains an element not of type :class:`File`.
+		:raises DuplicateFileError:           If parameter ``files`` contains two files of the same path.
+		:raises TypeError:                    If parameter ``functions`` contains an element not of type
+		                                      :class:`Function`.
+		:raises AlreadyInCoverageReportError: If parameter ``files`` or ``functions`` contains an element of another
+		                                      report.
+		:raises TypeError:                    If parameter ``totals`` isn't of type :class:`Summary`.
+		:raises AlreadyInCoverageReportError: If parameter ``totals`` is the summary of another element.
 		"""
 		if version is not None and not isinstance(version, SemanticVersion):
 			ex = TypeError(f"Parameter 'version' is not of type 'SemanticVersion'.")
@@ -2056,7 +2056,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(totals)}'.")
 			raise ex
 		elif totals is not None and totals._parent is not None:
-			raise AlreadyInHierarchyError(f"Parameter 'totals' is the summary of another element.")
+			raise AlreadyInCoverageReportError(f"Parameter 'totals' is the summary of another element.")
 
 		self._root =      self
 		self._version =   version
@@ -2076,7 +2076,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 					raise ex
 				elif file._parent is not None:
-					raise AlreadyInHierarchyError(f"Parameter 'files' contains a file of another report.")
+					raise AlreadyInCoverageReportError(f"Parameter 'files' contains a file of another report.")
 				elif file._path in self._files:
 					ex = DuplicateFileError(f"Parameter 'files' contains two files of the same path.")
 					ex.add_note(f"Got value '{file._path.as_posix()}'.")
@@ -2099,7 +2099,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(function)}'.")
 					raise ex
 				elif function._parent is not None:
-					raise AlreadyInHierarchyError(f"Parameter 'functions' contains a function of another report.")
+					raise AlreadyInCoverageReportError(f"Parameter 'functions' contains a function of another report.")
 
 				function._parent = self
 				function._SetRoot(self)

@@ -108,7 +108,8 @@ from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmetho
 from pyTooling.Tree             import Node
 
 from pyEDAA.Reports             import Resources
-from pyEDAA.Reports.Unittesting import UnittestError, AlreadyInHierarchyError, DuplicateTestsuiteError, DuplicateTestcaseError
+from pyEDAA.Reports.Unittesting import UnittestError, AlreadyInTestsuiteError, DuplicateTestsuiteError
+from pyEDAA.Reports.Unittesting import DuplicateTestcaseError
 from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, TestsuiteKind, IterationScheme
 from pyEDAA.Reports.Unittesting import TestcaseOutputMixin
 from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
@@ -126,7 +127,7 @@ class UnittestError(UnittestError, JUnitErrorMixin):
 
 
 @export
-class AlreadyInHierarchyError(AlreadyInHierarchyError, JUnitErrorMixin):
+class AlreadyInTestsuiteError(AlreadyInTestsuiteError, JUnitErrorMixin):
 	"""
 	A unit test exception raised if the element is already part of a hierarchy.
 
@@ -745,7 +746,7 @@ class Testclass(Base):
 		if testcases is not None:
 			for testcase in testcases:
 				if testcase._parent is not None:
-					raise AlreadyInHierarchyError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+					raise AlreadyInTestsuiteError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 				if testcase._name in self._testcases:
 					raise DuplicateTestcaseError(f"Class already contains a testcase with same name '{testcase._name}'.")
@@ -861,8 +862,9 @@ class Testsuite(TestsuiteBase):
 		:param parent:                   Optional, reference to the parent test summary.
 		:raises TypeError:               If parameter 'testcases' is not iterable.
 		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
-		:raises AlreadyInHierarchyError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
-		:raises DuplicateTestcaseError:  If a test case in parameter 'testcases' is already listed (by name) in the list of test cases.
+		:raises AlreadyInTestsuiteError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If a test case in parameter 'testcases' is already listed (by name) in the list of
+		                                 test cases.
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):

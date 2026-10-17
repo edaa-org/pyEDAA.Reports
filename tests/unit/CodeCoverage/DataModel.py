@@ -32,8 +32,9 @@
 """Unit tests of the code coverage data model: lines, branches, files, directories, units and their counters."""
 from pathlib                     import Path
 
-from pyEDAA.Reports              import DuplicateElementError
-from pyEDAA.Reports.CodeCoverage import Branch, Class, CodeCoverageError, CoverageSummary, Directory
+from pyEDAA.Reports              import AlreadyInHierarchyError, DuplicateElementError
+from pyEDAA.Reports.CodeCoverage import AlreadyInCoverageReportError, Branch, Class, CodeCoverageError, CoverageSummary
+from pyEDAA.Reports.CodeCoverage import Directory
 from pyEDAA.Reports.CodeCoverage import DuplicateDirectoryError, DuplicateFileError, DuplicateLineError
 from pyEDAA.Reports.CodeCoverage import DuplicateUnitError, File, Function, Line, LineCoverageStatus, Method, Module
 from pyEDAA.Reports.CodeCoverage import Package, SourceFile
@@ -342,6 +343,11 @@ class Units(Testcase):
 				self.assertTrue(issubclass(exception, DuplicateElementError))
 				self.assertTrue(issubclass(exception, CodeCoverageError))
 
+	def test_HierarchyError(self) -> None:
+		"""'AlreadyInCoverageReportError' derives from the common base and from 'CodeCoverageError'."""
+		self.assertTrue(issubclass(AlreadyInCoverageReportError, AlreadyInHierarchyError))
+		self.assertTrue(issubclass(AlreadyInCoverageReportError, CodeCoverageError))
+
 
 class Tree(Testcase):
 	"""Every element has a parent and the report's root; attaching a subtree passes the root on."""
@@ -387,6 +393,19 @@ class Tree(Testcase):
 		for element in (directory, subdirectory, file, file.Lines[1], file.Lines[1].Branches[1], unit, unit.Units["a"]):
 			with self.subTest(element=repr(element)):
 				self.assertIs(summary, element.Root)
+
+	def test_ParentTwice(self) -> None:
+		"""An element, which already has a parent, isn't moved to another parent."""
+		source = Directory("src")
+		tests =  Directory("tests")
+		file =   File("a.py", parent=source)
+
+		with self.assertRaises(AlreadyInCoverageReportError) as context:
+			file.Parent = tests
+
+		self.assertEqual("File already has a parent.", str(context.exception))
+		self.assertIs(source, file.Parent)
+		self.assertEqual({}, tests.Files)
 
 	def test_ParentType(self) -> None:
 		for create, expected in (
