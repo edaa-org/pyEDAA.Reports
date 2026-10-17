@@ -312,12 +312,13 @@ class Files(Testcase):
 		self.assertEqual(Path("Units/Imperial/Mile.py"), imperial.Path)
 
 	def test_IterateFiles(self) -> None:
+		"""A directory's files come before its directories' files, each in the order they were added."""
 		report = DocumentationReport(Path("myPackage"))
 		for path in ("Units/Length.py", "__init__.py", "Units/__init__.py", "Shapes.py"):
 			report.GetOrAddFile(Path(path))
 
 		self.assertEqual(
-			[Path("Shapes.py"), Path("__init__.py"), Path("Units/Length.py"), Path("Units/__init__.py")],
+			[Path("__init__.py"), Path("Shapes.py"), Path("Units/Length.py"), Path("Units/__init__.py")],
 			[file.Path for file in report.IterateFiles()]
 		)
 
