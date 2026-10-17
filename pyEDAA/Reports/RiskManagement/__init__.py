@@ -1379,13 +1379,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		return self._inboundLinks
 
-	def LinkTo(
-		self,
-		destination: Risk,
-		kind: LinkKind,
-		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
-	) -> Link:
+	def LinkTo(self, destination: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
 		"""
 		Create an outbound link from this risk to the given risk.
 
@@ -1410,15 +1404,9 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		   :meth:`LinkFrom`
 		      |rarr| Create an inbound link from the given risk to this risk.
 		"""
-		return Link(self, destination, kind, keyValuePairs=keyValuePairs)
+		return Link(self, destination, kind, keyValuePairs)
 
-	def LinkFrom(
-		self,
-		source: Risk,
-		kind: LinkKind,
-		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
-	) -> Link:
+	def LinkFrom(self, source: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
 		"""
 		Create an inbound link from the given risk to this risk.
 
@@ -1448,7 +1436,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 			ex.add_note(f"Got risk '{source._id}'.")
 			raise ex
 
-		return Link(source, self, kind, keyValuePairs=keyValuePairs)
+		return Link(source, self, kind, keyValuePairs)
 
 	def __repr__(self) -> str:
 		"""
@@ -1483,7 +1471,6 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		source: Risk,
 		destination: Risk,
 		kind: LinkKind,
-		*,
 		keyValuePairs: Nullable[Mapping[str, Any]] = None
 	) -> None:
 		"""

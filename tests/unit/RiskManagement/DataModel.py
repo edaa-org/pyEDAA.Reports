@@ -458,7 +458,7 @@ class Links(Testcase):
 		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
 		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
 		tools =    Risk("R3", "Tool license", "A license expires.", Probability.Low, Impact.Low, parent=register)
-		causes =   Link(foundry, board, LinkKind.Causes, keyValuePairs={"since": "v1.0.0"})
+		causes =   Link(foundry, board, LinkKind.Causes, {"since": "v1.0.0"})
 		related =  Link(foundry, board, LinkKind.Related)
 		depends =  Link(tools, foundry, LinkKind.DependsOn)
 
@@ -482,7 +482,7 @@ class Links(Testcase):
 		register = RiskManagement(VERSION)
 		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
 		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
-		causes =   foundry.LinkTo(board, LinkKind.Causes, keyValuePairs={"since": "v1.0.0"})
+		causes =   foundry.LinkTo(board, LinkKind.Causes, {"since": "v1.0.0"})
 
 		self.assertIs(foundry, causes.Source)
 		self.assertIs(board, causes.Destination)
