@@ -23,9 +23,9 @@ references its implications and mitigations, so several risks can share one.
 
    - :class:`RiskManagement`  | the risk register - version, name, key-value pairs
      - :class:`Risk`          | e.g. ``R1`` - title, description, probability, impact, state, owner, next review
+       - :class:`Link`        | e.g. ``R1`` causes ``R2`` - source, destination, kind
      - :class:`Implication`   | e.g. ``I1`` - a consequence, if a risk occurs
      - :class:`Mitigation`    | e.g. ``M1`` - a measure reducing a risk or an implication - kind, state
-     - :class:`Link`          | e.g. ``R1`` causes ``R2`` - source, destination, kind
 
 * A risk's :class:`Probability` says how likely it occurs: from *low* (identified, but sleeping) to *occurred* (the
   risk is active and causes heavy effects). Its :class:`Impact` says how much delay it causes, if it occurs: from
@@ -48,13 +48,17 @@ references its implications and mitigations, so several risks can share one.
   zone is a local time. The owner is a :class:`~pyEDAA.Reports.Person` - user ID, name, e-mail address -, which the
   register refers to (:meth:`RiskManagement.AddPerson`, :attr:`RiskManagement.Persons`). The same person may be
   registered in several registers, e.g. a register of risks and a specification of requirements.
-* A :class:`Link` relates two risks: from its source to its destination, of a :class:`LinkKind` - e.g. *causes*,
-  *amplifies*, *depends on*, *duplicates*. Both risks list it: :attr:`Risk.OutboundLinks` and
-  :attr:`Risk.InboundLinks`. A source has at most one link of a kind to a destination.
+* A :class:`Link` relates two risks of the same register: from its source to its destination, of a :class:`LinkKind` -
+  e.g. *causes*, *amplifies*, *depends on*, *duplicates*. A link has no parent: both risks list it -
+  :attr:`Risk.OutboundLinks` and :attr:`Risk.InboundLinks` -, and the register lists it in
+  :attr:`RiskManagement.Links`. A source has at most one link of a kind to a destination. :meth:`Risk.LinkTo` and
+  :meth:`Risk.LinkFrom` create an outbound or inbound link of a risk, with the parameters of the link's constructor.
 * An element joins the register by naming it as its parent, in its constructor or by :attr:`~Base.Parent`. An ID is
   unique among the elements of its kind; a second element of the same ID raises a :exc:`RiskManagementError`.
 * An element of the register references only implications and mitigations of the same register, and a link connects
-  risks of the same register: referenced elements join the register first.
+  risks of the same register: referenced elements and linked risks join the register first. Otherwise a
+  :exc:`NotInSameRiskRegister` is raised: the element is valid, but not part of the register. A risk's owner is a person
+  of the register too.
 * Every element - the register too - has key-value pairs for data the model doesn't name, e.g. a ticket:
   ``risk["ticket"] = "#42"``.
 * The register iterates its risks, implications, mitigations and links, optionally filtered by a predicate, e.g.
@@ -94,7 +98,7 @@ references its implications and mitigations, so several risks can share one.
 
    from pyTooling.Versioning import SemanticVersion
    from pyEDAA.Reports import Person
-   from pyEDAA.Reports.RiskManagement import Impact, Implication, Link, LinkKind, Mitigation, MitigationKind
+   from pyEDAA.Reports.RiskManagement import Impact, Implication, LinkKind, Mitigation, MitigationKind
    from pyEDAA.Reports.RiskManagement import Probability, Risk, RiskLevel, RiskManagement
 
    register = RiskManagement(SemanticVersion(1, 0, 0), "Wafer tape-out")
@@ -110,7 +114,7 @@ references its implications and mitigations, so several risks can share one.
    )
    foundry["ticket"] = "#42"
    board = Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
-   Link(foundry, board, LinkKind.Causes, parent=register)
+   foundry.LinkTo(board, LinkKind.Causes)
 
    for risk in register.IterateRisks(lambda risk: risk.Level in (RiskLevel.High, RiskLevel.Critical)):
      causes = [link.Destination.ID for link in risk.OutboundLinks if link.Kind is LinkKind.Causes]

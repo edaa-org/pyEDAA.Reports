@@ -34,8 +34,8 @@ from datetime                      import datetime, timezone
 
 from pyEDAA.Reports                import Person
 from pyEDAA.Reports.RiskManagement import Impact, Implication, Link, LinkKind, Mitigation, MitigationKind
-from pyEDAA.Reports.RiskManagement import MitigationState, Probability, Risk, RiskLevel, RiskManagement
-from pyEDAA.Reports.RiskManagement import RiskManagementError, RiskState
+from pyEDAA.Reports.RiskManagement import MitigationState, NotInSameRiskRegister, Probability, Risk, RiskLevel
+from pyEDAA.Reports.RiskManagement import RiskManagement, RiskManagementError, RiskState
 from pyTooling.Versioning          import SemanticVersion
 from pyTooling.Testing             import Testcase
 
@@ -367,7 +367,7 @@ class Register(Testcase):
 		implication = Implication("I1", "The tape-out is delayed.")
 		mitigation =  Mitigation("M1", "Order a second shuttle run.", parent=RiskManagement(VERSION))
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(NotInSameRiskRegister) as context:
 			_ = Implication("I2", "The launch is delayed.", [implication], parent=register)
 		self.assertEqual(
 			"Parameter 'implications' contains an implication outside the element's risk register.",
@@ -378,7 +378,7 @@ class Register(Testcase):
 			context.exception.__notes__
 		)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(NotInSameRiskRegister) as context:
 			_ = Implication("I2", "The launch is delayed.", mitigations=[mitigation], parent=register)
 		self.assertEqual(
 			"Parameter 'mitigations' contains a mitigation outside the element's risk register.",
@@ -386,11 +386,11 @@ class Register(Testcase):
 		)
 
 		risk = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(NotInSameRiskRegister) as context:
 			risk.AddImplication(implication)
 		self.assertEqual("Parameter 'implication' is outside the element's risk register.", str(context.exception))
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(NotInSameRiskRegister) as context:
 			risk.AddMitigation(mitigation)
 		self.assertEqual("Parameter 'mitigation' is outside the element's risk register.", str(context.exception))
 
@@ -406,7 +406,7 @@ class Register(Testcase):
 		risk =        Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
 		risk.AddImplication(implication)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(NotInSameRiskRegister) as context:
 			risk.Parent = register
 		self.assertEqual("Risk 'R1' references an implication outside the risk register.", str(context.exception))
 		self.assertEqual(
@@ -414,7 +414,7 @@ class Register(Testcase):
 			context.exception.__notes__
 		)
 
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(NotInSameRiskRegister) as context:
 			implication.Parent = register
 		self.assertEqual("Implication 'I1' references a mitigation outside the risk register.", str(context.exception))
 		self.assertIsNone(risk.Parent)
@@ -458,12 +458,11 @@ class Links(Testcase):
 		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
 		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
 		tools =    Risk("R3", "Tool license", "A license expires.", Probability.Low, Impact.Low, parent=register)
-		causes =   Link(foundry, board, LinkKind.Causes, {"since": "v1.0.0"}, parent=register)
-		related =  Link(foundry, board, LinkKind.Related, parent=register)
-		depends =  Link(tools, foundry, LinkKind.DependsOn, parent=register)
+		causes =   Link(foundry, board, LinkKind.Causes, {"since": "v1.0.0"})
+		related =  Link(foundry, board, LinkKind.Related)
+		depends =  Link(tools, foundry, LinkKind.DependsOn)
 
-		self.assertIs(register, causes.Parent)
-		self.assertIs(register, causes.Root)
+		self.assertFalse(hasattr(causes, "Parent"))
 		self.assertIs(foundry, causes.Source)
 		self.assertIs(board, causes.Destination)
 		self.assertIs(LinkKind.Causes, causes.Kind)
@@ -478,62 +477,90 @@ class Links(Testcase):
 		self.assertEqual([depends], list(register.IterateLinks(lambda link: link.Kind is LinkKind.DependsOn)))
 		self.assertEqual([foundry, board, tools], list(register.IterateRisks()))
 
-	def test_ParameterChecks(self) -> None:
-		foundry = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
-		board =   Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High)
+	def test_LinkTo(self) -> None:
+		"""'LinkTo()' creates an outbound link with everything a link's constructor takes."""
+		register = RiskManagement(VERSION)
+		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
+		causes =   foundry.LinkTo(board, LinkKind.Causes, {"since": "v1.0.0"})
 
-		for arguments, exception, message in (
-			((None,    board,   LinkKind.Causes), ValueError, "Parameter 'source' is None."),
-			(("R1",    board,   LinkKind.Causes), TypeError,  "Parameter 'source' is not of type 'Risk'."),
-			((foundry, None,    LinkKind.Causes), ValueError, "Parameter 'destination' is None."),
-			((foundry, "R2",    LinkKind.Causes), TypeError,  "Parameter 'destination' is not of type 'Risk'."),
-			((foundry, foundry, LinkKind.Causes), ValueError, "Parameter 'destination' is the source."),
-			((foundry, board,   None),            ValueError, "Parameter 'kind' is None."),
-			((foundry, board,   "causes"),        TypeError,  "Parameter 'kind' is not of type 'LinkKind'."),
+		self.assertIs(foundry, causes.Source)
+		self.assertIs(board, causes.Destination)
+		self.assertIs(LinkKind.Causes, causes.Kind)
+		self.assertEqual("v1.0.0", causes["since"])
+		self.assertEqual([causes], foundry.OutboundLinks)
+		self.assertEqual([causes], board.InboundLinks)
+		self.assertEqual([causes], register.Links)
+
+	def test_LinkFrom(self) -> None:
+		"""'LinkFrom()' creates an inbound link: the given risk is the link's source."""
+		register = RiskManagement(VERSION)
+		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
+		causes =   board.LinkFrom(foundry, LinkKind.Causes)
+
+		self.assertIs(foundry, causes.Source)
+		self.assertIs(board, causes.Destination)
+		self.assertEqual([causes], foundry.OutboundLinks)
+		self.assertEqual([causes], board.InboundLinks)
+		self.assertEqual([causes], register.Links)
+
+		for source, exception, message in (
+			(None,  ValueError, "Parameter 'source' is None."),
+			("R1",  TypeError,  "Parameter 'source' is not of type 'Risk'."),
+			(board, ValueError, "Parameter 'source' is this risk."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
-					_ = Link(*arguments)
+					board.LinkFrom(source, LinkKind.Related)
+
+				self.assertEqual(message, str(context.exception))
+
+	def test_ParameterChecks(self) -> None:
+		register = RiskManagement(VERSION)
+		second =   RiskManagement(VERSION)
+		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
+		alone =    Risk("R3", "Tool license", "A license expires.", Probability.Low, Impact.Low)
+		other =    Risk("R4", "Late mask", "The mask shop is late.", Probability.Low, Impact.High, parent=second)
+
+		for source, destination, kind, exception, message in (
+			(None,    board,   LinkKind.Causes, ValueError,            "Parameter 'source' is None."),
+			("R1",    board,   LinkKind.Causes, TypeError,             "Parameter 'source' is not of type 'Risk'."),
+			(alone,   board,   LinkKind.Causes, NotInSameRiskRegister, "Parameter 'source' isn't part of a risk register."),
+			(foundry, None,    LinkKind.Causes, ValueError,            "Parameter 'destination' is None."),
+			(foundry, "R2",    LinkKind.Causes, TypeError,             "Parameter 'destination' is not of type 'Risk'."),
+			(foundry, foundry, LinkKind.Causes, ValueError,            "Parameter 'destination' is the source."),
+			(foundry, alone,   LinkKind.Causes, NotInSameRiskRegister,
+				"Parameter 'destination' isn't part of the source's risk register."),
+			(foundry, other,   LinkKind.Causes, NotInSameRiskRegister,
+				"Parameter 'destination' isn't part of the source's risk register."),
+			(foundry, board,   None,            ValueError,            "Parameter 'kind' is None."),
+			(foundry, board,   "causes",        TypeError,             "Parameter 'kind' is not of type 'LinkKind'."),
+		):
+			with self.subTest(message=message):
+				with self.assertRaises(exception) as context:
+					_ = Link(source, destination, kind)
+
 				self.assertEqual(message, str(context.exception))
 
 		self.assertEqual([], foundry.OutboundLinks)
 		self.assertEqual([], board.InboundLinks)
+		self.assertEqual([], register.Links)
 
 	def test_Duplicate(self) -> None:
-		foundry = Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High)
-		board =   Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High)
-		link =    Link(foundry, board, LinkKind.Causes)
+		register = RiskManagement(VERSION)
+		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
+		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High, parent=register)
+		link =     Link(foundry, board, LinkKind.Causes)
 
 		with self.assertRaises(RiskManagementError) as context:
 			_ = Link(foundry, board, LinkKind.Causes)
+
 		self.assertEqual("Risk 'R1' already has a 'causes' link to risk 'R2'.", str(context.exception))
 		self.assertEqual([link], foundry.OutboundLinks)
 		self.assertEqual([link], board.InboundLinks)
-
-	def test_ForeignRisks(self) -> None:
-		"""A link of a risk register connects risks of that register; a link joins it after its risks."""
-		register = RiskManagement(VERSION)
-		foundry =  Risk("R1", "Late silicon", "The foundry is late.", Probability.High, Impact.High, parent=register)
-		board =    Risk("R2", "Late board", "The board waits.", Probability.Medium, Impact.High)
-
-		with self.assertRaises(ValueError) as context:
-			_ = Link(foundry, board, LinkKind.Causes, parent=register)
-		self.assertEqual("Link's destination is outside the risk register.", str(context.exception))
-		self.assertEqual(["Got risk 'R2'.", "Add the risk to the risk register first."], context.exception.__notes__)
-		self.assertEqual([], foundry.OutboundLinks)
-		self.assertEqual([], register.Links)
-
-		link = Link(foundry, board, LinkKind.Causes)
-		with self.assertRaises(ValueError) as context:
-			link.Parent = register
-		self.assertEqual("Link's destination is outside the risk register.", str(context.exception))
-
-		board.Parent = register
-		link.Parent =  register
-
-		self.assertIs(register, link.Root)
 		self.assertEqual([link], register.Links)
-		self.assertEqual([link], foundry.OutboundLinks)
 
 
 class Assessment(Testcase):
@@ -577,8 +604,8 @@ class Assessment(Testcase):
 
 		stranger = Person("stranger", "Somebody Else")
 		for value, exception, message in (
-			("paebbels", TypeError,  "Parameter 'value' is not of type 'Person'."),
-			(stranger,   ValueError, "Parameter 'value' isn't a person of the risk register."),
+			("paebbels", TypeError,             "Parameter 'value' is not of type 'Person'."),
+			(stranger,   NotInSameRiskRegister, "Parameter 'value' isn't a person of the risk register."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -586,8 +613,9 @@ class Assessment(Testcase):
 				self.assertEqual(message, str(context.exception))
 
 		for keywords, exception, message in (
-			({"owner": "paebbels"},                   TypeError,  "Parameter 'owner' is not of type 'Person'."),
-			({"owner": stranger, "parent": register}, ValueError, "Parameter 'owner' isn't a person of the risk register."),
+			({"owner": "paebbels"},                   TypeError,             "Parameter 'owner' is not of type 'Person'."),
+			({"owner": stranger, "parent": register}, NotInSameRiskRegister,
+				"Parameter 'owner' isn't a person of the risk register."),
 		):
 			with self.subTest(message=message):
 				with self.assertRaises(exception) as context:
@@ -595,7 +623,7 @@ class Assessment(Testcase):
 				self.assertEqual(message, str(context.exception))
 
 		standalone = Risk("R2", "Tool license", "A license expires.", Probability.Low, Impact.Low, owner=stranger)
-		with self.assertRaises(ValueError) as context:
+		with self.assertRaises(NotInSameRiskRegister) as context:
 			standalone.Parent = register
 		self.assertEqual("Risk 'R2' has an owner outside the risk register.", str(context.exception))
 		self.assertEqual(
