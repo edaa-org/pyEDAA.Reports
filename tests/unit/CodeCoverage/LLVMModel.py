@@ -385,56 +385,103 @@ class Tree(Testcase):
 	"""Every element knows the element containing it, and the report's root."""
 
 	def test_Parsed(self) -> None:
-		"""Each collection of a parsed report holds elements of its own type, and each element has the document as root."""
+		"""Each collection of a parsed report holds its own element type, with its owner as parent, the report as root."""
 		document = Document(Path("tests/data/CodeCoverage/LLVM/coverage-3.1.0.json"), analyzeAndConvert=True)
 
-		files =      list(document.Files.values())
-		functions =  document.Functions
-		expansions = [expansion for file in files for expansion in file.Expansions]
-		summaries =  [document.Totals, *(file.Summary for file in files)]
-		records =    [record for element in (*files, *functions) for record in element.MCDCRecords]
-		for name, elementType, elements in (
-			("files",          File,           files),
-			("functions",      Function,       functions),
-			("expansions",     Expansion,      expansions),
-			("summaries",      Summary,        summaries),
-			("MC/DC records",  MCDCRecord,     records),
-			("segments",       Segment,        [segment for file in files for segment in file.Segments]),
-			("branch regions", BranchRegion,   [
-				branch for element in (*files, *functions, *expansions) for branch in element.Branches
-			]),
-			("regions",        Region,         [
-				*(region for function in functions for region in function.Regions),
-				*(region for expansion in expansions for region in (expansion.SourceRegion, *expansion.TargetRegions))
-			]),
-			("test vectors",   MCDCTestVector, [testVector for record in records for testVector in record.TestVectors]),
-			("counters",       Counters,       [
-				counters for summary in summaries for counters in (
-					summary.Lines, summary.Functions, summary.Instantiations, summary.Regions, summary.Branches, summary.MCDC
-				) if counters is not None
-			])
-		):
-			with self.subTest(elements=name):
-				self.assertGreater(len(elements), 0)
-				for element in elements:
-					self.assertIsInstance(element, elementType)
-					self.assertIs(document, element.Root)
+		self.assertGreater(len(document.Files), 0)
+		for file in document.Files.values():
+			self.assertIsInstance(file, File)
+			self.assertIs(document, file.Parent)
+			self.assertIs(document, file.Root)
 
-		file = document.Files[Path("/project/src/Statistics.c")]
-		expansion = file.Expansions[0]
-		self.assertIs(document, file.Parent)
-		self.assertTrue(all(element.Parent is file for element in (*file.Segments, *file.Branches, expansion)))
-		self.assertIs(file, file.Summary.Parent)
-		self.assertIs(file.Summary, file.Summary.Lines.Parent)
-		self.assertIs(expansion, expansion.SourceRegion.Parent)
-		self.assertTrue(all(region.Parent is expansion for region in (*expansion.TargetRegions, *expansion.Branches)))
+			self.assertGreater(len(file.Segments), 0)
+			for segment in file.Segments:
+				self.assertIsInstance(segment, Segment)
+				self.assertIs(file, segment.Parent)
+				self.assertIs(document, segment.Root)
 
-		function = document.Functions[0]
-		self.assertIs(document, function.Parent)
-		self.assertTrue(all(region.Parent is function for region in (*function.Regions, *function.Branches)))
-		record = next(record for function in document.Functions for record in function.MCDCRecords)
-		self.assertIs(record, record.TestVectors[0].Parent)
-		self.assertIs(document, document.Totals.Parent)
+			for branch in file.Branches:
+				self.assertIsInstance(branch, BranchRegion)
+				self.assertIs(file, branch.Parent)
+				self.assertIs(document, branch.Root)
+
+			for record in file.MCDCRecords:
+				self.assertIsInstance(record, MCDCRecord)
+				self.assertIs(file, record.Parent)
+				self.assertIs(document, record.Root)
+
+			for expansion in file.Expansions:
+				self.assertIsInstance(expansion, Expansion)
+				self.assertIs(file, expansion.Parent)
+				self.assertIs(document, expansion.Root)
+
+				self.assertIsInstance(expansion.SourceRegion, Region)
+				self.assertIs(expansion, expansion.SourceRegion.Parent)
+				self.assertIs(document, expansion.SourceRegion.Root)
+
+				for region in expansion.TargetRegions:
+					self.assertIsInstance(region, Region)
+					self.assertIs(expansion, region.Parent)
+					self.assertIs(document, region.Root)
+
+				for branch in expansion.Branches:
+					self.assertIsInstance(branch, BranchRegion)
+					self.assertIs(expansion, branch.Parent)
+					self.assertIs(document, branch.Root)
+
+			summary = file.Summary
+			self.assertIsInstance(summary, Summary)
+			self.assertIs(file, summary.Parent)
+			self.assertIs(document, summary.Root)
+
+			for counters in (summary.Lines, summary.Functions, summary.Instantiations, summary.Regions, summary.Branches):
+				self.assertIsInstance(counters, Counters)
+				self.assertIs(summary, counters.Parent)
+				self.assertIs(document, counters.Root)
+
+		self.assertGreater(len(document.Functions), 0)
+		for function in document.Functions:
+			self.assertIsInstance(function, Function)
+			self.assertIs(document, function.Parent)
+			self.assertIs(document, function.Root)
+
+			self.assertGreater(len(function.Regions), 0)
+			for region in function.Regions:
+				self.assertIsInstance(region, Region)
+				self.assertIs(function, region.Parent)
+				self.assertIs(document, region.Root)
+
+			for branch in function.Branches:
+				self.assertIsInstance(branch, BranchRegion)
+				self.assertIs(function, branch.Parent)
+				self.assertIs(document, branch.Root)
+
+			for record in function.MCDCRecords:
+				self.assertIsInstance(record, MCDCRecord)
+				self.assertIs(function, record.Parent)
+				self.assertIs(document, record.Root)
+
+				self.assertGreater(len(record.TestVectors), 0)
+				for testVector in record.TestVectors:
+					self.assertIsInstance(testVector, MCDCTestVector)
+					self.assertIs(record, testVector.Parent)
+					self.assertIs(document, testVector.Root)
+
+		totals = document.Totals
+		self.assertIsInstance(totals, Summary)
+		self.assertIs(document, totals.Parent)
+		self.assertIs(document, totals.Root)
+
+		for counters in (totals.Lines, totals.Functions, totals.Instantiations, totals.Regions, totals.Branches):
+			self.assertIsInstance(counters, Counters)
+			self.assertIs(totals, counters.Parent)
+			self.assertIs(document, counters.Root)
+
+		# The loops, which may run zero times per file or function, run at least once for this report.
+		self.assertGreater(sum(len(file.Expansions) for file in document.Files.values()), 0)
+		self.assertGreater(sum(len(file.Branches) for file in document.Files.values()), 0)
+		self.assertGreater(sum(len(function.Branches) for function in document.Functions), 0)
+		self.assertGreater(sum(len(function.MCDCRecords) for function in document.Functions), 0)
 
 	def test_BottomUp(self) -> None:
 		"""A container connects the elements given to it; joining the report sets the root of every element below."""
