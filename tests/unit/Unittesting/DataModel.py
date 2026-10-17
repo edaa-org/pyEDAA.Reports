@@ -31,7 +31,9 @@
 from datetime                   import timedelta
 from unittest                   import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting import DuplicateTestsuiteError, DuplicateTestcaseError, TestsuiteStatus
+from pyEDAA.Reports             import DuplicateElementError
+from pyEDAA.Reports.Unittesting import AlreadyInHierarchyError, DuplicateTestsuiteError, DuplicateTestcaseError
+from pyEDAA.Reports.Unittesting import TestsuiteStatus, UnittestError
 from pyEDAA.Reports.Unittesting import TestcaseStatus, Testcase, Testsuite, TestsuiteSummary, IterationScheme
 from pyEDAA.Reports.Unittesting import MergedTestsuiteSummary
 from pyTooling.Testing          import Testcase as py_Testcase
@@ -221,6 +223,21 @@ class Hierarchy(ut_TestCase):
 		self.assertEqual(1, len(ts.Testcases))
 		self.assertEqual(tc1, ts.Testcases["tc1"])
 		self.assertEqual(ts, tc1.Parent)
+
+		with self.assertRaises(AlreadyInHierarchyError) as context:
+			Testsuite("other").AddTestcase(tc1)
+
+		self.assertEqual("Testcase 'tc1' is already part of a testsuite hierarchy.", str(context.exception))
+
+		with self.assertRaises(DuplicateTestcaseError):
+			ts.AddTestcase(Testcase("tc1"))
+
+	def test_DuplicateErrors(self) -> None:
+		"""Every duplicate error is a 'DuplicateElementError' and a 'UnittestError'."""
+		for exception in (DuplicateTestsuiteError, DuplicateTestcaseError):
+			with self.subTest(exception=exception.__name__):
+				self.assertTrue(issubclass(exception, DuplicateElementError))
+				self.assertTrue(issubclass(exception, UnittestError))
 
 	def test_AddTestcases(self) -> None:
 		ts = Testsuite("root")

@@ -84,7 +84,7 @@ from pyTooling.Decorators  import export, readonly
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Tree        import Node
 
-from pyEDAA.Reports        import ReportException
+from pyEDAA.Reports        import DuplicateElementError, ReportException
 
 
 @export
@@ -107,7 +107,7 @@ class AlreadyInHierarchyError(UnittestError):
 
 
 @export
-class DuplicateTestsuiteError(UnittestError):
+class DuplicateTestsuiteError(UnittestError, DuplicateElementError):
 	"""
 	A unit test exception raised on duplicate test suites (by name).
 
@@ -120,7 +120,7 @@ class DuplicateTestsuiteError(UnittestError):
 
 
 @export
-class DuplicateTestcaseError(UnittestError):
+class DuplicateTestcaseError(UnittestError, DuplicateElementError):
 	"""
 	A unit test exception raised on duplicate test cases (by name).
 
@@ -1735,7 +1735,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 			raise ex
 
 		if testcase._parent is not None:
-			raise ValueError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+			raise AlreadyInHierarchyError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
 
 		if testcase._name in self._testcases:
 			raise DuplicateTestcaseError(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
