@@ -458,12 +458,13 @@ class Base(metaclass=ExtendedType, slots=True):
 		Assigning a parent adds this element to it, and sets the parent's root as the root of this element and of every
 		element below it.
 
-		:returns:                      The parent, or ``None``.
-		:raises ValueError:            If ``None`` is assigned.
-		:raises TypeError:             If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises TypeError:             If a parent is assigned to a :class:`DocumentationReport`, which has no parent.
-		:raises DuplicateElementError: If the assigned parent is a directory, which already contains an element of this
-		                               name.
+		:returns:                        The parent, or ``None``.
+		:raises ValueError:              If ``None`` is assigned.
+		:raises TypeError:               If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
+		:raises TypeError:               If a parent is assigned to a :class:`DocumentationReport`, which has no parent.
+		:raises DuplicateDirectoryError: If the assigned parent is a directory, which already contains a directory of this
+		                                 name.
+		:raises DuplicateFileError:      If the assigned parent is a directory, which already contains a file of this name.
 		"""
 		return self._parent
 
@@ -672,8 +673,9 @@ class Directory(BaseWithPath):
 		"""
 		Add a directory or file, which names this directory as its parent.
 
-		:param element:                The directory or file.
-		:raises DuplicateElementError: If this directory already contains a file or directory of this name.
+		:param element:                  The directory or file.
+		:raises DuplicateDirectoryError: If this directory already contains a directory of this name.
+		:raises DuplicateFileError:      If this directory already contains a file of this name.
 		"""
 		if isinstance(element, Directory):
 			elements =  self._directories
@@ -841,8 +843,9 @@ class DocumentationReport(Directory):
 		"""
 		Add a top-level item, a directory or a file, which names the report as its parent.
 
-		:param element:                The item, directory or file.
-		:raises DuplicateElementError: If the report already contains a file or directory of this name.
+		:param element:                  The item, directory or file.
+		:raises DuplicateDirectoryError: If the report already contains a directory of this name.
+		:raises DuplicateFileError:      If the report already contains a file of this name.
 		"""
 		if isinstance(element, BaseWithPath):
 			super()._AddElement(element)

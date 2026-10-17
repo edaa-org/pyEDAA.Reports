@@ -295,14 +295,19 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 
 		Assigning a risk register adds this element to it, and sets the register's root as the root of this element.
 
-		:returns:                        The parent, or ``None``.
-		:raises ValueError:              If ``None`` is assigned.
-		:raises TypeError:               If the assigned parent isn't of type :class:`RiskManagement`.
-		:raises TypeError:               If a parent is assigned to a :class:`RiskManagement`, which has no parent.
-		:raises AlreadyInHierarchyError: If the element is already part of a risk register.
-		:raises DuplicateElementError:   If the risk register already contains an element of the same kind and ID.
-		:raises NotInSameRiskRegister:   If the element references an element, which isn't part of the risk register. |br|
-		                                 Add the referenced elements to the risk register first.
+		:returns:                          The parent, or ``None``.
+		:raises ValueError:                If ``None`` is assigned.
+		:raises TypeError:                 If the assigned parent isn't of type :class:`RiskManagement`.
+		:raises TypeError:                 If a parent is assigned to a :class:`RiskManagement`, which has no parent.
+		:raises AlreadyInHierarchyError:   If the element is already part of a risk register.
+		:raises DuplicateRiskError:        If the element is a risk, and the risk register already contains a risk of its
+		                                   ID.
+		:raises DuplicateImplicationError: If the element is an implication, and the risk register already contains an
+		                                   implication of its ID.
+		:raises DuplicateMitigationError:  If the element is a mitigation, and the risk register already contains a
+		                                   mitigation of its ID.
+		:raises NotInSameRiskRegister:     If the element references an element, which isn't part of the risk register. |br|
+		                                   Add the referenced elements to the risk register first.
 		"""
 		return self._parent
 

@@ -247,14 +247,26 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		Assigning a parent to an element without one adds the element to it, and sets the parent's specification as the
 		specification of this element and of every element below it.
 
-		:returns:                        The parent, or ``None``.
-		:raises ValueError:              If ``None`` is assigned.
-		:raises TypeError:               If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises TypeError:               If a parent is assigned to a :class:`RequirementSpecification`, which has no
-		                                 parent.
-		:raises AlreadyInHierarchyError: If the element already has a parent.
-		:raises DuplicateElementError:   If the assigned parent's specification already contains an element of an ID of this
-		                                 element or of an element below it.
+		:returns:                                The parent, or ``None``.
+		:raises ValueError:                      If ``None`` is assigned.
+		:raises TypeError:                       If the assigned parent isn't of a type this class declares in
+		                                         :attr:`_PARENT_TYPE`.
+		:raises TypeError:                       If a parent is assigned to a :class:`RequirementSpecification`, which has
+		                                         no
+		                                         parent.
+		:raises AlreadyInHierarchyError:         If the element already has a parent.
+		:raises DuplicatePersonaError:           If the element is a persona, and the specification already contains a
+		                                         persona of its ID.
+		:raises DuplicateLabelError:             If the element is a label, and the specification already contains a label
+		                                         of its ID.
+		:raises DuplicateDocumentError:          If the element is a document, and the specification already contains a
+		                                         document of its ID.
+		:raises DuplicateLayerError:             If the element is a layer, and the specification already contains a layer
+		                                         of its ID.
+		:raises DuplicateRequirementError:       If the specification already contains a requirement of an ID of this
+		                                         requirement or of a requirement below it.
+		:raises DuplicateSpecificationItemError: If the specification already contains a specification item of an ID of this
+		                                         item or of an item below it.
 		"""
 		return self._parent
 
@@ -449,9 +461,15 @@ class RequirementSpecification(Base):
 		Register a persona, label, document, layer, top-level requirement or top-level specification item, which names the
 		specification as its parent.
 
-		:param element:                The element.
-		:raises DuplicateElementError: If the specification already contains an element of the same class and ID, or an item
-		                               below a requirement or specification item has the ID of a registered one.
+		:param element:                          The element.
+		:raises DuplicatePersonaError:           If the specification already contains a persona of the element's ID.
+		:raises DuplicateLabelError:             If the specification already contains a label of the element's ID.
+		:raises DuplicateDocumentError:          If the specification already contains a document of the element's ID.
+		:raises DuplicateLayerError:             If the specification already contains a layer of the element's ID.
+		:raises DuplicateRequirementError:       If the specification already contains a requirement of the ID of the
+		                                         requirement or of a requirement below it.
+		:raises DuplicateSpecificationItemError: If the specification already contains a specification item of the ID of the
+		                                         item or of an item below it.
 		"""
 		if isinstance(element, BaseItem):
 			self._AddItems(element)
@@ -480,8 +498,11 @@ class RequirementSpecification(Base):
 
 		Either all of them are registered, or none.
 
-		:param item:                   The item joining the specification.
-		:raises DuplicateElementError: If an ID of these items is registered already, or used twice by them.
+		:param item:                             The item joining the specification.
+		:raises DuplicateRequirementError:       If the item is a requirement, and an ID of these requirements is registered
+		                                         already, or used twice by them.
+		:raises DuplicateSpecificationItemError: If the item is a specification item, and an ID of these items is registered
+		                                         already, or used twice by them.
 		"""
 		items =   self._requirements if isinstance(item, Requirement) else self._specificationItems
 		ids =     set()
@@ -749,24 +770,31 @@ class BaseWithName(BaseWithID):
 		"""
 		Initializes an element with its ID, name and description, and registers it in its specification.
 
-		:param identifier:             The element's ID.
-		:param name:                   The element's name.
-		:param description:            Optional, the element's description. Default: ``""``.
-		:param keyValuePairs:          Optional, the key-value pairs. Default: ``None``.
-		:param parent:                 Optional, the specification. Default: ``None``.
-		:raises TypeError:             If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:             If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:            If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:             If parameter ``parent`` isn't of type :class:`RequirementSpecification`.
-		:raises ValueError:            If parameter ``identifier`` is ``None``.
-		:raises TypeError:             If parameter ``identifier`` isn't of type :class:`str`.
-		:raises ValueError:            If parameter ``identifier`` is empty.
-		:raises ValueError:            If parameter ``description`` is ``None``.
-		:raises TypeError:             If parameter ``description`` isn't of type :class:`str`.
-		:raises ValueError:            If parameter ``name`` is ``None``.
-		:raises TypeError:             If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:            If parameter ``name`` is empty.
-		:raises DuplicateElementError: If the specification already contains an element of this class and ID.
+		:param identifier:              The element's ID.
+		:param name:                    The element's name.
+		:param description:             Optional, the element's description. Default: ``""``.
+		:param keyValuePairs:           Optional, the key-value pairs. Default: ``None``.
+		:param parent:                  Optional, the specification. Default: ``None``.
+		:raises TypeError:              If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:              If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:             If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:              If parameter ``parent`` isn't of type :class:`RequirementSpecification`.
+		:raises ValueError:             If parameter ``identifier`` is ``None``.
+		:raises TypeError:              If parameter ``identifier`` isn't of type :class:`str`.
+		:raises ValueError:             If parameter ``identifier`` is empty.
+		:raises ValueError:             If parameter ``description`` is ``None``.
+		:raises TypeError:              If parameter ``description`` isn't of type :class:`str`.
+		:raises ValueError:             If parameter ``name`` is ``None``.
+		:raises TypeError:              If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:             If parameter ``name`` is empty.
+		:raises DuplicatePersonaError:  If the element is a persona, and the specification already contains a persona of
+		                                this ID.
+		:raises DuplicateLabelError:    If the element is a label, and the specification already contains a label of this
+		                                ID.
+		:raises DuplicateDocumentError: If the element is a document, and the specification already contains a document of
+		                                this ID.
+		:raises DuplicateLayerError:    If the element is a layer, and the specification already contains a layer of this
+		                                ID.
 		"""
 		super().__init__(identifier, description=description, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -988,8 +1016,10 @@ class BaseItem(BaseWithID):
 		                                type :class:`Persona`, :class:`Label` or :class:`Document`.
 		:raises NotInSameSpecification: If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
 		                                contains an element, which isn't part of the item's specification.
-		:raises DuplicateElementError:  If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
-		                                contains an element twice.
+		:raises DuplicatePersonError:   If parameter ``authors`` or ``owners`` contains a person twice.
+		:raises DuplicatePersonaError:  If parameter ``personas`` contains a persona twice.
+		:raises DuplicateLabelError:    If parameter ``labels`` contains a label twice.
+		:raises DuplicateDocumentError: If parameter ``attachments`` contains a document twice.
 		"""
 		super().__init__(identifier, description=description, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -1098,11 +1128,16 @@ class BaseItem(BaseWithID):
 
 		A child item is registered with every item below it in the specification.
 
-		:param element:                The child item or history event.
-		:raises DuplicateElementError: If the specification already contains an item of an ID of the child or an item below
-		                               it.
-		:raises DuplicateElementError: If this item isn't part of a specification, and has a child of this ID already.
-		:raises RequirementsError:     If the history event is earlier than the item's creation or its last event.
+		:param element:                          The child item or history event.
+		:raises DuplicateRequirementError:       If the child is a requirement, and the specification already contains a
+		                                         requirement of an ID of the child or a requirement below it.
+		:raises DuplicateSpecificationItemError: If the child is a specification item, and the specification already
+		                                         contains a specification item of an ID of the child or an item below it.
+		:raises DuplicateRequirementError:       If the child is a requirement, this item isn't part of a specification, and
+		                                         it has a child of this ID already.
+		:raises DuplicateSpecificationItemError: If the child is a specification item, this item isn't part of a
+		                                         specification, and it has a child of this ID already.
+		:raises RequirementsError:               If the history event is earlier than the item's creation or its last event.
 		"""
 		if isinstance(element, HistoryEvent):
 			previous = self._history[-1]._timestamp if len(self._history) > 0 else self._created
@@ -1560,8 +1595,10 @@ class Requirement(BaseItem):
 		                                   of type :class:`Persona`, :class:`Label` or :class:`Document`.
 		:raises NotInSameSpecification:    If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
 		                                   contains an element, which isn't part of the requirement's specification.
-		:raises DuplicateElementError:     If parameter ``authors``, ``owners``, ``personas``, ``labels`` or ``attachments``
-		                                   contains an element twice.
+		:raises DuplicatePersonError:      If parameter ``authors`` or ``owners`` contains a person twice.
+		:raises DuplicatePersonaError:     If parameter ``personas`` contains a persona twice.
+		:raises DuplicateLabelError:       If parameter ``labels`` contains a label twice.
+		:raises DuplicateDocumentError:    If parameter ``attachments`` contains a document twice.
 		:raises ValueError:                If parameter ``kind`` is ``None``.
 		:raises TypeError:                 If parameter ``kind`` isn't of type :class:`RequirementKind`.
 		:raises ValueError:                If parameter ``obligation`` is ``None``.
@@ -1778,8 +1815,10 @@ class SpecificationItem(BaseItem):
 		:raises NotInSameSpecification:          If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
 		                                         ``attachments`` contains an element, which isn't part of the item's
 		                                         specification.
-		:raises DuplicateElementError:           If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
-		                                         ``attachments`` contains an element twice.
+		:raises DuplicatePersonError:            If parameter ``authors`` or ``owners`` contains a person twice.
+		:raises DuplicatePersonaError:           If parameter ``personas`` contains a persona twice.
+		:raises DuplicateLabelError:             If parameter ``labels`` contains a label twice.
+		:raises DuplicateDocumentError:          If parameter ``attachments`` contains a document twice.
 		:raises TypeError:                       If parameter ``requirements`` isn't iterable, or is a single element.
 		:raises TypeError:                       If parameter ``requirements`` contains an element not of type
 		                                         :class:`Requirement`.
@@ -2076,32 +2115,35 @@ class HistoryEvent(Base):
 		"""
 		Initializes a history event, and adds it to the history of its item.
 
-		:param kind:                    The kind of the event.
-		:param timestamp:               The time of the event; without a time zone, it is a local time.
-		:param person:                  Optional, the person causing the event. Default: ``None``.
-		:param involved:                Optional, the other items involved. Default: ``None``.
-		:param description:             Optional, the event's description. Default: ``""``.
-		:param keyValuePairs:           Optional, the key-value pairs. Default: ``None``.
-		:param parent:                  Optional, the item the event happened to. Default: ``None``.
-		:raises TypeError:              If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:              If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:             If parameter ``keyValuePairs`` contains an empty key.
-		:raises TypeError:              If parameter ``parent`` isn't of type :class:`BaseItem`.
-		:raises ValueError:             If parameter ``kind`` is ``None``.
-		:raises TypeError:              If parameter ``kind`` isn't of type :class:`EventKind`.
-		:raises ValueError:             If parameter ``timestamp`` is ``None``.
-		:raises TypeError:              If parameter ``timestamp`` isn't of type :class:`~datetime.datetime`.
-		:raises TypeError:              If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
-		:raises NotInSameSpecification: If parameter ``person`` isn't part of the item's specification.
-		:raises TypeError:              If parameter ``involved`` isn't iterable, or is a single element.
-		:raises TypeError:              If parameter ``involved`` contains an element not of type :class:`BaseItem`.
-		:raises NotInSameSpecification: If parameter ``involved`` contains an item, which isn't part of the item's
-		                                specification.
-		:raises DuplicateElementError:  If parameter ``involved`` contains an item twice.
-		:raises ValueError:             If parameter ``involved`` names no item for a split or a merge.
-		:raises ValueError:             If parameter ``description`` is ``None``.
-		:raises TypeError:              If parameter ``description`` isn't of type :class:`str`.
-		:raises RequirementsError:      If parameter ``timestamp`` is earlier than the item's creation or its last event.
+		:param kind:                             The kind of the event.
+		:param timestamp:                        The time of the event; without a time zone, it is a local time.
+		:param person:                           Optional, the person causing the event. Default: ``None``.
+		:param involved:                         Optional, the other items involved. Default: ``None``.
+		:param description:                      Optional, the event's description. Default: ``""``.
+		:param keyValuePairs:                    Optional, the key-value pairs. Default: ``None``.
+		:param parent:                           Optional, the item the event happened to. Default: ``None``.
+		:raises TypeError:                       If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:                       If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
+		:raises ValueError:                      If parameter ``keyValuePairs`` contains an empty key.
+		:raises TypeError:                       If parameter ``parent`` isn't of type :class:`BaseItem`.
+		:raises ValueError:                      If parameter ``kind`` is ``None``.
+		:raises TypeError:                       If parameter ``kind`` isn't of type :class:`EventKind`.
+		:raises ValueError:                      If parameter ``timestamp`` is ``None``.
+		:raises TypeError:                       If parameter ``timestamp`` isn't of type :class:`~datetime.datetime`.
+		:raises TypeError:                       If parameter ``person`` isn't of type :class:`~pyEDAA.Reports.Person`.
+		:raises NotInSameSpecification:          If parameter ``person`` isn't part of the item's specification.
+		:raises TypeError:                       If parameter ``involved`` isn't iterable, or is a single element.
+		:raises TypeError:                       If parameter ``involved`` contains an element not of type
+		                                         :class:`BaseItem`.
+		:raises NotInSameSpecification:          If parameter ``involved`` contains an item, which isn't part of the item's
+		                                         specification.
+		:raises DuplicateRequirementError:       If parameter ``involved`` contains a requirement twice.
+		:raises DuplicateSpecificationItemError: If parameter ``involved`` contains a specification item twice.
+		:raises ValueError:                      If parameter ``involved`` names no item for a split or a merge.
+		:raises ValueError:                      If parameter ``description`` is ``None``.
+		:raises TypeError:                       If parameter ``description`` isn't of type :class:`str`.
+		:raises RequirementsError:               If parameter ``timestamp`` is earlier than the item's creation or its last
+		                                         event.
 		"""
 		super().__init__(keyValuePairs=keyValuePairs, parent=parent)
 

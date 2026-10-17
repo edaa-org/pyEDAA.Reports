@@ -166,11 +166,14 @@ class Base(metaclass=ExtendedType, slots=True):
 		Assigning a parent adds this element to it, and sets the parent's root as the root of this element and of every
 		element below it.
 
-		:returns:                      The parent, or ``None``.
-		:raises ValueError:            If ``None`` is assigned.
-		:raises TypeError:             If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises TypeError:             If a parent is assigned to a :class:`CoverageSummary`, which has no parent.
-		:raises DuplicateElementError: If the assigned parent already contains an element of this name or line number.
+		:returns:                        The parent, or ``None``.
+		:raises ValueError:              If ``None`` is assigned.
+		:raises TypeError:               If the assigned parent isn't of a type this class declares in :attr:`_PARENT_TYPE`.
+		:raises TypeError:               If a parent is assigned to a :class:`CoverageSummary`, which has no parent.
+		:raises DuplicateDirectoryError: If the assigned parent already contains a directory of this name.
+		:raises DuplicateFileError:      If the assigned parent already contains a file of this name.
+		:raises DuplicateUnitError:      If the assigned parent already contains a unit of this name.
+		:raises DuplicateLineError:      If the assigned parent already contains a line of this line number.
 		"""
 		return self._parent
 
@@ -556,8 +559,9 @@ class Directory(BaseWithPath):
 		"""
 		Add a directory or file, which names this directory as its parent.
 
-		:param element:                The directory or file.
-		:raises DuplicateElementError: If this directory already contains a file or directory of this name.
+		:param element:                  The directory or file.
+		:raises DuplicateDirectoryError: If this directory already contains a directory of this name.
+		:raises DuplicateFileError:      If this directory already contains a file of this name.
 		"""
 		if isinstance(element, Directory):
 			elements =  self._directories
@@ -752,9 +756,10 @@ class CoverageSummary(Directory):
 		"""
 		Add a top-level unit, directory or file, which names the report's root as its parent.
 
-		:param element:                The unit, directory or file.
-		:raises DuplicateUnitError:    If the root already contains a unit of this name.
-		:raises DuplicateElementError: If the root already contains a file or directory of this name.
+		:param element:                  The unit, directory or file.
+		:raises DuplicateUnitError:      If the root already contains a unit of this name.
+		:raises DuplicateDirectoryError: If the root already contains a directory of this name.
+		:raises DuplicateFileError:      If the root already contains a file of this name.
 		"""
 		if not isinstance(element, Unit):
 			super()._AddElement(element)
