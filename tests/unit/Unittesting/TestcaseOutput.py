@@ -138,11 +138,13 @@ class JUnitReader(Testcase):
 
 	_outputDirectory = Path("tests/output/TestcaseOutput")
 
-	@classmethod
-	def setUpClass(cls) -> None:
-		cls._outputDirectory.mkdir(parents=True, exist_ok=True)
-		cls._reportFile = cls._outputDirectory / "report.xml"
-		cls._reportFile.write_text(REPORT, encoding="utf-8")
+	def setUp(self) -> None:
+		super().setUp()
+
+		# One file per testcase: pytest-xdist workers run the testcases of this class in parallel.
+		self._outputDirectory.mkdir(parents=True, exist_ok=True)
+		self._reportFile = self._outputDirectory / f"{self._testMethodName}.report.xml"
+		self._reportFile.write_text(REPORT, encoding="utf-8")
 
 	def _testcases(self, document: Document):
 		testclass = document.Testsuites["pytest"].Testclasses["tests.unit.Module.Class"]
