@@ -65,10 +65,11 @@ from typing                import Callable, ClassVar, Generator, Iterator, Optio
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
 from pyTooling.Decorators  import export, readonly
+from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Warning     import CriticalWarning
 
-from pyEDAA.Reports        import AlreadyInHierarchyError, DuplicateElementError, ReportException
+from pyEDAA.Reports        import ReportException
 
 
 @export

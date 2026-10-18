@@ -31,15 +31,16 @@
 """Unit tests of the requirements model: requirements, their hierarchy, and iterating them."""
 from datetime                    import datetime, timedelta, timezone
 
-from pyEDAA.Reports              import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
+from pyTooling.Exceptions        import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
+from pyTooling.Versioning        import SemanticVersion
+from pyTooling.Testing           import Testcase
+
 from pyEDAA.Reports.Requirements import AlreadyInSpecificationError, DuplicateDocumentError, DuplicateLabelError
 from pyEDAA.Reports.Requirements import DuplicateLayerError, DuplicateLinkError, DuplicatePersonaError
 from pyEDAA.Reports.Requirements import DuplicatePersonError, DuplicateRequirementError, DuplicateSpecificationItemError
 from pyEDAA.Reports.Requirements import ItemState, Label, NotInSameSpecificationError, Obligation, Requirement
 from pyEDAA.Reports.Requirements import RequirementKind
 from pyEDAA.Reports.Requirements import RequirementSpecification, RequirementsError
-from pyTooling.Versioning        import SemanticVersion
-from pyTooling.Testing           import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover
