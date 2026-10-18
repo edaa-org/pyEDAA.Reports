@@ -36,8 +36,8 @@ Every element carries key-value pairs for the information the model has no field
 * The :class:`RequirementSpecification` registers every person by user ID, and every persona, label, document and layer,
   every requirement and every specification item - also the child items - by its ID. An ID is unique among the elements
   of a class; a duplicate raises the duplicate error of its class, e.g. :exc:`DuplicateRequirementError` - each a
-  :exc:`~pyTooling.Exceptions.DuplicateElementError` and a :exc:`RequirementsError`. Each registry is a dictionary property,
-  e.g. :attr:`~RequirementSpecification.Labels`, with an iterator taking an optional predicate, e.g.
+  :exc:`~pyTooling.Exceptions.DuplicateElementError` and a :exc:`RequirementsError`. Each registry is a dictionary
+  property, e.g. :attr:`~RequirementSpecification.Labels`, with an iterator taking an optional predicate, e.g.
   :meth:`~RequirementSpecification.IterateLabels`.
 * The root's :attr:`~RequirementSpecification.Version` is the version of the specification itself; its name is
   optional.
@@ -50,8 +50,8 @@ Every element carries key-value pairs for the information the model has no field
   elements below it. An element, which already has a parent, raises an :exc:`AlreadyInSpecificationError` - an
   :exc:`~pyTooling.Exceptions.AlreadyInHierarchyError`.
 * An item refers only to personas, labels, documents and layers of its own specification. An element or person of
-  another specification raises a :exc:`NotInSameSpecificationError` - a :exc:`~pyTooling.Exceptions.NotInSameHierarchyError`:
-  it is valid, but not part of the specification.
+  another specification raises a :exc:`NotInSameSpecificationError` - a
+  :exc:`~pyTooling.Exceptions.NotInSameHierarchyError`: it is valid, but not part of the specification.
 
 
 .. _REQ/Requirements:

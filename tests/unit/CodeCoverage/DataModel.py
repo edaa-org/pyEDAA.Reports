@@ -32,13 +32,14 @@
 """Unit tests of the code coverage data model: lines, branches, files, directories, units and their counters."""
 from pathlib                     import Path
 
+from pyTooling.Exceptions        import AlreadyInHierarchyError, DuplicateElementError
+from pyTooling.Testing           import Testcase
+
 from pyEDAA.Reports.CodeCoverage import AlreadyInCoverageReportError, Branch, Class, CodeCoverageError, CoverageSummary
 from pyEDAA.Reports.CodeCoverage import Directory
 from pyEDAA.Reports.CodeCoverage import DuplicateDirectoryError, DuplicateFileError, DuplicateLineError
 from pyEDAA.Reports.CodeCoverage import DuplicateUnitError, File, Function, Line, LineCoverageStatus, Method, Module
 from pyEDAA.Reports.CodeCoverage import Package, SourceFile
-from pyTooling.Exceptions        import AlreadyInHierarchyError, DuplicateElementError
-from pyTooling.Testing           import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

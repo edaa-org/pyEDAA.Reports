@@ -55,8 +55,8 @@ references its implications and mitigations, so several risks can share one.
   :meth:`Risk.LinkFrom` create an outbound or inbound link of a risk, with the parameters of the link's constructor.
 * An element joins the register by naming it as its parent, in its constructor or by :attr:`~Base.Parent`. An ID is
   unique among the elements of its kind; a second element of the same ID raises a duplicate error of its kind, e.g.
-  :exc:`DuplicateRiskError` - each a :exc:`~pyTooling.Exceptions.DuplicateElementError` and a :exc:`RiskManagementError`. An
-  element already part of a register raises an :exc:`AlreadyInRiskRegisterError` - an
+  :exc:`DuplicateRiskError` - each a :exc:`~pyTooling.Exceptions.DuplicateElementError` and a
+  :exc:`RiskManagementError`. An element already part of a register raises an :exc:`AlreadyInRiskRegisterError` - an
   :exc:`~pyTooling.Exceptions.AlreadyInHierarchyError`.
 * An element of the register references only implications and mitigations of the same register, and a link connects
   risks of the same register: referenced elements and linked risks join the register first. Otherwise a

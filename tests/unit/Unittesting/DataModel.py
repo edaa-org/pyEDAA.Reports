@@ -31,12 +31,13 @@
 from datetime                   import timedelta
 from unittest                   import TestCase as ut_TestCase
 
+from pyTooling.Exceptions       import AlreadyInHierarchyError, DuplicateElementError
+from pyTooling.Testing          import Testcase as py_Testcase
+
 from pyEDAA.Reports.Unittesting import AlreadyInTestsuiteError, DuplicateTestsuiteError, DuplicateTestcaseError
 from pyEDAA.Reports.Unittesting import TestsuiteStatus, UnittestError
 from pyEDAA.Reports.Unittesting import TestcaseStatus, Testcase, Testsuite, TestsuiteSummary, IterationScheme
 from pyEDAA.Reports.Unittesting import MergedTestsuiteSummary
-from pyTooling.Exceptions       import AlreadyInHierarchyError, DuplicateElementError
-from pyTooling.Testing          import Testcase as py_Testcase
 
 
 class TestcaseInstantiation(ut_TestCase):
