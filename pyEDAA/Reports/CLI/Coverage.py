@@ -55,6 +55,7 @@ from pyEDAA.Reports.CodeCoverage.Gcov                            import Document
 from pyEDAA.Reports.CodeCoverage.GHDL                            import Document as GHDLDocument
 from pyEDAA.Reports.CodeCoverage.JaCoCo                          import Document as JaCoCoDocument
 from pyEDAA.Reports.CodeCoverage.LCOV                            import Document as LCOVDocument
+from pyEDAA.Reports.CodeCoverage.LLVM                            import Document as LLVMDocument
 from pyEDAA.Reports.CodeCoverage.QuestaSim                       import Document as QuestaSimDocument
 from pyEDAA.Reports.CodeCoverage.UCIS                            import Document as UCISDocument
 from pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS                     import Document as PyUCISDocument
@@ -75,6 +76,7 @@ class InputFormat(StringEnum):
 	GHDLJSON =            "GHDL-JSON"             #: GHDL's coverage file.
 	JaCoCoXML =           "JaCoCo-XML"            #: JaCoCo's XML report.
 	LCOV =                "LCOV"                  #: lcov's tracefile.
+	LLVMJSON =            "LLVM-JSON"             #: LLVM's JSON export (``llvm-cov export``).
 	NVCCobertura =        "NVC-Cobertura"         #: Cobertura XML as NVC writes it.
 	PyUCISXML =           "PyUCIS-XML"            #: UCIS XML as pyucis writes it: the elements in no namespace.
 	QuestaSimXML =        "QuestaSim-XML"         #: QuestaSim's coverage report XML (``vcover report -xml -details``).
@@ -102,6 +104,7 @@ INPUT_FORMATS: Dict[InputFormat, Type[cc_Document]] = {
 	InputFormat.GHDLJSON:            GHDLDocument,
 	InputFormat.JaCoCoXML:           JaCoCoDocument,
 	InputFormat.LCOV:                LCOVDocument,
+	InputFormat.LLVMJSON:            LLVMDocument,
 	InputFormat.NVCCobertura:        NVCCoberturaDocument,
 	InputFormat.PyUCISXML:           PyUCISDocument,
 	InputFormat.QuestaSimXML:        QuestaSimDocument,

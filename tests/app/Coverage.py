@@ -64,6 +64,7 @@ class CoverageCommand(ApplicationTestcase):
 			("GHDL-JSON",            DATA_DIRECTORY / "VHDL/coverage-Count.json",   "Lines:    23 of 27 covered (85.2%)"),
 			("JaCoCo-XML",           DATA_DIRECTORY / "Java/jacocoTestReport.xml",  "Lines:    6 of 8 covered (75.0%)"),
 			("LCOV",                 DATA_DIRECTORY / "lcov/VHDL/GHDL.info",        "Lines:    9 of 11 covered (81.8%)"),
+			("LLVM-JSON",            DATA_DIRECTORY / "LLVM/coverage-3.1.0.json",   "Lines:    42 of 48 covered (87.5%)"),
 			("NVC-Cobertura",        DATA_DIRECTORY / "NVC/Count.xml",              "Lines:    24 of 32 covered (75.0%)"),
 			("UCIS-XML",             DATA_DIRECTORY / "UCIS/synthetic-1.0.xml",     "Lines:    4 of 5 covered (80.0%)")
 		):
@@ -137,6 +138,25 @@ class CoverageCommand(ApplicationTestcase):
 		summary = CoberturaDocument(outputFile, analyzeAndConvert=True).ToCoverageSummary()
 		self.assertEqual((8, 6), (summary.TotalLines, summary.CoveredLines))
 		self.assertEqual((2, 1), (summary.TotalBranches, summary.CoveredBranches))
+
+	def test_LLVMToCobertura(self) -> None:
+		"""LLVM's JSON export written as Cobertura XML: valid by the strict schema, the same figures read back."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		outputFile = OUTPUT_DIRECTORY / "llvm.xml"
+		outputFile.unlink(missing_ok=True)
+
+		inputFile = DATA_DIRECTORY / "LLVM/coverage-3.1.0.json"
+		result = self.RunEntrypoint(
+			"coverage", f"--input=LLVM-JSON:{inputFile}", f"--output=Cobertura:{outputFile}", timeout=60.0
+		)
+
+		self.assertExitCode(result)
+		strict = XMLSchema(parse(getResourceFile(Resources, STRICT_SCHEMA)))
+		self.assertTrue(strict.validate(parse(outputFile)), msg=str(strict.error_log))
+
+		summary = CoberturaDocument(outputFile, analyzeAndConvert=True).ToCoverageSummary()
+		self.assertEqual((48, 42), (summary.TotalLines, summary.CoveredLines))
+		self.assertEqual((24, 16), (summary.TotalBranches, summary.CoveredBranches))
 
 	def test_AldecUCDBToCobertura(self) -> None:
 		"""Aldec's UCDB XML export written as Cobertura XML: valid by the strict schema, the same figures read back."""
