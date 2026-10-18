@@ -140,7 +140,7 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		if self._schemaVersion is None:
 			ex = UnittestError(f"pyTooling test report file '{self._path}' wasn't analyzed yet.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		return self._schemaVersion
@@ -233,7 +233,7 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		if self._xmlDocument is None:
 			ex = UnittestError(f"pyTooling test report file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:

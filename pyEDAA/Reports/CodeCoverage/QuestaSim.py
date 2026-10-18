@@ -189,27 +189,27 @@ class Statistics(metaclass=ExtendedType, slots=True):
 		:raises CodeCoverageError: If the parent already has coverage statistics of this kind.
 		"""
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, CoverageKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'CoverageKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'CoverageKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
 		if active is None:
-			raise ValueError(f"Parameter 'active' is None.")
+			raise ValueError("Parameter 'active' is None.")
 		elif not isinstance(active, int):
-			ex = TypeError(f"Parameter 'active' is not of type 'int'.")
+			ex = TypeError("Parameter 'active' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(active)}'.")
 			raise ex
 		elif active < 0:
-			ex = ValueError(f"Parameter 'active' is negative.")
+			ex = ValueError("Parameter 'active' is negative.")
 			ex.add_note(f"Got value '{active}'.")
 			raise ex
 
 		if hits is None:
-			raise ValueError(f"Parameter 'hits' is None.")
+			raise ValueError("Parameter 'hits' is None.")
 		elif not isinstance(hits, int):
-			ex = TypeError(f"Parameter 'hits' is not of type 'int'.")
+			ex = TypeError("Parameter 'hits' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(hits)}'.")
 			raise ex
 		elif not (0 <= hits <= active):
@@ -218,19 +218,19 @@ class Statistics(metaclass=ExtendedType, slots=True):
 			raise ex
 
 		if percent is None:
-			raise ValueError(f"Parameter 'percent' is None.")
+			raise ValueError("Parameter 'percent' is None.")
 		elif not isinstance(percent, (float, int)):
-			ex = TypeError(f"Parameter 'percent' is not of type 'float' or 'int'.")
+			ex = TypeError("Parameter 'percent' is not of type 'float' or 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(percent)}'.")
 			raise ex
 		elif not (0.0 <= percent <= 100.0):
-			ex = ValueError(f"Parameter 'percent' is out of range 0..100.")
+			ex = ValueError("Parameter 'percent' is out of range 0..100.")
 			ex.add_note(f"Got value '{percent}'.")
 			raise ex
 
 		if parent is not None:
 			if not isinstance(parent, StatisticsMixin):
-				ex = TypeError(f"Parameter 'parent' is not of type 'StatisticsMixin'.")
+				ex = TypeError("Parameter 'parent' is not of type 'StatisticsMixin'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 			elif kind in parent._statistics:
@@ -382,31 +382,31 @@ class SourceItem(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``index`` is less than 1.
 		"""
 		if file is None:
-			raise ValueError(f"Parameter 'file' is None.")
+			raise ValueError("Parameter 'file' is None.")
 		elif not isinstance(file, Path):
-			ex = TypeError(f"Parameter 'file' is not of type 'Path'.")
+			ex = TypeError("Parameter 'file' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
 		if index is None:
-			raise ValueError(f"Parameter 'index' is None.")
+			raise ValueError("Parameter 'index' is None.")
 		elif not isinstance(index, int):
-			ex = TypeError(f"Parameter 'index' is not of type 'int'.")
+			ex = TypeError("Parameter 'index' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
 			raise ex
 		elif index < 1:
-			ex = ValueError(f"Parameter 'index' is less than 1.")
+			ex = ValueError("Parameter 'index' is less than 1.")
 			ex.add_note(f"Got value '{index}'.")
 			raise ex
 
@@ -478,18 +478,18 @@ class Statement(SourceItem):
 		super().__init__(file, lineNumber, index)
 
 		if hits is None:
-			raise ValueError(f"Parameter 'hits' is None.")
+			raise ValueError("Parameter 'hits' is None.")
 		elif not isinstance(hits, int):
-			ex = TypeError(f"Parameter 'hits' is not of type 'int'.")
+			ex = TypeError("Parameter 'hits' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(hits)}'.")
 			raise ex
 		elif hits < 0:
-			ex = ValueError(f"Parameter 'hits' is negative.")
+			ex = ValueError("Parameter 'hits' is negative.")
 			ex.add_note(f"Got value '{hits}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Scope):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Scope'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Scope'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -587,29 +587,29 @@ class IfBranch(SourceItem):
 		super().__init__(file, lineNumber, index)
 
 		if trueCount is None:
-			raise ValueError(f"Parameter 'trueCount' is None.")
+			raise ValueError("Parameter 'trueCount' is None.")
 		elif not isinstance(trueCount, int):
-			ex = TypeError(f"Parameter 'trueCount' is not of type 'int'.")
+			ex = TypeError("Parameter 'trueCount' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(trueCount)}'.")
 			raise ex
 		elif trueCount < 0:
-			ex = ValueError(f"Parameter 'trueCount' is negative.")
+			ex = ValueError("Parameter 'trueCount' is negative.")
 			ex.add_note(f"Got value '{trueCount}'.")
 			raise ex
 
 		if falseCount is None:
-			raise ValueError(f"Parameter 'falseCount' is None.")
+			raise ValueError("Parameter 'falseCount' is None.")
 		elif not isinstance(falseCount, int):
-			ex = TypeError(f"Parameter 'falseCount' is not of type 'int'.")
+			ex = TypeError("Parameter 'falseCount' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(falseCount)}'.")
 			raise ex
 		elif falseCount < 0:
-			ex = ValueError(f"Parameter 'falseCount' is negative.")
+			ex = ValueError("Parameter 'falseCount' is negative.")
 			ex.add_note(f"Got value '{falseCount}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, IfStatement):
-			ex = TypeError(f"Parameter 'parent' is not of type 'IfStatement'.")
+			ex = TypeError("Parameter 'parent' is not of type 'IfStatement'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -700,14 +700,14 @@ class IfStatement(metaclass=ExtendedType, slots=True):
 		                    :class:`Scope`.
 		"""
 		if hasElse is None:
-			raise ValueError(f"Parameter 'hasElse' is None.")
+			raise ValueError("Parameter 'hasElse' is None.")
 		elif not isinstance(hasElse, bool):
-			ex = TypeError(f"Parameter 'hasElse' is not of type 'bool'.")
+			ex = TypeError("Parameter 'hasElse' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(hasElse)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Scope):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Scope'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Scope'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -835,18 +835,18 @@ class CaseBranch(SourceItem):
 		super().__init__(file, lineNumber, index)
 
 		if hits is None:
-			raise ValueError(f"Parameter 'hits' is None.")
+			raise ValueError("Parameter 'hits' is None.")
 		elif not isinstance(hits, int):
-			ex = TypeError(f"Parameter 'hits' is not of type 'int'.")
+			ex = TypeError("Parameter 'hits' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(hits)}'.")
 			raise ex
 		elif hits < 0:
-			ex = ValueError(f"Parameter 'hits' is negative.")
+			ex = ValueError("Parameter 'hits' is negative.")
 			ex.add_note(f"Got value '{hits}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, CaseStatement):
-			ex = TypeError(f"Parameter 'parent' is not of type 'CaseStatement'.")
+			ex = TypeError("Parameter 'parent' is not of type 'CaseStatement'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -916,7 +916,7 @@ class CaseStatement(metaclass=ExtendedType, slots=True):
 		                   :class:`Scope`.
 		"""
 		if parent is not None and not isinstance(parent, Scope):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Scope'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Scope'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1035,43 +1035,43 @@ class FSMState(metaclass=ExtendedType, slots=True):
 		                    :class:`Scope`.
 		"""
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if file is not None and not isinstance(file, Path):
-			ex = TypeError(f"Parameter 'file' is not of type 'Path'.")
+			ex = TypeError("Parameter 'file' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
 		if hits is None:
-			raise ValueError(f"Parameter 'hits' is None.")
+			raise ValueError("Parameter 'hits' is None.")
 		elif not isinstance(hits, int):
-			ex = TypeError(f"Parameter 'hits' is not of type 'int'.")
+			ex = TypeError("Parameter 'hits' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(hits)}'.")
 			raise ex
 		elif hits < 0:
-			ex = ValueError(f"Parameter 'hits' is negative.")
+			ex = ValueError("Parameter 'hits' is negative.")
 			ex.add_note(f"Got value '{hits}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Scope):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Scope'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Scope'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1202,63 +1202,63 @@ class FSMTransition(metaclass=ExtendedType, slots=True):
 		                    :class:`Scope`.
 		"""
 		if identifier is None:
-			raise ValueError(f"Parameter 'identifier' is None.")
+			raise ValueError("Parameter 'identifier' is None.")
 		elif not isinstance(identifier, int):
-			ex = TypeError(f"Parameter 'identifier' is not of type 'int'.")
+			ex = TypeError("Parameter 'identifier' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(identifier)}'.")
 			raise ex
 		elif identifier < 0:
-			ex = ValueError(f"Parameter 'identifier' is negative.")
+			ex = ValueError("Parameter 'identifier' is negative.")
 			ex.add_note(f"Got value '{identifier}'.")
 			raise ex
 
 		if fromState is None:
-			raise ValueError(f"Parameter 'fromState' is None.")
+			raise ValueError("Parameter 'fromState' is None.")
 		elif not isinstance(fromState, str):
-			ex = TypeError(f"Parameter 'fromState' is not of type 'str'.")
+			ex = TypeError("Parameter 'fromState' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(fromState)}'.")
 			raise ex
 		elif fromState == "":
-			raise ValueError(f"Parameter 'fromState' is empty.")
+			raise ValueError("Parameter 'fromState' is empty.")
 
 		if toState is None:
-			raise ValueError(f"Parameter 'toState' is None.")
+			raise ValueError("Parameter 'toState' is None.")
 		elif not isinstance(toState, str):
-			ex = TypeError(f"Parameter 'toState' is not of type 'str'.")
+			ex = TypeError("Parameter 'toState' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(toState)}'.")
 			raise ex
 		elif toState == "":
-			raise ValueError(f"Parameter 'toState' is empty.")
+			raise ValueError("Parameter 'toState' is empty.")
 
 		if file is not None and not isinstance(file, Path):
-			ex = TypeError(f"Parameter 'file' is not of type 'Path'.")
+			ex = TypeError("Parameter 'file' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
 		if hits is None:
-			raise ValueError(f"Parameter 'hits' is None.")
+			raise ValueError("Parameter 'hits' is None.")
 		elif not isinstance(hits, int):
-			ex = TypeError(f"Parameter 'hits' is not of type 'int'.")
+			ex = TypeError("Parameter 'hits' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(hits)}'.")
 			raise ex
 		elif hits < 0:
-			ex = ValueError(f"Parameter 'hits' is negative.")
+			ex = ValueError("Parameter 'hits' is negative.")
 			ex.add_note(f"Got value '{hits}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Scope):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Scope'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Scope'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1290,7 +1290,7 @@ class FSMTransition(metaclass=ExtendedType, slots=True):
 		if separator == "" or fromState == "" or toState == "":
 			ex = CodeCoverageError(f"'<trans>' in line {element.sourceline} doesn't name the states it connects.")
 			ex.add_note(f"Got state='{element.attrib['state']}'.")
-			ex.add_note(f"Questa writes it as '<state> -> <state>'.")
+			ex.add_note("Questa writes it as '<state> -> <state>'.")
 			raise ex
 
 		file = next(iter(parent._files.values())) if len(parent._files) == 1 else None
@@ -1404,28 +1404,28 @@ class Scope(StatisticsMixin, slots=True):
 		self._files = {}
 		if files is not None:
 			if not isinstance(files, Mapping):
-				ex = TypeError(f"Parameter 'files' is not a mapping.")
+				ex = TypeError("Parameter 'files' is not a mapping.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(files)}'.")
 				raise ex
 
 			for fileNumber, path in files.items():
 				if not isinstance(fileNumber, int):
-					ex = TypeError(f"Parameter 'files' contains a key not of type 'int'.")
+					ex = TypeError("Parameter 'files' contains a key not of type 'int'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(fileNumber)}'.")
 					raise ex
 				elif fileNumber < 0:
-					ex = ValueError(f"Parameter 'files' contains a negative key.")
+					ex = ValueError("Parameter 'files' contains a negative key.")
 					ex.add_note(f"Got value '{fileNumber}'.")
 					raise ex
 				elif not isinstance(path, Path):
-					ex = TypeError(f"Parameter 'files' contains a value not of type 'Path'.")
+					ex = TypeError("Parameter 'files' contains a value not of type 'Path'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 					raise ex
 
 				self._files[fileNumber] = path
 
 		if parent is not None and not isinstance(parent, Report):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1614,30 +1614,30 @@ class InstanceData(Scope):
 		super().__init__(files, parent=parent)
 
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif not isinstance(path, str):
-			ex = TypeError(f"Parameter 'path' is not of type 'str'.")
+			ex = TypeError("Parameter 'path' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 		elif path == "":
-			raise ValueError(f"Parameter 'path' is empty.")
+			raise ValueError("Parameter 'path' is empty.")
 
 		if designUnit is None:
-			raise ValueError(f"Parameter 'designUnit' is None.")
+			raise ValueError("Parameter 'designUnit' is None.")
 		elif not isinstance(designUnit, str):
-			ex = TypeError(f"Parameter 'designUnit' is not of type 'str'.")
+			ex = TypeError("Parameter 'designUnit' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(designUnit)}'.")
 			raise ex
 		elif designUnit == "":
-			raise ValueError(f"Parameter 'designUnit' is empty.")
+			raise ValueError("Parameter 'designUnit' is empty.")
 
 		if secondaryUnit is not None:
 			if not isinstance(secondaryUnit, str):
-				ex = TypeError(f"Parameter 'secondaryUnit' is not of type 'str'.")
+				ex = TypeError("Parameter 'secondaryUnit' is not of type 'str'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(secondaryUnit)}'.")
 				raise ex
 			elif secondaryUnit == "":
-				raise ValueError(f"Parameter 'secondaryUnit' is empty.")
+				raise ValueError("Parameter 'secondaryUnit' is empty.")
 
 		self._path =          path
 		self._designUnit =    designUnit
@@ -1733,21 +1733,21 @@ class DesignUnitData(Scope):
 		super().__init__(files, parent=parent)
 
 		if designUnit is None:
-			raise ValueError(f"Parameter 'designUnit' is None.")
+			raise ValueError("Parameter 'designUnit' is None.")
 		elif not isinstance(designUnit, str):
-			ex = TypeError(f"Parameter 'designUnit' is not of type 'str'.")
+			ex = TypeError("Parameter 'designUnit' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(designUnit)}'.")
 			raise ex
 		elif designUnit == "":
-			raise ValueError(f"Parameter 'designUnit' is empty.")
+			raise ValueError("Parameter 'designUnit' is empty.")
 
 		if secondaryUnit is not None:
 			if not isinstance(secondaryUnit, str):
-				ex = TypeError(f"Parameter 'secondaryUnit' is not of type 'str'.")
+				ex = TypeError("Parameter 'secondaryUnit' is not of type 'str'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(secondaryUnit)}'.")
 				raise ex
 			elif secondaryUnit == "":
-				raise ValueError(f"Parameter 'secondaryUnit' is empty.")
+				raise ValueError("Parameter 'secondaryUnit' is empty.")
 
 		self._designUnit =    designUnit
 		self._secondaryUnit = secondaryUnit
@@ -1821,9 +1821,9 @@ class FileData(Scope):
 		super().__init__(files, parent=parent)
 
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
@@ -1890,30 +1890,30 @@ class Totals(StatisticsMixin):
 		super().__init__()
 
 		if mode is None:
-			raise ValueError(f"Parameter 'mode' is None.")
+			raise ValueError("Parameter 'mode' is None.")
 		elif not isinstance(mode, ReportMode):
-			ex = TypeError(f"Parameter 'mode' is not of type 'ReportMode'.")
+			ex = TypeError("Parameter 'mode' is not of type 'ReportMode'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(mode)}'.")
 			raise ex
 		elif mode is ReportMode.ByDesignUnit:
-			ex = ValueError(f"Parameter 'mode' is not 'ByFile' or 'ByInstance'.")
+			ex = ValueError("Parameter 'mode' is not 'ByFile' or 'ByInstance'.")
 			ex.add_note(f"Got value '{mode.name}'.")
 			raise ex
 
 		if count is None:
-			raise ValueError(f"Parameter 'count' is None.")
+			raise ValueError("Parameter 'count' is None.")
 		elif not isinstance(count, int):
-			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex = TypeError("Parameter 'count' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 			raise ex
 		elif count < 0:
-			ex = ValueError(f"Parameter 'count' is negative.")
+			ex = ValueError("Parameter 'count' is negative.")
 			ex.add_note(f"Got value '{count}'.")
 			raise ex
 
 		if parent is not None:
 			if not isinstance(parent, Report):
-				ex = TypeError(f"Parameter 'parent' is not of type 'Report'.")
+				ex = TypeError("Parameter 'parent' is not of type 'Report'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 			elif mode in parent._totals:
@@ -2131,7 +2131,7 @@ class Document(cc_Document, Report):
 				raise ex
 			elif rootElement.find("functional_coverage_report") is not None:
 				ex = CodeCoverageError(f"'{self._path}' is a functional coverage report, not a code coverage report.")
-				ex.add_note(f"Write the report without '-cvg', '-directive' and '-assert'.")
+				ex.add_note("Write the report without '-cvg', '-directive' and '-assert'.")
 				raise ex
 
 			try:
@@ -2170,7 +2170,7 @@ class Document(cc_Document, Report):
 			ex = CodeCoverageError(
 				f"QuestaSim coverage report '{self._path}' needs to be read and analyzed by an XML parser."
 			)
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -2241,14 +2241,14 @@ class Document(cc_Document, Report):
 						f"The '{kind}' statement at '{first._file.as_posix()}:{first._lineNumber}' has {len(counts)} branches in "
 						f"one scope, but {len(merged)} in another."
 					)
-					ex.add_note(f"The scopes merge their branches by position.")
+					ex.add_note("The scopes merge their branches by position.")
 					raise ex
 				else:
 					branchesPerDecision[key] = [total + count for total, count in zip(merged, counts)]
 
 		if len(hitsPerStatement) == 0:
 			ex = CodeCoverageError(f"QuestaSim coverage report '{self._path}' has no statements to convert.")
-			ex.add_note(f"Write the report with details: 'vcover report -xml -details ...'.")
+			ex.add_note("Write the report with details: 'vcover report -xml -details ...'.")
 			raise ex
 
 		countsPerLine:   dict[Path, dict[int, list[int]]] = {}

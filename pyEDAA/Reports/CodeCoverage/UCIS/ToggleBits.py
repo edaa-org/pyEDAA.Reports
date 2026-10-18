@@ -127,7 +127,7 @@ class ToggleBit(Base, ObjectAttributesMixin):
 				raise ex
 
 		if parent is not None and not isinstance(parent, ToggleObject):
-			ex = TypeError(f"Parameter 'parent' is not of type 'ToggleObject'.")
+			ex = TypeError("Parameter 'parent' is not of type 'ToggleObject'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -139,17 +139,17 @@ class ToggleBit(Base, ObjectAttributesMixin):
 
 		if indices is not None:
 			if not isinstance(indices, Iterable):
-				ex = TypeError(f"Parameter 'indices' is not iterable.")
+				ex = TypeError("Parameter 'indices' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(indices)}'.")
 				raise ex
 
 			for index in indices:
 				if not isinstance(index, int) or isinstance(index, bool):
-					ex = TypeError(f"Parameter 'indices' contains an element not of type 'int'.")
+					ex = TypeError("Parameter 'indices' contains an element not of type 'int'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
 					raise ex
 				elif index < 0:
-					ex = ValueError(f"Parameter 'indices' contains a negative index.")
+					ex = ValueError("Parameter 'indices' contains a negative index.")
 					ex.add_note(f"Got value '{index}'.")
 					raise ex
 
@@ -268,14 +268,14 @@ class Toggle(metaclass=ExtendedType, slots=True):
 				raise ex
 
 		if coverBin is None:
-			raise ValueError(f"Parameter 'coverBin' is None.")
+			raise ValueError("Parameter 'coverBin' is None.")
 		elif not isinstance(coverBin, Bin):
-			ex = TypeError(f"Parameter 'coverBin' is not of type 'Bin'.")
+			ex = TypeError("Parameter 'coverBin' is not of type 'Bin'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, ToggleBit):
-			ex = TypeError(f"Parameter 'parent' is not of type 'ToggleBit'.")
+			ex = TypeError("Parameter 'parent' is not of type 'ToggleBit'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 

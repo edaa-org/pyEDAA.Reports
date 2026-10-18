@@ -205,26 +205,26 @@ class BranchStatement(Base, ObjectAttributesMixin, Generic[BranchStatementParent
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)
 
 		if statementID is None:
-			raise ValueError(f"Parameter 'statementID' is None.")
+			raise ValueError("Parameter 'statementID' is None.")
 		elif not isinstance(statementID, StatementID):
-			ex = TypeError(f"Parameter 'statementID' is not of type 'StatementID'.")
+			ex = TypeError("Parameter 'statementID' is not of type 'StatementID'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(statementID)}'.")
 			raise ex
 
 		if statementType is None:
-			raise ValueError(f"Parameter 'statementType' is None.")
+			raise ValueError("Parameter 'statementType' is None.")
 		elif not isinstance(statementType, str):
-			ex = TypeError(f"Parameter 'statementType' is not of type 'str'.")
+			ex = TypeError("Parameter 'statementType' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(statementType)}'.")
 			raise ex
 
 		if branchExpression is not None and not isinstance(branchExpression, str):
-			ex = TypeError(f"Parameter 'branchExpression' is not of type 'str'.")
+			ex = TypeError("Parameter 'branchExpression' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(branchExpression)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, (BranchCoverage, Branch)):
-			ex = TypeError(f"Parameter 'parent' is not of type 'BranchCoverage' or 'Branch'.")
+			ex = TypeError("Parameter 'parent' is not of type 'BranchCoverage' or 'Branch'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -363,21 +363,21 @@ class Branch(Base):
 		super().__init__(userAttributes)
 
 		if branchID is None:
-			raise ValueError(f"Parameter 'branchID' is None.")
+			raise ValueError("Parameter 'branchID' is None.")
 		elif not isinstance(branchID, StatementID):
-			ex = TypeError(f"Parameter 'branchID' is not of type 'StatementID'.")
+			ex = TypeError("Parameter 'branchID' is not of type 'StatementID'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(branchID)}'.")
 			raise ex
 
 		if coverBin is None:
-			raise ValueError(f"Parameter 'coverBin' is None.")
+			raise ValueError("Parameter 'coverBin' is None.")
 		elif not isinstance(coverBin, Bin):
-			ex = TypeError(f"Parameter 'coverBin' is not of type 'Bin'.")
+			ex = TypeError("Parameter 'coverBin' is not of type 'Bin'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, BranchStatement):
-			ex = TypeError(f"Parameter 'parent' is not of type 'BranchStatement'.")
+			ex = TypeError("Parameter 'parent' is not of type 'BranchStatement'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 

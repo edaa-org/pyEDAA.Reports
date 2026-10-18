@@ -111,7 +111,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 		returnCode = 0
 		if (args.input is None) and (args.merge is None):
-			self.WriteError(f"Either option '--input=[<Format>:]<File>' or '--merge=[<Format>:]<FilePattern>' is missing.")
+			self.WriteError("Either option '--input=[<Format>:]<File>' or '--merge=[<Format>:]<FilePattern>' is missing.")
 			returnCode = 3
 
 		if returnCode != 0:
@@ -121,7 +121,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		merged = MergedTestsuiteSummary(testsuiteSummaryName)
 
 		if args.input is not None:
-			self.WriteNormal(f"Reading unit test input file ...")
+			self.WriteNormal("Reading unit test input file ...")
 			openTask = args.input
 			try:
 				document = self._open(openTask)
@@ -143,10 +143,10 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			for mergeTask in mergeTasks:
 				self._merge(merged, mergeTask)
 
-		self.WriteNormal(f"Aggregating unit test metrics ...")
+		self.WriteNormal("Aggregating unit test metrics ...")
 		merged.Aggregate()
 
-		self.WriteNormal(f"Flattening data structures to a single dimension ...")
+		self.WriteNormal("Flattening data structures to a single dimension ...")
 		result = merged.ToTestsuiteSummary()
 
 		if args.pytest is not None:
@@ -253,13 +253,13 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteCritical(f"None of the {dialect} files were successfully read.")
 			return
 
-		self.WriteNormal(f"Merging unit test summary files into a single data model ...")
+		self.WriteNormal("Merging unit test summary files into a single data model ...")
 		for summary in junitDocuments:
 			self.WriteVerbose(f"  merging {summary.Path}")
 			testsuiteSummary.Merge(summary.ToTestsuiteSummary())
 
 	def _processPyTest(self, testsuiteSummary: TestsuiteSummary, cleanups: str) -> None:
-		self.WriteNormal(f"Simplifying unit testing reports created by pytest ...")
+		self.WriteNormal("Simplifying unit testing reports created by pytest ...")
 
 		for cleanup in cleanups.split(";"):
 			parts = cleanup.split(":")
@@ -282,7 +282,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 				self.WriteError(f"Syntax error: '{cleanup}'")
 
 	def _processPyTest_RewiteDunderInit(self, testsuiteSummary: TestsuiteSummary) -> None:
-		self.WriteVerbose(f"  Rewriting '__init__' in classnames to actual Python package names")
+		self.WriteVerbose("  Rewriting '__init__' in classnames to actual Python package names")
 
 		def processTestsuite(suite: Testsuite) -> None:
 			testsuites: Tuple[Testsuite, ...] = tuple(suite.Testsuites.values())
@@ -323,14 +323,14 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		self.WriteDebug(message)
 		cleanups.append(suite)
 
-		self.WriteDebug(f"    Moving testsuites ...")
+		self.WriteDebug("    Moving testsuites ...")
 		for ts in suite._testsuites.values():
 			self.WriteDebug(f"      {ts._name} -> {testsuiteSummary._name}")
 			ts._parent = None
 			ts._kind = TestsuiteKind.Logical
 			testsuiteSummary.AddTestsuite(ts)
 
-		self.WriteDebug(f"    Deleting empty testsuites ...")
+		self.WriteDebug("    Deleting empty testsuites ...")
 		for clean in cleanups:
 			suite = clean
 			while suite is not testsuiteSummary:
@@ -387,7 +387,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		file: Path,
 		dialect: str
 	) -> None:
-		self.WriteNormal(f"Writing merged unit test summaries to file ...")
+		self.WriteNormal("Writing merged unit test summaries to file ...")
 		self.WriteVerbose(f"  Common Data Model -> OUT ({dialect}): {file}")
 
 		junitDocument = documentClass.FromTestsuiteSummary(file, testsuiteSummary)

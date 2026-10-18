@@ -274,7 +274,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 	@Parent.setter
 	def Parent(self, parent: Base) -> None:
 		if parent is None:
-			raise ValueError(f"Parameter 'parent' is None.")
+			raise ValueError("Parameter 'parent' is None.")
 		elif not isinstance(parent, self._PARENT_TYPE):
 			typeNames = " or ".join(f"'{parentType.__name__}'" for parentType in self._PARENT_TYPE)
 			ex = TypeError(f"Parameter 'parent' is not of type {typeNames}.")
@@ -342,18 +342,18 @@ class BaseWithID(Base):
 		super().__init__(keyValuePairs=keyValuePairs, parent=parent)
 
 		if identifier is None:
-			raise ValueError(f"Parameter 'identifier' is None.")
+			raise ValueError("Parameter 'identifier' is None.")
 		elif not isinstance(identifier, str):
-			ex = TypeError(f"Parameter 'identifier' is not of type 'str'.")
+			ex = TypeError("Parameter 'identifier' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(identifier)}'.")
 			raise ex
 		elif identifier == "":
-			raise ValueError(f"Parameter 'identifier' is empty.")
+			raise ValueError("Parameter 'identifier' is empty.")
 
 		if description is None:
-			raise ValueError(f"Parameter 'description' is None.")
+			raise ValueError("Parameter 'description' is None.")
 		elif not isinstance(description, str):
-			ex = TypeError(f"Parameter 'description' is not of type 'str'.")
+			ex = TypeError("Parameter 'description' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(description)}'.")
 			raise ex
 
@@ -426,19 +426,19 @@ class RequirementSpecification(Base):
 		super().__init__(keyValuePairs=keyValuePairs)
 
 		if version is None:
-			raise ValueError(f"Parameter 'version' is None.")
+			raise ValueError("Parameter 'version' is None.")
 		elif not isinstance(version, SemanticVersion):
-			ex = TypeError(f"Parameter 'version' is not of type 'SemanticVersion'.")
+			ex = TypeError("Parameter 'version' is not of type 'SemanticVersion'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(version)}'.")
 			raise ex
 
 		if name is not None:
 			if not isinstance(name, str):
-				ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+				ex = TypeError("Parameter 'name' is not of type 'str'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 				raise ex
 			elif name == "":
-				raise ValueError(f"Parameter 'name' is empty.")
+				raise ValueError("Parameter 'name' is empty.")
 
 		self._root =               self
 		self._name =               name
@@ -578,9 +578,9 @@ class RequirementSpecification(Base):
 		:raises DuplicatePersonError: If the specification already contains a person of this user ID.
 		"""
 		if person is None:
-			raise ValueError(f"Parameter 'person' is None.")
+			raise ValueError("Parameter 'person' is None.")
 		elif not isinstance(person, Person):
-			ex = TypeError(f"Parameter 'person' is not of type 'Person'.")
+			ex = TypeError("Parameter 'person' is not of type 'Person'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(person)}'.")
 			raise ex
 		elif person._userID in self._persons:
@@ -800,13 +800,13 @@ class BaseWithName(BaseWithID):
 		super().__init__(identifier, description=description, keyValuePairs=keyValuePairs, parent=parent)
 
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		self._name = name
 
@@ -1030,42 +1030,42 @@ class BaseItem(BaseWithID):
 		super().__init__(identifier, description=description, keyValuePairs=keyValuePairs, parent=parent)
 
 		if title is None:
-			raise ValueError(f"Parameter 'title' is None.")
+			raise ValueError("Parameter 'title' is None.")
 		elif not isinstance(title, str):
-			ex = TypeError(f"Parameter 'title' is not of type 'str'.")
+			ex = TypeError("Parameter 'title' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(title)}'.")
 			raise ex
 		elif title == "":
-			raise ValueError(f"Parameter 'title' is empty.")
+			raise ValueError("Parameter 'title' is empty.")
 
 		if rationale is None:
-			raise ValueError(f"Parameter 'rationale' is None.")
+			raise ValueError("Parameter 'rationale' is None.")
 		elif not isinstance(rationale, str):
-			ex = TypeError(f"Parameter 'rationale' is not of type 'str'.")
+			ex = TypeError("Parameter 'rationale' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(rationale)}'.")
 			raise ex
 
 		if created is None:
 			created = datetime.now()
 		elif not isinstance(created, datetime):
-			ex = TypeError(f"Parameter 'created' is not of type 'datetime'.")
+			ex = TypeError("Parameter 'created' is not of type 'datetime'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(created)}'.")
 			raise ex
 
 		if state is None:
-			raise ValueError(f"Parameter 'state' is None.")
+			raise ValueError("Parameter 'state' is None.")
 		elif not isinstance(state, ItemState):
-			ex = TypeError(f"Parameter 'state' is not of type 'ItemState'.")
+			ex = TypeError("Parameter 'state' is not of type 'ItemState'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
 			raise ex
 
 		if layer is not None:
 			if not isinstance(layer, Layer):
-				ex = TypeError(f"Parameter 'layer' is not of type 'Layer'.")
+				ex = TypeError("Parameter 'layer' is not of type 'Layer'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(layer)}'.")
 				raise ex
 			elif self._root is None or layer._root is not self._root:
-				ex = NotInSameSpecificationError(f"Parameter 'layer' isn't part of the item's specification.")
+				ex = NotInSameSpecificationError("Parameter 'layer' isn't part of the item's specification.")
 				ex.add_note(f"Got layer '{layer._id}'.")
 				raise ex
 
@@ -1148,7 +1148,7 @@ class BaseItem(BaseWithID):
 		if isinstance(element, HistoryEvent):
 			previous = self._history[-1]._timestamp if len(self._history) > 0 else self._created
 			if element._timestamp.astimezone() < previous.astimezone():
-				ex = RequirementsError(f"History event is earlier than the item's creation or its last event.")
+				ex = RequirementsError("History event is earlier than the item's creation or its last event.")
 				ex.add_note(f"Got '{element._timestamp.isoformat()}' after '{previous.isoformat()}'.")
 				raise ex from ValueError(f"Parameter 'timestamp' is earlier than '{previous.isoformat()}'.")
 
@@ -1202,9 +1202,9 @@ class BaseItem(BaseWithID):
 	@State.setter
 	def State(self, state: ItemState) -> None:
 		if state is None:
-			raise ValueError(f"Parameter 'state' is None.")
+			raise ValueError("Parameter 'state' is None.")
 		elif not isinstance(state, ItemState):
-			ex = TypeError(f"Parameter 'state' is not of type 'ItemState'.")
+			ex = TypeError("Parameter 'state' is not of type 'ItemState'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
 			raise ex
 
@@ -1638,44 +1638,44 @@ class Requirement(BaseItem):
 		)
 
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, RequirementKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'RequirementKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'RequirementKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
 		if obligation is None:
-			raise ValueError(f"Parameter 'obligation' is None.")
+			raise ValueError("Parameter 'obligation' is None.")
 		elif not isinstance(obligation, Obligation):
-			ex = TypeError(f"Parameter 'obligation' is not of type 'Obligation'.")
+			ex = TypeError("Parameter 'obligation' is not of type 'Obligation'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(obligation)}'.")
 			raise ex
 
 		if verificationMethods is None:
-			raise ValueError(f"Parameter 'verificationMethods' is None.")
+			raise ValueError("Parameter 'verificationMethods' is None.")
 		elif not isinstance(verificationMethods, VerificationMethod):
-			ex = TypeError(f"Parameter 'verificationMethods' is not of type 'VerificationMethod'.")
+			ex = TypeError("Parameter 'verificationMethods' is not of type 'VerificationMethod'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(verificationMethods)}'.")
 			raise ex
 
 		self._acceptanceCriteria = []
 		if acceptanceCriteria is not None:
 			if not isinstance(acceptanceCriteria, Iterable):
-				ex = TypeError(f"Parameter 'acceptanceCriteria' is not iterable.")
+				ex = TypeError("Parameter 'acceptanceCriteria' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(acceptanceCriteria)}'.")
 				raise ex
 			elif isinstance(acceptanceCriteria, str):
-				ex = TypeError(f"Parameter 'acceptanceCriteria' is a single string, not an iterable of strings.")
+				ex = TypeError("Parameter 'acceptanceCriteria' is a single string, not an iterable of strings.")
 				ex.add_note(f"Got value '{acceptanceCriteria}'.")
 				raise ex
 
 			for criterion in acceptanceCriteria:
 				if not isinstance(criterion, str):
-					ex = TypeError(f"Parameter 'acceptanceCriteria' contains an element not of type 'str'.")
+					ex = TypeError("Parameter 'acceptanceCriteria' contains an element not of type 'str'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(criterion)}'.")
 					raise ex
 				elif criterion == "":
-					raise ValueError(f"Parameter 'acceptanceCriteria' contains an empty criterion.")
+					raise ValueError("Parameter 'acceptanceCriteria' contains an empty criterion.")
 
 				self._acceptanceCriteria.append(criterion)
 
@@ -1858,27 +1858,27 @@ class SpecificationItem(BaseItem):
 
 		if requirements is not None:
 			if not isinstance(requirements, Iterable):
-				ex = TypeError(f"Parameter 'requirements' is not iterable.")
+				ex = TypeError("Parameter 'requirements' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(requirements)}'.")
 				raise ex
 			elif isinstance(requirements, KeyValuePairsMixin):
-				ex = TypeError(f"Parameter 'requirements' is a single element, not an iterable of elements.")
+				ex = TypeError("Parameter 'requirements' is a single element, not an iterable of elements.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(requirements)}'.")
 				raise ex
 
 			for requirement in requirements:
 				if not isinstance(requirement, Requirement):
-					ex = TypeError(f"Parameter 'requirements' contains an element not of type 'Requirement'.")
+					ex = TypeError("Parameter 'requirements' contains an element not of type 'Requirement'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(requirement)}'.")
 					raise ex
 				elif self._root is None or requirement._root is not self._root:
 					ex = NotInSameSpecificationError(
-						f"Parameter 'requirements' contains a requirement not part of the item's specification."
+						"Parameter 'requirements' contains a requirement not part of the item's specification."
 					)
 					ex.add_note(f"Got requirement '{requirement._id}'.")
 					raise ex
 				elif requirement._id in self._requirements:
-					ex = DuplicateRequirementError(f"Parameter 'requirements' contains a requirement twice.")
+					ex = DuplicateRequirementError("Parameter 'requirements' contains a requirement twice.")
 					ex.add_note(f"Got requirement '{requirement._id}'.")
 					raise ex
 
@@ -1910,13 +1910,13 @@ class SpecificationItem(BaseItem):
 		:raises DuplicateRequirementError:   If the item specifies the requirement already.
 		"""
 		if requirement is None:
-			raise ValueError(f"Parameter 'requirement' is None.")
+			raise ValueError("Parameter 'requirement' is None.")
 		elif not isinstance(requirement, Requirement):
-			ex = TypeError(f"Parameter 'requirement' is not of type 'Requirement'.")
+			ex = TypeError("Parameter 'requirement' is not of type 'Requirement'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(requirement)}'.")
 			raise ex
 		elif self._root is None or requirement._root is not self._root:
-			ex = NotInSameSpecificationError(f"Parameter 'requirement' isn't part of the item's specification.")
+			ex = NotInSameSpecificationError("Parameter 'requirement' isn't part of the item's specification.")
 			ex.add_note(f"Got requirement '{requirement._id}'.")
 			raise ex
 		elif requirement._id in self._requirements:
@@ -1998,35 +1998,35 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		super().__init__(keyValuePairs)
 
 		if source is None:
-			raise ValueError(f"Parameter 'source' is None.")
+			raise ValueError("Parameter 'source' is None.")
 		elif not isinstance(source, BaseItem):
-			ex = TypeError(f"Parameter 'source' is not of type 'BaseItem'.")
+			ex = TypeError("Parameter 'source' is not of type 'BaseItem'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
 			raise ex
 		elif source._root is None:
-			ex = NotInSameSpecificationError(f"Parameter 'source' isn't part of a specification.")
+			ex = NotInSameSpecificationError("Parameter 'source' isn't part of a specification.")
 			ex.add_note(f"Got item '{source._id}'.")
 			raise ex
 
 		if destination is None:
-			raise ValueError(f"Parameter 'destination' is None.")
+			raise ValueError("Parameter 'destination' is None.")
 		elif not isinstance(destination, BaseItem):
-			ex = TypeError(f"Parameter 'destination' is not of type 'BaseItem'.")
+			ex = TypeError("Parameter 'destination' is not of type 'BaseItem'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(destination)}'.")
 			raise ex
 		elif destination is source:
-			ex = ValueError(f"Parameter 'destination' is the source.")
+			ex = ValueError("Parameter 'destination' is the source.")
 			ex.add_note(f"Got item '{destination._id}'.")
 			raise ex
 		elif destination._root is not source._root:
-			ex = NotInSameSpecificationError(f"Parameter 'destination' isn't part of the source's specification.")
+			ex = NotInSameSpecificationError("Parameter 'destination' isn't part of the source's specification.")
 			ex.add_note(f"Got item '{destination._id}'.")
 			raise ex
 
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, LinkKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'LinkKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'LinkKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
@@ -2158,53 +2158,53 @@ class HistoryEvent(Base):
 		super().__init__(keyValuePairs=keyValuePairs, parent=parent)
 
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, EventKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'EventKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'EventKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
 		if timestamp is None:
-			raise ValueError(f"Parameter 'timestamp' is None.")
+			raise ValueError("Parameter 'timestamp' is None.")
 		elif not isinstance(timestamp, datetime):
-			ex = TypeError(f"Parameter 'timestamp' is not of type 'datetime'.")
+			ex = TypeError("Parameter 'timestamp' is not of type 'datetime'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(timestamp)}'.")
 			raise ex
 
 		if person is not None:
 			if not isinstance(person, Person):
-				ex = TypeError(f"Parameter 'person' is not of type 'Person'.")
+				ex = TypeError("Parameter 'person' is not of type 'Person'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(person)}'.")
 				raise ex
 			elif self._root is None or self._root._persons.get(person._userID) is not person:
-				ex = NotInSameSpecificationError(f"Parameter 'person' isn't part of the item's specification.")
+				ex = NotInSameSpecificationError("Parameter 'person' isn't part of the item's specification.")
 				ex.add_note(f"Got person '{person._userID}'.")
 				raise ex
 
 		self._involved = []
 		if involved is not None:
 			if not isinstance(involved, Iterable):
-				ex = TypeError(f"Parameter 'involved' is not iterable.")
+				ex = TypeError("Parameter 'involved' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(involved)}'.")
 				raise ex
 			elif isinstance(involved, KeyValuePairsMixin):
-				ex = TypeError(f"Parameter 'involved' is a single element, not an iterable of elements.")
+				ex = TypeError("Parameter 'involved' is a single element, not an iterable of elements.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(involved)}'.")
 				raise ex
 
 			for item in involved:
 				if not isinstance(item, BaseItem):
-					ex = TypeError(f"Parameter 'involved' contains an element not of type 'BaseItem'.")
+					ex = TypeError("Parameter 'involved' contains an element not of type 'BaseItem'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(item)}'.")
 					raise ex
 				elif self._root is None or item._root is not self._root:
 					ex = NotInSameSpecificationError(
-						f"Parameter 'involved' contains an item not part of the item's specification."
+						"Parameter 'involved' contains an item not part of the item's specification."
 					)
 					ex.add_note(f"Got item '{item._id}'.")
 					raise ex
 				elif item in self._involved:
-					ex = item._DUPLICATE_ERROR(f"Parameter 'involved' contains an item twice.")
+					ex = item._DUPLICATE_ERROR("Parameter 'involved' contains an item twice.")
 					ex.add_note(f"Got item '{item._id}'.")
 					raise ex
 
@@ -2214,9 +2214,9 @@ class HistoryEvent(Base):
 			raise ValueError(f"Parameter 'involved' names no item for a '{kind}' event.")
 
 		if description is None:
-			raise ValueError(f"Parameter 'description' is None.")
+			raise ValueError("Parameter 'description' is None.")
 		elif not isinstance(description, str):
-			ex = TypeError(f"Parameter 'description' is not of type 'str'.")
+			ex = TypeError("Parameter 'description' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(description)}'.")
 			raise ex
 

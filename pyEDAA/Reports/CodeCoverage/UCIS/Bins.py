@@ -82,23 +82,23 @@ class BinContents(metaclass=ExtendedType, slots=True):
 		:raises TypeError:     If parameter ``typeComponent`` isn't of type :class:`str`.
 		"""
 		if coverageCount is None:
-			raise ValueError(f"Parameter 'coverageCount' is None.")
+			raise ValueError("Parameter 'coverageCount' is None.")
 		elif not isinstance(coverageCount, int) or isinstance(coverageCount, bool):
-			ex = TypeError(f"Parameter 'coverageCount' is not of type 'int'.")
+			ex = TypeError("Parameter 'coverageCount' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coverageCount)}'.")
 			raise ex
 		elif coverageCount < 0:
-			ex = ValueError(f"Parameter 'coverageCount' is negative.")
+			ex = ValueError("Parameter 'coverageCount' is negative.")
 			ex.add_note(f"Got value '{coverageCount}'.")
 			raise ex
 
 		if nameComponent is not None and not isinstance(nameComponent, str):
-			ex = TypeError(f"Parameter 'nameComponent' is not of type 'str'.")
+			ex = TypeError("Parameter 'nameComponent' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(nameComponent)}'.")
 			raise ex
 
 		if typeComponent is not None and not isinstance(typeComponent, str):
-			ex = TypeError(f"Parameter 'typeComponent' is not of type 'str'.")
+			ex = TypeError("Parameter 'typeComponent' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(typeComponent)}'.")
 			raise ex
 
@@ -109,13 +109,13 @@ class BinContents(metaclass=ExtendedType, slots=True):
 
 		if historyNodeIDs is not None:
 			if not isinstance(historyNodeIDs, Iterable):
-				ex = TypeError(f"Parameter 'historyNodeIDs' is not iterable.")
+				ex = TypeError("Parameter 'historyNodeIDs' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(historyNodeIDs)}'.")
 				raise ex
 
 			for historyNodeID in historyNodeIDs:
 				if not isinstance(historyNodeID, int) or isinstance(historyNodeID, bool):
-					ex = TypeError(f"Parameter 'historyNodeIDs' contains an element not of type 'int'.")
+					ex = TypeError("Parameter 'historyNodeIDs' contains an element not of type 'int'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(historyNodeID)}'.")
 					raise ex
 
@@ -225,19 +225,19 @@ class Bin(Base, ObjectAttributesMixin):
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)
 
 		if contents is None:
-			raise ValueError(f"Parameter 'contents' is None.")
+			raise ValueError("Parameter 'contents' is None.")
 		elif not isinstance(contents, BinContents):
-			ex = TypeError(f"Parameter 'contents' is not of type 'BinContents'.")
+			ex = TypeError("Parameter 'contents' is not of type 'BinContents'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(contents)}'.")
 			raise ex
 
 		if coverageCountGoal is not None:
 			if not isinstance(coverageCountGoal, int) or isinstance(coverageCountGoal, bool):
-				ex = TypeError(f"Parameter 'coverageCountGoal' is not of type 'int'.")
+				ex = TypeError("Parameter 'coverageCountGoal' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(coverageCountGoal)}'.")
 				raise ex
 			elif coverageCountGoal < 0:
-				ex = ValueError(f"Parameter 'coverageCountGoal' is negative.")
+				ex = ValueError("Parameter 'coverageCountGoal' is negative.")
 				ex.add_note(f"Got value '{coverageCountGoal}'.")
 				raise ex
 

@@ -282,7 +282,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 			self._parent = None
 			self._root =   None
 		elif not isinstance(parent, RiskManagement):
-			ex = TypeError(f"Parameter 'parent' is not of type 'RiskManagement'.")
+			ex = TypeError("Parameter 'parent' is not of type 'RiskManagement'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 		else:
@@ -316,13 +316,13 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 	@Parent.setter
 	def Parent(self, parent: RiskManagement) -> None:
 		if parent is None:
-			raise ValueError(f"Parameter 'parent' is None.")
+			raise ValueError("Parameter 'parent' is None.")
 		elif not isinstance(parent, RiskManagement):
-			ex = TypeError(f"Parameter 'parent' is not of type 'RiskManagement'.")
+			ex = TypeError("Parameter 'parent' is not of type 'RiskManagement'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 		elif self._parent is not None:
-			ex = AlreadyInRiskRegisterError(f"Element is already part of a risk register.")
+			ex = AlreadyInRiskRegisterError("Element is already part of a risk register.")
 			ex.add_note(f"Got element '{self!r}'.")
 			raise ex
 
@@ -383,19 +383,19 @@ class RiskManagement(Base):
 		super().__init__(keyValuePairs)
 
 		if version is None:
-			raise ValueError(f"Parameter 'version' is None.")
+			raise ValueError("Parameter 'version' is None.")
 		elif not isinstance(version, SemanticVersion):
-			ex = TypeError(f"Parameter 'version' is not of type 'SemanticVersion'.")
+			ex = TypeError("Parameter 'version' is not of type 'SemanticVersion'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(version)}'.")
 			raise ex
 
 		if name is not None:
 			if not isinstance(name, str):
-				ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+				ex = TypeError("Parameter 'name' is not of type 'str'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 				raise ex
 			elif name == "":
-				raise ValueError(f"Parameter 'name' is empty.")
+				raise ValueError("Parameter 'name' is empty.")
 
 		self._root =         self
 		self._version =      version
@@ -447,7 +447,7 @@ class RiskManagement(Base):
 			if implication._root is not self:
 				ex = NotInSameRiskRegisterError(f"{kind} '{element._id}' references an implication outside the risk register.")
 				ex.add_note(f"Got implication '{implication._id}'.")
-				ex.add_note(f"Add the implication to the risk register first.")
+				ex.add_note("Add the implication to the risk register first.")
 				raise ex
 
 		if isinstance(element, MitigationsMixin):
@@ -455,14 +455,14 @@ class RiskManagement(Base):
 				if mitigation._root is not self:
 					ex = NotInSameRiskRegisterError(f"{kind} '{element._id}' references a mitigation outside the risk register.")
 					ex.add_note(f"Got mitigation '{mitigation._id}'.")
-					ex.add_note(f"Add the mitigation to the risk register first.")
+					ex.add_note("Add the mitigation to the risk register first.")
 					raise ex
 
 		if isinstance(element, Risk) and element._owner is not None:
 			if self._persons.get(element._owner._userID) is not element._owner:
 				ex = NotInSameRiskRegisterError(f"Risk '{element._id}' has an owner outside the risk register.")
 				ex.add_note(f"Got person '{element._owner._userID}'.")
-				ex.add_note(f"Add the person to the risk register first.")
+				ex.add_note("Add the person to the risk register first.")
 				raise ex
 
 		elements[element._id] = element
@@ -544,9 +544,9 @@ class RiskManagement(Base):
 		:raises DuplicatePersonError: If the risk register already contains a person of the same user ID.
 		"""
 		if person is None:
-			raise ValueError(f"Parameter 'person' is None.")
+			raise ValueError("Parameter 'person' is None.")
 		elif not isinstance(person, Person):
-			ex = TypeError(f"Parameter 'person' is not of type 'Person'.")
+			ex = TypeError("Parameter 'person' is not of type 'Person'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(person)}'.")
 			raise ex
 		elif person._userID in self._persons:
@@ -678,22 +678,22 @@ class BaseWithID(Base):
 		super().__init__(keyValuePairs, parent=parent)
 
 		if identifier is None:
-			raise ValueError(f"Parameter 'identifier' is None.")
+			raise ValueError("Parameter 'identifier' is None.")
 		elif not isinstance(identifier, str):
-			ex = TypeError(f"Parameter 'identifier' is not of type 'str'.")
+			ex = TypeError("Parameter 'identifier' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(identifier)}'.")
 			raise ex
 		elif identifier == "":
-			raise ValueError(f"Parameter 'identifier' is empty.")
+			raise ValueError("Parameter 'identifier' is empty.")
 
 		if description is None:
-			raise ValueError(f"Parameter 'description' is None.")
+			raise ValueError("Parameter 'description' is None.")
 		elif not isinstance(description, str):
-			ex = TypeError(f"Parameter 'description' is not of type 'str'.")
+			ex = TypeError("Parameter 'description' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(description)}'.")
 			raise ex
 		elif description == "":
-			raise ValueError(f"Parameter 'description' is empty.")
+			raise ValueError("Parameter 'description' is empty.")
 
 		self._id =          identifier
 		self._description = description
@@ -747,27 +747,27 @@ class ImplicationsMixin(metaclass=ExtendedType, mixin=True):
 		if implications is None:
 			return
 		elif not isinstance(implications, Iterable):
-			ex = TypeError(f"Parameter 'implications' is not iterable.")
+			ex = TypeError("Parameter 'implications' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(implications)}'.")
 			raise ex
 		elif isinstance(implications, KeyValuePairsMixin):
-			ex = TypeError(f"Parameter 'implications' is a single element, not an iterable of elements.")
+			ex = TypeError("Parameter 'implications' is a single element, not an iterable of elements.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(implications)}'.")
 			raise ex
 
 		for implication in implications:
 			if not isinstance(implication, Implication):
-				ex = TypeError(f"Parameter 'implications' contains an element not of type 'Implication'.")
+				ex = TypeError("Parameter 'implications' contains an element not of type 'Implication'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(implication)}'.")
 				raise ex
 			elif implication._id in self._implications:
 				raise DuplicateImplicationError(f"Parameter 'implications' contains implication '{implication._id}' twice.")
 			elif self._root is not None and implication._root is not self._root:
 				ex = NotInSameRiskRegisterError(
-					f"Parameter 'implications' contains an implication outside the element's risk register."
+					"Parameter 'implications' contains an implication outside the element's risk register."
 				)
 				ex.add_note(f"Got implication '{implication._id}'.")
-				ex.add_note(f"Add the implication to the risk register first.")
+				ex.add_note("Add the implication to the risk register first.")
 				raise ex
 
 			self._implications[implication._id] = implication
@@ -793,17 +793,17 @@ class ImplicationsMixin(metaclass=ExtendedType, mixin=True):
 		                                    Add the implication to the risk register first.
 		"""
 		if implication is None:
-			raise ValueError(f"Parameter 'implication' is None.")
+			raise ValueError("Parameter 'implication' is None.")
 		elif not isinstance(implication, Implication):
-			ex = TypeError(f"Parameter 'implication' is not of type 'Implication'.")
+			ex = TypeError("Parameter 'implication' is not of type 'Implication'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(implication)}'.")
 			raise ex
 		elif implication._id in self._implications:
 			raise DuplicateImplicationError(f"Element already has implication '{implication._id}'.")
 		elif self._root is not None and implication._root is not self._root:
-			ex = NotInSameRiskRegisterError(f"Parameter 'implication' is outside the element's risk register.")
+			ex = NotInSameRiskRegisterError("Parameter 'implication' is outside the element's risk register.")
 			ex.add_note(f"Got implication '{implication._id}'.")
-			ex.add_note(f"Add the implication to the risk register first.")
+			ex.add_note("Add the implication to the risk register first.")
 			raise ex
 
 		self._implications[implication._id] = implication
@@ -838,27 +838,27 @@ class MitigationsMixin(metaclass=ExtendedType, mixin=True):
 		if mitigations is None:
 			return
 		elif not isinstance(mitigations, Iterable):
-			ex = TypeError(f"Parameter 'mitigations' is not iterable.")
+			ex = TypeError("Parameter 'mitigations' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(mitigations)}'.")
 			raise ex
 		elif isinstance(mitigations, KeyValuePairsMixin):
-			ex = TypeError(f"Parameter 'mitigations' is a single element, not an iterable of elements.")
+			ex = TypeError("Parameter 'mitigations' is a single element, not an iterable of elements.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(mitigations)}'.")
 			raise ex
 
 		for mitigation in mitigations:
 			if not isinstance(mitigation, Mitigation):
-				ex = TypeError(f"Parameter 'mitigations' contains an element not of type 'Mitigation'.")
+				ex = TypeError("Parameter 'mitigations' contains an element not of type 'Mitigation'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(mitigation)}'.")
 				raise ex
 			elif mitigation._id in self._mitigations:
 				raise DuplicateMitigationError(f"Parameter 'mitigations' contains mitigation '{mitigation._id}' twice.")
 			elif self._root is not None and mitigation._root is not self._root:
 				ex = NotInSameRiskRegisterError(
-					f"Parameter 'mitigations' contains a mitigation outside the element's risk register."
+					"Parameter 'mitigations' contains a mitigation outside the element's risk register."
 				)
 				ex.add_note(f"Got mitigation '{mitigation._id}'.")
-				ex.add_note(f"Add the mitigation to the risk register first.")
+				ex.add_note("Add the mitigation to the risk register first.")
 				raise ex
 
 			self._mitigations[mitigation._id] = mitigation
@@ -884,17 +884,17 @@ class MitigationsMixin(metaclass=ExtendedType, mixin=True):
 		                                    Add the mitigation to the risk register first.
 		"""
 		if mitigation is None:
-			raise ValueError(f"Parameter 'mitigation' is None.")
+			raise ValueError("Parameter 'mitigation' is None.")
 		elif not isinstance(mitigation, Mitigation):
-			ex = TypeError(f"Parameter 'mitigation' is not of type 'Mitigation'.")
+			ex = TypeError("Parameter 'mitigation' is not of type 'Mitigation'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(mitigation)}'.")
 			raise ex
 		elif mitigation._id in self._mitigations:
 			raise DuplicateMitigationError(f"Element already has mitigation '{mitigation._id}'.")
 		elif self._root is not None and mitigation._root is not self._root:
-			ex = NotInSameRiskRegisterError(f"Parameter 'mitigation' is outside the element's risk register.")
+			ex = NotInSameRiskRegisterError("Parameter 'mitigation' is outside the element's risk register.")
 			ex.add_note(f"Got mitigation '{mitigation._id}'.")
-			ex.add_note(f"Add the mitigation to the risk register first.")
+			ex.add_note("Add the mitigation to the risk register first.")
 			raise ex
 
 		self._mitigations[mitigation._id] = mitigation
@@ -1038,16 +1038,16 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 		ImplicationsMixin.__init__(self, implications)
 
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, MitigationKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'MitigationKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'MitigationKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
 		if state is None:
-			raise ValueError(f"Parameter 'state' is None.")
+			raise ValueError("Parameter 'state' is None.")
 		elif not isinstance(state, MitigationState):
-			ex = TypeError(f"Parameter 'state' is not of type 'MitigationState'.")
+			ex = TypeError("Parameter 'state' is not of type 'MitigationState'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
 			raise ex
 
@@ -1080,9 +1080,9 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 	@State.setter
 	def State(self, value: MitigationState) -> None:
 		if value is None:
-			raise ValueError(f"Parameter 'value' is None.")
+			raise ValueError("Parameter 'value' is None.")
 		elif not isinstance(value, MitigationState):
-			ex = TypeError(f"Parameter 'value' is not of type 'MitigationState'.")
+			ex = TypeError("Parameter 'value' is not of type 'MitigationState'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 			raise ex
 
@@ -1204,48 +1204,48 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		MitigationsMixin.__init__(self, mitigations)
 
 		if title is None:
-			raise ValueError(f"Parameter 'title' is None.")
+			raise ValueError("Parameter 'title' is None.")
 		elif not isinstance(title, str):
-			ex = TypeError(f"Parameter 'title' is not of type 'str'.")
+			ex = TypeError("Parameter 'title' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(title)}'.")
 			raise ex
 		elif title == "":
-			raise ValueError(f"Parameter 'title' is empty.")
+			raise ValueError("Parameter 'title' is empty.")
 
 		if probability is None:
-			raise ValueError(f"Parameter 'probability' is None.")
+			raise ValueError("Parameter 'probability' is None.")
 		elif not isinstance(probability, Probability):
-			ex = TypeError(f"Parameter 'probability' is not of type 'Probability'.")
+			ex = TypeError("Parameter 'probability' is not of type 'Probability'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(probability)}'.")
 			raise ex
 
 		if impact is None:
-			raise ValueError(f"Parameter 'impact' is None.")
+			raise ValueError("Parameter 'impact' is None.")
 		elif not isinstance(impact, Impact):
-			ex = TypeError(f"Parameter 'impact' is not of type 'Impact'.")
+			ex = TypeError("Parameter 'impact' is not of type 'Impact'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(impact)}'.")
 			raise ex
 
 		if state is None:
-			raise ValueError(f"Parameter 'state' is None.")
+			raise ValueError("Parameter 'state' is None.")
 		elif not isinstance(state, RiskState):
-			ex = TypeError(f"Parameter 'state' is not of type 'RiskState'.")
+			ex = TypeError("Parameter 'state' is not of type 'RiskState'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
 			raise ex
 
 		if owner is not None:
 			if not isinstance(owner, Person):
-				ex = TypeError(f"Parameter 'owner' is not of type 'Person'.")
+				ex = TypeError("Parameter 'owner' is not of type 'Person'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(owner)}'.")
 				raise ex
 			elif self._root is not None and self._root._persons.get(owner._userID) is not owner:
-				ex = NotInSameRiskRegisterError(f"Parameter 'owner' isn't a person of the risk register.")
+				ex = NotInSameRiskRegisterError("Parameter 'owner' isn't a person of the risk register.")
 				ex.add_note(f"Got person '{owner._userID}'.")
-				ex.add_note(f"Add the person to the risk register first.")
+				ex.add_note("Add the person to the risk register first.")
 				raise ex
 
 		if nextReview is not None and not isinstance(nextReview, datetime):
-			ex = TypeError(f"Parameter 'nextReview' is not of type 'datetime'.")
+			ex = TypeError("Parameter 'nextReview' is not of type 'datetime'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(nextReview)}'.")
 			raise ex
 
@@ -1284,9 +1284,9 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 	@Probability.setter
 	def Probability(self, value: Probability) -> None:
 		if value is None:
-			raise ValueError(f"Parameter 'value' is None.")
+			raise ValueError("Parameter 'value' is None.")
 		elif not isinstance(value, Probability):
-			ex = TypeError(f"Parameter 'value' is not of type 'Probability'.")
+			ex = TypeError("Parameter 'value' is not of type 'Probability'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 			raise ex
 
@@ -1306,9 +1306,9 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 	@Impact.setter
 	def Impact(self, value: Impact) -> None:
 		if value is None:
-			raise ValueError(f"Parameter 'value' is None.")
+			raise ValueError("Parameter 'value' is None.")
 		elif not isinstance(value, Impact):
-			ex = TypeError(f"Parameter 'value' is not of type 'Impact'.")
+			ex = TypeError("Parameter 'value' is not of type 'Impact'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 			raise ex
 
@@ -1328,9 +1328,9 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 	@State.setter
 	def State(self, value: RiskState) -> None:
 		if value is None:
-			raise ValueError(f"Parameter 'value' is None.")
+			raise ValueError("Parameter 'value' is None.")
 		elif not isinstance(value, RiskState):
-			ex = TypeError(f"Parameter 'value' is not of type 'RiskState'.")
+			ex = TypeError("Parameter 'value' is not of type 'RiskState'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 			raise ex
 
@@ -1354,13 +1354,13 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 	def Owner(self, value: Nullable[Person]) -> None:
 		if value is not None:
 			if not isinstance(value, Person):
-				ex = TypeError(f"Parameter 'value' is not of type 'Person'.")
+				ex = TypeError("Parameter 'value' is not of type 'Person'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 				raise ex
 			elif self._root is not None and self._root._persons.get(value._userID) is not value:
-				ex = NotInSameRiskRegisterError(f"Parameter 'value' isn't a person of the risk register.")
+				ex = NotInSameRiskRegisterError("Parameter 'value' isn't a person of the risk register.")
 				ex.add_note(f"Got person '{value._userID}'.")
-				ex.add_note(f"Add the person to the risk register first.")
+				ex.add_note("Add the person to the risk register first.")
 				raise ex
 
 		self._owner = value
@@ -1378,7 +1378,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 	@NextReview.setter
 	def NextReview(self, value: Nullable[datetime]) -> None:
 		if value is not None and not isinstance(value, datetime):
-			ex = TypeError(f"Parameter 'value' is not of type 'datetime'.")
+			ex = TypeError("Parameter 'value' is not of type 'datetime'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 			raise ex
 
@@ -1497,7 +1497,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		      |rarr| Create an outbound link from this risk to the given risk.
 		"""
 		if source is self:
-			ex = ValueError(f"Parameter 'source' is this risk.")
+			ex = ValueError("Parameter 'source' is this risk.")
 			ex.add_note(f"Got risk '{source._id}'.")
 			raise ex
 
@@ -1562,35 +1562,35 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		super().__init__(keyValuePairs)
 
 		if source is None:
-			raise ValueError(f"Parameter 'source' is None.")
+			raise ValueError("Parameter 'source' is None.")
 		elif not isinstance(source, Risk):
-			ex = TypeError(f"Parameter 'source' is not of type 'Risk'.")
+			ex = TypeError("Parameter 'source' is not of type 'Risk'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
 			raise ex
 		elif source._root is None:
-			ex = NotInSameRiskRegisterError(f"Parameter 'source' isn't part of a risk register.")
+			ex = NotInSameRiskRegisterError("Parameter 'source' isn't part of a risk register.")
 			ex.add_note(f"Got risk '{source._id}'.")
 			raise ex
 
 		if destination is None:
-			raise ValueError(f"Parameter 'destination' is None.")
+			raise ValueError("Parameter 'destination' is None.")
 		elif not isinstance(destination, Risk):
-			ex = TypeError(f"Parameter 'destination' is not of type 'Risk'.")
+			ex = TypeError("Parameter 'destination' is not of type 'Risk'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(destination)}'.")
 			raise ex
 		elif destination is source:
-			ex = ValueError(f"Parameter 'destination' is the source.")
+			ex = ValueError("Parameter 'destination' is the source.")
 			ex.add_note(f"Got risk '{destination._id}'.")
 			raise ex
 		elif destination._root is not source._root:
-			ex = NotInSameRiskRegisterError(f"Parameter 'destination' isn't part of the source's risk register.")
+			ex = NotInSameRiskRegisterError("Parameter 'destination' isn't part of the source's risk register.")
 			ex.add_note(f"Got risk '{destination._id}'.")
 			raise ex
 
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, LinkKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'LinkKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'LinkKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 

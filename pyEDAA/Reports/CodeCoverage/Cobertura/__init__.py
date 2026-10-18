@@ -334,16 +334,16 @@ class Document(cc_Document, Coverage):
 		                        :class:`~pyEDAA.Reports.CodeCoverage.CoverageSummary`.
 		"""
 		if xmlReportFile is None:
-			raise ValueError(f"Parameter 'xmlReportFile' is None.")
+			raise ValueError("Parameter 'xmlReportFile' is None.")
 		elif not isinstance(xmlReportFile, Path):
-			ex = TypeError(f"Parameter 'xmlReportFile' is not of type 'Path'.")
+			ex = TypeError("Parameter 'xmlReportFile' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(xmlReportFile)}'.")
 			raise ex
 
 		if coverageSummary is None:
-			raise ValueError(f"Parameter 'coverageSummary' is None.")
+			raise ValueError("Parameter 'coverageSummary' is None.")
 		elif not isinstance(coverageSummary, CoverageSummary):
-			ex = TypeError(f"Parameter 'coverageSummary' is not of type 'CoverageSummary'.")
+			ex = TypeError("Parameter 'coverageSummary' is not of type 'CoverageSummary'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coverageSummary)}'.")
 			raise ex
 
@@ -440,7 +440,7 @@ class Document(cc_Document, Coverage):
 		"""
 		if self._xmlDocument is None:
 			ex = CodeCoverageError(f"Cobertura report file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -610,14 +610,14 @@ class Document(cc_Document, Coverage):
 		:raises CodeCoverageError: If parameter ``overwrite`` is false and the XML document was read or generated before.
 		"""
 		if overwrite is None:
-			raise ValueError(f"Parameter 'overwrite' is None.")
+			raise ValueError("Parameter 'overwrite' is None.")
 		elif not isinstance(overwrite, bool):
-			ex = TypeError(f"Parameter 'overwrite' is not of type 'bool'.")
+			ex = TypeError("Parameter 'overwrite' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(overwrite)}'.")
 			raise ex
 		elif not overwrite and self._xmlDocument is not None:
 			ex = CodeCoverageError(f"XML document of Cobertura report file '{self._path}' is already populated.")
-			ex.add_note(f"Call 'Document.Generate(overwrite=True)' to replace it.")
+			ex.add_note("Call 'Document.Generate(overwrite=True)' to replace it.")
 			raise ex
 
 		counts = Element._CountLines(
@@ -673,21 +673,21 @@ class Document(cc_Document, Coverage):
 		if path is None:
 			path = self._path
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
 		if overwrite is None:
-			raise ValueError(f"Parameter 'overwrite' is None.")
+			raise ValueError("Parameter 'overwrite' is None.")
 		elif not isinstance(overwrite, bool):
-			ex = TypeError(f"Parameter 'overwrite' is not of type 'bool'.")
+			ex = TypeError("Parameter 'overwrite' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(overwrite)}'.")
 			raise ex
 
 		if regenerate is None:
-			raise ValueError(f"Parameter 'regenerate' is None.")
+			raise ValueError("Parameter 'regenerate' is None.")
 		elif not isinstance(regenerate, bool):
-			ex = TypeError(f"Parameter 'regenerate' is not of type 'bool'.")
+			ex = TypeError("Parameter 'regenerate' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(regenerate)}'.")
 			raise ex
 
@@ -700,7 +700,7 @@ class Document(cc_Document, Coverage):
 
 		if self._xmlDocument is None:
 			ex = CodeCoverageError(f"XML document of Cobertura report file '{path}' needs to be generated first.")
-			ex.add_note(f"Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.")
+			ex.add_note("Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.")
 			raise ex
 
 		content = tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True)

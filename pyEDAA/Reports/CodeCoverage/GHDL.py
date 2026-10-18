@@ -177,76 +177,76 @@ class File(Generic[ParentType], metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``parent`` contains a file of the same path already.
 		"""
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, Path):
-			ex = TypeError(f"Parameter 'name' is not of type 'Path'.")
+			ex = TypeError("Parameter 'name' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 
 		if directory is None:
-			raise ValueError(f"Parameter 'directory' is None.")
+			raise ValueError("Parameter 'directory' is None.")
 		elif not isinstance(directory, Path):
-			ex = TypeError(f"Parameter 'directory' is not of type 'Path'.")
+			ex = TypeError("Parameter 'directory' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(directory)}'.")
 			raise ex
 
 		if sha1 is None:
-			raise ValueError(f"Parameter 'sha1' is None.")
+			raise ValueError("Parameter 'sha1' is None.")
 		elif not isinstance(sha1, str):
-			ex = TypeError(f"Parameter 'sha1' is not of type 'str'.")
+			ex = TypeError("Parameter 'sha1' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(sha1)}'.")
 			raise ex
 		elif fullmatch(r"[0-9a-f]{40}", sha1) is None:
-			ex = ValueError(f"Parameter 'sha1' is not 40 lowercase hexadecimal digits.")
+			ex = ValueError("Parameter 'sha1' is not 40 lowercase hexadecimal digits.")
 			ex.add_note(f"Got value '{sha1}'.")
 			raise ex
 
 		if mode is None:
-			raise ValueError(f"Parameter 'mode' is None.")
+			raise ValueError("Parameter 'mode' is None.")
 		elif not isinstance(mode, CoverageMode):
-			ex = TypeError(f"Parameter 'mode' is not of type 'CoverageMode'.")
+			ex = TypeError("Parameter 'mode' is not of type 'CoverageMode'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(mode)}'.")
 			raise ex
 
 		if lastLine is None:
-			raise ValueError(f"Parameter 'lastLine' is None.")
+			raise ValueError("Parameter 'lastLine' is None.")
 		elif not isinstance(lastLine, int):
-			ex = TypeError(f"Parameter 'lastLine' is not of type 'int'.")
+			ex = TypeError("Parameter 'lastLine' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lastLine)}'.")
 			raise ex
 		elif lastLine < 1:
-			ex = ValueError(f"Parameter 'lastLine' is less than 1.")
+			ex = ValueError("Parameter 'lastLine' is less than 1.")
 			ex.add_note(f"Got value '{lastLine}'.")
 			raise ex
 
 		if result is None:
-			raise ValueError(f"Parameter 'result' is None.")
+			raise ValueError("Parameter 'result' is None.")
 		elif not isinstance(result, dict):
-			ex = TypeError(f"Parameter 'result' is not of type 'dict'.")
+			ex = TypeError("Parameter 'result' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(result)}'.")
 			raise ex
 
 		for number, ran in result.items():
 			if not isinstance(number, int):
-				ex = TypeError(f"Parameter 'result' contains a line number not of type 'int'.")
+				ex = TypeError("Parameter 'result' contains a line number not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(number)}'.")
 				raise ex
 			elif number < 1:
-				ex = ValueError(f"Parameter 'result' contains a line number less than 1.")
+				ex = ValueError("Parameter 'result' contains a line number less than 1.")
 				ex.add_note(f"Got value '{number}'.")
 				raise ex
 			elif number > lastLine:
-				ex = ValueError(f"Parameter 'result' contains a line number greater than parameter 'lastLine'.")
+				ex = ValueError("Parameter 'result' contains a line number greater than parameter 'lastLine'.")
 				ex.add_note(f"Got line {number} for 'lastLine' {lastLine}.")
 				raise ex
 			elif not isinstance(ran, bool):
-				ex = TypeError(f"Parameter 'result' contains a flag not of type 'bool'.")
+				ex = TypeError("Parameter 'result' contains a flag not of type 'bool'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(ran)}'.")
 				raise ex
 
 		if parent is not None:
 			if not isinstance(parent, (Report, MergedReport)):
-				ex = TypeError(f"Parameter 'parent' is not of type 'Report' or 'MergedReport'.")
+				ex = TypeError("Parameter 'parent' is not of type 'Report' or 'MergedReport'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 			elif (path := directory / name) in parent._files:
@@ -498,7 +498,7 @@ class Document(cc_Document, Report):
 		"""
 		if self._jsonDocument is None:
 			ex = CodeCoverageError(f"GHDL coverage file '{self._path}' needs to be read and analyzed by a JSON parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -569,13 +569,13 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 		:raises CodeCoverageError: If a source file's checksum differs between two reports.
 		"""
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		self._name =    name
 		self._reports = []
@@ -583,13 +583,13 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 
 		if reports is not None:
 			if not isinstance(reports, Iterable):
-				ex = TypeError(f"Parameter 'reports' is not iterable.")
+				ex = TypeError("Parameter 'reports' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(reports)}'.")
 				raise ex
 
 			for report in reports:
 				if not isinstance(report, Report):
-					ex = TypeError(f"Parameter 'reports' contains an element not of type 'Report'.")
+					ex = TypeError("Parameter 'reports' contains an element not of type 'Report'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(report)}'.")
 					raise ex
 
@@ -607,9 +607,9 @@ class MergedReport(metaclass=ExtendedType, slots=True):
 		:raises CodeCoverageError: If a source file's checksum differs from the checksum in a report merged before.
 		"""
 		if report is None:
-			raise ValueError(f"Parameter 'report' is None.")
+			raise ValueError("Parameter 'report' is None.")
 		elif not isinstance(report, Report):
-			ex = TypeError(f"Parameter 'report' is not of type 'Report'.")
+			ex = TypeError("Parameter 'report' is not of type 'Report'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(report)}'.")
 			raise ex
 
