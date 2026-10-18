@@ -55,7 +55,6 @@ jobs:
     with:
       name: pyEDAA.Reports
       python_version_list: ""   # use latest Python version
-      disable_list:        'ucrt64:*'
 
   UnitTesting:
     uses: pyTooling/Actions/.github/workflows/UnitTesting.yml@r9
