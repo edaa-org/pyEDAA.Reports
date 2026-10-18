@@ -29,8 +29,9 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the requirements model: rationale, verification methods and acceptance criteria."""
-from pyEDAA.Reports.Requirements import Requirement, RequirementSpecification, SpecificationItem, VerificationMethod
 from pyTooling.Testing           import Testcase
+
+from pyEDAA.Reports.Requirements import Requirement, RequirementSpecification, SpecificationItem, VerificationMethod
 
 from .                           import FUNCTIONAL, VERSION
 

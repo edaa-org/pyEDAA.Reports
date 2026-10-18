@@ -34,6 +34,8 @@ assertions and covergroups - kept in the format's model."""
 from pathlib                                       import Path
 from tempfile                                      import TemporaryDirectory
 
+from pyTooling.Testing                             import Testcase
+
 from pyEDAA.Reports.CodeCoverage                   import CodeCoverageError
 from pyEDAA.Reports.CodeCoverage.UCIS              import Document
 from pyEDAA.Reports.CodeCoverage.UCIS.Assertions   import Assertion, AssertionBinKind, AssertionCoverage
@@ -49,7 +51,6 @@ from pyEDAA.Reports.CodeCoverage.UCIS.Instances    import InstanceCoverage
 from pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS       import Document as PyUCISDocument
 from pyEDAA.Reports.CodeCoverage.UCIS.ToggleBits   import Toggle, ToggleBit
 from pyEDAA.Reports.CodeCoverage.UCIS.Toggles      import Dimension, MetricMode, ToggleCoverage, ToggleObject
-from pyTooling.Testing                             import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -81,10 +81,11 @@ from typing                import Optional as Nullable, Dict, Iterable, Any, Tup
 
 from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
+from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
 from pyTooling.Tree        import Node
 
-from pyEDAA.Reports        import AlreadyInHierarchyError, DuplicateElementError, ReportException
+from pyEDAA.Reports        import ReportException
 
 
 @export

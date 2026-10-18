@@ -33,12 +33,14 @@ from pathlib                               import Path
 from tempfile                              import TemporaryDirectory
 
 from lxml.etree                            import fromstring
+
+from pyTooling.Testing                     import Testcase
+
 from pyEDAA.Reports.CodeCoverage           import CodeCoverageError, LineCoverageStatus
 from pyEDAA.Reports.CodeCoverage.AldecUCDB import AttributesMixin, Bin, BinFlags, Command, CoverType, Document
 from pyEDAA.Reports.CodeCoverage.AldecUCDB import HistoryNode, HistoryNodeKind, Language, NAMESPACE, Report, SCHEMA
 from pyEDAA.Reports.CodeCoverage.AldecUCDB import Scope, ScopeType, SourceLocation, Statement
 from pyEDAA.Reports.CodeCoverage.Cobertura import Document as CoberturaDocument
-from pyTooling.Testing                     import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

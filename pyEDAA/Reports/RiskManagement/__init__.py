@@ -56,11 +56,11 @@ from typing                import Any, Callable, ClassVar, Generator, Iterable, 
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
 from pyTooling.Decorators  import export, readonly
+from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import AlreadyInHierarchyError, DuplicateElementError, KeyValuePairsMixin
-from pyEDAA.Reports        import NotInSameHierarchyError, Person, ReportException
+from pyEDAA.Reports        import KeyValuePairsMixin, Person, ReportException
 
 
 @export

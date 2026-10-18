@@ -36,13 +36,14 @@ from pathlib                                import Path
 from tempfile                               import TemporaryDirectory
 from typing                                 import Any
 
+from pyTooling.MetaClasses                  import AbstractClassError
+from pyTooling.Versioning                   import SemanticVersion
+from pyTooling.Testing                      import Testcase
+
 from pyEDAA.Reports.CodeCoverage            import Class, CodeCoverageError, Function, LineCoverageStatus, Method
 from pyEDAA.Reports.CodeCoverage            import Module, Package
 from pyEDAA.Reports.CodeCoverage.CoveragePy import Base, Document, File, FormatVersion, Region, RegionKind
 from pyEDAA.Reports.CodeCoverage.CoveragePy import Summary
-from pyTooling.MetaClasses                  import AbstractClassError
-from pyTooling.Testing                      import Testcase
-from pyTooling.Versioning                   import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover

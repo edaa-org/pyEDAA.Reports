@@ -36,13 +36,14 @@ from tempfile                                           import TemporaryDirector
 from textwrap                                           import dedent
 
 from lxml.etree                                         import XMLSchema, parse
+
 from pyTooling.Common                                   import getResourceFile
+from pyTooling.Testing                                  import Testcase
 
 from pyEDAA.Reports                                     import Resources
 from pyEDAA.Reports.CodeCoverage                        import CodeCoverageError, LineCoverageStatus, Module, Package
 from pyEDAA.Reports.CodeCoverage.Cobertura              import READ_SCHEMA as ANY_SCHEMA, Document as AnyDocument
 from pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura import READ_SCHEMA, Class, Document
-from pyTooling.Testing                                  import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

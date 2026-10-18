@@ -37,7 +37,7 @@ __author__ =            "Patrick Lehmann"
 __email__ =             "Paebbels@gmail.com"
 __copyright__ =         "2021-2026, Electronic Design Automation Abstraction (EDA²)"
 __license__ =           "Apache License, Version 2.0"
-__version__ =           "0.20.0rc1"
+__version__ =           "0.20.0rc2"
 __keywords__ =          ["Reports", "Abstract Model", "Data Model", "Unit Testing", "Testcase", "Testsuite", "OSVVM", "YAML", "XML"]
 __project_url__ =       "https://github.com/edaa-org/pyEDAA.Reports"
 __documentation_url__ = "https://edaa-org.github.io/pyEDAA.Reports"
@@ -55,37 +55,6 @@ from pyTooling.MetaClasses import ExtendedType
 @export
 class ReportException(ExceptionBase):
 	"""Base-exception of all exceptions raised by pyEDAA.Reports."""
-
-
-@export
-class DuplicateElementError(ReportException):
-	"""
-	The exception is raised when an element is added to a data model, which already contains an element of the same kind
-	and key.
-
-	Each data model raises a subclass per element kind, which derives from this class and from the data model's own
-	base-exception.
-	"""
-
-
-@export
-class AlreadyInHierarchyError(ReportException):
-	"""
-	The exception is raised when an element is added to a data model's hierarchy, but it already has a parent.
-
-	Each data model raises a subclass named after its root, which derives from this class and from the data model's own
-	base-exception.
-	"""
-
-
-@export
-class NotInSameHierarchyError(ReportException):
-	"""
-	The exception is raised when an element is used together with an element or a person of another hierarchy.
-
-	The element or person itself is valid, only its ownership is wrong. Each data model raises a subclass named after its
-	root, which derives from this class and from the data model's own base-exception.
-	"""
 
 
 @export

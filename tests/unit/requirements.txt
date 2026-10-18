@@ -6,6 +6,7 @@ Coverage ~= 7.16
 # Test Runner
 pytest ~= 9.1
 pytest-cov ~= 7.1
+pytest-xdist ~= 3.8
 
 docstr_coverage ~= 2.3
 

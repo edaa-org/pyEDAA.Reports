@@ -55,7 +55,19 @@ jobs:
     with:
       name: pyEDAA.Reports
       python_version_list: ""   # use latest Python version
-      disable_list:        'ucrt64:*'
+
+  VersionCheck:
+    uses: pyTooling/Actions/.github/workflows/CheckReleaseVersion.yml@r9
+    needs:
+      - Prepare
+      - UnitTestingParams
+    if: needs.Prepare.outputs.version != ''
+    with:
+      python_version:       ${{ needs.UnitTestingParams.outputs.python_version }}
+      version:              ${{ needs.Prepare.outputs.version }}
+      package_version:      ${{ needs.UnitTestingParams.outputs.package_version }}
+      check_pypi_duplicate: ${{ needs.Prepare.outputs.is_release_commit }}
+      pypi_package:         ${{ needs.UnitTestingParams.outputs.package_fullname }}
 
   UnitTesting:
     uses: pyTooling/Actions/.github/workflows/UnitTesting.yml@r9
@@ -218,16 +230,17 @@ jobs:
     uses: pyTooling/Actions/.github/workflows/TagReleaseCommit.yml@r9
     needs:
       - Prepare
+      - VersionCheck
       - UnitTesting
 #      - StaticTypeCheck
       - Package
       - AppTesting
       - PublishToGitHubPages
     if: >-
-      ${{ !failure() && !cancelled()
+      !failure() && !cancelled()
        && needs.Prepare.outputs.is_release_commit == 'true'
+       && needs.VersionCheck.result == 'success'
        && github.event_name != 'schedule'
-      }}
     permissions:
       contents: write  # required for create tag
       actions:  write  # required for trigger workflow
@@ -241,15 +254,16 @@ jobs:
     uses: pyTooling/Actions/.github/workflows/PublishReleaseNotes.yml@r9
     needs:
       - Prepare
+      - VersionCheck
       - UnitTesting
 #      - StaticTypeCheck
       - Package
       - AppTesting
       - PublishToGitHubPages
     if: >-
-      ${{ !failure() && !cancelled()
+      !failure() && !cancelled()
        && needs.Prepare.outputs.is_release_tag == 'true'
-      }}
+       && needs.VersionCheck.result == 'success'
     permissions:
       contents: write
       actions:  write
@@ -263,14 +277,15 @@ jobs:
     uses: pyTooling/Actions/.github/workflows/PublishOnPyPI.yml@r9
     needs:
       - Prepare
+      - VersionCheck
       - UnitTestingParams
       - Package
       - ReleasePage
     if: >-
-      ${{ !failure() && !cancelled()
+      !failure() && !cancelled()
        && needs.Package.result == 'success'
        && needs.Prepare.outputs.is_release_tag == 'true'
-      }}
+       && needs.VersionCheck.result == 'success'
     with:
       python_version: ${{ needs.UnitTestingParams.outputs.python_version }}
       requirements:   '-r dist/requirements.txt'
