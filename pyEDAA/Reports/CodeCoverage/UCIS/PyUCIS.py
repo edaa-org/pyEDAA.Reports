@@ -50,6 +50,8 @@ target namespace. The format's model and the conversion to the common model are 
    for file in summary.IterateFiles():
      print(f"{file.Path}: {file.LineCoverage:.1%}")
 """
+from __future__                       import annotations
+
 from typing                           import ClassVar, Optional as Nullable
 
 from pyTooling.Decorators             import export
