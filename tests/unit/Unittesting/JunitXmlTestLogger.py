@@ -42,11 +42,12 @@ from textwrap                                         import dedent
 
 from lxml.etree                                       import parse
 
+from pyTooling.Testing                                import Testcase
+
 from pyEDAA.Reports.Unittesting                       import TestcaseStatus, TestsuiteKind, UnittestError
 from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument
 from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document, Testsuite as ju_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Testclass as ju_Testclass, Testcase as ju_Testcase
-from pyTooling.Testing                                import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

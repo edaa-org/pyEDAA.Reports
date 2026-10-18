@@ -34,11 +34,12 @@ from json                             import dumps
 from pathlib                          import Path
 from tempfile                         import TemporaryDirectory
 
+from pyTooling.Versioning             import SemanticVersion
+from pyTooling.Testing                import Testcase
+
 from pyEDAA.Reports.CodeCoverage      import AlreadyInCoverageReportError, DuplicateFileError
 from pyEDAA.Reports.CodeCoverage.LLVM import BranchRegion, Counters, Document, Expansion, File, Function, MCDCRecord
 from pyEDAA.Reports.CodeCoverage.LLVM import Region, RegionKind, Segment, Summary, TestVector as MCDCTestVector
-from pyTooling.Testing                import Testcase
-from pyTooling.Versioning             import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover

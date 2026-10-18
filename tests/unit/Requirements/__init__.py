@@ -31,8 +31,9 @@
 """Unit tests of the requirements model, and a specification of three layers they share."""
 from datetime                    import datetime, timezone
 
-from pyEDAA.Reports.Requirements import Layer, Requirement, RequirementKind, RequirementSpecification
 from pyTooling.Versioning        import SemanticVersion
+
+from pyEDAA.Reports.Requirements import Layer, Requirement, RequirementKind, RequirementSpecification
 
 
 VERSION =    SemanticVersion(1, 2, 0)                          #: Version of the shared specification.

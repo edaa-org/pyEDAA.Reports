@@ -33,10 +33,11 @@ from datetime                                      import datetime, timedelta, t
 from pathlib                                       import Path
 from uuid                                          import UUID
 
+from pyTooling.Testing                             import Testcase
+
 from pyEDAA.Reports.Unittesting                    import Testcase as ut_Testcase, TestcaseStatus, TestsuiteKind
 from pyEDAA.Reports.Unittesting                    import UnittestError
 from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document, Testcase as ne_Testcase
-from pyTooling.Testing                             import Testcase
 
 
 EXAMPLE_FILE = Path("tests/data/JUnit/pyEDAA.Reports/Rust-Cargo/nextest-junit.xml")

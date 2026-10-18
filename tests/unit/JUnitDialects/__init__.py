@@ -41,9 +41,10 @@ from pathlib import Path
 from sys     import modules
 from typing  import Dict, List, Tuple, Type
 
+from xmlschema             import XMLSchema
+
 from pyTooling.Decorators import export, readonly
 from pyTooling.MetaClasses import ExtendedType
-from xmlschema             import XMLSchema
 
 from pyEDAA.Reports.Unittesting                       import TestsuiteSummary
 from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument

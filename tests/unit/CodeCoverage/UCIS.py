@@ -36,6 +36,9 @@ from pathlib                                       import Path
 from tempfile                                      import TemporaryDirectory
 
 from lxml.etree                                    import fromstring
+
+from pyTooling.Testing                             import Testcase
+
 from pyEDAA.Reports.CodeCoverage                   import CodeCoverageError, LineCoverageStatus
 from pyEDAA.Reports.CodeCoverage.Cobertura         import Document as CoberturaDocument
 from pyEDAA.Reports.CodeCoverage.UCIS              import Document, FormatVersion, SCHEMAS
@@ -45,7 +48,6 @@ from pyEDAA.Reports.CodeCoverage.UCIS.Branches     import Branch, BranchCoverage
 from pyEDAA.Reports.CodeCoverage.UCIS.Elements     import StatementID, UserAttribute, UserAttributeType
 from pyEDAA.Reports.CodeCoverage.UCIS.HistoryNodes import HistoryNode
 from pyEDAA.Reports.CodeCoverage.UCIS.Instances    import InstanceCoverage, SourceFile
-from pyTooling.Testing                             import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

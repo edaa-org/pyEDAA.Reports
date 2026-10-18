@@ -33,9 +33,10 @@
 from datetime                                            import timedelta
 from pathlib                                             import Path
 
+from pyTooling.Testing                                   import Testcase
+
 from pyEDAA.Reports.DocumentationCoverage                import CoverageState, ItemKind
 from pyEDAA.Reports.DocumentationCoverage.DocStrCoverage import DocStrCoverage, DocStrCoverageError
-from pyTooling.Testing                                   import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

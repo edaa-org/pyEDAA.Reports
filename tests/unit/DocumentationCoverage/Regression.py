@@ -35,9 +35,10 @@ from sys                                         import version_info
 from tempfile                                    import TemporaryDirectory
 from unittest                                    import skipIf
 
+from pyTooling.Testing                           import Testcase
+
 from pyEDAA.Reports.DocumentationCoverage        import CoverageState, ItemKind
 from pyEDAA.Reports.DocumentationCoverage.Python import Analyzer, CountedItems
-from pyTooling.Testing                           import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

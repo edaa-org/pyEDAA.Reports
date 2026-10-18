@@ -29,12 +29,13 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the requirements model: the specification, and its persons, personas, labels, documents and layers."""
+from pyTooling.Versioning        import SemanticVersion
+from pyTooling.Testing           import Testcase
+
 from pyEDAA.Reports              import Person
 from pyEDAA.Reports.Requirements import AlreadyInSpecificationError, Document, DuplicateDocumentError
 from pyEDAA.Reports.Requirements import DuplicatePersonaError, DuplicatePersonError, Label, Layer, Persona
 from pyEDAA.Reports.Requirements import RequirementSpecification
-from pyTooling.Versioning        import SemanticVersion
-from pyTooling.Testing           import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover
