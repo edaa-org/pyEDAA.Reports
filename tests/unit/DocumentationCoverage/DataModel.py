@@ -31,11 +31,11 @@
 """Unit tests of the documentation coverage model: kinds, states, both hierarchies, and aggregation."""
 from pathlib                              import Path
 
-from pyEDAA.Reports                       import AlreadyInHierarchyError, DuplicateElementError
 from pyEDAA.Reports.DocumentationCoverage import AlreadyInDocumentationReportError, CoverageCounters, CoverageState
 from pyEDAA.Reports.DocumentationCoverage import Directory, DocCoverageError
 from pyEDAA.Reports.DocumentationCoverage import DocumentationReport, DuplicateDirectoryError, DuplicateFileError, File
 from pyEDAA.Reports.DocumentationCoverage import Item, ItemCategory, ItemKind
+from pyTooling.Exceptions                 import AlreadyInHierarchyError, DuplicateElementError
 from pyTooling.Testing                    import Testcase
 
 

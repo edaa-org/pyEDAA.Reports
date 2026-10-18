@@ -78,9 +78,10 @@ from typing                import Callable, ClassVar, Generator, Iterable, Optio
 
 from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly
+from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError
 from pyTooling.MetaClasses import ExtendedType, abstractclass, abstractmethod
 
-from pyEDAA.Reports        import AlreadyInHierarchyError, DuplicateElementError, ReportException
+from pyEDAA.Reports        import ReportException
 
 
 @export

@@ -122,15 +122,14 @@ Version 0.20 (2026)
      :class:`~pyEDAA.Reports.RiskManagement.Risk` with probability, impact and state; implications and mitigations,
      shared by risks; links between risks of a kind; a risk's score and level, owner and next review.
 
-   * :mod:`pyEDAA.Reports` holds what the data models share:
-
-     * :class:`~pyEDAA.Reports.KeyValuePairsMixin` attaches key-value pairs to an element, accessed with the
-       dictionary syntax; :class:`~pyEDAA.Reports.Person` is a real person - user ID, name, e-mail address.
-     * :exc:`~pyEDAA.Reports.DuplicateElementError`, :exc:`~pyEDAA.Reports.AlreadyInHierarchyError` and
-       :exc:`~pyEDAA.Reports.NotInSameHierarchyError` are the common bases of the data models' errors. Each model
-       raises one error per duplicate element kind, e.g.
-       :exc:`~pyEDAA.Reports.CodeCoverage.DuplicateFileError`, and an error named after its root, e.g.
-       :exc:`~pyEDAA.Reports.RiskManagement.AlreadyInRiskRegisterError`.
+   * :mod:`pyEDAA.Reports` holds what the data models share: :class:`~pyEDAA.Reports.KeyValuePairsMixin` attaches
+     key-value pairs to an element, accessed with the dictionary syntax; :class:`~pyEDAA.Reports.Person` is a real
+     person - user ID, name, e-mail address.
+   * The data models' errors derive from pyTooling's common bases :exc:`~pyTooling.Exceptions.DuplicateElementError`,
+     :exc:`~pyTooling.Exceptions.AlreadyInHierarchyError` and :exc:`~pyTooling.Exceptions.NotInSameHierarchyError`. Each
+     model raises one error per duplicate element kind, e.g.
+     :exc:`~pyEDAA.Reports.CodeCoverage.DuplicateFileError`, and an error named after its root, e.g.
+     :exc:`~pyEDAA.Reports.RiskManagement.AlreadyInRiskRegisterError`.
 
    * :mod:`pyEDAA.Reports.Unittesting`
 

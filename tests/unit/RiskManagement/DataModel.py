@@ -32,13 +32,13 @@
 """Unit tests of the risk management model: enumerations, risks, implications, mitigations, links and the register."""
 from datetime                      import datetime, timezone
 
-from pyEDAA.Reports                import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
 from pyEDAA.Reports                import Person
 from pyEDAA.Reports.RiskManagement import AlreadyInRiskRegisterError, DuplicateImplicationError, DuplicateLinkError
 from pyEDAA.Reports.RiskManagement import DuplicateMitigationError, DuplicatePersonError, DuplicateRiskError, Impact
 from pyEDAA.Reports.RiskManagement import Implication, Link, LinkKind, Mitigation, MitigationKind, MitigationState
 from pyEDAA.Reports.RiskManagement import NotInSameRiskRegisterError, Probability, Risk, RiskLevel, RiskManagement
 from pyEDAA.Reports.RiskManagement import RiskManagementError, RiskState
+from pyTooling.Exceptions          import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
 from pyTooling.Versioning          import SemanticVersion
 from pyTooling.Testing             import Testcase
 
