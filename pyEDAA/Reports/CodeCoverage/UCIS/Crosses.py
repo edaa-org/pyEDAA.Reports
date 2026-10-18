@@ -116,19 +116,19 @@ class Cross(Base):
 				raise ex
 
 		if options is None:
-			raise ValueError(f"Parameter 'options' is None.")
+			raise ValueError("Parameter 'options' is None.")
 		elif not isinstance(options, CrossOptions):
-			ex = TypeError(f"Parameter 'options' is not of type 'CrossOptions'.")
+			ex = TypeError("Parameter 'options' is not of type 'CrossOptions'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(options)}'.")
 			raise ex
 
 		if alias is not None and not isinstance(alias, str):
-			ex = TypeError(f"Parameter 'alias' is not of type 'str'.")
+			ex = TypeError("Parameter 'alias' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(alias)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, CovergroupInstance):
-			ex = TypeError(f"Parameter 'parent' is not of type 'CovergroupInstance'.")
+			ex = TypeError("Parameter 'parent' is not of type 'CovergroupInstance'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -142,13 +142,13 @@ class Cross(Base):
 
 		if expressions is not None:
 			if not isinstance(expressions, Iterable):
-				ex = TypeError(f"Parameter 'expressions' is not iterable.")
+				ex = TypeError("Parameter 'expressions' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(expressions)}'.")
 				raise ex
 
 			for expression in expressions:
 				if not isinstance(expression, str):
-					ex = TypeError(f"Parameter 'expressions' contains an element not of type 'str'.")
+					ex = TypeError("Parameter 'expressions' contains an element not of type 'str'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(expression)}'.")
 					raise ex
 
@@ -299,14 +299,14 @@ class CrossBin(BinBase):
 		super().__init__(binType, alias, name, key, userAttributes)
 
 		if contents is None:
-			raise ValueError(f"Parameter 'contents' is None.")
+			raise ValueError("Parameter 'contents' is None.")
 		elif not isinstance(contents, BinContents):
-			ex = TypeError(f"Parameter 'contents' is not of type 'BinContents'.")
+			ex = TypeError("Parameter 'contents' is not of type 'BinContents'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(contents)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Cross):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Cross'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Cross'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -315,22 +315,22 @@ class CrossBin(BinBase):
 		self._contents = contents
 
 		if indices is None:
-			raise ValueError(f"Parameter 'indices' is None.")
+			raise ValueError("Parameter 'indices' is None.")
 		elif not isinstance(indices, Iterable):
-			ex = TypeError(f"Parameter 'indices' is not iterable.")
+			ex = TypeError("Parameter 'indices' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(indices)}'.")
 			raise ex
 
 		for index in indices:
 			if not isinstance(index, int) or isinstance(index, bool):
-				ex = TypeError(f"Parameter 'indices' contains an element not of type 'int'.")
+				ex = TypeError("Parameter 'indices' contains an element not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
 				raise ex
 
 			self._indices.append(index)
 
 		if len(self._indices) == 0:
-			raise ValueError(f"Parameter 'indices' is empty.")
+			raise ValueError("Parameter 'indices' is empty.")
 
 		if parent is not None:
 			parent._bins.append(self)

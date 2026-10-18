@@ -196,16 +196,16 @@ class FSM(Base, ObjectAttributesMixin):
 
 		if width is not None:
 			if not isinstance(width, int) or isinstance(width, bool):
-				ex = TypeError(f"Parameter 'width' is not of type 'int'.")
+				ex = TypeError("Parameter 'width' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(width)}'.")
 				raise ex
 			elif width < 1:
-				ex = ValueError(f"Parameter 'width' is less than 1.")
+				ex = ValueError("Parameter 'width' is less than 1.")
 				ex.add_note(f"Got value '{width}'.")
 				raise ex
 
 		if parent is not None and not isinstance(parent, FSMCoverage):
-			ex = TypeError(f"Parameter 'parent' is not of type 'FSMCoverage'.")
+			ex = TypeError("Parameter 'parent' is not of type 'FSMCoverage'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -344,9 +344,9 @@ class FSMState(Base):
 		super().__init__(userAttributes)
 
 		if coverBin is None:
-			raise ValueError(f"Parameter 'coverBin' is None.")
+			raise ValueError("Parameter 'coverBin' is None.")
 		elif not isinstance(coverBin, Bin):
-			ex = TypeError(f"Parameter 'coverBin' is not of type 'Bin'.")
+			ex = TypeError("Parameter 'coverBin' is not of type 'Bin'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 			raise ex
 
@@ -360,7 +360,7 @@ class FSMState(Base):
 				raise ex
 
 		if parent is not None and not isinstance(parent, FSM):
-			ex = TypeError(f"Parameter 'parent' is not of type 'FSM'.")
+			ex = TypeError("Parameter 'parent' is not of type 'FSM'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -467,14 +467,14 @@ class FSMTransition(Base):
 		super().__init__(userAttributes)
 
 		if coverBin is None:
-			raise ValueError(f"Parameter 'coverBin' is None.")
+			raise ValueError("Parameter 'coverBin' is None.")
 		elif not isinstance(coverBin, Bin):
-			ex = TypeError(f"Parameter 'coverBin' is not of type 'Bin'.")
+			ex = TypeError("Parameter 'coverBin' is not of type 'Bin'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, FSM):
-			ex = TypeError(f"Parameter 'parent' is not of type 'FSM'.")
+			ex = TypeError("Parameter 'parent' is not of type 'FSM'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -484,22 +484,22 @@ class FSMTransition(Base):
 		coverBin._parent = self
 
 		if states is None:
-			raise ValueError(f"Parameter 'states' is None.")
+			raise ValueError("Parameter 'states' is None.")
 		elif not isinstance(states, Iterable):
-			ex = TypeError(f"Parameter 'states' is not iterable.")
+			ex = TypeError("Parameter 'states' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(states)}'.")
 			raise ex
 
 		for state in states:
 			if not isinstance(state, str):
-				ex = TypeError(f"Parameter 'states' contains an element not of type 'str'.")
+				ex = TypeError("Parameter 'states' contains an element not of type 'str'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
 				raise ex
 
 			self._states.append(state)
 
 		if len(self._states) < 2:
-			ex = ValueError(f"Parameter 'states' has less than two states.")
+			ex = ValueError("Parameter 'states' has less than two states.")
 			ex.add_note(f"Got {len(self._states)} state(s).")
 			raise ex
 

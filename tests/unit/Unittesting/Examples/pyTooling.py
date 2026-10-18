@@ -76,7 +76,7 @@ class PyTooling(ut_TestCase):
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 
-		print(f"Merging generic testsuites ...")
+		print("Merging generic testsuites ...")
 		startMerging = perf_counter_ns()
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
@@ -102,7 +102,7 @@ class PyTooling(ut_TestCase):
 		for testcase in (tc for tc in merged.IterateTestcases() if tc.Name not in ("test_NativeMacOS", "test_MSYS", "test_MinGW32", "test_Clang32")):
 			self.assertEqual(TestcaseStatus.Passed, testcase.Status, f"{testcase.Parent.Name}.{testcase.Name}")
 
-		print(f"Aggregating datapoints in testsuite ...")
+		print("Aggregating datapoints in testsuite ...")
 		startAggregate = perf_counter_ns()
 		merged.Aggregate()
 		endAggregate = perf_counter_ns()
@@ -127,7 +127,7 @@ class PyTooling(ut_TestCase):
 		self.assertEqual(0, result.Errored)
 		self.assertEqual(0, result.Failed)
 
-		print(f"Writing merged data as JUnit XML ...")
+		print("Writing merged data as JUnit XML ...")
 		startWrite = perf_counter_ns()
 		junitDocument = Document.FromTestsuiteSummary(self._outputDirectory / "Platform.xml", result)
 		junitDocument.Write(regenerate=True)
@@ -155,7 +155,7 @@ class PyTooling(ut_TestCase):
 		endParsing = perf_counter_ns()
 		parsingDuration = (endParsing - startParsing) / 1e9
 
-		print(f"Merging generic testsuites ...")
+		print("Merging generic testsuites ...")
 		startMerging = perf_counter_ns()
 		merged = MergedTestsuiteSummary("PlatformTesting")
 		for summary in junitDocuments:
@@ -177,13 +177,13 @@ class PyTooling(ut_TestCase):
 		for item in merged.Iterate(IterationScheme.Default | IterationScheme.IncludeSelf):
 			self.assertEqual(mergedCount, item.MergedCount, f"{item.Name}")
 
-		print(f"Aggregating datapoints in testsuite ...")
+		print("Aggregating datapoints in testsuite ...")
 		startAggregate = perf_counter_ns()
 		merged.Aggregate()
 		endAggregate = perf_counter_ns()
 		aggregateDuration = (endAggregate - startAggregate) / 1e9
 
-		print(f"Writing merged data as JUnit XML ...")
+		print("Writing merged data as JUnit XML ...")
 		startWrite = perf_counter_ns()
 		junitDocument = Document.FromTestsuiteSummary(self._outputDirectory / "Unittesting.xml", merged)
 		junitDocument.Write(regenerate=True)

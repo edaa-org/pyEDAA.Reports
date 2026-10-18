@@ -204,13 +204,13 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises ValueError: When parameter 'name' is empty.
 		"""
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name.strip() == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		self._parent = parent
 		self._name = name
@@ -271,12 +271,12 @@ class BaseWithProperties(Base):
 		super().__init__(name, parent=parent)
 
 		if duration is not None and not isinstance(duration, timedelta):
-			ex = TypeError(f"Parameter 'duration' is not of type 'timedelta'.")
+			ex = TypeError("Parameter 'duration' is not of type 'timedelta'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(duration)}'.")
 			raise ex
 
 		if assertionCount is not None and not isinstance(assertionCount, int):
-			ex = TypeError(f"Parameter 'assertionCount' is not of type 'int'.")
+			ex = TypeError("Parameter 'assertionCount' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(assertionCount)}'.")
 			raise ex
 
@@ -422,7 +422,7 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		"""
 		if parent is not None:
 			if not isinstance(parent, Testclass):
-				ex = TypeError(f"Parameter 'parent' is not of type 'Testclass'.")
+				ex = TypeError("Parameter 'parent' is not of type 'Testclass'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
@@ -432,7 +432,7 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
 		if not isinstance(status, TestcaseStatus):
-			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
+			ex = TypeError("Parameter 'status' is not of type 'TestcaseStatus'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 
@@ -593,7 +593,7 @@ class TestsuiteBase(BaseWithProperties):
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
-				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
+				ex = TypeError("Parameter 'parent' is not of type 'TestsuiteBase'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
@@ -734,7 +734,7 @@ class Testclass(Base):
 		"""
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
-				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+				ex = TypeError("Parameter 'parent' is not of type 'Testsuite'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
@@ -868,7 +868,7 @@ class Testsuite(TestsuiteBase):
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
-				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteSummary'.")
+				ex = TypeError("Parameter 'parent' is not of type 'TestsuiteSummary'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
@@ -1445,8 +1445,8 @@ class Document(TestsuiteSummary, ut_Document):
 			self.Generate(overwrite=True)
 
 		if self._xmlDocument is None:
-			ex = UnittestError(f"Internal XML document tree is empty and needs to be generated before write is possible.")
-			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
+			ex = UnittestError("Internal XML document tree is empty and needs to be generated before write is possible.")
+			ex.add_note("Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
 			raise ex
 
 		content = tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True)
@@ -1470,7 +1470,7 @@ class Document(TestsuiteSummary, ut_Document):
 		"""
 		if self._xmlDocument is None:
 			ex = UnittestError(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
+			ex.add_note("Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -1794,7 +1794,7 @@ class Document(TestsuiteSummary, ut_Document):
 		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
 		"""
 		if not overwrite and self._xmlDocument is not None:
-			raise UnittestError(f"Internal XML document is populated with data.")
+			raise UnittestError("Internal XML document is populated with data.")
 
 		rootElement = Element("testsuites")
 		rootElement.attrib["name"] = self._name

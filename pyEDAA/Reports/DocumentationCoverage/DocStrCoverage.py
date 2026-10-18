@@ -91,18 +91,18 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 		:raises DocStrCoverageError: If the directory doesn't exist.
 		"""
 		if packageName is None:
-			raise ValueError(f"Parameter 'packageName' is None.")
+			raise ValueError("Parameter 'packageName' is None.")
 		elif not isinstance(packageName, str):
-			ex = TypeError(f"Parameter 'packageName' is not of type 'str'.")
+			ex = TypeError("Parameter 'packageName' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(packageName)}'.")
 			raise ex
 		elif packageName == "":
-			raise ValueError(f"Parameter 'packageName' is empty.")
+			raise ValueError("Parameter 'packageName' is empty.")
 
 		if directory is None:
-			raise ValueError(f"Parameter 'directory' is None.")
+			raise ValueError("Parameter 'directory' is None.")
 		elif not isinstance(directory, Path):
-			ex = TypeError(f"Parameter 'directory' is not of type 'Path'.")
+			ex = TypeError("Parameter 'directory' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(directory)}'.")
 			raise ex
 		elif not directory.exists():
@@ -198,7 +198,7 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 		:raises DocStrCoverageError: If :meth:`Analyze` didn't run.
 		"""
 		if self._coverageReport is None:
-			raise DocStrCoverageError(f"docstr_coverage's analysis didn't run.")
+			raise DocStrCoverageError("docstr_coverage's analysis didn't run.")
 
 		def state(expected: ExpectedDocstring) -> CoverageState:
 			"""

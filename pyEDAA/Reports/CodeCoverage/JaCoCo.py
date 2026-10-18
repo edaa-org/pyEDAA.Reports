@@ -175,9 +175,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
 		"""
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 
@@ -231,36 +231,36 @@ class Counter(metaclass=ExtendedType, slots=True):
 		:raises TypeError:   If parameter ``parent`` isn't of type :class:`CountersMixin`.
 		"""
 		if counterType is None:
-			raise ValueError(f"Parameter 'counterType' is None.")
+			raise ValueError("Parameter 'counterType' is None.")
 		elif not isinstance(counterType, CounterType):
-			ex = TypeError(f"Parameter 'counterType' is not of type 'CounterType'.")
+			ex = TypeError("Parameter 'counterType' is not of type 'CounterType'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(counterType)}'.")
 			raise ex
 
 		if missedCount is None:
-			raise ValueError(f"Parameter 'missedCount' is None.")
+			raise ValueError("Parameter 'missedCount' is None.")
 		elif not isinstance(missedCount, int):
-			ex = TypeError(f"Parameter 'missedCount' is not of type 'int'.")
+			ex = TypeError("Parameter 'missedCount' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(missedCount)}'.")
 			raise ex
 		elif missedCount < 0:
-			ex = ValueError(f"Parameter 'missedCount' is negative.")
+			ex = ValueError("Parameter 'missedCount' is negative.")
 			ex.add_note(f"Got value '{missedCount}'.")
 			raise ex
 
 		if coveredCount is None:
-			raise ValueError(f"Parameter 'coveredCount' is None.")
+			raise ValueError("Parameter 'coveredCount' is None.")
 		elif not isinstance(coveredCount, int):
-			ex = TypeError(f"Parameter 'coveredCount' is not of type 'int'.")
+			ex = TypeError("Parameter 'coveredCount' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coveredCount)}'.")
 			raise ex
 		elif coveredCount < 0:
-			ex = ValueError(f"Parameter 'coveredCount' is negative.")
+			ex = ValueError("Parameter 'coveredCount' is negative.")
 			ex.add_note(f"Got value '{coveredCount}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, CountersMixin):
-			ex = TypeError(f"Parameter 'parent' is not of type 'CountersMixin'.")
+			ex = TypeError("Parameter 'parent' is not of type 'CountersMixin'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -354,28 +354,28 @@ class SessionInfo(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report`.
 		"""
 		if sessionID is None:
-			raise ValueError(f"Parameter 'sessionID' is None.")
+			raise ValueError("Parameter 'sessionID' is None.")
 		elif not isinstance(sessionID, str):
-			ex = TypeError(f"Parameter 'sessionID' is not of type 'str'.")
+			ex = TypeError("Parameter 'sessionID' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(sessionID)}'.")
 			raise ex
 
 		if start is None:
-			raise ValueError(f"Parameter 'start' is None.")
+			raise ValueError("Parameter 'start' is None.")
 		elif not isinstance(start, datetime):
-			ex = TypeError(f"Parameter 'start' is not of type 'datetime'.")
+			ex = TypeError("Parameter 'start' is not of type 'datetime'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(start)}'.")
 			raise ex
 
 		if dump is None:
-			raise ValueError(f"Parameter 'dump' is None.")
+			raise ValueError("Parameter 'dump' is None.")
 		elif not isinstance(dump, datetime):
-			ex = TypeError(f"Parameter 'dump' is not of type 'datetime'.")
+			ex = TypeError("Parameter 'dump' is not of type 'datetime'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(dump)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Report):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -487,29 +487,29 @@ class Method(Base, CountersMixin):
 		CountersMixin.__init__(self)
 
 		if name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if descriptor is None:
-			raise ValueError(f"Parameter 'descriptor' is None.")
+			raise ValueError("Parameter 'descriptor' is None.")
 		elif not isinstance(descriptor, str):
-			ex = TypeError(f"Parameter 'descriptor' is not of type 'str'.")
+			ex = TypeError("Parameter 'descriptor' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(descriptor)}'.")
 			raise ex
 		elif descriptor == "":
-			raise ValueError(f"Parameter 'descriptor' is empty.")
+			raise ValueError("Parameter 'descriptor' is empty.")
 
 		if lineNumber is not None:
 			if not isinstance(lineNumber, int):
-				ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+				ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 				raise ex
 			elif lineNumber < 1:
-				ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+				ex = ValueError("Parameter 'lineNumber' is less than 1.")
 				ex.add_note(f"Got value '{lineNumber}'.")
 				raise ex
 
 		if parent is not None and not isinstance(parent, Class):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Class'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Class'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -609,15 +609,15 @@ class Class(Base, CountersMixin):
 		CountersMixin.__init__(self)
 
 		if name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if sourceFileName is not None and not isinstance(sourceFileName, str):
-			ex = TypeError(f"Parameter 'sourceFileName' is not of type 'str'.")
+			ex = TypeError("Parameter 'sourceFileName' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(sourceFileName)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Package):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Package'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Package'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -734,13 +734,13 @@ class Line(metaclass=ExtendedType, slots=True):
 		:raises TypeError:              If parameter ``parent`` isn't of type :class:`SourceFile`.
 		"""
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
@@ -761,7 +761,7 @@ class Line(metaclass=ExtendedType, slots=True):
 					raise ex
 
 		if parent is not None and not isinstance(parent, SourceFile):
-			ex = TypeError(f"Parameter 'parent' is not of type 'SourceFile'.")
+			ex = TypeError("Parameter 'parent' is not of type 'SourceFile'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -876,10 +876,10 @@ class SourceFile(Base, CountersMixin):
 		CountersMixin.__init__(self)
 
 		if name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if parent is not None and not isinstance(parent, Package):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Package'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Package'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -962,7 +962,7 @@ class Package(Base, CountersMixin, Generic[ParentType]):
 		CountersMixin.__init__(self)
 
 		if parent is not None and not isinstance(parent, (Report, Group)):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report' or 'Group'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report' or 'Group'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1069,10 +1069,10 @@ class Group(Base, CountersMixin, Generic[ParentType]):
 		CountersMixin.__init__(self)
 
 		if name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if parent is not None and not isinstance(parent, (Report, Group)):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report' or 'Group'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report' or 'Group'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1318,7 +1318,7 @@ class Document(cc_Document, Report):
 		"""
 		if self._xmlDocument is None:
 			ex = CodeCoverageError(f"JaCoCo report file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:

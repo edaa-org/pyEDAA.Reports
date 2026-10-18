@@ -124,22 +124,22 @@ class Class(cob_Class):
 		super().__init__(f"{entity}({architecture})", filename, lineRate, branchRate, complexity)
 
 		if entity is None:
-			raise ValueError(f"Parameter 'entity' is None.")
+			raise ValueError("Parameter 'entity' is None.")
 		elif not isinstance(entity, str):
-			ex = TypeError(f"Parameter 'entity' is not of type 'str'.")
+			ex = TypeError("Parameter 'entity' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(entity)}'.")
 			raise ex
 		elif entity == "":
-			raise ValueError(f"Parameter 'entity' is empty.")
+			raise ValueError("Parameter 'entity' is empty.")
 
 		if architecture is None:
-			raise ValueError(f"Parameter 'architecture' is None.")
+			raise ValueError("Parameter 'architecture' is None.")
 		elif not isinstance(architecture, str):
-			ex = TypeError(f"Parameter 'architecture' is not of type 'str'.")
+			ex = TypeError("Parameter 'architecture' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(architecture)}'.")
 			raise ex
 		elif architecture == "":
-			raise ValueError(f"Parameter 'architecture' is empty.")
+			raise ValueError("Parameter 'architecture' is empty.")
 
 		self._entity =       entity
 		self._architecture = architecture

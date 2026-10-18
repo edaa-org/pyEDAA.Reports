@@ -207,7 +207,7 @@ class Assertion(Base, ObjectAttributesMixin):
 				raise ex
 
 		if parent is not None and not isinstance(parent, AssertionCoverage):
-			ex = TypeError(f"Parameter 'parent' is not of type 'AssertionCoverage'.")
+			ex = TypeError("Parameter 'parent' is not of type 'AssertionCoverage'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -218,17 +218,17 @@ class Assertion(Base, ObjectAttributesMixin):
 
 		if bins is not None:
 			if not isinstance(bins, Mapping):
-				ex = TypeError(f"Parameter 'bins' is not a mapping.")
+				ex = TypeError("Parameter 'bins' is not a mapping.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(bins)}'.")
 				raise ex
 
 			for binKind, coverBin in bins.items():
 				if not isinstance(binKind, AssertionBinKind):
-					ex = TypeError(f"Parameter 'bins' contains a key not of type 'AssertionBinKind'.")
+					ex = TypeError("Parameter 'bins' contains a key not of type 'AssertionBinKind'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(binKind)}'.")
 					raise ex
 				elif not isinstance(coverBin, Bin):
-					ex = TypeError(f"Parameter 'bins' contains a value not of type 'Bin'.")
+					ex = TypeError("Parameter 'bins' contains a value not of type 'Bin'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}' for key '{binKind}'.")
 					raise ex
 

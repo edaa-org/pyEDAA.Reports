@@ -208,9 +208,9 @@ class Line(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``line`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.Line`.
 		"""
 		if line is None:
-			raise ValueError(f"Parameter 'line' is None.")
+			raise ValueError("Parameter 'line' is None.")
 		elif not isinstance(line, cc_Line):
-			ex = TypeError(f"Parameter 'line' is not of type 'Line'.")
+			ex = TypeError("Parameter 'line' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
 			raise ex
 

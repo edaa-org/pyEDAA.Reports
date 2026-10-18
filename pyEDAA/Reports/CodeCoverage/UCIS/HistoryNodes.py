@@ -176,27 +176,27 @@ class HistoryNode(Base):
 		super().__init__(userAttributes)
 
 		if historyNodeID is None:
-			raise ValueError(f"Parameter 'historyNodeID' is None.")
+			raise ValueError("Parameter 'historyNodeID' is None.")
 		elif not isinstance(historyNodeID, int) or isinstance(historyNodeID, bool):
-			ex = TypeError(f"Parameter 'historyNodeID' is not of type 'int'.")
+			ex = TypeError("Parameter 'historyNodeID' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(historyNodeID)}'.")
 			raise ex
 		elif historyNodeID < 0:
-			ex = ValueError(f"Parameter 'historyNodeID' is negative.")
+			ex = ValueError("Parameter 'historyNodeID' is negative.")
 			ex.add_note(f"Got value '{historyNodeID}'.")
 			raise ex
 
 		if testStatus is None:
-			raise ValueError(f"Parameter 'testStatus' is None.")
+			raise ValueError("Parameter 'testStatus' is None.")
 		elif not isinstance(testStatus, bool):
-			ex = TypeError(f"Parameter 'testStatus' is not of type 'bool'.")
+			ex = TypeError("Parameter 'testStatus' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(testStatus)}'.")
 			raise ex
 
 		if date is None:
-			raise ValueError(f"Parameter 'date' is None.")
+			raise ValueError("Parameter 'date' is None.")
 		elif not isinstance(date, datetime):
-			ex = TypeError(f"Parameter 'date' is not of type 'datetime'.")
+			ex = TypeError("Parameter 'date' is not of type 'datetime'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(date)}'.")
 			raise ex
 
@@ -217,41 +217,41 @@ class HistoryNode(Base):
 
 		if parentID is not None:
 			if not isinstance(parentID, int) or isinstance(parentID, bool):
-				ex = TypeError(f"Parameter 'parentID' is not of type 'int'.")
+				ex = TypeError("Parameter 'parentID' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parentID)}'.")
 				raise ex
 			elif parentID < 0:
-				ex = ValueError(f"Parameter 'parentID' is negative.")
+				ex = ValueError("Parameter 'parentID' is negative.")
 				ex.add_note(f"Got value '{parentID}'.")
 				raise ex
 
 		if sameTests is not None:
 			if not isinstance(sameTests, int) or isinstance(sameTests, bool):
-				ex = TypeError(f"Parameter 'sameTests' is not of type 'int'.")
+				ex = TypeError("Parameter 'sameTests' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(sameTests)}'.")
 				raise ex
 			elif sameTests < 0:
-				ex = ValueError(f"Parameter 'sameTests' is negative.")
+				ex = ValueError("Parameter 'sameTests' is negative.")
 				ex.add_note(f"Got value '{sameTests}'.")
 				raise ex
 
 		if physicalName is not None and not isinstance(physicalName, Path):
-			ex = TypeError(f"Parameter 'physicalName' is not of type 'Path'.")
+			ex = TypeError("Parameter 'physicalName' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(physicalName)}'.")
 			raise ex
 
 		if runDirectory is not None and not isinstance(runDirectory, Path):
-			ex = TypeError(f"Parameter 'runDirectory' is not of type 'Path'.")
+			ex = TypeError("Parameter 'runDirectory' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(runDirectory)}'.")
 			raise ex
 
 		if simulationTime is not None and not isinstance(simulationTime, float):
-			ex = TypeError(f"Parameter 'simulationTime' is not of type 'float'.")
+			ex = TypeError("Parameter 'simulationTime' is not of type 'float'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(simulationTime)}'.")
 			raise ex
 
 		if cpuTime is not None and not isinstance(cpuTime, float):
-			ex = TypeError(f"Parameter 'cpuTime' is not of type 'float'.")
+			ex = TypeError("Parameter 'cpuTime' is not of type 'float'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(cpuTime)}'.")
 			raise ex
 
@@ -271,12 +271,12 @@ class HistoryNode(Base):
 				raise ex
 
 		if cost is not None and not isinstance(cost, Decimal):
-			ex = TypeError(f"Parameter 'cost' is not of type 'Decimal'.")
+			ex = TypeError("Parameter 'cost' is not of type 'Decimal'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(cost)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Report):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 

@@ -481,7 +481,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@Parent.setter
 	def Parent(self, parent: Base) -> None:
 		if parent is None:
-			raise ValueError(f"Parameter 'parent' is None.")
+			raise ValueError("Parameter 'parent' is None.")
 		elif not isinstance(parent, self._PARENT_TYPE):
 			typeNames = " or ".join(f"'{parentType.__name__}'" for parentType in self._PARENT_TYPE)
 			ex = TypeError(f"Parameter 'parent' is not of type {typeNames}.")
@@ -609,17 +609,17 @@ class BaseWithPath(Base):
 		super().__init__(parent=parent)
 
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, Path):
-			ex = TypeError(f"Parameter 'name' is not of type 'Path'.")
+			ex = TypeError("Parameter 'name' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name.name == "":
-			ex = ValueError(f"Parameter 'name' is empty.")
+			ex = ValueError("Parameter 'name' is empty.")
 			ex.add_note(f"Got path '{name}'.")
 			raise ex
 		elif len(name.parts) > 1:
-			ex = ValueError(f"Parameter 'name' has more than one component.")
+			ex = ValueError("Parameter 'name' has more than one component.")
 			ex.add_note(f"Got path '{name.as_posix()}'.")
 			raise ex
 
@@ -754,15 +754,15 @@ class Directory(BaseWithPath):
 		                          directory's.
 		"""
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
 		parts = [Path(part) for part in path.parts if part not in ("", ".", path.anchor)]
 		if len(parts) == 0:
-			ex = ValueError(f"Parameter 'path' names no file.")
+			ex = ValueError("Parameter 'path' names no file.")
 			ex.add_note(f"Got path '{path}'.")
 			raise ex
 
@@ -1033,52 +1033,52 @@ class Item(Base):
 		super().__init__(parent=parent)
 
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, ItemKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'ItemKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'ItemKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
 		if status is None:
-			raise ValueError(f"Parameter 'status' is None.")
+			raise ValueError("Parameter 'status' is None.")
 		elif not isinstance(status, CoverageState):
-			ex = TypeError(f"Parameter 'status' is not of type 'CoverageState'.")
+			ex = TypeError("Parameter 'status' is not of type 'CoverageState'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 		elif status is CoverageState.Unknown:
-			raise ValueError(f"Parameter 'status' is 'Unknown'.")
+			raise ValueError("Parameter 'status' is 'Unknown'.")
 
 		if file is not None and not isinstance(file, File):
-			ex = TypeError(f"Parameter 'file' is not of type 'File'.")
+			ex = TypeError("Parameter 'file' is not of type 'File'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
 		if startLine is not None:
 			if not isinstance(startLine, int):
-				ex = TypeError(f"Parameter 'startLine' is not of type 'int'.")
+				ex = TypeError("Parameter 'startLine' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
 				raise ex
 			elif startLine < 1:
-				ex = ValueError(f"Parameter 'startLine' is less than 1.")
+				ex = ValueError("Parameter 'startLine' is less than 1.")
 				ex.add_note(f"Got value '{startLine}'.")
 				raise ex
 
 		if endLine is not None:
 			if not isinstance(endLine, int):
-				ex = TypeError(f"Parameter 'endLine' is not of type 'int'.")
+				ex = TypeError("Parameter 'endLine' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
 				raise ex
 			elif endLine < (1 if startLine is None else startLine):
-				ex = ValueError(f"Parameter 'endLine' is before parameter 'startLine', or less than 1.")
+				ex = ValueError("Parameter 'endLine' is before parameter 'startLine', or less than 1.")
 				ex.add_note(f"Got lines {startLine} to {endLine}.")
 				raise ex
 

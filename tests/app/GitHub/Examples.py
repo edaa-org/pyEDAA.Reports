@@ -76,12 +76,12 @@ class CppGoogleTest(TestCase):
 		self.assertEqual(1, doc.TestsuiteCount)
 		self.assertEqual(3, doc.TestcaseCount)
 
-		print(f"JUnit file:")
+		print("JUnit file:")
 		print(f"  Testsuites: {doc.TestsuiteCount}")
 		print(f"  Testcases:  {doc.TestcaseCount}")
 
 		print()
-		print(f"Statistics:")
+		print("Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
 	def test_ReadWrite(self) -> None:
@@ -139,12 +139,12 @@ class CppGoogleTestCTest(TestCase):
 		# self.assertEqual(1, doc.TestsuiteCount)
 		# self.assertEqual(3, doc.TestcaseCount)
 
-		print(f"JUnit file:")
+		print("JUnit file:")
 		print(f"  Testsuites: {doc.TestsuiteCount}")
 		print(f"  Testcases:  {doc.TestcaseCount}")
 
 		print()
-		print(f"Statistics:")
+		print("Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
 	def test_ReadWrite(self) -> None:
@@ -678,12 +678,12 @@ class JavaAntJUnit4(TestCase):
 		self.assertEqual(1, doc.TestsuiteCount)
 		self.assertEqual(2, doc.TestcaseCount)
 
-		print(f"JUnit file:")
+		print("JUnit file:")
 		print(f"  Testsuites: {doc.TestsuiteCount}")
 		print(f"  Testcases:  {doc.TestcaseCount}")
 
 		print()
-		print(f"Statistics:")
+		print("Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
 	def test_ReadWrite(self) -> None:
@@ -985,12 +985,12 @@ class PythonPyTest(TestCase):
 		# self.assertEqual(8, doc.Passed)
 		self.assertEqual(8, doc.Tests)
 
-		print(f"JUnit file:")
+		print("JUnit file:")
 		print(f"  Testsuites: {doc.TestsuiteCount}")
 		print(f"  Testcases:  {doc.TestcaseCount}")
 
 		print()
-		print(f"Statistics:")
+		print("Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")
 
 	def test_ReadWrite(self) -> None:
@@ -1091,12 +1091,12 @@ class RustCargo(TestCase):
 		self.assertEqual(8, doc.Passed)
 		self.assertEqual(12, doc.Tests)
 
-		print(f"JUnit file:")
+		print("JUnit file:")
 		print(f"  Testsuites: {doc.TestsuiteCount}")
 		print(f"  Testcases:  {doc.TestcaseCount}")
 
 		print()
-		print(f"Statistics:")
+		print("Statistics:")
 		print(
 			f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   "
 			f"convert: {doc.ModelConversionDuration.total_seconds():.3f}s"

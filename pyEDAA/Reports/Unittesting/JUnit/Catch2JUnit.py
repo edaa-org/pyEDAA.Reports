@@ -202,8 +202,8 @@ class Document(ju_Document):
 			self.Generate(overwrite=True)
 
 		if self._xmlDocument is None:
-			ex = UnittestError(f"Internal XML document tree is empty and needs to be generated before write is possible.")
-			ex.add_note(f"Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
+			ex = UnittestError("Internal XML document tree is empty and needs to be generated before write is possible.")
+			ex.add_note("Call 'JUnitDocument.Generate()' or 'JUnitDocument.Write(..., regenerate=True)'.")
 			raise ex
 
 		content = tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True)
@@ -227,7 +227,7 @@ class Document(ju_Document):
 		"""
 		if self._xmlDocument is None:
 			ex = UnittestError(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
+			ex.add_note("Call 'JUnitDocument.Analyze()' or create the document using 'JUnitDocument(path, parse=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -292,7 +292,7 @@ class Document(ju_Document):
 		:raises UnittestError: If the document has not exactly one test suite.
 		"""
 		if not overwrite and self._xmlDocument is not None:
-			raise UnittestError(f"Internal XML document is populated with data.")
+			raise UnittestError("Internal XML document is populated with data.")
 
 		if self.TestsuiteCount != 1:
 			ex = UnittestError(f"The {self._DIALECT} format requires exactly one test suite.")

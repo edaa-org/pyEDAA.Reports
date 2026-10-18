@@ -98,16 +98,16 @@ class UserAttribute(metaclass=ExtendedType, slots=True):
 		:raises TypeError:    If parameter ``length`` isn't of type :class:`int`.
 		"""
 		if key is None:
-			raise ValueError(f"Parameter 'key' is None.")
+			raise ValueError("Parameter 'key' is None.")
 		elif not isinstance(key, str):
-			ex = TypeError(f"Parameter 'key' is not of type 'str'.")
+			ex = TypeError("Parameter 'key' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(key)}'.")
 			raise ex
 
 		if attributeType is None:
-			raise ValueError(f"Parameter 'attributeType' is None.")
+			raise ValueError("Parameter 'attributeType' is None.")
 		elif not isinstance(attributeType, UserAttributeType):
-			ex = TypeError(f"Parameter 'attributeType' is not of type 'UserAttributeType'.")
+			ex = TypeError("Parameter 'attributeType' is not of type 'UserAttributeType'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(attributeType)}'.")
 			raise ex
 
@@ -124,7 +124,7 @@ class UserAttribute(metaclass=ExtendedType, slots=True):
 			raise ex
 
 		if length is not None and not isinstance(length, int):
-			ex = TypeError(f"Parameter 'length' is not of type 'int'.")
+			ex = TypeError("Parameter 'length' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(length)}'.")
 			raise ex
 
@@ -223,13 +223,13 @@ class Base(metaclass=ExtendedType, slots=True):
 
 		if userAttributes is not None:
 			if not isinstance(userAttributes, Iterable):
-				ex = TypeError(f"Parameter 'userAttributes' is not iterable.")
+				ex = TypeError("Parameter 'userAttributes' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(userAttributes)}'.")
 				raise ex
 
 			for userAttribute in userAttributes:
 				if not isinstance(userAttribute, UserAttribute):
-					ex = TypeError(f"Parameter 'userAttributes' contains an element not of type 'UserAttribute'.")
+					ex = TypeError("Parameter 'userAttributes' contains an element not of type 'UserAttribute'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(userAttribute)}'.")
 					raise ex
 
@@ -300,30 +300,30 @@ class ObjectAttributesMixin(metaclass=ExtendedType, mixin=True):
 		:raises ValueError:    If parameter ``weight`` is negative.
 		"""
 		if alias is not None and not isinstance(alias, str):
-			ex = TypeError(f"Parameter 'alias' is not of type 'str'.")
+			ex = TypeError("Parameter 'alias' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(alias)}'.")
 			raise ex
 
 		if excluded is None:
-			raise ValueError(f"Parameter 'excluded' is None.")
+			raise ValueError("Parameter 'excluded' is None.")
 		elif not isinstance(excluded, bool):
-			ex = TypeError(f"Parameter 'excluded' is not of type 'bool'.")
+			ex = TypeError("Parameter 'excluded' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(excluded)}'.")
 			raise ex
 
 		if excludedReason is not None and not isinstance(excludedReason, str):
-			ex = TypeError(f"Parameter 'excludedReason' is not of type 'str'.")
+			ex = TypeError("Parameter 'excludedReason' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(excludedReason)}'.")
 			raise ex
 
 		if weight is None:
-			raise ValueError(f"Parameter 'weight' is None.")
+			raise ValueError("Parameter 'weight' is None.")
 		elif not isinstance(weight, int) or isinstance(weight, bool):
-			ex = TypeError(f"Parameter 'weight' is not of type 'int'.")
+			ex = TypeError("Parameter 'weight' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(weight)}'.")
 			raise ex
 		elif weight < 0:
-			ex = ValueError(f"Parameter 'weight' is negative.")
+			ex = ValueError("Parameter 'weight' is negative.")
 			ex.add_note(f"Got value '{weight}'.")
 			raise ex
 
@@ -513,23 +513,23 @@ class MetricCoverage(Base):
 		super().__init__(userAttributes)
 
 		if metricMode is not None and not isinstance(metricMode, str):
-			ex = TypeError(f"Parameter 'metricMode' is not of type 'str'.")
+			ex = TypeError("Parameter 'metricMode' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(metricMode)}'.")
 			raise ex
 
 		if weight is None:
-			raise ValueError(f"Parameter 'weight' is None.")
+			raise ValueError("Parameter 'weight' is None.")
 		elif not isinstance(weight, int) or isinstance(weight, bool):
-			ex = TypeError(f"Parameter 'weight' is not of type 'int'.")
+			ex = TypeError("Parameter 'weight' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(weight)}'.")
 			raise ex
 		elif weight < 0:
-			ex = ValueError(f"Parameter 'weight' is negative.")
+			ex = ValueError("Parameter 'weight' is negative.")
 			ex.add_note(f"Got value '{weight}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, InstanceCoverage):
-			ex = TypeError(f"Parameter 'parent' is not of type 'InstanceCoverage'.")
+			ex = TypeError("Parameter 'parent' is not of type 'InstanceCoverage'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 

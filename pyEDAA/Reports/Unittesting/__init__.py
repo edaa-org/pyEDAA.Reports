@@ -357,18 +357,18 @@ class Base(metaclass=ExtendedType, slots=True):
 		"""
 
 		if parent is not None and not isinstance(parent, TestsuiteBase):
-			ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
+			ex = TypeError("Parameter 'parent' is not of type 'TestsuiteBase'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name.strip() == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		self._parent = parent
 		self._name = name
@@ -389,13 +389,13 @@ class Base(metaclass=ExtendedType, slots=True):
 				if teardownDuration is not None:
 					if totalDuration is not None:
 						if totalDuration < (setupDuration + testDuration + teardownDuration):
-							raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of setup, test and teardown durations.")
+							raise ValueError("Parameter 'totalDuration' can not be less than the sum of setup, test and teardown durations.")
 					else:  # no total
 						totalDuration = setupDuration + testDuration + teardownDuration
 				# no teardown
 				elif totalDuration is not None:
 					if totalDuration < (setupDuration + testDuration):
-						raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of setup and test durations.")
+						raise ValueError("Parameter 'totalDuration' can not be less than the sum of setup and test durations.")
 				# no teardown, no total
 				else:
 					totalDuration = setupDuration + testDuration
@@ -403,13 +403,13 @@ class Base(metaclass=ExtendedType, slots=True):
 			elif teardownDuration is not None:
 				if totalDuration is not None:
 					if totalDuration < (testDuration + teardownDuration):
-						raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of test and teardown durations.")
+						raise ValueError("Parameter 'totalDuration' can not be less than the sum of test and teardown durations.")
 				else:  # no setup, no total
 					totalDuration = testDuration + teardownDuration
 			# no setup, no teardown
 			elif totalDuration is not None:
 				if totalDuration < testDuration:
-					raise ValueError(f"Parameter 'totalDuration' can not be less than test durations.")
+					raise ValueError("Parameter 'totalDuration' can not be less than test durations.")
 			else:  # no setup, no teardown, no total
 				totalDuration = testDuration
 		# no test
@@ -422,7 +422,7 @@ class Base(metaclass=ExtendedType, slots=True):
 				testDuration -= teardownDuration
 
 			if testDuration < timedelta():
-				raise ValueError(f"Parameter 'totalDuration' can not be less than the sum of setup and teardown durations.")
+				raise ValueError("Parameter 'totalDuration' can not be less than the sum of setup and teardown durations.")
 
 		self._startTime = startTime
 		self._setupDuration = setupDuration
@@ -461,7 +461,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		self._description = description
 
 		if keyValuePairs is not None and not isinstance(keyValuePairs, Mapping):
-			ex = TypeError(f"Parameter 'keyValuePairs' is not a mapping.")
+			ex = TypeError("Parameter 'keyValuePairs' is not a mapping.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
 			raise ex
 
@@ -861,7 +861,7 @@ class Testcase(Base, TestcaseOutputMixin):
 
 		if parent is not None:
 			if not isinstance(parent, Testsuite):
-				ex = TypeError(f"Parameter 'parent' is not of type 'Testsuite'.")
+				ex = TypeError("Parameter 'parent' is not of type 'Testsuite'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
@@ -880,7 +880,7 @@ class Testcase(Base, TestcaseOutputMixin):
 		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
 
 		if not isinstance(status, TestcaseStatus):
-			ex = TypeError(f"Parameter 'status' is not of type 'TestcaseStatus'.")
+			ex = TypeError("Parameter 'status' is not of type 'TestcaseStatus'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 
@@ -912,7 +912,7 @@ class Testcase(Base, TestcaseOutputMixin):
 				self._passedAssertionCount = passedAssertionCount
 				self._failedAssertionCount = assertionCount - passedAssertionCount
 			else:
-				raise ValueError(f"Neither passed assertion count nor failed assertion count are provided.")
+				raise ValueError("Neither passed assertion count nor failed assertion count are provided.")
 		elif failedAssertionCount is not None:
 			self._failedAssertionCount = failedAssertionCount
 
@@ -920,9 +920,9 @@ class Testcase(Base, TestcaseOutputMixin):
 				self._passedAssertionCount = passedAssertionCount
 				self._assertionCount = passedAssertionCount + failedAssertionCount
 			else:
-				raise ValueError(f"Passed assertion count is mandatory, if failed assertion count is provided instead of assertion count.")
+				raise ValueError("Passed assertion count is mandatory, if failed assertion count is provided instead of assertion count.")
 		elif passedAssertionCount is not None:
-			raise ValueError(f"Assertion count or failed assertion count is mandatory, if passed assertion count is provided.")
+			raise ValueError("Assertion count or failed assertion count is mandatory, if passed assertion count is provided.")
 		else:
 			self._passedAssertionCount = None
 			self._failedAssertionCount = None
@@ -1121,7 +1121,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteBase):
-				ex = TypeError(f"Parameter 'parent' is not of type 'TestsuiteBase'.")
+				ex = TypeError("Parameter 'parent' is not of type 'TestsuiteBase'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
@@ -1149,13 +1149,13 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		self._testsuites = {}
 		if testsuites is not None:
 			if not isinstance(testsuites, Iterable):
-				ex = TypeError(f"Parameter 'testsuites' is not iterable.")
+				ex = TypeError("Parameter 'testsuites' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
 				raise ex
 
 			for testsuite in testsuites:
 				if not isinstance(testsuite, Testsuite):
-					ex = TypeError(f"Element of parameter 'testsuites' is not of type 'Testsuite'.")
+					ex = TypeError("Element of parameter 'testsuites' is not of type 'Testsuite'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
 					raise ex
 
@@ -1415,7 +1415,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		if testsuite is None:
 			raise ValueError("Parameter 'testsuite' is None.")
 		elif not isinstance(testsuite, Testsuite):
-			ex = TypeError(f"Parameter 'testsuite' is not of type 'Testsuite'.")
+			ex = TypeError("Parameter 'testsuite' is not of type 'Testsuite'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(testsuite)}'.")
 			raise ex
 
@@ -1439,7 +1439,7 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		if testsuites is None:
 			raise ValueError("Parameter 'testsuites' is None.")
 		elif not isinstance(testsuites, Iterable):
-			ex = TypeError(f"Parameter 'testsuites' is not iterable.")
+			ex = TypeError("Parameter 'testsuites' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(testsuites)}'.")
 			raise ex
 
@@ -1565,13 +1565,13 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		self._testcases = {}
 		if testcases is not None:
 			if not isinstance(testcases, Iterable):
-				ex = TypeError(f"Parameter 'testcases' is not iterable.")
+				ex = TypeError("Parameter 'testcases' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
 				raise ex
 
 			for testcase in testcases:
 				if not isinstance(testcase, Testcase):
-					ex = TypeError(f"Element of parameter 'testcases' is not of type 'Testcase'.")
+					ex = TypeError("Element of parameter 'testcases' is not of type 'Testcase'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
 					raise ex
 
@@ -1734,7 +1734,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		if testcase is None:
 			raise ValueError("Parameter 'testcase' is None.")
 		elif not isinstance(testcase, Testcase):
-			ex = TypeError(f"Parameter 'testcase' is not of type 'Testcase'.")
+			ex = TypeError("Parameter 'testcase' is not of type 'Testcase'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
 			raise ex
 
@@ -1758,7 +1758,7 @@ class Testsuite(TestsuiteBase[TestsuiteType]):
 		if testcases is None:
 			raise ValueError("Parameter 'testcases' is None.")
 		elif not isinstance(testcases, Iterable):
-			ex = TypeError(f"Parameter 'testcases' is not iterable.")
+			ex = TypeError("Parameter 'testcases' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
 			raise ex
 
@@ -2071,7 +2071,7 @@ class MergedTestcase(Testcase, Merged):
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		if testcase is None:
-			raise ValueError(f"Parameter 'testcase' is None.")
+			raise ValueError("Parameter 'testcase' is None.")
 
 		super().__init__(
 			testcase._name,
@@ -2219,7 +2219,7 @@ class MergedTestsuite(Testsuite, Merged):
 		parent: Nullable[Testsuite] = None
 	) -> None:
 		if testsuite is None:
-			raise ValueError(f"Parameter 'testsuite' is None.")
+			raise ValueError("Parameter 'testsuite' is None.")
 
 		super().__init__(
 			testsuite._name,

@@ -109,18 +109,18 @@ class Testcase(ju_Testcase):
 		)
 
 		if startTime is not None and not isinstance(startTime, datetime):
-			ex = TypeError(f"Parameter 'startTime' is not of type 'datetime'.")
+			ex = TypeError("Parameter 'startTime' is not of type 'datetime'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(startTime)}'.")
 			raise ex
 
 		if rerunCount is None:
-			raise ValueError(f"Parameter 'rerunCount' is None.")
+			raise ValueError("Parameter 'rerunCount' is None.")
 		elif not isinstance(rerunCount, int):
-			ex = TypeError(f"Parameter 'rerunCount' is not of type 'int'.")
+			ex = TypeError("Parameter 'rerunCount' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(rerunCount)}'.")
 			raise ex
 		elif rerunCount < 0:
-			ex = ValueError(f"Parameter 'rerunCount' is negative.")
+			ex = ValueError("Parameter 'rerunCount' is negative.")
 			ex.add_note(f"Got value '{rerunCount}'.")
 			raise ex
 
@@ -382,8 +382,8 @@ class Document(ju_Document):
 			self.Generate(overwrite=True)
 
 		if self._xmlDocument is None:
-			ex = UnittestError(f"Internal XML document tree is empty and needs to be generated before write is possible.")
-			ex.add_note(f"Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.")
+			ex = UnittestError("Internal XML document tree is empty and needs to be generated before write is possible.")
+			ex.add_note("Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.")
 			raise ex
 
 		content = tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True)
@@ -409,7 +409,7 @@ class Document(ju_Document):
 		"""
 		if self._xmlDocument is None:
 			ex = UnittestError(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -475,7 +475,7 @@ class Document(ju_Document):
 		:raises UnittestError: If the test suite summary has no duration.
 		"""
 		if not overwrite and self._xmlDocument is not None:
-			raise UnittestError(f"Internal XML document is populated with data.")
+			raise UnittestError("Internal XML document is populated with data.")
 
 		if self._startTime is None:
 			raise UnittestError(

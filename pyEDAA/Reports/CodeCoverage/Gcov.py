@@ -122,13 +122,13 @@ class FormatVersion(IntEnum):
 		:raises ValueError: If parameter ``value`` isn't a supported format version.
 		"""
 		if value is None:
-			raise ValueError(f"Parameter 'value' is None.")
+			raise ValueError("Parameter 'value' is None.")
 		elif not isinstance(value, str):
-			ex = TypeError(f"Parameter 'value' is not of type 'str'.")
+			ex = TypeError("Parameter 'value' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 			raise ex
 		elif value not in [str(member.value) for member in cls]:
-			ex = ValueError(f"Parameter 'value' is not a supported gcov JSON format version.")
+			ex = ValueError("Parameter 'value' is not a supported gcov JSON format version.")
 			ex.add_note(f"Got value '{value}'.")
 			ex.add_note(f"Supported format versions: {', '.join(str(member.value) for member in cls)}.")
 			raise ex
@@ -192,52 +192,52 @@ class Branch(metaclass=ExtendedType, slots=True):
 		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Line`.
 		"""
 		if count is None:
-			raise ValueError(f"Parameter 'count' is None.")
+			raise ValueError("Parameter 'count' is None.")
 		elif not isinstance(count, int):
-			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex = TypeError("Parameter 'count' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 			raise ex
 		elif count < 0:
-			ex = ValueError(f"Parameter 'count' is negative.")
+			ex = ValueError("Parameter 'count' is negative.")
 			ex.add_note(f"Got value '{count}'.")
 			raise ex
 
 		if throw is None:
-			raise ValueError(f"Parameter 'throw' is None.")
+			raise ValueError("Parameter 'throw' is None.")
 		elif not isinstance(throw, bool):
-			ex = TypeError(f"Parameter 'throw' is not of type 'bool'.")
+			ex = TypeError("Parameter 'throw' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(throw)}'.")
 			raise ex
 
 		if fallthrough is None:
-			raise ValueError(f"Parameter 'fallthrough' is None.")
+			raise ValueError("Parameter 'fallthrough' is None.")
 		elif not isinstance(fallthrough, bool):
-			ex = TypeError(f"Parameter 'fallthrough' is not of type 'bool'.")
+			ex = TypeError("Parameter 'fallthrough' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(fallthrough)}'.")
 			raise ex
 
 		if sourceBlockID is not None:
 			if not isinstance(sourceBlockID, int):
-				ex = TypeError(f"Parameter 'sourceBlockID' is not of type 'int'.")
+				ex = TypeError("Parameter 'sourceBlockID' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(sourceBlockID)}'.")
 				raise ex
 			elif sourceBlockID < 0:
-				ex = ValueError(f"Parameter 'sourceBlockID' is negative.")
+				ex = ValueError("Parameter 'sourceBlockID' is negative.")
 				ex.add_note(f"Got value '{sourceBlockID}'.")
 				raise ex
 
 		if destinationBlockID is not None:
 			if not isinstance(destinationBlockID, int):
-				ex = TypeError(f"Parameter 'destinationBlockID' is not of type 'int'.")
+				ex = TypeError("Parameter 'destinationBlockID' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(destinationBlockID)}'.")
 				raise ex
 			elif destinationBlockID < 0:
-				ex = ValueError(f"Parameter 'destinationBlockID' is negative.")
+				ex = ValueError("Parameter 'destinationBlockID' is negative.")
 				ex.add_note(f"Got value '{destinationBlockID}'.")
 				raise ex
 
 		if parent is not None and not isinstance(parent, Line):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -263,9 +263,9 @@ class Branch(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
 		if record is None:
-			raise ValueError(f"Parameter 'record' is None.")
+			raise ValueError("Parameter 'record' is None.")
 		elif not isinstance(record, dict):
-			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex = TypeError("Parameter 'record' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
 			raise ex
 
@@ -372,40 +372,40 @@ class Call(metaclass=ExtendedType, slots=True):
 		:raises TypeError:         If parameter ``parent`` isn't of type :class:`Line`.
 		"""
 		if sourceBlockID is None:
-			raise ValueError(f"Parameter 'sourceBlockID' is None.")
+			raise ValueError("Parameter 'sourceBlockID' is None.")
 		elif not isinstance(sourceBlockID, int):
-			ex = TypeError(f"Parameter 'sourceBlockID' is not of type 'int'.")
+			ex = TypeError("Parameter 'sourceBlockID' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(sourceBlockID)}'.")
 			raise ex
 		elif sourceBlockID < 0:
-			ex = ValueError(f"Parameter 'sourceBlockID' is negative.")
+			ex = ValueError("Parameter 'sourceBlockID' is negative.")
 			ex.add_note(f"Got value '{sourceBlockID}'.")
 			raise ex
 
 		if destinationBlockID is None:
-			raise ValueError(f"Parameter 'destinationBlockID' is None.")
+			raise ValueError("Parameter 'destinationBlockID' is None.")
 		elif not isinstance(destinationBlockID, int):
-			ex = TypeError(f"Parameter 'destinationBlockID' is not of type 'int'.")
+			ex = TypeError("Parameter 'destinationBlockID' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(destinationBlockID)}'.")
 			raise ex
 		elif destinationBlockID < 0:
-			ex = ValueError(f"Parameter 'destinationBlockID' is negative.")
+			ex = ValueError("Parameter 'destinationBlockID' is negative.")
 			ex.add_note(f"Got value '{destinationBlockID}'.")
 			raise ex
 
 		if returned is None:
-			raise ValueError(f"Parameter 'returned' is None.")
+			raise ValueError("Parameter 'returned' is None.")
 		elif not isinstance(returned, int):
-			ex = TypeError(f"Parameter 'returned' is not of type 'int'.")
+			ex = TypeError("Parameter 'returned' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(returned)}'.")
 			raise ex
 		elif returned < 0:
-			ex = ValueError(f"Parameter 'returned' is negative.")
+			ex = ValueError("Parameter 'returned' is negative.")
 			ex.add_note(f"Got value '{returned}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Line):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -429,9 +429,9 @@ class Call(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
 		if record is None:
-			raise ValueError(f"Parameter 'record' is None.")
+			raise ValueError("Parameter 'record' is None.")
 		elif not isinstance(record, dict):
-			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex = TypeError("Parameter 'record' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
 			raise ex
 
@@ -518,37 +518,37 @@ class Condition(metaclass=ExtendedType, slots=True):
 		:raises TypeError:      If parameter ``parent`` isn't of type :class:`Line`.
 		"""
 		if count is None:
-			raise ValueError(f"Parameter 'count' is None.")
+			raise ValueError("Parameter 'count' is None.")
 		elif not isinstance(count, int):
-			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex = TypeError("Parameter 'count' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 			raise ex
 		elif count < 0:
-			ex = ValueError(f"Parameter 'count' is negative.")
+			ex = ValueError("Parameter 'count' is negative.")
 			ex.add_note(f"Got value '{count}'.")
 			raise ex
 
 		if covered is None:
-			raise ValueError(f"Parameter 'covered' is None.")
+			raise ValueError("Parameter 'covered' is None.")
 		elif not isinstance(covered, int):
-			ex = TypeError(f"Parameter 'covered' is not of type 'int'.")
+			ex = TypeError("Parameter 'covered' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(covered)}'.")
 			raise ex
 		elif covered < 0:
-			ex = ValueError(f"Parameter 'covered' is negative.")
+			ex = ValueError("Parameter 'covered' is negative.")
 			ex.add_note(f"Got value '{covered}'.")
 			raise ex
 
 		notCoveredTrueList: list[int] = []
 		if notCoveredTrue is not None:
 			if not isinstance(notCoveredTrue, Iterable):
-				ex = TypeError(f"Parameter 'notCoveredTrue' is not iterable.")
+				ex = TypeError("Parameter 'notCoveredTrue' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(notCoveredTrue)}'.")
 				raise ex
 
 			for term in notCoveredTrue:
 				if not isinstance(term, int):
-					ex = TypeError(f"Parameter 'notCoveredTrue' contains an element not of type 'int'.")
+					ex = TypeError("Parameter 'notCoveredTrue' contains an element not of type 'int'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(term)}'.")
 					raise ex
 
@@ -557,20 +557,20 @@ class Condition(metaclass=ExtendedType, slots=True):
 		notCoveredFalseList: list[int] = []
 		if notCoveredFalse is not None:
 			if not isinstance(notCoveredFalse, Iterable):
-				ex = TypeError(f"Parameter 'notCoveredFalse' is not iterable.")
+				ex = TypeError("Parameter 'notCoveredFalse' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(notCoveredFalse)}'.")
 				raise ex
 
 			for term in notCoveredFalse:
 				if not isinstance(term, int):
-					ex = TypeError(f"Parameter 'notCoveredFalse' contains an element not of type 'int'.")
+					ex = TypeError("Parameter 'notCoveredFalse' contains an element not of type 'int'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(term)}'.")
 					raise ex
 
 				notCoveredFalseList.append(term)
 
 		if parent is not None and not isinstance(parent, Line):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Line'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -595,9 +595,9 @@ class Condition(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
 		if record is None:
-			raise ValueError(f"Parameter 'record' is None.")
+			raise ValueError("Parameter 'record' is None.")
 		elif not isinstance(record, dict):
-			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex = TypeError("Parameter 'record' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
 			raise ex
 
@@ -703,56 +703,56 @@ class Line(metaclass=ExtendedType, slots=True):
 		:raises TypeError:      If parameter ``parent`` isn't of type :class:`File`.
 		"""
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
 		if count is None:
-			raise ValueError(f"Parameter 'count' is None.")
+			raise ValueError("Parameter 'count' is None.")
 		elif not isinstance(count, int):
-			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex = TypeError("Parameter 'count' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 			raise ex
 		elif count < 0:
-			ex = ValueError(f"Parameter 'count' is negative.")
+			ex = ValueError("Parameter 'count' is negative.")
 			ex.add_note(f"Got value '{count}'.")
 			raise ex
 
 		if unexecutedBlock is None:
-			raise ValueError(f"Parameter 'unexecutedBlock' is None.")
+			raise ValueError("Parameter 'unexecutedBlock' is None.")
 		elif not isinstance(unexecutedBlock, bool):
-			ex = TypeError(f"Parameter 'unexecutedBlock' is not of type 'bool'.")
+			ex = TypeError("Parameter 'unexecutedBlock' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(unexecutedBlock)}'.")
 			raise ex
 
 		if functionName is not None and not isinstance(functionName, str):
-			ex = TypeError(f"Parameter 'functionName' is not of type 'str'.")
+			ex = TypeError("Parameter 'functionName' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(functionName)}'.")
 			raise ex
 
 		blockIDList: list[int] = []
 		if blockIDs is not None:
 			if not isinstance(blockIDs, Iterable):
-				ex = TypeError(f"Parameter 'blockIDs' is not iterable.")
+				ex = TypeError("Parameter 'blockIDs' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(blockIDs)}'.")
 				raise ex
 
 			for blockID in blockIDs:
 				if not isinstance(blockID, int):
-					ex = TypeError(f"Parameter 'blockIDs' contains an element not of type 'int'.")
+					ex = TypeError("Parameter 'blockIDs' contains an element not of type 'int'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(blockID)}'.")
 					raise ex
 
 				blockIDList.append(blockID)
 
 		if parent is not None and not isinstance(parent, File):
-			ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+			ex = TypeError("Parameter 'parent' is not of type 'File'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -781,9 +781,9 @@ class Line(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
 		if record is None:
-			raise ValueError(f"Parameter 'record' is None.")
+			raise ValueError("Parameter 'record' is None.")
 		elif not isinstance(record, dict):
-			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex = TypeError("Parameter 'record' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
 			raise ex
 
@@ -967,103 +967,103 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises ValueError:    If parameter ``parent`` contains a function of the same name already.
 		"""
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if demangledName is None:
-			raise ValueError(f"Parameter 'demangledName' is None.")
+			raise ValueError("Parameter 'demangledName' is None.")
 		elif not isinstance(demangledName, str):
-			ex = TypeError(f"Parameter 'demangledName' is not of type 'str'.")
+			ex = TypeError("Parameter 'demangledName' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(demangledName)}'.")
 			raise ex
 		elif demangledName == "":
-			raise ValueError(f"Parameter 'demangledName' is empty.")
+			raise ValueError("Parameter 'demangledName' is empty.")
 
 		if startLine is None:
-			raise ValueError(f"Parameter 'startLine' is None.")
+			raise ValueError("Parameter 'startLine' is None.")
 		elif not isinstance(startLine, int):
-			ex = TypeError(f"Parameter 'startLine' is not of type 'int'.")
+			ex = TypeError("Parameter 'startLine' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
 			raise ex
 		elif startLine < 0:
-			ex = ValueError(f"Parameter 'startLine' is negative.")
+			ex = ValueError("Parameter 'startLine' is negative.")
 			ex.add_note(f"Got value '{startLine}'.")
 			raise ex
 
 		if startColumn is None:
-			raise ValueError(f"Parameter 'startColumn' is None.")
+			raise ValueError("Parameter 'startColumn' is None.")
 		elif not isinstance(startColumn, int):
-			ex = TypeError(f"Parameter 'startColumn' is not of type 'int'.")
+			ex = TypeError("Parameter 'startColumn' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(startColumn)}'.")
 			raise ex
 		elif startColumn < 0:
-			ex = ValueError(f"Parameter 'startColumn' is negative.")
+			ex = ValueError("Parameter 'startColumn' is negative.")
 			ex.add_note(f"Got value '{startColumn}'.")
 			raise ex
 
 		if endLine is None:
-			raise ValueError(f"Parameter 'endLine' is None.")
+			raise ValueError("Parameter 'endLine' is None.")
 		elif not isinstance(endLine, int):
-			ex = TypeError(f"Parameter 'endLine' is not of type 'int'.")
+			ex = TypeError("Parameter 'endLine' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
 			raise ex
 		elif endLine < 0:
-			ex = ValueError(f"Parameter 'endLine' is negative.")
+			ex = ValueError("Parameter 'endLine' is negative.")
 			ex.add_note(f"Got value '{endLine}'.")
 			raise ex
 
 		if endColumn is None:
-			raise ValueError(f"Parameter 'endColumn' is None.")
+			raise ValueError("Parameter 'endColumn' is None.")
 		elif not isinstance(endColumn, int):
-			ex = TypeError(f"Parameter 'endColumn' is not of type 'int'.")
+			ex = TypeError("Parameter 'endColumn' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(endColumn)}'.")
 			raise ex
 		elif endColumn < 0:
-			ex = ValueError(f"Parameter 'endColumn' is negative.")
+			ex = ValueError("Parameter 'endColumn' is negative.")
 			ex.add_note(f"Got value '{endColumn}'.")
 			raise ex
 
 		if blocks is None:
-			raise ValueError(f"Parameter 'blocks' is None.")
+			raise ValueError("Parameter 'blocks' is None.")
 		elif not isinstance(blocks, int):
-			ex = TypeError(f"Parameter 'blocks' is not of type 'int'.")
+			ex = TypeError("Parameter 'blocks' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(blocks)}'.")
 			raise ex
 		elif blocks < 0:
-			ex = ValueError(f"Parameter 'blocks' is negative.")
+			ex = ValueError("Parameter 'blocks' is negative.")
 			ex.add_note(f"Got value '{blocks}'.")
 			raise ex
 
 		if blocksExecuted is None:
-			raise ValueError(f"Parameter 'blocksExecuted' is None.")
+			raise ValueError("Parameter 'blocksExecuted' is None.")
 		elif not isinstance(blocksExecuted, int):
-			ex = TypeError(f"Parameter 'blocksExecuted' is not of type 'int'.")
+			ex = TypeError("Parameter 'blocksExecuted' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(blocksExecuted)}'.")
 			raise ex
 		elif blocksExecuted < 0:
-			ex = ValueError(f"Parameter 'blocksExecuted' is negative.")
+			ex = ValueError("Parameter 'blocksExecuted' is negative.")
 			ex.add_note(f"Got value '{blocksExecuted}'.")
 			raise ex
 
 		if executionCount is None:
-			raise ValueError(f"Parameter 'executionCount' is None.")
+			raise ValueError("Parameter 'executionCount' is None.")
 		elif not isinstance(executionCount, int):
-			ex = TypeError(f"Parameter 'executionCount' is not of type 'int'.")
+			ex = TypeError("Parameter 'executionCount' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(executionCount)}'.")
 			raise ex
 		elif executionCount < 0:
-			ex = ValueError(f"Parameter 'executionCount' is negative.")
+			ex = ValueError("Parameter 'executionCount' is negative.")
 			ex.add_note(f"Got value '{executionCount}'.")
 			raise ex
 
 		if parent is not None:
 			if not isinstance(parent, File):
-				ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+				ex = TypeError("Parameter 'parent' is not of type 'File'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 			elif name in parent._functions:
@@ -1095,9 +1095,9 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``record`` isn't of type :class:`dict`.
 		"""
 		if record is None:
-			raise ValueError(f"Parameter 'record' is None.")
+			raise ValueError("Parameter 'record' is None.")
 		elif not isinstance(record, dict):
-			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex = TypeError("Parameter 'record' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
 			raise ex
 
@@ -1237,15 +1237,15 @@ class File(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``parent`` contains a file of the same path already.
 		"""
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
 		if parent is not None:
 			if not isinstance(parent, DataFile):
-				ex = TypeError(f"Parameter 'parent' is not of type 'DataFile'.")
+				ex = TypeError("Parameter 'parent' is not of type 'DataFile'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 			elif path in parent._files:
@@ -1274,9 +1274,9 @@ class File(metaclass=ExtendedType, slots=True):
 		:raises CodeCoverageError: If the file names a function twice.
 		"""
 		if record is None:
-			raise ValueError(f"Parameter 'record' is None.")
+			raise ValueError("Parameter 'record' is None.")
 		elif not isinstance(record, dict):
-			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex = TypeError("Parameter 'record' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
 			raise ex
 
@@ -1374,33 +1374,33 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		:raises TypeError:              If parameter ``parent`` isn't of type :class:`Coverage`.
 		"""
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
 		if formatVersion is None:
-			raise ValueError(f"Parameter 'formatVersion' is None.")
+			raise ValueError("Parameter 'formatVersion' is None.")
 		elif not isinstance(formatVersion, FormatVersion):
-			ex = TypeError(f"Parameter 'formatVersion' is not of type 'FormatVersion'.")
+			ex = TypeError("Parameter 'formatVersion' is not of type 'FormatVersion'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(formatVersion)}'.")
 			raise ex
 
 		if gccVersion is None:
-			raise ValueError(f"Parameter 'gccVersion' is None.")
+			raise ValueError("Parameter 'gccVersion' is None.")
 		elif not isinstance(gccVersion, SemanticVersion):
-			ex = TypeError(f"Parameter 'gccVersion' is not of type 'SemanticVersion'.")
+			ex = TypeError("Parameter 'gccVersion' is not of type 'SemanticVersion'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(gccVersion)}'.")
 			raise ex
 
 		if currentWorkingDirectory is not None and not isinstance(currentWorkingDirectory, Path):
-			ex = TypeError(f"Parameter 'currentWorkingDirectory' is not of type 'Path'.")
+			ex = TypeError("Parameter 'currentWorkingDirectory' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(currentWorkingDirectory)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Coverage):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Coverage'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Coverage'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1431,9 +1431,9 @@ class DataFile(metaclass=ExtendedType, slots=True):
 		:raises CodeCoverageError: If the data file names a source file twice.
 		"""
 		if record is None:
-			raise ValueError(f"Parameter 'record' is None.")
+			raise ValueError("Parameter 'record' is None.")
 		elif not isinstance(record, dict):
-			ex = TypeError(f"Parameter 'record' is not of type 'dict'.")
+			ex = TypeError("Parameter 'record' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(record)}'.")
 			raise ex
 
@@ -1659,7 +1659,7 @@ class Document(cc_Document, Coverage):
 		"""
 		if self._jsonDocuments is None:
 			ex = CodeCoverageError(f"gcov report file '{self._path}' needs to be read and analyzed by a JSON parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:

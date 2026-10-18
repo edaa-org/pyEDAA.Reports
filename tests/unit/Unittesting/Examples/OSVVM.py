@@ -51,10 +51,10 @@ class OSVVMLibraries(TestCase):
 		self.assertGreater(doc.TestsuiteCount, 0)
 		self.assertGreater(doc.TestcaseCount, 0)
 
-		print(f"JUnit file:")
+		print("JUnit file:")
 		print(f"  Testsuites: {len(doc.Testsuites)}")
-		print(f"  Testcases:  ")
+		print("  Testcases:  ")
 
 		print()
-		print(f"Statistics:")
+		print("Statistics:")
 		print(f"  Times: parsing by lxml: {doc.AnalysisDuration.total_seconds():.3f}s   convert: {doc.ModelConversionDuration.total_seconds():.3f}s")

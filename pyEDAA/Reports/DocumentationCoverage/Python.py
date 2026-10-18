@@ -160,7 +160,7 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 				raise ex
 
 		if parsingDuration is not None and not isinstance(parsingDuration, timedelta):
-			ex = TypeError(f"Parameter 'parsingDuration' is not of type 'timedelta'.")
+			ex = TypeError("Parameter 'parsingDuration' is not of type 'timedelta'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parsingDuration)}'.")
 			raise ex
 
@@ -199,9 +199,9 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 		:raises TokenError:         If the source ends inside a statement.
 		"""
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
@@ -401,25 +401,25 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		:raises ValueError:     If parameter ``excludePatterns`` contains an invalid regular expression.
 		"""
 		if packageName is None:
-			raise ValueError(f"Parameter 'packageName' is None.")
+			raise ValueError("Parameter 'packageName' is None.")
 		elif not isinstance(packageName, str):
-			ex = TypeError(f"Parameter 'packageName' is not of type 'str'.")
+			ex = TypeError("Parameter 'packageName' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(packageName)}'.")
 			raise ex
 		elif packageName == "":
-			raise ValueError(f"Parameter 'packageName' is empty.")
+			raise ValueError("Parameter 'packageName' is empty.")
 
 		if directory is None:
-			raise ValueError(f"Parameter 'directory' is None.")
+			raise ValueError("Parameter 'directory' is None.")
 		elif not isinstance(directory, Path):
-			ex = TypeError(f"Parameter 'directory' is not of type 'Path'.")
+			ex = TypeError("Parameter 'directory' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(directory)}'.")
 			raise ex
 
 		if countedItems is None:
-			raise ValueError(f"Parameter 'countedItems' is None.")
+			raise ValueError("Parameter 'countedItems' is None.")
 		elif not isinstance(countedItems, CountedItems):
-			ex = TypeError(f"Parameter 'countedItems' is not of type 'CountedItems'.")
+			ex = TypeError("Parameter 'countedItems' is not of type 'CountedItems'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(countedItems)}'.")
 			raise ex
 
@@ -430,20 +430,20 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 
 		if excludePatterns is not None:
 			if not isinstance(excludePatterns, Iterable):
-				ex = TypeError(f"Parameter 'excludePatterns' is not iterable.")
+				ex = TypeError("Parameter 'excludePatterns' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(excludePatterns)}'.")
 				raise ex
 
 			for excludePattern in excludePatterns:
 				if not isinstance(excludePattern, str):
-					ex = TypeError(f"Parameter 'excludePatterns' contains an element not of type 'str'.")
+					ex = TypeError("Parameter 'excludePatterns' contains an element not of type 'str'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(excludePattern)}'.")
 					raise ex
 
 				try:
 					self._excludePatterns.append(re_compile(excludePattern))
 				except RegularExpressionError as cause:
-					ex = ValueError(f"Parameter 'excludePatterns' contains an invalid regular expression.")
+					ex = ValueError("Parameter 'excludePatterns' contains an invalid regular expression.")
 					ex.add_note(f"Got pattern '{excludePattern}'.")
 					raise ex from cause
 
