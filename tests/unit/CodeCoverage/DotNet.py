@@ -40,12 +40,13 @@ from json                                  import loads
 from pathlib                               import Path, PurePosixPath
 
 from lxml.etree                            import XMLSchema, parse
+
 from pyTooling.Common                      import getResourceFile
+from pyTooling.Testing                     import Testcase
 
 from pyEDAA.Reports                        import Resources
 from pyEDAA.Reports.CodeCoverage           import Class, CodeCoverageError
 from pyEDAA.Reports.CodeCoverage.Cobertura import READ_SCHEMA, STRICT_SCHEMA, Document
-from pyTooling.Testing                     import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

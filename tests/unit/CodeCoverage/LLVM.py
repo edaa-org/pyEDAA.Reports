@@ -36,10 +36,11 @@ from pathlib                          import Path
 from tempfile                         import TemporaryDirectory
 from typing                           import Any
 
+from pyTooling.Versioning             import SemanticVersion
+from pyTooling.Testing                import Testcase
+
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, Function, LineCoverageStatus, SourceFile
 from pyEDAA.Reports.CodeCoverage.LLVM import Document, RegionKind
-from pyTooling.Testing                import Testcase
-from pyTooling.Versioning             import SemanticVersion
 
 
 if __name__ == "__main__":  # pragma: no cover

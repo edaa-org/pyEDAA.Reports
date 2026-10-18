@@ -29,8 +29,9 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the requirements model: following links transitively."""
-from pyEDAA.Reports.Requirements import Link, LinkKind, RequirementSpecification
 from pyTooling.Testing           import Testcase
+
+from pyEDAA.Reports.Requirements import Link, LinkKind, RequirementSpecification
 
 from .                           import BuildSpecification
 

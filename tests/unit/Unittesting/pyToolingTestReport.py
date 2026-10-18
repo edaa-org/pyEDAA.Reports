@@ -33,10 +33,11 @@ from datetime import timedelta
 from pathlib  import Path
 from textwrap import dedent
 
+from pyTooling.Testing                    import Testcase
+
 from pyEDAA.Reports.Unittesting           import Testcase as ut_Testcase, TestcaseStatus, Testsuite, TestsuiteStatus
 from pyEDAA.Reports.Unittesting           import UnittestError, TestsuiteSummary, MergedTestsuiteSummary
 from pyEDAA.Reports.Unittesting.pyTooling import SCHEMA_FILES, Document, FormatVersion
-from pyTooling.Testing                    import Testcase
 
 
 REPORT = dedent("""\

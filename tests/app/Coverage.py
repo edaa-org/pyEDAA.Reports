@@ -36,6 +36,7 @@ from pathlib   import Path
 from typing    import ClassVar
 
 from lxml.etree        import XMLSchema, parse
+
 from pyTooling.Common  import getResourceFile
 from pyTooling.Testing import ApplicationTestcase
 

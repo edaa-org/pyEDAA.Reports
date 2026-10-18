@@ -35,9 +35,10 @@ from pathlib                          import Path
 from tempfile                         import TemporaryDirectory
 from typing                           import Any
 
+from pyTooling.Testing                import Testcase
+
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError
 from pyEDAA.Reports.CodeCoverage.Gcov import Branch, Call, Condition, Document, File, Line
-from pyTooling.Testing                import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

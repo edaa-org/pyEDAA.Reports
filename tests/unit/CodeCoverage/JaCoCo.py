@@ -35,12 +35,14 @@ from pathlib                               import Path
 from tempfile                              import TemporaryDirectory
 
 from lxml.etree                            import fromstring
+
+from pyTooling.Testing                     import Testcase
+
 from pyEDAA.Reports.CodeCoverage           import Class as cc_Class, CodeCoverageError, LineCoverageStatus
 from pyEDAA.Reports.CodeCoverage           import Method as cc_Method, Package as cc_Package, Unit
 from pyEDAA.Reports.CodeCoverage.Cobertura import Document as CoberturaDocument
 from pyEDAA.Reports.CodeCoverage.JaCoCo    import Class, Counter, CounterType, Document, FormatVersion, Group, Line
 from pyEDAA.Reports.CodeCoverage.JaCoCo    import Method, Package, PUBLIC_IDENTIFIER, SCHEMAS, SessionInfo, SourceFile
-from pyTooling.Testing                     import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

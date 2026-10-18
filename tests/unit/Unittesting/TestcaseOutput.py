@@ -32,10 +32,11 @@
 from pathlib  import Path
 from textwrap import dedent
 
+from pyTooling.Testing                            import Testcase
+
 from pyEDAA.Reports.Unittesting                   import MergedTestcase, Testcase as ut_Testcase, TestcaseStatus
 from pyEDAA.Reports.Unittesting.JUnit             import Document, Testcase as ju_Testcase
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document as PyTestDocument
-from pyTooling.Testing                            import Testcase
 
 
 REPORT = dedent("""\

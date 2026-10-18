@@ -39,9 +39,10 @@ from pathlib                          import Path
 
 from lxml.etree                       import parse
 
+from pyTooling.Testing                import Testcase
+
 from pyEDAA.Reports.Unittesting       import UnittestError
 from pyEDAA.Reports.Unittesting.JUnit import Document
-from pyTooling.Testing                import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

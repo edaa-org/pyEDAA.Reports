@@ -39,8 +39,9 @@ module adds.
 from pathlib   import Path
 from typing    import ClassVar, Dict, Tuple
 
-from pyTooling.Testing import ApplicationTestcase
 from xmlschema         import XMLSchema
+
+from pyTooling.Testing import ApplicationTestcase
 
 from ..unit.JUnitDialects import DIALECTS, SCHEMA_DIRECTORY
 

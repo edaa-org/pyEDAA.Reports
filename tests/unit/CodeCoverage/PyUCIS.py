@@ -34,10 +34,11 @@ from datetime                                import datetime
 from pathlib                                 import Path
 from tempfile                                import TemporaryDirectory
 
+from pyTooling.Testing                       import Testcase
+
 from pyEDAA.Reports.CodeCoverage             import CodeCoverageError, LineCoverageStatus
 from pyEDAA.Reports.CodeCoverage.UCIS        import Document, FormatVersion
 from pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS import Document as PyUCISDocument, SCHEMAS
-from pyTooling.Testing                       import Testcase
 
 
 if __name__ == "__main__":  # pragma: no cover

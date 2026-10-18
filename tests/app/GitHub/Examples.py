@@ -34,7 +34,9 @@ from pathlib                                            import Path
 from unittest                                           import TestCase
 
 from lxml.etree                                         import XMLSchema, parse
+
 from pyTooling.Common                                   import getResourceFile, zipdicts
+from pyTooling.Testing                                  import Testcase
 
 from pyEDAA.Reports                                     import Resources
 from pyEDAA.Reports.CodeCoverage                        import CodeCoverageError
@@ -56,7 +58,6 @@ from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit   import Document as GTest
 from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit      import Document as NextestDocument
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit       import Document as PyTestDocument
 from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit   import Document as JunitXmlTestLoggerDocument
-from pyTooling.Testing                                  import Testcase
 
 
 if __name__ == "__main__": # pragma: no cover

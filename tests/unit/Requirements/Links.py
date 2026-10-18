@@ -29,9 +29,10 @@
 # ==================================================================================================================== #
 #
 """Unit tests of the requirements model: links between items."""
+from pyTooling.Testing           import Testcase
+
 from pyEDAA.Reports.Requirements import DuplicateLinkError, Link, LinkKind, NotInSameSpecificationError
 from pyEDAA.Reports.Requirements import Requirement, RequirementSpecification, SpecificationItem
-from pyTooling.Testing           import Testcase
 
 from .                           import BuildSpecification, FUNCTIONAL, VERSION
 
