@@ -89,6 +89,7 @@ aren't converted.
 """
 from __future__                  import annotations
 
+from datetime                    import timedelta
 from io                          import BytesIO
 from pathlib                     import Path
 from typing                      import Generator, Mapping, Optional as Nullable, Self
@@ -2152,7 +2153,9 @@ class Document(cc_Document, Report):
 
 			self._xmlDocument = xmlDocument
 
-		self._analysisDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._analysisDuration = sw.Duration
+		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def Convert(self) -> None:
 		"""
@@ -2199,7 +2202,9 @@ class Document(cc_Document, Report):
 				else:
 					FileData.Parse(element, parent=self)
 
-		self._conversionDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._conversionDuration = sw.Duration
+		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def ToCoverageSummary(self) -> CoverageSummary:
 		"""

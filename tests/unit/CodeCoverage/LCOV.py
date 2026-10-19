@@ -30,6 +30,7 @@
 #
 #
 """Unit tests of lcov's tracefile format: its model, its line parser and the conversion to the common model."""
+from datetime                         import timedelta
 from pathlib                          import Path
 from tempfile                         import TemporaryDirectory
 from typing                           import Callable
@@ -99,6 +100,7 @@ class FormatModel(Testcase):
 			for condition in section.Conditions if condition.LineNumber == 14 and condition.Index == 1
 		])
 		self.assertGreaterEqual(tracefile.AnalysisDuration.total_seconds(), 0.0)
+		self.assertIs(timedelta, type(tracefile.AnalysisDuration))
 
 	def test_LLVM(self) -> None:
 		"""llvm-cov writes no test name, functions without end line, and a header's static function prefixed by its unit."""

@@ -1922,14 +1922,14 @@ class Document(metaclass=ExtendedType, mixin=True):
 
 	_path:             Path   #: Path to the YAML file.
 
-	_analysisDuration: float  #: TODO: replace by Timer; should be timedelta?
-	_modelConversion:  float  #: TODO: replace by Timer; should be timedelta?
+	_analysisDuration: timedelta  #: Duration of :meth:`Analyze`, or a negative duration before it ran.
+	_modelConversion:  timedelta  #: Duration of :meth:`Convert`, or a negative duration before it ran.
 
 	def __init__(self, reportFile: Path, analyzeAndConvert: bool = False) -> None:
 		self._path = reportFile
 
-		self._analysisDuration = -1.0
-		self._modelConversion = -1.0
+		self._analysisDuration = timedelta(seconds=-1)
+		self._modelConversion =  timedelta(seconds=-1)
 
 		if analyzeAndConvert:
 			self.Analyze()
@@ -1947,30 +1947,30 @@ class Document(metaclass=ExtendedType, mixin=True):
 	@readonly
 	def AnalysisDuration(self) -> timedelta:
 		"""
-		Read-only property to return analysis duration.
+		Read-only property to access the analysis duration (:attr:`_analysisDuration`).
 
 		.. note::
 
 		   This includes usually the duration to validate and parse the file format, but it excludes the time to convert the
 		   content to the test entity hierarchy.
 
-		:returns: Duration to analyze the document.
+		:returns: Duration to analyze the document; negative, if it wasn't analyzed yet.
 		"""
-		return timedelta(seconds=self._analysisDuration)
+		return self._analysisDuration
 
 	@readonly
 	def ModelConversionDuration(self) -> timedelta:
 		"""
-		Read-only property to return conversion duration.
+		Read-only property to access the conversion duration (:attr:`_modelConversion`).
 
 		.. note::
 
 		   This includes usually the duration to convert the document's content to the test entity hierarchy. It might also
 		   include the duration to (re-)aggregate all states and statistics in the hierarchy.
 
-		:returns: Duration to convert the document.
+		:returns: Duration to convert the document; negative, if it wasn't converted yet.
 		"""
-		return timedelta(seconds=self._modelConversion)
+		return self._modelConversion
 
 	@abstractmethod
 	def Analyze(self) -> None:

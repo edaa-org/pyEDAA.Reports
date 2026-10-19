@@ -1305,7 +1305,9 @@ class Document(cc_Document, Report):
 			self._xmlDocument =   xmlDocument
 			self._formatVersion = formatVersion
 
-		self._analysisDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._analysisDuration = sw.Duration
+		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def Convert(self) -> None:
 		"""
@@ -1346,7 +1348,9 @@ class Document(cc_Document, Report):
 
 				Counter.Parse(counterElement, parent=self)
 
-		self._conversionDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._conversionDuration = sw.Duration
+		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def ToCoverageSummary(self) -> CoverageSummary:
 		"""

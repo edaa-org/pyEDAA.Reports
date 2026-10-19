@@ -1567,9 +1567,9 @@ class Document(metaclass=ExtendedType, slots=True):
 	A format's document derives from this class and mixes in the root of the format's model.
 	"""
 
-	_path:               Path   #: Path to the report file.
-	_analysisDuration:   float  #: Duration of :meth:`Analyze` in seconds, or ``-1.0`` before it ran.
-	_conversionDuration: float  #: Duration of :meth:`Convert` in seconds, or ``-1.0`` before it ran.
+	_path:               Path       #: Path to the report file.
+	_analysisDuration:   timedelta  #: Duration of :meth:`Analyze`, or a negative duration before it ran.
+	_conversionDuration: timedelta  #: Duration of :meth:`Convert`, or a negative duration before it ran.
 
 	def __init__(self, reportFile: Path) -> None:
 		"""
@@ -1579,8 +1579,8 @@ class Document(metaclass=ExtendedType, slots=True):
 		"""
 		self._path = reportFile
 
-		self._analysisDuration =   -1.0
-		self._conversionDuration = -1.0
+		self._analysisDuration =   timedelta(seconds=-1)
+		self._conversionDuration = timedelta(seconds=-1)
 
 	@readonly
 	def ReportFile(self) -> Path:
@@ -1594,20 +1594,22 @@ class Document(metaclass=ExtendedType, slots=True):
 	@readonly
 	def AnalysisDuration(self) -> timedelta:
 		"""
-		Read-only property to return the duration of :meth:`Analyze`: reading, parsing and validating the file.
+		Read-only property to access the duration of :meth:`Analyze`: reading, parsing and validating the file
+		(:attr:`_analysisDuration`).
 
 		:returns: The duration; negative, if the file wasn't analyzed yet.
 		"""
-		return timedelta(seconds=self._analysisDuration)
+		return self._analysisDuration
 
 	@readonly
 	def ModelConversionDuration(self) -> timedelta:
 		"""
-		Read-only property to return the duration of :meth:`Convert`: building the report format's model.
+		Read-only property to access the duration of :meth:`Convert`: building the report format's model
+		(:attr:`_conversionDuration`).
 
 		:returns: The duration; negative, if the content wasn't converted yet.
 		"""
-		return timedelta(seconds=self._conversionDuration)
+		return self._conversionDuration
 
 	@abstractmethod
 	def Analyze(self) -> None:
