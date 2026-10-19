@@ -81,14 +81,14 @@ class MetricMode(Base):
 		super().__init__(userAttributes)
 
 		if metricMode is None:
-			raise ValueError(f"Parameter 'metricMode' is None.")
+			raise ValueError("Parameter 'metricMode' is None.")
 		elif not isinstance(metricMode, str):
-			ex = TypeError(f"Parameter 'metricMode' is not of type 'str'.")
+			ex = TypeError("Parameter 'metricMode' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(metricMode)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, ToggleCoverage):
-			ex = TypeError(f"Parameter 'parent' is not of type 'ToggleCoverage'.")
+			ex = TypeError("Parameter 'parent' is not of type 'ToggleCoverage'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -242,23 +242,23 @@ class Dimension(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``downTo`` isn't of type :class:`bool`.
 		"""
 		if left is None:
-			raise ValueError(f"Parameter 'left' is None.")
+			raise ValueError("Parameter 'left' is None.")
 		elif not isinstance(left, int) or isinstance(left, bool):
-			ex = TypeError(f"Parameter 'left' is not of type 'int'.")
+			ex = TypeError("Parameter 'left' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(left)}'.")
 			raise ex
 
 		if right is None:
-			raise ValueError(f"Parameter 'right' is None.")
+			raise ValueError("Parameter 'right' is None.")
 		elif not isinstance(right, int) or isinstance(right, bool):
-			ex = TypeError(f"Parameter 'right' is not of type 'int'.")
+			ex = TypeError("Parameter 'right' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(right)}'.")
 			raise ex
 
 		if downTo is None:
-			raise ValueError(f"Parameter 'downTo' is None.")
+			raise ValueError("Parameter 'downTo' is None.")
 		elif not isinstance(downTo, bool):
-			ex = TypeError(f"Parameter 'downTo' is not of type 'bool'.")
+			ex = TypeError("Parameter 'downTo' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(downTo)}'.")
 			raise ex
 
@@ -391,9 +391,9 @@ class ToggleObject(Base, ObjectAttributesMixin):
 				raise ex
 
 		if statementID is None:
-			raise ValueError(f"Parameter 'statementID' is None.")
+			raise ValueError("Parameter 'statementID' is None.")
 		elif not isinstance(statementID, StatementID):
-			ex = TypeError(f"Parameter 'statementID' is not of type 'StatementID'.")
+			ex = TypeError("Parameter 'statementID' is not of type 'StatementID'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(statementID)}'.")
 			raise ex
 
@@ -407,7 +407,7 @@ class ToggleObject(Base, ObjectAttributesMixin):
 				raise ex
 
 		if parent is not None and not isinstance(parent, ToggleCoverage):
-			ex = TypeError(f"Parameter 'parent' is not of type 'ToggleCoverage'.")
+			ex = TypeError("Parameter 'parent' is not of type 'ToggleCoverage'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -422,13 +422,13 @@ class ToggleObject(Base, ObjectAttributesMixin):
 
 		if dimensions is not None:
 			if not isinstance(dimensions, Iterable):
-				ex = TypeError(f"Parameter 'dimensions' is not iterable.")
+				ex = TypeError("Parameter 'dimensions' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(dimensions)}'.")
 				raise ex
 
 			for dimension in dimensions:
 				if not isinstance(dimension, Dimension):
-					ex = TypeError(f"Parameter 'dimensions' contains an element not of type 'Dimension'.")
+					ex = TypeError("Parameter 'dimensions' contains an element not of type 'Dimension'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(dimension)}'.")
 					raise ex
 

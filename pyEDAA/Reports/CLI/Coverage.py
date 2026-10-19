@@ -134,7 +134,7 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 		self._PrintHeadline()
 
 		if args.input is None:
-			self.WriteError(f"Option '--input=[<Format>:]<File>' is missing.")
+			self.WriteError("Option '--input=[<Format>:]<File>' is missing.")
 			self.Exit(3)
 
 		try:

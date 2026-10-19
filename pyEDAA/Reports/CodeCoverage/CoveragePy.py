@@ -63,7 +63,7 @@ the keyword parameter ``parent`` and is added to it. Its class method ``Parse`` 
 """
 from __future__                  import annotations
 
-from datetime                    import datetime
+from datetime                    import datetime, timedelta
 from enum                        import IntEnum
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
@@ -115,13 +115,13 @@ class FormatVersion(IntEnum):
 		:raises ValueError: If parameter ``value`` is not a supported format version.
 		"""
 		if value is None:
-			raise ValueError(f"Parameter 'value' is None.")
+			raise ValueError("Parameter 'value' is None.")
 		elif not isinstance(value, int) or isinstance(value, bool):
-			ex = TypeError(f"Parameter 'value' is not of type 'int'.")
+			ex = TypeError("Parameter 'value' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 			raise ex
 		elif value not in [member.value for member in cls]:
-			ex = ValueError(f"Parameter 'value' is not a supported coverage.py JSON format version.")
+			ex = ValueError("Parameter 'value' is not a supported coverage.py JSON format version.")
 			ex.add_note(f"Got value '{value}'.")
 			ex.add_note(f"Supported format versions: {', '.join(str(member.value) for member in cls)}.")
 			raise ex
@@ -216,13 +216,13 @@ class Summary(metaclass=ExtendedType, slots=True):
 				raise ex
 
 		if percentCovered is None:
-			raise ValueError(f"Parameter 'percentCovered' is None.")
+			raise ValueError("Parameter 'percentCovered' is None.")
 		elif not isinstance(percentCovered, (int, float)):
-			ex = TypeError(f"Parameter 'percentCovered' is not of type 'float'.")
+			ex = TypeError("Parameter 'percentCovered' is not of type 'float'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(percentCovered)}'.")
 			raise ex
 		elif not 0 <= percentCovered <= 100:
-			ex = ValueError(f"Parameter 'percentCovered' is out of range 0..100.")
+			ex = ValueError("Parameter 'percentCovered' is out of range 0..100.")
 			ex.add_note(f"Got value '{percentCovered}'.")
 			raise ex
 
@@ -262,9 +262,9 @@ class Summary(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``summary`` is not of type :class:`dict`.
 		"""
 		if summary is None:
-			raise ValueError(f"Parameter 'summary' is None.")
+			raise ValueError("Parameter 'summary' is None.")
 		elif not isinstance(summary, dict):
-			ex = TypeError(f"Parameter 'summary' is not of type 'dict'.")
+			ex = TypeError("Parameter 'summary' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(summary)}'.")
 			raise ex
 
@@ -406,9 +406,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises TypeError:       If an element of parameter ``missingBranches`` is not a pair of :class:`int`.
 		"""
 		if summary is None:
-			raise ValueError(f"Parameter 'summary' is None.")
+			raise ValueError("Parameter 'summary' is None.")
 		elif not isinstance(summary, Summary):
-			ex = TypeError(f"Parameter 'summary' is not of type 'Summary'.")
+			ex = TypeError("Parameter 'summary' is not of type 'Summary'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(summary)}'.")
 			raise ex
 
@@ -593,35 +593,35 @@ class Region(Base):
 		super().__init__(summary, executedLines, missingLines, excludedLines, executedBranches, missingBranches)
 
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, RegionKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'RegionKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'RegionKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
 		if startLine is None:
-			raise ValueError(f"Parameter 'startLine' is None.")
+			raise ValueError("Parameter 'startLine' is None.")
 		elif not isinstance(startLine, int):
-			ex = TypeError(f"Parameter 'startLine' is not of type 'int'.")
+			ex = TypeError("Parameter 'startLine' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
 			raise ex
 		elif startLine < 1:
-			ex = ValueError(f"Parameter 'startLine' is less than 1.")
+			ex = ValueError("Parameter 'startLine' is less than 1.")
 			ex.add_note(f"Got value '{startLine}'.")
 			raise ex
 
 		if parent is not None:
 			if not isinstance(parent, File):
-				ex = TypeError(f"Parameter 'parent' is not of type 'File'.")
+				ex = TypeError("Parameter 'parent' is not of type 'File'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
@@ -652,9 +652,9 @@ class Region(Base):
 		:raises TypeError:  If parameter ``region`` is not of type :class:`dict`.
 		"""
 		if region is None:
-			raise ValueError(f"Parameter 'region' is None.")
+			raise ValueError("Parameter 'region' is None.")
 		elif not isinstance(region, dict):
-			ex = TypeError(f"Parameter 'region' is not of type 'dict'.")
+			ex = TypeError("Parameter 'region' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(region)}'.")
 			raise ex
 
@@ -757,15 +757,15 @@ class File(Base):
 		super().__init__(summary, executedLines, missingLines, excludedLines, executedBranches, missingBranches)
 
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
 		if parent is not None:
 			if not isinstance(parent, Report):
-				ex = TypeError(f"Parameter 'parent' is not of type 'Report'.")
+				ex = TypeError("Parameter 'parent' is not of type 'Report'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 			elif path in parent._files:
@@ -798,16 +798,16 @@ class File(Base):
 		:raises CodeCoverageError: If the report names the file's path twice.
 		"""
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 
 		if file is None:
-			raise ValueError(f"Parameter 'file' is None.")
+			raise ValueError("Parameter 'file' is None.")
 		elif not isinstance(file, dict):
-			ex = TypeError(f"Parameter 'file' is not of type 'dict'.")
+			ex = TypeError("Parameter 'file' is not of type 'dict'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
@@ -1046,7 +1046,9 @@ class Document(cc_Document, Report):
 
 			self._jsonDocument = jsonDocument
 
-		self._analysisDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._analysisDuration = sw.Duration
+		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def Convert(self) -> None:
 		"""
@@ -1061,7 +1063,7 @@ class Document(cc_Document, Report):
 		"""
 		if self._jsonDocument is None:
 			ex = CodeCoverageError(f"coverage.py report file '{self._path}' needs to be read and analyzed by a JSON parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -1090,7 +1092,9 @@ class Document(cc_Document, Report):
 			for name, record in self._jsonDocument["files"].items():
 				File.Parse(name, record, parent=self)
 
-		self._conversionDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._conversionDuration = sw.Duration
+		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def ToCoverageSummary(self) -> CoverageSummary:
 		"""

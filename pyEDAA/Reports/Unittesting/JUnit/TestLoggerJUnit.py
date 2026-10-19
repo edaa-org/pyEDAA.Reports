@@ -40,7 +40,7 @@ The logger writes it, when ``dotnet test`` is called with ``--logger junit``.
 """
 from __future__                       import annotations
 
-from datetime                         import timezone
+from datetime                         import timezone, timedelta
 from pathlib                          import Path
 from typing                           import Optional as Nullable, ClassVar, Type
 
@@ -238,8 +238,8 @@ class Document(ju_Document):
 			self.Generate(overwrite=True)
 
 		if self._xmlDocument is None:
-			ex = UnittestError(f"Internal XML document tree is empty and needs to be generated before write is possible.")
-			ex.add_note(f"Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.")
+			ex = UnittestError("Internal XML document tree is empty and needs to be generated before write is possible.")
+			ex.add_note("Call 'Document.Generate()' or 'Document.Write(..., regenerate=True)'.")
 			raise ex
 
 		content = tostring(self._xmlDocument, encoding="utf-8", xml_declaration=True, pretty_print=True)
@@ -266,7 +266,7 @@ class Document(ju_Document):
 		"""
 		if self._xmlDocument is None:
 			ex = UnittestError(f"JUnit XML file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -282,7 +282,9 @@ class Document(ju_Document):
 
 			self.Aggregate()
 
-		self._modelConversion = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._modelConversion = sw.Duration
+		self._modelConversion = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def _ConvertTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
 		"""
@@ -315,7 +317,7 @@ class Document(ju_Document):
 		:raises UnittestError: If overwrite is false and the internal XML data structure is not empty.
 		"""
 		if not overwrite and self._xmlDocument is not None:
-			raise UnittestError(f"Internal XML document is populated with data.")
+			raise UnittestError("Internal XML document is populated with data.")
 
 		rootElement = Element("testsuites")
 

@@ -183,7 +183,7 @@ class Base(metaclass=ExtendedType, slots=True):
 	@Parent.setter
 	def Parent(self, parent: Base) -> None:
 		if parent is None:
-			raise ValueError(f"Parameter 'parent' is None.")
+			raise ValueError("Parameter 'parent' is None.")
 		elif not isinstance(parent, self._PARENT_TYPE):
 			typeNames = " or ".join(f"'{parentType.__name__}'" for parentType in self._PARENT_TYPE)
 			ex = TypeError(f"Parameter 'parent' is not of type {typeNames}.")
@@ -247,24 +247,24 @@ class BaseWithStatus(Base):
 		super().__init__(parent=parent)
 
 		if status is None:
-			raise ValueError(f"Parameter 'status' is None.")
+			raise ValueError("Parameter 'status' is None.")
 		elif not isinstance(status, LineCoverageStatus):
-			ex = TypeError(f"Parameter 'status' is not of type 'LineCoverageStatus'.")
+			ex = TypeError("Parameter 'status' is not of type 'LineCoverageStatus'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(status)}'.")
 			raise ex
 
 		if coverageCount is not None:
 			if not isinstance(coverageCount, int):
-				ex = TypeError(f"Parameter 'coverageCount' is not of type 'int'.")
+				ex = TypeError("Parameter 'coverageCount' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(coverageCount)}'.")
 				raise ex
 			elif coverageCount < 0:
-				ex = ValueError(f"Parameter 'coverageCount' is negative.")
+				ex = ValueError("Parameter 'coverageCount' is negative.")
 				ex.add_note(f"Got value '{coverageCount}'.")
 				raise ex
 			elif (coverageCount == 0 and status in (LineCoverageStatus.Covered, LineCoverageStatus.PartiallyCovered)) or \
 					(coverageCount > 0 and status is LineCoverageStatus.Uncovered):
-				ex = ValueError(f"Parameter 'coverageCount' contradicts parameter 'status'.")
+				ex = ValueError("Parameter 'coverageCount' contradicts parameter 'status'.")
 				ex.add_note(f"Got count '{coverageCount}' for status '{status.name}'.")
 				raise ex
 
@@ -489,13 +489,13 @@ class BaseWithPath(Base, CoverageCountersMixin):
 		CoverageCountersMixin.__init__(self)
 
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		self._name = name
 
@@ -635,17 +635,17 @@ class Directory(BaseWithPath):
 		                           directory's.
 		"""
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif isinstance(path, str):
 			path = Path(path.replace("\\", "/"))
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path' or 'str'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path' or 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
 		parts = [part for part in path.parts if part not in ("", ".", path.anchor)]
 		if len(parts) == 0:
-			ex = ValueError(f"Parameter 'path' names no file.")
+			ex = ValueError("Parameter 'path' names no file.")
 			ex.add_note(f"Got path '{path}'.")
 			raise ex
 
@@ -739,13 +739,13 @@ class CoverageSummary(Directory):
 
 		if sourceDirectories is not None:
 			if not isinstance(sourceDirectories, Iterable):
-				ex = TypeError(f"Parameter 'sourceDirectories' is not iterable.")
+				ex = TypeError("Parameter 'sourceDirectories' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(sourceDirectories)}'.")
 				raise ex
 
 			for sourceDirectory in sourceDirectories:
 				if not isinstance(sourceDirectory, Path):
-					ex = TypeError(f"Parameter 'sourceDirectories' contains an element not of type 'Path'.")
+					ex = TypeError("Parameter 'sourceDirectories' contains an element not of type 'Path'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(sourceDirectory)}'.")
 					raise ex
 
@@ -869,7 +869,7 @@ class File(BaseWithPath):
 			self._lines =          [None]
 			self._lastLineNumber = 0
 		elif not isinstance(lines, Iterable):
-			ex = TypeError(f"Parameter 'lines' is not iterable.")
+			ex = TypeError("Parameter 'lines' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lines)}'.")
 			raise ex
 		else:
@@ -878,7 +878,7 @@ class File(BaseWithPath):
 			lastLineNumber = 0
 			for line in lines:
 				if not isinstance(line, Line):
-					ex = TypeError(f"Parameter 'lines' contains an element not of type 'Line'.")
+					ex = TypeError("Parameter 'lines' contains an element not of type 'Line'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(line)}'.")
 					raise ex
 
@@ -962,13 +962,13 @@ class File(BaseWithPath):
 		:raises ValueError: If parameter ``lineNumber`` is beyond the last line the report lists (:attr:`LastLineNumber`).
 		"""
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 		elif lineNumber > self._lastLineNumber:
@@ -1008,7 +1008,7 @@ class File(BaseWithPath):
 		if startLine is None:
 			first = 1
 		elif not isinstance(startLine, Line):
-			ex = TypeError(f"Parameter 'startLine' is not of type 'Line'.")
+			ex = TypeError("Parameter 'startLine' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
 			raise ex
 		elif startLine._parent is not self:
@@ -1019,7 +1019,7 @@ class File(BaseWithPath):
 		if endLine is None:
 			last = self._lastLineNumber
 		elif not isinstance(endLine, Line):
-			ex = TypeError(f"Parameter 'endLine' is not of type 'Line'.")
+			ex = TypeError("Parameter 'endLine' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
 			raise ex
 		elif endLine._parent is not self:
@@ -1100,13 +1100,13 @@ class Line(BaseWithStatus):
 		super().__init__(status, coverageCount, parent=parent)
 
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
@@ -1119,13 +1119,13 @@ class Line(BaseWithStatus):
 
 		if branches is not None:
 			if not isinstance(branches, Iterable):
-				ex = TypeError(f"Parameter 'branches' is not iterable.")
+				ex = TypeError("Parameter 'branches' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(branches)}'.")
 				raise ex
 
 			for branch in branches:
 				if not isinstance(branch, Branch):
-					ex = TypeError(f"Parameter 'branches' contains an element not of type 'Branch'.")
+					ex = TypeError("Parameter 'branches' contains an element not of type 'Branch'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(branch)}'.")
 					raise ex
 
@@ -1236,7 +1236,7 @@ class Branch(BaseWithStatus):
 		super().__init__(status, coverageCount, parent=parent)
 
 		if target is not None and not isinstance(target, Line):
-			ex = TypeError(f"Parameter 'target' is not of type 'Line'.")
+			ex = TypeError("Parameter 'target' is not of type 'Line'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(target)}'.")
 			raise ex
 
@@ -1317,36 +1317,36 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		CoverageCountersMixin.__init__(self)
 
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if file is not None and not isinstance(file, File):
-			ex = TypeError(f"Parameter 'file' is not of type 'File'.")
+			ex = TypeError("Parameter 'file' is not of type 'File'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
 		if startLine is not None:
 			if not isinstance(startLine, Line):
-				ex = TypeError(f"Parameter 'startLine' is not of type 'Line'.")
+				ex = TypeError("Parameter 'startLine' is not of type 'Line'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
 				raise ex
 			elif startLine._parent is not file:
-				raise ValueError(f"Parameter 'startLine' is not a line of parameter 'file'.")
+				raise ValueError("Parameter 'startLine' is not a line of parameter 'file'.")
 
 		if endLine is not None:
 			if not isinstance(endLine, Line):
-				ex = TypeError(f"Parameter 'endLine' is not of type 'Line'.")
+				ex = TypeError("Parameter 'endLine' is not of type 'Line'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
 				raise ex
 			elif endLine._parent is not file:
-				raise ValueError(f"Parameter 'endLine' is not a line of parameter 'file'.")
+				raise ValueError("Parameter 'endLine' is not a line of parameter 'file'.")
 			elif startLine is not None and endLine._lineNumber < startLine._lineNumber:
-				ex = ValueError(f"Parameter 'endLine' is before parameter 'startLine'.")
+				ex = ValueError("Parameter 'endLine' is before parameter 'startLine'.")
 				ex.add_note(f"Got lines {startLine._lineNumber} to {endLine._lineNumber}.")
 				raise ex
 
@@ -1567,9 +1567,9 @@ class Document(metaclass=ExtendedType, slots=True):
 	A format's document derives from this class and mixes in the root of the format's model.
 	"""
 
-	_path:               Path   #: Path to the report file.
-	_analysisDuration:   float  #: Duration of :meth:`Analyze` in seconds, or ``-1.0`` before it ran.
-	_conversionDuration: float  #: Duration of :meth:`Convert` in seconds, or ``-1.0`` before it ran.
+	_path:               Path                 #: Path to the report file.
+	_analysisDuration:   Nullable[timedelta]  #: Duration of :meth:`Analyze`, or ``None`` before it ran.
+	_conversionDuration: Nullable[timedelta]  #: Duration of :meth:`Convert`, or ``None`` before it ran.
 
 	def __init__(self, reportFile: Path) -> None:
 		"""
@@ -1579,8 +1579,8 @@ class Document(metaclass=ExtendedType, slots=True):
 		"""
 		self._path = reportFile
 
-		self._analysisDuration =   -1.0
-		self._conversionDuration = -1.0
+		self._analysisDuration =   None
+		self._conversionDuration = None
 
 	@readonly
 	def ReportFile(self) -> Path:
@@ -1592,22 +1592,24 @@ class Document(metaclass=ExtendedType, slots=True):
 		return self._path
 
 	@readonly
-	def AnalysisDuration(self) -> timedelta:
+	def AnalysisDuration(self) -> Nullable[timedelta]:
 		"""
-		Read-only property to return the duration of :meth:`Analyze`: reading, parsing and validating the file.
+		Read-only property to access the duration of :meth:`Analyze`: reading, parsing and validating the file
+		(:attr:`_analysisDuration`).
 
-		:returns: The duration; negative, if the file wasn't analyzed yet.
+		:returns: The duration, or ``None`` if the file wasn't analyzed yet.
 		"""
-		return timedelta(seconds=self._analysisDuration)
+		return self._analysisDuration
 
 	@readonly
-	def ModelConversionDuration(self) -> timedelta:
+	def ModelConversionDuration(self) -> Nullable[timedelta]:
 		"""
-		Read-only property to return the duration of :meth:`Convert`: building the report format's model.
+		Read-only property to access the duration of :meth:`Convert`: building the report format's model
+		(:attr:`_conversionDuration`).
 
-		:returns: The duration; negative, if the content wasn't converted yet.
+		:returns: The duration, or ``None`` if the content wasn't converted yet.
 		"""
-		return timedelta(seconds=self._conversionDuration)
+		return self._conversionDuration
 
 	@abstractmethod
 	def Analyze(self) -> None:

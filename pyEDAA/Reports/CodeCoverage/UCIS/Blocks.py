@@ -233,21 +233,21 @@ class Statement(Base, ObjectAttributesMixin):
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)
 
 		if statementID is None:
-			raise ValueError(f"Parameter 'statementID' is None.")
+			raise ValueError("Parameter 'statementID' is None.")
 		elif not isinstance(statementID, StatementID):
-			ex = TypeError(f"Parameter 'statementID' is not of type 'StatementID'.")
+			ex = TypeError("Parameter 'statementID' is not of type 'StatementID'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(statementID)}'.")
 			raise ex
 
 		if coverBin is None:
-			raise ValueError(f"Parameter 'coverBin' is None.")
+			raise ValueError("Parameter 'coverBin' is None.")
 		elif not isinstance(coverBin, Bin):
-			ex = TypeError(f"Parameter 'coverBin' is not of type 'Bin'.")
+			ex = TypeError("Parameter 'coverBin' is not of type 'Bin'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, BlockCoverage):
-			ex = TypeError(f"Parameter 'parent' is not of type 'BlockCoverage'.")
+			ex = TypeError("Parameter 'parent' is not of type 'BlockCoverage'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -359,14 +359,14 @@ class Process(Base, ObjectAttributesMixin):
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)
 
 		if processType is None:
-			raise ValueError(f"Parameter 'processType' is None.")
+			raise ValueError("Parameter 'processType' is None.")
 		elif not isinstance(processType, str):
-			ex = TypeError(f"Parameter 'processType' is not of type 'str'.")
+			ex = TypeError("Parameter 'processType' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(processType)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, BlockCoverage):
-			ex = TypeError(f"Parameter 'parent' is not of type 'BlockCoverage'.")
+			ex = TypeError("Parameter 'parent' is not of type 'BlockCoverage'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -499,26 +499,26 @@ class Block(Base, ObjectAttributesMixin, Generic[BlockParentType]):
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)
 
 		if blockID is None:
-			raise ValueError(f"Parameter 'blockID' is None.")
+			raise ValueError("Parameter 'blockID' is None.")
 		elif not isinstance(blockID, StatementID):
-			ex = TypeError(f"Parameter 'blockID' is not of type 'StatementID'.")
+			ex = TypeError("Parameter 'blockID' is not of type 'StatementID'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(blockID)}'.")
 			raise ex
 
 		if coverBin is None:
-			raise ValueError(f"Parameter 'coverBin' is None.")
+			raise ValueError("Parameter 'coverBin' is None.")
 		elif not isinstance(coverBin, Bin):
-			ex = TypeError(f"Parameter 'coverBin' is not of type 'Bin'.")
+			ex = TypeError("Parameter 'coverBin' is not of type 'Bin'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 			raise ex
 
 		if parentProcess is not None and not isinstance(parentProcess, str):
-			ex = TypeError(f"Parameter 'parentProcess' is not of type 'str'.")
+			ex = TypeError("Parameter 'parentProcess' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parentProcess)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, (BlockCoverage, Process, Block)):
-			ex = TypeError(f"Parameter 'parent' is not of type 'BlockCoverage', 'Process' or 'Block'.")
+			ex = TypeError("Parameter 'parent' is not of type 'BlockCoverage', 'Process' or 'Block'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -532,13 +532,13 @@ class Block(Base, ObjectAttributesMixin, Generic[BlockParentType]):
 
 		if statementIDs is not None:
 			if not isinstance(statementIDs, Iterable):
-				ex = TypeError(f"Parameter 'statementIDs' is not iterable.")
+				ex = TypeError("Parameter 'statementIDs' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(statementIDs)}'.")
 				raise ex
 
 			for statementID in statementIDs:
 				if not isinstance(statementID, StatementID):
-					ex = TypeError(f"Parameter 'statementIDs' contains an element not of type 'StatementID'.")
+					ex = TypeError("Parameter 'statementIDs' contains an element not of type 'StatementID'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(statementID)}'.")
 					raise ex
 

@@ -79,6 +79,7 @@ report's root.
 """
 from __future__                  import annotations
 
+from datetime                    import timedelta
 from enum                        import Enum
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
@@ -260,29 +261,29 @@ class Base(Element[ParentType]):
 
 		if fileID is not None:
 			if not isinstance(fileID, int):
-				ex = TypeError(f"Parameter 'fileID' is not of type 'int'.")
+				ex = TypeError("Parameter 'fileID' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(fileID)}'.")
 				raise ex
 			elif fileID < 0:
-				ex = ValueError(f"Parameter 'fileID' is negative.")
+				ex = ValueError("Parameter 'fileID' is negative.")
 				ex.add_note(f"Got value '{fileID}'.")
 				raise ex
 
 		if expandedFileID is None:
-			raise ValueError(f"Parameter 'expandedFileID' is None.")
+			raise ValueError("Parameter 'expandedFileID' is None.")
 		elif not isinstance(expandedFileID, int):
-			ex = TypeError(f"Parameter 'expandedFileID' is not of type 'int'.")
+			ex = TypeError("Parameter 'expandedFileID' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(expandedFileID)}'.")
 			raise ex
 		elif expandedFileID < 0:
-			ex = ValueError(f"Parameter 'expandedFileID' is negative.")
+			ex = ValueError("Parameter 'expandedFileID' is negative.")
 			ex.add_note(f"Got value '{expandedFileID}'.")
 			raise ex
 
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, RegionKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'RegionKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'RegionKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
@@ -474,16 +475,16 @@ class Region(Base["Function | Expansion"]):
 		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind, parent=parent)
 
 		if fileID is None:
-			raise ValueError(f"Parameter 'fileID' is None.")
+			raise ValueError("Parameter 'fileID' is None.")
 
 		if count is None:
-			raise ValueError(f"Parameter 'count' is None.")
+			raise ValueError("Parameter 'count' is None.")
 		elif not isinstance(count, int):
-			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex = TypeError("Parameter 'count' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 			raise ex
 		elif count < 0:
-			ex = ValueError(f"Parameter 'count' is negative.")
+			ex = ValueError("Parameter 'count' is negative.")
 			ex.add_note(f"Got value '{count}'.")
 			raise ex
 
@@ -562,7 +563,7 @@ class BranchRegion(Base["File | Function | Expansion"]):
 		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind, parent=parent)
 
 		if fileID is None:
-			raise ValueError(f"Parameter 'fileID' is None.")
+			raise ValueError("Parameter 'fileID' is None.")
 
 		for name, value in (("trueCount", trueCount), ("falseCount", falseCount)):
 			if value is None:
@@ -648,21 +649,21 @@ class TestVector(Element["MCDCRecord"]):
 		super().__init__(parent=parent)
 
 		if conditions is None:
-			raise ValueError(f"Parameter 'conditions' is None.")
+			raise ValueError("Parameter 'conditions' is None.")
 		elif not isinstance(conditions, Iterable):
-			ex = TypeError(f"Parameter 'conditions' is not iterable.")
+			ex = TypeError("Parameter 'conditions' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(conditions)}'.")
 			raise ex
 
 		if executed is None:
-			raise ValueError(f"Parameter 'executed' is None.")
+			raise ValueError("Parameter 'executed' is None.")
 		elif not isinstance(executed, bool):
-			ex = TypeError(f"Parameter 'executed' is not of type 'bool'.")
+			ex = TypeError("Parameter 'executed' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(executed)}'.")
 			raise ex
 
 		if result is not None and not isinstance(result, bool):
-			ex = TypeError(f"Parameter 'result' is not of type 'bool'.")
+			ex = TypeError("Parameter 'result' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(result)}'.")
 			raise ex
 
@@ -672,7 +673,7 @@ class TestVector(Element["MCDCRecord"]):
 
 		for condition in conditions:
 			if condition is not None and not isinstance(condition, bool):
-				ex = TypeError(f"Parameter 'conditions' contains an element not of type 'bool'.")
+				ex = TypeError("Parameter 'conditions' contains an element not of type 'bool'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(condition)}'.")
 				raise ex
 
@@ -804,9 +805,9 @@ class MCDCRecord(Base["File | Function"]):
 				raise ex
 
 		if conditions is None:
-			raise ValueError(f"Parameter 'conditions' is None.")
+			raise ValueError("Parameter 'conditions' is None.")
 		elif not isinstance(conditions, Iterable):
-			ex = TypeError(f"Parameter 'conditions' is not iterable.")
+			ex = TypeError("Parameter 'conditions' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(conditions)}'.")
 			raise ex
 
@@ -817,7 +818,7 @@ class MCDCRecord(Base["File | Function"]):
 
 		for condition in conditions:
 			if not isinstance(condition, bool):
-				ex = TypeError(f"Parameter 'conditions' contains an element not of type 'bool'.")
+				ex = TypeError("Parameter 'conditions' contains an element not of type 'bool'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(condition)}'.")
 				raise ex
 
@@ -825,17 +826,17 @@ class MCDCRecord(Base["File | Function"]):
 
 		if testVectors is not None:
 			if not isinstance(testVectors, Iterable):
-				ex = TypeError(f"Parameter 'testVectors' is not iterable.")
+				ex = TypeError("Parameter 'testVectors' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(testVectors)}'.")
 				raise ex
 
 			for testVector in testVectors:
 				if not isinstance(testVector, TestVector):
-					ex = TypeError(f"Parameter 'testVectors' contains an element not of type 'TestVector'.")
+					ex = TypeError("Parameter 'testVectors' contains an element not of type 'TestVector'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(testVector)}'.")
 					raise ex
 				elif testVector._parent is not None:
-					raise AlreadyInCoverageReportError(f"Parameter 'testVectors' contains a test vector of another MC/DC record.")
+					raise AlreadyInCoverageReportError("Parameter 'testVectors' contains a test vector of another MC/DC record.")
 
 				testVector._parent = self
 				testVector._root =   self._root
@@ -958,22 +959,22 @@ class Counters(Element["Summary"]):
 
 		if notCovered is not None:
 			if not isinstance(notCovered, int):
-				ex = TypeError(f"Parameter 'notCovered' is not of type 'int'.")
+				ex = TypeError("Parameter 'notCovered' is not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(notCovered)}'.")
 				raise ex
 			elif notCovered < 0:
-				ex = ValueError(f"Parameter 'notCovered' is negative.")
+				ex = ValueError("Parameter 'notCovered' is negative.")
 				ex.add_note(f"Got value '{notCovered}'.")
 				raise ex
 
 		if percent is None:
-			raise ValueError(f"Parameter 'percent' is None.")
+			raise ValueError("Parameter 'percent' is None.")
 		elif not isinstance(percent, (float, int)):
-			ex = TypeError(f"Parameter 'percent' is not of type 'float'.")
+			ex = TypeError("Parameter 'percent' is not of type 'float'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(percent)}'.")
 			raise ex
 		elif not 0 <= percent <= 100:
-			ex = ValueError(f"Parameter 'percent' is out of range 0..100.")
+			ex = ValueError("Parameter 'percent' is out of range 0..100.")
 			ex.add_note(f"Got value '{percent}'.")
 			raise ex
 
@@ -1256,13 +1257,13 @@ class Segment(Element["File"]):
 				raise ex
 
 		if count is None:
-			raise ValueError(f"Parameter 'count' is None.")
+			raise ValueError("Parameter 'count' is None.")
 		elif not isinstance(count, int):
-			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex = TypeError("Parameter 'count' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 			raise ex
 		elif count < 0:
-			ex = ValueError(f"Parameter 'count' is negative.")
+			ex = ValueError("Parameter 'count' is negative.")
 			ex.add_note(f"Got value '{count}'.")
 			raise ex
 
@@ -1401,23 +1402,23 @@ class Expansion(Element["File"]):
 		super().__init__(parent=parent)
 
 		if filePaths is None:
-			raise ValueError(f"Parameter 'filePaths' is None.")
+			raise ValueError("Parameter 'filePaths' is None.")
 		elif not isinstance(filePaths, Iterable):
-			ex = TypeError(f"Parameter 'filePaths' is not iterable.")
+			ex = TypeError("Parameter 'filePaths' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(filePaths)}'.")
 			raise ex
 
 		if sourceRegion is None:
-			raise ValueError(f"Parameter 'sourceRegion' is None.")
+			raise ValueError("Parameter 'sourceRegion' is None.")
 		elif not isinstance(sourceRegion, Region):
-			ex = TypeError(f"Parameter 'sourceRegion' is not of type 'Region'.")
+			ex = TypeError("Parameter 'sourceRegion' is not of type 'Region'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(sourceRegion)}'.")
 			raise ex
 		elif sourceRegion._parent is not None:
-			raise AlreadyInCoverageReportError(f"Parameter 'sourceRegion' is a region of another element.")
+			raise AlreadyInCoverageReportError("Parameter 'sourceRegion' is a region of another element.")
 
 		if targetRegions is None:
-			raise ValueError(f"Parameter 'targetRegions' is None.")
+			raise ValueError("Parameter 'targetRegions' is None.")
 
 		self._filePaths =     []
 		self._sourceRegion =  sourceRegion
@@ -1426,7 +1427,7 @@ class Expansion(Element["File"]):
 
 		for filePath in filePaths:
 			if not isinstance(filePath, Path):
-				ex = TypeError(f"Parameter 'filePaths' contains an element not of type 'Path'.")
+				ex = TypeError("Parameter 'filePaths' contains an element not of type 'Path'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(filePath)}'.")
 				raise ex
 
@@ -1464,11 +1465,11 @@ class Expansion(Element["File"]):
 				target.append(element)
 
 		if sourceRegion._fileID >= len(self._filePaths):
-			ex = ValueError(f"Parameter 'sourceRegion' is a region of a file ID out of range.")
+			ex = ValueError("Parameter 'sourceRegion' is a region of a file ID out of range.")
 			ex.add_note(f"Got value '{sourceRegion._fileID}' for {len(self._filePaths)} file paths.")
 			raise ex
 		elif sourceRegion._kind is RegionKind.Expansion and sourceRegion._expandedFileID >= len(self._filePaths):
-			ex = ValueError(f"Parameter 'sourceRegion' is an expansion region of an expanded file ID out of range.")
+			ex = ValueError("Parameter 'sourceRegion' is an expansion region of an expanded file ID out of range.")
 			ex.add_note(f"Got value '{sourceRegion._expandedFileID}' for {len(self._filePaths)} file paths.")
 			raise ex
 
@@ -1602,24 +1603,24 @@ class File(Element["Report"]):
 		super().__init__(parent=parent)
 
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 		elif parent is not None and path in parent._files:
-			ex = DuplicateFileError(f"Parameter 'parent' has a file of the same path.")
+			ex = DuplicateFileError("Parameter 'parent' has a file of the same path.")
 			ex.add_note(f"Got value '{path.as_posix()}'.")
 			raise ex
 
 		if summary is None:
-			raise ValueError(f"Parameter 'summary' is None.")
+			raise ValueError("Parameter 'summary' is None.")
 		elif not isinstance(summary, Summary):
-			ex = TypeError(f"Parameter 'summary' is not of type 'Summary'.")
+			ex = TypeError("Parameter 'summary' is not of type 'Summary'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(summary)}'.")
 			raise ex
 		elif summary._parent is not None:
-			raise AlreadyInCoverageReportError(f"Parameter 'summary' is the summary of another element.")
+			raise AlreadyInCoverageReportError("Parameter 'summary' is the summary of another element.")
 
 		self._path =        path
 		self._segments =    []
@@ -1807,32 +1808,32 @@ class Function(Element["Report"]):
 		super().__init__(parent=parent)
 
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 		elif name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if count is None:
-			raise ValueError(f"Parameter 'count' is None.")
+			raise ValueError("Parameter 'count' is None.")
 		elif not isinstance(count, int):
-			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex = TypeError("Parameter 'count' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 			raise ex
 		elif count < 0:
-			ex = ValueError(f"Parameter 'count' is negative.")
+			ex = ValueError("Parameter 'count' is negative.")
 			ex.add_note(f"Got value '{count}'.")
 			raise ex
 
 		if regions is None:
-			raise ValueError(f"Parameter 'regions' is None.")
+			raise ValueError("Parameter 'regions' is None.")
 
 		if filePaths is None:
-			raise ValueError(f"Parameter 'filePaths' is None.")
+			raise ValueError("Parameter 'filePaths' is None.")
 		elif not isinstance(filePaths, Iterable):
-			ex = TypeError(f"Parameter 'filePaths' is not iterable.")
+			ex = TypeError("Parameter 'filePaths' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(filePaths)}'.")
 			raise ex
 
@@ -1845,7 +1846,7 @@ class Function(Element["Report"]):
 
 		for filePath in filePaths:
 			if not isinstance(filePath, Path):
-				ex = TypeError(f"Parameter 'filePaths' contains an element not of type 'Path'.")
+				ex = TypeError("Parameter 'filePaths' contains an element not of type 'Path'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(filePath)}'.")
 				raise ex
 
@@ -2047,16 +2048,16 @@ class Report(metaclass=ExtendedType, mixin=True):
 		:raises AlreadyInCoverageReportError: If parameter ``totals`` is the summary of another element.
 		"""
 		if version is not None and not isinstance(version, SemanticVersion):
-			ex = TypeError(f"Parameter 'version' is not of type 'SemanticVersion'.")
+			ex = TypeError("Parameter 'version' is not of type 'SemanticVersion'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(version)}'.")
 			raise ex
 
 		if totals is not None and not isinstance(totals, Summary):
-			ex = TypeError(f"Parameter 'totals' is not of type 'Summary'.")
+			ex = TypeError("Parameter 'totals' is not of type 'Summary'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(totals)}'.")
 			raise ex
 		elif totals is not None and totals._parent is not None:
-			raise AlreadyInCoverageReportError(f"Parameter 'totals' is the summary of another element.")
+			raise AlreadyInCoverageReportError("Parameter 'totals' is the summary of another element.")
 
 		self._root =      self
 		self._version =   version
@@ -2066,19 +2067,19 @@ class Report(metaclass=ExtendedType, mixin=True):
 
 		if files is not None:
 			if not isinstance(files, Iterable):
-				ex = TypeError(f"Parameter 'files' is not iterable.")
+				ex = TypeError("Parameter 'files' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(files)}'.")
 				raise ex
 
 			for file in files:
 				if not isinstance(file, File):
-					ex = TypeError(f"Parameter 'files' contains an element not of type 'File'.")
+					ex = TypeError("Parameter 'files' contains an element not of type 'File'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 					raise ex
 				elif file._parent is not None:
-					raise AlreadyInCoverageReportError(f"Parameter 'files' contains a file of another report.")
+					raise AlreadyInCoverageReportError("Parameter 'files' contains a file of another report.")
 				elif file._path in self._files:
-					ex = DuplicateFileError(f"Parameter 'files' contains two files of the same path.")
+					ex = DuplicateFileError("Parameter 'files' contains two files of the same path.")
 					ex.add_note(f"Got value '{file._path.as_posix()}'.")
 					raise ex
 
@@ -2089,17 +2090,17 @@ class Report(metaclass=ExtendedType, mixin=True):
 
 		if functions is not None:
 			if not isinstance(functions, Iterable):
-				ex = TypeError(f"Parameter 'functions' is not iterable.")
+				ex = TypeError("Parameter 'functions' is not iterable.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(functions)}'.")
 				raise ex
 
 			for function in functions:
 				if not isinstance(function, Function):
-					ex = TypeError(f"Parameter 'functions' contains an element not of type 'Function'.")
+					ex = TypeError("Parameter 'functions' contains an element not of type 'Function'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(function)}'.")
 					raise ex
 				elif function._parent is not None:
-					raise AlreadyInCoverageReportError(f"Parameter 'functions' contains a function of another report.")
+					raise AlreadyInCoverageReportError("Parameter 'functions' contains a function of another report.")
 
 				function._parent = self
 				function._SetRoot(self)
@@ -2237,7 +2238,9 @@ class Document(cc_Document, Report):
 
 			self._jsonDocument = jsonDocument
 
-		self._analysisDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._analysisDuration = sw.Duration
+		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def Convert(self) -> None:
 		"""
@@ -2251,7 +2254,7 @@ class Document(cc_Document, Report):
 			ex = CodeCoverageError(
 				f"LLVM coverage export file '{self._path}' needs to be read and analyzed by a JSON parser."
 			)
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -2270,7 +2273,9 @@ class Document(cc_Document, Report):
 			for function in data.get("functions", []):
 				Function.Parse(function, parent=self)
 
-		self._conversionDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._conversionDuration = sw.Duration
+		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def ToCoverageSummary(self) -> CoverageSummary:
 		"""

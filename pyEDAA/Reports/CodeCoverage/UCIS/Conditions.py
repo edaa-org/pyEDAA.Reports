@@ -247,19 +247,19 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 				raise ex
 
 		if statementID is None:
-			raise ValueError(f"Parameter 'statementID' is None.")
+			raise ValueError("Parameter 'statementID' is None.")
 		elif not isinstance(statementID, StatementID):
-			ex = TypeError(f"Parameter 'statementID' is not of type 'StatementID'.")
+			ex = TypeError("Parameter 'statementID' is not of type 'StatementID'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(statementID)}'.")
 			raise ex
 
 		if statementType is not None and not isinstance(statementType, str):
-			ex = TypeError(f"Parameter 'statementType' is not of type 'str'.")
+			ex = TypeError("Parameter 'statementType' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(statementType)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, (ConditionCoverage, Expression)):
-			ex = TypeError(f"Parameter 'parent' is not of type 'ConditionCoverage' or 'Expression'.")
+			ex = TypeError("Parameter 'parent' is not of type 'ConditionCoverage' or 'Expression'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -276,30 +276,30 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 		self._expressions =    []
 
 		if subExpressions is None:
-			raise ValueError(f"Parameter 'subExpressions' is None.")
+			raise ValueError("Parameter 'subExpressions' is None.")
 		elif not isinstance(subExpressions, Iterable):
-			ex = TypeError(f"Parameter 'subExpressions' is not iterable.")
+			ex = TypeError("Parameter 'subExpressions' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(subExpressions)}'.")
 			raise ex
 
 		for subExpression in subExpressions:
 			if not isinstance(subExpression, str):
-				ex = TypeError(f"Parameter 'subExpressions' contains an element not of type 'str'.")
+				ex = TypeError("Parameter 'subExpressions' contains an element not of type 'str'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(subExpression)}'.")
 				raise ex
 
 			self._subExpressions.append(subExpression)
 
 		if bins is None:
-			raise ValueError(f"Parameter 'bins' is None.")
+			raise ValueError("Parameter 'bins' is None.")
 		elif not isinstance(bins, Iterable):
-			ex = TypeError(f"Parameter 'bins' is not iterable.")
+			ex = TypeError("Parameter 'bins' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(bins)}'.")
 			raise ex
 
 		for coverBin in bins:
 			if not isinstance(coverBin, Bin):
-				ex = TypeError(f"Parameter 'bins' contains an element not of type 'Bin'.")
+				ex = TypeError("Parameter 'bins' contains an element not of type 'Bin'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 				raise ex
 

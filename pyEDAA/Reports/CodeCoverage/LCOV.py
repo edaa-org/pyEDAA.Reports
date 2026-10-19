@@ -64,6 +64,7 @@ the record's line number.
 """
 from __future__                  import annotations
 
+from datetime                    import timedelta
 from pathlib                     import Path
 from re                          import Pattern, compile as re_compile
 from typing                      import Mapping, Optional as Nullable
@@ -165,36 +166,36 @@ class Line(metaclass=ExtendedType, slots=True):
 		:raises CodeCoverageError: If the section already has a line of this number.
 		"""
 		if number is None:
-			raise ValueError(f"Parameter 'number' is None.")
+			raise ValueError("Parameter 'number' is None.")
 		elif not isinstance(number, int):
-			ex = TypeError(f"Parameter 'number' is not of type 'int'.")
+			ex = TypeError("Parameter 'number' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(number)}'.")
 			raise ex
 		elif number < 1:
-			ex = ValueError(f"Parameter 'number' is less than 1.")
+			ex = ValueError("Parameter 'number' is less than 1.")
 			ex.add_note(f"Got value '{number}'.")
 			raise ex
 
 		if count is None:
-			raise ValueError(f"Parameter 'count' is None.")
+			raise ValueError("Parameter 'count' is None.")
 		elif not isinstance(count, int):
-			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex = TypeError("Parameter 'count' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 			raise ex
 		elif count < 0:
-			ex = ValueError(f"Parameter 'count' is negative.")
+			ex = ValueError("Parameter 'count' is negative.")
 			ex.add_note(f"Got value '{count}'.")
 			raise ex
 
 		if checksum is not None and not isinstance(checksum, str):
-			ex = TypeError(f"Parameter 'checksum' is not of type 'str'.")
+			ex = TypeError("Parameter 'checksum' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(checksum)}'.")
 			raise ex
 		elif checksum == "":
-			raise ValueError(f"Parameter 'checksum' is empty.")
+			raise ValueError("Parameter 'checksum' is empty.")
 
 		if parent is not None and not isinstance(parent, Section):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Section'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -297,54 +298,54 @@ class Branch(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
 		"""
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
 		if block is None:
-			raise ValueError(f"Parameter 'block' is None.")
+			raise ValueError("Parameter 'block' is None.")
 		elif not isinstance(block, int):
-			ex = TypeError(f"Parameter 'block' is not of type 'int'.")
+			ex = TypeError("Parameter 'block' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(block)}'.")
 			raise ex
 		elif block < 0:
-			ex = ValueError(f"Parameter 'block' is negative.")
+			ex = ValueError("Parameter 'block' is negative.")
 			ex.add_note(f"Got value '{block}'.")
 			raise ex
 
 		if expression is None:
-			raise ValueError(f"Parameter 'expression' is None.")
+			raise ValueError("Parameter 'expression' is None.")
 		elif not isinstance(expression, str):
-			ex = TypeError(f"Parameter 'expression' is not of type 'str'.")
+			ex = TypeError("Parameter 'expression' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(expression)}'.")
 			raise ex
 		elif expression == "":
-			raise ValueError(f"Parameter 'expression' is empty.")
+			raise ValueError("Parameter 'expression' is empty.")
 
 		if taken is not None and not isinstance(taken, int):
-			ex = TypeError(f"Parameter 'taken' is not of type 'int'.")
+			ex = TypeError("Parameter 'taken' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(taken)}'.")
 			raise ex
 		elif taken is not None and taken < 0:
-			ex = ValueError(f"Parameter 'taken' is negative.")
+			ex = ValueError("Parameter 'taken' is negative.")
 			ex.add_note(f"Got value '{taken}'.")
 			raise ex
 
 		if isException is None:
-			raise ValueError(f"Parameter 'isException' is None.")
+			raise ValueError("Parameter 'isException' is None.")
 		elif not isinstance(isException, bool):
-			ex = TypeError(f"Parameter 'isException' is not of type 'bool'.")
+			ex = TypeError("Parameter 'isException' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(isException)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Section):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Section'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -472,67 +473,67 @@ class Condition(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
 		"""
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
 		if groupSize is None:
-			raise ValueError(f"Parameter 'groupSize' is None.")
+			raise ValueError("Parameter 'groupSize' is None.")
 		elif not isinstance(groupSize, int):
-			ex = TypeError(f"Parameter 'groupSize' is not of type 'int'.")
+			ex = TypeError("Parameter 'groupSize' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(groupSize)}'.")
 			raise ex
 		elif groupSize < 0:
-			ex = ValueError(f"Parameter 'groupSize' is negative.")
+			ex = ValueError("Parameter 'groupSize' is negative.")
 			ex.add_note(f"Got value '{groupSize}'.")
 			raise ex
 
 		if sense is None:
-			raise ValueError(f"Parameter 'sense' is None.")
+			raise ValueError("Parameter 'sense' is None.")
 		elif not isinstance(sense, bool):
-			ex = TypeError(f"Parameter 'sense' is not of type 'bool'.")
+			ex = TypeError("Parameter 'sense' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(sense)}'.")
 			raise ex
 
 		if taken is None:
-			raise ValueError(f"Parameter 'taken' is None.")
+			raise ValueError("Parameter 'taken' is None.")
 		elif not isinstance(taken, int):
-			ex = TypeError(f"Parameter 'taken' is not of type 'int'.")
+			ex = TypeError("Parameter 'taken' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(taken)}'.")
 			raise ex
 		elif taken < 0:
-			ex = ValueError(f"Parameter 'taken' is negative.")
+			ex = ValueError("Parameter 'taken' is negative.")
 			ex.add_note(f"Got value '{taken}'.")
 			raise ex
 
 		if index is None:
-			raise ValueError(f"Parameter 'index' is None.")
+			raise ValueError("Parameter 'index' is None.")
 		elif not isinstance(index, int):
-			ex = TypeError(f"Parameter 'index' is not of type 'int'.")
+			ex = TypeError("Parameter 'index' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
 			raise ex
 		elif index < 0:
-			ex = ValueError(f"Parameter 'index' is negative.")
+			ex = ValueError("Parameter 'index' is negative.")
 			ex.add_note(f"Got value '{index}'.")
 			raise ex
 
 		if expression is None:
-			raise ValueError(f"Parameter 'expression' is None.")
+			raise ValueError("Parameter 'expression' is None.")
 		elif not isinstance(expression, str):
-			ex = TypeError(f"Parameter 'expression' is not of type 'str'.")
+			ex = TypeError("Parameter 'expression' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(expression)}'.")
 			raise ex
 		elif expression == "":
-			raise ValueError(f"Parameter 'expression' is empty.")
+			raise ValueError("Parameter 'expression' is empty.")
 
 		if parent is not None and not isinstance(parent, Section):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Section'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -663,45 +664,45 @@ class Function(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Section`.
 		"""
 		if startLine is None:
-			raise ValueError(f"Parameter 'startLine' is None.")
+			raise ValueError("Parameter 'startLine' is None.")
 		elif not isinstance(startLine, int):
-			ex = TypeError(f"Parameter 'startLine' is not of type 'int'.")
+			ex = TypeError("Parameter 'startLine' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(startLine)}'.")
 			raise ex
 		elif startLine < 1:
-			ex = ValueError(f"Parameter 'startLine' is less than 1.")
+			ex = ValueError("Parameter 'startLine' is less than 1.")
 			ex.add_note(f"Got value '{startLine}'.")
 			raise ex
 
 		if endLine is not None and not isinstance(endLine, int):
-			ex = TypeError(f"Parameter 'endLine' is not of type 'int'.")
+			ex = TypeError("Parameter 'endLine' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(endLine)}'.")
 			raise ex
 		elif endLine is not None and endLine < 1:
-			ex = ValueError(f"Parameter 'endLine' is less than 1.")
+			ex = ValueError("Parameter 'endLine' is less than 1.")
 			ex.add_note(f"Got value '{endLine}'.")
 			raise ex
 
 		if aliases is None:
-			raise ValueError(f"Parameter 'aliases' is None.")
+			raise ValueError("Parameter 'aliases' is None.")
 		elif not isinstance(aliases, Mapping):
-			ex = TypeError(f"Parameter 'aliases' is not a mapping.")
+			ex = TypeError("Parameter 'aliases' is not a mapping.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(aliases)}'.")
 			raise ex
 		elif len(aliases) == 0:
-			raise ValueError(f"Parameter 'aliases' is empty.")
+			raise ValueError("Parameter 'aliases' is empty.")
 
 		if index is not None and not isinstance(index, int):
-			ex = TypeError(f"Parameter 'index' is not of type 'int'.")
+			ex = TypeError("Parameter 'index' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
 			raise ex
 		elif index is not None and index < 0:
-			ex = ValueError(f"Parameter 'index' is negative.")
+			ex = ValueError("Parameter 'index' is negative.")
 			ex.add_note(f"Got value '{index}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Section):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Section'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Section'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -713,17 +714,17 @@ class Function(metaclass=ExtendedType, slots=True):
 
 		for name, count in aliases.items():
 			if not isinstance(name, str):
-				ex = TypeError(f"Parameter 'aliases' contains a name not of type 'str'.")
+				ex = TypeError("Parameter 'aliases' contains a name not of type 'str'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 				raise ex
 			elif name == "":
-				raise ValueError(f"Parameter 'aliases' contains an empty name.")
+				raise ValueError("Parameter 'aliases' contains an empty name.")
 			elif count is not None and not isinstance(count, int):
-				ex = TypeError(f"Parameter 'aliases' contains a count not of type 'int'.")
+				ex = TypeError("Parameter 'aliases' contains a count not of type 'int'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 				raise ex
 			elif count is not None and count < 0:
-				ex = ValueError(f"Parameter 'aliases' contains a negative count.")
+				ex = ValueError("Parameter 'aliases' contains a negative count.")
 				ex.add_note(f"Got value '{count}'.")
 				raise ex
 
@@ -838,21 +839,21 @@ class Section(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Tracefile`.
 		"""
 		if testName is None:
-			raise ValueError(f"Parameter 'testName' is None.")
+			raise ValueError("Parameter 'testName' is None.")
 		elif not isinstance(testName, str):
-			ex = TypeError(f"Parameter 'testName' is not of type 'str'.")
+			ex = TypeError("Parameter 'testName' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(testName)}'.")
 			raise ex
 
 		if sourceFile is None:
-			raise ValueError(f"Parameter 'sourceFile' is None.")
+			raise ValueError("Parameter 'sourceFile' is None.")
 		elif not isinstance(sourceFile, Path):
-			ex = TypeError(f"Parameter 'sourceFile' is not of type 'Path'.")
+			ex = TypeError("Parameter 'sourceFile' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(sourceFile)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Tracefile):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Tracefile'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Tracefile'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1138,7 +1139,9 @@ class Document(cc_Document, Tracefile):
 
 			self._records = records
 
-		self._analysisDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._analysisDuration = sw.Duration
+		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def Convert(self) -> None:
 		"""
@@ -1167,7 +1170,7 @@ class Document(cc_Document, Tracefile):
 		"""
 		if self._records is None:
 			ex = CodeCoverageError(f"lcov tracefile '{self._path}' needs to be read and analyzed by a line parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -1289,7 +1292,9 @@ class Document(cc_Document, Tracefile):
 				ex.add_note(f"The section of '{section._sourceFile}' starts in line {sectionLineNumber}.")
 				raise ex
 
-		self._conversionDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._conversionDuration = sw.Duration
+		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def ToCoverageSummary(self) -> CoverageSummary:
 		"""

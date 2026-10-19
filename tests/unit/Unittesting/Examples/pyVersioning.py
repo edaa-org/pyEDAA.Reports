@@ -94,7 +94,7 @@ class pyVersioning(ut_TestCase):
 
 		self.assertEqual(0, exceptionCount, "Discovered XML parser exceptions.")
 
-		print(f"Merging generic testsuites ...")
+		print("Merging generic testsuites ...")
 		startMerging = perf_counter_ns()
 		merged = MergedTestsuiteSummary("Unittests")
 		for summary in junitDocuments:
@@ -117,7 +117,7 @@ class pyVersioning(ut_TestCase):
 		for item in merged.Iterate(IterationScheme.Default | IterationScheme.IncludeSelf):
 			self.assertEqual(mergedCount, item.MergedCount, f"{item.Name}")
 
-		print(f"Aggregating datapoints in testsuite ...")
+		print("Aggregating datapoints in testsuite ...")
 		startAggregate = perf_counter_ns()
 		merged.Aggregate()
 		endAggregate = perf_counter_ns()
@@ -142,7 +142,7 @@ class pyVersioning(ut_TestCase):
 		self.assertEqual(0, result.Errored)
 		self.assertEqual(2, result.Failed)
 
-		print(f"Writing merged data as JUnit XML ...")
+		print("Writing merged data as JUnit XML ...")
 		startWrite = perf_counter_ns()
 		junitDocument = Document.FromTestsuiteSummary(self._outputDirectory / "Unittests.xml", result)
 		junitDocument.Write(regenerate=True)

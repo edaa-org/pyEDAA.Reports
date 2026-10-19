@@ -81,6 +81,7 @@ element.
 """
 from __future__                  import annotations
 
+from datetime                    import timedelta
 from enum                        import IntEnum, IntFlag
 from io                          import BytesIO
 from pathlib                     import Path
@@ -273,20 +274,20 @@ class AttributesMixin(metaclass=ExtendedType, mixin=True):
 
 		if attributes is not None:
 			if not isinstance(attributes, Mapping):
-				ex = TypeError(f"Parameter 'attributes' is not a mapping.")
+				ex = TypeError("Parameter 'attributes' is not a mapping.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(attributes)}'.")
 				raise ex
 
 			for key, value in attributes.items():
 				if not isinstance(key, str):
-					ex = TypeError(f"Parameter 'attributes' contains a key not of type 'str'.")
+					ex = TypeError("Parameter 'attributes' contains a key not of type 'str'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(key)}'.")
 					raise ex
 				elif key == "":
-					raise ValueError(f"Parameter 'attributes' contains an empty key.")
+					raise ValueError("Parameter 'attributes' contains an empty key.")
 
 				if not isinstance(value, (int, float, str)):
-					ex = TypeError(f"Parameter 'attributes' contains a value not of type 'int', 'float' or 'str'.")
+					ex = TypeError("Parameter 'attributes' contains a value not of type 'int', 'float' or 'str'.")
 					ex.add_note(f"Got type '{getFullyQualifiedName(value)}' for key '{key}'.")
 					raise ex
 
@@ -350,9 +351,9 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
 		"""
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 
@@ -401,38 +402,38 @@ class SourceLocation(metaclass=ExtendedType, slots=True):
 		:raises ValueError:   If parameter ``token`` is negative.
 		"""
 		if file is None:
-			raise ValueError(f"Parameter 'file' is None.")
+			raise ValueError("Parameter 'file' is None.")
 		elif not isinstance(file, Path):
-			ex = TypeError(f"Parameter 'file' is not of type 'Path'.")
+			ex = TypeError("Parameter 'file' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
 		if workDirectory is None:
-			raise ValueError(f"Parameter 'workDirectory' is None.")
+			raise ValueError("Parameter 'workDirectory' is None.")
 		elif not isinstance(workDirectory, Path):
-			ex = TypeError(f"Parameter 'workDirectory' is not of type 'Path'.")
+			ex = TypeError("Parameter 'workDirectory' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(workDirectory)}'.")
 			raise ex
 
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 0:
-			ex = ValueError(f"Parameter 'lineNumber' is negative.")
+			ex = ValueError("Parameter 'lineNumber' is negative.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
 		if token is None:
-			raise ValueError(f"Parameter 'token' is None.")
+			raise ValueError("Parameter 'token' is None.")
 		elif not isinstance(token, int):
-			ex = TypeError(f"Parameter 'token' is not of type 'int'.")
+			ex = TypeError("Parameter 'token' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(token)}'.")
 			raise ex
 		elif token < 0:
-			ex = ValueError(f"Parameter 'token' is negative.")
+			ex = ValueError("Parameter 'token' is negative.")
 			ex.add_note(f"Got value '{token}'.")
 			raise ex
 
@@ -553,39 +554,39 @@ class Bin(Base, AttributesMixin):
 		AttributesMixin.__init__(self, attributes)
 
 		if coverType is None:
-			raise ValueError(f"Parameter 'coverType' is None.")
+			raise ValueError("Parameter 'coverType' is None.")
 		elif not isinstance(coverType, CoverType):
-			ex = TypeError(f"Parameter 'coverType' is not of type 'CoverType'.")
+			ex = TypeError("Parameter 'coverType' is not of type 'CoverType'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(coverType)}'.")
 			raise ex
 
 		if flags is None:
-			raise ValueError(f"Parameter 'flags' is None.")
+			raise ValueError("Parameter 'flags' is None.")
 		elif not isinstance(flags, BinFlags):
-			ex = TypeError(f"Parameter 'flags' is not of type 'BinFlags'.")
+			ex = TypeError("Parameter 'flags' is not of type 'BinFlags'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(flags)}'.")
 			raise ex
 
 		if count is None:
-			raise ValueError(f"Parameter 'count' is None.")
+			raise ValueError("Parameter 'count' is None.")
 		elif not isinstance(count, int):
-			ex = TypeError(f"Parameter 'count' is not of type 'int'.")
+			ex = TypeError("Parameter 'count' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(count)}'.")
 			raise ex
 		elif count < 0:
-			ex = ValueError(f"Parameter 'count' is negative.")
+			ex = ValueError("Parameter 'count' is negative.")
 			ex.add_note(f"Got value '{count}'.")
 			raise ex
 
 		if source is None:
-			raise ValueError(f"Parameter 'source' is None.")
+			raise ValueError("Parameter 'source' is None.")
 		elif not isinstance(source, SourceLocation):
-			ex = TypeError(f"Parameter 'source' is not of type 'SourceLocation'.")
+			ex = TypeError("Parameter 'source' is not of type 'SourceLocation'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Scope):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Scope'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Scope'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -751,61 +752,61 @@ class Scope(Base, AttributesMixin, Generic[ScopeParentType]):
 		AttributesMixin.__init__(self, attributes)
 
 		if name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if scopeType is None:
-			raise ValueError(f"Parameter 'scopeType' is None.")
+			raise ValueError("Parameter 'scopeType' is None.")
 		elif not isinstance(scopeType, ScopeType):
-			ex = TypeError(f"Parameter 'scopeType' is not of type 'ScopeType'.")
+			ex = TypeError("Parameter 'scopeType' is not of type 'ScopeType'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(scopeType)}'.")
 			raise ex
 
 		if language is None:
-			raise ValueError(f"Parameter 'language' is None.")
+			raise ValueError("Parameter 'language' is None.")
 		elif not isinstance(language, Language):
-			ex = TypeError(f"Parameter 'language' is not of type 'Language'.")
+			ex = TypeError("Parameter 'language' is not of type 'Language'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(language)}'.")
 			raise ex
 
 		if weight is None:
-			raise ValueError(f"Parameter 'weight' is None.")
+			raise ValueError("Parameter 'weight' is None.")
 		elif not isinstance(weight, int):
-			ex = TypeError(f"Parameter 'weight' is not of type 'int'.")
+			ex = TypeError("Parameter 'weight' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(weight)}'.")
 			raise ex
 		elif weight < 0:
-			ex = ValueError(f"Parameter 'weight' is negative.")
+			ex = ValueError("Parameter 'weight' is negative.")
 			ex.add_note(f"Got value '{weight}'.")
 			raise ex
 
 		if flags is None:
-			raise ValueError(f"Parameter 'flags' is None.")
+			raise ValueError("Parameter 'flags' is None.")
 		elif not isinstance(flags, int):
-			ex = TypeError(f"Parameter 'flags' is not of type 'int'.")
+			ex = TypeError("Parameter 'flags' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(flags)}'.")
 			raise ex
 		elif flags < 0:
-			ex = ValueError(f"Parameter 'flags' is negative.")
+			ex = ValueError("Parameter 'flags' is negative.")
 			ex.add_note(f"Got value '{flags}'.")
 			raise ex
 
 		if source is None:
-			raise ValueError(f"Parameter 'source' is None.")
+			raise ValueError("Parameter 'source' is None.")
 		elif not isinstance(source, SourceLocation):
-			ex = TypeError(f"Parameter 'source' is not of type 'SourceLocation'.")
+			ex = TypeError("Parameter 'source' is not of type 'SourceLocation'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(source)}'.")
 			raise ex
 
 		if designUnit is not None:
 			if not isinstance(designUnit, str):
-				ex = TypeError(f"Parameter 'designUnit' is not of type 'str'.")
+				ex = TypeError("Parameter 'designUnit' is not of type 'str'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(designUnit)}'.")
 				raise ex
 			elif designUnit == "":
-				raise ValueError(f"Parameter 'designUnit' is empty.")
+				raise ValueError("Parameter 'designUnit' is empty.")
 
 		if parent is not None and not isinstance(parent, (Report, Scope)):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report' or 'Scope'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report' or 'Scope'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -998,24 +999,24 @@ class HistoryNode(Base, AttributesMixin, Generic[HistoryNodeParentType]):
 		AttributesMixin.__init__(self, attributes)
 
 		if name == "":
-			raise ValueError(f"Parameter 'name' is empty.")
+			raise ValueError("Parameter 'name' is empty.")
 
 		if physicalName is None:
-			raise ValueError(f"Parameter 'physicalName' is None.")
+			raise ValueError("Parameter 'physicalName' is None.")
 		elif not isinstance(physicalName, Path):
-			ex = TypeError(f"Parameter 'physicalName' is not of type 'Path'.")
+			ex = TypeError("Parameter 'physicalName' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(physicalName)}'.")
 			raise ex
 
 		if kind is None:
-			raise ValueError(f"Parameter 'kind' is None.")
+			raise ValueError("Parameter 'kind' is None.")
 		elif not isinstance(kind, HistoryNodeKind):
-			ex = TypeError(f"Parameter 'kind' is not of type 'HistoryNodeKind'.")
+			ex = TypeError("Parameter 'kind' is not of type 'HistoryNodeKind'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(kind)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, (Report, HistoryNode)):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report' or 'HistoryNode'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report' or 'HistoryNode'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1125,43 +1126,43 @@ class Command(metaclass=ExtendedType, slots=True):
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report`.
 		"""
 		if commandType is None:
-			raise ValueError(f"Parameter 'commandType' is None.")
+			raise ValueError("Parameter 'commandType' is None.")
 		elif not isinstance(commandType, int):
-			ex = TypeError(f"Parameter 'commandType' is not of type 'int'.")
+			ex = TypeError("Parameter 'commandType' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(commandType)}'.")
 			raise ex
 
 		if flags is None:
-			raise ValueError(f"Parameter 'flags' is None.")
+			raise ValueError("Parameter 'flags' is None.")
 		elif not isinstance(flags, int):
-			ex = TypeError(f"Parameter 'flags' is not of type 'int'.")
+			ex = TypeError("Parameter 'flags' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(flags)}'.")
 			raise ex
 		elif flags < 0:
-			ex = ValueError(f"Parameter 'flags' is negative.")
+			ex = ValueError("Parameter 'flags' is negative.")
 			ex.add_note(f"Got value '{flags}'.")
 			raise ex
 
 		if data is None:
-			raise ValueError(f"Parameter 'data' is None.")
+			raise ValueError("Parameter 'data' is None.")
 		elif not isinstance(data, str):
-			ex = TypeError(f"Parameter 'data' is not of type 'str'.")
+			ex = TypeError("Parameter 'data' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(data)}'.")
 			raise ex
 
 		if index is None:
-			raise ValueError(f"Parameter 'index' is None.")
+			raise ValueError("Parameter 'index' is None.")
 		elif not isinstance(index, int):
-			ex = TypeError(f"Parameter 'index' is not of type 'int'.")
+			ex = TypeError("Parameter 'index' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
 			raise ex
 		elif index < 0:
-			ex = ValueError(f"Parameter 'index' is negative.")
+			ex = ValueError("Parameter 'index' is negative.")
 			ex.add_note(f"Got value '{index}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Report):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -1276,38 +1277,38 @@ class Statement(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``bins`` is empty.
 		"""
 		if file is None:
-			raise ValueError(f"Parameter 'file' is None.")
+			raise ValueError("Parameter 'file' is None.")
 		elif not isinstance(file, Path):
-			ex = TypeError(f"Parameter 'file' is not of type 'Path'.")
+			ex = TypeError("Parameter 'file' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(file)}'.")
 			raise ex
 
 		if lineNumber is None:
-			raise ValueError(f"Parameter 'lineNumber' is None.")
+			raise ValueError("Parameter 'lineNumber' is None.")
 		elif not isinstance(lineNumber, int):
-			ex = TypeError(f"Parameter 'lineNumber' is not of type 'int'.")
+			ex = TypeError("Parameter 'lineNumber' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(lineNumber)}'.")
 			raise ex
 		elif lineNumber < 1:
-			ex = ValueError(f"Parameter 'lineNumber' is less than 1.")
+			ex = ValueError("Parameter 'lineNumber' is less than 1.")
 			ex.add_note(f"Got value '{lineNumber}'.")
 			raise ex
 
 		if index is None:
-			raise ValueError(f"Parameter 'index' is None.")
+			raise ValueError("Parameter 'index' is None.")
 		elif not isinstance(index, int):
-			ex = TypeError(f"Parameter 'index' is not of type 'int'.")
+			ex = TypeError("Parameter 'index' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
 			raise ex
 		elif index < 0:
-			ex = ValueError(f"Parameter 'index' is negative.")
+			ex = ValueError("Parameter 'index' is negative.")
 			ex.add_note(f"Got value '{index}'.")
 			raise ex
 
 		if bins is None:
-			raise ValueError(f"Parameter 'bins' is None.")
+			raise ValueError("Parameter 'bins' is None.")
 		elif not isinstance(bins, Iterable):
-			ex = TypeError(f"Parameter 'bins' is not iterable.")
+			ex = TypeError("Parameter 'bins' is not iterable.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(bins)}'.")
 			raise ex
 
@@ -1320,7 +1321,7 @@ class Statement(metaclass=ExtendedType, slots=True):
 
 		for coverBin in bins:
 			if not isinstance(coverBin, Bin):
-				ex = TypeError(f"Parameter 'bins' contains an element not of type 'Bin'.")
+				ex = TypeError("Parameter 'bins' contains an element not of type 'Bin'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 				raise ex
 
@@ -1330,7 +1331,7 @@ class Statement(metaclass=ExtendedType, slots=True):
 				self._isExcluded = False
 
 		if len(self._bins) == 0:
-			raise ValueError(f"Parameter 'bins' is empty.")
+			raise ValueError("Parameter 'bins' is empty.")
 
 	@readonly
 	def File(self) -> Path:
@@ -1474,9 +1475,9 @@ class Report(AttributesMixin, mixin=True):
 		:raises CodeCoverageError: If a statement bin states no statement index.
 		"""
 		if mergeInstances is None:
-			raise ValueError(f"Parameter 'mergeInstances' is None.")
+			raise ValueError("Parameter 'mergeInstances' is None.")
 		elif not isinstance(mergeInstances, bool):
-			ex = TypeError(f"Parameter 'mergeInstances' is not of type 'bool'.")
+			ex = TypeError("Parameter 'mergeInstances' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(mergeInstances)}'.")
 			raise ex
 
@@ -1498,7 +1499,7 @@ class Report(AttributesMixin, mixin=True):
 					ex = CodeCoverageError(
 						f"UCDB statement bin at '{source._file.as_posix()}:{source._lineNumber}' states no statement index."
 					)
-					ex.add_note(f"A statement bin states its index in the line by attribute '#SINDEX#' of type 'int'.")
+					ex.add_note("A statement bin states its index in the line by attribute '#SINDEX#' of type 'int'.")
 					raise ex
 
 				if mergeInstances:
@@ -1584,7 +1585,9 @@ class Document(cc_Document, Report):
 
 			self._xmlDocument = xmlDocument
 
-		self._analysisDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._analysisDuration = sw.Duration
+		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def Convert(self) -> None:
 		"""
@@ -1597,7 +1600,7 @@ class Document(cc_Document, Report):
 		"""
 		if self._xmlDocument is None:
 			ex = CodeCoverageError(f"Aldec UCDB file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -1616,7 +1619,9 @@ class Document(cc_Document, Report):
 			for commandElement in root.iterfind("ux:command", NAMESPACES):
 				Command.Parse(commandElement, parent=self)
 
-		self._conversionDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._conversionDuration = sw.Duration
+		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def ToCoverageSummary(self, mergeInstances: bool = False) -> CoverageSummary:
 		"""

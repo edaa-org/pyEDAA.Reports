@@ -435,14 +435,16 @@ class Document(py_TestCase):
 		doc = JUnitDocument(junitExampleFile)
 
 		self.assertEqual(junitExampleFile, doc.Path)
-		self.assertLess(doc.AnalysisDuration, zeroTime)
-		self.assertLess(doc.ModelConversionDuration, zeroTime)
+		self.assertIsNone(doc.AnalysisDuration)
+		self.assertIsNone(doc.ModelConversionDuration)
 
 		doc.Analyze()
 		self.assertGreater(doc.AnalysisDuration, zeroTime)
 
 		doc.Convert()
 		self.assertGreater(doc.ModelConversionDuration, zeroTime)
+		self.assertIs(timedelta, type(doc.AnalysisDuration))
+		self.assertIs(timedelta, type(doc.ModelConversionDuration))
 
 	def test_Create_WithParse(self) -> None:
 		zeroTime = timedelta()

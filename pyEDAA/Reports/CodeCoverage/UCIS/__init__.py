@@ -85,7 +85,7 @@ reads the element's XML element.
 """
 from __future__                                    import annotations
 
-from datetime                                      import datetime
+from datetime                                      import datetime, timedelta
 from io                                            import BytesIO
 from pathlib                                       import Path
 from typing                                        import ClassVar, Generator, Optional as Nullable
@@ -323,7 +323,9 @@ class Document(cc_Document, Report):
 			self._xmlDocument =   xmlDocument
 			self._formatVersion = formatVersion
 
-		self._analysisDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._analysisDuration = sw.Duration
+		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def Convert(self) -> None:
 		"""
@@ -337,7 +339,7 @@ class Document(cc_Document, Report):
 		"""
 		if self._xmlDocument is None:
 			ex = CodeCoverageError(f"UCIS XML file '{self._path}' needs to be read and analyzed by an XML parser.")
-			ex.add_note(f"Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
+			ex.add_note("Call 'Document.Analyze()' or create the document using 'Document(path, analyzeAndConvert=True)'.")
 			raise ex
 
 		with Stopwatch() as sw:
@@ -360,7 +362,9 @@ class Document(cc_Document, Report):
 			for instanceElement in root.iterfind("{*}instanceCoverages"):
 				InstanceCoverage.Parse(instanceElement, parent=self)
 
-		self._conversionDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._conversionDuration = sw.Duration
+		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def ToCoverageSummary(self, mergeInstances: bool = False) -> CoverageSummary:
 		"""
@@ -380,9 +384,9 @@ class Document(cc_Document, Report):
 		:raises CodeCoverageError: If a file's path runs through another file.
 		"""
 		if mergeInstances is None:
-			raise ValueError(f"Parameter 'mergeInstances' is None.")
+			raise ValueError("Parameter 'mergeInstances' is None.")
 		elif not isinstance(mergeInstances, bool):
-			ex = TypeError(f"Parameter 'mergeInstances' is not of type 'bool'.")
+			ex = TypeError("Parameter 'mergeInstances' is not of type 'bool'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(mergeInstances)}'.")
 			raise ex
 

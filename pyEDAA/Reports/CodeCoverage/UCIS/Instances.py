@@ -87,25 +87,25 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 		from pyEDAA.Reports.CodeCoverage.UCIS import Report
 
 		if path is None:
-			raise ValueError(f"Parameter 'path' is None.")
+			raise ValueError("Parameter 'path' is None.")
 		elif not isinstance(path, Path):
-			ex = TypeError(f"Parameter 'path' is not of type 'Path'.")
+			ex = TypeError("Parameter 'path' is not of type 'Path'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
 		if sourceFileID is None:
-			raise ValueError(f"Parameter 'sourceFileID' is None.")
+			raise ValueError("Parameter 'sourceFileID' is None.")
 		elif not isinstance(sourceFileID, int) or isinstance(sourceFileID, bool):
-			ex = TypeError(f"Parameter 'sourceFileID' is not of type 'int'.")
+			ex = TypeError("Parameter 'sourceFileID' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(sourceFileID)}'.")
 			raise ex
 		elif sourceFileID < 1:
-			ex = ValueError(f"Parameter 'sourceFileID' is less than 1.")
+			ex = ValueError("Parameter 'sourceFileID' is less than 1.")
 			ex.add_note(f"Got value '{sourceFileID}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Report):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -235,48 +235,48 @@ class InstanceCoverage(Base):
 		super().__init__(userAttributes)
 
 		if name is None:
-			raise ValueError(f"Parameter 'name' is None.")
+			raise ValueError("Parameter 'name' is None.")
 		elif not isinstance(name, str):
-			ex = TypeError(f"Parameter 'name' is not of type 'str'.")
+			ex = TypeError("Parameter 'name' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(name)}'.")
 			raise ex
 
 		if key is None:
-			raise ValueError(f"Parameter 'key' is None.")
+			raise ValueError("Parameter 'key' is None.")
 		elif not isinstance(key, str):
-			ex = TypeError(f"Parameter 'key' is not of type 'str'.")
+			ex = TypeError("Parameter 'key' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(key)}'.")
 			raise ex
 
 		if statementID is None:
-			raise ValueError(f"Parameter 'statementID' is None.")
+			raise ValueError("Parameter 'statementID' is None.")
 		elif not isinstance(statementID, StatementID):
-			ex = TypeError(f"Parameter 'statementID' is not of type 'StatementID'.")
+			ex = TypeError("Parameter 'statementID' is not of type 'StatementID'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(statementID)}'.")
 			raise ex
 
 		if instanceID is not None and (not isinstance(instanceID, int) or isinstance(instanceID, bool)):
-			ex = TypeError(f"Parameter 'instanceID' is not of type 'int'.")
+			ex = TypeError("Parameter 'instanceID' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(instanceID)}'.")
 			raise ex
 
 		if alias is not None and not isinstance(alias, str):
-			ex = TypeError(f"Parameter 'alias' is not of type 'str'.")
+			ex = TypeError("Parameter 'alias' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(alias)}'.")
 			raise ex
 
 		if moduleName is not None and not isinstance(moduleName, str):
-			ex = TypeError(f"Parameter 'moduleName' is not of type 'str'.")
+			ex = TypeError("Parameter 'moduleName' is not of type 'str'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(moduleName)}'.")
 			raise ex
 
 		if parentInstanceID is not None and (not isinstance(parentInstanceID, int) or isinstance(parentInstanceID, bool)):
-			ex = TypeError(f"Parameter 'parentInstanceID' is not of type 'int'.")
+			ex = TypeError("Parameter 'parentInstanceID' is not of type 'int'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parentInstanceID)}'.")
 			raise ex
 
 		if parent is not None and not isinstance(parent, Report):
-			ex = TypeError(f"Parameter 'parent' is not of type 'Report'.")
+			ex = TypeError("Parameter 'parent' is not of type 'Report'.")
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 
@@ -299,13 +299,13 @@ class InstanceCoverage(Base):
 
 		if designParameters is not None:
 			if not isinstance(designParameters, Mapping):
-				ex = TypeError(f"Parameter 'designParameters' is not a mapping.")
+				ex = TypeError("Parameter 'designParameters' is not a mapping.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(designParameters)}'.")
 				raise ex
 
 			for parameterName, value in designParameters.items():
 				if not isinstance(parameterName, str) or not isinstance(value, str):
-					ex = TypeError(f"Parameter 'designParameters' contains a name or value not of type 'str'.")
+					ex = TypeError("Parameter 'designParameters' contains a name or value not of type 'str'.")
 					ex.add_note(f"Got types '{getFullyQualifiedName(parameterName)}' and '{getFullyQualifiedName(value)}'.")
 					raise ex
 
