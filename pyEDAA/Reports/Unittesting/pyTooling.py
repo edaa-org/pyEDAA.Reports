@@ -214,7 +214,9 @@ class Document(TestsuiteSummary, ut_Document):
 			self._xmlDocument =   xmlDocument
 			self._schemaVersion = schemaVersion
 
-		self._analysisDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._analysisDuration = sw.Duration
+		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def Convert(self) -> None:
 		"""
@@ -250,7 +252,9 @@ class Document(TestsuiteSummary, ut_Document):
 
 			self.Aggregate()
 
-		self._modelConversion = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._modelConversion = sw.Duration
+		self._modelConversion = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def _ConvertTestsuite(self, testsuiteElement: _Element, parent: TestsuiteSummary | Testsuite) -> None:
 		"""

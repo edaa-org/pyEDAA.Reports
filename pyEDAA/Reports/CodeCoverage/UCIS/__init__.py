@@ -85,7 +85,7 @@ reads the element's XML element.
 """
 from __future__                                    import annotations
 
-from datetime                                      import datetime
+from datetime                                      import datetime, timedelta
 from io                                            import BytesIO
 from pathlib                                       import Path
 from typing                                        import ClassVar, Generator, Optional as Nullable
@@ -323,7 +323,9 @@ class Document(cc_Document, Report):
 			self._xmlDocument =   xmlDocument
 			self._formatVersion = formatVersion
 
-		self._analysisDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._analysisDuration = sw.Duration
+		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def Convert(self) -> None:
 		"""
@@ -360,7 +362,9 @@ class Document(cc_Document, Report):
 			for instanceElement in root.iterfind("{*}instanceCoverages"):
 				InstanceCoverage.Parse(instanceElement, parent=self)
 
-		self._conversionDuration = sw.Duration
+		# WORKAROUND: pyTooling <10.0.0rc4
+		# self._conversionDuration = sw.Duration
+		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
 
 	def ToCoverageSummary(self, mergeInstances: bool = False) -> CoverageSummary:
 		"""

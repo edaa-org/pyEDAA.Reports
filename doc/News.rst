@@ -170,6 +170,11 @@ Version 0.20 (2026)
 
    .. rubric:: Breaking Changes
 
+   * ⚠️ ``AnalysisDuration`` and ``ModelConversionDuration`` of a unit test document
+     (:class:`~pyEDAA.Reports.Unittesting.Document`) are ``None`` before
+     :meth:`~pyEDAA.Reports.Unittesting.Document.Analyze` / :meth:`~pyEDAA.Reports.Unittesting.Document.Convert` ran,
+     instead of ``timedelta(seconds=-1)``. Test for ``None`` instead of a negative duration.
+
    * ⚠️ pyEDAA.Reports requires pyTooling 10: ``pyTooling[terminal] >= 10.0.0rc2, < 11.0``. The JUnit dialects
      merge their doc-strings with ``DocStringMergeStrategy.BaseLast``, as pyTooling 10 replaced
      ``InheritDocString``'s ``merge``.
@@ -272,6 +277,10 @@ Version 0.20 (2026)
    * The ``test`` extra describes every test level: :file:`tests/requirements.txt` includes
      :file:`tests/app/requirements.txt`.
    * Python 3.15 is supported and listed in the classifiers.
+   * The report readers store a measured duration as a :class:`~datetime.timedelta`, as pyTooling's
+     :class:`~pyTooling.Stopwatch.Stopwatch` hands it out from pyTooling 10.0.0rc4 on; ``AnalysisDuration`` and
+     ``ModelConversionDuration`` return it unchanged instead of converting seconds. ⚠️ A duration not measured yet
+     is ``None`` instead of a negative :class:`~datetime.timedelta`.
    * Dependencies: ``wheel ~= 0.48.0``, ``lxml >= 6.1.3``, ``Coverage ~= 7.16``, ``mypy ~= 2.4``.
 
    .. rubric:: Bug Fixes
