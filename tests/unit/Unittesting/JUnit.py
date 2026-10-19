@@ -435,8 +435,8 @@ class Document(py_TestCase):
 		doc = JUnitDocument(junitExampleFile)
 
 		self.assertEqual(junitExampleFile, doc.Path)
-		self.assertLess(doc.AnalysisDuration, zeroTime)
-		self.assertLess(doc.ModelConversionDuration, zeroTime)
+		self.assertIsNone(doc.AnalysisDuration)
+		self.assertIsNone(doc.ModelConversionDuration)
 
 		doc.Analyze()
 		self.assertGreater(doc.AnalysisDuration, zeroTime)

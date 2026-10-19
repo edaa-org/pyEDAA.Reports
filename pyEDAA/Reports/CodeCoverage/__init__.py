@@ -1567,9 +1567,9 @@ class Document(metaclass=ExtendedType, slots=True):
 	A format's document derives from this class and mixes in the root of the format's model.
 	"""
 
-	_path:               Path       #: Path to the report file.
-	_analysisDuration:   timedelta  #: Duration of :meth:`Analyze`, or a negative duration before it ran.
-	_conversionDuration: timedelta  #: Duration of :meth:`Convert`, or a negative duration before it ran.
+	_path:               Path                 #: Path to the report file.
+	_analysisDuration:   Nullable[timedelta]  #: Duration of :meth:`Analyze`, or ``None`` before it ran.
+	_conversionDuration: Nullable[timedelta]  #: Duration of :meth:`Convert`, or ``None`` before it ran.
 
 	def __init__(self, reportFile: Path) -> None:
 		"""
@@ -1579,8 +1579,8 @@ class Document(metaclass=ExtendedType, slots=True):
 		"""
 		self._path = reportFile
 
-		self._analysisDuration =   timedelta(seconds=-1)
-		self._conversionDuration = timedelta(seconds=-1)
+		self._analysisDuration =   None
+		self._conversionDuration = None
 
 	@readonly
 	def ReportFile(self) -> Path:
@@ -1592,22 +1592,22 @@ class Document(metaclass=ExtendedType, slots=True):
 		return self._path
 
 	@readonly
-	def AnalysisDuration(self) -> timedelta:
+	def AnalysisDuration(self) -> Nullable[timedelta]:
 		"""
 		Read-only property to access the duration of :meth:`Analyze`: reading, parsing and validating the file
 		(:attr:`_analysisDuration`).
 
-		:returns: The duration; negative, if the file wasn't analyzed yet.
+		:returns: The duration, or ``None`` if the file wasn't analyzed yet.
 		"""
 		return self._analysisDuration
 
 	@readonly
-	def ModelConversionDuration(self) -> timedelta:
+	def ModelConversionDuration(self) -> Nullable[timedelta]:
 		"""
 		Read-only property to access the duration of :meth:`Convert`: building the report format's model
 		(:attr:`_conversionDuration`).
 
-		:returns: The duration; negative, if the content wasn't converted yet.
+		:returns: The duration, or ``None`` if the content wasn't converted yet.
 		"""
 		return self._conversionDuration
 

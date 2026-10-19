@@ -102,6 +102,13 @@ class FormatModel(Testcase):
 		self.assertGreaterEqual(tracefile.AnalysisDuration.total_seconds(), 0.0)
 		self.assertIs(timedelta, type(tracefile.AnalysisDuration))
 
+	def test_Durations_NotRun(self) -> None:
+		"""Before :meth:`Analyze` and :meth:`Convert` ran, their durations are ``None``."""
+		tracefile = Document(GCC)
+
+		self.assertIsNone(tracefile.AnalysisDuration)
+		self.assertIsNone(tracefile.ModelConversionDuration)
+
 	def test_LLVM(self) -> None:
 		"""llvm-cov writes no test name, functions without end line, and a header's static function prefixed by its unit."""
 		tracefile = Document(LLVM, analyzeAndConvert=True)

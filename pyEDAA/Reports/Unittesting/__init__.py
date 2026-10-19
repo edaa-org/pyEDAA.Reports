@@ -1922,14 +1922,14 @@ class Document(metaclass=ExtendedType, mixin=True):
 
 	_path:             Path   #: Path to the YAML file.
 
-	_analysisDuration: timedelta  #: Duration of :meth:`Analyze`, or a negative duration before it ran.
-	_modelConversion:  timedelta  #: Duration of :meth:`Convert`, or a negative duration before it ran.
+	_analysisDuration: Nullable[timedelta]  #: Duration of :meth:`Analyze`, or ``None`` before it ran.
+	_modelConversion:  Nullable[timedelta]  #: Duration of :meth:`Convert`, or ``None`` before it ran.
 
 	def __init__(self, reportFile: Path, analyzeAndConvert: bool = False) -> None:
 		self._path = reportFile
 
-		self._analysisDuration = timedelta(seconds=-1)
-		self._modelConversion =  timedelta(seconds=-1)
+		self._analysisDuration = None
+		self._modelConversion =  None
 
 		if analyzeAndConvert:
 			self.Analyze()
@@ -1945,7 +1945,7 @@ class Document(metaclass=ExtendedType, mixin=True):
 		return self._path
 
 	@readonly
-	def AnalysisDuration(self) -> timedelta:
+	def AnalysisDuration(self) -> Nullable[timedelta]:
 		"""
 		Read-only property to access the analysis duration (:attr:`_analysisDuration`).
 
@@ -1954,12 +1954,12 @@ class Document(metaclass=ExtendedType, mixin=True):
 		   This includes usually the duration to validate and parse the file format, but it excludes the time to convert the
 		   content to the test entity hierarchy.
 
-		:returns: Duration to analyze the document; negative, if it wasn't analyzed yet.
+		:returns: Duration to analyze the document, or ``None`` if it wasn't analyzed yet.
 		"""
 		return self._analysisDuration
 
 	@readonly
-	def ModelConversionDuration(self) -> timedelta:
+	def ModelConversionDuration(self) -> Nullable[timedelta]:
 		"""
 		Read-only property to access the conversion duration (:attr:`_modelConversion`).
 
@@ -1968,7 +1968,7 @@ class Document(metaclass=ExtendedType, mixin=True):
 		   This includes usually the duration to convert the document's content to the test entity hierarchy. It might also
 		   include the duration to (re-)aggregate all states and statistics in the hierarchy.
 
-		:returns: Duration to convert the document; negative, if it wasn't converted yet.
+		:returns: Duration to convert the document, or ``None`` if it wasn't converted yet.
 		"""
 		return self._modelConversion
 
