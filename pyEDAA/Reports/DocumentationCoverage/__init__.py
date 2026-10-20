@@ -63,7 +63,7 @@ from enum                  import Flag
 from pathlib               import Path
 from typing                import Callable, ClassVar, Generator, Iterator, Optional as Nullable
 
-from pyTooling.Common      import getFullyQualifiedName, StringEnum
+from pyTooling.Common      import getFullyQualifiedName, getTypeName, StringEnum
 from pyTooling.Decorators  import export, readonly
 from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
@@ -488,7 +488,7 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 		elif self._parent is not None:
-			raise AlreadyInDocumentationReportError(f"{self.__class__.__name__} already has a parent.")
+			raise AlreadyInDocumentationReportError(f"{getTypeName(self)} already has a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent

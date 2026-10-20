@@ -76,7 +76,7 @@ from enum                  import Enum
 from pathlib               import Path
 from typing                import Callable, ClassVar, Generator, Iterable, Optional as Nullable
 
-from pyTooling.Common      import getFullyQualifiedName
+from pyTooling.Common      import getFullyQualifiedName, getTypeName
 from pyTooling.Decorators  import export, readonly
 from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError
 from pyTooling.MetaClasses import ExtendedType, abstractclass, abstractmethod
@@ -190,7 +190,7 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 		elif self._parent is not None:
-			raise AlreadyInCoverageReportError(f"{self.__class__.__name__} already has a parent.")
+			raise AlreadyInCoverageReportError(f"{getTypeName(self)} already has a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent
@@ -1502,7 +1502,7 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 
 		:returns: The unit's kind, qualified name and line coverage.
 		"""
-		return f"<{self.__class__.__name__} {self.QualifiedName}: {self.LineCoverage:.1%}>"
+		return f"<{getTypeName(self)} {self.QualifiedName}: {self.LineCoverage:.1%}>"
 
 
 Unit._PARENT_TYPE = (Unit, CoverageSummary)
