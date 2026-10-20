@@ -107,6 +107,30 @@ class SourceFileWarning(CriticalWarning):
 	   :exc:`~pyTooling.Warning.UnhandledCriticalWarningError`.
 	"""
 
+	_file: Nullable[_File]  #: The report's file of the source file.
+
+	def __init__(self, message: str, /, *, file: Nullable[_File] = None) -> None:
+		"""
+		Initializes the warning with the report's file of the source file that can't be analyzed.
+
+		:param message: The warning's message.
+		:param file:    Optional, the report's file of the source file.
+		"""
+		super().__init__(message)
+		self._file = file
+
+	@readonly
+	def File(self) -> Nullable[_File]:
+		"""
+		Read-only property to access the report's file of the source file that can't be analyzed (:attr:`_file`).
+
+		Its path, relative to the analyzed directory, is
+		:attr:`File.Path <pyEDAA.Reports.DocumentationCoverage.File.Path>`.
+
+		:returns: The file, or ``None`` if it wasn't recorded.
+		"""
+		return self._file
+
 
 @export
 class CoverageState(Flag):
