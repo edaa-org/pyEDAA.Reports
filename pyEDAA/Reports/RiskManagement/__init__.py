@@ -47,20 +47,21 @@ A risk's :attr:`~Risk.Score` - the rank of its probability times the rank of its
 :class:`RiskLevel`. A risk names its owner - a :class:`~pyEDAA.Reports.Person` the register refers to - and the date of
 its next review; a mitigation states its :class:`MitigationKind` and its :class:`MitigationState`.
 
-Every element has key-value pairs (:class:`~pyEDAA.Reports.KeyValuePairsMixin`) for data the model doesn't name.
+Every element has key-value pairs (:class:`~pyTooling.DataModel.KeyValuePairsMixin`) for data the model doesn't name.
 """
 from __future__            import annotations
 
 from datetime              import datetime
-from typing                import Any, Callable, ClassVar, Generator, Iterable, Mapping, Optional as Nullable
+from typing                import Any, Callable, ClassVar, Generator, Hashable, Iterable, Mapping, Optional as Nullable
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
+from pyTooling.DataModel   import KeyValuePairsMixin
 from pyTooling.Decorators  import export, readonly
 from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import KeyValuePairsMixin, Person, ReportException
+from pyEDAA.Reports        import Person, ReportException
 
 
 @export
@@ -259,7 +260,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 
 	def __init__(
 		self,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -272,8 +273,6 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the risk register containing this element. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		"""
 		super().__init__(keyValuePairs)
@@ -364,7 +363,7 @@ class RiskManagement(Base):
 		self,
 		version: SemanticVersion,
 		name: Nullable[str] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> None:
 		"""
 		Initializes an empty risk register of a version.
@@ -373,8 +372,6 @@ class RiskManagement(Base):
 		:param name:          Optional, the name of the risk register, e.g. the project's name. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:   If parameter ``version`` is ``None``.
 		:raises TypeError:    If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
@@ -653,7 +650,7 @@ class BaseWithID(Base):
 		self,
 		identifier: str,
 		description: str,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -665,8 +662,6 @@ class BaseWithID(Base):
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the risk register containing this element. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		:raises ValueError:   If parameter ``identifier`` is ``None``.
 		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
@@ -915,7 +910,7 @@ class Implication(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		description: str,
 		implications: Nullable[Iterable[Implication]] = None,
 		mitigations: Nullable[Iterable[Mitigation]] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -929,8 +924,6 @@ class Implication(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:param keyValuePairs:               Optional, the key-value pairs. Default: ``None``.
 		:param parent:                      Optional, the risk register containing the implication. Default: ``None``.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                  If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		:raises ValueError:                 If parameter ``identifier`` is ``None``.
 		:raises TypeError:                  If parameter ``identifier`` isn't of type :class:`str`.
@@ -994,7 +987,7 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 		implications: Nullable[Iterable[Implication]] = None,
 		kind: MitigationKind = MitigationKind.Prevent,
 		state: MitigationState = MitigationState.Planned,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -1011,8 +1004,6 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 		:param keyValuePairs:               Optional, the key-value pairs. Default: ``None``.
 		:param parent:                      Optional, the risk register containing the mitigation. Default: ``None``.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                  If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		:raises ValueError:                 If parameter ``identifier`` is ``None``.
 		:raises TypeError:                  If parameter ``identifier`` isn't of type :class:`str`.
@@ -1137,7 +1128,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		mitigations: Nullable[Iterable[Mitigation]] = None,
 		owner: Nullable[Person] = None,
 		nextReview: Nullable[datetime] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -1159,8 +1150,6 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:param keyValuePairs:               Optional, the key-value pairs. Default: ``None``.
 		:param parent:                      Optional, the risk register containing the risk. Default: ``None``.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                  If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		:raises ValueError:                 If parameter ``identifier`` is ``None``.
 		:raises TypeError:                  If parameter ``identifier`` isn't of type :class:`str`.
@@ -1444,7 +1433,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		return self._inboundLinks
 
-	def LinkTo(self, destination: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
+	def LinkTo(self, destination: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[Hashable, Any]] = None) -> Link:
 		"""
 		Create an outbound link from this risk to the given risk.
 
@@ -1453,8 +1442,6 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:param keyValuePairs:               Optional, the key-value pairs of the link. Default: ``None``.
 		:returns:                           The link from this risk to the destination.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises NotInSameRiskRegisterError: If this risk isn't part of a risk register.
 		:raises ValueError:                 If parameter ``destination`` is ``None``.
 		:raises TypeError:                  If parameter ``destination`` isn't of type :class:`Risk`.
@@ -1471,7 +1458,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		return Link(self, destination, kind, keyValuePairs)
 
-	def LinkFrom(self, source: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
+	def LinkFrom(self, source: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[Hashable, Any]] = None) -> Link:
 		"""
 		Create an inbound link from the given risk to this risk.
 
@@ -1481,8 +1468,6 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:returns:                           The link from the source to this risk.
 		:raises ValueError:                 If parameter ``source`` is this risk.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:                 If parameter ``source`` is ``None``.
 		:raises TypeError:                  If parameter ``source`` isn't of type :class:`Risk`.
 		:raises NotInSameRiskRegisterError: If parameter ``source`` isn't part of a risk register.
@@ -1536,7 +1521,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		source: Risk,
 		destination: Risk,
 		kind: LinkKind,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> None:
 		"""
 		Initializes a link, and adds it to its source, its destination and their risk register.
@@ -1546,8 +1531,6 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param kind:                        The relationship the link states.
 		:param keyValuePairs:               Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:                 If parameter ``source`` is ``None``.
 		:raises TypeError:                  If parameter ``source`` isn't of type :class:`Risk`.
 		:raises NotInSameRiskRegisterError: If parameter ``source`` isn't part of a risk register.
