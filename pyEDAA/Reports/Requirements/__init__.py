@@ -49,15 +49,17 @@ from __future__            import annotations
 
 from datetime              import datetime
 from enum                  import Flag
-from typing                import Any, Callable, ClassVar, Generator, Iterable, Mapping, Optional as Nullable, Self
+from typing                import Any, Callable, ClassVar, Generator, Hashable, Iterable, Mapping, \
+                                  Optional as Nullable, Self
 
 from pyTooling.Common      import getFullyQualifiedName, StringEnum
+from pyTooling.DataModel   import KeyValuePairsMixin
 from pyTooling.Decorators  import export, readonly
 from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import KeyValuePairsMixin, Person, ReportException
+from pyEDAA.Reports        import Person, ReportException
 
 
 @export
@@ -212,7 +214,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 	_parent:      Nullable[Base]                      #: The element containing this one, or ``None``.
 	_root:        Nullable[RequirementSpecification]  #: The specification, or ``None`` while the element isn't in one.
 
-	def __init__(self, *, keyValuePairs: Nullable[Mapping[str, Any]] = None, parent: Nullable[Base] = None) -> None:
+	def __init__(self, *, keyValuePairs: Nullable[Mapping[Hashable, Any]] = None, parent: Nullable[Base] = None) -> None:
 		"""
 		Initializes an element with its key-value pairs, its parent, and the parent's specification.
 
@@ -222,8 +224,6 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the element containing this one. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		"""
 		super().__init__(keyValuePairs)
@@ -319,7 +319,7 @@ class BaseWithID(Base):
 		identifier: str,
 		*,
 		description: str = "",
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[Base] = None
 	) -> None:
 		"""
@@ -330,8 +330,6 @@ class BaseWithID(Base):
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the element containing this one. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		:raises ValueError:   If parameter ``identifier`` is ``None``.
 		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
@@ -407,7 +405,7 @@ class RequirementSpecification(Base):
 		version: SemanticVersion,
 		name: Nullable[str] = None,
 		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> None:
 		"""
 		Initializes an empty requirement specification.
@@ -416,8 +414,6 @@ class RequirementSpecification(Base):
 		:param name:          Optional, the specification's name. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:   If parameter ``version`` is ``None``.
 		:raises TypeError:    If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
@@ -765,7 +761,7 @@ class BaseWithName(BaseWithID):
 		name: str,
 		*,
 		description: str = "",
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[RequirementSpecification] = None
 	) -> None:
 		"""
@@ -777,8 +773,6 @@ class BaseWithName(BaseWithID):
 		:param keyValuePairs:           Optional, the key-value pairs. Default: ``None``.
 		:param parent:                  Optional, the specification. Default: ``None``.
 		:raises TypeError:              If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:              If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:             If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:              If parameter ``parent`` isn't of type :class:`RequirementSpecification`.
 		:raises ValueError:             If parameter ``identifier`` is ``None``.
 		:raises TypeError:              If parameter ``identifier`` isn't of type :class:`str`.
@@ -968,7 +962,7 @@ class BaseItem(BaseWithID):
 		personas: Nullable[Iterable[Persona]] = None,
 		labels: Nullable[Iterable[Label]] = None,
 		attachments: Nullable[Iterable[Document]] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[BaseItem | RequirementSpecification] = None
 	) -> None:
 		"""
@@ -992,8 +986,6 @@ class BaseItem(BaseWithID):
 		:param keyValuePairs:                Optional, the key-value pairs. Default: ``None``.
 		:param parent:                       Optional, the parent item or the specification. Default: ``None``.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                   If parameter ``parent`` isn't of a type this class declares in
 		                                     :attr:`_PARENT_TYPE`.
 		:raises ValueError:                  If parameter ``identifier`` is ``None``.
@@ -1345,7 +1337,7 @@ class BaseItem(BaseWithID):
 		destination: BaseItem,
 		kind: LinkKind,
 		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> Link:
 		"""
 		Create an outbound link from this item to the given item.
@@ -1355,8 +1347,6 @@ class BaseItem(BaseWithID):
 		:param keyValuePairs:                Optional, the key-value pairs of the link. Default: ``None``.
 		:returns:                            The link from this item to the destination.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises NotInSameSpecificationError: If this item isn't part of a specification.
 		:raises ValueError:                  If parameter ``destination`` is ``None``.
 		:raises TypeError:                   If parameter ``destination`` isn't of type :class:`BaseItem`.
@@ -1378,7 +1368,7 @@ class BaseItem(BaseWithID):
 		source: BaseItem,
 		kind: LinkKind,
 		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> Link:
 		"""
 		Create an inbound link from the given item to this item.
@@ -1388,8 +1378,6 @@ class BaseItem(BaseWithID):
 		:param keyValuePairs:                Optional, the key-value pairs of the link. Default: ``None``.
 		:returns:                            The link from the source to this item.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:                  If parameter ``source`` is ``None``.
 		:raises TypeError:                   If parameter ``source`` isn't of type :class:`BaseItem`.
 		:raises NotInSameSpecificationError: If parameter ``source`` isn't part of a specification.
@@ -1544,7 +1532,7 @@ class Requirement(BaseItem):
 		personas: Nullable[Iterable[Persona]] = None,
 		labels: Nullable[Iterable[Label]] = None,
 		attachments: Nullable[Iterable[Document]] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[Requirement | RequirementSpecification] = None
 	) -> None:
 		"""
@@ -1574,8 +1562,6 @@ class Requirement(BaseItem):
 		:param parent:                       Optional, the requirement this one refines, or the specification. Default:
 		                                     ``None``.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                   If parameter ``parent`` isn't of type :class:`Requirement` or
 		                                     :class:`RequirementSpecification`.
 		:raises ValueError:                  If parameter ``identifier`` is ``None``.
@@ -1772,7 +1758,7 @@ class SpecificationItem(BaseItem):
 		personas: Nullable[Iterable[Persona]] = None,
 		labels: Nullable[Iterable[Label]] = None,
 		attachments: Nullable[Iterable[Document]] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[SpecificationItem | RequirementSpecification] = None
 	) -> None:
 		"""
@@ -1797,8 +1783,6 @@ class SpecificationItem(BaseItem):
 		:param parent:                           Optional, the specification item this one details, or the specification.
 		                                         Default: ``None``.
 		:raises TypeError:                       If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                       If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                      If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                       If parameter ``parent`` isn't of type :class:`SpecificationItem` or
 		                                         :class:`RequirementSpecification`.
 		:raises ValueError:                      If parameter ``identifier`` is ``None``.
@@ -1972,7 +1956,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		destination: BaseItem,
 		kind: LinkKind,
 		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> None:
 		"""
 		Initializes a link, and adds it to its source and its destination.
@@ -1982,8 +1966,6 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param kind:                         The relationship the link states.
 		:param keyValuePairs:                Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:                  If parameter ``source`` is ``None``.
 		:raises TypeError:                   If parameter ``source`` isn't of type :class:`BaseItem`.
 		:raises NotInSameSpecificationError: If parameter ``source`` isn't part of a specification.
@@ -2119,7 +2101,7 @@ class HistoryEvent(Base):
 		person: Nullable[Person] = None,
 		involved: Nullable[Iterable[BaseItem]] = None,
 		description: str = "",
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[BaseItem] = None
 	) -> None:
 		"""
@@ -2133,8 +2115,6 @@ class HistoryEvent(Base):
 		:param keyValuePairs:                    Optional, the key-value pairs. Default: ``None``.
 		:param parent:                           Optional, the item the event happened to. Default: ``None``.
 		:raises TypeError:                       If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                       If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                      If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                       If parameter ``parent`` isn't of type :class:`BaseItem`.
 		:raises ValueError:                      If parameter ``kind`` is ``None``.
 		:raises TypeError:                       If parameter ``kind`` isn't of type :class:`EventKind`.

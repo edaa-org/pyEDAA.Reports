@@ -122,9 +122,8 @@ Version 0.20 (2026)
      :class:`~pyEDAA.Reports.RiskManagement.Risk` with probability, impact and state; implications and mitigations,
      shared by risks; links between risks of a kind; a risk's score and level, owner and next review.
 
-   * :mod:`pyEDAA.Reports` holds what the data models share: :class:`~pyEDAA.Reports.KeyValuePairsMixin` attaches
-     key-value pairs to an element, accessed with the dictionary syntax; :class:`~pyEDAA.Reports.Person` is a real
-     person - user ID, name, e-mail address.
+   * :mod:`pyEDAA.Reports` holds what the data models share: :class:`~pyEDAA.Reports.Person` is a real person - user
+     ID, name, e-mail address.
    * The data models' errors derive from pyTooling's common bases :exc:`~pyTooling.Exceptions.DuplicateElementError`,
      :exc:`~pyTooling.Exceptions.AlreadyInHierarchyError` and :exc:`~pyTooling.Exceptions.NotInSameHierarchyError`. Each
      model raises one error per duplicate element kind, e.g.
@@ -281,6 +280,10 @@ Version 0.20 (2026)
      :class:`~pyTooling.Stopwatch.Stopwatch` hands it out from pyTooling 10.0.0rc4 on; ``AnalysisDuration`` and
      ``ModelConversionDuration`` return it unchanged instead of converting seconds. ⚠️ A duration not measured yet
      is ``None`` instead of a negative :class:`~datetime.timedelta`.
+   * The data models - :mod:`~pyEDAA.Reports.Requirements`, :mod:`~pyEDAA.Reports.RiskManagement` and
+     :class:`~pyEDAA.Reports.Person` - attach key-value pairs with pyTooling's
+     :class:`~pyTooling.DataModel.KeyValuePairsMixin`, accessed with the dictionary syntax; a key is any hashable
+     value.
    * Dependencies: ``wheel ~= 0.48.0``, ``lxml >= 6.1.3``, ``Coverage ~= 7.16``, ``mypy ~= 2.4``.
 
    .. rubric:: Bug Fixes
