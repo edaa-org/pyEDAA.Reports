@@ -100,7 +100,7 @@ from typing          import Optional as Nullable, Iterable, Dict, Any, Generator
 
 from lxml.etree                 import XMLParser, parse, XMLSchema, ElementTree, Element, SubElement, tostring
 from lxml.etree                 import XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
-from pyTooling.Common           import getFullyQualifiedName, getResourceFile
+from pyTooling.Common           import getFullyQualifiedName, getTypeName, getResourceFile
 from pyTooling.Decorators       import export, readonly
 from pyTooling.Stopwatch        import Stopwatch
 from pyTooling.Exceptions       import ToolingException
@@ -546,7 +546,7 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 
 	def __str__(self) -> str:
 		moduleName = self.__module__.split(".")[-1]
-		className = self.__class__.__name__
+		className = getTypeName(self)
 		return (
 			f"<{moduleName}{className} {self._name}: {self._status.name} - asserts:{self._assertionCount}>"
 		)
@@ -824,7 +824,7 @@ class Testclass(Base):
 
 	def __str__(self) -> str:
 		moduleName = self.__module__.split(".")[-1]
-		className = self.__class__.__name__
+		className = getTypeName(self)
 		return (
 			f"<{moduleName}{className} {self._name}: {len(self._testcases)}>"
 		)
@@ -1120,7 +1120,7 @@ class Testsuite(TestsuiteBase):
 
 	def __str__(self) -> str:
 		moduleName = self.__module__.split(".")[-1]
-		className = self.__class__.__name__
+		className = getTypeName(self)
 		return (
 			f"<{moduleName}{className} {self._name}: {self._status.name} - tests:{self._tests}>"
 		)
@@ -1299,7 +1299,7 @@ class TestsuiteSummary(TestsuiteBase):
 
 	def __str__(self) -> str:
 		moduleName = self.__module__.split(".")[-1]
-		className = self.__class__.__name__
+		className = getTypeName(self)
 		return (
 			f"<{moduleName}{className} {self._name}: {self._status.name} - tests:{self._tests}>"
 		)
@@ -1901,7 +1901,7 @@ class Document(TestsuiteSummary, ut_Document):
 
 	def __str__(self) -> str:
 		moduleName = self.__module__.split(".")[-1]
-		className = self.__class__.__name__
+		className = getTypeName(self)
 		return (
 			f"<{moduleName}{className} {self._name} ({self._path}): {self._status.name} - suites/tests:{self.TestsuiteCount}/{self.TestcaseCount}>"
 		)

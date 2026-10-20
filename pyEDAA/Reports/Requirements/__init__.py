@@ -52,7 +52,7 @@ from enum                  import Flag
 from typing                import Any, Callable, ClassVar, Generator, Hashable, Iterable, Mapping
 from typing                import Optional as Nullable, Self
 
-from pyTooling.Common      import getFullyQualifiedName, StringEnum
+from pyTooling.Common      import getFullyQualifiedName, getTypeName, StringEnum
 from pyTooling.DataModel   import KeyValuePairsMixin
 from pyTooling.Decorators  import export, readonly
 from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
@@ -282,7 +282,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 			raise ex
 
 		if self._parent is not None:
-			raise AlreadyInSpecificationError(f"{self.__class__.__name__} already has a parent.")
+			raise AlreadyInSpecificationError(f"{getTypeName(self)} already has a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent
@@ -483,7 +483,7 @@ class RequirementSpecification(Base):
 
 		if element._id in elements:
 			raise element._DUPLICATE_ERROR(
-				f"{element.__class__.__name__} '{element._id}' already exists in the specification."
+				f"{getTypeName(element)} '{element._id}' already exists in the specification."
 			)
 
 		elements[element._id] = element
@@ -507,7 +507,7 @@ class RequirementSpecification(Base):
 		for element in subtree:
 			if element._id in items or element._id in ids:
 				raise element._DUPLICATE_ERROR(
-					f"{element.__class__.__name__} '{element._id}' already exists in the specification."
+					f"{getTypeName(element)} '{element._id}' already exists in the specification."
 				)
 
 			ids.add(element._id)
@@ -1149,7 +1149,7 @@ class BaseItem(BaseWithID):
 			if self._root is not None:
 				self._root._AddItems(element)
 			elif element._id in self._children:
-				raise element._DUPLICATE_ERROR(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
+				raise element._DUPLICATE_ERROR(f"{getTypeName(self)} '{self._id}' already has a child '{element._id}'.")
 
 			self._children[element._id] = element
 
@@ -2014,7 +2014,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 
 		for link in source._outboundLinks:
 			if link._destination is destination and link._kind is kind:
-				ex = DuplicateLinkError(f"{source.__class__.__name__} '{source._id}' has a '{kind}' link already.")
+				ex = DuplicateLinkError(f"{getTypeName(source)} '{source._id}' has a '{kind}' link already.")
 				ex.add_note(f"Got destination '{destination._id}'.")
 				raise ex
 
