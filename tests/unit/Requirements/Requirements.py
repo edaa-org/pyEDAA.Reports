@@ -54,21 +54,6 @@ CREATED =    datetime(2026, 3, 1, 9, 30, tzinfo=timezone(timedelta(hours=1)))  #
 FUNCTIONAL = RequirementKind.Functional                                       #: Kind of most requirements.
 
 
-class Enumerations(Testcase):
-	def test_Parse(self) -> None:
-		self.assertIs(ItemState.Placeholder, ItemState.Parse("placeholder"))
-		self.assertIs(ItemState.InReview, ItemState.Parse("in-review"))
-		self.assertIs(ItemState.Final, ItemState.Parse("final"))
-		self.assertIs(ItemState.Closed, ItemState.Parse("closed"))
-		self.assertIs(RequirementKind.Environmental, RequirementKind.Parse("environmental"))
-		self.assertIs(Obligation.Recommended, Obligation.Parse("recommended"))
-
-		with self.assertRaises(ValueError) as context:
-			_ = Obligation.Parse("shall")
-
-		self.assertEqual("'shall' is not a valid Obligation.", str(context.exception))
-
-
 class Instantiation(Testcase):
 	def test_Requirement(self) -> None:
 		requirement = Requirement("REQ-1", "Supply voltage", RequirementKind.Environmental, created=CREATED)

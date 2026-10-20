@@ -271,6 +271,22 @@ Version 0.20 (2026)
    * :meth:`Testsuite.Aggregate() <pyEDAA.Reports.Unittesting.Testsuite.Aggregate>` counts a testcase with status
      ``ExpectedFailed`` as passed and ``UnexpectedPassed`` as failed instead of raising
      :exc:`~pyEDAA.Reports.Unittesting.UnittestError`.
+   * Enumerations, whose values are neither read from nor written to text, are plain :class:`~enum.Enum`\ s with
+     integer values instead of :class:`~pyTooling.Common.StringEnum`\ s; messages and representations name a member
+     by its name:
+
+     * :mod:`pyEDAA.Reports.CodeCoverage.CoveragePy`: :class:`~pyEDAA.Reports.CodeCoverage.CoveragePy.RegionKind`.
+     * :mod:`pyEDAA.Reports.DocumentationCoverage`: :class:`~pyEDAA.Reports.DocumentationCoverage.ItemCategory`,
+       :class:`~pyEDAA.Reports.DocumentationCoverage.ItemKind`.
+     * :mod:`pyEDAA.Reports.Requirements`: :class:`~pyEDAA.Reports.Requirements.ItemState`,
+       :class:`~pyEDAA.Reports.Requirements.RequirementKind`, :class:`~pyEDAA.Reports.Requirements.Obligation`,
+       :class:`~pyEDAA.Reports.Requirements.LinkKind`, :class:`~pyEDAA.Reports.Requirements.EventKind`.
+     * :mod:`pyEDAA.Reports.RiskManagement`: :class:`~pyEDAA.Reports.RiskManagement.Probability`,
+       :class:`~pyEDAA.Reports.RiskManagement.Impact`, :class:`~pyEDAA.Reports.RiskManagement.RiskLevel`,
+       :class:`~pyEDAA.Reports.RiskManagement.RiskState`, :class:`~pyEDAA.Reports.RiskManagement.LinkKind`,
+       :class:`~pyEDAA.Reports.RiskManagement.MitigationKind`,
+       :class:`~pyEDAA.Reports.RiskManagement.MitigationState`.
+
    * Every module with code carries ``from __future__ import annotations`` and writes forward references unquoted.
    * New requirement ``jsonschema ~= 4.26`` for the JSON Schemas of JSON report formats.
    * The ``test`` extra describes every test level: :file:`tests/requirements.txt` includes
