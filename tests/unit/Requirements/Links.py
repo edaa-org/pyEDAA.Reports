@@ -140,7 +140,7 @@ class Links(Testcase):
 		with self.assertRaises(DuplicateLinkError) as context:
 			Link(requirements["FW-1"], requirements["EL-1"], LinkKind.CounterpartOf)
 
-		self.assertEqual("Requirement 'FW-1' has a 'counterpart-of' link already.", str(context.exception))
+		self.assertEqual("Requirement 'FW-1' has a 'CounterpartOf' link already.", str(context.exception))
 		self.assertEqual(["Got destination 'EL-1'."], context.exception.__notes__)
 		self.assertEqual(2, len(requirements["EL-1"].InboundLinks))
 

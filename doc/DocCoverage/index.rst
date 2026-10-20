@@ -56,27 +56,27 @@ uncovered, ignored and excluded items, and the coverage - of every item, file an
 
    * - Category
      - Kinds
-   * - ``container``
-     - ``library``, ``package``, ``package-body``, ``namespace``, ``module``, ``source-file``, ``entity``,
-       ``architecture``, ``configuration``, ``context``
-   * - ``type``
-     - ``class``, ``struct``, ``union``, ``interface``, ``enumeration``, ``record``, ``type``, ``type-alias``,
-       ``type-variable``, ``component``
-   * - ``callable``
-     - ``function``, ``method``, ``constructor``, ``destructor``, ``property``, ``procedure``, ``macro``,
-       ``process``
-   * - ``field``
-     - ``field``, ``enumeration-member``
-   * - ``variable``
-     - ``variable``, ``signal``, ``file-object``
-   * - ``constant``
-     - ``constant``
-   * - ``generic``
-     - ``generic``, ``type-parameter`` - compile-time parameters
-   * - ``parameter``
-     - ``parameter``, ``port`` - run-time parameters
-   * - ``other``
-     - ``alias``, ``attribute``, ``other``
+   * - ``Container``
+     - ``Library``, ``Package``, ``PackageBody``, ``Namespace``, ``Module``, ``SourceFile``, ``Entity``,
+       ``Architecture``, ``Configuration``, ``Context``
+   * - ``Type``
+     - ``Class``, ``Struct``, ``Union``, ``Interface``, ``Enumeration``, ``Record``, ``Type``, ``TypeAlias``,
+       ``TypeVariable``, ``Component``
+   * - ``Callable``
+     - ``Function``, ``Method``, ``Constructor``, ``Destructor``, ``Property``, ``Procedure``, ``Macro``,
+       ``Process``
+   * - ``Field``
+     - ``Field``, ``EnumerationMember``
+   * - ``Variable``
+     - ``Variable``, ``Signal``, ``FileObject``
+   * - ``Constant``
+     - ``Constant``
+   * - ``Generic``
+     - ``Generic``, ``TypeParameter`` - compile-time parameters
+   * - ``Parameter``
+     - ``Parameter``, ``Port`` - run-time parameters
+   * - ``Other``
+     - ``Alias``, ``Attribute``, ``Other``
 
 
 .. _DOCCOV/Python:
