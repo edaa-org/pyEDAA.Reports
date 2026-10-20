@@ -604,6 +604,8 @@ class SourceFiles(Testcase):
 		self.assertIsInstance(warnings[0], SourceFileWarning)
 		self.assertEqual("Source file 'Broken.py' can't be analyzed.", str(warnings[0]))
 		self.assertIsInstance(warnings[0].__cause__, SyntaxError)
+		self.assertIs(package["Broken"].File, warnings[0].File)
+		self.assertEqual(Path("Broken.py"), warnings[0].File.Path)
 		self.assertEqual(CoverageState.Excluded, package["Broken"].Status)
 		self.assertEqual(DOCUMENTED, package["Shapes"].Status)
 		self.assertEqual(1, report.Counters.Expected)
@@ -615,6 +617,11 @@ class SourceFiles(Testcase):
 			_ = analyzePackage({"Broken.py": "def (:\n"})
 
 		self.assertIsInstance(context.exception.__cause__, SourceFileWarning)
+
+	def test_SourceFileWarning_MessageOnly(self) -> None:
+		warning = SourceFileWarning("Source file can't be analyzed.")
+
+		self.assertIsNone(warning.File)
 
 	def test_Encoding(self) -> None:
 		"""A file is read in its declared encoding; a file not encoded as declared is collected as a critical warning."""

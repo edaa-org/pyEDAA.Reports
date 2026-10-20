@@ -569,7 +569,10 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		try:
 			sourceFile = SourceFile.Read(path)
 		except (OSError, SyntaxError, TokenError, ValueError) as ex:
-			WarningCollector.Raise(SourceFileWarning(f"Source file '{file.Path.as_posix()}' can't be analyzed."), ex)
+			WarningCollector.Raise(
+				SourceFileWarning(f"Source file '{file.Path.as_posix()}' can't be analyzed.", file=file),
+				ex
+			)
 			return Item(name, kind, CoverageState.Excluded, file=file, parent=parent)
 
 		if len(sourceFile.Tree.body) == 0:

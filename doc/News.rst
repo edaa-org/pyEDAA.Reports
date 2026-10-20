@@ -100,7 +100,8 @@ Version 0.20 (2026)
        :class:`~pyEDAA.Reports.DocumentationCoverage.Item`\ s, whose counters count the item and every item below
        it.
      * :class:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning` is a critical warning for a source file that
-       can't be read or parsed.
+       can't be read or parsed; it carries the report's file
+       (:attr:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning.File`).
 
    * :class:`pyEDAA.Reports.DocumentationCoverage.Python.Analyzer` reads a package's Python source code and returns
      its aggregated documentation report. It counts what docstr_coverage counts, plus class fields and module
