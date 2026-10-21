@@ -1421,9 +1421,7 @@ class Document(TestsuiteSummary, ut_Document):
 					f"XML syntax or validation error for '{self._path}' using XSD schema '{xmlSchemaResourceFile}'."
 				) from ex
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._analysisDuration = sw.Duration
-		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._analysisDuration = sw.Duration
 
 	def Write(self, path: Nullable[Path] = None, overwrite: bool = False, regenerate: bool = False) -> None:
 		"""
@@ -1495,9 +1493,7 @@ class Document(TestsuiteSummary, ut_Document):
 			if True:  # self._readerMode is JUnitReaderMode.
 				self.Aggregate()
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._modelConversion = sw.Duration
-		self._modelConversion = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._modelConversion = sw.Duration
 
 	def _ConvertName(self, element: _Element, default: str = "root", optional: bool = True) -> str:
 		"""

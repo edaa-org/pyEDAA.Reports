@@ -212,9 +212,7 @@ class SourceFile(metaclass=ExtendedType, slots=True):
 			tree = parse(source, filename=str(path))
 			tokens = list(generate_tokens(StringIO(source).readline))
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# parsingDuration = stopwatch.Duration
-		parsingDuration = timedelta(microseconds=stopwatch.DurationInNanoseconds / 1000)
+		parsingDuration = stopwatch.Duration
 		return cls(path, source.split("\n"), tree, tokens, parsingDuration=parsingDuration)
 
 	@readonly
@@ -510,9 +508,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 			self._ReadPackage(self._directory, self._packageName, report, report)
 			report.Aggregate()
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# report._analysisDuration = stopwatch.Duration
-		report._analysisDuration = timedelta(microseconds=stopwatch.DurationInNanoseconds / 1000)
+		report._analysisDuration = stopwatch.Duration
 
 		return report
 

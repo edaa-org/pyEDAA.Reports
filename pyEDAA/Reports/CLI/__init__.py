@@ -69,7 +69,7 @@ from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
 class Application(TerminalApplication, UnittestingHandlers, CoverageHandlers, ArgParseHelperMixin):
 	"""Program class to implement the command line interface (CLI) using commands and options."""
 
-	HeadLine: ClassVar[str] =          "Report Service Program"
+	HEADLINE: ClassVar[str] =          "Report Service Program"
 	ISSUE_TRACKER_URL: ClassVar[str] = __issue_tracker_url__
 
 	def __init__(self) -> None:
@@ -159,9 +159,9 @@ def main() -> NoReturn:
 	try:
 		program.Run()
 	except UnittestError as ex:
-		program.WriteLineToStdErr(f"{{RED}}[ERROR] {ex}{{NOCOLOR}}".format(**Application.Foreground))
+		program.WriteLineToStdErr(f"{{RED}}[ERROR] {ex}{{NOCOLOR}}".format(**Application.FOREGROUND))
 		if ex.__cause__ is not None:
-			program.WriteLineToStdErr(f"{{DARK_YELLOW}}Because of: {ex.__cause__}{{NOCOLOR}}".format(**Application.Foreground))
+			program.WriteLineToStdErr(f"{{DARK_YELLOW}}Because of: {ex.__cause__}{{NOCOLOR}}".format(**Application.FOREGROUND))
 
 		program.Exit(1)
 	except ReportException as ex:

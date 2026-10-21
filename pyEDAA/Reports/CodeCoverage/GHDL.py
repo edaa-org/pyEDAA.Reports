@@ -64,7 +64,7 @@ line ran.
 """
 from __future__                  import annotations
 
-from datetime                    import datetime, timezone, timedelta
+from datetime                    import datetime, timezone
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from re                          import fullmatch
@@ -483,9 +483,7 @@ class Document(cc_Document, Report):
 
 			self._jsonDocument = jsonDocument
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._analysisDuration = sw.Duration
-		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._analysisDuration = sw.Duration
 
 	def Convert(self) -> None:
 		"""
@@ -532,9 +530,7 @@ class Document(cc_Document, Report):
 
 				File(name, directory, output["sha1"], CoverageMode.Parse(output["mode"]), lastLine, result, parent=self)
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._conversionDuration = sw.Duration
-		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._conversionDuration = sw.Duration
 
 	def ToCoverageSummary(self) -> CoverageSummary:
 		"""

@@ -63,7 +63,7 @@ the keyword parameter ``parent`` and is added to it. Its class method ``Parse`` 
 """
 from __future__                  import annotations
 
-from datetime                    import datetime, timedelta
+from datetime                    import datetime
 from enum                        import Enum, IntEnum
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
@@ -1046,9 +1046,7 @@ class Document(cc_Document, Report):
 
 			self._jsonDocument = jsonDocument
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._analysisDuration = sw.Duration
-		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._analysisDuration = sw.Duration
 
 	def Convert(self) -> None:
 		"""
@@ -1092,9 +1090,7 @@ class Document(cc_Document, Report):
 			for name, record in self._jsonDocument["files"].items():
 				File.Parse(name, record, parent=self)
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._conversionDuration = sw.Duration
-		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._conversionDuration = sw.Duration
 
 	def ToCoverageSummary(self) -> CoverageSummary:
 		"""

@@ -40,7 +40,7 @@ Reader and writer for the JUnit XML report written by Catch2's JUnit reporter.
 """
 from __future__                       import annotations
 
-from datetime                         import timezone, timedelta
+from datetime                         import timezone
 from pathlib                          import Path
 from typing                           import Optional as Nullable, Type, ClassVar
 
@@ -240,9 +240,7 @@ class Document(ju_Document):
 
 			self.Aggregate()
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._modelConversion = sw.Duration
-		self._modelConversion = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._modelConversion = sw.Duration
 
 	def _ConvertTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
 		"""

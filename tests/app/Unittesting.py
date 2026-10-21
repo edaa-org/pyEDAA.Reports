@@ -46,8 +46,8 @@ REFERENCE_FILE =   Path("tests/data/JUnit/pyEDAA.Reports/Python-pytest/TestRepor
 class UnittestCommand(ApplicationTestcase):
 	"""Read, merge and write unit test reports, with defective options and files."""
 
-	_consoleScript:  ClassVar[str] = "pyedaa-reports"
-	_runnableModule: ClassVar[str] = "pyEDAA.Reports.CLI"
+	_CONSOLE_SCRIPT:  ClassVar[str] = "pyedaa-reports"
+	_RUNNABLE_MODULE: ClassVar[str] = "pyEDAA.Reports.CLI"
 
 	def test_UnreadableInput(self) -> None:
 		"""A file that is no JUnit XML: the reader's message, exit code 1."""
