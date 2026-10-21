@@ -215,7 +215,7 @@ server.
      - ≥84.0
      - `MIT <https://GitHub.com/pypa/setuptools/blob/main/LICENSE>`__
    * - `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__
-     - ≥9.0
+     - ≥10.0
      - `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__
 
 

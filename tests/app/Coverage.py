@@ -51,8 +51,8 @@ DATA_DIRECTORY =   Path("tests/data/CodeCoverage")
 class CoverageCommand(ApplicationTestcase):
 	"""Read each supported format, show the figures and write Cobertura XML."""
 
-	_consoleScript:  ClassVar[str] = "pyedaa-reports"
-	_runnableModule: ClassVar[str] = "pyEDAA.Reports.CLI"
+	_CONSOLE_SCRIPT:  ClassVar[str] = "pyedaa-reports"
+	_RUNNABLE_MODULE: ClassVar[str] = "pyEDAA.Reports.CLI"
 
 	def test_Read(self) -> None:
 		"""Each format shows the line figures of its fixture."""
