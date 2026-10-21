@@ -40,7 +40,7 @@ The logger writes it, when ``dotnet test`` is called with ``--logger junit``.
 """
 from __future__                       import annotations
 
-from datetime                         import timezone, timedelta
+from datetime                         import timezone
 from pathlib                          import Path
 from typing                           import Optional as Nullable, ClassVar, Type
 
@@ -282,9 +282,7 @@ class Document(ju_Document):
 
 			self.Aggregate()
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._modelConversion = sw.Duration
-		self._modelConversion = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._modelConversion = sw.Duration
 
 	def _ConvertTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
 		"""

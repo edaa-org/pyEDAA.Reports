@@ -425,9 +425,7 @@ class Document(ju_Document):
 
 			self.Aggregate()
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._modelConversion = sw.Duration
-		self._modelConversion = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._modelConversion = sw.Duration
 
 	def _ConvertTestsuite(self, parent: TestsuiteSummary, testsuitesNode: _Element) -> None:
 		"""

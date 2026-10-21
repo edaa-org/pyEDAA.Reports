@@ -93,7 +93,6 @@ writes following the DTD:
 """
 from __future__                                    import annotations
 
-from datetime                                      import timedelta
 from io                                            import BytesIO
 from pathlib                                       import Path
 from re                                            import compile as re_compile
@@ -429,9 +428,7 @@ class Document(cc_Document, Coverage):
 
 			self._xmlDocument = xmlDocument
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._analysisDuration = sw.Duration
-		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._analysisDuration = sw.Duration
 
 	def Convert(self) -> None:
 		"""
@@ -474,9 +471,7 @@ class Document(cc_Document, Coverage):
 				for classElement in packageElement.iterfind("classes/class"):  # type: _Element
 					package._classes.append(self._ConvertClass(classElement))
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._conversionDuration = sw.Duration
-		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._conversionDuration = sw.Duration
 
 	@classmethod
 	def _ConvertClass(cls, classElement: _Element) -> Class:
