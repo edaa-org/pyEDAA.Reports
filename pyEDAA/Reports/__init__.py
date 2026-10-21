@@ -37,16 +37,17 @@ __author__ =            "Patrick Lehmann"
 __email__ =             "Paebbels@gmail.com"
 __copyright__ =         "2021-2026, Electronic Design Automation Abstraction (EDA²)"
 __license__ =           "Apache License, Version 2.0"
-__version__ =           "0.20.0rc3"
+__version__ =           "0.20.0rc4"
 __keywords__ =          ["Reports", "Abstract Model", "Data Model", "Unit Testing", "Testcase", "Testsuite", "OSVVM", "YAML", "XML"]
 __project_url__ =       "https://github.com/edaa-org/pyEDAA.Reports"
 __documentation_url__ = "https://edaa-org.github.io/pyEDAA.Reports"
 __issue_tracker_url__ = "https://GitHub.com/edaa-org/pyEDAA.Reports/issues"
 
 from enum                  import Enum
-from typing                import Any, Iterator, Mapping, Optional as Nullable
+from typing                import Any, Hashable, Mapping, Optional as Nullable
 
 from pyTooling.Common      import getFullyQualifiedName
+from pyTooling.DataModel   import KeyValuePairsMixin
 from pyTooling.Decorators  import export, readonly
 from pyTooling.Exceptions  import ExceptionBase
 from pyTooling.MetaClasses import ExtendedType
@@ -71,122 +72,6 @@ class Severity(Enum):
 
 
 @export
-class KeyValuePairsMixin(metaclass=ExtendedType, mixin=True):
-	"""
-	A mixin-class adding key-value pairs to an element of a data model, accessed with the dictionary syntax.
-
-	``element[key]`` reads a value, ``element[key] = value`` creates or updates a pair, ``del element[key]`` removes it,
-	``key in element`` asks for a key, ``len(element)`` counts the pairs, and iterating yields the keys.
-
-	A data model iterates its elements by methods, not by iterating an element. As every element is iterable, a
-	collection parameter of a data model rejects an element given in place of the collection explicitly.
-	"""
-
-	_keyValuePairs: dict[str, Any]  #: The key-value pairs, by key.
-
-	def __init__(self, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> None:
-		"""
-		Initialize the key-value pairs.
-
-		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
-		"""
-		self._keyValuePairs = {}
-
-		if keyValuePairs is not None:
-			if not isinstance(keyValuePairs, Mapping):
-				ex = TypeError("Parameter 'keyValuePairs' is not a mapping.")
-				ex.add_note(f"Got type '{getFullyQualifiedName(keyValuePairs)}'.")
-				raise ex
-
-			for key, value in keyValuePairs.items():
-				if not isinstance(key, str):
-					ex = TypeError("Parameter 'keyValuePairs' contains a key not of type 'str'.")
-					ex.add_note(f"Got type '{getFullyQualifiedName(key)}'.")
-					raise ex
-				elif key == "":
-					raise ValueError("Parameter 'keyValuePairs' contains an empty key.")
-
-				self._keyValuePairs[key] = value
-
-	@readonly
-	def KeyValuePairs(self) -> dict[str, Any]:
-		"""
-		Read-only property to access the key-value pairs (:attr:`_keyValuePairs`).
-
-		:returns: The key-value pairs, by key.
-		"""
-		return self._keyValuePairs
-
-	def __len__(self) -> int:
-		"""
-		Return the number of key-value pairs.
-
-		:returns: The number of key-value pairs.
-		"""
-		return len(self._keyValuePairs)
-
-	def __getitem__(self, key: str) -> Any:
-		"""
-		Return the value of a key.
-
-		:param key:       The key.
-		:returns:         The value.
-		:raises KeyError: If the element has no pair of that key.
-		"""
-		return self._keyValuePairs[key]
-
-	def __setitem__(self, key: str, value: Any) -> None:
-		"""
-		Create or update the key-value pair of a key.
-
-		:param key:         The key.
-		:param value:       The value.
-		:raises ValueError: If parameter ``key`` is ``None``.
-		:raises TypeError:  If parameter ``key`` isn't of type :class:`str`.
-		:raises ValueError: If parameter ``key`` is empty.
-		"""
-		if key is None:
-			raise ValueError("Parameter 'key' is None.")
-		elif not isinstance(key, str):
-			ex = TypeError("Parameter 'key' is not of type 'str'.")
-			ex.add_note(f"Got type '{getFullyQualifiedName(key)}'.")
-			raise ex
-		elif key == "":
-			raise ValueError("Parameter 'key' is empty.")
-
-		self._keyValuePairs[key] = value
-
-	def __delitem__(self, key: str) -> None:
-		"""
-		Remove the key-value pair of a key.
-
-		:param key:       The key.
-		:raises KeyError: If the element has no pair of that key.
-		"""
-		del self._keyValuePairs[key]
-
-	def __contains__(self, key: str) -> bool:
-		"""
-		Check whether the element has a key-value pair of a key.
-
-		:param key: The key.
-		:returns:   ``True``, if the element has a pair of that key.
-		"""
-		return key in self._keyValuePairs
-
-	def __iter__(self) -> Iterator[str]:
-		"""
-		Iterate the keys of the key-value pairs.
-
-		:returns: An iterator of the keys.
-		"""
-		return iter(self._keyValuePairs)
-
-
-@export
 class Person(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 	"""
 	A real person: a user ID, a name and an e-mail address.
@@ -205,7 +90,7 @@ class Person(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		userID: str,
 		name: str,
 		email: Nullable[str] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> None:
 		"""
 		Initialize a person.
@@ -215,8 +100,6 @@ class Person(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param email:         Optional, the person's e-mail address. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:   If parameter ``userID`` or ``name`` is ``None``.
 		:raises TypeError:    If parameter ``userID``, ``name`` or ``email`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``userID`` or ``name`` is empty.

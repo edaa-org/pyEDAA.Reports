@@ -100,7 +100,8 @@ Version 0.20 (2026)
        :class:`~pyEDAA.Reports.DocumentationCoverage.Item`\ s, whose counters count the item and every item below
        it.
      * :class:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning` is a critical warning for a source file that
-       can't be read or parsed.
+       can't be read or parsed; it carries the report's file
+       (:attr:`~pyEDAA.Reports.DocumentationCoverage.SourceFileWarning.File`).
 
    * :class:`pyEDAA.Reports.DocumentationCoverage.Python.Analyzer` reads a package's Python source code and returns
      its aggregated documentation report. It counts what docstr_coverage counts, plus class fields and module
@@ -122,9 +123,8 @@ Version 0.20 (2026)
      :class:`~pyEDAA.Reports.RiskManagement.Risk` with probability, impact and state; implications and mitigations,
      shared by risks; links between risks of a kind; a risk's score and level, owner and next review.
 
-   * :mod:`pyEDAA.Reports` holds what the data models share: :class:`~pyEDAA.Reports.KeyValuePairsMixin` attaches
-     key-value pairs to an element, accessed with the dictionary syntax; :class:`~pyEDAA.Reports.Person` is a real
-     person - user ID, name, e-mail address.
+   * :mod:`pyEDAA.Reports` holds what the data models share: :class:`~pyEDAA.Reports.Person` is a real person - user
+     ID, name, e-mail address.
    * The data models' errors derive from pyTooling's common bases :exc:`~pyTooling.Exceptions.DuplicateElementError`,
      :exc:`~pyTooling.Exceptions.AlreadyInHierarchyError` and :exc:`~pyTooling.Exceptions.NotInSameHierarchyError`. Each
      model raises one error per duplicate element kind, e.g.
@@ -272,6 +272,22 @@ Version 0.20 (2026)
    * :meth:`Testsuite.Aggregate() <pyEDAA.Reports.Unittesting.Testsuite.Aggregate>` counts a testcase with status
      ``ExpectedFailed`` as passed and ``UnexpectedPassed`` as failed instead of raising
      :exc:`~pyEDAA.Reports.Unittesting.UnittestError`.
+   * Enumerations, whose values are neither read from nor written to text, are plain :class:`~enum.Enum`\ s with
+     integer values instead of :class:`~pyTooling.Common.StringEnum`\ s; messages and representations name a member
+     by its name:
+
+     * :mod:`pyEDAA.Reports.CodeCoverage.CoveragePy`: :class:`~pyEDAA.Reports.CodeCoverage.CoveragePy.RegionKind`.
+     * :mod:`pyEDAA.Reports.DocumentationCoverage`: :class:`~pyEDAA.Reports.DocumentationCoverage.ItemCategory`,
+       :class:`~pyEDAA.Reports.DocumentationCoverage.ItemKind`.
+     * :mod:`pyEDAA.Reports.Requirements`: :class:`~pyEDAA.Reports.Requirements.ItemState`,
+       :class:`~pyEDAA.Reports.Requirements.RequirementKind`, :class:`~pyEDAA.Reports.Requirements.Obligation`,
+       :class:`~pyEDAA.Reports.Requirements.LinkKind`, :class:`~pyEDAA.Reports.Requirements.EventKind`.
+     * :mod:`pyEDAA.Reports.RiskManagement`: :class:`~pyEDAA.Reports.RiskManagement.Probability`,
+       :class:`~pyEDAA.Reports.RiskManagement.Impact`, :class:`~pyEDAA.Reports.RiskManagement.RiskLevel`,
+       :class:`~pyEDAA.Reports.RiskManagement.RiskState`, :class:`~pyEDAA.Reports.RiskManagement.LinkKind`,
+       :class:`~pyEDAA.Reports.RiskManagement.MitigationKind`,
+       :class:`~pyEDAA.Reports.RiskManagement.MitigationState`.
+
    * Every module with code carries ``from __future__ import annotations`` and writes forward references unquoted.
    * New requirement ``jsonschema ~= 4.26`` for the JSON Schemas of JSON report formats.
    * The ``test`` extra describes every test level: :file:`tests/requirements.txt` includes
@@ -281,6 +297,10 @@ Version 0.20 (2026)
      :class:`~pyTooling.Stopwatch.Stopwatch` hands it out from pyTooling 10.0.0rc4 on; ``AnalysisDuration`` and
      ``ModelConversionDuration`` return it unchanged instead of converting seconds. ⚠️ A duration not measured yet
      is ``None`` instead of a negative :class:`~datetime.timedelta`.
+   * The data models - :mod:`~pyEDAA.Reports.Requirements`, :mod:`~pyEDAA.Reports.RiskManagement` and
+     :class:`~pyEDAA.Reports.Person` - attach key-value pairs with pyTooling's
+     :class:`~pyTooling.DataModel.KeyValuePairsMixin`, accessed with the dictionary syntax; a key is any hashable
+     value.
    * Dependencies: ``wheel ~= 0.48.0``, ``lxml >= 6.1.3``, ``Coverage ~= 7.16``, ``mypy ~= 2.4``.
 
    .. rubric:: Bug Fixes

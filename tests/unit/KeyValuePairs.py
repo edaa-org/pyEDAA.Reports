@@ -28,11 +28,10 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
-"""Unit tests of :class:`~pyEDAA.Reports.KeyValuePairsMixin`."""
+"""Unit tests of :class:`~pyTooling.DataModel.KeyValuePairsMixin` in an element of a data model."""
+from pyTooling.DataModel   import KeyValuePairsMixin
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Testing     import Testcase
-
-from pyEDAA.Reports        import KeyValuePairsMixin
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -49,16 +48,18 @@ class KeyValuePairs(Testcase):
 	def test_Empty(self) -> None:
 		element = Element()
 
-		self.assertEqual((0, {}), (len(element), element.KeyValuePairs))
+		self.assertEqual(0, len(element))
+		self.assertEqual([], list(element))
 		self.assertNotIn("owner", element)
 
 	def test_DictionarySyntax(self) -> None:
 		element = Element({"owner": "Paebbels"})
 
-		self.assertEqual((1, "Paebbels"), (len(element), element["owner"]))
+		self.assertEqual(1, len(element))
+		self.assertEqual("Paebbels", element["owner"])
 		element["owner"] = "EDA²"
 		element["effort"] = 3
-		self.assertEqual({"owner": "EDA²", "effort": 3}, element.KeyValuePairs)
+		self.assertEqual({"owner": "EDA²", "effort": 3}, {key: element[key] for key in element})
 		self.assertEqual(["owner", "effort"], list(element))
 		self.assertIn("effort", element)
 
@@ -71,27 +72,8 @@ class KeyValuePairs(Testcase):
 			del element["owner"]
 
 	def test_ParameterChecks(self) -> None:
-		for keyValuePairs, exception, message in (
-			([("owner", 1)], TypeError,  "Parameter 'keyValuePairs' is not a mapping."),
-			({1: "owner"},   TypeError,  "Parameter 'keyValuePairs' contains a key not of type 'str'."),
-			({"": "owner"},  ValueError, "Parameter 'keyValuePairs' contains an empty key."),
-		):
-			with self.subTest(message=message):
-				with self.assertRaises(exception) as context:
-					_ = Element(keyValuePairs)
-
-				self.assertEqual(message, str(context.exception))
-
-		element = Element()
-		with self.assertRaises(ValueError) as context:
-			element[None] = "owner"
-		self.assertEqual("Parameter 'key' is None.", str(context.exception))
-
 		with self.assertRaises(TypeError) as context:
-			element[1] = "owner"
-		self.assertEqual("Parameter 'key' is not of type 'str'.", str(context.exception))
-		self.assertEqual(["Got type 'int'."], context.exception.__notes__)
+			_ = Element([("owner", 1)])
 
-		with self.assertRaises(ValueError) as context:
-			element[""] = "owner"
-		self.assertEqual("Parameter 'key' is empty.", str(context.exception))
+		self.assertEqual("Parameter 'keyValuePairs' is not a mapping ('dict', ...).", str(context.exception))
+		self.assertEqual(["Got type 'list'."], context.exception.__notes__)

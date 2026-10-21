@@ -51,16 +51,8 @@ UNDOCUMENTED = CoverageState.Undocumented                        #: State of an 
 
 
 class Kinds(Testcase):
-	def test_ItemKind_Parse(self) -> None:
-		self.assertIs(ItemKind.Method, ItemKind.Parse("method"))
-		self.assertIs(ItemKind.EnumerationMember, ItemKind.Parse("enumeration-member"))
-		self.assertIs(ItemKind.Other, ItemKind.Parse(None))
+	def test_ItemKind_Default(self) -> None:
 		self.assertIs(ItemKind.Other, ItemKind.DEFAULT)
-
-		with self.assertRaises(ValueError) as context:
-			_ = ItemKind.Parse("subroutine")
-
-		self.assertEqual("'subroutine' is not a valid ItemKind.", str(context.exception))
 
 	def test_ItemKind_Category(self) -> None:
 		"""Every kind belongs to a category."""
@@ -78,9 +70,8 @@ class Kinds(Testcase):
 		self.assertIs(ItemCategory.Other, ItemKind.Other.Category)
 		self.assertIs(ItemCategory.Other, ItemKind.DEFAULT.Category)
 
-	def test_ItemCategory_Parse(self) -> None:
-		self.assertIs(ItemCategory.Callable, ItemCategory.Parse("callable"))
-		self.assertIs(ItemCategory.Other, ItemCategory.Parse(""))
+	def test_ItemCategory_Default(self) -> None:
+		self.assertIs(ItemCategory.Other, ItemCategory.DEFAULT)
 
 
 class Counters(Testcase):
@@ -137,7 +128,7 @@ class ItemInstantiation(Testcase):
 		self.assertIsNone(item.EndLine)
 		self.assertEqual(0, len(item))
 		self.assertEqual("Circle", item.QualifiedName)
-		self.assertEqual("<Item class Circle: 100.0%>", repr(item))
+		self.assertEqual("<Item Class Circle: 100.0%>", repr(item))
 
 	def test_Item_Lines(self) -> None:
 		file = File(Path("Shapes.py"))

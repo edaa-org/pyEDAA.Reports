@@ -126,8 +126,8 @@ class ConversionMixin:
 	Classic mixin: convert this dialect's reference report into every writable dialect, through the command line.
 	"""
 
-	_consoleScript:  ClassVar[str] = "pyedaa-reports"
-	_runnableModule: ClassVar[str] = "pyEDAA.Reports.CLI"
+	_CONSOLE_SCRIPT:  ClassVar[str] = "pyedaa-reports"
+	_RUNNABLE_MODULE: ClassVar[str] = "pyEDAA.Reports.CLI"
 	_dialectName:    ClassVar[str] = None
 
 	def _convert(self, targetName: str) -> Path:
@@ -272,8 +272,8 @@ class FromAnyJUnit(ConversionMixin, ApplicationTestcase):
 class TheCommandLineVocabulary(ApplicationTestcase):
 	"""What the command line accepts as a dialect, which is not what the documents and schemas call them."""
 
-	_consoleScript:  ClassVar[str] = "pyedaa-reports"
-	_runnableModule: ClassVar[str] = "pyEDAA.Reports.CLI"
+	_CONSOLE_SCRIPT:  ClassVar[str] = "pyedaa-reports"
+	_RUNNABLE_MODULE: ClassVar[str] = "pyEDAA.Reports.CLI"
 
 	def _merge(self, dialect: str) -> str:
 		reference = DIALECTS["pyTest-JUnit"].ReferenceFiles[0]

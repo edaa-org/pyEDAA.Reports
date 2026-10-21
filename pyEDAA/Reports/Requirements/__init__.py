@@ -48,16 +48,18 @@ history lists the events of its life cycle (:class:`HistoryEvent`), e.g. a split
 from __future__            import annotations
 
 from datetime              import datetime
-from enum                  import Flag
-from typing                import Any, Callable, ClassVar, Generator, Iterable, Mapping, Optional as Nullable, Self
+from enum                  import Enum, Flag
+from typing                import Any, Callable, ClassVar, Generator, Hashable, Iterable, Mapping
+from typing                import Optional as Nullable, Self
 
-from pyTooling.Common      import getFullyQualifiedName, StringEnum
+from pyTooling.Common      import getFullyQualifiedName, getTypeName
+from pyTooling.DataModel   import KeyValuePairsMixin
 from pyTooling.Decorators  import export, readonly
 from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import KeyValuePairsMixin, Person, ReportException
+from pyEDAA.Reports        import Person, ReportException
 
 
 @export
@@ -121,7 +123,7 @@ class DuplicateLinkError(RequirementsError, DuplicateElementError):
 
 
 @export
-class ItemState(StringEnum):
+class ItemState(Enum):
 	"""
 	The state of an item in its life cycle.
 
@@ -130,19 +132,19 @@ class ItemState(StringEnum):
 	time.
 	"""
 
-	Placeholder = "placeholder"  #: Reserved, e.g. an ID and a title, but not yet written.
-	Draft =       "draft"        #: Written, but not yet reviewed.
-	InReview =    "in-review"    #: Under review by its stakeholders.
-	Final =       "final"        #: Reviewed and agreed by its stakeholders; it binds the design.
-	Implemented = "implemented"  #: Implemented, but not yet verified.
-	Verified =    "verified"     #: Implemented and verified; open for a regression.
-	Closed =      "closed"       #: Verified and released, e.g. in a baseline; it changes no more.
-	Rejected =    "rejected"     #: Not accepted by its stakeholders.
-	Obsolete =    "obsolete"     #: No longer valid, e.g. replaced by another one, split or merged.
+	Placeholder = 1  #: Reserved, e.g. an ID and a title, but not yet written.
+	Draft =       2  #: Written, but not yet reviewed.
+	InReview =    3  #: Under review by its stakeholders.
+	Final =       4  #: Reviewed and agreed by its stakeholders; it binds the design.
+	Implemented = 5  #: Implemented, but not yet verified.
+	Verified =    6  #: Implemented and verified; open for a regression.
+	Closed =      7  #: Verified and released, e.g. in a baseline; it changes no more.
+	Rejected =    8  #: Not accepted by its stakeholders.
+	Obsolete =    9  #: No longer valid, e.g. replaced by another one, split or merged.
 
 
 @export
-class RequirementKind(StringEnum):
+class RequirementKind(Enum):
 	"""
 	The kind of a requirement: what it constrains.
 
@@ -150,20 +152,20 @@ class RequirementKind(StringEnum):
 	functional safety and security standards treat them separately.
 	"""
 
-	Functional =    "functional"     #: A function the system performs, e.g. a register map or a protocol's behavior.
-	Performance =   "performance"    #: How well a function is performed, e.g. a clock frequency, latency or throughput.
-	Quality =       "quality"        #: A quality attribute, e.g. reliability, maintainability or usability.
-	Safety =        "safety"         #: A measure against hazards, e.g. a safety mechanism of ISO 26262 or IEC 61508.
-	Security =      "security"       #: A measure against threats, e.g. encrypted bitstreams or secure boot.
-	Interface =     "interface"      #: An interface to another system, e.g. a pin-out, a bus or a signal level.
-	Environmental = "environmental"  #: An operating condition, e.g. a temperature range, vibration or EMC.
-	Constraint =    "constraint"     #: A design or implementation constraint, e.g. an FPGA family or a language.
-	Regulatory =    "regulatory"     #: A standard, law or certification the system complies with.
-	Other =         "other"          #: Any other requirement.
+	Functional =    1   #: A function the system performs, e.g. a register map or a protocol's behavior.
+	Performance =   2   #: How well a function is performed, e.g. a clock frequency, latency or throughput.
+	Quality =       3   #: A quality attribute, e.g. reliability, maintainability or usability.
+	Safety =        4   #: A measure against hazards, e.g. a safety mechanism of ISO 26262 or IEC 61508.
+	Security =      5   #: A measure against threats, e.g. encrypted bitstreams or secure boot.
+	Interface =     6   #: An interface to another system, e.g. a pin-out, a bus or a signal level.
+	Environmental = 7   #: An operating condition, e.g. a temperature range, vibration or EMC.
+	Constraint =    8   #: A design or implementation constraint, e.g. an FPGA family or a language.
+	Regulatory =    9   #: A standard, law or certification the system complies with.
+	Other =         10  #: Any other requirement.
 
 
 @export
-class Obligation(StringEnum):
+class Obligation(Enum):
 	"""
 	The obligation of a requirement: whether it must, should or may be met.
 
@@ -172,9 +174,9 @@ class Obligation(StringEnum):
 	of its text.
 	"""
 
-	Mandatory =   "mandatory"    #: Binding: the requirement must be met (*shall*, *must*).
-	Recommended = "recommended"  #: A goal: the requirement should be met, deviations are justified (*should*).
-	Optional =    "optional"     #: A permission: the requirement may be met (*may*).
+	Mandatory =   1  #: Binding: the requirement must be met (*shall*, *must*).
+	Recommended = 2  #: A goal: the requirement should be met, deviations are justified (*should*).
+	Optional =    3  #: A permission: the requirement may be met (*may*).
 
 
 # A class with a property named like a class - ``Obligation`` - can't name that class in the annotation of a field: the
@@ -212,7 +214,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 	_parent:      Nullable[Base]                      #: The element containing this one, or ``None``.
 	_root:        Nullable[RequirementSpecification]  #: The specification, or ``None`` while the element isn't in one.
 
-	def __init__(self, *, keyValuePairs: Nullable[Mapping[str, Any]] = None, parent: Nullable[Base] = None) -> None:
+	def __init__(self, *, keyValuePairs: Nullable[Mapping[Hashable, Any]] = None, parent: Nullable[Base] = None) -> None:
 		"""
 		Initializes an element with its key-value pairs, its parent, and the parent's specification.
 
@@ -222,8 +224,6 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the element containing this one. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		"""
 		super().__init__(keyValuePairs)
@@ -282,7 +282,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 			raise ex
 
 		if self._parent is not None:
-			raise AlreadyInSpecificationError(f"{self.__class__.__name__} already has a parent.")
+			raise AlreadyInSpecificationError(f"{getTypeName(self)} already has a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent
@@ -319,7 +319,7 @@ class BaseWithID(Base):
 		identifier: str,
 		*,
 		description: str = "",
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[Base] = None
 	) -> None:
 		"""
@@ -330,8 +330,6 @@ class BaseWithID(Base):
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the element containing this one. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		:raises ValueError:   If parameter ``identifier`` is ``None``.
 		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
@@ -407,7 +405,7 @@ class RequirementSpecification(Base):
 		version: SemanticVersion,
 		name: Nullable[str] = None,
 		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> None:
 		"""
 		Initializes an empty requirement specification.
@@ -416,8 +414,6 @@ class RequirementSpecification(Base):
 		:param name:          Optional, the specification's name. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:   If parameter ``version`` is ``None``.
 		:raises TypeError:    If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
@@ -487,7 +483,7 @@ class RequirementSpecification(Base):
 
 		if element._id in elements:
 			raise element._DUPLICATE_ERROR(
-				f"{element.__class__.__name__} '{element._id}' already exists in the specification."
+				f"{getTypeName(element)} '{element._id}' already exists in the specification."
 			)
 
 		elements[element._id] = element
@@ -511,7 +507,7 @@ class RequirementSpecification(Base):
 		for element in subtree:
 			if element._id in items or element._id in ids:
 				raise element._DUPLICATE_ERROR(
-					f"{element.__class__.__name__} '{element._id}' already exists in the specification."
+					f"{getTypeName(element)} '{element._id}' already exists in the specification."
 				)
 
 			ids.add(element._id)
@@ -765,7 +761,7 @@ class BaseWithName(BaseWithID):
 		name: str,
 		*,
 		description: str = "",
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[RequirementSpecification] = None
 	) -> None:
 		"""
@@ -777,8 +773,6 @@ class BaseWithName(BaseWithID):
 		:param keyValuePairs:           Optional, the key-value pairs. Default: ``None``.
 		:param parent:                  Optional, the specification. Default: ``None``.
 		:raises TypeError:              If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:              If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:             If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:              If parameter ``parent`` isn't of type :class:`RequirementSpecification`.
 		:raises ValueError:             If parameter ``identifier`` is ``None``.
 		:raises TypeError:              If parameter ``identifier`` isn't of type :class:`str`.
@@ -968,7 +962,7 @@ class BaseItem(BaseWithID):
 		personas: Nullable[Iterable[Persona]] = None,
 		labels: Nullable[Iterable[Label]] = None,
 		attachments: Nullable[Iterable[Document]] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[BaseItem | RequirementSpecification] = None
 	) -> None:
 		"""
@@ -992,8 +986,6 @@ class BaseItem(BaseWithID):
 		:param keyValuePairs:                Optional, the key-value pairs. Default: ``None``.
 		:param parent:                       Optional, the parent item or the specification. Default: ``None``.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                   If parameter ``parent`` isn't of a type this class declares in
 		                                     :attr:`_PARENT_TYPE`.
 		:raises ValueError:                  If parameter ``identifier`` is ``None``.
@@ -1157,7 +1149,7 @@ class BaseItem(BaseWithID):
 			if self._root is not None:
 				self._root._AddItems(element)
 			elif element._id in self._children:
-				raise element._DUPLICATE_ERROR(f"{self.__class__.__name__} '{self._id}' already has a child '{element._id}'.")
+				raise element._DUPLICATE_ERROR(f"{getTypeName(self)} '{self._id}' already has a child '{element._id}'.")
 
 			self._children[element._id] = element
 
@@ -1345,7 +1337,7 @@ class BaseItem(BaseWithID):
 		destination: BaseItem,
 		kind: LinkKind,
 		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> Link:
 		"""
 		Create an outbound link from this item to the given item.
@@ -1355,8 +1347,6 @@ class BaseItem(BaseWithID):
 		:param keyValuePairs:                Optional, the key-value pairs of the link. Default: ``None``.
 		:returns:                            The link from this item to the destination.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises NotInSameSpecificationError: If this item isn't part of a specification.
 		:raises ValueError:                  If parameter ``destination`` is ``None``.
 		:raises TypeError:                   If parameter ``destination`` isn't of type :class:`BaseItem`.
@@ -1378,7 +1368,7 @@ class BaseItem(BaseWithID):
 		source: BaseItem,
 		kind: LinkKind,
 		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> Link:
 		"""
 		Create an inbound link from the given item to this item.
@@ -1388,8 +1378,6 @@ class BaseItem(BaseWithID):
 		:param keyValuePairs:                Optional, the key-value pairs of the link. Default: ``None``.
 		:returns:                            The link from the source to this item.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:                  If parameter ``source`` is ``None``.
 		:raises TypeError:                   If parameter ``source`` isn't of type :class:`BaseItem`.
 		:raises NotInSameSpecificationError: If parameter ``source`` isn't part of a specification.
@@ -1544,7 +1532,7 @@ class Requirement(BaseItem):
 		personas: Nullable[Iterable[Persona]] = None,
 		labels: Nullable[Iterable[Label]] = None,
 		attachments: Nullable[Iterable[Document]] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[Requirement | RequirementSpecification] = None
 	) -> None:
 		"""
@@ -1574,8 +1562,6 @@ class Requirement(BaseItem):
 		:param parent:                       Optional, the requirement this one refines, or the specification. Default:
 		                                     ``None``.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                   If parameter ``parent`` isn't of type :class:`Requirement` or
 		                                     :class:`RequirementSpecification`.
 		:raises ValueError:                  If parameter ``identifier`` is ``None``.
@@ -1772,7 +1758,7 @@ class SpecificationItem(BaseItem):
 		personas: Nullable[Iterable[Persona]] = None,
 		labels: Nullable[Iterable[Label]] = None,
 		attachments: Nullable[Iterable[Document]] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[SpecificationItem | RequirementSpecification] = None
 	) -> None:
 		"""
@@ -1797,8 +1783,6 @@ class SpecificationItem(BaseItem):
 		:param parent:                           Optional, the specification item this one details, or the specification.
 		                                         Default: ``None``.
 		:raises TypeError:                       If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                       If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                      If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                       If parameter ``parent`` isn't of type :class:`SpecificationItem` or
 		                                         :class:`RequirementSpecification`.
 		:raises ValueError:                      If parameter ``identifier`` is ``None``.
@@ -1933,7 +1917,7 @@ SpecificationItem._DUPLICATE_ERROR = DuplicateSpecificationItemError
 
 
 @export
-class LinkKind(StringEnum):
+class LinkKind(Enum):
 	"""
 	The relationship a link states: the source item *<kind>* the destination item.
 
@@ -1942,14 +1926,14 @@ class LinkKind(StringEnum):
 	:attr:`SpecificationItem.Requirements` and :attr:`Requirement.SpecificationItems`.
 	"""
 
-	Refines =       "refines"         #: The source states the destination in more detail, outside the item hierarchy.
-	DerivesFrom =   "derives-from"    #: The source is derived from the destination, e.g. from a higher layer.
-	CounterpartOf = "counterpart-of"  #: The source is the destination's counterpart in another layer.
-	DependsOn =     "depends-on"      #: The source can only be met, if the destination is met.
-	ConflictsWith = "conflicts-with"  #: The source and the destination can't both be met.
-	Duplicates =    "duplicates"      #: The source states the same as the destination.
-	Replaces =      "replaces"        #: The source replaces the destination, which is obsolete.
-	RelatesTo =     "relates-to"      #: Any other relationship.
+	Refines =       1  #: The source states the destination in more detail, outside the item hierarchy.
+	DerivesFrom =   2  #: The source is derived from the destination, e.g. from a higher layer.
+	CounterpartOf = 3  #: The source is the destination's counterpart in another layer.
+	DependsOn =     4  #: The source can only be met, if the destination is met.
+	ConflictsWith = 5  #: The source and the destination can't both be met.
+	Duplicates =    6  #: The source states the same as the destination.
+	Replaces =      7  #: The source replaces the destination, which is obsolete.
+	RelatesTo =     8  #: Any other relationship.
 
 
 @export
@@ -1972,7 +1956,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		destination: BaseItem,
 		kind: LinkKind,
 		*,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> None:
 		"""
 		Initializes a link, and adds it to its source and its destination.
@@ -1982,8 +1966,6 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param kind:                         The relationship the link states.
 		:param keyValuePairs:                Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:                   If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                   If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                  If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:                  If parameter ``source`` is ``None``.
 		:raises TypeError:                   If parameter ``source`` isn't of type :class:`BaseItem`.
 		:raises NotInSameSpecificationError: If parameter ``source`` isn't part of a specification.
@@ -2032,7 +2014,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 
 		for link in source._outboundLinks:
 			if link._destination is destination and link._kind is kind:
-				ex = DuplicateLinkError(f"{source.__class__.__name__} '{source._id}' has a '{kind}' link already.")
+				ex = DuplicateLinkError(f"{getTypeName(source)} '{source._id}' has a '{kind.name}' link already.")
 				ex.add_note(f"Got destination '{destination._id}'.")
 				raise ex
 
@@ -2072,21 +2054,21 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 
 
 @export
-class EventKind(StringEnum):
+class EventKind(Enum):
 	"""
 	The kind of an event in the life cycle of an item.
 	"""
 
-	Opened =    "opened"     #: The item was opened, e.g. written as a draft.
-	Modified =  "modified"   #: The item's text or fields were changed.
-	Reviewed =  "reviewed"   #: The item was reviewed.
-	Approved =  "approved"   #: The item was approved: it became final.
-	Rejected =  "rejected"   #: The item was rejected.
-	Split =     "split"      #: The item was split; the event names the other items involved.
-	Merged =    "merged"     #: The item was merged; the event names the other items involved.
-	Closed =    "closed"     #: The item was closed after its verification, e.g. released.
-	Reopened =  "reopened"   #: The closed item was opened again.
-	Obsoleted = "obsoleted"  #: The item became obsolete, e.g. replaced by the items the event names.
+	Opened =    1   #: The item was opened, e.g. written as a draft.
+	Modified =  2   #: The item's text or fields were changed.
+	Reviewed =  3   #: The item was reviewed.
+	Approved =  4   #: The item was approved: it became final.
+	Rejected =  5   #: The item was rejected.
+	Split =     6   #: The item was split; the event names the other items involved.
+	Merged =    7   #: The item was merged; the event names the other items involved.
+	Closed =    8   #: The item was closed after its verification, e.g. released.
+	Reopened =  9   #: The closed item was opened again.
+	Obsoleted = 10  #: The item became obsolete, e.g. replaced by the items the event names.
 
 
 # A class with a property named like a class - ``Person`` - can't name that class in the annotation of a field: the
@@ -2119,7 +2101,7 @@ class HistoryEvent(Base):
 		person: Nullable[Person] = None,
 		involved: Nullable[Iterable[BaseItem]] = None,
 		description: str = "",
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		parent: Nullable[BaseItem] = None
 	) -> None:
 		"""
@@ -2133,8 +2115,6 @@ class HistoryEvent(Base):
 		:param keyValuePairs:                    Optional, the key-value pairs. Default: ``None``.
 		:param parent:                           Optional, the item the event happened to. Default: ``None``.
 		:raises TypeError:                       If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                       If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                      If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                       If parameter ``parent`` isn't of type :class:`BaseItem`.
 		:raises ValueError:                      If parameter ``kind`` is ``None``.
 		:raises TypeError:                       If parameter ``kind`` isn't of type :class:`EventKind`.
@@ -2211,7 +2191,7 @@ class HistoryEvent(Base):
 				self._involved.append(item)
 
 		if len(self._involved) == 0 and kind in (EventKind.Split, EventKind.Merged):
-			raise ValueError(f"Parameter 'involved' names no item for a '{kind}' event.")
+			raise ValueError(f"Parameter 'involved' names no item for a '{kind.name}' event.")
 
 		if description is None:
 			raise ValueError("Parameter 'description' is None.")

@@ -47,20 +47,22 @@ A risk's :attr:`~Risk.Score` - the rank of its probability times the rank of its
 :class:`RiskLevel`. A risk names its owner - a :class:`~pyEDAA.Reports.Person` the register refers to - and the date of
 its next review; a mitigation states its :class:`MitigationKind` and its :class:`MitigationState`.
 
-Every element has key-value pairs (:class:`~pyEDAA.Reports.KeyValuePairsMixin`) for data the model doesn't name.
+Every element has key-value pairs (:class:`~pyTooling.DataModel.KeyValuePairsMixin`) for data the model doesn't name.
 """
 from __future__            import annotations
 
 from datetime              import datetime
-from typing                import Any, Callable, ClassVar, Generator, Iterable, Mapping, Optional as Nullable
+from enum                  import Enum
+from typing                import Any, Callable, ClassVar, Generator, Hashable, Iterable, Mapping, Optional as Nullable
 
-from pyTooling.Common      import getFullyQualifiedName, StringEnum
+from pyTooling.Common      import getFullyQualifiedName
+from pyTooling.DataModel   import KeyValuePairsMixin
 from pyTooling.Decorators  import export, readonly
 from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError, NotInSameHierarchyError
 from pyTooling.MetaClasses import ExtendedType
 from pyTooling.Versioning  import SemanticVersion
 
-from pyEDAA.Reports        import KeyValuePairsMixin, Person, ReportException
+from pyEDAA.Reports        import Person, ReportException
 
 
 @export
@@ -109,17 +111,17 @@ class DuplicateLinkError(RiskManagementError, DuplicateElementError):
 
 
 @export
-class Probability(StringEnum):
+class Probability(Enum):
 	"""
 	The probability of a risk to occur.
 	"""
 
-	Low =      "low"       #: Identified, but sleeping.
-	Medium =   "medium"    #: Likely to occur soon.
-	High =     "high"      #: Very likely to occur.
-	Occurred = "occurred"  #: Occurred: the risk is active and causes heavy effects.
+	Low =      1  #: Identified, but sleeping.
+	Medium =   2  #: Likely to occur soon.
+	High =     3  #: Very likely to occur.
+	Occurred = 4  #: Occurred: the risk is active and causes heavy effects.
 
-	__RANKS: ClassVar[dict[str, int]] = {
+	__RANKS: ClassVar[dict[int, int]] = {
 		Low:      1,
 		Medium:   2,
 		High:     3,
@@ -133,21 +135,21 @@ class Probability(StringEnum):
 
 		:returns: The rank in range 1..4; ``1`` is the lowest probability.
 		"""
-		return self.__RANKS[self]
+		return self.__RANKS[self.value]
 
 
 @export
-class Impact(StringEnum):
+class Impact(Enum):
 	"""
 	The impact of a risk, if it occurs, as the delay it causes.
 	"""
 
-	Low =      "low"       #: A delay of a few days.
-	Medium =   "medium"    #: A delay of multiple days.
-	High =     "high"      #: A delay of a few weeks.
-	Critical = "critical"  #: A delay of multiple weeks.
+	Low =      1  #: A delay of a few days.
+	Medium =   2  #: A delay of multiple days.
+	High =     3  #: A delay of a few weeks.
+	Critical = 4  #: A delay of multiple weeks.
 
-	__RANKS: ClassVar[dict[str, int]] = {
+	__RANKS: ClassVar[dict[int, int]] = {
 		Low:      1,
 		Medium:   2,
 		High:     3,
@@ -161,11 +163,11 @@ class Impact(StringEnum):
 
 		:returns: The rank in range 1..4; ``1`` is the lowest impact.
 		"""
-		return self.__RANKS[self]
+		return self.__RANKS[self.value]
 
 
 @export
-class RiskLevel(StringEnum):
+class RiskLevel(Enum):
 	"""
 	The level of a risk, classified by its score: the rank of its probability times the rank of its impact.
 
@@ -178,14 +180,14 @@ class RiskLevel(StringEnum):
 	                occurred            4       8    12        16
 	"""
 
-	Low =      "low"       #: A score of 1 to 3.
-	Medium =   "medium"    #: A score of 4 to 6.
-	High =     "high"      #: A score of 8 or 9.
-	Critical = "critical"  #: A score of 12 to 16.
+	Low =      1  #: A score of 1 to 3.
+	Medium =   2  #: A score of 4 to 6.
+	High =     3  #: A score of 8 or 9.
+	Critical = 4  #: A score of 12 to 16.
 
 
 @export
-class RiskState(StringEnum):
+class RiskState(Enum):
 	"""
 	The state of a risk in its life cycle.
 
@@ -193,58 +195,58 @@ class RiskState(StringEnum):
 	solved.
 	"""
 
-	Open =    "open"     #: Identified and tracked.
-	OnHold =  "on-hold"  #: Tracking is paused, e.g. until a decision is made.
-	Closed =  "closed"   #: Not tracked anymore, without being solved, e.g. accepted, obsolete or its time has passed.
-	Solved =  "solved"   #: Removed by its mitigations: it can't occur anymore.
+	Open =    1     #: Identified and tracked.
+	OnHold =  2     #: Tracking is paused, e.g. until a decision is made.
+	Closed =  3     #: Not tracked anymore, without being solved, e.g. accepted, obsolete or its time has passed.
+	Solved =  4     #: Removed by its mitigations: it can't occur anymore.
 
-	DEFAULT = Open       #: The state of a newly identified risk.
+	DEFAULT = Open  #: The state of a newly identified risk.
 
 
 @export
-class LinkKind(StringEnum):
+class LinkKind(Enum):
 	"""
 	The relationship a :class:`Link` states from its source risk to its destination risk.
 	"""
 
-	Causes =     "causes"      #: The source, if it occurs, causes the destination to occur.
-	Amplifies =  "amplifies"   #: The source, if it occurs, raises the probability or the impact of the destination.
-	DependsOn =  "depends-on"  #: The source can only occur, if the destination occurred.
-	Duplicates = "duplicates"  #: The source describes the same risk as the destination.
-	Related =    "related"     #: The source relates to the destination in another way.
+	Causes =     1        #: The source, if it occurs, causes the destination to occur.
+	Amplifies =  2        #: The source, if it occurs, raises the probability or the impact of the destination.
+	DependsOn =  3        #: The source can only occur, if the destination occurred.
+	Duplicates = 4        #: The source describes the same risk as the destination.
+	Related =    5        #: The source relates to the destination in another way.
 
-	DEFAULT =    Related       #: The relationship of a link, which states no other.
+	DEFAULT =    Related  #: The relationship of a link, which states no other.
 
 
 @export
-class MitigationKind(StringEnum):
+class MitigationKind(Enum):
 	"""
 	The way a mitigation reduces a risk or an implication.
 	"""
 
-	Avoid =       "avoid"        #: Removes the cause, so the risk can't occur.
-	Prevent =     "prevent"      #: Reduces the probability the risk occurs.
-	Contingency = "contingency"  #: Reduces the impact: a plan applied, when the risk occurs.
-	Transfer =    "transfer"     #: Moves the impact to a third party, e.g. by a contract or an insurance.
+	Avoid =       1        #: Removes the cause, so the risk can't occur.
+	Prevent =     2        #: Reduces the probability the risk occurs.
+	Contingency = 3        #: Reduces the impact: a plan applied, when the risk occurs.
+	Transfer =    4        #: Moves the impact to a third party, e.g. by a contract or an insurance.
 
-	DEFAULT =     Prevent        #: The way of a mitigation, which states no other.
+	DEFAULT =     Prevent  #: The way of a mitigation, which states no other.
 
 
 @export
-class MitigationState(StringEnum):
+class MitigationState(Enum):
 	"""
 	The state of a mitigation: whether it is applied.
 
 	A mitigation *on hold* waits to be planned; a new mitigation is *planned*.
 	"""
 
-	OnHold =    "on-hold"    #: Proposed, but waiting to be planned, e.g. for a decision or a budget.
-	Planned =   "planned"    #: Decided, but not started.
-	Active =    "active"     #: Being applied.
-	Done =      "done"       #: Applied completely.
-	Abandoned = "abandoned"  #: Not applied anymore, e.g. too expensive or without effect.
+	OnHold =    1        #: Proposed, but waiting to be planned, e.g. for a decision or a budget.
+	Planned =   2        #: Decided, but not started.
+	Active =    3        #: Being applied.
+	Done =      4        #: Applied completely.
+	Abandoned = 5        #: Not applied anymore, e.g. too expensive or without effect.
 
-	DEFAULT =   Planned      #: The state of a newly decided mitigation.
+	DEFAULT =   Planned  #: The state of a newly decided mitigation.
 
 
 @export
@@ -259,7 +261,7 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 
 	def __init__(
 		self,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -272,8 +274,6 @@ class Base(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the risk register containing this element. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		"""
 		super().__init__(keyValuePairs)
@@ -364,7 +364,7 @@ class RiskManagement(Base):
 		self,
 		version: SemanticVersion,
 		name: Nullable[str] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> None:
 		"""
 		Initializes an empty risk register of a version.
@@ -373,8 +373,6 @@ class RiskManagement(Base):
 		:param name:          Optional, the name of the risk register, e.g. the project's name. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:   If parameter ``version`` is ``None``.
 		:raises TypeError:    If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
@@ -653,7 +651,7 @@ class BaseWithID(Base):
 		self,
 		identifier: str,
 		description: str,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -665,8 +663,6 @@ class BaseWithID(Base):
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the risk register containing this element. Default: ``None``.
 		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:   If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:    If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		:raises ValueError:   If parameter ``identifier`` is ``None``.
 		:raises TypeError:    If parameter ``identifier`` isn't of type :class:`str`.
@@ -915,7 +911,7 @@ class Implication(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		description: str,
 		implications: Nullable[Iterable[Implication]] = None,
 		mitigations: Nullable[Iterable[Mitigation]] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -929,8 +925,6 @@ class Implication(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:param keyValuePairs:               Optional, the key-value pairs. Default: ``None``.
 		:param parent:                      Optional, the risk register containing the implication. Default: ``None``.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                  If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		:raises ValueError:                 If parameter ``identifier`` is ``None``.
 		:raises TypeError:                  If parameter ``identifier`` isn't of type :class:`str`.
@@ -994,7 +988,7 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 		implications: Nullable[Iterable[Implication]] = None,
 		kind: MitigationKind = MitigationKind.Prevent,
 		state: MitigationState = MitigationState.Planned,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -1011,8 +1005,6 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 		:param keyValuePairs:               Optional, the key-value pairs. Default: ``None``.
 		:param parent:                      Optional, the risk register containing the mitigation. Default: ``None``.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                  If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		:raises ValueError:                 If parameter ``identifier`` is ``None``.
 		:raises TypeError:                  If parameter ``identifier`` isn't of type :class:`str`.
@@ -1092,12 +1084,12 @@ class Mitigation(BaseWithID, ImplicationsMixin):
 		"""
 		Return a representation of the mitigation for debugging.
 
-		A planned, preventing mitigation ``M1`` with 1 side effect reads ``<Mitigation M1: prevent, planned,
+		A planned, preventing mitigation ``M1`` with 1 side effect reads ``<Mitigation M1: Prevent, Planned,
 		1 implications>``.
 
 		:returns: The mitigation's ID, kind, state and number of implications.
 		"""
-		return f"<Mitigation {self._id}: {self._kind}, {self._state}, {len(self._implications)} implications>"
+		return f"<Mitigation {self._id}: {self._kind.name}, {self._state.name}, {len(self._implications)} implications>"
 
 
 # A class with a property named like a class - ``Probability``, ``Impact`` - can't name that class in the annotation of
@@ -1137,7 +1129,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		mitigations: Nullable[Iterable[Mitigation]] = None,
 		owner: Nullable[Person] = None,
 		nextReview: Nullable[datetime] = None,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None,
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
 		*,
 		parent: Nullable[RiskManagement] = None
 	) -> None:
@@ -1159,8 +1151,6 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:param keyValuePairs:               Optional, the key-value pairs. Default: ``None``.
 		:param parent:                      Optional, the risk register containing the risk. Default: ``None``.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises TypeError:                  If parameter ``parent`` isn't of type :class:`RiskManagement`.
 		:raises ValueError:                 If parameter ``identifier`` is ``None``.
 		:raises TypeError:                  If parameter ``identifier`` isn't of type :class:`str`.
@@ -1444,7 +1434,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		return self._inboundLinks
 
-	def LinkTo(self, destination: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
+	def LinkTo(self, destination: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[Hashable, Any]] = None) -> Link:
 		"""
 		Create an outbound link from this risk to the given risk.
 
@@ -1453,8 +1443,6 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:param keyValuePairs:               Optional, the key-value pairs of the link. Default: ``None``.
 		:returns:                           The link from this risk to the destination.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises NotInSameRiskRegisterError: If this risk isn't part of a risk register.
 		:raises ValueError:                 If parameter ``destination`` is ``None``.
 		:raises TypeError:                  If parameter ``destination`` isn't of type :class:`Risk`.
@@ -1471,7 +1459,7 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		return Link(self, destination, kind, keyValuePairs)
 
-	def LinkFrom(self, source: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[str, Any]] = None) -> Link:
+	def LinkFrom(self, source: Risk, kind: LinkKind, keyValuePairs: Nullable[Mapping[Hashable, Any]] = None) -> Link:
 		"""
 		Create an inbound link from the given risk to this risk.
 
@@ -1481,8 +1469,6 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		:returns:                           The link from the source to this risk.
 		:raises ValueError:                 If parameter ``source`` is this risk.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:                 If parameter ``source`` is ``None``.
 		:raises TypeError:                  If parameter ``source`` isn't of type :class:`Risk`.
 		:raises NotInSameRiskRegisterError: If parameter ``source`` isn't part of a risk register.
@@ -1507,13 +1493,14 @@ class Risk(BaseWithID, ImplicationsMixin, MitigationsMixin):
 		"""
 		Return a representation of the risk for debugging.
 
-		An open risk ``R1`` of medium probability and high impact reads ``<Risk R1: open, probability medium,
-		impact high, level medium>``.
+		An open risk ``R1`` of medium probability and high impact reads ``<Risk R1: Open, probability Medium,
+		impact High, level Medium>``.
 
 		:returns: The risk's ID, state, probability, impact and level.
 		"""
 		return (
-			f"<Risk {self._id}: {self._state}, probability {self._probability}, impact {self._impact}, level {self.Level}>"
+			f"<Risk {self._id}: {self._state.name}, probability {self._probability.name}, impact {self._impact.name}, "
+			f"level {self.Level.name}>"
 		)
 
 
@@ -1536,7 +1523,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		source: Risk,
 		destination: Risk,
 		kind: LinkKind,
-		keyValuePairs: Nullable[Mapping[str, Any]] = None
+		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None
 	) -> None:
 		"""
 		Initializes a link, and adds it to its source, its destination and their risk register.
@@ -1546,8 +1533,6 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param kind:                        The relationship the link states.
 		:param keyValuePairs:               Optional, the key-value pairs. Default: ``None``.
 		:raises TypeError:                  If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                  If parameter ``keyValuePairs`` contains a key not of type :class:`str`.
-		:raises ValueError:                 If parameter ``keyValuePairs`` contains an empty key.
 		:raises ValueError:                 If parameter ``source`` is ``None``.
 		:raises TypeError:                  If parameter ``source`` isn't of type :class:`Risk`.
 		:raises NotInSameRiskRegisterError: If parameter ``source`` isn't part of a risk register.
@@ -1596,7 +1581,7 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 
 		for link in source._outboundLinks:
 			if link._destination is destination and link._kind is kind:
-				raise DuplicateLinkError(f"Risk '{source._id}' already has a '{kind}' link to risk '{destination._id}'.")
+				raise DuplicateLinkError(f"Risk '{source._id}' already has a '{kind.name}' link to risk '{destination._id}'.")
 
 		self._source =      source
 		self._destination = destination
@@ -1638,8 +1623,8 @@ class Link(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		"""
 		Return a representation of the link for debugging.
 
-		A link stating risk ``R1`` causes risk ``R2`` reads ``<Link R1 causes R2>``.
+		A link stating risk ``R1`` causes risk ``R2`` reads ``<Link R1 Causes R2>``.
 
 		:returns: The IDs of the source and the destination, and the link's kind.
 		"""
-		return f"<Link {self._source._id} {self._kind} {self._destination._id}>"
+		return f"<Link {self._source._id} {self._kind.name} {self._destination._id}>"

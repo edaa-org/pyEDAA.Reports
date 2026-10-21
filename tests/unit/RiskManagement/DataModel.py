@@ -55,41 +55,31 @@ VERSION = SemanticVersion(1, 0, 0)  #: Version of the risk registers of the test
 
 class Enumerations(Testcase):
 	def test_Probability(self) -> None:
-		self.assertIs(Probability.Occurred, Probability.Parse("occurred"))
-		self.assertIsNone(Probability.Parse(None))
-		self.assertEqual(["low", "medium", "high", "occurred"], [str(probability) for probability in Probability])
+		self.assertEqual(["Low", "Medium", "High", "Occurred"], [probability.name for probability in Probability])
 
 	def test_Impact(self) -> None:
-		self.assertIs(Impact.Critical, Impact.Parse("critical"))
-		self.assertEqual(["low", "medium", "high", "critical"], [str(impact) for impact in Impact])
+		self.assertEqual(["Low", "Medium", "High", "Critical"], [impact.name for impact in Impact])
 
 	def test_RiskState(self) -> None:
-		self.assertIs(RiskState.OnHold, RiskState.Parse("on-hold"))
-		self.assertIs(RiskState.Open, RiskState.Parse(None))
 		self.assertIs(RiskState.Open, RiskState.DEFAULT)
-		self.assertEqual(["open", "on-hold", "closed", "solved"], [str(state) for state in RiskState])
+		self.assertEqual(["Open", "OnHold", "Closed", "Solved"], [state.name for state in RiskState])
 
 	def test_LinkKind(self) -> None:
-		self.assertIs(LinkKind.DependsOn, LinkKind.Parse("depends-on"))
-		self.assertIs(LinkKind.Related, LinkKind.Parse(None))
+		self.assertIs(LinkKind.Related, LinkKind.DEFAULT)
 
 	def test_Rank(self) -> None:
 		self.assertEqual([1, 2, 3, 4], [probability.Rank for probability in Probability])
 		self.assertEqual([1, 2, 3, 4], [impact.Rank for impact in Impact])
 
 	def test_RiskLevel(self) -> None:
-		self.assertIs(RiskLevel.Critical, RiskLevel.Parse("critical"))
-		self.assertEqual(["low", "medium", "high", "critical"], [str(level) for level in RiskLevel])
+		self.assertEqual(["Low", "Medium", "High", "Critical"], [level.name for level in RiskLevel])
 
 	def test_MitigationKind(self) -> None:
-		self.assertIs(MitigationKind.Contingency, MitigationKind.Parse("contingency"))
-		self.assertIs(MitigationKind.Prevent, MitigationKind.Parse(None))
+		self.assertIs(MitigationKind.Prevent, MitigationKind.DEFAULT)
 
 	def test_MitigationState(self) -> None:
-		self.assertIs(MitigationState.OnHold, MitigationState.Parse("on-hold"))
-		self.assertIs(MitigationState.Abandoned, MitigationState.Parse("abandoned"))
-		self.assertIs(MitigationState.Planned, MitigationState.Parse(None))
-		self.assertEqual(["on-hold", "planned", "active", "done", "abandoned"], [str(state) for state in MitigationState])
+		self.assertIs(MitigationState.Planned, MitigationState.DEFAULT)
+		self.assertEqual(["OnHold", "Planned", "Active", "Done", "Abandoned"], [state.name for state in MitigationState])
 
 
 class RiskManagementInstantiation(Testcase):
@@ -161,7 +151,7 @@ class ElementInstantiation(Testcase):
 		self.assertEqual(6, risk.Score)
 		self.assertIs(RiskLevel.Medium, risk.Level)
 		self.assertEqual(0, len(risk))
-		self.assertEqual("<Risk R1: open, probability medium, impact high, level medium>", repr(risk))
+		self.assertEqual("<Risk R1: Open, probability Medium, impact High, level Medium>", repr(risk))
 
 	def test_Risk_Assessment(self) -> None:
 		"""Probability, impact and state are reassessed by assignment."""
@@ -234,7 +224,7 @@ class ElementInstantiation(Testcase):
 		self.assertEqual({"I1": sideEffect}, mitigation.Implications)
 		self.assertIs(MitigationKind.Prevent, mitigation.Kind)
 		self.assertIs(MitigationState.Planned, mitigation.State)
-		self.assertEqual("<Mitigation M1: prevent, planned, 1 implications>", repr(mitigation))
+		self.assertEqual("<Mitigation M1: Prevent, Planned, 1 implications>", repr(mitigation))
 
 	def test_References_ParameterChecks(self) -> None:
 		implication = Implication("I1", "The tape-out is delayed.")
@@ -489,7 +479,7 @@ class Links(Testcase):
 		self.assertIs(board, causes.Destination)
 		self.assertIs(LinkKind.Causes, causes.Kind)
 		self.assertEqual("v1.0.0", causes["since"])
-		self.assertEqual("<Link R1 causes R2>", repr(causes))
+		self.assertEqual("<Link R1 Causes R2>", repr(causes))
 
 		self.assertEqual([causes, related], foundry.OutboundLinks)
 		self.assertEqual([depends], foundry.InboundLinks)
@@ -580,7 +570,7 @@ class Links(Testcase):
 		with self.assertRaises(DuplicateLinkError) as context:
 			_ = Link(foundry, board, LinkKind.Causes)
 
-		self.assertEqual("Risk 'R1' already has a 'causes' link to risk 'R2'.", str(context.exception))
+		self.assertEqual("Risk 'R1' already has a 'Causes' link to risk 'R2'.", str(context.exception))
 		self.assertEqual([link], foundry.OutboundLinks)
 		self.assertEqual([link], board.InboundLinks)
 		self.assertEqual([link], register.Links)

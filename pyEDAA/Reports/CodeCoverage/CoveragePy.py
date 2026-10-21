@@ -63,14 +63,14 @@ the keyword parameter ``parent`` and is added to it. Its class method ``Parse`` 
 """
 from __future__                  import annotations
 
-from datetime                    import datetime, timedelta
-from enum                        import IntEnum
+from datetime                    import datetime
+from enum                        import Enum, IntEnum
 from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from typing                      import Any, Iterable, Optional as Nullable, Self
 
 from jsonschema                  import Draft202012Validator
-from pyTooling.Common            import getFullyQualifiedName, readResourceFile, StringEnum
+from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
 from pyTooling.MetaClasses       import ExtendedType, abstractclass
@@ -524,15 +524,15 @@ class Base(metaclass=ExtendedType, slots=True):
 
 
 @export
-class RegionKind(StringEnum):
+class RegionKind(Enum):
 	"""
-	Kind of a region of a file, as coverage.py names it: a function or a class.
+	Kind of a region of a file: a function or a class.
 
 	A file states its regions of each kind in their own JSON object: ``functions`` and ``classes``.
 	"""
 
-	Function = "function"  #: A function or a method, listed in ``functions``.
-	Class =    "class"     #: A class, listed in ``classes``.
+	Function = 1  #: A function or a method, listed in ``functions``.
+	Class =    2  #: A class, listed in ``classes``.
 
 
 @export
@@ -627,7 +627,7 @@ class Region(Base):
 
 			regions = parent._functions if kind is RegionKind.Function else parent._classes
 			if name in regions:
-				raise ValueError(f"Parameter 'parent' contains {kind} '{name}' already.")
+				raise ValueError(f"Parameter 'parent' contains {kind.name.lower()} '{name}' already.")
 
 		self._parent =    parent
 		self._name =      name
@@ -1046,9 +1046,7 @@ class Document(cc_Document, Report):
 
 			self._jsonDocument = jsonDocument
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._analysisDuration = sw.Duration
-		self._analysisDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._analysisDuration = sw.Duration
 
 	def Convert(self) -> None:
 		"""
@@ -1092,9 +1090,7 @@ class Document(cc_Document, Report):
 			for name, record in self._jsonDocument["files"].items():
 				File.Parse(name, record, parent=self)
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._conversionDuration = sw.Duration
-		self._conversionDuration = timedelta(microseconds=sw.DurationInNanoseconds / 1000)
+		self._conversionDuration = sw.Duration
 
 	def ToCoverageSummary(self) -> CoverageSummary:
 		"""
@@ -1171,7 +1167,7 @@ class Document(cc_Document, Report):
 			parent=parent
 		)
 
-		for kind, regions in (("class", file._classes), ("function", file._functions)):
+		for kind, regions in ((RegionKind.Class, file._classes), (RegionKind.Function, file._functions)):
 			for name in sorted(regions):
 				region = regions[name]
 				*outerNames, ownName = name.split(".")
@@ -1185,7 +1181,7 @@ class Document(cc_Document, Report):
 				if container is None or ownName in container._units:
 					continue
 
-				if kind == "class":
+				if kind is RegionKind.Class:
 					unitClass: type[cc_Unit] = cc_Class
 				elif isinstance(container, cc_Class):
 					unitClass = cc_Method

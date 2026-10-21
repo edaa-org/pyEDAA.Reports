@@ -180,9 +180,7 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 		with Stopwatch() as stopwatch:
 			self._coverageReport = analyze(self._moduleFiles, show_progress=False)
 
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._analysisDuration = stopwatch.Duration
-		self._analysisDuration = timedelta(microseconds=stopwatch.DurationInNanoseconds / 1000)
+		self._analysisDuration = stopwatch.Duration
 		return self._coverageReport
 
 	def Convert(self) -> DocumentationReport:
@@ -264,8 +262,6 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 			report.Aggregate()
 
 		report._analysisDuration = self._analysisDuration
-		# WORKAROUND: pyTooling <10.0.0rc4
-		# self._conversionDuration = stopwatch.Duration
-		self._conversionDuration = timedelta(microseconds=stopwatch.DurationInNanoseconds / 1000)
+		self._conversionDuration = stopwatch.Duration
 
 		return report

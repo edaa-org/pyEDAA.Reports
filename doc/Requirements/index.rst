@@ -71,20 +71,20 @@ it is mandatory or optional, by the levels of ISO/IEC/IEEE 29148 and RFC 2119:
    * - Obligation
      - Keyword
      - Meaning
-   * - ``mandatory``
+   * - ``Mandatory``
      - *shall*, *must*
      - Binding; the default.
-   * - ``recommended``
+   * - ``Recommended``
      - *should*
      - A goal; a deviation is justified.
-   * - ``optional``
+   * - ``Optional``
      - *may*
      - A permission.
 
-Its :class:`ItemState` follows its life cycle from ``placeholder`` over ``draft``, ``in-review``, ``final`` and
-``implemented`` to ``verified``; a new requirement is a ``draft``. A verified requirement is ``closed``, when it is
-released and changes no more, e.g. in a baseline. At any time, a requirement can be ``rejected`` or become
-``obsolete``.
+Its :class:`ItemState` follows its life cycle from ``Placeholder`` over ``Draft``, ``InReview``, ``Final`` and
+``Implemented`` to ``Verified``; a new requirement is a ``Draft``. A verified requirement is ``Closed``, when it is
+released and changes no more, e.g. in a baseline. At any time, a requirement can be ``Rejected`` or become
+``Obsolete``.
 
 A requirement belongs to at most one :class:`Layer`: the requirements of one engineering discipline, e.g. electrical,
 mechanical, FPGA firmware or software. A layer partitions the requirements; a selection across layers - e.g. the
@@ -145,21 +145,21 @@ parameters of the link's constructor.
 
    * - Link kind
      - The source ...
-   * - ``refines``
+   * - ``Refines``
      - states the destination in more detail, outside the item hierarchy.
-   * - ``derives-from``
+   * - ``DerivesFrom``
      - is derived from the destination, e.g. a firmware requirement from an electrical one.
-   * - ``counterpart-of``
+   * - ``CounterpartOf``
      - is the destination's counterpart in another layer.
-   * - ``depends-on``
+   * - ``DependsOn``
      - can only be met, if the destination is met.
-   * - ``conflicts-with``
+   * - ``ConflictsWith``
      - can't be met together with the destination.
-   * - ``duplicates``
+   * - ``Duplicates``
      - states the same as the destination.
-   * - ``replaces``
+   * - ``Replaces``
      - replaces the destination, which is obsolete.
-   * - ``relates-to``
+   * - ``RelatesTo``
      - has any other relationship to the destination.
 
 A source has one link of a kind to a destination. :meth:`~BaseItem.IterateOutboundLinks` and

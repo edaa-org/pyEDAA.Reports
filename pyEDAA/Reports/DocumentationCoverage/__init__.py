@@ -59,11 +59,11 @@ An item's :class:`CoverageState` says, whether it is documented, and whether it 
 from __future__            import annotations
 
 from datetime              import timedelta
-from enum                  import Flag
+from enum                  import Enum, Flag
 from pathlib               import Path
 from typing                import Callable, ClassVar, Generator, Iterator, Optional as Nullable
 
-from pyTooling.Common      import getFullyQualifiedName, StringEnum
+from pyTooling.Common      import getFullyQualifiedName, getTypeName
 from pyTooling.Decorators  import export, readonly
 from pyTooling.Exceptions  import AlreadyInHierarchyError, DuplicateElementError
 from pyTooling.MetaClasses import ExtendedType, abstractmethod
@@ -107,6 +107,30 @@ class SourceFileWarning(CriticalWarning):
 	   :exc:`~pyTooling.Warning.UnhandledCriticalWarningError`.
 	"""
 
+	_file: Nullable[_File]  #: The report's file of the source file.
+
+	def __init__(self, message: str, /, *, file: Nullable[_File] = None) -> None:
+		"""
+		Initializes the warning with the report's file of the source file that can't be analyzed.
+
+		:param message: The warning's message.
+		:param file:    Optional, the report's file of the source file.
+		"""
+		super().__init__(message)
+		self._file = file
+
+	@readonly
+	def File(self) -> Nullable[_File]:
+		"""
+		Read-only property to access the report's file of the source file that can't be analyzed (:attr:`_file`).
+
+		Its path, relative to the analyzed directory, is
+		:attr:`File.Path <pyEDAA.Reports.DocumentationCoverage.File.Path>`.
+
+		:returns: The file, or ``None`` if it wasn't recorded.
+		"""
+		return self._file
+
 
 @export
 class CoverageState(Flag):
@@ -145,7 +169,7 @@ class CoverageState(Flag):
 
 
 @export
-class ItemCategory(StringEnum):
+class ItemCategory(Enum):
 	"""
 	The category of a documentable item, shared by all languages.
 
@@ -153,21 +177,21 @@ class ItemCategory(StringEnum):
 	down the same way.
 	"""
 
-	Container = "container"  #: Contains other items, e.g. a package, a module, a namespace or a VHDL entity.
-	Type =      "type"       #: Declares a type, e.g. a class, a struct, an enumeration or a type alias.
-	Callable =  "callable"   #: Can be called, e.g. a function, a method, a procedure or a property.
-	Field =     "field"      #: Data of a type, e.g. a class' field, a record's element or an enumeration's member.
-	Variable =  "variable"   #: Data of a container, whose value can change, e.g. a module's variable or a VHDL signal.
-	Constant =  "constant"   #: Data of a container, whose value can't change, e.g. a constant of C or VHDL.
-	Generic =   "generic"    #: A compile-time parameter, e.g. a VHDL generic or a C++ template parameter.
-	Parameter = "parameter"  #: A run-time parameter declared as an item of its own, e.g. a VHDL port.
-	Other =     "other"      #: Belongs to no other category.
+	Container = 1      #: Contains other items, e.g. a package, a module, a namespace or a VHDL entity.
+	Type =      2      #: Declares a type, e.g. a class, a struct, an enumeration or a type alias.
+	Callable =  3      #: Can be called, e.g. a function, a method, a procedure or a property.
+	Field =     4      #: Data of a type, e.g. a class' field, a record's element or an enumeration's member.
+	Variable =  5      #: Data of a container, whose value can change, e.g. a module's variable or a VHDL signal.
+	Constant =  6      #: Data of a container, whose value can't change, e.g. a constant of C or VHDL.
+	Generic =   7      #: A compile-time parameter, e.g. a VHDL generic or a C++ template parameter.
+	Parameter = 8      #: A run-time parameter declared as an item of its own, e.g. a VHDL port.
+	Other =     9      #: Belongs to no other category.
 
-	DEFAULT =   Other        #: The category of an item, which belongs to no other category.
+	DEFAULT =   Other  #: The category of an item, which belongs to no other category.
 
 
 @export
-class ItemKind(StringEnum):
+class ItemKind(Enum):
 	"""
 	The kind of a documentable item: the language construct it is.
 
@@ -176,57 +200,57 @@ class ItemKind(StringEnum):
 	(:attr:`Category`).
 	"""
 
-	Library =           "library"             #: A library of design units, e.g. a VHDL library.
-	Package =           "package"             #: A package, e.g. of Python, Java or Go, or a VHDL package.
-	PackageBody =       "package-body"        #: The body of a VHDL package.
-	Namespace =         "namespace"           #: A namespace, e.g. of C++ or TCL.
-	Module =            "module"              #: A module, e.g. a Python module.
-	SourceFile =        "source-file"         #: A source file, where the file is the language's unit, e.g. in C.
-	Entity =            "entity"              #: A VHDL entity.
-	Architecture =      "architecture"        #: A VHDL architecture.
-	Configuration =     "configuration"       #: A VHDL configuration.
-	Context =           "context"             #: A VHDL context.
+	Library =           1      #: A library of design units, e.g. a VHDL library.
+	Package =           2      #: A package, e.g. of Python, Java or Go, or a VHDL package.
+	PackageBody =       3      #: The body of a VHDL package.
+	Namespace =         4      #: A namespace, e.g. of C++ or TCL.
+	Module =            5      #: A module, e.g. a Python module.
+	SourceFile =        6      #: A source file, where the file is the language's unit, e.g. in C.
+	Entity =            7      #: A VHDL entity.
+	Architecture =      8      #: A VHDL architecture.
+	Configuration =     9      #: A VHDL configuration.
+	Context =           10     #: A VHDL context.
 
-	Class =             "class"               #: A class.
-	Struct =            "struct"              #: A structure, e.g. of C, C++ or Go.
-	Union =             "union"               #: A union of C or C++.
-	Interface =         "interface"           #: An interface, e.g. of Java or Go.
-	Enumeration =       "enumeration"         #: An enumeration.
-	Record =            "record"              #: A record, e.g. of Java or a VHDL record type.
-	Type =              "type"                #: Any other type declaration, e.g. a VHDL type or subtype.
-	TypeAlias =         "type-alias"          #: A type alias, e.g. a C ``typedef`` or Python's ``type`` statement.
-	TypeVariable =      "type-variable"       #: A type variable, e.g. Python's ``TypeVar``.
-	Component =         "component"           #: A VHDL component declaration.
+	Class =             11     #: A class.
+	Struct =            12     #: A structure, e.g. of C, C++ or Go.
+	Union =             13     #: A union of C or C++.
+	Interface =         14     #: An interface, e.g. of Java or Go.
+	Enumeration =       15     #: An enumeration.
+	Record =            16     #: A record, e.g. of Java or a VHDL record type.
+	Type =              17     #: Any other type declaration, e.g. a VHDL type or subtype.
+	TypeAlias =         18     #: A type alias, e.g. a C ``typedef`` or Python's ``type`` statement.
+	TypeVariable =      19     #: A type variable, e.g. Python's ``TypeVar``.
+	Component =         20     #: A VHDL component declaration.
 
-	Function =          "function"            #: A function.
-	Method =            "method"              #: A method of a type.
-	Constructor =       "constructor"         #: A type's constructor, e.g. Python's ``__init__``.
-	Destructor =        "destructor"          #: A type's destructor, e.g. of C++, or Python's ``__del__``.
-	Property =          "property"            #: A property: a method accessed like a field.
-	Procedure =         "procedure"           #: A procedure, e.g. of VHDL or TCL.
-	Macro =             "macro"               #: A preprocessor macro, e.g. of C.
-	Process =           "process"             #: A VHDL process.
+	Function =          21     #: A function.
+	Method =            22     #: A method of a type.
+	Constructor =       23     #: A type's constructor, e.g. Python's ``__init__``.
+	Destructor =        24     #: A type's destructor, e.g. of C++, or Python's ``__del__``.
+	Property =          25     #: A property: a method accessed like a field.
+	Procedure =         26     #: A procedure, e.g. of VHDL or TCL.
+	Macro =             27     #: A preprocessor macro, e.g. of C.
+	Process =           28     #: A VHDL process.
 
-	Field =             "field"               #: A field of a type, e.g. a class' field or a record's element.
-	EnumerationMember = "enumeration-member"  #: A member of an enumeration.
+	Field =             29     #: A field of a type, e.g. a class' field or a record's element.
+	EnumerationMember = 30     #: A member of an enumeration.
 
-	Variable =          "variable"            #: A variable of a container, e.g. a module's variable.
-	Signal =            "signal"              #: A VHDL signal.
-	FileObject =        "file-object"         #: A file object, e.g. declared by a VHDL file declaration.
-	Constant =          "constant"            #: A constant.
+	Variable =          31     #: A variable of a container, e.g. a module's variable.
+	Signal =            32     #: A VHDL signal.
+	FileObject =        33     #: A file object, e.g. declared by a VHDL file declaration.
+	Constant =          34     #: A constant.
 
-	Generic =           "generic"             #: A VHDL generic.
-	TypeParameter =     "type-parameter"      #: A type parameter, e.g. of a C++ template or a Java generic class.
-	Parameter =         "parameter"           #: A parameter declared as an item of its own, e.g. of a VHDL subprogram.
-	Port =              "port"                #: A VHDL port.
+	Generic =           35     #: A VHDL generic.
+	TypeParameter =     36     #: A type parameter, e.g. of a C++ template or a Java generic class.
+	Parameter =         37     #: A parameter declared as an item of its own, e.g. of a VHDL subprogram.
+	Port =              38     #: A VHDL port.
 
-	Alias =             "alias"               #: An alias, e.g. a VHDL alias declaration.
-	Attribute =         "attribute"           #: A VHDL attribute declaration.
-	Other =             "other"               #: Any other documentable item.
+	Alias =             39     #: An alias, e.g. a VHDL alias declaration.
+	Attribute =         40     #: A VHDL attribute declaration.
+	Other =             41     #: Any other documentable item.
 
-	DEFAULT =           Other                 #: The kind of an item, which is no other kind.
+	DEFAULT =           Other  #: The kind of an item, which is no other kind.
 
-	__CATEGORIES: ClassVar[dict[str, ItemCategory]] = {
+	__CATEGORIES: ClassVar[dict[int, ItemCategory]] = {
 		Library:           ItemCategory.Container,
 		Package:           ItemCategory.Container,
 		PackageBody:       ItemCategory.Container,
@@ -277,7 +301,7 @@ class ItemKind(StringEnum):
 
 		:returns: The kind's category.
 		"""
-		return self.__CATEGORIES[self]
+		return self.__CATEGORIES[self.value]
 
 
 @export
@@ -488,7 +512,7 @@ class Base(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 			raise ex
 		elif self._parent is not None:
-			raise AlreadyInDocumentationReportError(f"{self.__class__.__name__} already has a parent.")
+			raise AlreadyInDocumentationReportError(f"{getTypeName(self)} already has a parent.")
 
 		parent._AddElement(self)
 		self._parent = parent
@@ -1278,11 +1302,11 @@ class Item(Base):
 		"""
 		Return a representation of the item for debugging.
 
-		A method ``Area`` of class ``Circle`` in module ``Shapes`` reads ``<Item method Shapes.Circle.Area: 100.0%>``.
+		A method ``Area`` of class ``Circle`` in module ``Shapes`` reads ``<Item Method Shapes.Circle.Area: 100.0%>``.
 
 		:returns: The item's kind, qualified name and documentation coverage.
 		"""
-		return f"<Item {self._kind} {self.QualifiedName}: {self._counters.Coverage:.1%}>"
+		return f"<Item {self._kind.name} {self.QualifiedName}: {self._counters.Coverage:.1%}>"
 
 
 Item._PARENT_TYPE = (Item, DocumentationReport)
