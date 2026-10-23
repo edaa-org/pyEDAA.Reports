@@ -69,7 +69,6 @@ from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from typing                      import Any, Iterable, Optional as Nullable, Self
 
-from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
@@ -1006,6 +1005,8 @@ class Document(cc_Document, Report):
 		if not self._path.exists():
 			raise CodeCoverageError(f"coverage.py report file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
+
+		from jsonschema import Draft202012Validator
 
 		with Stopwatch() as sw:
 			try:
