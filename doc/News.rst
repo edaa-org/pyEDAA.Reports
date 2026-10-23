@@ -302,6 +302,8 @@ Version 0.20 (2026)
      :class:`~pyTooling.DataModel.KeyValuePairsMixin`, accessed with the dictionary syntax; a key is any hashable
      value.
    * Dependencies: ``wheel ~= 0.48.0``, ``lxml >= 6.1.3``, ``Coverage ~= 7.16``, ``mypy ~= 2.4``.
+   * ``ruamel.yaml`` isn't a requirement any more: no module imports it since the OSVVM YAML reader moved to
+     pyEDAA.OSVVM. The documentation requires it, for the overrides file of the dependency tables.
 
    .. rubric:: Bug Fixes
 
