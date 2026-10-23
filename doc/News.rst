@@ -289,7 +289,9 @@ Version 0.20 (2026)
        :class:`~pyEDAA.Reports.RiskManagement.MitigationState`.
 
    * Every module with code carries ``from __future__ import annotations`` and writes forward references unquoted.
-   * New requirement ``jsonschema ~= 4.26`` for the JSON Schemas of JSON report formats.
+   * New requirement ``jsonschema ~= 4.26`` for the JSON Schemas of JSON report formats. A JSON reader imports it in
+     ``Analyze()``, before measuring the analysis duration: importing a reader or :mod:`pyEDAA.Reports.CLI` doesn't
+     load it.
    * The ``test`` extra describes every test level: :file:`tests/requirements.txt` includes
      :file:`tests/app/requirements.txt`.
    * Python 3.15 is supported and listed in the classifiers.
@@ -335,6 +337,10 @@ Version 0.20 (2026)
    * :program:`pyedaa-reports` ``unittest``: an unreadable or missing input file crashed with a :exc:`TypeError`, a
      fatal error ended with exit code 0, an absolute file pattern raised :exc:`NotImplementedError`, and a failed
      write was announced as written. They end with a message and a non-zero exit code now.
+   * :mod:`pyEDAA.Reports.DocumentationCoverage.DocStrCoverage` failed to import without docstr_coverage, which
+     isn't a requirement of pyEDAA.Reports. The module imports without it;
+     :meth:`~pyEDAA.Reports.DocumentationCoverage.DocStrCoverage.DocStrCoverage.Analyze` raises a
+     :exc:`~pyTooling.Exceptions.MissingDependencyError`.
 
    .. rubric:: Documentation
 

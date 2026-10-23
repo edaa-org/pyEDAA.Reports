@@ -47,16 +47,19 @@ from __future__                           import annotations
 
 from datetime                             import timedelta
 from pathlib                              import Path
-from typing                               import Optional as Nullable
+from typing                               import TYPE_CHECKING, Optional as Nullable
 
-from docstr_coverage                      import analyze, ResultCollection
-from docstr_coverage.result_collection    import ExpectedDocstring
 from pyTooling.Common                     import getFullyQualifiedName
 from pyTooling.Decorators                 import export, readonly
+from pyTooling.Exceptions                 import MissingDependencyError
 from pyTooling.MetaClasses                import ExtendedType
 from pyTooling.Stopwatch                  import Stopwatch
 
 from pyEDAA.Reports.DocumentationCoverage import CoverageState, DocCoverageError, DocumentationReport, Item, ItemKind
+
+if TYPE_CHECKING:
+	from docstr_coverage                    import ResultCollection
+	from docstr_coverage.result_collection  import ExpectedDocstring
 
 
 @export
@@ -175,8 +178,14 @@ class DocStrCoverage(metaclass=ExtendedType, slots=True):
 		"""
 		Run docstr_coverage's analysis on the Python source files found, and measure its duration.
 
-		:returns: The analyzer's result collection.
+		:returns:                       The analyzer's result collection.
+		:raises MissingDependencyError: If docstr_coverage isn't installed.
 		"""
+		try:
+			from docstr_coverage import analyze
+		except ImportError as ex:
+			raise MissingDependencyError(dependency="docstr_coverage") from ex
+
 		with Stopwatch() as stopwatch:
 			self._coverageReport = analyze(self._moduleFiles, show_progress=False)
 

@@ -85,7 +85,6 @@ from pathlib                     import Path
 from re                          import match
 from typing                      import Any, ClassVar, Generic, Iterable, Optional as Nullable, Self, TypeVar
 
-from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
@@ -2216,6 +2215,8 @@ class Document(cc_Document, Report):
 		if not self._path.exists():
 			raise CodeCoverageError(f"LLVM coverage export file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
+
+		from jsonschema import Draft202012Validator
 
 		with Stopwatch() as sw:
 			try:

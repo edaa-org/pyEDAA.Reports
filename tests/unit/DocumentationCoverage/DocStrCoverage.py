@@ -31,8 +31,12 @@
 #
 """Unit tests of the converter of docstr_coverage's analysis to the documentation coverage model."""
 from datetime                                            import timedelta
+from importlib                                           import import_module
 from pathlib                                             import Path
+from sys                                                 import modules as sys_modules
+from unittest.mock                                       import patch
 
+from pyTooling.Exceptions                                import MissingDependencyError
 from pyTooling.Testing                                   import Testcase
 
 from pyEDAA.Reports.DocumentationCoverage                import CoverageState, ItemKind
@@ -158,3 +162,25 @@ class Analyze(Testcase):
 		with self.assertRaises(TypeError) as context:
 			_ = DocStrCoverage("MyPackage", "tests/packages/documented")
 		self.assertEqual("Parameter 'directory' is not of type 'Path'.", str(context.exception))
+
+
+class MissingDependency(Testcase):
+	def test_Analyze(self) -> None:
+		"""Without docstr_coverage, the module imports and ``Analyze()`` raises a :exc:`MissingDependencyError`."""
+		moduleName = "pyEDAA.Reports.DocumentationCoverage.DocStrCoverage"
+		package =    sys_modules["pyEDAA.Reports.DocumentationCoverage"]
+
+		with patch.dict(sys_modules, {"docstr_coverage": None}), patch.object(package, "DocStrCoverage"):
+			del sys_modules[moduleName]
+			module = import_module(moduleName)
+
+			docStrCov = module.DocStrCoverage("MyPackage", Path("tests/packages/documented"))
+			with self.assertRaises(MissingDependencyError) as context:
+				docStrCov.Analyze()
+
+		self.assertEqual("Optional dependency 'docstr_coverage' not installed.", str(context.exception))
+		self.assertEqual("docstr_coverage", context.exception.Dependency)
+		self.assertIsNone(context.exception.Extra)
+		self.assertIsInstance(context.exception.__cause__, ImportError)
+		self.assertIsNone(docStrCov.CoverageReport)
+		self.assertIsNot(module, sys_modules[moduleName])
