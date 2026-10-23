@@ -35,7 +35,6 @@ The CLI command ``coverage``: read a code coverage report of any supported forma
 from __future__ import annotations
 
 from argparse import Namespace
-from pathlib  import Path
 from typing   import Dict, Type
 
 from pyTooling.Attributes.ArgParse            import CommandHandler, splitFormat
