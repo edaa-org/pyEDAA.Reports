@@ -19,6 +19,3 @@ pyTooling.Sphinx @ git+https://github.com/pyTooling/pyTooling.Sphinx.git@dev
 
 # Directive 'dependency-table': package overrides file (YAML)
 ruamel.yaml ~= 0.19.1
-
-# Domain 'report': documentation coverage
-docstr_coverage ~= 2.3
