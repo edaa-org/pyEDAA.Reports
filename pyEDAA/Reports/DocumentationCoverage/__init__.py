@@ -53,8 +53,6 @@ An item's :class:`CoverageState` says, whether it is documented, and whether it 
 
    :mod:`pyEDAA.Reports.DocumentationCoverage.Python`
       |rarr| The reader of Python source files.
-   :mod:`pyEDAA.Reports.DocumentationCoverage.DocStrCoverage`
-      |rarr| The converter of docstr_coverage's analysis.
 """
 from __future__            import annotations
 

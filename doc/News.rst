@@ -227,10 +227,9 @@ Version 0.20 (2026)
      :class:`~pyEDAA.Reports.DocumentationCoverage.Item` and its counters; a package's own :file:`__init__.py`
      figures are its file's counters.
 
-   * ⚠️ :class:`~pyEDAA.Reports.DocumentationCoverage.DocStrCoverage.DocStrCoverage` and
-     :exc:`~pyEDAA.Reports.DocumentationCoverage.DocStrCoverage.DocStrCoverageError` moved from
-     :mod:`~pyEDAA.Reports.DocumentationCoverage.Python` to :mod:`pyEDAA.Reports.DocumentationCoverage.DocStrCoverage`;
-     ``SearchDirectories`` is renamed ``SearchDirectory``. Import from the new module; there is no alias.
+   * ⚠️ :mod:`pyEDAA.Reports.DocumentationCoverage.Python`: ``DocStrCoverage`` and ``DocStrCoverageError``, the
+     wrapper of docstr_coverage, are removed. Use :class:`~pyEDAA.Reports.DocumentationCoverage.Python.Analyzer`,
+     which reads the source code itself.
 
    .. rubric:: Changes
 
@@ -239,10 +238,9 @@ Version 0.20 (2026)
      :class:`~pyEDAA.Reports.DocumentationCoverage.DocumentationReport`,
      :class:`~pyEDAA.Reports.DocumentationCoverage.Directory` and
      :class:`~pyEDAA.Reports.DocumentationCoverage.File`.
-   * ⚠️ :mod:`pyEDAA.Reports.DocumentationCoverage.DocStrCoverage` is a new module holding
-     :class:`~pyEDAA.Reports.DocumentationCoverage.DocStrCoverage.DocStrCoverage`, formerly in ``.Python``.
-     ``Convert()`` returns an aggregated documentation report with an item per doc-string docstr_coverage expects;
-     before, it only set per-file counters.
+   * ⚠️ :mod:`pyEDAA.Reports.DocumentationCoverage.Python`: ``DocStrCoverage`` and ``DocStrCoverageError`` are
+     removed, and with them the use of docstr_coverage: the documentation coverage is read by
+     :class:`~pyEDAA.Reports.DocumentationCoverage.Python.Analyzer`.
    * ⚠️ :exc:`~pyEDAA.Reports.ReportException` - and with it every exception of this package - joins the pyTooling
      exception hierarchy, so ``except ExceptionBase`` covers this package like it covers ``pyEDAA.CLITool``,
      ``pyEDAA.OSVVM``, ``pyEDAA.OutputFilter`` and ``pyEDAA.ToolSetup``.
@@ -339,10 +337,6 @@ Version 0.20 (2026)
    * :program:`pyedaa-reports` ``unittest``: an unreadable or missing input file crashed with a :exc:`TypeError`, a
      fatal error ended with exit code 0, an absolute file pattern raised :exc:`NotImplementedError`, and a failed
      write was announced as written. They end with a message and a non-zero exit code now.
-   * :mod:`pyEDAA.Reports.DocumentationCoverage.DocStrCoverage` failed to import without docstr_coverage, which
-     isn't a requirement of pyEDAA.Reports. The module imports without it;
-     :meth:`~pyEDAA.Reports.DocumentationCoverage.DocStrCoverage.DocStrCoverage.Analyze` raises a
-     :exc:`~pyTooling.Exceptions.MissingDependencyError`.
 
    .. rubric:: Documentation
 
