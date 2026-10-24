@@ -49,6 +49,8 @@ from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUni
 from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document, Testsuite as ju_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Testclass as ju_Testclass, Testcase as ju_Testcase
 
+from .                                                import OUTPUT_DIRECTORY
+
 
 if __name__ == "__main__":  # pragma: no cover
 	print("ERROR: you called a testcase declaration file as an executable module.")
@@ -167,7 +169,7 @@ class Reading(Testcase):
 class Writing(Testcase):
 	"""A report of another dialect written as the logger would write it."""
 
-	_outputDirectory = Path("tests/output/JunitXmlTestLogger")
+	_outputDirectory = OUTPUT_DIRECTORY / "JunitXmlTestLogger"
 
 	@classmethod
 	def setUpClass(cls) -> None:
