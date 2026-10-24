@@ -219,7 +219,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
 		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type :class:`UserAttribute`.
 		"""
-		self._userAttributes = []
+		self._userAttributes = userAttributeList = []
 
 		if userAttributes is not None:
 			if not isinstance(userAttributes, Iterable):
@@ -233,7 +233,7 @@ class Base(metaclass=ExtendedType, slots=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(userAttribute)}'.")
 					raise ex
 
-				self._userAttributes.append(userAttribute)
+				userAttributeList.append(userAttribute)
 
 	@staticmethod
 	def _ParseUserAttributes(element: _Element) -> list[UserAttribute]:
