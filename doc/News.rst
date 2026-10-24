@@ -290,6 +290,8 @@ Version 0.20 (2026)
    * New requirement ``jsonschema ~= 4.26`` for the JSON Schemas of JSON report formats. A JSON reader imports it in
      ``Analyze()``, before measuring the analysis duration: importing a reader or :mod:`pyEDAA.Reports.CLI` doesn't
      load it.
+   * :program:`pyedaa-reports` imports the readers and writers of a command when the command runs: ``help`` and
+     ``version`` load none of them, ``unittest`` no code coverage reader, ``coverage`` no JUnit dialect.
    * The ``test`` extra describes every test level: :file:`tests/requirements.txt` includes
      :file:`tests/app/requirements.txt`.
    * Python 3.15 is supported and listed in the classifiers.
