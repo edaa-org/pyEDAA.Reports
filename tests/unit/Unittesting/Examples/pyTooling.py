@@ -38,22 +38,20 @@ from pyEDAA.Reports.Unittesting                   import MergedTestsuiteSummary,
 from pyEDAA.Reports.Unittesting.JUnit             import JUnitReaderMode
 from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit import Document
 
+from ..                                          import OUTPUT_DIRECTORY
+
 
 class PyTooling(ut_TestCase):
-	_outputDirectory = Path("tests/output/Merge_PyTooling")
+	_outputDirectory = OUTPUT_DIRECTORY / "Merge_PyTooling"
 
 	@classmethod
 	def setUpClass(cls):
 		print()
-		if cls._outputDirectory.exists():
-			print(f"Output directory '{cls._outputDirectory}' already exists.")
-			print(f"Cleaning XML files from '{cls._outputDirectory}' ...")
-			for file in cls._outputDirectory.glob("*.xml"):
-				print(f"  unlinking file: {file}")
-				file.unlink()
-		else:
-			print(f"Creating output directory '{cls._outputDirectory}' ...")
-			cls._outputDirectory.mkdir(parents=True)
+		print(f"Cleaning XML files from '{cls._outputDirectory}' ...")
+		cls._outputDirectory.mkdir(parents=True, exist_ok=True)
+		for file in cls._outputDirectory.glob("*.xml"):
+			print(f"  unlinking file: {file}")
+			file.unlink()
 
 	def test_PlatformTesting(self) -> None:
 		print()
