@@ -35,9 +35,9 @@ from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
 
 from pyEDAA.Reports              import Person
-from pyEDAA.Reports.Requirements import EventKind, HistoryEvent, ItemState, Persona, Requirement, RequirementKind
-from pyEDAA.Reports.Requirements import DuplicateRequirementError, NotInSameSpecificationError, RequirementSpecification
-from pyEDAA.Reports.Requirements import RequirementsError
+from pyEDAA.Reports.Requirements import EventKind, HistoryEvent, ItemState, Persona, Requirement, RequirementKind, \
+                                        DuplicateRequirementError, NotInSameSpecificationError, \
+                                        RequirementSpecification, RequirementsError
 
 
 if __name__ == "__main__":  # pragma: no cover

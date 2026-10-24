@@ -31,9 +31,9 @@
 """Unit tests of the requirements model: specification items, and their N:M relation to requirements."""
 from pyTooling.Testing           import Testcase
 
-from pyEDAA.Reports.Requirements import DuplicateRequirementError, DuplicateSpecificationItemError, Layer
-from pyEDAA.Reports.Requirements import NotInSameSpecificationError, Requirement, RequirementSpecification
-from pyEDAA.Reports.Requirements import SpecificationItem
+from pyEDAA.Reports.Requirements import DuplicateRequirementError, DuplicateSpecificationItemError, Layer, \
+                                        NotInSameSpecificationError, Requirement, RequirementSpecification, \
+                                        SpecificationItem
 
 from .                           import BuildSpecification, FUNCTIONAL, VERSION
 

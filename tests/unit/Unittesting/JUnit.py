@@ -34,11 +34,11 @@ from unittest import TestCase as py_TestCase, mock
 
 from lxml.etree                       import XMLSchemaParseError
 
-from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, TestsuiteKind
-from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary
-from pyEDAA.Reports.Unittesting       import Testsuite as ut_Testsuite, Testcase as ut_Testcase
-from pyEDAA.Reports.Unittesting.JUnit import UnittestError
-from pyEDAA.Reports.Unittesting.JUnit import Testcase, Testclass, Testsuite, TestsuiteSummary, Document as JUnitDocument
+from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, TestsuiteKind, \
+                                             TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, \
+                                             Testcase as ut_Testcase
+from pyEDAA.Reports.Unittesting.JUnit import UnittestError, Testcase, Testclass, Testsuite, TestsuiteSummary, \
+                                             Document as JUnitDocument
 
 from .                               import OUTPUT_DIRECTORY
 

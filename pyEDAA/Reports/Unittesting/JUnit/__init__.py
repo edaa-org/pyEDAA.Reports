@@ -98,8 +98,8 @@ from io              import BytesIO
 from pathlib         import Path
 from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
-from lxml.etree                 import XMLParser, parse, XMLSchema, ElementTree, Element, SubElement, tostring
-from lxml.etree                 import XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
+from lxml.etree                 import XMLParser, parse, XMLSchema, ElementTree, Element, SubElement, tostring, \
+                                       XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
 from pyTooling.Common           import getFullyQualifiedName, getTypeName, getResourceFile
 from pyTooling.Decorators       import export, readonly
 from pyTooling.Stopwatch        import Stopwatch
@@ -108,12 +108,11 @@ from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmetho
 from pyTooling.Tree             import Node
 
 from pyEDAA.Reports             import Resources
-from pyEDAA.Reports.Unittesting import UnittestError, AlreadyInTestsuiteError, DuplicateTestsuiteError
-from pyEDAA.Reports.Unittesting import DuplicateTestcaseError
-from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, TestsuiteKind, IterationScheme
-from pyEDAA.Reports.Unittesting import TestcaseOutputMixin
-from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
-from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut_Testcase
+from pyEDAA.Reports.Unittesting import UnittestError, AlreadyInTestsuiteError, DuplicateTestsuiteError, \
+                                       DuplicateTestcaseError, TestcaseStatus, TestsuiteStatus, TestsuiteKind, \
+                                       IterationScheme, TestcaseOutputMixin, Document as ut_Document, \
+                                       TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, \
+                                       Testcase as ut_Testcase
 
 
 @export

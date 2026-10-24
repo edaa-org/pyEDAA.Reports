@@ -41,8 +41,8 @@ from pyTooling.Common                             import getFullyQualifiedName
 from pyTooling.Decorators                         import export, readonly
 from pyTooling.MetaClasses                        import ExtendedType
 
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import UserAttribute
+from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID, \
+                                                         UserAttribute
 from pyEDAA.Reports.CodeCoverage.UCIS.ToggleBits  import ToggleBit
 
 if TYPE_CHECKING:

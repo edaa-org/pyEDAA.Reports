@@ -34,10 +34,10 @@ from pathlib                              import Path
 from pyTooling.Exceptions                 import AlreadyInHierarchyError, DuplicateElementError
 from pyTooling.Testing                    import Testcase
 
-from pyEDAA.Reports.DocumentationCoverage import AlreadyInDocumentationReportError, CoverageCounters, CoverageState
-from pyEDAA.Reports.DocumentationCoverage import Directory, DocCoverageError
-from pyEDAA.Reports.DocumentationCoverage import DocumentationReport, DuplicateDirectoryError, DuplicateFileError, File
-from pyEDAA.Reports.DocumentationCoverage import Item, ItemCategory, ItemKind
+from pyEDAA.Reports.DocumentationCoverage import AlreadyInDocumentationReportError, CoverageCounters, CoverageState, \
+                                                 Directory, DocCoverageError, DocumentationReport, \
+                                                 DuplicateDirectoryError, DuplicateFileError, File, Item, \
+                                                 ItemCategory, ItemKind
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -49,8 +49,8 @@ from __future__            import annotations
 
 from datetime              import datetime
 from enum                  import Enum, Flag
-from typing                import Any, Callable, ClassVar, Generator, Hashable, Iterable, Mapping
-from typing                import Optional as Nullable, Self
+from typing                import Any, Callable, ClassVar, Generator, Hashable, Iterable, Mapping, \
+                                  Optional as Nullable, Self
 
 from pyTooling.Common      import getFullyQualifiedName, getTypeName
 from pyTooling.DataModel   import KeyValuePairsMixin

@@ -10,8 +10,8 @@ from pyTooling.Common                         import StringEnum
 from pyTooling.Decorators                     import export
 from pyTooling.MetaClasses                    import ExtendedType
 
-from pyEDAA.Reports.Unittesting                       import UnittestError, TestsuiteKind, TestsuiteSummary, Testsuite
-from pyEDAA.Reports.Unittesting                       import Testcase, MergedTestsuiteSummary
+from pyEDAA.Reports.Unittesting                       import UnittestError, TestsuiteKind, TestsuiteSummary, \
+                                                             Testsuite, Testcase, MergedTestsuiteSummary
 
 if TYPE_CHECKING:
 	from pyEDAA.Reports.Unittesting.JUnit               import Document as AnyJUnitDocument

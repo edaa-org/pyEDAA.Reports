@@ -77,7 +77,8 @@ from __future__            import annotations
 from datetime              import timedelta, datetime
 from enum                  import Flag, IntEnum
 from pathlib               import Path
-from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, TypeVar, Mapping
+from typing                import Optional as Nullable, Dict, Iterable, Any, Tuple, Generator, Union, List, Generic, \
+                                  TypeVar, Mapping
 
 from pyTooling.Common      import getFullyQualifiedName
 from pyTooling.Decorators  import export, readonly

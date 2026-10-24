@@ -40,9 +40,9 @@ from pyTooling.Testing                     import Testcase
 
 from pyEDAA.Reports.CodeCoverage           import CodeCoverageError, LineCoverageStatus
 from pyEDAA.Reports.CodeCoverage.Cobertura import Document as CoberturaDocument
-from pyEDAA.Reports.CodeCoverage.QuestaSim import CaseBranch, CaseStatement, CoverageKind, DesignUnitData, Document
-from pyEDAA.Reports.CodeCoverage.QuestaSim import FileData, FSMState, FSMTransition, IfBranch, IfStatement, InstanceData
-from pyEDAA.Reports.CodeCoverage.QuestaSim import ReportMode, SCHEMA, Statement, Statistics, Totals
+from pyEDAA.Reports.CodeCoverage.QuestaSim import CaseBranch, CaseStatement, CoverageKind, DesignUnitData, Document, \
+                                                  FileData, FSMState, FSMTransition, IfBranch, IfStatement, \
+                                                  InstanceData, ReportMode, SCHEMA, Statement, Statistics, Totals
 
 
 if __name__ == "__main__":  # pragma: no cover

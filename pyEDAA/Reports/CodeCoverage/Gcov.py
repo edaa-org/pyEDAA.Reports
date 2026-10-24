@@ -83,9 +83,9 @@ from pyTooling.Stopwatch         import Stopwatch
 from pyTooling.Versioning        import SemanticVersion
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, CodeCoverageError, CoverageSummary
-from pyEDAA.Reports.CodeCoverage import Document as cc_Document, File as cc_File, Function as cc_Function
-from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus, SourceFile as cc_SourceFile
+from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, CodeCoverageError, CoverageSummary, \
+                                        Document as cc_Document, File as cc_File, Function as cc_Function, \
+                                        Line as cc_Line, LineCoverageStatus, SourceFile as cc_SourceFile
 
 
 __all__ = ["SCHEMAS"]

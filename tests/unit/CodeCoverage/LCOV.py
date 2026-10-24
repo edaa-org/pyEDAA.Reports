@@ -38,8 +38,8 @@ from typing                           import Callable
 from pyTooling.Testing                import Testcase
 
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.LCOV import RECORD_SYNTAX, Branch, Condition, Document
-from pyEDAA.Reports.CodeCoverage.LCOV import Function as lcov_Function, Line, Section
+from pyEDAA.Reports.CodeCoverage.LCOV import RECORD_SYNTAX, Branch, Condition, Document, Function as lcov_Function, \
+                                             Line, Section
 
 
 if __name__ == "__main__":  # pragma: no cover

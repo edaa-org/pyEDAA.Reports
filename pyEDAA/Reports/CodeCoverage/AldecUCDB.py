@@ -86,8 +86,8 @@ from io                          import BytesIO
 from pathlib                     import Path
 from typing                      import Generator, Generic, Iterable, Mapping, Optional as Nullable, Self, TypeVar
 
-from lxml.etree                  import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError
-from lxml.etree                  import _Element, _ElementTree, parse
+from lxml.etree                  import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError, _Element, \
+                                        _ElementTree, parse
 from pyTooling.Common            import getFullyQualifiedName, getResourceFile, StringEnum
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
@@ -96,8 +96,8 @@ from pyTooling.Stopwatch         import Stopwatch
 from pyTooling.Versioning        import CalendarVersion
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Document as cc_Document
-from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus
+from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Document as cc_Document, Line as cc_Line, \
+                                        LineCoverageStatus
 
 
 __all__ = ["SCHEMA", "NAMESPACE", "NAMESPACES", "HistoryNodeParentType", "ScopeParentType"]
