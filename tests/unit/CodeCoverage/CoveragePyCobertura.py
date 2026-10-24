@@ -41,8 +41,8 @@ from pyTooling.Common                                          import getResourc
 from pyTooling.Testing                                         import Testcase
 
 from pyEDAA.Reports                                            import Resources
-from pyEDAA.Reports.CodeCoverage                               import CodeCoverageError, LineCoverageStatus, Module
-from pyEDAA.Reports.CodeCoverage                               import Package
+from pyEDAA.Reports.CodeCoverage                               import CodeCoverageError, LineCoverageStatus, Module, \
+                                                                      Package
 from pyEDAA.Reports.CodeCoverage.Cobertura                     import READ_SCHEMA as ANY_SCHEMA
 from pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura import READ_SCHEMA, Document, Line
 

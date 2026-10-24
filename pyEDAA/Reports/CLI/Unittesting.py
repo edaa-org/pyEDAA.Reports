@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from argparse import Namespace
-from pathlib  import Path
-from typing   import TYPE_CHECKING, List, Mapping, Tuple, Type, TypeVar
+from argparse                                 import Namespace
+from pathlib                                  import Path
+from typing                                   import TYPE_CHECKING, List, Mapping, Tuple, Type, TypeVar
 
 from pyTooling.Attributes.ArgParse            import CommandHandler, splitFormat
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
@@ -10,11 +10,11 @@ from pyTooling.Common                         import StringEnum
 from pyTooling.Decorators                     import export
 from pyTooling.MetaClasses                    import ExtendedType
 
-from pyEDAA.Reports.Unittesting                       import UnittestError, TestsuiteKind, TestsuiteSummary, Testsuite
-from pyEDAA.Reports.Unittesting                       import Testcase, MergedTestsuiteSummary
+from pyEDAA.Reports.Unittesting               import UnittestError, TestsuiteKind, TestsuiteSummary, Testsuite, \
+                                                     Testcase, MergedTestsuiteSummary
 
 if TYPE_CHECKING:
-	from pyEDAA.Reports.Unittesting.JUnit               import Document as AnyJUnitDocument
+	from pyEDAA.Reports.Unittesting.JUnit       import Document as AnyJUnitDocument
 
 
 @export

@@ -34,8 +34,8 @@ The CLI command ``coverage``: read a code coverage report of any supported forma
 """
 from __future__ import annotations
 
-from argparse import Namespace
-from typing   import Mapping
+from argparse                                 import Namespace
+from typing                                   import Mapping
 
 from pyTooling.Attributes.ArgParse            import CommandHandler, splitFormat
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
@@ -43,8 +43,7 @@ from pyTooling.Common                         import StringEnum
 from pyTooling.Decorators                     import export
 from pyTooling.MetaClasses                    import ExtendedType
 
-from pyEDAA.Reports.CodeCoverage                                 import CodeCoverageError, CoverageSummary
-from pyEDAA.Reports.CodeCoverage                                 import Document as cc_Document
+from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, CoverageSummary, Document as cc_Document
 
 
 @export

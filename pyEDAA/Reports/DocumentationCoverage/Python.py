@@ -68,18 +68,17 @@ or variable for Sphinx' autodoc, or excuse a missing doc-string for docstr_cover
 """
 from __future__                           import annotations
 
-from ast                                  import AnnAssign, Assign, AST, AsyncFunctionDef, Attribute, Call, ClassDef
-from ast                                  import Constant, Expr, FunctionDef, If, List, Module, Name, Starred, Subscript
-from ast                                  import Try, Tuple, expr, get_docstring, parse, stmt
+from ast                                  import AnnAssign, Assign, AST, AsyncFunctionDef, Attribute, Call, ClassDef, \
+                                                 Constant, Expr, FunctionDef, If, List, Module, Name, Starred, \
+                                                 Subscript, Try, Tuple, expr, get_docstring, parse, stmt
 from datetime                             import timedelta
 from enum                                 import Flag
 from io                                   import StringIO
 from pathlib                              import Path
-from re                                   import Pattern, compile as re_compile
-from re                                   import error as RegularExpressionError
+from re                                   import Pattern, compile as re_compile, error as RegularExpressionError
 from sys                                  import version_info
-from tokenize                             import COMMENT, ENDMARKER, NAME, NEWLINE, NL, NUMBER, OP, STRING
-from tokenize                             import TokenError, TokenInfo, generate_tokens, open as tokenize_open
+from tokenize                             import COMMENT, ENDMARKER, NAME, NEWLINE, NL, NUMBER, OP, STRING, \
+                                                 TokenError, TokenInfo, generate_tokens, open as tokenize_open
 from typing                               import ClassVar, Iterable, Optional as Nullable
 
 from pyTooling.Common                     import getFullyQualifiedName
@@ -88,8 +87,8 @@ from pyTooling.MetaClasses                import ExtendedType
 from pyTooling.Stopwatch                  import Stopwatch
 from pyTooling.Warning                    import WarningCollector
 
-from pyEDAA.Reports.DocumentationCoverage import CoverageState, DocCoverageError, DocumentationReport, Item, ItemKind
-from pyEDAA.Reports.DocumentationCoverage import SourceFileWarning
+from pyEDAA.Reports.DocumentationCoverage import CoverageState, DocCoverageError, DocumentationReport, Item, ItemKind, \
+                                                 SourceFileWarning
 
 if version_info >= (3, 12):  # pragma: no cover
 	from ast                                import TypeAlias

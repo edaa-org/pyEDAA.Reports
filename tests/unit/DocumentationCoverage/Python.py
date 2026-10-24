@@ -41,8 +41,8 @@ from unittest                                    import skipIf
 from pyTooling.Warning                           import UnhandledCriticalWarningError, WarningCollector
 from pyTooling.Testing                           import Testcase
 
-from pyEDAA.Reports.DocumentationCoverage        import CoverageState, DocCoverageError, DocumentationReport
-from pyEDAA.Reports.DocumentationCoverage        import Item, ItemKind, SourceFileWarning
+from pyEDAA.Reports.DocumentationCoverage        import CoverageState, DocCoverageError, DocumentationReport, Item, \
+                                                        ItemKind, SourceFileWarning
 from pyEDAA.Reports.DocumentationCoverage.Python import Analyzer, CountedItems, SourceFile
 
 

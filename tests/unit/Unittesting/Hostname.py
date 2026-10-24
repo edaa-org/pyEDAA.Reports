@@ -33,8 +33,8 @@ from datetime import datetime
 from pathlib  import Path
 from unittest import TestCase as ut_TestCase
 
-from pyEDAA.Reports.Unittesting                       import MergedTestsuiteSummary, Testsuite, TestsuiteSummary
-from pyEDAA.Reports.Unittesting                       import UnittestError
+from pyEDAA.Reports.Unittesting                       import MergedTestsuiteSummary, Testsuite, TestsuiteSummary, \
+                                                             UnittestError
 from pyEDAA.Reports.Unittesting.JUnit                 import Document, JUnitReaderMode
 from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntDocument
 from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestDocument

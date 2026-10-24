@@ -39,8 +39,8 @@ from pyTooling.Versioning             import SemanticVersion
 from pyTooling.Testing                import Testcase
 
 from pyEDAA.Reports.CodeCoverage      import CodeCoverageError, Function, LineCoverageStatus, SourceFile
-from pyEDAA.Reports.CodeCoverage.Gcov import DataFile, Document, File, FormatVersion, Function as gcov_Function, Line
-from pyEDAA.Reports.CodeCoverage.Gcov import SCHEMAS
+from pyEDAA.Reports.CodeCoverage.Gcov import DataFile, Document, File, FormatVersion, Function as gcov_Function, Line, \
+                                             SCHEMAS
 
 
 if __name__ == "__main__":  # pragma: no cover

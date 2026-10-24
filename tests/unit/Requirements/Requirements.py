@@ -35,12 +35,12 @@ from pyTooling.Exceptions        import AlreadyInHierarchyError, DuplicateElemen
 from pyTooling.Versioning        import SemanticVersion
 from pyTooling.Testing           import Testcase
 
-from pyEDAA.Reports.Requirements import AlreadyInSpecificationError, DuplicateDocumentError, DuplicateLabelError
-from pyEDAA.Reports.Requirements import DuplicateLayerError, DuplicateLinkError, DuplicatePersonaError
-from pyEDAA.Reports.Requirements import DuplicatePersonError, DuplicateRequirementError, DuplicateSpecificationItemError
-from pyEDAA.Reports.Requirements import ItemState, Label, NotInSameSpecificationError, Obligation, Requirement
-from pyEDAA.Reports.Requirements import RequirementKind
-from pyEDAA.Reports.Requirements import RequirementSpecification, RequirementsError
+from pyEDAA.Reports.Requirements import AlreadyInSpecificationError, DuplicateDocumentError, DuplicateLabelError, \
+                                        DuplicateLayerError, DuplicateLinkError, DuplicatePersonaError, \
+                                        DuplicatePersonError, DuplicateRequirementError, \
+                                        DuplicateSpecificationItemError, ItemState, Label, \
+                                        NotInSameSpecificationError, Obligation, Requirement, RequirementKind, \
+                                        RequirementSpecification, RequirementsError
 
 
 if __name__ == "__main__":  # pragma: no cover

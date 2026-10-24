@@ -35,8 +35,8 @@ from uuid                                          import UUID
 
 from pyTooling.Testing                             import Testcase
 
-from pyEDAA.Reports.Unittesting                    import Testcase as ut_Testcase, TestcaseStatus, TestsuiteKind
-from pyEDAA.Reports.Unittesting                    import UnittestError
+from pyEDAA.Reports.Unittesting                    import Testcase as ut_Testcase, TestcaseStatus, TestsuiteKind, \
+                                                          UnittestError
 from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit import Document, Testcase as ne_Testcase
 
 

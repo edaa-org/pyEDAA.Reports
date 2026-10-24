@@ -71,9 +71,9 @@ from lxml.etree                                    import _Element
 from pyTooling.Common                              import getFullyQualifiedName
 from pyTooling.Decorators                          import export, readonly
 
-from pyEDAA.Reports.CodeCoverage                   import Branch as cc_Branch, CoverageSummary, File as cc_File
-from pyEDAA.Reports.CodeCoverage                   import Line as cc_Line, LineCoverageStatus, Module as cc_Module
-from pyEDAA.Reports.CodeCoverage                   import Package as cc_Package
+from pyEDAA.Reports.CodeCoverage                   import Branch as cc_Branch, CoverageSummary, File as cc_File, \
+                                                          Line as cc_Line, LineCoverageStatus, Module as cc_Module, \
+                                                          Package as cc_Package
 from pyEDAA.Reports.CodeCoverage.Cobertura         import Document as cob_Document, _float
 from pyEDAA.Reports.CodeCoverage.Cobertura.Records import Class as cob_Class, Condition, Line
 

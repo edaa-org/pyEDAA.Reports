@@ -44,10 +44,10 @@ from pyEDAA.Reports.CodeCoverage.Cobertura              import STRICT_SCHEMA, Do
 from pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura import Document as NVCCoberturaDocument
 from pyEDAA.Reports.CodeCoverage.CoveragePy             import Document as CoveragePyDocument
 from pyEDAA.Reports.CodeCoverage.GHDL                   import Document as GHDLDocument, MergedReport
-from pyEDAA.Reports.CodeCoverage.Gcov                   import Document as GcovDocument
-from pyEDAA.Reports.CodeCoverage.Gcov                   import FormatVersion as GcovFormatVersion
-from pyEDAA.Reports.Unittesting                         import TestcaseStatus, TestsuiteKind, TestsuiteStatus
-from pyEDAA.Reports.Unittesting                         import UnittestError
+from pyEDAA.Reports.CodeCoverage.Gcov                   import Document as GcovDocument, \
+                                                               FormatVersion as GcovFormatVersion
+from pyEDAA.Reports.Unittesting                         import TestcaseStatus, TestsuiteKind, TestsuiteStatus, \
+                                                               UnittestError
 from pyEDAA.Reports.Unittesting.JUnit                   import Document as AnyJUnitDocument
 # FIXME: change to generic JUnit
 from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4         import Document as JUnit4Document

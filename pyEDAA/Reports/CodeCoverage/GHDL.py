@@ -77,8 +77,8 @@ from pyTooling.MetaClasses       import ExtendedType
 from pyTooling.Stopwatch         import Stopwatch
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Document as cc_Document, Line as cc_Line
-from pyEDAA.Reports.CodeCoverage import LineCoverageStatus
+from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Document as cc_Document, Line as cc_Line, \
+                                        LineCoverageStatus
 
 
 __all__ = ["SCHEMAS", "ParentType"]

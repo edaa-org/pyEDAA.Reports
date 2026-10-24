@@ -34,16 +34,16 @@ expressions, nested by their sub-expressions.
 """
 from __future__                                   import annotations
 
-from typing                                       import TYPE_CHECKING, Generic, Iterable, Optional as Nullable, Self
-from typing                                       import TypeVar
+from typing                                       import TYPE_CHECKING, Generic, Iterable, Optional as Nullable, Self, \
+                                                         TypeVar
 
 from lxml.etree                                   import _Element
 from pyTooling.Common                             import getFullyQualifiedName
 from pyTooling.Decorators                         import export, readonly
 
 from pyEDAA.Reports.CodeCoverage.UCIS.Bins        import Bin
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import UserAttribute
+from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID, \
+                                                         UserAttribute
 
 if TYPE_CHECKING:
 	from pyEDAA.Reports.CodeCoverage.UCIS.Instances import InstanceCoverage

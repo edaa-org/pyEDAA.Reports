@@ -68,9 +68,9 @@ from typing                                import Iterable, Optional as Nullable
 from lxml.etree                            import _Element
 from pyTooling.Decorators                  import export, readonly
 
-from pyEDAA.Reports.CodeCoverage           import Branch as cc_Branch, CoverageSummary, Line as cc_Line
-from pyEDAA.Reports.CodeCoverage           import LineCoverageStatus, Module as cc_Module, Package as cc_Package
-from pyEDAA.Reports.CodeCoverage           import Unit as cc_Unit
+from pyEDAA.Reports.CodeCoverage           import Branch as cc_Branch, CoverageSummary, Line as cc_Line, \
+                                                  LineCoverageStatus, Module as cc_Module, Package as cc_Package, \
+                                                  Unit as cc_Unit
 from pyEDAA.Reports.CodeCoverage.Cobertura import CONDITION_COVERAGE, Document as cob_Document, Line as cob_Line
 
 

@@ -57,16 +57,16 @@ from io                         import BytesIO
 from pathlib                    import Path
 from typing                     import Dict, Optional as Nullable
 
-from lxml.etree                 import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError, parse
-from lxml.etree                 import _Element, _ElementTree
+from lxml.etree                 import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError, parse, _Element, \
+                                       _ElementTree
 from pyTooling                  import Resources as pyToolingResources
 from pyTooling.Common           import getResourceFile, StringEnum
 from pyTooling.Decorators       import export, readonly
 from pyTooling.Exceptions       import ToolingException
 from pyTooling.Stopwatch        import Stopwatch
 
-from pyEDAA.Reports.Unittesting import UnittestError, TestcaseStatus, TestsuiteKind
-from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary, Testsuite, Testcase
+from pyEDAA.Reports.Unittesting import UnittestError, TestcaseStatus, TestsuiteKind, Document as ut_Document, \
+                                       TestsuiteSummary, Testsuite, Testcase
 
 
 __all__ = ["XML_SCHEMA_INSTANCE_NAMESPACE", "SCHEMA_FILES", "STATUS_MAP"]

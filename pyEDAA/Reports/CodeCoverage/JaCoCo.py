@@ -73,8 +73,8 @@ from pathlib                     import Path
 from re                          import compile as re_compile
 from typing                      import Generator, Generic, Optional as Nullable, Self, TypeVar
 
-from lxml.etree                  import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError
-from lxml.etree                  import _Element, _ElementTree, parse
+from lxml.etree                  import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError, _Element, \
+                                        _ElementTree, parse
 from pyTooling.Common            import getFullyQualifiedName, getResourceFile, StringEnum
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
@@ -82,10 +82,9 @@ from pyTooling.MetaClasses       import ExtendedType, abstractclass
 from pyTooling.Stopwatch         import Stopwatch
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError
-from pyEDAA.Reports.CodeCoverage import CoverageSummary, Document as cc_Document, Line as cc_Line
-from pyEDAA.Reports.CodeCoverage import LineCoverageStatus, Method as cc_Method, Package as cc_Package
-from pyEDAA.Reports.CodeCoverage import Unit as cc_Unit
+from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, CoverageSummary, \
+                                        Document as cc_Document, Line as cc_Line, LineCoverageStatus, \
+                                        Method as cc_Method, Package as cc_Package, Unit as cc_Unit
 
 
 __all__ = ["PUBLIC_IDENTIFIER", "SCHEMAS"]

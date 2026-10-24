@@ -49,11 +49,11 @@ from pyTooling.Common                 import firstValue
 from pyTooling.Decorators             import export, InheritDocString, DocStringMergeStrategy
 from pyTooling.Stopwatch              import Stopwatch
 
-from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus
-from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
-from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass
-from pyEDAA.Reports.Unittesting.JUnit import Testsuite as ju_Testsuite, TestsuiteSummary as ju_TestsuiteSummary
-from pyEDAA.Reports.Unittesting.JUnit import Document as ju_Document
+from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus, \
+                                             TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
+from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, \
+                                             Testsuite as ju_Testsuite, TestsuiteSummary as ju_TestsuiteSummary, \
+                                             Document as ju_Document
 
 
 @export

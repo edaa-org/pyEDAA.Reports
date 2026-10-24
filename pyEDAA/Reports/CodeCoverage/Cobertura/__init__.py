@@ -99,9 +99,9 @@ from re                                            import compile as re_compile
 from time                                          import time_ns
 from typing                                        import Optional as Nullable
 
-from lxml.etree                                    import Element as XMLElement, ElementTree, SubElement, XMLParser
-from lxml.etree                                    import XMLSchema, XMLSchemaParseError, XMLSyntaxError, parse
-from lxml.etree                                    import tostring, _Element, _ElementTree
+from lxml.etree                                    import Element as XMLElement, ElementTree, SubElement, XMLParser, \
+                                                          XMLSchema, XMLSchemaParseError, XMLSyntaxError, parse, \
+                                                          tostring, _Element, _ElementTree
 from pyTooling.Common                              import getFullyQualifiedName, getResourceFile
 from pyTooling.Decorators                          import export, readonly
 from pyTooling.Exceptions                          import ToolingException
@@ -109,10 +109,10 @@ from pyTooling.MetaClasses                         import ExtendedType
 from pyTooling.Stopwatch                           import Stopwatch
 
 from pyEDAA.Reports                                import Resources, __version__
-from pyEDAA.Reports.CodeCoverage                   import Branch as cc_Branch, Class as cc_Class, CodeCoverageError
-from pyEDAA.Reports.CodeCoverage                   import CoverageSummary, Document as cc_Document, File as cc_File
-from pyEDAA.Reports.CodeCoverage                   import Line as cc_Line, LineCoverageStatus, Method as cc_Method
-from pyEDAA.Reports.CodeCoverage                   import Package as cc_Package, Unit as cc_Unit
+from pyEDAA.Reports.CodeCoverage                   import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, \
+                                                          CoverageSummary, Document as cc_Document, File as cc_File, \
+                                                          Line as cc_Line, LineCoverageStatus, Method as cc_Method, \
+                                                          Package as cc_Package, Unit as cc_Unit
 from pyEDAA.Reports.CodeCoverage.Cobertura.Records import Class, Condition, Element, Line, Method, Package
 
 

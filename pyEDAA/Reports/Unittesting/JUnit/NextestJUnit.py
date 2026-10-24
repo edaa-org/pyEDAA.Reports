@@ -48,13 +48,12 @@ from pyTooling.Common                 import getFullyQualifiedName
 from pyTooling.Decorators             import export, readonly, InheritDocString, DocStringMergeStrategy
 from pyTooling.Stopwatch              import Stopwatch
 
-from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus, TestsuiteStatus
-from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
-from pyEDAA.Reports.Unittesting       import Testcase as ut_Testcase
-from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass
-from pyEDAA.Reports.Unittesting.JUnit import Testsuite as ju_Testsuite
-from pyEDAA.Reports.Unittesting.JUnit import TestsuiteSummary as ju_TestsuiteSummary, Document as ju_Document
-from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode
+from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus, TestsuiteStatus, \
+                                             TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, \
+                                             Testcase as ut_Testcase
+from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, \
+                                             Testsuite as ju_Testsuite, TestsuiteSummary as ju_TestsuiteSummary, \
+                                             Document as ju_Document, JUnitReaderMode
 
 
 @export
