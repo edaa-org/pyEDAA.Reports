@@ -53,7 +53,7 @@ class CrossInstantiation(Testcase):
 		self.assertIsNone(cross.Parent)
 		self.assertIsNone(cross.Root)
 		self.assertEqual([], cross.Bins)
-		self.assertEqual("<Cross DelayCov BurstDelay: 0 bins>", repr(cross))
+		self.assertEqual("<Cross DelayCov BurstDelay: 0/0 bins, hits 100.0%>", repr(cross))
 
 	def test_ParameterChecks(self) -> None:
 		for arguments, exception, message in (

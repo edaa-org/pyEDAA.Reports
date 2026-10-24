@@ -55,7 +55,7 @@ class ReportInstantiation(Testcase):
 		self.assertEqual(0, report.CovergroupCount)
 		self.assertEqual(0, report["WritePassFail"])
 		self.assertEqual(
-			"<FunctionalCoverageReport TbStream_SendGetRandom1: 0 covergroups>",
+			"<FunctionalCoverageReport TbStream_SendGetRandom1: 0 covergroups, bins 100.0%, hits 100.0%>",
 			repr(report)
 		)
 
@@ -97,7 +97,7 @@ class CovergroupInstantiation(Testcase):
 		self.assertEqual({}, covergroup.Coverpoints)
 		self.assertEqual(0, covergroup.CoverpointCount)
 		self.assertEqual(
-			"<Covergroup DelayCov BurstLength: 0 coverpoints, 0 crosses>",
+			"<Covergroup DelayCov BurstLength: 0 coverpoints, 0 crosses, bins 100.0%, hits 100.0%>",
 			repr(covergroup)
 		)
 
@@ -139,7 +139,7 @@ class CoverpointInstantiation(Testcase):
 		self.assertIsNone(coverpoint.Expression)
 		self.assertIsNone(coverpoint.Parent)
 		self.assertIsNone(coverpoint.Root)
-		self.assertEqual("<Coverpoint Bin1: 0 bins>", repr(coverpoint))
+		self.assertEqual("<Coverpoint Bin1: 0/0 bins, hits 100.0%>", repr(coverpoint))
 
 	def test_Expression(self) -> None:
 		coverpoint = Coverpoint("Length", "BurstLength")
