@@ -1920,7 +1920,7 @@ class TestsuiteSummary(TestsuiteBase[TestsuiteType]):
 class Document(metaclass=ExtendedType, mixin=True):
 	"""A mixin-class representing a unit test summary document (file)."""
 
-	_path:             Path   #: Path to the YAML file.
+	_path:             Path   #: Path to the report file.
 
 	_analysisDuration: Nullable[timedelta]  #: Duration of :meth:`Analyze`, or ``None`` before it ran.
 	_modelConversion:  Nullable[timedelta]  #: Duration of :meth:`Convert`, or ``None`` before it ran.

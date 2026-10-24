@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from argparse import Namespace
 from pathlib  import Path
-from typing   import Dict, List, Tuple, Type, TypeVar
+from typing   import TYPE_CHECKING, List, Mapping, Tuple, Type, TypeVar
 
-from lxml.etree                               import XMLSyntaxError
 from pyTooling.Attributes.ArgParse            import CommandHandler, splitFormat
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
 from pyTooling.Common                         import StringEnum
@@ -13,18 +12,9 @@ from pyTooling.MetaClasses                    import ExtendedType
 
 from pyEDAA.Reports.Unittesting                       import UnittestError, TestsuiteKind, TestsuiteSummary, Testsuite
 from pyEDAA.Reports.Unittesting                       import Testcase, MergedTestsuiteSummary
-from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument, JUnitReaderMode
-from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit     import Document as Catch2JUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport   import Document as GoJUnitReportDocument
-from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GoogleTestJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit    import Document as NextestJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestJUnitDocument
-from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document as TestLoggerJUnitDocument
 
-
-__all__ = ["INPUT_FORMATS", "OUTPUT_FORMATS"]
+if TYPE_CHECKING:
+	from pyEDAA.Reports.Unittesting.JUnit               import Document as AnyJUnitDocument
 
 
 @export
@@ -60,31 +50,6 @@ class OutputFormat(StringEnum):
 	DEFAULT = PyTestJUnit                       #: A file without format is written as JUnit XML as pytest writes it.
 
 
-#: The document class reading each input format.
-INPUT_FORMATS: Dict[InputFormat, Type[AnyJUnitDocument]] = {
-	InputFormat.AntJUnit:           AntJUnitDocument,
-	InputFormat.AnyJUnit:           AnyJUnitDocument,
-	InputFormat.Catch2JUnit:        Catch2JUnitDocument,
-	InputFormat.CTestJUnit:         CTestJUnitDocument,
-	InputFormat.GoJUnitReportJUnit: GoJUnitReportDocument,
-	InputFormat.GoogleTestJUnit:    GoogleTestJUnitDocument,
-	InputFormat.NextestJUnit:       NextestJUnitDocument,
-	InputFormat.PyTestJUnit:        PyTestJUnitDocument,
-	InputFormat.TestLoggerJUnit:    TestLoggerJUnitDocument
-}
-
-#: The document class writing each output format.
-OUTPUT_FORMATS: Dict[OutputFormat, Type[AnyJUnitDocument]] = {
-	OutputFormat.AntJUnit:           AntJUnitDocument,
-	OutputFormat.Catch2JUnit:        Catch2JUnitDocument,
-	OutputFormat.CTestJUnit:         CTestJUnitDocument,
-	OutputFormat.GoJUnitReportJUnit: GoJUnitReportDocument,
-	OutputFormat.GoogleTestJUnit:    GoogleTestJUnitDocument,
-	OutputFormat.NextestJUnit:       NextestJUnitDocument,
-	OutputFormat.PyTestJUnit:        PyTestJUnitDocument,
-	OutputFormat.TestLoggerJUnit:    TestLoggerJUnitDocument
-}
-
 Format = TypeVar("Format", InputFormat, OutputFormat)
 
 
@@ -107,6 +72,40 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 	)
 	def HandleUnittest(self, args: Namespace) -> None:
 		"""Handle program calls with command ``unittest``."""
+		from lxml.etree                                       import XMLSyntaxError
+
+		from pyEDAA.Reports.Unittesting.JUnit                 import Document as AnyJUnitDocument
+		from pyEDAA.Reports.Unittesting.JUnit.AntJUnit4       import Document as AntJUnitDocument
+		from pyEDAA.Reports.Unittesting.JUnit.Catch2JUnit     import Document as Catch2JUnitDocument
+		from pyEDAA.Reports.Unittesting.JUnit.CTestJUnit      import Document as CTestJUnitDocument
+		from pyEDAA.Reports.Unittesting.JUnit.GoJUnitReport   import Document as GoJUnitReportDocument
+		from pyEDAA.Reports.Unittesting.JUnit.GoogleTestJUnit import Document as GoogleTestJUnitDocument
+		from pyEDAA.Reports.Unittesting.JUnit.NextestJUnit    import Document as NextestJUnitDocument
+		from pyEDAA.Reports.Unittesting.JUnit.PyTestJUnit     import Document as PyTestJUnitDocument
+		from pyEDAA.Reports.Unittesting.JUnit.TestLoggerJUnit import Document as TestLoggerJUnitDocument
+
+		inputFormats = {
+			InputFormat.AntJUnit:           AntJUnitDocument,
+			InputFormat.AnyJUnit:           AnyJUnitDocument,
+			InputFormat.Catch2JUnit:        Catch2JUnitDocument,
+			InputFormat.CTestJUnit:         CTestJUnitDocument,
+			InputFormat.GoJUnitReportJUnit: GoJUnitReportDocument,
+			InputFormat.GoogleTestJUnit:    GoogleTestJUnitDocument,
+			InputFormat.NextestJUnit:       NextestJUnitDocument,
+			InputFormat.PyTestJUnit:        PyTestJUnitDocument,
+			InputFormat.TestLoggerJUnit:    TestLoggerJUnitDocument
+		}
+		outputFormats = {
+			OutputFormat.AntJUnit:           AntJUnitDocument,
+			OutputFormat.Catch2JUnit:        Catch2JUnitDocument,
+			OutputFormat.CTestJUnit:         CTestJUnitDocument,
+			OutputFormat.GoJUnitReportJUnit: GoJUnitReportDocument,
+			OutputFormat.GoogleTestJUnit:    GoogleTestJUnitDocument,
+			OutputFormat.NextestJUnit:       NextestJUnitDocument,
+			OutputFormat.PyTestJUnit:        PyTestJUnitDocument,
+			OutputFormat.TestLoggerJUnit:    TestLoggerJUnitDocument
+		}
+
 		self._PrintHeadline()
 
 		returnCode = 0
@@ -124,7 +123,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteNormal("Reading unit test input file ...")
 			openTask = args.input
 			try:
-				document = self._open(openTask)
+				document = self._open(openTask, inputFormats)
 			except UnittestError as ex:
 				self.WriteFatal(str(ex), immediateExit=False)
 				for note in getattr(ex, "__notes__", ()):
@@ -141,7 +140,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		if args.merge is not None:
 			mergeTasks: Tuple[str, ...] = (args.merge, )
 			for mergeTask in mergeTasks:
-				self._merge(merged, mergeTask)
+				self._merge(merged, mergeTask, inputFormats)
 
 		self.WriteNormal("Aggregating unit test metrics ...")
 		merged.Aggregate()
@@ -164,7 +163,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		if args.output is not None:
 			outputs = (args.output, )
 			for output in outputs:
-				self._output(result, output)
+				self._output(result, output, outputFormats)
 
 		self.ExitOnPreviousErrors()
 
@@ -202,7 +201,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		directory = Path(pattern.anchor) if pattern.is_absolute() else Path.cwd()
 		return tuple(directory.glob(str(pattern.relative_to(pattern.anchor))))
 
-	def _open(self, task: str) -> AnyJUnitDocument:
+	def _open(self, task: str, documentClasses: Mapping[InputFormat, type[AnyJUnitDocument]]) -> AnyJUnitDocument:
 		inputFormat, globPattern = self._SplitTask(task, InputFormat, "input")
 		foundFiles = self._FindFiles(globPattern)
 		if (length := len(foundFiles)) != 1:
@@ -211,9 +210,14 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 		file = foundFiles[0]
 		self.WriteVerbose(f"  Reading {file}")
-		return INPUT_FORMATS[inputFormat](file, analyzeAndConvert=True)
+		return documentClasses[inputFormat](file, analyzeAndConvert=True)
 
-	def _merge(self, testsuiteSummary: MergedTestsuiteSummary, task: str) -> None:
+	def _merge(
+		self,
+		testsuiteSummary: MergedTestsuiteSummary,
+		task: str,
+		documentClasses: Mapping[InputFormat, type[AnyJUnitDocument]]
+	) -> None:
 		try:
 			inputFormat, globPattern = self._SplitTask(task, InputFormat, "input")
 		except UnittestError as ex:
@@ -228,7 +232,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteWarning(f"Found no matching files for pattern '{Path.cwd() / globPattern}'")
 			return
 
-		self._mergeJUnit(testsuiteSummary, INPUT_FORMATS[inputFormat], foundFiles, inputFormat)
+		self._mergeJUnit(testsuiteSummary, documentClasses[inputFormat], foundFiles, inputFormat)
 
 	def _mergeJUnit(
 		self,
@@ -237,6 +241,8 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 		foundFiles: Tuple[Path, ...],
 		dialect: str
 	) -> None:
+		from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode
+
 		self.WriteNormal(f"Reading {len(foundFiles)} {dialect} unit test summary files ...")
 
 		junitDocuments: List[documentClass] = []
@@ -368,7 +374,12 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  Removing empty testsuite '{path}'")
 			del parentTestsuite.Testsuites[path]
 
-	def _output(self, testsuiteSummary: TestsuiteSummary, task: str):
+	def _output(
+		self,
+		testsuiteSummary: TestsuiteSummary,
+		task: str,
+		documentClasses: Mapping[OutputFormat, type[AnyJUnitDocument]]
+	) -> None:
 		try:
 			outputFormat, fileName = self._SplitTask(task, OutputFormat, "output")
 		except UnittestError as ex:
@@ -378,7 +389,7 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 
 			return
 
-		self._outputJUnit(testsuiteSummary, OUTPUT_FORMATS[outputFormat], Path(fileName), outputFormat)
+		self._outputJUnit(testsuiteSummary, documentClasses[outputFormat], Path(fileName), outputFormat)
 
 	def _outputJUnit(
 		self,

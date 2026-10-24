@@ -35,7 +35,7 @@ Reader for JUnit unit testing summary files in XML format.
 from __future__           import annotations
 
 from pathlib              import Path
-from typing               import Optional as Nullable, Generator, Tuple, Union, TypeVar, Type, ClassVar
+from typing               import Optional as Nullable, Tuple, TypeVar, Type, ClassVar
 
 from lxml.etree           import ElementTree, Element, SubElement, tostring, _Element
 from pyTooling.Common     import firstValue
@@ -43,7 +43,6 @@ from pyTooling.Decorators import export, InheritDocString, DocStringMergeStrateg
 from pyTooling.Stopwatch  import Stopwatch
 
 from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind
-from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, IterationScheme
 from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, Testsuite as ju_Testsuite
 from pyEDAA.Reports.Unittesting.JUnit import TestsuiteSummary as ju_TestsuiteSummary, Document as ju_Document

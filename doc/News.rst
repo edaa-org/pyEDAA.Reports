@@ -227,10 +227,9 @@ Version 0.20 (2026)
      :class:`~pyEDAA.Reports.DocumentationCoverage.Item` and its counters; a package's own :file:`__init__.py`
      figures are its file's counters.
 
-   * ⚠️ :class:`~pyEDAA.Reports.DocumentationCoverage.DocStrCoverage.DocStrCoverage` and
-     :exc:`~pyEDAA.Reports.DocumentationCoverage.DocStrCoverage.DocStrCoverageError` moved from
-     :mod:`~pyEDAA.Reports.DocumentationCoverage.Python` to :mod:`pyEDAA.Reports.DocumentationCoverage.DocStrCoverage`;
-     ``SearchDirectories`` is renamed ``SearchDirectory``. Import from the new module; there is no alias.
+   * ⚠️ :mod:`pyEDAA.Reports.DocumentationCoverage.Python`: ``DocStrCoverage`` and ``DocStrCoverageError``, the
+     wrapper of docstr_coverage, are removed. Use :class:`~pyEDAA.Reports.DocumentationCoverage.Python.Analyzer`,
+     which reads the source code itself.
 
    .. rubric:: Changes
 
@@ -239,10 +238,9 @@ Version 0.20 (2026)
      :class:`~pyEDAA.Reports.DocumentationCoverage.DocumentationReport`,
      :class:`~pyEDAA.Reports.DocumentationCoverage.Directory` and
      :class:`~pyEDAA.Reports.DocumentationCoverage.File`.
-   * ⚠️ :mod:`pyEDAA.Reports.DocumentationCoverage.DocStrCoverage` is a new module holding
-     :class:`~pyEDAA.Reports.DocumentationCoverage.DocStrCoverage.DocStrCoverage`, formerly in ``.Python``.
-     ``Convert()`` returns an aggregated documentation report with an item per doc-string docstr_coverage expects;
-     before, it only set per-file counters.
+   * ⚠️ :mod:`pyEDAA.Reports.DocumentationCoverage.Python`: ``DocStrCoverage`` and ``DocStrCoverageError`` are
+     removed, and with them the use of docstr_coverage: the documentation coverage is read by
+     :class:`~pyEDAA.Reports.DocumentationCoverage.Python.Analyzer`.
    * ⚠️ :exc:`~pyEDAA.Reports.ReportException` - and with it every exception of this package - joins the pyTooling
      exception hierarchy, so ``except ExceptionBase`` covers this package like it covers ``pyEDAA.CLITool``,
      ``pyEDAA.OSVVM``, ``pyEDAA.OutputFilter`` and ``pyEDAA.ToolSetup``.
@@ -289,7 +287,11 @@ Version 0.20 (2026)
        :class:`~pyEDAA.Reports.RiskManagement.MitigationState`.
 
    * Every module with code carries ``from __future__ import annotations`` and writes forward references unquoted.
-   * New requirement ``jsonschema ~= 4.26`` for the JSON Schemas of JSON report formats.
+   * New requirement ``jsonschema ~= 4.26`` for the JSON Schemas of JSON report formats. A JSON reader imports it in
+     ``Analyze()``, before measuring the analysis duration: importing a reader or :mod:`pyEDAA.Reports.CLI` doesn't
+     load it.
+   * :program:`pyedaa-reports` imports the readers and writers of a command when the command runs: ``help`` and
+     ``version`` load none of them, ``unittest`` no code coverage reader, ``coverage`` no JUnit dialect.
    * The ``test`` extra describes every test level: :file:`tests/requirements.txt` includes
      :file:`tests/app/requirements.txt`.
    * Python 3.15 is supported and listed in the classifiers.
@@ -302,6 +304,8 @@ Version 0.20 (2026)
      :class:`~pyTooling.DataModel.KeyValuePairsMixin`, accessed with the dictionary syntax; a key is any hashable
      value.
    * Dependencies: ``wheel ~= 0.48.0``, ``lxml >= 6.1.3``, ``Coverage ~= 7.16``, ``mypy ~= 2.4``.
+   * ``ruamel.yaml`` isn't a requirement any more: no module imports it since the OSVVM YAML reader moved to
+     pyEDAA.OSVVM. The documentation requires it, for the overrides file of the dependency tables.
 
    .. rubric:: Bug Fixes
 

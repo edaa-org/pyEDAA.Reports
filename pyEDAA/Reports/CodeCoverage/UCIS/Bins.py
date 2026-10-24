@@ -103,7 +103,7 @@ class BinContents(metaclass=ExtendedType, slots=True):
 			raise ex
 
 		self._coverageCount =  coverageCount
-		self._historyNodeIDs = []
+		self._historyNodeIDs = historyNodeIDList = []
 		self._nameComponent =  nameComponent
 		self._typeComponent =  typeComponent
 
@@ -119,7 +119,7 @@ class BinContents(metaclass=ExtendedType, slots=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(historyNodeID)}'.")
 					raise ex
 
-				self._historyNodeIDs.append(historyNodeID)
+				historyNodeIDList.append(historyNodeID)
 
 	@classmethod
 	def Parse(cls, element: _Element) -> Self:

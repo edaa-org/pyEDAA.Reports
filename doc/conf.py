@@ -128,7 +128,6 @@ nitpick_ignore = [
 	("py:class", "ast.expr"),
 	("py:class", "ast.stmt"),
 	("py:class", "tokenize.TokenInfo"),
-	("py:class", "docstr_coverage.result_collection.ResultCollection"),
 ]
 
 

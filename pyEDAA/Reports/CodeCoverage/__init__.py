@@ -734,7 +734,7 @@ class CoverageSummary(Directory):
 		super().__init__(name)
 
 		self._root =              self
-		self._sourceDirectories = []
+		self._sourceDirectories = sourceDirectoryList = []
 		self._units =             {}
 
 		if sourceDirectories is not None:
@@ -749,7 +749,7 @@ class CoverageSummary(Directory):
 					ex.add_note(f"Got type '{getFullyQualifiedName(sourceDirectory)}'.")
 					raise ex
 
-				self._sourceDirectories.append(sourceDirectory)
+				sourceDirectoryList.append(sourceDirectory)
 
 	@Base.Parent.setter
 	def Parent(self, parent: None) -> None:
@@ -1111,7 +1111,7 @@ class Line(BaseWithStatus):
 			raise ex
 
 		self._lineNumber =      lineNumber
-		self._branches =        []
+		self._branches =        branchList = []
 		self._coveredBranches = 0
 
 		if parent is not None:
@@ -1131,7 +1131,7 @@ class Line(BaseWithStatus):
 
 				branch._parent = self
 				branch._root =   self._root
-				self._branches.append(branch)
+				branchList.append(branch)
 
 	def _AddElement(self, branch: Branch) -> None:
 		"""

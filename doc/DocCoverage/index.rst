@@ -116,5 +116,4 @@ continues. The report states the duration of the analysis.
 
 Without fields and variables, the counts equal those of
 `docstr_coverage <https://github.com/HunterMcGushion/docstr_coverage>`__, except for ``@overload`` stubs, which
-docstr_coverage expects to be documented. Its analysis can be converted to the model as well, by
-:class:`~DocStrCoverage.DocStrCoverage`.
+docstr_coverage expects to be documented.

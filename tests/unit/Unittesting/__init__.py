@@ -28,3 +28,10 @@
 # SPDX-License-Identifier: Apache-2.0                                                                                  #
 # ==================================================================================================================== #
 #
+"""Unit tests of the unified unit testing data model and its file formats."""
+from os      import environ
+from pathlib import Path
+
+
+#: Directory for files written by the tests: one subdirectory per pytest-xdist worker, ``tests/output`` without xdist.
+OUTPUT_DIRECTORY = Path("tests/output") / environ.get("PYTEST_XDIST_WORKER", "")

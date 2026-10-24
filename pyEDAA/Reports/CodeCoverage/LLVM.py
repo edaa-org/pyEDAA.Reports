@@ -85,7 +85,6 @@ from pathlib                     import Path
 from re                          import match
 from typing                      import Any, ClassVar, Generic, Iterable, Optional as Nullable, Self, TypeVar
 
-from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
@@ -666,7 +665,7 @@ class TestVector(Element["MCDCRecord"]):
 			ex.add_note(f"Got type '{getFullyQualifiedName(result)}'.")
 			raise ex
 
-		self._conditions = []
+		self._conditions = conditionList = []
 		self._executed =   executed
 		self._result =     result
 
@@ -676,7 +675,7 @@ class TestVector(Element["MCDCRecord"]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(condition)}'.")
 				raise ex
 
-			self._conditions.append(condition)
+			conditionList.append(condition)
 
 		if parent is not None:
 			parent._testVectors.append(self)
@@ -812,8 +811,8 @@ class MCDCRecord(Base["File | Function"]):
 
 		self._trueDecisions =  trueDecisions
 		self._falseDecisions = falseDecisions
-		self._conditions =     []
-		self._testVectors =    []
+		self._conditions =     conditionList = []
+		self._testVectors =    testVectorList = []
 
 		for condition in conditions:
 			if not isinstance(condition, bool):
@@ -821,7 +820,7 @@ class MCDCRecord(Base["File | Function"]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(condition)}'.")
 				raise ex
 
-			self._conditions.append(condition)
+			conditionList.append(condition)
 
 		if testVectors is not None:
 			if not isinstance(testVectors, Iterable):
@@ -839,7 +838,7 @@ class MCDCRecord(Base["File | Function"]):
 
 				testVector._parent = self
 				testVector._root =   self._root
-				self._testVectors.append(testVector)
+				testVectorList.append(testVector)
 
 		if parent is not None:
 			parent._mcdcRecords.append(self)
@@ -1419,7 +1418,7 @@ class Expansion(Element["File"]):
 		if targetRegions is None:
 			raise ValueError("Parameter 'targetRegions' is None.")
 
-		self._filePaths =     []
+		self._filePaths =     filePathList = []
 		self._sourceRegion =  sourceRegion
 		self._targetRegions = []
 		self._branches =      []
@@ -1430,7 +1429,7 @@ class Expansion(Element["File"]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(filePath)}'.")
 				raise ex
 
-			self._filePaths.append(filePath)
+			filePathList.append(filePath)
 
 		for name, elements, elementType, target in (
 			("targetRegions", targetRegions, Region, self._targetRegions),
@@ -1841,7 +1840,7 @@ class Function(Element["Report"]):
 		self._regions =     []
 		self._branches =    []
 		self._mcdcRecords = []
-		self._filePaths =   []
+		self._filePaths =   filePathList = []
 
 		for filePath in filePaths:
 			if not isinstance(filePath, Path):
@@ -1849,7 +1848,7 @@ class Function(Element["Report"]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(filePath)}'.")
 				raise ex
 
-			self._filePaths.append(filePath)
+			filePathList.append(filePath)
 
 		for parameterName, elements, elementType, target in (
 			("regions", regions, Region, self._regions), ("branches", branches, BranchRegion, self._branches),
@@ -2061,7 +2060,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 		self._root =      self
 		self._version =   version
 		self._files =     {}
-		self._functions = []
+		self._functions = functionList = []
 		self._totals =    totals
 
 		if files is not None:
@@ -2104,7 +2103,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 				function._parent = self
 				function._SetRoot(self)
 
-				self._functions.append(function)
+				functionList.append(function)
 
 		if totals is not None:
 			totals._parent = self
@@ -2216,6 +2215,8 @@ class Document(cc_Document, Report):
 		if not self._path.exists():
 			raise CodeCoverageError(f"LLVM coverage export file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
+
+		from jsonschema import Draft202012Validator
 
 		with Stopwatch() as sw:
 			try:

@@ -283,7 +283,7 @@ class ValueSequence(metaclass=ExtendedType, slots=True):
 			raise ex
 
 		self._parent =   None
-		self._values =   []
+		self._values =   valueList = []
 		self._contents = contents
 
 		if values is None:
@@ -299,7 +299,7 @@ class ValueSequence(metaclass=ExtendedType, slots=True):
 				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 				raise ex
 
-			self._values.append(value)
+			valueList.append(value)
 
 		if len(self._values) == 0:
 			raise ValueError("Parameter 'values' is empty.")
@@ -399,8 +399,8 @@ class CoverpointBin(BinBase):
 			raise ex
 
 		self._parent =    parent
-		self._ranges =    []
-		self._sequences = []
+		self._ranges =    rangeList = []
+		self._sequences = sequenceList = []
 
 		if ranges is not None:
 			if not isinstance(ranges, Iterable):
@@ -415,7 +415,7 @@ class CoverpointBin(BinBase):
 					raise ex
 
 				valueRange._parent = self
-				self._ranges.append(valueRange)
+				rangeList.append(valueRange)
 
 		if sequences is not None:
 			if not isinstance(sequences, Iterable):
@@ -430,7 +430,7 @@ class CoverpointBin(BinBase):
 					raise ex
 
 				valueSequence._parent = self
-				self._sequences.append(valueSequence)
+				sequenceList.append(valueSequence)
 
 		if parent is not None:
 			parent._bins.append(self)

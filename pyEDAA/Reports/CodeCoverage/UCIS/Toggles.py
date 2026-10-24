@@ -417,7 +417,7 @@ class ToggleObject(Base, ObjectAttributesMixin):
 		self._id =            statementID
 		self._type =          objectType
 		self._portDirection = portDirection
-		self._dimensions =    []
+		self._dimensions =    dimensionList = []
 		self._bits =          []
 
 		if dimensions is not None:
@@ -432,7 +432,7 @@ class ToggleObject(Base, ObjectAttributesMixin):
 					ex.add_note(f"Got type '{getFullyQualifiedName(dimension)}'.")
 					raise ex
 
-				self._dimensions.append(dimension)
+				dimensionList.append(dimension)
 
 		if parent is not None:
 			parent._objects.append(self)
