@@ -525,7 +525,7 @@ class Block(Base, ObjectAttributesMixin, Generic[BlockParentType]):
 		self._parent =        parent
 		self._id =            blockID
 		self._bin =           coverBin
-		self._statementIDs =  []
+		self._statementIDs =  statementIDList = []
 		self._parentProcess = parentProcess
 		self._blocks =        []
 		coverBin._parent =    self
@@ -542,7 +542,7 @@ class Block(Base, ObjectAttributesMixin, Generic[BlockParentType]):
 					ex.add_note(f"Got type '{getFullyQualifiedName(statementID)}'.")
 					raise ex
 
-				self._statementIDs.append(statementID)
+				statementIDList.append(statementID)
 
 		if parent is not None:
 			parent._blocks.append(self)

@@ -1314,7 +1314,7 @@ class Statement(metaclass=ExtendedType, slots=True):
 		self._file =       file
 		self._lineNumber = lineNumber
 		self._index =      index
-		self._bins =       []
+		self._bins =       binList = []
 		self._count =      0
 		self._isExcluded = True
 
@@ -1324,7 +1324,7 @@ class Statement(metaclass=ExtendedType, slots=True):
 				ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 				raise ex
 
-			self._bins.append(coverBin)
+			binList.append(coverBin)
 			if not coverBin.IsExcluded:
 				self._count +=     coverBin._count
 				self._isExcluded = False

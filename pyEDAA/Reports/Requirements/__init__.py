@@ -1644,7 +1644,7 @@ class Requirement(BaseItem):
 			ex.add_note(f"Got type '{getFullyQualifiedName(verificationMethods)}'.")
 			raise ex
 
-		self._acceptanceCriteria = []
+		self._acceptanceCriteria = acceptanceCriterionList = []
 		if acceptanceCriteria is not None:
 			if not isinstance(acceptanceCriteria, Iterable):
 				ex = TypeError("Parameter 'acceptanceCriteria' is not iterable.")
@@ -1663,7 +1663,7 @@ class Requirement(BaseItem):
 				elif criterion == "":
 					raise ValueError("Parameter 'acceptanceCriteria' contains an empty criterion.")
 
-				self._acceptanceCriteria.append(criterion)
+				acceptanceCriterionList.append(criterion)
 
 		self._kind =                kind
 		self._obligation =          obligation
@@ -2161,7 +2161,7 @@ class HistoryEvent(Base):
 				ex.add_note(f"Got person '{person._userID}'.")
 				raise ex
 
-		self._involved = []
+		self._involved = involvedList = []
 		if involved is not None:
 			if not isinstance(involved, Iterable):
 				ex = TypeError("Parameter 'involved' is not iterable.")
@@ -2188,7 +2188,7 @@ class HistoryEvent(Base):
 					ex.add_note(f"Got item '{item._id}'.")
 					raise ex
 
-				self._involved.append(item)
+				involvedList.append(item)
 
 		if len(self._involved) == 0 and kind in (EventKind.Split, EventKind.Merged):
 			raise ValueError(f"Parameter 'involved' names no item for a '{kind.name}' event.")

@@ -479,7 +479,7 @@ class FSMTransition(Base):
 			raise ex
 
 		self._parent =     parent
-		self._states =     []
+		self._states =     stateList = []
 		self._bin =        coverBin
 		coverBin._parent = self
 
@@ -496,7 +496,7 @@ class FSMTransition(Base):
 				ex.add_note(f"Got type '{getFullyQualifiedName(state)}'.")
 				raise ex
 
-			self._states.append(state)
+			stateList.append(state)
 
 		if len(self._states) < 2:
 			ex = ValueError("Parameter 'states' has less than two states.")

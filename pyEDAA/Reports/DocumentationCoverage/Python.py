@@ -427,7 +427,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		self._packageName =     packageName
 		self._directory =       directory
 		self._countedItems =    countedItems
-		self._excludePatterns = []
+		self._excludePatterns = excludePatternList = []
 
 		if excludePatterns is not None:
 			if not isinstance(excludePatterns, Iterable):
@@ -442,7 +442,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 					raise ex
 
 				try:
-					self._excludePatterns.append(re_compile(excludePattern))
+					excludePatternList.append(re_compile(excludePattern))
 				except RegularExpressionError as cause:
 					ex = ValueError("Parameter 'excludePatterns' contains an invalid regular expression.")
 					ex.add_note(f"Got pattern '{excludePattern}'.")

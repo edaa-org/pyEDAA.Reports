@@ -137,7 +137,7 @@ class Cross(Base):
 		self._key =         key
 		self._options =     options
 		self._alias =       alias
-		self._expressions = []
+		self._expressions = expressionList = []
 		self._bins =        []
 
 		if expressions is not None:
@@ -152,7 +152,7 @@ class Cross(Base):
 					ex.add_note(f"Got type '{getFullyQualifiedName(expression)}'.")
 					raise ex
 
-				self._expressions.append(expression)
+				expressionList.append(expression)
 
 		if parent is not None:
 			parent._crosses.append(self)
@@ -311,7 +311,7 @@ class CrossBin(BinBase):
 			raise ex
 
 		self._parent =   parent
-		self._indices =  []
+		self._indices =  indexList = []
 		self._contents = contents
 
 		if indices is None:
@@ -327,7 +327,7 @@ class CrossBin(BinBase):
 				ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
 				raise ex
 
-			self._indices.append(index)
+			indexList.append(index)
 
 		if len(self._indices) == 0:
 			raise ValueError("Parameter 'indices' is empty.")

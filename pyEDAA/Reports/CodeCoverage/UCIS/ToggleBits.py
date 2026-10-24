@@ -134,7 +134,7 @@ class ToggleBit(Base, ObjectAttributesMixin):
 		self._parent =  parent
 		self._name =    name
 		self._key =     key
-		self._indices = []
+		self._indices = indexList = []
 		self._toggles = []
 
 		if indices is not None:
@@ -153,7 +153,7 @@ class ToggleBit(Base, ObjectAttributesMixin):
 					ex.add_note(f"Got value '{index}'.")
 					raise ex
 
-				self._indices.append(index)
+				indexList.append(index)
 
 		if parent is not None:
 			parent._bits.append(self)

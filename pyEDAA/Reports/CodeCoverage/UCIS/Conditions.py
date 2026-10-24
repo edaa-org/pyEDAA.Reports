@@ -270,8 +270,8 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 		self._index =          index
 		self._width =          width
 		self._id =             statementID
-		self._subExpressions = []
-		self._bins =           []
+		self._subExpressions = subExpressionList = []
+		self._bins =           binList = []
 		self._statementType =  statementType
 		self._expressions =    []
 
@@ -288,7 +288,7 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(subExpression)}'.")
 				raise ex
 
-			self._subExpressions.append(subExpression)
+			subExpressionList.append(subExpression)
 
 		if bins is None:
 			raise ValueError("Parameter 'bins' is None.")
@@ -304,7 +304,7 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 				raise ex
 
 			coverBin._parent = self
-			self._bins.append(coverBin)
+			binList.append(coverBin)
 
 		if parent is not None:
 			parent._expressions.append(self)
