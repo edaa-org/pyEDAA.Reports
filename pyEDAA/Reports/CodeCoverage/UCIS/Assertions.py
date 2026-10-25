@@ -184,8 +184,10 @@ class Assertion(Base, ObjectAttributesMixin):
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises ValueError:    If parameter ``name`` or ``assertionKind`` is ``None``.
-		:raises TypeError:     If parameter ``name`` or ``assertionKind`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``assertionKind`` is ``None``.
+		:raises TypeError:     If parameter ``assertionKind`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`AssertionCoverage`.
 		:raises TypeError:     If parameter ``bins`` isn't a mapping.
 		:raises TypeError:     If parameter ``bins`` contains a key not of type :class:`AssertionBinKind`.

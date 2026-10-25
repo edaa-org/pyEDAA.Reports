@@ -1003,18 +1003,30 @@ class BaseItem(BaseWithID):
 		:raises TypeError:                   If parameter ``state`` isn't of type :class:`ItemState`.
 		:raises TypeError:                   If parameter ``layer`` isn't of type :class:`Layer`.
 		:raises NotInSameSpecificationError: If parameter ``layer`` isn't part of the item's specification.
-		:raises TypeError:                   If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
-		                                     ``attachments``
-		                                     isn't iterable, or is a single element.
-		:raises TypeError:                   If parameter ``authors`` or ``owners`` contains an element not of type
+		:raises TypeError:                   If parameter ``authors`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``authors`` contains an element not of type
 		                                     :class:`~pyEDAA.Reports.Person`.
-		:raises TypeError:                   If parameter ``personas``, ``labels`` or ``attachments`` contains an element
-		                                     not of
-		                                     type :class:`Persona`, :class:`Label` or :class:`Document`.
-		:raises NotInSameSpecificationError: If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
-		                                     ``attachments``
-		                                     contains an element, which isn't part of the item's specification.
-		:raises DuplicatePersonError:        If parameter ``authors`` or ``owners`` contains a person twice.
+		:raises NotInSameSpecificationError: If parameter ``authors`` contains an element, which isn't part of the item's
+		                                     specification.
+		:raises DuplicatePersonError:        If parameter ``authors`` contains a person twice.
+		:raises TypeError:                   If parameter ``owners`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``owners`` contains an element not of type
+		                                     :class:`~pyEDAA.Reports.Person`.
+		:raises NotInSameSpecificationError: If parameter ``owners`` contains an element, which isn't part of the item's
+		                                     specification.
+		:raises DuplicatePersonError:        If parameter ``owners`` contains a person twice.
+		:raises TypeError:                   If parameter ``personas`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``personas`` contains an element not of type :class:`Persona`.
+		:raises NotInSameSpecificationError: If parameter ``personas`` contains an element, which isn't part of the item's
+		                                     specification.
+		:raises TypeError:                   If parameter ``labels`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``labels`` contains an element not of type :class:`Label`.
+		:raises NotInSameSpecificationError: If parameter ``labels`` contains an element, which isn't part of the item's
+		                                     specification.
+		:raises TypeError:                   If parameter ``attachments`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``attachments`` contains an element not of type :class:`Document`.
+		:raises NotInSameSpecificationError: If parameter ``attachments`` contains an element, which isn't part of the
+		                                     item's specification.
 		:raises DuplicatePersonaError:       If parameter ``personas`` contains a persona twice.
 		:raises DuplicateLabelError:         If parameter ``labels`` contains a label twice.
 		:raises DuplicateDocumentError:      If parameter ``attachments`` contains a document twice.
@@ -1579,18 +1591,30 @@ class Requirement(BaseItem):
 		:raises TypeError:                   If parameter ``state`` isn't of type :class:`ItemState`.
 		:raises TypeError:                   If parameter ``layer`` isn't of type :class:`Layer`.
 		:raises NotInSameSpecificationError: If parameter ``layer`` isn't part of the requirement's specification.
-		:raises TypeError:                   If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
-		                                     ``attachments``
-		                                     isn't iterable, or is a single element.
-		:raises TypeError:                   If parameter ``authors`` or ``owners`` contains an element not of type
+		:raises TypeError:                   If parameter ``authors`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``authors`` contains an element not of type
 		                                     :class:`~pyEDAA.Reports.Person`.
-		:raises TypeError:                   If parameter ``personas``, ``labels`` or ``attachments`` contains an element
-		                                     not
-		                                     of type :class:`Persona`, :class:`Label` or :class:`Document`.
-		:raises NotInSameSpecificationError: If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
-		                                     ``attachments``
-		                                     contains an element, which isn't part of the requirement's specification.
-		:raises DuplicatePersonError:        If parameter ``authors`` or ``owners`` contains a person twice.
+		:raises NotInSameSpecificationError: If parameter ``authors`` contains an element, which isn't part of the
+		                                     requirement's specification.
+		:raises DuplicatePersonError:        If parameter ``authors`` contains a person twice.
+		:raises TypeError:                   If parameter ``owners`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``owners`` contains an element not of type
+		                                     :class:`~pyEDAA.Reports.Person`.
+		:raises NotInSameSpecificationError: If parameter ``owners`` contains an element, which isn't part of the
+		                                     requirement's specification.
+		:raises DuplicatePersonError:        If parameter ``owners`` contains a person twice.
+		:raises TypeError:                   If parameter ``personas`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``personas`` contains an element not of type :class:`Persona`.
+		:raises NotInSameSpecificationError: If parameter ``personas`` contains an element, which isn't part of the
+		                                     requirement's specification.
+		:raises TypeError:                   If parameter ``labels`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``labels`` contains an element not of type :class:`Label`.
+		:raises NotInSameSpecificationError: If parameter ``labels`` contains an element, which isn't part of the
+		                                     requirement's specification.
+		:raises TypeError:                   If parameter ``attachments`` isn't iterable, or is a single element.
+		:raises TypeError:                   If parameter ``attachments`` contains an element not of type :class:`Document`.
+		:raises NotInSameSpecificationError: If parameter ``attachments`` contains an element, which isn't part of the
+		                                     requirement's specification.
 		:raises DuplicatePersonaError:       If parameter ``personas`` contains a persona twice.
 		:raises DuplicateLabelError:         If parameter ``labels`` contains a label twice.
 		:raises DuplicateDocumentError:      If parameter ``attachments`` contains a document twice.
@@ -1800,16 +1824,31 @@ class SpecificationItem(BaseItem):
 		:raises TypeError:                       If parameter ``state`` isn't of type :class:`ItemState`.
 		:raises TypeError:                       If parameter ``layer`` isn't of type :class:`Layer`.
 		:raises NotInSameSpecificationError:     If parameter ``layer`` isn't part of the item's specification.
-		:raises TypeError:                       If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
-		                                         ``attachments`` isn't iterable, or is a single element.
-		:raises TypeError:                       If parameter ``authors`` or ``owners`` contains an element not of type
+		:raises TypeError:                       If parameter ``authors`` isn't iterable, or is a single element.
+		:raises TypeError:                       If parameter ``authors`` contains an element not of type
 		                                         :class:`~pyEDAA.Reports.Person`.
-		:raises TypeError:                       If parameter ``personas``, ``labels`` or ``attachments`` contains an
-		                                         element not of type :class:`Persona`, :class:`Label` or :class:`Document`.
-		:raises NotInSameSpecificationError:     If parameter ``authors``, ``owners``, ``personas``, ``labels`` or
-		                                         ``attachments`` contains an element, which isn't part of the item's
+		:raises NotInSameSpecificationError:     If parameter ``authors`` contains an element, which isn't part of the
+		                                         item's specification.
+		:raises DuplicatePersonError:            If parameter ``authors`` contains a person twice.
+		:raises TypeError:                       If parameter ``owners`` isn't iterable, or is a single element.
+		:raises TypeError:                       If parameter ``owners`` contains an element not of type
+		                                         :class:`~pyEDAA.Reports.Person`.
+		:raises NotInSameSpecificationError:     If parameter ``owners`` contains an element, which isn't part of the item's
 		                                         specification.
-		:raises DuplicatePersonError:            If parameter ``authors`` or ``owners`` contains a person twice.
+		:raises DuplicatePersonError:            If parameter ``owners`` contains a person twice.
+		:raises TypeError:                       If parameter ``personas`` isn't iterable, or is a single element.
+		:raises TypeError:                       If parameter ``personas`` contains an element not of type :class:`Persona`.
+		:raises NotInSameSpecificationError:     If parameter ``personas`` contains an element, which isn't part of the
+		                                         item's specification.
+		:raises TypeError:                       If parameter ``labels`` isn't iterable, or is a single element.
+		:raises TypeError:                       If parameter ``labels`` contains an element not of type :class:`Label`.
+		:raises NotInSameSpecificationError:     If parameter ``labels`` contains an element, which isn't part of the item's
+		                                         specification.
+		:raises TypeError:                       If parameter ``attachments`` isn't iterable, or is a single element.
+		:raises TypeError:                       If parameter ``attachments`` contains an element not of type
+		                                         :class:`Document`.
+		:raises NotInSameSpecificationError:     If parameter ``attachments`` contains an element, which isn't part of the
+		                                         item's specification.
 		:raises DuplicatePersonaError:           If parameter ``personas`` contains a persona twice.
 		:raises DuplicateLabelError:             If parameter ``labels`` contains a label twice.
 		:raises DuplicateDocumentError:          If parameter ``attachments`` contains a document twice.

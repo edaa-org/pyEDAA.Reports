@@ -85,7 +85,9 @@ class BinBase(Base):
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises ValueError:    If parameter ``binType`` is ``None``.
 		:raises TypeError:     If parameter ``binType`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``alias``, ``name`` or ``key`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
 		"""
 		super().__init__(userAttributes)
 
@@ -168,8 +170,10 @@ class ValueRange(metaclass=ExtendedType, slots=True):
 		:param fromValue:   The range's lowest value.
 		:param toValue:     The range's highest value; the lowest one again for a single value.
 		:param contents:    How often the expression had a value of the range.
-		:raises ValueError: If parameter ``fromValue`` or ``toValue`` is ``None``.
-		:raises TypeError:  If parameter ``fromValue`` or ``toValue`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``fromValue`` is ``None``.
+		:raises TypeError:  If parameter ``fromValue`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``toValue`` is ``None``.
+		:raises TypeError:  If parameter ``toValue`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``contents`` is ``None``.
 		:raises TypeError:  If parameter ``contents`` isn't of type
 		                    :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.BinContents`.
@@ -384,7 +388,9 @@ class CoverpointBin(BinBase):
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises ValueError:    If parameter ``binType`` is ``None``.
 		:raises TypeError:     If parameter ``binType`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``alias``, ``name`` or ``key`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`Coverpoint`.
 		:raises TypeError:     If parameter ``ranges`` isn't iterable.
 		:raises TypeError:     If parameter ``ranges`` contains an element not of type :class:`ValueRange`.
@@ -524,12 +530,15 @@ class Coverpoint(Base):
 		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
 		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
-		:raises ValueError:    If parameter ``name`` or ``key`` is ``None``.
-		:raises TypeError:     If parameter ``name`` or ``key`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``key`` is ``None``.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``options`` is ``None``.
 		:raises TypeError:     If parameter ``options`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.CoverOptions.CoverpointOptions`.
-		:raises TypeError:     If parameter ``alias`` or ``expression`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``expression`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``parent`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Covergroups.CovergroupInstance`.
 		"""

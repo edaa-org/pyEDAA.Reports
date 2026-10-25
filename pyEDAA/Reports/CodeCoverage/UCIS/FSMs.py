@@ -177,7 +177,8 @@ class FSM(Base, ObjectAttributesMixin):
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises TypeError:     If parameter ``name`` or ``objectType`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``objectType`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``width`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``width`` is less than 1.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`FSMCoverage`.
@@ -338,7 +339,8 @@ class FSMState(Base):
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises ValueError:    If parameter ``coverBin`` is ``None``.
 		:raises TypeError:     If parameter ``coverBin`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
-		:raises TypeError:     If parameter ``name`` or ``value`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``value`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`FSM`.
 		"""
 		super().__init__(userAttributes)

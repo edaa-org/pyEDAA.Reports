@@ -89,8 +89,10 @@ class Cross(Base):
 		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
 		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
-		:raises ValueError:    If parameter ``name`` or ``key`` is ``None``.
-		:raises TypeError:     If parameter ``name`` or ``key`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``key`` is ``None``.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``options`` is ``None``.
 		:raises TypeError:     If parameter ``options`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.CoverOptions.CrossOptions`.
@@ -286,7 +288,9 @@ class CrossBin(BinBase):
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises ValueError:    If parameter ``binType`` is ``None``.
 		:raises TypeError:     If parameter ``binType`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``alias``, ``name`` or ``key`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``contents`` is ``None``.
 		:raises TypeError:     If parameter ``contents`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.BinContents`.

@@ -154,10 +154,18 @@ class HistoryNode(Base):
 		:raises TypeError:        If parameter ``testStatus`` isn't of type :class:`bool`.
 		:raises ValueError:       If parameter ``date`` is ``None``.
 		:raises TypeError:        If parameter ``date`` isn't of type :class:`~datetime.datetime`.
-		:raises ValueError:       If parameter ``logicalName``, ``toolCategory``, ``ucisVersion``, ``vendorID``,
-		                          ``vendorTool`` or ``vendorToolVersion`` is ``None``.
-		:raises TypeError:        If parameter ``logicalName``, ``toolCategory``, ``ucisVersion``, ``vendorID``,
-		                          ``vendorTool`` or ``vendorToolVersion`` isn't of type :class:`str`.
+		:raises ValueError:       If parameter ``logicalName`` is ``None``.
+		:raises TypeError:        If parameter ``logicalName`` isn't of type :class:`str`.
+		:raises ValueError:       If parameter ``toolCategory`` is ``None``.
+		:raises TypeError:        If parameter ``toolCategory`` isn't of type :class:`str`.
+		:raises ValueError:       If parameter ``ucisVersion`` is ``None``.
+		:raises TypeError:        If parameter ``ucisVersion`` isn't of type :class:`str`.
+		:raises ValueError:       If parameter ``vendorID`` is ``None``.
+		:raises TypeError:        If parameter ``vendorID`` isn't of type :class:`str`.
+		:raises ValueError:       If parameter ``vendorTool`` is ``None``.
+		:raises TypeError:        If parameter ``vendorTool`` isn't of type :class:`str`.
+		:raises ValueError:       If parameter ``vendorToolVersion`` is ``None``.
+		:raises TypeError:        If parameter ``vendorToolVersion`` isn't of type :class:`str`.
 		:raises TypeError:        If parameter ``parentID`` isn't of type :class:`int`.
 		:raises ValueError:       If parameter ``parentID`` is negative.
 		:raises TypeError:        If parameter ``sameTests`` isn't of type :class:`int`.
@@ -166,8 +174,14 @@ class HistoryNode(Base):
 		:raises TypeError:        If parameter ``runDirectory`` isn't of type :class:`~pathlib.Path`.
 		:raises TypeError:        If parameter ``simulationTime`` isn't of type :class:`float`.
 		:raises TypeError:        If parameter ``cpuTime`` isn't of type :class:`float`.
-		:raises TypeError:        If parameter ``kind``, ``timeUnit``, ``seed``, ``command``, ``arguments``,
-		                          ``compulsory``, ``userName`` or ``comment`` isn't of type :class:`str`.
+		:raises TypeError:        If parameter ``kind`` isn't of type :class:`str`.
+		:raises TypeError:        If parameter ``timeUnit`` isn't of type :class:`str`.
+		:raises TypeError:        If parameter ``seed`` isn't of type :class:`str`.
+		:raises TypeError:        If parameter ``command`` isn't of type :class:`str`.
+		:raises TypeError:        If parameter ``arguments`` isn't of type :class:`str`.
+		:raises TypeError:        If parameter ``compulsory`` isn't of type :class:`str`.
+		:raises TypeError:        If parameter ``userName`` isn't of type :class:`str`.
+		:raises TypeError:        If parameter ``comment`` isn't of type :class:`str`.
 		:raises TypeError:        If parameter ``cost`` isn't of type :class:`~decimal.Decimal`.
 		:raises TypeError:        If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Report`.
 		"""
