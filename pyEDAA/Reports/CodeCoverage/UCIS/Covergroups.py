@@ -146,10 +146,15 @@ class CovergroupID(metaclass=ExtendedType, slots=True):
 		:param moduleName:       Name of the module or package declaring the covergroup.
 		:param instanceSourceID: Where the covergroup instance is declared.
 		:param sourceID:         Where the covergroup is declared.
-		:raises ValueError:      If parameter ``name`` or ``moduleName`` is ``None``.
-		:raises TypeError:       If parameter ``name`` or ``moduleName`` isn't of type :class:`str`.
-		:raises ValueError:      If parameter ``instanceSourceID`` or ``sourceID`` is ``None``.
-		:raises TypeError:       If parameter ``instanceSourceID`` or ``sourceID`` isn't of type
+		:raises ValueError:      If parameter ``name`` is ``None``.
+		:raises TypeError:       If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:      If parameter ``moduleName`` is ``None``.
+		:raises TypeError:       If parameter ``moduleName`` isn't of type :class:`str`.
+		:raises ValueError:      If parameter ``instanceSourceID`` is ``None``.
+		:raises TypeError:       If parameter ``instanceSourceID`` isn't of type
+		                         :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
+		:raises ValueError:      If parameter ``sourceID`` is ``None``.
+		:raises TypeError:       If parameter ``sourceID`` isn't of type
 		                         :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
 		"""
 		for parameterName, value in (
@@ -288,14 +293,17 @@ class CovergroupInstance(Base):
 		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
 		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
-		:raises ValueError:    If parameter ``name`` or ``key`` is ``None``.
-		:raises TypeError:     If parameter ``name`` or ``key`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``key`` is ``None``.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``options`` is ``None``.
 		:raises TypeError:     If parameter ``options`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.CoverOptions.CovergroupOptions`.
 		:raises ValueError:    If parameter ``covergroupID`` is ``None``.
 		:raises TypeError:     If parameter ``covergroupID`` isn't of type :class:`CovergroupID`.
-		:raises TypeError:     If parameter ``alias`` or ``excludedReason`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``excludedReason`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``excluded`` is ``None``.
 		:raises TypeError:     If parameter ``excluded`` isn't of type :class:`bool`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`CovergroupCoverage`.

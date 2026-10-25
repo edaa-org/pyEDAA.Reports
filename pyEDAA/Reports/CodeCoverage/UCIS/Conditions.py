@@ -198,11 +198,18 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises ValueError:    If parameter ``name``, ``key`` or ``text`` is ``None``.
-		:raises TypeError:     If parameter ``name``, ``key`` or ``text`` isn't of type :class:`str`.
-		:raises ValueError:    If parameter ``index`` or ``width`` is ``None``.
-		:raises TypeError:     If parameter ``index`` or ``width`` isn't of type :class:`int`.
-		:raises ValueError:    If parameter ``index`` or ``width`` is negative.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``key`` is ``None``.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``text`` is ``None``.
+		:raises TypeError:     If parameter ``text`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``index`` is ``None``.
+		:raises TypeError:     If parameter ``index`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``index`` is negative.
+		:raises ValueError:    If parameter ``width`` is ``None``.
+		:raises TypeError:     If parameter ``width`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``width`` is negative.
 		:raises ValueError:    If parameter ``statementID`` is ``None``.
 		:raises TypeError:     If parameter ``statementID`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.

@@ -67,9 +67,15 @@ class Options(metaclass=ExtendedType, slots=True):
 		:param goal:        Optional, coverage goal, in percent. Default: ``100``.
 		:param comment:     Optional, a comment. Default: ``""``.
 		:param atLeast:     Optional, how often a bin must be hit to be covered. Default: ``1``.
-		:raises ValueError: If parameter ``weight``, ``goal`` or ``atLeast`` is ``None``.
-		:raises TypeError:  If parameter ``weight``, ``goal`` or ``atLeast`` isn't of type :class:`int`.
-		:raises ValueError: If parameter ``weight``, ``goal`` or ``atLeast`` is negative.
+		:raises ValueError: If parameter ``weight`` is ``None``.
+		:raises TypeError:  If parameter ``weight`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``weight`` is negative.
+		:raises ValueError: If parameter ``goal`` is ``None``.
+		:raises TypeError:  If parameter ``goal`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``goal`` is negative.
+		:raises ValueError: If parameter ``atLeast`` is ``None``.
+		:raises TypeError:  If parameter ``atLeast`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``atLeast`` is negative.
 		:raises ValueError: If parameter ``comment`` is ``None``.
 		:raises TypeError:  If parameter ``comment`` isn't of type :class:`str`.
 		"""
@@ -165,9 +171,15 @@ class CoverpointOptions(Options):
 		:param atLeast:       Optional, how often a bin must be hit to be covered. Default: ``1``.
 		:param detectOverlap: Optional, whether to warn about overlapping bins. Default: ``False``.
 		:param autoBinMax:    Optional, maximum number of bins created automatically. Default: ``64``.
-		:raises ValueError:   If parameter ``weight``, ``goal`` or ``atLeast`` is ``None``.
-		:raises TypeError:    If parameter ``weight``, ``goal`` or ``atLeast`` isn't of type :class:`int`.
-		:raises ValueError:   If parameter ``weight``, ``goal`` or ``atLeast`` is negative.
+		:raises ValueError:   If parameter ``weight`` is ``None``.
+		:raises TypeError:    If parameter ``weight`` isn't of type :class:`int`.
+		:raises ValueError:   If parameter ``weight`` is negative.
+		:raises ValueError:   If parameter ``goal`` is ``None``.
+		:raises TypeError:    If parameter ``goal`` isn't of type :class:`int`.
+		:raises ValueError:   If parameter ``goal`` is negative.
+		:raises ValueError:   If parameter ``atLeast`` is ``None``.
+		:raises TypeError:    If parameter ``atLeast`` isn't of type :class:`int`.
+		:raises ValueError:   If parameter ``atLeast`` is negative.
 		:raises ValueError:   If parameter ``comment`` is ``None``.
 		:raises TypeError:    If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``detectOverlap`` is ``None``.
@@ -260,9 +272,15 @@ class CrossOptions(Options):
 		:param comment:              Optional, a comment. Default: ``""``.
 		:param atLeast:              Optional, how often a bin must be hit to be covered. Default: ``1``.
 		:param crossNumPrintMissing: Optional, number of uncovered cross bins to save and report. Default: ``0``.
-		:raises ValueError:          If parameter ``weight``, ``goal`` or ``atLeast`` is ``None``.
-		:raises TypeError:           If parameter ``weight``, ``goal`` or ``atLeast`` isn't of type :class:`int`.
-		:raises ValueError:          If parameter ``weight``, ``goal`` or ``atLeast`` is negative.
+		:raises ValueError:          If parameter ``weight`` is ``None``.
+		:raises TypeError:           If parameter ``weight`` isn't of type :class:`int`.
+		:raises ValueError:          If parameter ``weight`` is negative.
+		:raises ValueError:          If parameter ``goal`` is ``None``.
+		:raises TypeError:           If parameter ``goal`` isn't of type :class:`int`.
+		:raises ValueError:          If parameter ``goal`` is negative.
+		:raises ValueError:          If parameter ``atLeast`` is ``None``.
+		:raises TypeError:           If parameter ``atLeast`` isn't of type :class:`int`.
+		:raises ValueError:          If parameter ``atLeast`` is negative.
 		:raises ValueError:          If parameter ``comment`` is ``None``.
 		:raises TypeError:           If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError:          If parameter ``crossNumPrintMissing`` is ``None``.
@@ -346,9 +364,15 @@ class CovergroupOptions(CoverpointOptions):
 		:param perInstance:          Optional, whether the instance's coverage is kept on its own. Default: ``False``.
 		:param mergeInstances:       Optional, whether the covergroup's coverage merges its instances. Default:
 		                             ``False``.
-		:raises ValueError:          If parameter ``weight``, ``goal`` or ``atLeast`` is ``None``.
-		:raises TypeError:           If parameter ``weight``, ``goal`` or ``atLeast`` isn't of type :class:`int`.
-		:raises ValueError:          If parameter ``weight``, ``goal`` or ``atLeast`` is negative.
+		:raises ValueError:          If parameter ``weight`` is ``None``.
+		:raises TypeError:           If parameter ``weight`` isn't of type :class:`int`.
+		:raises ValueError:          If parameter ``weight`` is negative.
+		:raises ValueError:          If parameter ``goal`` is ``None``.
+		:raises TypeError:           If parameter ``goal`` isn't of type :class:`int`.
+		:raises ValueError:          If parameter ``goal`` is negative.
+		:raises ValueError:          If parameter ``atLeast`` is ``None``.
+		:raises TypeError:           If parameter ``atLeast`` isn't of type :class:`int`.
+		:raises ValueError:          If parameter ``atLeast`` is negative.
 		:raises ValueError:          If parameter ``comment`` is ``None``.
 		:raises TypeError:           If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError:          If parameter ``detectOverlap`` is ``None``.
@@ -359,8 +383,10 @@ class CovergroupOptions(CoverpointOptions):
 		:raises ValueError:          If parameter ``crossNumPrintMissing`` is ``None``.
 		:raises TypeError:           If parameter ``crossNumPrintMissing`` isn't of type :class:`int`.
 		:raises ValueError:          If parameter ``crossNumPrintMissing`` is negative.
-		:raises ValueError:          If parameter ``perInstance`` or ``mergeInstances`` is ``None``.
-		:raises TypeError:           If parameter ``perInstance`` or ``mergeInstances`` isn't of type :class:`bool`.
+		:raises ValueError:          If parameter ``perInstance`` is ``None``.
+		:raises TypeError:           If parameter ``perInstance`` isn't of type :class:`bool`.
+		:raises ValueError:          If parameter ``mergeInstances`` is ``None``.
+		:raises TypeError:           If parameter ``mergeInstances`` isn't of type :class:`bool`.
 		"""
 		super().__init__(weight, goal, comment, atLeast, detectOverlap, autoBinMax)
 
