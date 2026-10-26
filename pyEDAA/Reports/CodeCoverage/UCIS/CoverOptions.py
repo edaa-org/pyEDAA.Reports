@@ -73,11 +73,11 @@ class Options(metaclass=ExtendedType, slots=True):
 		:raises ValueError: If parameter ``goal`` is ``None``.
 		:raises TypeError:  If parameter ``goal`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``goal`` is negative.
+		:raises ValueError: If parameter ``comment`` is ``None``.
+		:raises TypeError:  If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``atLeast`` is ``None``.
 		:raises TypeError:  If parameter ``atLeast`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``atLeast`` is negative.
-		:raises ValueError: If parameter ``comment`` is ``None``.
-		:raises TypeError:  If parameter ``comment`` isn't of type :class:`str`.
 		"""
 		for parameterName, value in (
 			("weight",  weight),
@@ -177,11 +177,11 @@ class CoverpointOptions(Options):
 		:raises ValueError:   If parameter ``goal`` is ``None``.
 		:raises TypeError:    If parameter ``goal`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``goal`` is negative.
+		:raises ValueError:   If parameter ``comment`` is ``None``.
+		:raises TypeError:    If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``atLeast`` is ``None``.
 		:raises TypeError:    If parameter ``atLeast`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``atLeast`` is negative.
-		:raises ValueError:   If parameter ``comment`` is ``None``.
-		:raises TypeError:    If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``detectOverlap`` is ``None``.
 		:raises TypeError:    If parameter ``detectOverlap`` isn't of type :class:`bool`.
 		:raises ValueError:   If parameter ``autoBinMax`` is ``None``.
@@ -278,11 +278,11 @@ class CrossOptions(Options):
 		:raises ValueError:          If parameter ``goal`` is ``None``.
 		:raises TypeError:           If parameter ``goal`` isn't of type :class:`int`.
 		:raises ValueError:          If parameter ``goal`` is negative.
+		:raises ValueError:          If parameter ``comment`` is ``None``.
+		:raises TypeError:           If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError:          If parameter ``atLeast`` is ``None``.
 		:raises TypeError:           If parameter ``atLeast`` isn't of type :class:`int`.
 		:raises ValueError:          If parameter ``atLeast`` is negative.
-		:raises ValueError:          If parameter ``comment`` is ``None``.
-		:raises TypeError:           If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError:          If parameter ``crossNumPrintMissing`` is ``None``.
 		:raises TypeError:           If parameter ``crossNumPrintMissing`` isn't of type :class:`int`.
 		:raises ValueError:          If parameter ``crossNumPrintMissing`` is negative.
@@ -370,11 +370,11 @@ class CovergroupOptions(CoverpointOptions):
 		:raises ValueError:          If parameter ``goal`` is ``None``.
 		:raises TypeError:           If parameter ``goal`` isn't of type :class:`int`.
 		:raises ValueError:          If parameter ``goal`` is negative.
+		:raises ValueError:          If parameter ``comment`` is ``None``.
+		:raises TypeError:           If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError:          If parameter ``atLeast`` is ``None``.
 		:raises TypeError:           If parameter ``atLeast`` isn't of type :class:`int`.
 		:raises ValueError:          If parameter ``atLeast`` is negative.
-		:raises ValueError:          If parameter ``comment`` is ``None``.
-		:raises TypeError:           If parameter ``comment`` isn't of type :class:`str`.
 		:raises ValueError:          If parameter ``detectOverlap`` is ``None``.
 		:raises TypeError:           If parameter ``detectOverlap`` isn't of type :class:`bool`.
 		:raises ValueError:          If parameter ``autoBinMax`` is ``None``.

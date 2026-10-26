@@ -532,11 +532,6 @@ class Bin(Base, AttributesMixin):
 		:param parent:      Optional, the scope the bin belongs to; the bin is appended to its bins. Default: ``None``.
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
-		:raises TypeError:  If parameter ``attributes`` isn't a mapping.
-		:raises TypeError:  If parameter ``attributes`` contains a key not of type :class:`str`.
-		:raises ValueError: If parameter ``attributes`` contains an empty key.
-		:raises TypeError:  If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
-		                    :class:`str`.
 		:raises ValueError: If parameter ``coverType`` is ``None``.
 		:raises TypeError:  If parameter ``coverType`` isn't of type
 		                    :class:`CoverType`.
@@ -547,6 +542,11 @@ class Bin(Base, AttributesMixin):
 		:raises ValueError: If parameter ``count`` is negative.
 		:raises ValueError: If parameter ``source`` is ``None``.
 		:raises TypeError:  If parameter ``source`` isn't of type :class:`SourceLocation`.
+		:raises TypeError:  If parameter ``attributes`` isn't a mapping.
+		:raises TypeError:  If parameter ``attributes`` contains a key not of type :class:`str`.
+		:raises ValueError: If parameter ``attributes`` contains an empty key.
+		:raises TypeError:  If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
+		                    :class:`str`.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Scope`.
 		"""
 		super().__init__(name)
@@ -722,11 +722,6 @@ class Scope(Base, AttributesMixin, Generic[ScopeParentType]):
 		                    Default: ``None``.
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
-		:raises TypeError:  If parameter ``attributes`` isn't a mapping.
-		:raises TypeError:  If parameter ``attributes`` contains a key not of type :class:`str`.
-		:raises ValueError: If parameter ``attributes`` contains an empty key.
-		:raises TypeError:  If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
-		                    :class:`str`.
 		:raises ValueError: If parameter ``name`` is empty.
 		:raises ValueError: If parameter ``scopeType`` is ``None``.
 		:raises TypeError:  If parameter ``scopeType`` isn't of type
@@ -744,6 +739,11 @@ class Scope(Base, AttributesMixin, Generic[ScopeParentType]):
 		:raises TypeError:  If parameter ``source`` isn't of type :class:`SourceLocation`.
 		:raises TypeError:  If parameter ``designUnit`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``designUnit`` is empty.
+		:raises TypeError:  If parameter ``attributes`` isn't a mapping.
+		:raises TypeError:  If parameter ``attributes`` contains a key not of type :class:`str`.
+		:raises ValueError: If parameter ``attributes`` contains an empty key.
+		:raises TypeError:  If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
+		                    :class:`str`.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report`
 		                    or :class:`Scope`.
 		"""
@@ -981,16 +981,16 @@ class HistoryNode(Base, AttributesMixin, Generic[HistoryNodeParentType]):
 		                     to its history nodes. Default: ``None``.
 		:raises ValueError:  If parameter ``name`` is ``None``.
 		:raises TypeError:   If parameter ``name`` isn't of type :class:`str`.
-		:raises TypeError:   If parameter ``attributes`` isn't a mapping.
-		:raises TypeError:   If parameter ``attributes`` contains a key not of type :class:`str`.
-		:raises ValueError:  If parameter ``attributes`` contains an empty key.
-		:raises TypeError:   If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
-		                     :class:`str`.
 		:raises ValueError:  If parameter ``name`` is empty.
 		:raises ValueError:  If parameter ``physicalName`` is ``None``.
 		:raises TypeError:   If parameter ``physicalName`` isn't of type :class:`~pathlib.Path`.
 		:raises ValueError:  If parameter ``kind`` is ``None``.
 		:raises TypeError:   If parameter ``kind`` isn't of type :class:`HistoryNodeKind`.
+		:raises TypeError:   If parameter ``attributes`` isn't a mapping.
+		:raises TypeError:   If parameter ``attributes`` contains a key not of type :class:`str`.
+		:raises ValueError:  If parameter ``attributes`` contains an empty key.
+		:raises TypeError:   If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
+		                     :class:`str`.
 		:raises TypeError:   If parameter ``parent`` isn't of type :class:`Report`
 		                     or :class:`HistoryNode`.
 		"""

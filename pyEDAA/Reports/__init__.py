@@ -101,7 +101,6 @@ class Person(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:param name:          The person's name.
 		:param email:         Optional, the person's e-mail address. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
 		:raises ValueError:   If parameter ``userID`` is ``None``.
 		:raises TypeError:    If parameter ``userID`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``userID`` is empty.
@@ -110,6 +109,7 @@ class Person(KeyValuePairsMixin, metaclass=ExtendedType, slots=True):
 		:raises ValueError:   If parameter ``name`` is empty.
 		:raises TypeError:    If parameter ``email`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``email`` isn't of the form ``local@domain``.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
 		"""
 		super().__init__(keyValuePairs)
 

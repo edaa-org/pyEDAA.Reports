@@ -89,13 +89,13 @@ class AssertionCoverage(MetricCoverage):
 		:param weight:         Optional, weight of the mode in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the instance the coverage belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``metricMode`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Instances.InstanceCoverage`.
 		"""
@@ -174,9 +174,14 @@ class Assertion(Base, ObjectAttributesMixin):
 		:param weight:         Optional, weight of the assertion in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the assertion coverage the assertion belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``assertionKind`` is ``None``.
+		:raises TypeError:     If parameter ``assertionKind`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``bins`` isn't a mapping.
+		:raises TypeError:     If parameter ``bins`` contains a key not of type :class:`AssertionBinKind`.
+		:raises TypeError:     If parameter ``bins`` contains a value not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
 		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``excluded`` is ``None``.
 		:raises TypeError:     If parameter ``excluded`` isn't of type :class:`bool`.
@@ -184,15 +189,10 @@ class Assertion(Base, ObjectAttributesMixin):
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises ValueError:    If parameter ``name`` is ``None``.
-		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
-		:raises ValueError:    If parameter ``assertionKind`` is ``None``.
-		:raises TypeError:     If parameter ``assertionKind`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`AssertionCoverage`.
-		:raises TypeError:     If parameter ``bins`` isn't a mapping.
-		:raises TypeError:     If parameter ``bins`` contains a key not of type :class:`AssertionBinKind`.
-		:raises TypeError:     If parameter ``bins`` contains a value not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
 		"""
 		super().__init__(userAttributes)
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)

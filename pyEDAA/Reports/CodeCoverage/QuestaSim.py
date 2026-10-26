@@ -1596,12 +1596,6 @@ class InstanceData(Scope):
 		:param secondaryUnit: Optional, name of the secondary unit (the architecture). Default: ``None``.
 		:param files:         Optional, the source files, by the number the report gives them. Default: ``None``.
 		:param parent:        Optional, the report the instance belongs to. Default: ``None``.
-		:raises TypeError:    If parameter ``files`` isn't a mapping.
-		:raises TypeError:    If parameter ``files`` contains a key not of type :class:`int`.
-		:raises ValueError:   If parameter ``files`` contains a negative key.
-		:raises TypeError:    If parameter ``files`` contains a value not of type :class:`~pathlib.Path`.
-		:raises TypeError:    If parameter ``parent`` isn't of type
-		                      :class:`Report`.
 		:raises ValueError:   If parameter ``path`` is ``None``.
 		:raises TypeError:    If parameter ``path`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``path`` is empty.
@@ -1610,6 +1604,12 @@ class InstanceData(Scope):
 		:raises ValueError:   If parameter ``designUnit`` is empty.
 		:raises TypeError:    If parameter ``secondaryUnit`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``secondaryUnit`` is empty.
+		:raises TypeError:    If parameter ``files`` isn't a mapping.
+		:raises TypeError:    If parameter ``files`` contains a key not of type :class:`int`.
+		:raises ValueError:   If parameter ``files`` contains a negative key.
+		:raises TypeError:    If parameter ``files`` contains a value not of type :class:`~pathlib.Path`.
+		:raises TypeError:    If parameter ``parent`` isn't of type
+		                      :class:`Report`.
 		"""
 		super().__init__(files, parent=parent)
 
@@ -1718,17 +1718,17 @@ class DesignUnitData(Scope):
 		:param secondaryUnit: Optional, name of the secondary unit (the architecture). Default: ``None``.
 		:param files:         Optional, the source files, by the number the report gives them. Default: ``None``.
 		:param parent:        Optional, the report the design unit belongs to. Default: ``None``.
+		:raises ValueError:   If parameter ``designUnit`` is ``None``.
+		:raises TypeError:    If parameter ``designUnit`` isn't of type :class:`str`.
+		:raises ValueError:   If parameter ``designUnit`` is empty.
+		:raises TypeError:    If parameter ``secondaryUnit`` isn't of type :class:`str`.
+		:raises ValueError:   If parameter ``secondaryUnit`` is empty.
 		:raises TypeError:    If parameter ``files`` isn't a mapping.
 		:raises TypeError:    If parameter ``files`` contains a key not of type :class:`int`.
 		:raises ValueError:   If parameter ``files`` contains a negative key.
 		:raises TypeError:    If parameter ``files`` contains a value not of type :class:`~pathlib.Path`.
 		:raises TypeError:    If parameter ``parent`` isn't of type
 		                      :class:`Report`.
-		:raises ValueError:   If parameter ``designUnit`` is ``None``.
-		:raises TypeError:    If parameter ``designUnit`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``designUnit`` is empty.
-		:raises TypeError:    If parameter ``secondaryUnit`` isn't of type :class:`str`.
-		:raises ValueError:   If parameter ``secondaryUnit`` is empty.
 		"""
 		super().__init__(files, parent=parent)
 
@@ -1809,14 +1809,14 @@ class FileData(Scope):
 		:param path:        Path of the source file, as the report states it.
 		:param files:       Optional, the source files, by the number the report gives them. Default: ``None``.
 		:param parent:      Optional, the report the source file belongs to. Default: ``None``.
+		:raises ValueError: If parameter ``path`` is ``None``.
+		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
 		:raises TypeError:  If parameter ``files`` isn't a mapping.
 		:raises TypeError:  If parameter ``files`` contains a key not of type :class:`int`.
 		:raises ValueError: If parameter ``files`` contains a negative key.
 		:raises TypeError:  If parameter ``files`` contains a value not of type :class:`~pathlib.Path`.
 		:raises TypeError:  If parameter ``parent`` isn't of type
 		                    :class:`Report`.
-		:raises ValueError: If parameter ``path`` is ``None``.
-		:raises TypeError:  If parameter ``path`` isn't of type :class:`~pathlib.Path`.
 		"""
 		super().__init__(files, parent=parent)
 
