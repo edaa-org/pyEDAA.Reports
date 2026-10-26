@@ -97,7 +97,7 @@ class CovergroupInstantiation(Testcase):
 		self.assertEqual({}, covergroup.Coverpoints)
 		self.assertEqual(0, covergroup.CoverpointCount)
 		self.assertEqual(
-			"<Covergroup DelayCov BurstLength: 0 coverpoints>",
+			"<Covergroup DelayCov BurstLength: 0 coverpoints, 0 crosses>",
 			repr(covergroup)
 		)
 
@@ -139,7 +139,7 @@ class CoverpointInstantiation(Testcase):
 		self.assertIsNone(coverpoint.Expression)
 		self.assertIsNone(coverpoint.Parent)
 		self.assertIsNone(coverpoint.Root)
-		self.assertEqual("<Coverpoint Bin1>", repr(coverpoint))
+		self.assertEqual("<Coverpoint Bin1: 0 bins>", repr(coverpoint))
 
 	def test_Expression(self) -> None:
 		coverpoint = Coverpoint("Length", "BurstLength")
