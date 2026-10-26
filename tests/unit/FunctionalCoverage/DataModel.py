@@ -176,12 +176,12 @@ class KeyValuePairsArgument(Testcase):
 		self.assertEqual(0, report["WritePassFail"])
 
 	def test_Covergroup(self) -> None:
-		covergroup = Covergroup("cg", None, {"Seed": 5})
+		covergroup = Covergroup("cg", 1, 100.0, None, {"Seed": 5})
 
 		self.assertEqual(5, covergroup["Seed"])
 
 	def test_Coverpoint(self) -> None:
-		coverpoint = Coverpoint("cp", "addr", {"Weight": 1})
+		coverpoint = Coverpoint("cp", "addr", 1, 100.0, {"Weight": 1})
 
 		self.assertEqual(1, coverpoint["Weight"])
 
