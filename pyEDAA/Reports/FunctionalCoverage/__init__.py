@@ -380,11 +380,11 @@ class BaseWithCoverage(BaseWithName):
 		:param name:          Name of the element.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the element containing this one. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		:raises ValueError:   If parameter ``name`` is ``None``.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``name`` is empty.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		"""
 		super().__init__(name, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -572,8 +572,6 @@ class BaseWithGoal(BaseWithCoverage):
 		:param goal:          Optional, coverage goal, in percent. Default: ``100.0``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the element containing this one. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		:raises ValueError:   If parameter ``name`` is ``None``.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``name`` is empty.
@@ -583,6 +581,8 @@ class BaseWithGoal(BaseWithCoverage):
 		:raises ValueError:   If parameter ``goal`` is ``None``.
 		:raises TypeError:    If parameter ``goal`` isn't of type :class:`float` or :class:`int`.
 		:raises ValueError:   If parameter ``goal`` is negative.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		"""
 		super().__init__(name, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -980,14 +980,14 @@ class CoverageItem(BaseWithGoal):
 		:raises ValueError:   If parameter ``name`` is ``None``.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``name`` is empty.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Covergroup`.
 		:raises ValueError:   If parameter ``weight`` is ``None``.
 		:raises TypeError:    If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``weight`` is negative.
 		:raises ValueError:   If parameter ``goal`` is ``None``.
 		:raises TypeError:    If parameter ``goal`` isn't of type :class:`float` or :class:`int`.
 		:raises ValueError:   If parameter ``goal`` is negative.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Covergroup`.
 		"""
 		super().__init__(name, weight, goal, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -1112,14 +1112,14 @@ class Coverpoint(CoverageItem):
 		:raises ValueError:               If parameter ``name`` is ``None``.
 		:raises TypeError:                If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:               If parameter ``name`` is empty.
+		:raises TypeError:                If parameter ``expression`` isn't of type :class:`str`.
+		:raises ValueError:               If parameter ``expression`` is empty.
 		:raises ValueError:               If parameter ``weight`` is ``None``.
 		:raises TypeError:                If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:               If parameter ``weight`` is negative.
 		:raises ValueError:               If parameter ``goal`` is ``None``.
 		:raises TypeError:                If parameter ``goal`` isn't of type :class:`float` or :class:`int`.
 		:raises ValueError:               If parameter ``goal`` is negative.
-		:raises TypeError:                If parameter ``expression`` isn't of type :class:`str`.
-		:raises ValueError:               If parameter ``expression`` is empty.
 		:raises TypeError:                If parameter ``keyValuePairs`` isn't a mapping.
 		:raises TypeError:                If parameter ``parent`` isn't of type :class:`Covergroup`.
 		:raises DuplicateCoverpointError: If the covergroup already contains a coverpoint or cross of this name.
@@ -1186,17 +1186,17 @@ class Cross(CoverageItem):
 		:raises ValueError:          If parameter ``name`` is ``None``.
 		:raises TypeError:           If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:          If parameter ``name`` is empty.
+		:raises ValueError:          If parameter ``crossedItems`` is ``None``.
+		:raises TypeError:           If parameter ``crossedItems`` isn't iterable.
+		:raises TypeError:           If parameter ``crossedItems`` contains an element not of type :class:`str`.
+		:raises ValueError:          If parameter ``crossedItems`` contains an empty name.
+		:raises ValueError:          If parameter ``crossedItems`` contains less than two names.
 		:raises ValueError:          If parameter ``weight`` is ``None``.
 		:raises TypeError:           If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:          If parameter ``weight`` is negative.
 		:raises ValueError:          If parameter ``goal`` is ``None``.
 		:raises TypeError:           If parameter ``goal`` isn't of type :class:`float` or :class:`int`.
 		:raises ValueError:          If parameter ``goal`` is negative.
-		:raises ValueError:          If parameter ``crossedItems`` is ``None``.
-		:raises TypeError:           If parameter ``crossedItems`` isn't iterable.
-		:raises TypeError:           If parameter ``crossedItems`` contains an element not of type :class:`str`.
-		:raises ValueError:          If parameter ``crossedItems`` contains an empty name.
-		:raises ValueError:          If parameter ``crossedItems`` contains less than two names.
 		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
 		:raises TypeError:           If parameter ``parent`` isn't of type :class:`Covergroup`.
 		:raises DuplicateCrossError: If the covergroup already contains a cross or coverpoint of this name.
