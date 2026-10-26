@@ -307,11 +307,11 @@ class BaseWithName(Base):
 		:param name:          Name of the element.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the element containing this one. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		:raises ValueError:   If parameter ``name`` is ``None``.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``name`` is empty.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		"""
 		super().__init__(keyValuePairs, parent=parent)
 
@@ -354,10 +354,10 @@ class FunctionalCoverageReport(BaseWithName):
 
 		:param name:          Name of the report, e.g. of the testcase measured.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
 		:raises ValueError:   If parameter ``name`` is ``None``.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``name`` is empty.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
 		"""
 		super().__init__(name, keyValuePairs=keyValuePairs)
 
@@ -459,13 +459,13 @@ class Covergroup(BaseWithName):
 		:param testcases:     Optional, the names of the testcases, which sampled the covergroup. Default: ``None``.
 		:param keyValuePairs: Optional, the key-value pairs, e.g. a tool's settings. Default: ``None``.
 		:param parent:        Optional, the report containing the covergroup. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`FunctionalCoverageReport`.
 		:raises ValueError:   If parameter ``name`` is ``None``.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``name`` is empty.
 		:raises TypeError:    If parameter ``testcases`` isn't iterable.
 		:raises TypeError:    If parameter ``testcases`` contains an element not of type :class:`str`.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`FunctionalCoverageReport`.
 		"""
 		super().__init__(name, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -640,11 +640,11 @@ class CoverageItem(BaseWithName):
 		:param name:          Name of the coverage item.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the covergroup containing the coverage item. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Covergroup`.
 		:raises ValueError:   If parameter ``name`` is ``None``.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``name`` is empty.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Covergroup`.
 		"""
 		super().__init__(name, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -732,13 +732,13 @@ class Coverpoint(CoverageItem):
 		:param expression:                Optional, the sampled expression, e.g. a signal's name. Default: ``None``.
 		:param keyValuePairs:             Optional, the key-value pairs. Default: ``None``.
 		:param parent:                    Optional, the covergroup containing the coverpoint. Default: ``None``.
-		:raises TypeError:                If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:                If parameter ``parent`` isn't of type :class:`Covergroup`.
 		:raises ValueError:               If parameter ``name`` is ``None``.
 		:raises TypeError:                If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:               If parameter ``name`` is empty.
 		:raises TypeError:                If parameter ``expression`` isn't of type :class:`str`.
 		:raises ValueError:               If parameter ``expression`` is empty.
+		:raises TypeError:                If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:                If parameter ``parent`` isn't of type :class:`Covergroup`.
 		:raises DuplicateCoverpointError: If the covergroup already contains a coverpoint or cross of this name.
 		"""
 		super().__init__(name, keyValuePairs=keyValuePairs, parent=parent)
@@ -795,8 +795,6 @@ class Cross(CoverageItem):
 		:param crossedItems:         The names of the crossed items, e.g. of coverpoints, one per dimension.
 		:param keyValuePairs:        Optional, the key-value pairs. Default: ``None``.
 		:param parent:               Optional, the covergroup containing the cross. Default: ``None``.
-		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:           If parameter ``parent`` isn't of type :class:`Covergroup`.
 		:raises ValueError:          If parameter ``name`` is ``None``.
 		:raises TypeError:           If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:          If parameter ``name`` is empty.
@@ -805,6 +803,8 @@ class Cross(CoverageItem):
 		:raises TypeError:           If parameter ``crossedItems`` contains an element not of type :class:`str`.
 		:raises ValueError:          If parameter ``crossedItems`` contains an empty name.
 		:raises ValueError:          If parameter ``crossedItems`` contains less than two names.
+		:raises TypeError:           If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:           If parameter ``parent`` isn't of type :class:`Covergroup`.
 		:raises DuplicateCrossError: If the covergroup already contains a cross or coverpoint of this name.
 		"""
 		super().__init__(name, keyValuePairs=keyValuePairs, parent=parent)
@@ -900,8 +900,6 @@ class Bin(Base):
 		:param atLeast:       Optional, how often the bin must be hit to be covered. Default: ``1``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the coverage item containing the bin. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``name`` is empty.
 		:raises ValueError:   If parameter ``kind`` is ``None``.
@@ -912,6 +910,8 @@ class Bin(Base):
 		:raises ValueError:   If parameter ``atLeast`` is ``None``.
 		:raises TypeError:    If parameter ``atLeast`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``atLeast`` is negative.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		"""
 		super().__init__(keyValuePairs, parent=parent)
 
@@ -1031,21 +1031,21 @@ class CoverpointBin(Bin):
 		:param atLeast:       Optional, how often the bin must be hit to be covered. Default: ``1``.
 		:param keyValuePairs: Optional, the key-value pairs. Default: ``None``.
 		:param parent:        Optional, the coverpoint containing the bin. Default: ``None``.
-		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Coverpoint`.
 		:raises TypeError:    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:   If parameter ``name`` is empty.
 		:raises ValueError:   If parameter ``kind`` is ``None``.
 		:raises TypeError:    If parameter ``kind`` isn't of type :class:`BinKind`.
+		:raises ValueError:   If parameter ``ranges`` is ``None``.
+		:raises TypeError:    If parameter ``ranges`` isn't iterable.
+		:raises TypeError:    If parameter ``ranges`` contains an element not of type :class:`ValueRange`.
 		:raises ValueError:   If parameter ``count`` is ``None``.
 		:raises TypeError:    If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``count`` is negative.
 		:raises ValueError:   If parameter ``atLeast`` is ``None``.
 		:raises TypeError:    If parameter ``atLeast`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``atLeast`` is negative.
-		:raises ValueError:   If parameter ``ranges`` is ``None``.
-		:raises TypeError:    If parameter ``ranges`` isn't iterable.
-		:raises TypeError:    If parameter ``ranges`` contains an element not of type :class:`ValueRange`.
+		:raises TypeError:    If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Coverpoint`.
 		"""
 		super().__init__(name, kind, count, atLeast, keyValuePairs=keyValuePairs, parent=parent)
 
@@ -1111,22 +1111,22 @@ class CrossBin(Bin):
 		:param atLeast:                  Optional, how often the bin must be hit to be covered. Default: ``1``.
 		:param keyValuePairs:            Optional, the key-value pairs. Default: ``None``.
 		:param parent:                   Optional, the cross containing the bin. Default: ``None``.
-		:raises TypeError:               If parameter ``keyValuePairs`` isn't a mapping.
-		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Cross`.
 		:raises TypeError:               If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:              If parameter ``name`` is empty.
 		:raises ValueError:              If parameter ``kind`` is ``None``.
 		:raises TypeError:               If parameter ``kind`` isn't of type :class:`BinKind`.
+		:raises ValueError:              If parameter ``ranges`` is ``None``.
+		:raises TypeError:               If parameter ``ranges`` isn't iterable, or contains an element, which isn't.
+		:raises TypeError:               If parameter ``ranges`` contains a range not of type :class:`ValueRange`.
+		:raises FunctionalCoverageError: If parameter ``ranges`` has not one set of ranges per crossed item of the cross.
 		:raises ValueError:              If parameter ``count`` is ``None``.
 		:raises TypeError:               If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError:              If parameter ``count`` is negative.
 		:raises ValueError:              If parameter ``atLeast`` is ``None``.
 		:raises TypeError:               If parameter ``atLeast`` isn't of type :class:`int`.
 		:raises ValueError:              If parameter ``atLeast`` is negative.
-		:raises ValueError:              If parameter ``ranges`` is ``None``.
-		:raises TypeError:               If parameter ``ranges`` isn't iterable, or contains an element, which isn't.
-		:raises TypeError:               If parameter ``ranges`` contains a range not of type :class:`ValueRange`.
-		:raises FunctionalCoverageError: If parameter ``ranges`` has not one set of ranges per crossed item of the cross.
+		:raises TypeError:               If parameter ``keyValuePairs`` isn't a mapping.
+		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Cross`.
 		"""
 		super().__init__(name, kind, count, atLeast, keyValuePairs=keyValuePairs, parent=parent)
 
