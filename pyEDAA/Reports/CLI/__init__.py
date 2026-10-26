@@ -52,13 +52,15 @@ from typing   import ClassVar, NoReturn, Optional as Nullable
 
 from argparse import RawDescriptionHelpFormatter, Namespace
 from textwrap import dedent
+from types    import ModuleType
 
 from pyTooling.Decorators                     import export
 from pyTooling.Attributes.ArgParse            import ArgParseHelperMixin, DefaultHandler, CommandHandler
 from pyTooling.Attributes.ArgParse.Argument   import StringArgument
 from pyTooling.TerminalUI                     import TerminalApplication
 
-from pyEDAA.Reports                           import ReportException, __issue_tracker_url__
+from pyEDAA                                   import Reports
+from pyEDAA.Reports                           import ReportException
 from pyEDAA.Reports.Unittesting               import UnittestError
 from pyEDAA.Reports.CLI.Coverage              import CoverageHandlers
 # from pyEDAA.Reports.CLI.Dependency            import DependencyHandlers
@@ -69,8 +71,8 @@ from pyEDAA.Reports.CLI.Unittesting           import UnittestingHandlers
 class Application(TerminalApplication, UnittestingHandlers, CoverageHandlers, ArgParseHelperMixin):
 	"""Program class to implement the command line interface (CLI) using commands and options."""
 
-	HEADLINE: ClassVar[str] =          "Report Service Program"
-	ISSUE_TRACKER_URL: ClassVar[str] = __issue_tracker_url__
+	HEADLINE:      ClassVar[str]        = "Report Service Program"  #: Headline above every command's output.
+	DUNDER_MODULE: ClassVar[ModuleType] = Reports                   #: Package with the dunder variables.
 
 	def __init__(self) -> None:
 		super().__init__()
@@ -119,9 +121,7 @@ class Application(TerminalApplication, UnittestingHandlers, CoverageHandlers, Ar
 
 	def _PrintVersion(self) -> None:
 		"""Helper function to print the version information."""
-		import pyEDAA.Reports as DunderModule
-
-		super()._PrintVersion(DunderModule, "pyEDAA.Reports")
+		super()._PrintVersion("pyEDAA.Reports")
 
 	def _PrintHelp(self, command: Nullable[str] = None) -> None:
 		"""Helper function to print the command line parsers help page(s)."""
