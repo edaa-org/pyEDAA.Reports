@@ -153,11 +153,15 @@ class ValueRange(metaclass=ExtendedType, slots=True):
 		"""
 		Compare two ranges of values.
 
-		:param other: The other range.
-		:returns:     ``True``, if both ranges have the same lowest and highest value.
+		:param other:      The other range.
+		:returns:          ``True``, if both ranges have the same lowest and highest value.
+		:raises TypeError: If parameter ``other`` isn't of type :class:`ValueRange`.
 		"""
 		if not isinstance(other, ValueRange):
-			return NotImplemented
+			ex = TypeError("Second operand is not supported by == operator.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(other)}'.")
+			ex.add_note("Supported types for second operand: ValueRange")
+			raise ex
 
 		return self._low == other._low and self._high == other._high
 

@@ -64,8 +64,15 @@ class ValueRanges(Testcase):
 	def test_Equality(self) -> None:
 		self.assertEqual(ValueRange(0, 7), ValueRange(0, 7))
 		self.assertNotEqual(ValueRange(0, 7), ValueRange(0, 8))
-		self.assertNotEqual(ValueRange(0, 7), (0, 7))
 		self.assertEqual(1, len({ValueRange(0, 7), ValueRange(0, 7)}))
+
+	def test_Equality_OtherType(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = ValueRange(0, 7) == (0, 7)
+
+		self.assertEqual("Second operand is not supported by == operator.", str(context.exception))
+		self.assertEqual("Got type 'tuple'.", context.exception.__notes__[0])
+		self.assertEqual("Supported types for second operand: ValueRange", context.exception.__notes__[1])
 
 	def test_ParameterChecks(self) -> None:
 		for arguments, exception, message in (
