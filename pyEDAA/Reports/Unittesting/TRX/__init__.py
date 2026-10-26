@@ -176,11 +176,11 @@ class UnitTest(metaclass=ExtendedType, slots=True):
 		:raises ValueError:     If parameter 'methodName' is None.
 		:raises TypeError:      If parameter 'methodName' is not of type :class:`str`.
 		:raises ValueError:     If parameter 'methodName' is empty.
+		:raises ValueError:     If parameter 'codeBase' is None.
+		:raises TypeError:      If parameter 'codeBase' is not of type :class:`~pathlib.Path`.
 		:raises ValueError:     If parameter 'adapterTypeName' is None.
 		:raises TypeError:      If parameter 'adapterTypeName' is not of type :class:`str`.
 		:raises ValueError:     If parameter 'adapterTypeName' is empty.
-		:raises ValueError:     If parameter 'codeBase' is None.
-		:raises TypeError:      If parameter 'codeBase' is not of type :class:`~pathlib.Path`.
 		:raises TypeError:      If parameter 'parent' is not of type :class:`TestRun`.
 		"""
 		if id is None:
@@ -356,16 +356,10 @@ class UnitTestResult(TestcaseOutputMixin, Generic[ParentType], metaclass=Extende
 		:param standardError:  Optional, captured standard error of the test.
 		:param parent:         Optional, the test run or the container's result the result belongs to; the result is
 		                       appended to its results or inner results. Default: ``None``.
-		:raises TypeError:     If parameter 'message' is not of type :class:`str`.
-		:raises TypeError:     If parameter 'details' is not of type :class:`str`.
-		:raises TypeError:     If parameter 'standardOutput' is not of type :class:`str`.
-		:raises TypeError:     If parameter 'standardError' is not of type :class:`str`.
 		:raises ValueError:    If parameter 'executionId' is None.
 		:raises TypeError:     If parameter 'executionId' is not of type :class:`~uuid.UUID`.
 		:raises ValueError:    If parameter 'testId' is None.
 		:raises TypeError:     If parameter 'testId' is not of type :class:`~uuid.UUID`.
-		:raises ValueError:    If parameter 'testListId' is None.
-		:raises TypeError:     If parameter 'testListId' is not of type :class:`~uuid.UUID`.
 		:raises ValueError:    If parameter 'testName' is None.
 		:raises TypeError:     If parameter 'testName' is not of type :class:`str`.
 		:raises ValueError:    If parameter 'testName' is empty.
@@ -374,9 +368,15 @@ class UnitTestResult(TestcaseOutputMixin, Generic[ParentType], metaclass=Extende
 		:raises ValueError:    If parameter 'computerName' is empty.
 		:raises ValueError:    If parameter 'outcome' is None.
 		:raises TypeError:     If parameter 'outcome' is not of type :class:`TestOutcome`.
+		:raises ValueError:    If parameter 'testListId' is None.
+		:raises TypeError:     If parameter 'testListId' is not of type :class:`~uuid.UUID`.
 		:raises TypeError:     If parameter 'startTime' is not of type :class:`~datetime.datetime`.
 		:raises TypeError:     If parameter 'endTime' is not of type :class:`~datetime.datetime`.
 		:raises TypeError:     If parameter 'duration' is not of type :class:`~datetime.timedelta`.
+		:raises TypeError:     If parameter 'message' is not of type :class:`str`.
+		:raises TypeError:     If parameter 'details' is not of type :class:`str`.
+		:raises TypeError:     If parameter 'standardOutput' is not of type :class:`str`.
+		:raises TypeError:     If parameter 'standardError' is not of type :class:`str`.
 		:raises TypeError:     If parameter 'parent' is not of type :class:`TestRun` or :class:`UnitTestResult`.
 		"""
 		TestcaseOutputMixin.__init__(self, message, details, standardOutput, standardError)
