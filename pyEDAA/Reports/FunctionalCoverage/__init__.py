@@ -626,8 +626,8 @@ class CoverageItem(BaseWithName):
 	def __init__(
 		self,
 		name: str,
-		*,
 		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
+		*,
 		parent: Nullable[Covergroup] = None
 	) -> None:
 		"""
@@ -778,8 +778,8 @@ class Cross(CoverageItem):
 		self,
 		name: str,
 		crossedItems: Iterable[str],
-		*,
 		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
+		*,
 		parent: Nullable[Covergroup] = None
 	) -> None:
 		"""
@@ -883,8 +883,8 @@ class Bin(Base):
 		kind: BinKind,
 		count: int,
 		atLeast: int = 1,
-		*,
 		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
+		*,
 		parent: Nullable[CoverageItem] = None
 	) -> None:
 		"""
@@ -1013,8 +1013,8 @@ class CoverpointBin(Bin):
 		ranges: Iterable[ValueRange],
 		count: int,
 		atLeast: int = 1,
-		*,
 		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
+		*,
 		parent: Nullable[Coverpoint] = None
 	) -> None:
 		"""
@@ -1093,8 +1093,8 @@ class CrossBin(Bin):
 		ranges: Iterable[Iterable[ValueRange]],
 		count: int,
 		atLeast: int = 1,
-		*,
 		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
+		*,
 		parent: Nullable[Cross] = None
 	) -> None:
 		"""
