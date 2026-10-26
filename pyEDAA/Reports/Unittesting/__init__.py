@@ -336,25 +336,25 @@ class Base(metaclass=ExtendedType, slots=True):
 		:param fatalCount:         Optional, count of encountered fatal errors.
 		:param keyValuePairs:      Optional, mapping of key-value pairs to initialize the test entity with.
 		:param parent:             Optional, reference to the parent test entity.
-		:raises TypeError:         When parameter 'parent' is not a TestsuiteBase.
 		:raises ValueError:        When parameter 'name' is None.
 		:raises TypeError:         When parameter 'name' is not a string.
 		:raises ValueError:        When parameter 'name' is empty.
-		:raises TypeError:         When parameter 'testDuration' is not a timedelta.
+		:raises TypeError:         When parameter 'title' is not a string.
+		:raises TypeError:         When parameter 'summary' is not a string.
+		:raises TypeError:         When parameter 'description' is not a string.
 		:raises TypeError:         When parameter 'setupDuration' is not a timedelta.
+		:raises TypeError:         When parameter 'testDuration' is not a timedelta.
 		:raises TypeError:         When parameter 'teardownDuration' is not a timedelta.
 		:raises TypeError:         When parameter 'totalDuration' is not a timedelta.
+		:raises ValueError:        When parameter 'totalDuration' is not consistent.
 		:raises TypeError:         When parameter 'warningCount' is not an integer.
 		:raises TypeError:         When parameter 'errorCount' is not an integer.
 		:raises TypeError:         When parameter 'fatalCount' is not an integer.
 		:raises TypeError:         When parameter 'expectedWarningCount' is not an integer.
 		:raises TypeError:         When parameter 'expectedErrorCount' is not an integer.
 		:raises TypeError:         When parameter 'expectedFatalCount' is not an integer.
-		:raises TypeError:         When parameter 'title' is not a string.
-		:raises TypeError:         When parameter 'summary' is not a string.
-		:raises TypeError:         When parameter 'description' is not a string.
 		:raises TypeError:         When parameter 'keyValuePairs' is not a Mapping.
-		:raises ValueError:        When parameter 'totalDuration' is not consistent.
+		:raises TypeError:         When parameter 'parent' is not a TestsuiteBase.
 		"""
 
 		if parent is not None and not isinstance(parent, TestsuiteBase):
@@ -856,8 +856,8 @@ class Testcase(Base, TestcaseOutputMixin):
 		:param standardOutput:       Optional, captured standard output of the test case.
 		:param standardError:        Optional, captured standard error of the test case.
 		:param parent:               Optional, reference to the parent test suite.
-		:raises TypeError:           If parameter 'parent' is not a Testsuite.
 		:raises ValueError:          If parameter 'assertionCount' is not consistent.
+		:raises TypeError:           If parameter 'parent' is not a Testsuite.
 		"""
 
 		if parent is not None:
@@ -1112,9 +1112,9 @@ class TestsuiteBase(Base, Generic[TestsuiteType]):
 		:param testsuites:               Optional, list of test suites to initialize the test entity with.
 		:param keyValuePairs:            Optional, mapping of key-value pairs to initialize the test entity with.
 		:param parent:                   Optional, reference to the parent test entity.
-		:raises TypeError:               If parameter 'parent' is not a TestsuiteBase.
 		:raises TypeError:               If parameter 'testsuites' is not iterable.
 		:raises TypeError:               If element in parameter 'testsuites' is not a Testsuite.
+		:raises TypeError:               If parameter 'parent' is not a TestsuiteBase.
 		:raises AlreadyInTestsuiteError: If a test suite in parameter 'testsuites' is already part of a test entity
 		                                 hierarchy.
 		:raises DuplicateTestsuiteError: If a test suite in parameter 'testsuites' is already listed (by name) in the list

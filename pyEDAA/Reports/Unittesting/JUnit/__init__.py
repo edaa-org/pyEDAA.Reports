@@ -416,8 +416,8 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		:param standardOutput: Optional, captured standard output of the test case.
 		:param standardError:  Optional, captured standard error of the test case.
 		:param parent:         Optional, reference to the parent test class.
-		:raises TypeError:     If parameter 'parent' is not a Testclass.
 		:raises ValueError:    If parameter 'assertionCount' is not consistent.
+		:raises TypeError:     If parameter 'parent' is not a Testclass.
 		"""
 		if parent is not None:
 			if not isinstance(parent, Testclass):

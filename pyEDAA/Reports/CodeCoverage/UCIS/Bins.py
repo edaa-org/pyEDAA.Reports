@@ -206,9 +206,10 @@ class Bin(Base, ObjectAttributesMixin):
 		:param excludedReason:    Optional, why the bin is excluded. Default: ``None``.
 		:param weight:            Optional, weight of the bin in computing the coverage. Default: ``1``.
 		:param userAttributes:    Optional, the user-defined attributes. Default: ``None``.
-		:raises TypeError:        If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:        If parameter ``userAttributes`` contains an element not of type
-		                          :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises ValueError:       If parameter ``contents`` is ``None``.
+		:raises TypeError:        If parameter ``contents`` isn't of type :class:`BinContents`.
+		:raises TypeError:        If parameter ``coverageCountGoal`` isn't of type :class:`int`.
+		:raises ValueError:       If parameter ``coverageCountGoal`` is negative.
 		:raises TypeError:        If parameter ``alias`` isn't of type :class:`str`.
 		:raises ValueError:       If parameter ``excluded`` is ``None``.
 		:raises TypeError:        If parameter ``excluded`` isn't of type :class:`bool`.
@@ -216,10 +217,9 @@ class Bin(Base, ObjectAttributesMixin):
 		:raises ValueError:       If parameter ``weight`` is ``None``.
 		:raises TypeError:        If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:       If parameter ``weight`` is negative.
-		:raises ValueError:       If parameter ``contents`` is ``None``.
-		:raises TypeError:        If parameter ``contents`` isn't of type :class:`BinContents`.
-		:raises TypeError:        If parameter ``coverageCountGoal`` isn't of type :class:`int`.
-		:raises ValueError:       If parameter ``coverageCountGoal`` is negative.
+		:raises TypeError:        If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:        If parameter ``userAttributes`` contains an element not of type
+		                          :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		"""
 		super().__init__(userAttributes)
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)

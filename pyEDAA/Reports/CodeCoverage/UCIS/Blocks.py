@@ -89,13 +89,13 @@ class BlockCoverage(MetricCoverage):
 		:param weight:         Optional, weight of the mode in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the instance the coverage belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``metricMode`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Instances.InstanceCoverage`.
 		"""
@@ -212,9 +212,11 @@ class Statement(Base, ObjectAttributesMixin):
 		:param weight:         Optional, weight of the statement in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the block coverage the statement belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises ValueError:    If parameter ``statementID`` is ``None``.
+		:raises TypeError:     If parameter ``statementID`` isn't of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
+		:raises ValueError:    If parameter ``coverBin`` is ``None``.
+		:raises TypeError:     If parameter ``coverBin`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
 		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``excluded`` is ``None``.
 		:raises TypeError:     If parameter ``excluded`` isn't of type :class:`bool`.
@@ -222,11 +224,9 @@ class Statement(Base, ObjectAttributesMixin):
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises ValueError:    If parameter ``statementID`` is ``None``.
-		:raises TypeError:     If parameter ``statementID`` isn't of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
-		:raises ValueError:    If parameter ``coverBin`` is ``None``.
-		:raises TypeError:     If parameter ``coverBin`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`BlockCoverage`.
 		"""
 		super().__init__(userAttributes)
@@ -341,9 +341,8 @@ class Process(Base, ObjectAttributesMixin):
 		:param weight:         Optional, weight of the process in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the block coverage the process belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises ValueError:    If parameter ``processType`` is ``None``.
+		:raises TypeError:     If parameter ``processType`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``excluded`` is ``None``.
 		:raises TypeError:     If parameter ``excluded`` isn't of type :class:`bool`.
@@ -351,8 +350,9 @@ class Process(Base, ObjectAttributesMixin):
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises ValueError:    If parameter ``processType`` is ``None``.
-		:raises TypeError:     If parameter ``processType`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`BlockCoverage`.
 		"""
 		super().__init__(userAttributes)
@@ -473,9 +473,15 @@ class Block(Base, ObjectAttributesMixin, Generic[BlockParentType]):
 		:param weight:         Optional, weight of the block in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the block coverage, process or block the block belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises ValueError:    If parameter ``blockID`` is ``None``.
+		:raises TypeError:     If parameter ``blockID`` isn't of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
+		:raises ValueError:    If parameter ``coverBin`` is ``None``.
+		:raises TypeError:     If parameter ``coverBin`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
+		:raises TypeError:     If parameter ``statementIDs`` isn't iterable.
+		:raises TypeError:     If parameter ``statementIDs`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
+		:raises TypeError:     If parameter ``parentProcess`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``excluded`` is ``None``.
 		:raises TypeError:     If parameter ``excluded`` isn't of type :class:`bool`.
@@ -483,17 +489,11 @@ class Block(Base, ObjectAttributesMixin, Generic[BlockParentType]):
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises ValueError:    If parameter ``blockID`` is ``None``.
-		:raises TypeError:     If parameter ``blockID`` isn't of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
-		:raises ValueError:    If parameter ``coverBin`` is ``None``.
-		:raises TypeError:     If parameter ``coverBin`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
-		:raises TypeError:     If parameter ``parentProcess`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`BlockCoverage`, :class:`Process` or
 		                       :class:`Block`.
-		:raises TypeError:     If parameter ``statementIDs`` isn't iterable.
-		:raises TypeError:     If parameter ``statementIDs`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
 		"""
 		super().__init__(userAttributes)
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)
