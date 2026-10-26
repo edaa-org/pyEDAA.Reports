@@ -220,6 +220,7 @@ Contributors
    :caption: Data Models
    :hidden:
 
+   FunctionalCoverage/index
    Requirements/index
    RiskManagement/index
 
