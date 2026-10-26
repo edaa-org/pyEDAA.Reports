@@ -145,10 +145,10 @@ class TestRun(metaclass=ExtendedType, slots=True):
 		:raises TypeError:     If parameter 'startTime' is not of type :class:`~datetime.datetime`.
 		:raises TypeError:     If parameter 'finishTime' is not of type :class:`~datetime.datetime`.
 		:raises TypeError:     If parameter 'outcome' is not of type :class:`TestOutcome`.
-		:raises TypeError:     If parameter 'standardOutput' is not of type :class:`str`.
 		:raises TypeError:     If parameter 'counters' is not a mapping.
 		:raises TypeError:     If a key of parameter 'counters' is not of type :class:`str`.
 		:raises TypeError:     If a value of parameter 'counters' is not of type :class:`int`.
+		:raises TypeError:     If parameter 'standardOutput' is not of type :class:`str`.
 		:raises TypeError:     If parameter 'testLists' is not a mapping.
 		:raises TypeError:     If a key of parameter 'testLists' is not of type :class:`~uuid.UUID`.
 		:raises TypeError:     If a value of parameter 'testLists' is not of type :class:`str`.
