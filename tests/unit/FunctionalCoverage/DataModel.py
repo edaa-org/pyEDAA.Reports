@@ -167,6 +167,25 @@ class CoverpointInstantiation(Testcase):
 			_ = CoverageItem("P")
 
 
+class KeyValuePairsArgument(Testcase):
+	"""``keyValuePairs`` is a positional or keyword argument, as in ``Base``; only ``parent`` is keyword-only."""
+
+	def test_Report(self) -> None:
+		report = FunctionalCoverageReport("T", {"WritePassFail": 0})
+
+		self.assertEqual(0, report["WritePassFail"])
+
+	def test_Covergroup(self) -> None:
+		covergroup = Covergroup("cg", None, {"Seed": 5})
+
+		self.assertEqual(5, covergroup["Seed"])
+
+	def test_Coverpoint(self) -> None:
+		coverpoint = Coverpoint("cp", "addr", {"Weight": 1})
+
+		self.assertEqual(1, coverpoint["Weight"])
+
+
 class Hierarchy(Testcase):
 	def test_Constructors(self) -> None:
 		"""Every element joins its parent in its constructor and takes the parent's root."""

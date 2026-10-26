@@ -177,8 +177,8 @@ class BaseWithName(Base):
 	def __init__(
 		self,
 		name: str,
-		*,
 		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
+		*,
 		parent: Nullable[Base] = None
 	) -> None:
 		"""
@@ -228,7 +228,7 @@ class FunctionalCoverageReport(BaseWithName):
 
 	_covergroups: list[Covergroup]  #: The covergroups, in the order they were added.
 
-	def __init__(self, name: str, *, keyValuePairs: Nullable[Mapping[Hashable, Any]] = None) -> None:
+	def __init__(self, name: str, keyValuePairs: Nullable[Mapping[Hashable, Any]] = None) -> None:
 		"""
 		Initializes the root of a functional coverage report.
 
@@ -325,8 +325,8 @@ class Covergroup(BaseWithName):
 		self,
 		name: str,
 		testcases: Nullable[Iterable[str]] = None,
-		*,
 		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
+		*,
 		parent: Nullable[FunctionalCoverageReport] = None
 	) -> None:
 		"""
@@ -482,8 +482,8 @@ class Coverpoint(CoverageItem):
 		self,
 		name: str,
 		expression: Nullable[str] = None,
-		*,
 		keyValuePairs: Nullable[Mapping[Hashable, Any]] = None,
+		*,
 		parent: Nullable[Covergroup] = None
 	) -> None:
 		"""
