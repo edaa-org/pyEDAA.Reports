@@ -441,8 +441,8 @@ class Document(py_TestCase):
 
 		doc.Convert()
 		self.assertGreater(doc.ModelConversionDuration, zeroTime)
-		self.assertIs(timedelta, type(doc.AnalysisDuration))
-		self.assertIs(timedelta, type(doc.ModelConversionDuration))
+		self.assertIsInstance(doc.AnalysisDuration, timedelta)
+		self.assertIsInstance(doc.ModelConversionDuration, timedelta)
 
 	def test_Create_WithParse(self) -> None:
 		zeroTime = timedelta()
