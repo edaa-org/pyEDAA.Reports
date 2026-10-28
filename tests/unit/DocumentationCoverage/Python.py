@@ -111,7 +111,7 @@ class Modules(Testcase):
 
 		self.assertEqual(Path("myPackage"), report.Name)
 		self.assertGreaterEqual(report.AnalysisDuration, timedelta(0))
-		self.assertIs(timedelta, type(report.AnalysisDuration))
+		self.assertIsInstance(report.AnalysisDuration, timedelta)
 		self.assertEqual([package], report.Items)
 		self.assertEqual(ItemKind.Package, package.Kind)
 		self.assertEqual(DOCUMENTED, package.Status)
@@ -645,7 +645,7 @@ class SourceFiles(Testcase):
 		self.assertEqual("from enum   import Enum", sourceFile.Lines[1])
 		self.assertEqual(sourceFile.Tree.body[0].lineno, 1)
 		self.assertGreaterEqual(sourceFile.ParsingDuration, timedelta(0))
-		self.assertIs(timedelta, type(sourceFile.ParsingDuration))
+		self.assertIsInstance(sourceFile.ParsingDuration, timedelta)
 
 		with self.assertRaises(ValueError) as context:
 			_ = SourceFile.Read(None)

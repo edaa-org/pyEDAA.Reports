@@ -100,7 +100,7 @@ class FormatModel(Testcase):
 			for condition in section.Conditions if condition.LineNumber == 14 and condition.Index == 1
 		])
 		self.assertGreaterEqual(tracefile.AnalysisDuration.total_seconds(), 0.0)
-		self.assertIs(timedelta, type(tracefile.AnalysisDuration))
+		self.assertIsInstance(tracefile.AnalysisDuration, timedelta)
 
 	def test_Durations_NotRun(self) -> None:
 		"""Before :meth:`Analyze` and :meth:`Convert` ran, their durations are ``None``."""
