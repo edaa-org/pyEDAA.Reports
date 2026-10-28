@@ -96,7 +96,7 @@ Report Formats
 
       .. rubric:: Supported tools
 
-      * `docstr_coverage <https://github.com/HunterMcGushion/docstr_coverage>`__
+      * Python source code, read by :class:`~pyEDAA.Reports.DocumentationCoverage.Python.Analyzer`
       * others tbd. (GHDL)
 
       .. rubric:: Supported file formats
@@ -220,6 +220,7 @@ Contributors
    :caption: Data Models
    :hidden:
 
+   FunctionalCoverage/index
    Requirements/index
    RiskManagement/index
 

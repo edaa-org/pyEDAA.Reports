@@ -37,11 +37,11 @@ from pyTooling.Versioning          import SemanticVersion
 from pyTooling.Testing             import Testcase
 
 from pyEDAA.Reports                import Person
-from pyEDAA.Reports.RiskManagement import AlreadyInRiskRegisterError, DuplicateImplicationError, DuplicateLinkError
-from pyEDAA.Reports.RiskManagement import DuplicateMitigationError, DuplicatePersonError, DuplicateRiskError, Impact
-from pyEDAA.Reports.RiskManagement import Implication, Link, LinkKind, Mitigation, MitigationKind, MitigationState
-from pyEDAA.Reports.RiskManagement import NotInSameRiskRegisterError, Probability, Risk, RiskLevel, RiskManagement
-from pyEDAA.Reports.RiskManagement import RiskManagementError, RiskState
+from pyEDAA.Reports.RiskManagement import AlreadyInRiskRegisterError, DuplicateImplicationError, DuplicateLinkError, \
+                                          DuplicateMitigationError, DuplicatePersonError, DuplicateRiskError, Impact, \
+                                          Implication, Link, LinkKind, Mitigation, MitigationKind, MitigationState, \
+                                          NotInSameRiskRegisterError, Probability, Risk, RiskLevel, RiskManagement, \
+                                          RiskManagementError, RiskState
 
 
 if __name__ == "__main__":  # pragma: no cover

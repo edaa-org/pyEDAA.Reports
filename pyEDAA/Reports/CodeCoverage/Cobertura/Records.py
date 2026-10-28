@@ -40,9 +40,9 @@ from pyTooling.Common            import getFullyQualifiedName
 from pyTooling.Decorators        import export, readonly
 from pyTooling.MetaClasses       import ExtendedType
 
-from pyEDAA.Reports.CodeCoverage import Class as cc_Class, CoverageSummary, File as cc_File, Function as cc_Function
-from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus, Method as cc_Method, Module as cc_Module
-from pyEDAA.Reports.CodeCoverage import Package as cc_Package, SourceFile as cc_SourceFile, Unit as cc_Unit
+from pyEDAA.Reports.CodeCoverage import Class as cc_Class, CoverageSummary, File as cc_File, Function as cc_Function, \
+                                        Line as cc_Line, LineCoverageStatus, Method as cc_Method, Module as cc_Module, \
+                                        Package as cc_Package, SourceFile as cc_SourceFile, Unit as cc_Unit
 
 
 @export

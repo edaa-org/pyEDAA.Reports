@@ -41,8 +41,8 @@ from pyTooling.Common                             import getFullyQualifiedName
 from pyTooling.Decorators                         import export, readonly
 from pyTooling.MetaClasses                        import ExtendedType
 
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import UserAttribute
+from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID, \
+                                                         UserAttribute
 from pyEDAA.Reports.CodeCoverage.UCIS.ToggleBits  import ToggleBit
 
 if TYPE_CHECKING:
@@ -71,11 +71,11 @@ class MetricMode(Base):
 		:param metricMode:     Name of the mode, e.g. ``2STOGGLE``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the toggle coverage the metric mode belongs to. Default: ``None``.
+		:raises ValueError:    If parameter ``metricMode`` is ``None``.
+		:raises TypeError:     If parameter ``metricMode`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
 		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
-		:raises ValueError:    If parameter ``metricMode`` is ``None``.
-		:raises TypeError:     If parameter ``metricMode`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`ToggleCoverage`.
 		"""
 		super().__init__(userAttributes)
@@ -155,13 +155,13 @@ class ToggleCoverage(MetricCoverage):
 		:param weight:         Optional, weight of the mode in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the instance the coverage belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``metricMode`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Instances.InstanceCoverage`.
 		"""
@@ -236,8 +236,10 @@ class Dimension(metaclass=ExtendedType, slots=True):
 		:param left:        The left index.
 		:param right:       The right index.
 		:param downTo:      Whether the index descends from left to right, e.g. for ``[3:0]``.
-		:raises ValueError: If parameter ``left`` or ``right`` is ``None``.
-		:raises TypeError:  If parameter ``left`` or ``right`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``left`` is ``None``.
+		:raises TypeError:  If parameter ``left`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``right`` is ``None``.
+		:raises TypeError:  If parameter ``right`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``downTo`` is ``None``.
 		:raises TypeError:  If parameter ``downTo`` isn't of type :class:`bool`.
 		"""
@@ -356,9 +358,17 @@ class ToggleObject(Base, ObjectAttributesMixin):
 		:param weight:         Optional, weight of the signal in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the toggle coverage the toggle object belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``key`` is ``None``.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``statementID`` is ``None``.
+		:raises TypeError:     If parameter ``statementID`` isn't of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
+		:raises TypeError:     If parameter ``objectType`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``portDirection`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``dimensions`` isn't iterable.
+		:raises TypeError:     If parameter ``dimensions`` contains an element not of type :class:`Dimension`.
 		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``excluded`` is ``None``.
 		:raises TypeError:     If parameter ``excluded`` isn't of type :class:`bool`.
@@ -366,15 +376,10 @@ class ToggleObject(Base, ObjectAttributesMixin):
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises ValueError:    If parameter ``name`` or ``key`` is ``None``.
-		:raises TypeError:     If parameter ``name`` or ``key`` isn't of type :class:`str`.
-		:raises ValueError:    If parameter ``statementID`` is ``None``.
-		:raises TypeError:     If parameter ``statementID`` isn't of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
-		:raises TypeError:     If parameter ``objectType`` or ``portDirection`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`ToggleCoverage`.
-		:raises TypeError:     If parameter ``dimensions`` isn't iterable.
-		:raises TypeError:     If parameter ``dimensions`` contains an element not of type :class:`Dimension`.
 		"""
 		super().__init__(userAttributes)
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)
@@ -417,7 +422,7 @@ class ToggleObject(Base, ObjectAttributesMixin):
 		self._id =            statementID
 		self._type =          objectType
 		self._portDirection = portDirection
-		self._dimensions =    []
+		self._dimensions =    dimensionList = []
 		self._bits =          []
 
 		if dimensions is not None:
@@ -432,7 +437,7 @@ class ToggleObject(Base, ObjectAttributesMixin):
 					ex.add_note(f"Got type '{getFullyQualifiedName(dimension)}'.")
 					raise ex
 
-				self._dimensions.append(dimension)
+				dimensionList.append(dimension)
 
 		if parent is not None:
 			parent._objects.append(self)

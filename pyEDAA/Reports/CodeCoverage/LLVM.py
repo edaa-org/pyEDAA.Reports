@@ -85,7 +85,6 @@ from pathlib                     import Path
 from re                          import match
 from typing                      import Any, ClassVar, Generic, Iterable, Optional as Nullable, Self, TypeVar
 
-from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
@@ -94,10 +93,10 @@ from pyTooling.Stopwatch         import Stopwatch
 from pyTooling.Versioning        import SemanticVersion
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import AlreadyInCoverageReportError, Branch as cc_Branch, CodeCoverageError
-from pyEDAA.Reports.CodeCoverage import CoverageSummary, DuplicateFileError
-from pyEDAA.Reports.CodeCoverage import Document as cc_Document, File as cc_File, Function as cc_Function
-from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus, SourceFile as cc_SourceFile
+from pyEDAA.Reports.CodeCoverage import AlreadyInCoverageReportError, Branch as cc_Branch, CodeCoverageError, \
+                                        CoverageSummary, DuplicateFileError, Document as cc_Document, File as cc_File, \
+                                        Function as cc_Function, Line as cc_Line, LineCoverageStatus, \
+                                        SourceFile as cc_SourceFile
 
 
 __all__ = ["SCHEMA"]
@@ -227,20 +226,29 @@ class Base(Element[ParentType]):
 		:param expandedFileID: Index of the file an expansion region expands to.
 		:param kind:           The kind of the region.
 		:param parent:         Optional, the element containing the region. Default: ``None``.
-		:raises TypeError:     If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
-		:raises ValueError:    If parameter ``lineStart``, ``columnStart``, ``lineEnd`` or ``columnEnd`` is ``None``.
-		:raises TypeError:     If parameter ``lineStart``, ``columnStart``, ``lineEnd`` or ``columnEnd`` isn't of type
-		                       :class:`int`.
-		:raises ValueError:    If parameter ``lineStart``, ``columnStart``, ``lineEnd`` or ``columnEnd`` is less than 1.
+		:raises ValueError:    If parameter ``lineStart`` is ``None``.
+		:raises TypeError:     If parameter ``lineStart`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``lineStart`` is less than 1.
+		:raises ValueError:    If parameter ``columnStart`` is ``None``.
+		:raises TypeError:     If parameter ``columnStart`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``columnStart`` is less than 1.
+		:raises ValueError:    If parameter ``lineEnd`` is ``None``.
+		:raises TypeError:     If parameter ``lineEnd`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``lineEnd`` is less than 1.
+		:raises ValueError:    If parameter ``columnEnd`` is ``None``.
+		:raises TypeError:     If parameter ``columnEnd`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``columnEnd`` is less than 1.
 		:raises TypeError:     If parameter ``fileID`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``fileID`` is negative.
+		:raises ValueError:    If parameter ``fileID`` is no index into the file paths of parameter ``parent``.
 		:raises ValueError:    If parameter ``expandedFileID`` is ``None``.
 		:raises TypeError:     If parameter ``expandedFileID`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``expandedFileID`` is negative.
+		:raises ValueError:    If parameter ``expandedFileID`` of an expansion region is no index into the file paths of
+		                       parameter ``parent``.
 		:raises ValueError:    If parameter ``kind`` is ``None``.
 		:raises TypeError:     If parameter ``kind`` isn't of type :class:`RegionKind`.
-		:raises ValueError:    If parameter ``fileID``, or ``expandedFileID`` of an expansion region, is no index into the
-		                       file paths of parameter ``parent``.
+		:raises TypeError:     If parameter ``parent`` isn't of a type this class declares in :attr:`_PARENT_TYPE`.
 		"""
 		super().__init__(parent=parent)
 
@@ -465,11 +473,11 @@ class Region(Base["Function | Expansion"]):
 		:param expandedFileID: Index of the file an expansion region expands to.
 		:param kind:           The kind of the region.
 		:param parent:         Optional, the function or expansion the region belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``parent`` isn't of type :class:`Function` or :class:`Expansion`.
-		:raises ValueError:    If parameter ``fileID`` is ``None``.
 		:raises ValueError:    If parameter ``count`` is ``None``.
 		:raises TypeError:     If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``count`` is negative.
+		:raises ValueError:    If parameter ``fileID`` is ``None``.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`Function` or :class:`Expansion`.
 		"""
 		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind, parent=parent)
 
@@ -552,12 +560,15 @@ class BranchRegion(Base["File | Function | Expansion"]):
 		:param expandedFileID: Index of the file an expansion region expands to; ``0`` for a branch region.
 		:param kind:           The kind of the region: a branch, or a condition measured for MC/DC.
 		:param parent:         Optional, the file, function or expansion the branch region belongs to. Default: ``None``.
+		:raises ValueError:    If parameter ``trueCount`` is ``None``.
+		:raises TypeError:     If parameter ``trueCount`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``trueCount`` is negative.
+		:raises ValueError:    If parameter ``falseCount`` is ``None``.
+		:raises TypeError:     If parameter ``falseCount`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``falseCount`` is negative.
+		:raises ValueError:    If parameter ``fileID`` is ``None``.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`File`, :class:`Function` or
 		                       :class:`Expansion`.
-		:raises ValueError:    If parameter ``fileID`` is ``None``.
-		:raises ValueError:    If parameter ``trueCount`` or ``falseCount`` is ``None``.
-		:raises TypeError:     If parameter ``trueCount`` or ``falseCount`` isn't of type :class:`int`.
-		:raises ValueError:    If parameter ``trueCount`` or ``falseCount`` is negative.
 		"""
 		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind, parent=parent)
 
@@ -637,13 +648,13 @@ class TestVector(Element["MCDCRecord"]):
 		:param executed:    Whether the test vector was executed.
 		:param result:      The outcome of the decision.
 		:param parent:      Optional, the MC/DC record the test vector belongs to. Default: ``None``.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`MCDCRecord`.
 		:raises ValueError: If parameter ``conditions`` is ``None``.
 		:raises TypeError:  If parameter ``conditions`` isn't iterable.
 		:raises TypeError:  If parameter ``conditions`` contains an element not of type :class:`bool`, other than ``None``.
 		:raises ValueError: If parameter ``executed`` is ``None``.
 		:raises TypeError:  If parameter ``executed`` isn't of type :class:`bool`.
 		:raises TypeError:  If parameter ``result`` isn't of type :class:`bool`.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`MCDCRecord`.
 		"""
 		super().__init__(parent=parent)
 
@@ -666,7 +677,7 @@ class TestVector(Element["MCDCRecord"]):
 			ex.add_note(f"Got type '{getFullyQualifiedName(result)}'.")
 			raise ex
 
-		self._conditions = []
+		self._conditions = conditionList = []
 		self._executed =   executed
 		self._result =     result
 
@@ -676,7 +687,7 @@ class TestVector(Element["MCDCRecord"]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(condition)}'.")
 				raise ex
 
-			self._conditions.append(condition)
+			conditionList.append(condition)
 
 		if parent is not None:
 			parent._testVectors.append(self)
@@ -774,20 +785,21 @@ class MCDCRecord(Base["File | Function"]):
 		:param testVectors:                   Optional, the test vectors. Default: none.
 		:param parent:                        Optional, the file or function the MC/DC record belongs to. Default:
 		                                      ``None``.
-		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`File` or
-		                                      :class:`Function`.
-		:raises TypeError:                    If parameter ``trueDecisions`` or ``falseDecisions`` isn't of type
-		                                      :class:`int`.
-		:raises ValueError:                   If parameter ``trueDecisions`` or ``falseDecisions`` is negative.
 		:raises ValueError:                   If parameter ``conditions`` is ``None``.
 		:raises TypeError:                    If parameter ``conditions`` isn't iterable.
 		:raises TypeError:                    If parameter ``conditions`` contains an element not of type
 		                                      :class:`bool`.
+		:raises TypeError:                    If parameter ``trueDecisions`` isn't of type :class:`int`.
+		:raises ValueError:                   If parameter ``trueDecisions`` is negative.
+		:raises TypeError:                    If parameter ``falseDecisions`` isn't of type :class:`int`.
+		:raises ValueError:                   If parameter ``falseDecisions`` is negative.
 		:raises TypeError:                    If parameter ``testVectors`` isn't iterable.
 		:raises TypeError:                    If parameter ``testVectors`` contains an element not of type
 		                                      :class:`TestVector`.
 		:raises AlreadyInCoverageReportError: If parameter ``testVectors`` contains a test vector of another MC/DC
 		                                      record.
+		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`File` or
+		                                      :class:`Function`.
 		"""
 		super().__init__(lineStart, columnStart, lineEnd, columnEnd, fileID, expandedFileID, kind, parent=parent)
 
@@ -812,8 +824,8 @@ class MCDCRecord(Base["File | Function"]):
 
 		self._trueDecisions =  trueDecisions
 		self._falseDecisions = falseDecisions
-		self._conditions =     []
-		self._testVectors =    []
+		self._conditions =     conditionList = []
+		self._testVectors =    testVectorList = []
 
 		for condition in conditions:
 			if not isinstance(condition, bool):
@@ -821,7 +833,7 @@ class MCDCRecord(Base["File | Function"]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(condition)}'.")
 				raise ex
 
-			self._conditions.append(condition)
+			conditionList.append(condition)
 
 		if testVectors is not None:
 			if not isinstance(testVectors, Iterable):
@@ -839,7 +851,7 @@ class MCDCRecord(Base["File | Function"]):
 
 				testVector._parent = self
 				testVector._root =   self._root
-				self._testVectors.append(testVector)
+				testVectorList.append(testVector)
 
 		if parent is not None:
 			parent._mcdcRecords.append(self)
@@ -933,14 +945,17 @@ class Counters(Element["Summary"]):
 		:param covered:     Number of the covered ones.
 		:param percent:     The coverage in percent.
 		:param notCovered:  Optional, number of the uncovered ones. Default: ``None``.
-		:raises ValueError: If parameter ``count`` or ``covered`` is ``None``.
-		:raises TypeError:  If parameter ``count`` or ``covered`` isn't of type :class:`int`.
-		:raises ValueError: If parameter ``count`` or ``covered`` is negative.
-		:raises TypeError:  If parameter ``notCovered`` isn't of type :class:`int`.
-		:raises ValueError: If parameter ``notCovered`` is negative.
+		:raises ValueError: If parameter ``count`` is ``None``.
+		:raises TypeError:  If parameter ``count`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``count`` is negative.
+		:raises ValueError: If parameter ``covered`` is ``None``.
+		:raises TypeError:  If parameter ``covered`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``covered`` is negative.
 		:raises ValueError: If parameter ``percent`` is ``None``.
 		:raises TypeError:  If parameter ``percent`` isn't of type :class:`float` or :class:`int`.
 		:raises ValueError: If parameter ``percent`` is out of range 0..100.
+		:raises TypeError:  If parameter ``notCovered`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``notCovered`` is negative.
 		"""
 		super().__init__()
 
@@ -1063,13 +1078,22 @@ class Summary(Element["File | Report"]):
 		:param regions:                       The counters of code regions.
 		:param branches:                      Optional, the counters of branch outcomes. Default: ``None``.
 		:param mcdc:                          Optional, the counters of MC/DC conditions. Default: ``None``.
-		:raises ValueError:                   If parameter ``lines``, ``functions``, ``instantiations`` or
-		                                      ``regions`` is ``None``.
-		:raises TypeError:                    If parameter ``lines``, ``functions``, ``instantiations``,
-		                                      ``regions``, ``branches`` or ``mcdc`` isn't of type :class:`Counters`.
-		:raises AlreadyInCoverageReportError: If parameter ``lines``, ``functions``, ``instantiations``,
-		                                      ``regions``, ``branches`` or ``mcdc`` are the counters of another
-		                                      summary.
+		:raises ValueError:                   If parameter ``lines`` is ``None``.
+		:raises TypeError:                    If parameter ``lines`` isn't of type :class:`Counters`.
+		:raises AlreadyInCoverageReportError: If parameter ``lines`` are the counters of another summary.
+		:raises ValueError:                   If parameter ``functions`` is ``None``.
+		:raises TypeError:                    If parameter ``functions`` isn't of type :class:`Counters`.
+		:raises AlreadyInCoverageReportError: If parameter ``functions`` are the counters of another summary.
+		:raises ValueError:                   If parameter ``instantiations`` is ``None``.
+		:raises TypeError:                    If parameter ``instantiations`` isn't of type :class:`Counters`.
+		:raises AlreadyInCoverageReportError: If parameter ``instantiations`` are the counters of another summary.
+		:raises ValueError:                   If parameter ``regions`` is ``None``.
+		:raises TypeError:                    If parameter ``regions`` isn't of type :class:`Counters`.
+		:raises AlreadyInCoverageReportError: If parameter ``regions`` are the counters of another summary.
+		:raises TypeError:                    If parameter ``branches`` isn't of type :class:`Counters`.
+		:raises AlreadyInCoverageReportError: If parameter ``branches`` are the counters of another summary.
+		:raises TypeError:                    If parameter ``mcdc`` isn't of type :class:`Counters`.
+		:raises AlreadyInCoverageReportError: If parameter ``mcdc`` are the counters of another summary.
 		"""
 		super().__init__()
 
@@ -1231,15 +1255,22 @@ class Segment(Element["File"]):
 		:param isRegionEntry: Whether a region starts here.
 		:param isGapRegion:   Optional, whether a gap region starts here. Default: ``False``.
 		:param parent:        Optional, the file the segment belongs to. Default: ``None``.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`File`.
-		:raises ValueError:   If parameter ``line`` or ``column`` is ``None``.
-		:raises TypeError:    If parameter ``line`` or ``column`` isn't of type :class:`int`.
-		:raises ValueError:   If parameter ``line`` or ``column`` is less than 1.
+		:raises ValueError:   If parameter ``line`` is ``None``.
+		:raises TypeError:    If parameter ``line`` isn't of type :class:`int`.
+		:raises ValueError:   If parameter ``line`` is less than 1.
+		:raises ValueError:   If parameter ``column`` is ``None``.
+		:raises TypeError:    If parameter ``column`` isn't of type :class:`int`.
+		:raises ValueError:   If parameter ``column`` is less than 1.
 		:raises ValueError:   If parameter ``count`` is ``None``.
 		:raises TypeError:    If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``count`` is negative.
-		:raises ValueError:   If parameter ``hasCount``, ``isRegionEntry`` or ``isGapRegion`` is ``None``.
-		:raises TypeError:    If parameter ``hasCount``, ``isRegionEntry`` or ``isGapRegion`` isn't of type :class:`bool`.
+		:raises ValueError:   If parameter ``hasCount`` is ``None``.
+		:raises TypeError:    If parameter ``hasCount`` isn't of type :class:`bool`.
+		:raises ValueError:   If parameter ``isRegionEntry`` is ``None``.
+		:raises TypeError:    If parameter ``isRegionEntry`` isn't of type :class:`bool`.
+		:raises ValueError:   If parameter ``isGapRegion`` is ``None``.
+		:raises TypeError:    If parameter ``isGapRegion`` isn't of type :class:`bool`.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`File`.
 		"""
 		super().__init__(parent=parent)
 
@@ -1379,24 +1410,29 @@ class Expansion(Element["File"]):
 		:param branches:                      Optional, the branch regions in the expansion, and in the expansions
 		                                      nested in it. Default: none.
 		:param parent:                        Optional, the file the expansion belongs to. Default: ``None``.
-		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`File`.
-		:raises ValueError:                   If parameter ``filePaths`` or ``targetRegions`` is ``None``.
-		:raises TypeError:                    If parameter ``filePaths``, ``targetRegions`` or ``branches`` isn't
-		                                      iterable.
+		:raises ValueError:                   If parameter ``filePaths`` is ``None``.
+		:raises TypeError:                    If parameter ``filePaths`` isn't iterable.
 		:raises TypeError:                    If parameter ``filePaths`` contains an element not of type
 		                                      :class:`~pathlib.Path`.
 		:raises ValueError:                   If parameter ``sourceRegion`` is ``None``.
 		:raises TypeError:                    If parameter ``sourceRegion`` isn't of type :class:`Region`.
 		:raises AlreadyInCoverageReportError: If parameter ``sourceRegion`` is a region of another element.
+		:raises ValueError:                   If parameter ``sourceRegion`` is a region of a file ID or an expanded file ID
+		                                      out of range of parameter ``filePaths``.
+		:raises ValueError:                   If parameter ``targetRegions`` is ``None``.
+		:raises TypeError:                    If parameter ``targetRegions`` isn't iterable.
 		:raises TypeError:                    If parameter ``targetRegions`` contains an element not of type
 		                                      :class:`Region`.
+		:raises AlreadyInCoverageReportError: If parameter ``targetRegions`` contains a region of another element.
+		:raises ValueError:                   If parameter ``targetRegions`` contains a region of a file ID or an expanded
+		                                      file ID out of range of parameter ``filePaths``.
+		:raises TypeError:                    If parameter ``branches`` isn't iterable.
 		:raises TypeError:                    If parameter ``branches`` contains an element not of type
 		                                      :class:`BranchRegion`.
-		:raises AlreadyInCoverageReportError: If parameter ``targetRegions`` or ``branches`` contains a region of
-		                                      another element.
-		:raises ValueError:                   If parameter ``sourceRegion`` is, or ``targetRegions`` or ``branches``
-		                                      contains, a region of a file ID or an expanded file ID out of range of
-		                                      parameter ``filePaths``.
+		:raises AlreadyInCoverageReportError: If parameter ``branches`` contains a region of another element.
+		:raises ValueError:                   If parameter ``branches`` contains a region of a file ID or an expanded file
+		                                      ID out of range of parameter ``filePaths``.
+		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`File`.
 		"""
 		super().__init__(parent=parent)
 
@@ -1419,7 +1455,7 @@ class Expansion(Element["File"]):
 		if targetRegions is None:
 			raise ValueError("Parameter 'targetRegions' is None.")
 
-		self._filePaths =     []
+		self._filePaths =     filePathList = []
 		self._sourceRegion =  sourceRegion
 		self._targetRegions = []
 		self._branches =      []
@@ -1430,7 +1466,7 @@ class Expansion(Element["File"]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(filePath)}'.")
 				raise ex
 
-			self._filePaths.append(filePath)
+			filePathList.append(filePath)
 
 		for name, elements, elementType, target in (
 			("targetRegions", targetRegions, Region, self._targetRegions),
@@ -1579,25 +1615,29 @@ class File(Element["Report"]):
 		:param mcdcRecords:                   Optional, the MC/DC records of the file's functions. Default: none.
 		:param expansions:                    Optional, the macro expansions in the file. Default: none.
 		:param parent:                        Optional, the report the file belongs to. Default: ``None``.
-		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`Report`.
 		:raises ValueError:                   If parameter ``path`` is ``None``.
 		:raises TypeError:                    If parameter ``path`` isn't of type :class:`~pathlib.Path`.
-		:raises DuplicateFileError:           If parameter ``parent`` has a file of the same path.
 		:raises ValueError:                   If parameter ``summary`` is ``None``.
 		:raises TypeError:                    If parameter ``summary`` isn't of type :class:`Summary`.
 		:raises AlreadyInCoverageReportError: If parameter ``summary`` is the summary of another element.
-		:raises TypeError:                    If parameter ``segments``, ``branches``, ``mcdcRecords`` or
-		                                      ``expansions`` isn't iterable.
+		:raises TypeError:                    If parameter ``segments`` isn't iterable.
 		:raises TypeError:                    If parameter ``segments`` contains an element not of type
 		                                      :class:`Segment`.
+		:raises AlreadyInCoverageReportError: If parameter ``segments`` contains an element of another element.
+		:raises TypeError:                    If parameter ``branches`` isn't iterable.
 		:raises TypeError:                    If parameter ``branches`` contains an element not of type
 		                                      :class:`BranchRegion`.
+		:raises AlreadyInCoverageReportError: If parameter ``branches`` contains an element of another element.
+		:raises TypeError:                    If parameter ``mcdcRecords`` isn't iterable.
 		:raises TypeError:                    If parameter ``mcdcRecords`` contains an element not of type
 		                                      :class:`MCDCRecord`.
+		:raises AlreadyInCoverageReportError: If parameter ``mcdcRecords`` contains an element of another element.
+		:raises TypeError:                    If parameter ``expansions`` isn't iterable.
 		:raises TypeError:                    If parameter ``expansions`` contains an element not of type
 		                                      :class:`Expansion`.
-		:raises AlreadyInCoverageReportError: If parameter ``segments``, ``branches``, ``mcdcRecords`` or
-		                                      ``expansions`` contains an element of another element.
+		:raises AlreadyInCoverageReportError: If parameter ``expansions`` contains an element of another element.
+		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`Report`.
+		:raises DuplicateFileError:           If parameter ``parent`` has a file of the same path.
 		"""
 		super().__init__(parent=parent)
 
@@ -1780,29 +1820,36 @@ class Function(Element["Report"]):
 		:param branches:                      Optional, the branch regions. Default: none.
 		:param mcdcRecords:                   Optional, the MC/DC records. Default: none.
 		:param parent:                        Optional, the report the function belongs to. Default: ``None``.
-		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`Report`.
 		:raises ValueError:                   If parameter ``name`` is ``None``.
 		:raises TypeError:                    If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:                   If parameter ``name`` is empty.
 		:raises ValueError:                   If parameter ``count`` is ``None``.
 		:raises TypeError:                    If parameter ``count`` isn't of type :class:`int`.
 		:raises ValueError:                   If parameter ``count`` is negative.
-		:raises ValueError:                   If parameter ``regions`` or ``filePaths`` is ``None``.
-		:raises TypeError:                    If parameter ``regions``, ``filePaths``, ``branches`` or
-		                                      ``mcdcRecords`` isn't iterable.
+		:raises ValueError:                   If parameter ``regions`` is ``None``.
+		:raises TypeError:                    If parameter ``regions`` isn't iterable.
 		:raises TypeError:                    If parameter ``regions`` contains an element not of type
 		                                      :class:`Region`.
+		:raises AlreadyInCoverageReportError: If parameter ``regions`` contains a region of another element.
+		:raises ValueError:                   If parameter ``regions`` contains a region of a file ID or an expanded file ID
+		                                      out of range of parameter ``filePaths``.
+		:raises ValueError:                   If parameter ``filePaths`` is ``None``.
+		:raises TypeError:                    If parameter ``filePaths`` isn't iterable.
 		:raises TypeError:                    If parameter ``filePaths`` contains an element not of type
 		                                      :class:`~pathlib.Path`.
+		:raises TypeError:                    If parameter ``branches`` isn't iterable.
 		:raises TypeError:                    If parameter ``branches`` contains an element not of type
 		                                      :class:`BranchRegion`.
+		:raises AlreadyInCoverageReportError: If parameter ``branches`` contains a region of another element.
+		:raises ValueError:                   If parameter ``branches`` contains a region of a file ID or an expanded file
+		                                      ID out of range of parameter ``filePaths``.
+		:raises TypeError:                    If parameter ``mcdcRecords`` isn't iterable.
 		:raises TypeError:                    If parameter ``mcdcRecords`` contains an element not of type
 		                                      :class:`MCDCRecord`.
-		:raises AlreadyInCoverageReportError: If parameter ``regions``, ``branches`` or ``mcdcRecords`` contains a
-		                                      region of another element.
-		:raises ValueError:                   If parameter ``regions``, ``branches`` or ``mcdcRecords`` contains a
-		                                      region of a file ID or an expanded file ID out of range of parameter
-		                                      ``filePaths``.
+		:raises AlreadyInCoverageReportError: If parameter ``mcdcRecords`` contains a region of another element.
+		:raises ValueError:                   If parameter ``mcdcRecords`` contains a region of a file ID or an expanded
+		                                      file ID out of range of parameter ``filePaths``.
+		:raises TypeError:                    If parameter ``parent`` isn't of type :class:`Report`.
 		"""
 		super().__init__(parent=parent)
 
@@ -1841,7 +1888,7 @@ class Function(Element["Report"]):
 		self._regions =     []
 		self._branches =    []
 		self._mcdcRecords = []
-		self._filePaths =   []
+		self._filePaths =   filePathList = []
 
 		for filePath in filePaths:
 			if not isinstance(filePath, Path):
@@ -1849,7 +1896,7 @@ class Function(Element["Report"]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(filePath)}'.")
 				raise ex
 
-			self._filePaths.append(filePath)
+			filePathList.append(filePath)
 
 		for parameterName, elements, elementType, target in (
 			("regions", regions, Region, self._regions), ("branches", branches, BranchRegion, self._branches),
@@ -2036,13 +2083,14 @@ class Report(metaclass=ExtendedType, mixin=True):
 		:param totals:                        Optional, the counters of the whole report. Default: ``None``.
 		:raises TypeError:                    If parameter ``version`` isn't of type
 		                                      :class:`~pyTooling.Versioning.SemanticVersion`.
-		:raises TypeError:                    If parameter ``files`` or ``functions`` isn't iterable.
+		:raises TypeError:                    If parameter ``files`` isn't iterable.
 		:raises TypeError:                    If parameter ``files`` contains an element not of type :class:`File`.
 		:raises DuplicateFileError:           If parameter ``files`` contains two files of the same path.
+		:raises AlreadyInCoverageReportError: If parameter ``files`` contains an element of another report.
+		:raises TypeError:                    If parameter ``functions`` isn't iterable.
 		:raises TypeError:                    If parameter ``functions`` contains an element not of type
 		                                      :class:`Function`.
-		:raises AlreadyInCoverageReportError: If parameter ``files`` or ``functions`` contains an element of another
-		                                      report.
+		:raises AlreadyInCoverageReportError: If parameter ``functions`` contains an element of another report.
 		:raises TypeError:                    If parameter ``totals`` isn't of type :class:`Summary`.
 		:raises AlreadyInCoverageReportError: If parameter ``totals`` is the summary of another element.
 		"""
@@ -2061,7 +2109,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 		self._root =      self
 		self._version =   version
 		self._files =     {}
-		self._functions = []
+		self._functions = functionList = []
 		self._totals =    totals
 
 		if files is not None:
@@ -2104,7 +2152,7 @@ class Report(metaclass=ExtendedType, mixin=True):
 				function._parent = self
 				function._SetRoot(self)
 
-				self._functions.append(function)
+				functionList.append(function)
 
 		if totals is not None:
 			totals._parent = self
@@ -2187,9 +2235,10 @@ class Document(cc_Document, Report):
 		:param functions:         Optional, the functions. Default: none.
 		:param totals:            Optional, the counters of the whole report. Default: ``None``.
 		:raises TypeError:        If parameter ``version`` isn't of type :class:`~pyTooling.Versioning.SemanticVersion`.
-		:raises TypeError:        If parameter ``files`` or ``functions`` isn't iterable.
+		:raises TypeError:        If parameter ``files`` isn't iterable.
 		:raises TypeError:        If parameter ``files`` contains an element not of type
 		                          :class:`File`.
+		:raises TypeError:        If parameter ``functions`` isn't iterable.
 		:raises TypeError:        If parameter ``functions`` contains an element not of type
 		                          :class:`Function`.
 		:raises TypeError:        If parameter ``totals`` isn't of type
@@ -2216,6 +2265,8 @@ class Document(cc_Document, Report):
 		if not self._path.exists():
 			raise CodeCoverageError(f"LLVM coverage export file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
+
+		from jsonschema import Draft202012Validator
 
 		with Stopwatch() as sw:
 			try:

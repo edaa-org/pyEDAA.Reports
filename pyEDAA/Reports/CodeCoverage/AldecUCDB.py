@@ -86,8 +86,8 @@ from io                          import BytesIO
 from pathlib                     import Path
 from typing                      import Generator, Generic, Iterable, Mapping, Optional as Nullable, Self, TypeVar
 
-from lxml.etree                  import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError
-from lxml.etree                  import _Element, _ElementTree, parse
+from lxml.etree                  import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError, _Element, \
+                                        _ElementTree, parse
 from pyTooling.Common            import getFullyQualifiedName, getResourceFile, StringEnum
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
@@ -96,8 +96,8 @@ from pyTooling.Stopwatch         import Stopwatch
 from pyTooling.Versioning        import CalendarVersion
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Document as cc_Document
-from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus
+from pyEDAA.Reports.CodeCoverage import CodeCoverageError, CoverageSummary, Document as cc_Document, Line as cc_Line, \
+                                        LineCoverageStatus
 
 
 __all__ = ["SCHEMA", "NAMESPACE", "NAMESPACES", "HistoryNodeParentType", "ScopeParentType"]
@@ -532,11 +532,6 @@ class Bin(Base, AttributesMixin):
 		:param parent:      Optional, the scope the bin belongs to; the bin is appended to its bins. Default: ``None``.
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
-		:raises TypeError:  If parameter ``attributes`` isn't a mapping.
-		:raises TypeError:  If parameter ``attributes`` contains a key not of type :class:`str`.
-		:raises ValueError: If parameter ``attributes`` contains an empty key.
-		:raises TypeError:  If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
-		                    :class:`str`.
 		:raises ValueError: If parameter ``coverType`` is ``None``.
 		:raises TypeError:  If parameter ``coverType`` isn't of type
 		                    :class:`CoverType`.
@@ -547,6 +542,11 @@ class Bin(Base, AttributesMixin):
 		:raises ValueError: If parameter ``count`` is negative.
 		:raises ValueError: If parameter ``source`` is ``None``.
 		:raises TypeError:  If parameter ``source`` isn't of type :class:`SourceLocation`.
+		:raises TypeError:  If parameter ``attributes`` isn't a mapping.
+		:raises TypeError:  If parameter ``attributes`` contains a key not of type :class:`str`.
+		:raises ValueError: If parameter ``attributes`` contains an empty key.
+		:raises TypeError:  If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
+		                    :class:`str`.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Scope`.
 		"""
 		super().__init__(name)
@@ -722,11 +722,6 @@ class Scope(Base, AttributesMixin, Generic[ScopeParentType]):
 		                    Default: ``None``.
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
-		:raises TypeError:  If parameter ``attributes`` isn't a mapping.
-		:raises TypeError:  If parameter ``attributes`` contains a key not of type :class:`str`.
-		:raises ValueError: If parameter ``attributes`` contains an empty key.
-		:raises TypeError:  If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
-		                    :class:`str`.
 		:raises ValueError: If parameter ``name`` is empty.
 		:raises ValueError: If parameter ``scopeType`` is ``None``.
 		:raises TypeError:  If parameter ``scopeType`` isn't of type
@@ -744,6 +739,11 @@ class Scope(Base, AttributesMixin, Generic[ScopeParentType]):
 		:raises TypeError:  If parameter ``source`` isn't of type :class:`SourceLocation`.
 		:raises TypeError:  If parameter ``designUnit`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``designUnit`` is empty.
+		:raises TypeError:  If parameter ``attributes`` isn't a mapping.
+		:raises TypeError:  If parameter ``attributes`` contains a key not of type :class:`str`.
+		:raises ValueError: If parameter ``attributes`` contains an empty key.
+		:raises TypeError:  If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
+		                    :class:`str`.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Report`
 		                    or :class:`Scope`.
 		"""
@@ -981,16 +981,16 @@ class HistoryNode(Base, AttributesMixin, Generic[HistoryNodeParentType]):
 		                     to its history nodes. Default: ``None``.
 		:raises ValueError:  If parameter ``name`` is ``None``.
 		:raises TypeError:   If parameter ``name`` isn't of type :class:`str`.
-		:raises TypeError:   If parameter ``attributes`` isn't a mapping.
-		:raises TypeError:   If parameter ``attributes`` contains a key not of type :class:`str`.
-		:raises ValueError:  If parameter ``attributes`` contains an empty key.
-		:raises TypeError:   If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
-		                     :class:`str`.
 		:raises ValueError:  If parameter ``name`` is empty.
 		:raises ValueError:  If parameter ``physicalName`` is ``None``.
 		:raises TypeError:   If parameter ``physicalName`` isn't of type :class:`~pathlib.Path`.
 		:raises ValueError:  If parameter ``kind`` is ``None``.
 		:raises TypeError:   If parameter ``kind`` isn't of type :class:`HistoryNodeKind`.
+		:raises TypeError:   If parameter ``attributes`` isn't a mapping.
+		:raises TypeError:   If parameter ``attributes`` contains a key not of type :class:`str`.
+		:raises ValueError:  If parameter ``attributes`` contains an empty key.
+		:raises TypeError:   If parameter ``attributes`` contains a value not of type :class:`int`, :class:`float` or
+		                     :class:`str`.
 		:raises TypeError:   If parameter ``parent`` isn't of type :class:`Report`
 		                     or :class:`HistoryNode`.
 		"""
@@ -1314,7 +1314,7 @@ class Statement(metaclass=ExtendedType, slots=True):
 		self._file =       file
 		self._lineNumber = lineNumber
 		self._index =      index
-		self._bins =       []
+		self._bins =       binList = []
 		self._count =      0
 		self._isExcluded = True
 
@@ -1324,7 +1324,7 @@ class Statement(metaclass=ExtendedType, slots=True):
 				ex.add_note(f"Got type '{getFullyQualifiedName(coverBin)}'.")
 				raise ex
 
-			self._bins.append(coverBin)
+			binList.append(coverBin)
 			if not coverBin.IsExcluded:
 				self._count +=     coverBin._count
 				self._isExcluded = False

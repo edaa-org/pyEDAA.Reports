@@ -48,13 +48,12 @@ from pyTooling.Common                 import getFullyQualifiedName
 from pyTooling.Decorators             import export, readonly, InheritDocString, DocStringMergeStrategy
 from pyTooling.Stopwatch              import Stopwatch
 
-from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus, TestsuiteStatus
-from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
-from pyEDAA.Reports.Unittesting       import Testcase as ut_Testcase
-from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass
-from pyEDAA.Reports.Unittesting.JUnit import Testsuite as ju_Testsuite
-from pyEDAA.Reports.Unittesting.JUnit import TestsuiteSummary as ju_TestsuiteSummary, Document as ju_Document
-from pyEDAA.Reports.Unittesting.JUnit import JUnitReaderMode
+from pyEDAA.Reports.Unittesting       import UnittestError, TestsuiteKind, TestcaseStatus, TestsuiteStatus, \
+                                             TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, \
+                                             Testcase as ut_Testcase
+from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, \
+                                             Testsuite as ju_Testsuite, TestsuiteSummary as ju_TestsuiteSummary, \
+                                             Document as ju_Document, JUnitReaderMode
 
 
 @export
@@ -83,7 +82,7 @@ class Testcase(ju_Testcase):
 		startTime: Nullable[datetime] = None,
 		rerunCount: int = 0,
 		*,
-		parent: Nullable[Testclass] = None
+		parent: Nullable[Testclass | Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of a test case.
@@ -98,7 +97,7 @@ class Testcase(ju_Testcase):
 		:param standardError:  Optional, captured standard error of the test case.
 		:param startTime:      Optional, time when the test case was started.
 		:param rerunCount:     Optional, number of reruns recorded for the test case.
-		:param parent:         Optional, reference to the parent test class.
+		:param parent:         Optional, reference to the parent test class or test suite.
 		:raises TypeError:     If parameter 'startTime' is not a datetime.
 		:raises ValueError:    If parameter 'rerunCount' is None.
 		:raises TypeError:     If parameter 'rerunCount' is not an integer.
@@ -232,6 +231,9 @@ class Testsuite(ju_Testsuite):
 			ts = tc._parent
 			if ts is None:
 				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
+			elif ts is testsuite:
+				juTestsuite.AddTestcase(Testcase.FromTestcase(tc))
+				continue
 
 			classname = ts._name
 			ts = ts._parent
@@ -451,14 +453,17 @@ class Document(ju_Document):
 		:param testcaseNode: The current XML element node representing a test case.
 		"""
 		className = self._ConvertClassname(testcaseNode)
-		testclass = self._FindOrCreateTestclass(parent, className)
+		if className == "":
+			testcaseParent = parent
+		else:
+			testcaseParent = self._FindOrCreateTestclass(parent, className)
 
 		newTestcase = self._TESTCASE(
 			self._ConvertName(testcaseNode, optional=False),
 			self._ConvertTime(testcaseNode, optional=False),
 			startTime=self._ConvertTimestamp(testcaseNode, optional=True),
 			rerunCount=len(tuple(testcaseNode.iterchildren("flakyFailure", "flakyError", "rerunFailure", "rerunError"))),
-			parent=testclass
+			parent=testcaseParent
 		)
 
 		self._ConvertTestcaseChildren(testcaseNode, newTestcase)
@@ -517,6 +522,9 @@ class Document(ju_Document):
 		testsuiteElement.attrib["skipped"] = str(testsuite._skipped)
 		testsuiteElement.attrib["errors"] = str(testsuite._errored)
 		testsuiteElement.attrib["failures"] = str(testsuite._failed)
+
+		for tc in testsuite._testcases.values():
+			self._GenerateTestcase(tc, testsuiteElement)
 
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():

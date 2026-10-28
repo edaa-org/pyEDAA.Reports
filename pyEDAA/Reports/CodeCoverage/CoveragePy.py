@@ -69,7 +69,6 @@ from json                        import JSONDecodeError, loads
 from pathlib                     import Path
 from typing                      import Any, Iterable, Optional as Nullable, Self
 
-from jsonschema                  import Draft202012Validator
 from pyTooling.Common            import getFullyQualifiedName, readResourceFile
 from pyTooling.Decorators        import export, readonly
 from pyTooling.Exceptions        import ToolingException
@@ -78,10 +77,10 @@ from pyTooling.Stopwatch         import Stopwatch
 from pyTooling.Versioning        import SemanticVersion
 
 from pyEDAA.Reports              import Resources
-from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, CoverageSummary
-from pyEDAA.Reports.CodeCoverage import Document as cc_Document, File as cc_File, Function as cc_Function
-from pyEDAA.Reports.CodeCoverage import Line as cc_Line, LineCoverageStatus, Method as cc_Method, Module as cc_Module
-from pyEDAA.Reports.CodeCoverage import Package as cc_Package, Unit as cc_Unit
+from pyEDAA.Reports.CodeCoverage import Branch as cc_Branch, Class as cc_Class, CodeCoverageError, CoverageSummary, \
+                                        Document as cc_Document, File as cc_File, Function as cc_Function, \
+                                        Line as cc_Line, LineCoverageStatus, Method as cc_Method, Module as cc_Module, \
+                                        Package as cc_Package, Unit as cc_Unit
 
 
 __all__ = ["SCHEMAS"]
@@ -1006,6 +1005,8 @@ class Document(cc_Document, Report):
 		if not self._path.exists():
 			raise CodeCoverageError(f"coverage.py report file '{self._path}' does not exist.") \
 				from FileNotFoundError(f"File '{self._path}' not found.")
+
+		from jsonschema import Draft202012Validator
 
 		with Stopwatch() as sw:
 			try:

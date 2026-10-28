@@ -92,9 +92,13 @@ class ToggleBit(Base, ObjectAttributesMixin):
 		:param weight:         Optional, weight of the bit in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the toggle object the bit belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``key`` is ``None``.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``indices`` isn't iterable.
+		:raises TypeError:     If parameter ``indices`` contains an element not of type :class:`int`.
+		:raises ValueError:    If parameter ``indices`` contains a negative index.
 		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``excluded`` is ``None``.
 		:raises TypeError:     If parameter ``excluded`` isn't of type :class:`bool`.
@@ -102,13 +106,11 @@ class ToggleBit(Base, ObjectAttributesMixin):
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises ValueError:    If parameter ``name`` or ``key`` is ``None``.
-		:raises TypeError:     If parameter ``name`` or ``key`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Toggles.ToggleObject`.
-		:raises TypeError:     If parameter ``indices`` isn't iterable.
-		:raises TypeError:     If parameter ``indices`` contains an element not of type :class:`int`.
-		:raises ValueError:    If parameter ``indices`` contains a negative index.
 		"""
 		from pyEDAA.Reports.CodeCoverage.UCIS.Toggles import ToggleObject
 
@@ -134,7 +136,7 @@ class ToggleBit(Base, ObjectAttributesMixin):
 		self._parent =  parent
 		self._name =    name
 		self._key =     key
-		self._indices = []
+		self._indices = indexList = []
 		self._toggles = []
 
 		if indices is not None:
@@ -153,7 +155,7 @@ class ToggleBit(Base, ObjectAttributesMixin):
 					ex.add_note(f"Got value '{index}'.")
 					raise ex
 
-				self._indices.append(index)
+				indexList.append(index)
 
 		if parent is not None:
 			parent._bits.append(self)
@@ -250,8 +252,10 @@ class Toggle(metaclass=ExtendedType, slots=True):
 		:param toValue:     The value after the transition, e.g. ``1``.
 		:param coverBin:    How often the transition happened.
 		:param parent:      Optional, the toggle bit the transition belongs to. Default: ``None``.
-		:raises ValueError: If parameter ``fromValue`` or ``toValue`` is ``None``.
-		:raises TypeError:  If parameter ``fromValue`` or ``toValue`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``fromValue`` is ``None``.
+		:raises TypeError:  If parameter ``fromValue`` isn't of type :class:`str`.
+		:raises ValueError: If parameter ``toValue`` is ``None``.
+		:raises TypeError:  If parameter ``toValue`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``coverBin`` is ``None``.
 		:raises TypeError:  If parameter ``coverBin`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
 		:raises TypeError:  If parameter ``parent`` isn't of type :class:`ToggleBit`.

@@ -34,16 +34,16 @@ expressions, nested by their sub-expressions.
 """
 from __future__                                   import annotations
 
-from typing                                       import TYPE_CHECKING, Generic, Iterable, Optional as Nullable, Self
-from typing                                       import TypeVar
+from typing                                       import TYPE_CHECKING, Generic, Iterable, Optional as Nullable, Self, \
+                                                         TypeVar
 
 from lxml.etree                                   import _Element
 from pyTooling.Common                             import getFullyQualifiedName
 from pyTooling.Decorators                         import export, readonly
 
 from pyEDAA.Reports.CodeCoverage.UCIS.Bins        import Bin
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import UserAttribute
+from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID, \
+                                                         UserAttribute
 
 if TYPE_CHECKING:
 	from pyEDAA.Reports.CodeCoverage.UCIS.Instances import InstanceCoverage
@@ -81,13 +81,13 @@ class ConditionCoverage(MetricCoverage):
 		:param weight:         Optional, weight of the mode in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the instance the coverage belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``metricMode`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Instances.InstanceCoverage`.
 		"""
@@ -188,26 +188,21 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 		:param weight:         Optional, weight of the expression in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the condition coverage or expression the expression belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
-		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
-		:raises ValueError:    If parameter ``excluded`` is ``None``.
-		:raises TypeError:     If parameter ``excluded`` isn't of type :class:`bool`.
-		:raises TypeError:     If parameter ``excludedReason`` isn't of type :class:`str`.
-		:raises ValueError:    If parameter ``weight`` is ``None``.
-		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
-		:raises ValueError:    If parameter ``weight`` is negative.
-		:raises ValueError:    If parameter ``name``, ``key`` or ``text`` is ``None``.
-		:raises TypeError:     If parameter ``name``, ``key`` or ``text`` isn't of type :class:`str`.
-		:raises ValueError:    If parameter ``index`` or ``width`` is ``None``.
-		:raises TypeError:     If parameter ``index`` or ``width`` isn't of type :class:`int`.
-		:raises ValueError:    If parameter ``index`` or ``width`` is negative.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``key`` is ``None``.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``text`` is ``None``.
+		:raises TypeError:     If parameter ``text`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``index`` is ``None``.
+		:raises TypeError:     If parameter ``index`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``index`` is negative.
+		:raises ValueError:    If parameter ``width`` is ``None``.
+		:raises TypeError:     If parameter ``width`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``width`` is negative.
 		:raises ValueError:    If parameter ``statementID`` is ``None``.
 		:raises TypeError:     If parameter ``statementID`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
-		:raises TypeError:     If parameter ``statementType`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``parent`` isn't of type :class:`ConditionCoverage` or :class:`Expression`.
 		:raises ValueError:    If parameter ``subExpressions`` is ``None``.
 		:raises TypeError:     If parameter ``subExpressions`` isn't iterable.
 		:raises TypeError:     If parameter ``subExpressions`` contains an element not of type :class:`str`.
@@ -215,6 +210,18 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 		:raises TypeError:     If parameter ``bins`` isn't iterable.
 		:raises TypeError:     If parameter ``bins`` contains an element not of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
+		:raises TypeError:     If parameter ``statementType`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``excluded`` is ``None``.
+		:raises TypeError:     If parameter ``excluded`` isn't of type :class:`bool`.
+		:raises TypeError:     If parameter ``excludedReason`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``weight`` is ``None``.
+		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
+		:raises ValueError:    If parameter ``weight`` is negative.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`ConditionCoverage` or :class:`Expression`.
 		"""
 		super().__init__(userAttributes)
 		ObjectAttributesMixin.__init__(self, alias, excluded, excludedReason, weight)
@@ -270,8 +277,8 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 		self._index =          index
 		self._width =          width
 		self._id =             statementID
-		self._subExpressions = []
-		self._bins =           []
+		self._subExpressions = subExpressionList = []
+		self._bins =           binList = []
 		self._statementType =  statementType
 		self._expressions =    []
 
@@ -288,7 +295,7 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 				ex.add_note(f"Got type '{getFullyQualifiedName(subExpression)}'.")
 				raise ex
 
-			self._subExpressions.append(subExpression)
+			subExpressionList.append(subExpression)
 
 		if bins is None:
 			raise ValueError("Parameter 'bins' is None.")
@@ -304,7 +311,7 @@ class Expression(Base, ObjectAttributesMixin, Generic[ExpressionParentType]):
 				raise ex
 
 			coverBin._parent = self
-			self._bins.append(coverBin)
+			binList.append(coverBin)
 
 		if parent is not None:
 			parent._expressions.append(self)

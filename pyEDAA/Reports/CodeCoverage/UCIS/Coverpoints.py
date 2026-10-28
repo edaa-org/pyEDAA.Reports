@@ -80,12 +80,14 @@ class BinBase(Base):
 		:param key:            Optional, UCIS key of the bin; the standard's schema has none, pyucis writes it. Default:
 		                       ``None``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
+		:raises ValueError:    If parameter ``binType`` is ``None``.
+		:raises TypeError:     If parameter ``binType`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
 		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
 		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
-		:raises ValueError:    If parameter ``binType`` is ``None``.
-		:raises TypeError:     If parameter ``binType`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``alias``, ``name`` or ``key`` isn't of type :class:`str`.
 		"""
 		super().__init__(userAttributes)
 
@@ -168,8 +170,10 @@ class ValueRange(metaclass=ExtendedType, slots=True):
 		:param fromValue:   The range's lowest value.
 		:param toValue:     The range's highest value; the lowest one again for a single value.
 		:param contents:    How often the expression had a value of the range.
-		:raises ValueError: If parameter ``fromValue`` or ``toValue`` is ``None``.
-		:raises TypeError:  If parameter ``fromValue`` or ``toValue`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``fromValue`` is ``None``.
+		:raises TypeError:  If parameter ``fromValue`` isn't of type :class:`int`.
+		:raises ValueError: If parameter ``toValue`` is ``None``.
+		:raises TypeError:  If parameter ``toValue`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``contents`` is ``None``.
 		:raises TypeError:  If parameter ``contents`` isn't of type
 		                    :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.BinContents`.
@@ -267,13 +271,13 @@ class ValueSequence(metaclass=ExtendedType, slots=True):
 
 		:param values:      The values, from the first one.
 		:param contents:    How often the expression had the values one after the other.
-		:raises ValueError: If parameter ``contents`` is ``None``.
-		:raises TypeError:  If parameter ``contents`` isn't of type
-		                    :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.BinContents`.
 		:raises ValueError: If parameter ``values`` is ``None``.
 		:raises TypeError:  If parameter ``values`` isn't iterable.
 		:raises TypeError:  If parameter ``values`` contains an element not of type :class:`int`.
 		:raises ValueError: If parameter ``values`` is empty.
+		:raises ValueError: If parameter ``contents`` is ``None``.
+		:raises TypeError:  If parameter ``contents`` isn't of type
+		                    :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.BinContents`.
 		"""
 		if contents is None:
 			raise ValueError("Parameter 'contents' is None.")
@@ -283,7 +287,7 @@ class ValueSequence(metaclass=ExtendedType, slots=True):
 			raise ex
 
 		self._parent =   None
-		self._values =   []
+		self._values =   valueList = []
 		self._contents = contents
 
 		if values is None:
@@ -299,7 +303,7 @@ class ValueSequence(metaclass=ExtendedType, slots=True):
 				ex.add_note(f"Got type '{getFullyQualifiedName(value)}'.")
 				raise ex
 
-			self._values.append(value)
+			valueList.append(value)
 
 		if len(self._values) == 0:
 			raise ValueError("Parameter 'values' is empty.")
@@ -379,17 +383,19 @@ class CoverpointBin(BinBase):
 		:param key:            Optional, UCIS key of the bin, as pyucis writes it. Default: ``None``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the coverpoint the bin belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises ValueError:    If parameter ``binType`` is ``None``.
 		:raises TypeError:     If parameter ``binType`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``alias``, ``name`` or ``key`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``parent`` isn't of type :class:`Coverpoint`.
 		:raises TypeError:     If parameter ``ranges`` isn't iterable.
 		:raises TypeError:     If parameter ``ranges`` contains an element not of type :class:`ValueRange`.
 		:raises TypeError:     If parameter ``sequences`` isn't iterable.
 		:raises TypeError:     If parameter ``sequences`` contains an element not of type :class:`ValueSequence`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`Coverpoint`.
 		"""
 		super().__init__(binType, alias, name, key, userAttributes)
 
@@ -399,8 +405,8 @@ class CoverpointBin(BinBase):
 			raise ex
 
 		self._parent =    parent
-		self._ranges =    []
-		self._sequences = []
+		self._ranges =    rangeList = []
+		self._sequences = sequenceList = []
 
 		if ranges is not None:
 			if not isinstance(ranges, Iterable):
@@ -415,7 +421,7 @@ class CoverpointBin(BinBase):
 					raise ex
 
 				valueRange._parent = self
-				self._ranges.append(valueRange)
+				rangeList.append(valueRange)
 
 		if sequences is not None:
 			if not isinstance(sequences, Iterable):
@@ -430,7 +436,7 @@ class CoverpointBin(BinBase):
 					raise ex
 
 				valueSequence._parent = self
-				self._sequences.append(valueSequence)
+				sequenceList.append(valueSequence)
 
 		if parent is not None:
 			parent._bins.append(self)
@@ -521,15 +527,18 @@ class Coverpoint(Base):
 		:param expression:     Optional, the expression the coverpoint samples, e.g. ``a``. Default: ``None``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the covergroup instance the coverpoint belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
-		:raises ValueError:    If parameter ``name`` or ``key`` is ``None``.
-		:raises TypeError:     If parameter ``name`` or ``key`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``key`` is ``None``.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``options`` is ``None``.
 		:raises TypeError:     If parameter ``options`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.CoverOptions.CoverpointOptions`.
-		:raises TypeError:     If parameter ``alias`` or ``expression`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``expression`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Covergroups.CovergroupInstance`.
 		"""

@@ -237,12 +237,12 @@ class BaseWithStatus(Base):
 		:param coverageCount: How often the line ran, the branch was taken or the unit was called; ``None``, if the report
 		                      doesn't say.
 		:param parent:        The element containing this one, or ``None``.
-		:raises TypeError:    If parameter ``parent`` isn't of a type the class declares in :attr:`_PARENT_TYPE`.
 		:raises ValueError:   If parameter ``status`` is ``None``.
 		:raises TypeError:    If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
 		:raises TypeError:    If parameter ``coverageCount`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``coverageCount`` is negative.
 		:raises ValueError:   If parameter ``coverageCount`` contradicts parameter ``status``.
+		:raises TypeError:    If parameter ``parent`` isn't of a type the class declares in :attr:`_PARENT_TYPE`.
 		"""
 		super().__init__(parent=parent)
 
@@ -480,10 +480,10 @@ class BaseWithPath(Base, CoverageCountersMixin):
 
 		:param name:        Name of the directory or file.
 		:param parent:      The directory containing this one, or ``None``.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``name`` is empty.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Directory`.
 		"""
 		super().__init__(parent=parent)
 		CoverageCountersMixin.__init__(self)
@@ -546,10 +546,10 @@ class Directory(BaseWithPath):
 
 		:param name:                     Name of the directory.
 		:param parent:                   Optional, the directory containing this one. Default: ``None``.
-		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError:              If parameter ``name`` is ``None``.
 		:raises TypeError:               If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:              If parameter ``name`` is empty.
+		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises DuplicateDirectoryError: If the parent directory already contains a file or directory of this name.
 		"""
 		super().__init__(name, parent=parent)
@@ -734,7 +734,7 @@ class CoverageSummary(Directory):
 		super().__init__(name)
 
 		self._root =              self
-		self._sourceDirectories = []
+		self._sourceDirectories = sourceDirectoryList = []
 		self._units =             {}
 
 		if sourceDirectories is not None:
@@ -749,7 +749,7 @@ class CoverageSummary(Directory):
 					ex.add_note(f"Got type '{getFullyQualifiedName(sourceDirectory)}'.")
 					raise ex
 
-				self._sourceDirectories.append(sourceDirectory)
+				sourceDirectoryList.append(sourceDirectory)
 
 	@Base.Parent.setter
 	def Parent(self, parent: None) -> None:
@@ -849,13 +849,13 @@ class File(BaseWithPath):
 		:param name:                Name of the file.
 		:param lines:               Optional, the executable lines. Default: ``None``.
 		:param parent:              Optional, the directory containing the file. Default: ``None``.
-		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError:         If parameter ``name`` is ``None``.
 		:raises TypeError:          If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:         If parameter ``name`` is empty.
-		:raises DuplicateFileError: If the directory already contains a file or directory of this name.
 		:raises TypeError:          If parameter ``lines`` isn't iterable.
 		:raises TypeError:          If parameter ``lines`` contains an element not of type :class:`Line`.
+		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Directory`.
+		:raises DuplicateFileError: If the directory already contains a file or directory of this name.
 		:raises DuplicateLineError: If two lines have the same number.
 		"""
 		super().__init__(name, parent=parent)
@@ -1084,18 +1084,18 @@ class Line(BaseWithStatus):
 		:param coverageCount:       Optional, how often the line ran, if the report says. Default: ``None``.
 		:param branches:            Optional, the branches starting at this line. Default: ``None``.
 		:param parent:              Optional, the file the line is in. Default: ``None``.
-		:raises TypeError:          If parameter ``parent`` isn't of type :class:`File`.
+		:raises ValueError:         If parameter ``lineNumber`` is ``None``.
+		:raises TypeError:          If parameter ``lineNumber`` isn't of type :class:`int`.
+		:raises ValueError:         If parameter ``lineNumber`` is less than 1.
 		:raises ValueError:         If parameter ``status`` is ``None``.
 		:raises TypeError:          If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
 		:raises TypeError:          If parameter ``coverageCount`` isn't of type :class:`int`.
 		:raises ValueError:         If parameter ``coverageCount`` is negative.
 		:raises ValueError:         If parameter ``coverageCount`` contradicts parameter ``status``.
-		:raises ValueError:         If parameter ``lineNumber`` is ``None``.
-		:raises TypeError:          If parameter ``lineNumber`` isn't of type :class:`int`.
-		:raises ValueError:         If parameter ``lineNumber`` is less than 1.
-		:raises DuplicateLineError: If the file already has a line of this number.
 		:raises TypeError:          If parameter ``branches`` isn't iterable.
 		:raises TypeError:          If parameter ``branches`` contains an element not of type :class:`Branch`.
+		:raises TypeError:          If parameter ``parent`` isn't of type :class:`File`.
+		:raises DuplicateLineError: If the file already has a line of this number.
 		"""
 		super().__init__(status, coverageCount, parent=parent)
 
@@ -1111,7 +1111,7 @@ class Line(BaseWithStatus):
 			raise ex
 
 		self._lineNumber =      lineNumber
-		self._branches =        []
+		self._branches =        branchList = []
 		self._coveredBranches = 0
 
 		if parent is not None:
@@ -1131,7 +1131,7 @@ class Line(BaseWithStatus):
 
 				branch._parent = self
 				branch._root =   self._root
-				self._branches.append(branch)
+				branchList.append(branch)
 
 	def _AddElement(self, branch: Branch) -> None:
 		"""
@@ -1225,13 +1225,13 @@ class Branch(BaseWithStatus):
 		:param target:        Optional, the line the branch goes to, if the report says; ``None`` for an exit of a function.
 		                      Default: ``None``.
 		:param parent:        Optional, the line the branch starts at. Default: ``None``.
-		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Line`.
 		:raises ValueError:   If parameter ``status`` is ``None``.
 		:raises TypeError:    If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
 		:raises TypeError:    If parameter ``coverageCount`` isn't of type :class:`int`.
 		:raises ValueError:   If parameter ``coverageCount`` is negative.
 		:raises ValueError:   If parameter ``coverageCount`` contradicts parameter ``status``.
 		:raises TypeError:    If parameter ``target`` isn't of type :class:`Line`.
+		:raises TypeError:    If parameter ``parent`` isn't of type :class:`Line`.
 		"""
 		super().__init__(status, coverageCount, parent=parent)
 
@@ -1296,12 +1296,6 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		:param status:              Optional, whether the unit was called. Default: :attr:`LineCoverageStatus.Unknown`.
 		:param coverageCount:       Optional, how often the unit was called. Default: ``None``.
 		:param parent:              Optional, the unit or report containing this unit. Default: ``None``.
-		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Unit` or :class:`CoverageSummary`.
-		:raises ValueError:         If parameter ``status`` is ``None``.
-		:raises TypeError:          If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
-		:raises TypeError:          If parameter ``coverageCount`` isn't of type :class:`int`.
-		:raises ValueError:         If parameter ``coverageCount`` is negative.
-		:raises ValueError:         If parameter ``coverageCount`` contradicts parameter ``status``.
 		:raises ValueError:         If parameter ``name`` is ``None``.
 		:raises TypeError:          If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:         If parameter ``name`` is empty.
@@ -1311,6 +1305,12 @@ class Unit(BaseWithStatus, CoverageCountersMixin):
 		:raises TypeError:          If parameter ``endLine`` isn't of type :class:`Line`.
 		:raises ValueError:         If parameter ``endLine`` isn't a line of parameter ``file``.
 		:raises ValueError:         If parameter ``endLine`` is before parameter ``startLine``.
+		:raises ValueError:         If parameter ``status`` is ``None``.
+		:raises TypeError:          If parameter ``status`` isn't of type :class:`LineCoverageStatus`.
+		:raises TypeError:          If parameter ``coverageCount`` isn't of type :class:`int`.
+		:raises ValueError:         If parameter ``coverageCount`` is negative.
+		:raises ValueError:         If parameter ``coverageCount`` contradicts parameter ``status``.
+		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Unit` or :class:`CoverageSummary`.
 		:raises DuplicateUnitError: If the parent already contains a unit of this name.
 		"""
 		super().__init__(status, coverageCount, parent=parent)

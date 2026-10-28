@@ -219,7 +219,7 @@ class Base(metaclass=ExtendedType, slots=True):
 		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
 		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type :class:`UserAttribute`.
 		"""
-		self._userAttributes = []
+		self._userAttributes = userAttributeList = []
 
 		if userAttributes is not None:
 			if not isinstance(userAttributes, Iterable):
@@ -233,7 +233,7 @@ class Base(metaclass=ExtendedType, slots=True):
 					ex.add_note(f"Got type '{getFullyQualifiedName(userAttribute)}'.")
 					raise ex
 
-				self._userAttributes.append(userAttribute)
+				userAttributeList.append(userAttribute)
 
 	@staticmethod
 	def _ParseUserAttributes(element: _Element) -> list[UserAttribute]:
@@ -499,12 +499,12 @@ class MetricCoverage(Base):
 		:param weight:         Optional, weight of the mode in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the instance the coverage belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type :class:`UserAttribute`.
 		:raises TypeError:     If parameter ``metricMode`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type :class:`UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Instances.InstanceCoverage`.
 		"""

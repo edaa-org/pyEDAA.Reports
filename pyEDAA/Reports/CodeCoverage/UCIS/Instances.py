@@ -212,9 +212,6 @@ class InstanceCoverage(Base):
 		:param userAttributes:   Optional, the user-defined attributes. Default: ``None``.
 		:param parent:           Optional, the report the instance belongs to; the instance is appended to its instances.
 		                         Default: ``None``.
-		:raises TypeError:       If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:       If parameter ``userAttributes`` contains an element not of type
-		                         :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises ValueError:      If parameter ``name`` is ``None``.
 		:raises TypeError:       If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError:      If parameter ``key`` is ``None``.
@@ -228,6 +225,9 @@ class InstanceCoverage(Base):
 		:raises TypeError:       If parameter ``parentInstanceID`` isn't of type :class:`int`.
 		:raises TypeError:       If parameter ``designParameters`` isn't a mapping.
 		:raises TypeError:       If parameter ``designParameters`` contains a name or value not of type :class:`str`.
+		:raises TypeError:       If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:       If parameter ``userAttributes`` contains an element not of type
+		                         :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:       If parameter ``parent`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Report`.
 		"""
 		from pyEDAA.Reports.CodeCoverage.UCIS import Report

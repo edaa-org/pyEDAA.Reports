@@ -34,16 +34,16 @@ and their branches.
 """
 from __future__                                   import annotations
 
-from typing                                       import TYPE_CHECKING, Generator, Generic, Iterable
-from typing                                       import Optional as Nullable, Self, TypeVar
+from typing                                       import TYPE_CHECKING, Generator, Generic, Iterable, \
+                                                         Optional as Nullable, Self, TypeVar
 
 from lxml.etree                                   import _Element
 from pyTooling.Common                             import getFullyQualifiedName
 from pyTooling.Decorators                         import export, readonly
 
 from pyEDAA.Reports.CodeCoverage.UCIS.Bins        import Bin
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID
-from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import UserAttribute
+from pyEDAA.Reports.CodeCoverage.UCIS.Elements    import Base, MetricCoverage, ObjectAttributesMixin, StatementID, \
+                                                         UserAttribute
 
 if TYPE_CHECKING:
 	from pyEDAA.Reports.CodeCoverage.UCIS.Instances import InstanceCoverage
@@ -84,13 +84,13 @@ class BranchCoverage(MetricCoverage):
 		:param weight:         Optional, weight of the mode in computing the coverage. Default: ``1``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the instance the coverage belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``metricMode`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``weight`` is ``None``.
 		:raises TypeError:     If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:    If parameter ``weight`` is negative.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Instances.InstanceCoverage`.
 		"""
@@ -183,9 +183,12 @@ class BranchStatement(Base, ObjectAttributesMixin, Generic[BranchStatementParent
 		:param weight:           Optional, weight of the statement in computing the coverage. Default: ``1``.
 		:param userAttributes:   Optional, the user-defined attributes. Default: ``None``.
 		:param parent:           Optional, the branch coverage or branch the statement belongs to. Default: ``None``.
-		:raises TypeError:       If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:       If parameter ``userAttributes`` contains an element not of type
-		                         :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises ValueError:      If parameter ``statementID`` is ``None``.
+		:raises TypeError:       If parameter ``statementID`` isn't of type
+		                         :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
+		:raises ValueError:      If parameter ``statementType`` is ``None``.
+		:raises TypeError:       If parameter ``statementType`` isn't of type :class:`str`.
+		:raises TypeError:       If parameter ``branchExpression`` isn't of type :class:`str`.
 		:raises TypeError:       If parameter ``alias`` isn't of type :class:`str`.
 		:raises ValueError:      If parameter ``excluded`` is ``None``.
 		:raises TypeError:       If parameter ``excluded`` isn't of type :class:`bool`.
@@ -193,12 +196,9 @@ class BranchStatement(Base, ObjectAttributesMixin, Generic[BranchStatementParent
 		:raises ValueError:      If parameter ``weight`` is ``None``.
 		:raises TypeError:       If parameter ``weight`` isn't of type :class:`int`.
 		:raises ValueError:      If parameter ``weight`` is negative.
-		:raises ValueError:      If parameter ``statementID`` is ``None``.
-		:raises TypeError:       If parameter ``statementID`` isn't of type
-		                         :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
-		:raises ValueError:      If parameter ``statementType`` is ``None``.
-		:raises TypeError:       If parameter ``statementType`` isn't of type :class:`str`.
-		:raises TypeError:       If parameter ``branchExpression`` isn't of type :class:`str`.
+		:raises TypeError:       If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:       If parameter ``userAttributes`` contains an element not of type
+		                         :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:       If parameter ``parent`` isn't of type :class:`BranchCoverage` or :class:`Branch`.
 		"""
 		super().__init__(userAttributes)
@@ -350,14 +350,14 @@ class Branch(Base):
 		:param coverBin:       How often the branch was taken.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the branching statement the branch belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises ValueError:    If parameter ``branchID`` is ``None``.
 		:raises TypeError:     If parameter ``branchID`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.StatementID`.
 		:raises ValueError:    If parameter ``coverBin`` is ``None``.
 		:raises TypeError:     If parameter ``coverBin`` isn't of type :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.Bin`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
 		:raises TypeError:     If parameter ``parent`` isn't of type :class:`BranchStatement`.
 		"""
 		super().__init__(userAttributes)

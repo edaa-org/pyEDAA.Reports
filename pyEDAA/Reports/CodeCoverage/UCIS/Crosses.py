@@ -86,19 +86,21 @@ class Cross(Base):
 		:param alias:          Optional, an alias of the cross' name. Default: ``None``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the covergroup instance the cross belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
-		:raises ValueError:    If parameter ``name`` or ``key`` is ``None``.
-		:raises TypeError:     If parameter ``name`` or ``key`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``name`` is ``None``.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises ValueError:    If parameter ``key`` is ``None``.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
 		:raises ValueError:    If parameter ``options`` is ``None``.
 		:raises TypeError:     If parameter ``options`` isn't of type
 		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.CoverOptions.CrossOptions`.
-		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``parent`` isn't of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Covergroups.CovergroupInstance`.
 		:raises TypeError:     If parameter ``expressions`` isn't iterable.
 		:raises TypeError:     If parameter ``expressions`` contains an element not of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises TypeError:     If parameter ``parent`` isn't of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Covergroups.CovergroupInstance`.
 		"""
 		from pyEDAA.Reports.CodeCoverage.UCIS.Covergroups import CovergroupInstance
 
@@ -137,7 +139,7 @@ class Cross(Base):
 		self._key =         key
 		self._options =     options
 		self._alias =       alias
-		self._expressions = []
+		self._expressions = expressionList = []
 		self._bins =        []
 
 		if expressions is not None:
@@ -152,7 +154,7 @@ class Cross(Base):
 					ex.add_note(f"Got type '{getFullyQualifiedName(expression)}'.")
 					raise ex
 
-				self._expressions.append(expression)
+				expressionList.append(expression)
 
 		if parent is not None:
 			parent._crosses.append(self)
@@ -281,20 +283,22 @@ class CrossBin(BinBase):
 		:param key:            Optional, UCIS key of the bin, as pyucis writes it. Default: ``None``.
 		:param userAttributes: Optional, the user-defined attributes. Default: ``None``.
 		:param parent:         Optional, the cross the bin belongs to. Default: ``None``.
-		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
-		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
-		:raises ValueError:    If parameter ``binType`` is ``None``.
-		:raises TypeError:     If parameter ``binType`` isn't of type :class:`str`.
-		:raises TypeError:     If parameter ``alias``, ``name`` or ``key`` isn't of type :class:`str`.
-		:raises ValueError:    If parameter ``contents`` is ``None``.
-		:raises TypeError:     If parameter ``contents`` isn't of type
-		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.BinContents`.
-		:raises TypeError:     If parameter ``parent`` isn't of type :class:`Cross`.
 		:raises ValueError:    If parameter ``indices`` is ``None``.
 		:raises TypeError:     If parameter ``indices`` isn't iterable.
 		:raises TypeError:     If parameter ``indices`` contains an element not of type :class:`int`.
 		:raises ValueError:    If parameter ``indices`` is empty.
+		:raises ValueError:    If parameter ``contents`` is ``None``.
+		:raises TypeError:     If parameter ``contents`` isn't of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Bins.BinContents`.
+		:raises ValueError:    If parameter ``binType`` is ``None``.
+		:raises TypeError:     If parameter ``binType`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``alias`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``name`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``key`` isn't of type :class:`str`.
+		:raises TypeError:     If parameter ``userAttributes`` isn't iterable.
+		:raises TypeError:     If parameter ``userAttributes`` contains an element not of type
+		                       :class:`~pyEDAA.Reports.CodeCoverage.UCIS.Elements.UserAttribute`.
+		:raises TypeError:     If parameter ``parent`` isn't of type :class:`Cross`.
 		"""
 		super().__init__(binType, alias, name, key, userAttributes)
 
@@ -311,7 +315,7 @@ class CrossBin(BinBase):
 			raise ex
 
 		self._parent =   parent
-		self._indices =  []
+		self._indices =  indexList = []
 		self._contents = contents
 
 		if indices is None:
@@ -327,7 +331,7 @@ class CrossBin(BinBase):
 				ex.add_note(f"Got type '{getFullyQualifiedName(index)}'.")
 				raise ex
 
-			self._indices.append(index)
+			indexList.append(index)
 
 		if len(self._indices) == 0:
 			raise ValueError("Parameter 'indices' is empty.")

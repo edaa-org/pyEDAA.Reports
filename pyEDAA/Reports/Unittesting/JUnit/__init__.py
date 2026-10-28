@@ -98,8 +98,8 @@ from io              import BytesIO
 from pathlib         import Path
 from typing          import Optional as Nullable, Iterable, Dict, Any, Generator, Tuple, Union, TypeVar, Type, ClassVar
 
-from lxml.etree                 import XMLParser, parse, XMLSchema, ElementTree, Element, SubElement, tostring
-from lxml.etree                 import XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
+from lxml.etree                 import XMLParser, parse, XMLSchema, ElementTree, Element, SubElement, tostring, \
+                                       XMLSyntaxError, _ElementTree, _Element, _Comment, XMLSchemaParseError
 from pyTooling.Common           import getFullyQualifiedName, getTypeName, getResourceFile
 from pyTooling.Decorators       import export, readonly
 from pyTooling.Stopwatch        import Stopwatch
@@ -108,12 +108,11 @@ from pyTooling.MetaClasses      import ExtendedType, mustoverride, abstractmetho
 from pyTooling.Tree             import Node
 
 from pyEDAA.Reports             import Resources
-from pyEDAA.Reports.Unittesting import UnittestError, AlreadyInTestsuiteError, DuplicateTestsuiteError
-from pyEDAA.Reports.Unittesting import DuplicateTestcaseError
-from pyEDAA.Reports.Unittesting import TestcaseStatus, TestsuiteStatus, TestsuiteKind, IterationScheme
-from pyEDAA.Reports.Unittesting import TestcaseOutputMixin
-from pyEDAA.Reports.Unittesting import Document as ut_Document, TestsuiteSummary as ut_TestsuiteSummary
-from pyEDAA.Reports.Unittesting import Testsuite as ut_Testsuite, Testcase as ut_Testcase
+from pyEDAA.Reports.Unittesting import UnittestError, AlreadyInTestsuiteError, DuplicateTestsuiteError, \
+                                       DuplicateTestcaseError, TestcaseStatus, TestsuiteStatus, TestsuiteKind, \
+                                       IterationScheme, TestcaseOutputMixin, Document as ut_Document, \
+                                       TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, \
+                                       Testcase as ut_Testcase
 
 
 @export
@@ -383,7 +382,8 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 	A testcase is the leaf-entity in the test entity hierarchy representing an individual test run.
 
 	Test cases are grouped by test classes in the test entity hierarchy. These are again grouped by test suites. The root
-	of the hierarchy is a test summary.
+	of the hierarchy is a test summary. A test case without a class (empty ``classname``) belongs to its test suite
+	directly, e.g. pytest's entry for a skipped test module.
 
 	Every test case has an overall status like unknown, skipped, failed or passed. The message and details of a
 	``<failure>``, ``<error>`` or ``<skipped>`` element, as well as the captured output of ``<system-out>`` and
@@ -403,7 +403,7 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		standardOutput: Nullable[str] = None,
 		standardError: Nullable[str] = None,
 		*,
-		parent: Nullable[Testclass] = None
+		parent: Nullable[Testclass | Testsuite] = None
 	) -> None:
 		"""
 		Initializes the fields of a test case.
@@ -416,13 +416,13 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		:param details:        Optional, details explaining the test case's status (e.g. a traceback).
 		:param standardOutput: Optional, captured standard output of the test case.
 		:param standardError:  Optional, captured standard error of the test case.
-		:param parent:         Optional, reference to the parent test class.
-		:raises TypeError:     If parameter 'parent' is not a Testclass.
+		:param parent:         Optional, reference to the parent test class or test suite.
 		:raises ValueError:    If parameter 'assertionCount' is not consistent.
+		:raises TypeError:     If parameter 'parent' is not a Testclass or Testsuite.
 		"""
 		if parent is not None:
-			if not isinstance(parent, Testclass):
-				ex = TypeError("Parameter 'parent' is not of type 'Testclass'.")
+			if not isinstance(parent, (Testclass, Testsuite)):
+				ex = TypeError("Parameter 'parent' is not of type 'Testclass' or 'Testsuite'.")
 				ex.add_note(f"Got type '{getFullyQualifiedName(parent)}'.")
 				raise ex
 
@@ -441,9 +441,9 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 	@readonly
 	def Classname(self) -> str:
 		"""
-		Read-only property to access the class name of the test case.
+		Read-only property to return the class name of the test case.
 
-		:returns: The test case's class name.
+		:returns: The test case's class name, or an empty string for a test case directly in a test suite.
 
 		.. note::
 
@@ -453,7 +453,10 @@ class Testcase(BaseWithProperties, TestcaseOutputMixin):
 		"""
 		if self._parent is None:
 			raise UnittestError("Standalone Testcase instance is not linked to a Testclass.")
-		return self._parent._name
+		elif isinstance(self._parent, Testsuite):
+			return ""
+		else:
+			return self._parent._name
 
 	@readonly
 	def Status(self) -> TestcaseStatus:
@@ -835,11 +838,13 @@ class Testsuite(TestsuiteBase):
 	"""
 	A testsuite is a mid-level element in the test entity hierarchy representing a logical group of tests.
 
-	Test suites contain test classes and are grouped by a test summary, which is the root of the hierarchy.
+	Test suites contain test classes and are grouped by a test summary, which is the root of the hierarchy. A test case
+	without a class (empty ``classname``) is contained in the test suite directly.
 	"""
 
 	_hostname:    str
 	_testclasses: Dict[str, Testclass]
+	_testcases:   Dict[str, Testcase]   #: Test cases without a class, contained in the test suite directly.
 
 	def __init__(
 		self,
@@ -849,6 +854,7 @@ class Testsuite(TestsuiteBase):
 		duration:  Nullable[timedelta] = None,
 		status: TestsuiteStatus = TestsuiteStatus.Unknown,
 		testclasses: Nullable[Iterable[Testclass]] = None,
+		testcases: Nullable[Iterable[Testcase]] = None,
 		*,
 		parent: Nullable[TestsuiteSummary] = None
 	) -> None:
@@ -856,15 +862,19 @@ class Testsuite(TestsuiteBase):
 		Initializes the fields of a test suite.
 
 		:param name:                     Name of the test suite.
+		:param hostname:                 Optional, name of the host the test suite was executed on.
 		:param startTime:                Optional, time when the test suite was started.
 		:param duration:                 Optional, duration of the entity's execution.
 		:param status:                   Optional, overall status of the test suite.
+		:param testclasses:              Optional, test classes of the test suite.
+		:param testcases:                Optional, test cases without a class, contained in the test suite directly.
 		:param parent:                   Optional, reference to the parent test summary.
 		:raises TypeError:               If parameter 'testcases' is not iterable.
-		:raises TypeError:               If element in parameter 'testcases' is not a Testcase.
+		:raises TypeError:               If an element of parameter 'testcases' is not a Testcase.
 		:raises AlreadyInTestsuiteError: If a test case in parameter 'testcases' is already part of a test entity hierarchy.
 		:raises DuplicateTestcaseError:  If a test case in parameter 'testcases' is already listed (by name) in the list of
 		                                 test cases.
+		:raises TypeError:               If parameter 'parent' is not a TestsuiteSummary.
 		"""
 		if parent is not None:
 			if not isinstance(parent, TestsuiteSummary):
@@ -889,6 +899,27 @@ class Testsuite(TestsuiteBase):
 
 				testclass._parent = self
 				self._testclasses[testclass._name] = testclass
+
+		self._testcases = {}
+		if testcases is not None:
+			if not isinstance(testcases, Iterable):
+				ex = TypeError("Parameter 'testcases' is not iterable.")
+				ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
+				raise ex
+
+			for testcase in testcases:
+				if not isinstance(testcase, Testcase):
+					ex = TypeError("Element of parameter 'testcases' is not of type 'Testcase'.")
+					ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
+					raise ex
+				elif testcase._parent is not None:
+					raise AlreadyInTestsuiteError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+
+				if testcase._name in self._testcases:
+					raise DuplicateTestcaseError(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
+
+				testcase._parent = self
+				self._testcases[testcase._name] = testcase
 
 	@readonly
 	def Hostname(self) -> Nullable[str]:
@@ -917,27 +948,35 @@ class Testsuite(TestsuiteBase):
 		"""
 		return len(self._testclasses)
 
-	# @readonly
-	# def Testcases(self) -> Dict[str, "Testcase"]:
-	# 	return self._classes
+	@readonly
+	def Testcases(self) -> Dict[str, Testcase]:
+		"""
+		Read-only property to access the testsuite's testcases without a class (:attr:`_testcases`).
+
+		:returns: Dictionary of testcase names and testcases.
+		"""
+		return self._testcases
 
 	@readonly
 	def TestcaseCount(self) -> int:
 		"""
-		Read-only property to return the number of testcases across all testclasses.
+		Read-only property to return the number of testcases across all testclasses and of the testcases without a class.
 
-		:returns: Sum of the testclasses' testcase counts.
+		:returns: Sum of the testclasses' testcase counts and the number of testcases without a class.
 		"""
-		return sum(cls.TestcaseCount for cls in self._testclasses.values())
+		return sum(cls.TestcaseCount for cls in self._testclasses.values()) + len(self._testcases)
 
 	@readonly
 	def AssertionCount(self) -> int:
 		"""
-		Read-only property to return the number of assertions across all testclasses.
+		Read-only property to return the number of assertions across all testclasses and testcases without a class.
 
-		:returns: Sum of the testclasses' assertion counts.
+		:returns: Sum of the testclasses' and the testcases' assertion counts.
 		"""
-		return sum(cls.AssertionCount for cls in self._testclasses.values())
+		return (
+			sum(cls.AssertionCount for cls in self._testclasses.values()) +
+			sum(tc.AssertionCount for tc in self._testcases.values())
+		)
 
 	def AddTestclass(self, testclass: Testclass) -> None:
 		if testclass._parent is not None:
@@ -952,6 +991,49 @@ class Testsuite(TestsuiteBase):
 	def AddTestclasses(self, testclasses: Iterable[Testclass]) -> None:
 		for testcase in testclasses:
 			self.AddTestclass(testcase)
+
+	def AddTestcase(self, testcase: Testcase) -> None:
+		"""
+		Add a testcase without a class to the testsuite.
+
+		:param testcase:                 The testcase to add.
+		:raises ValueError:              If parameter 'testcase' is None.
+		:raises TypeError:               If parameter 'testcase' is not a Testcase.
+		:raises AlreadyInTestsuiteError: If the testcase is already part of a test entity hierarchy.
+		:raises DuplicateTestcaseError:  If the testsuite already contains a testcase without a class by the same name.
+		"""
+		if testcase is None:
+			raise ValueError("Parameter 'testcase' is None.")
+		elif not isinstance(testcase, Testcase):
+			ex = TypeError("Parameter 'testcase' is not of type 'Testcase'.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testcase)}'.")
+			raise ex
+		elif testcase._parent is not None:
+			raise AlreadyInTestsuiteError(f"Testcase '{testcase._name}' is already part of a testsuite hierarchy.")
+
+		if testcase._name in self._testcases:
+			raise DuplicateTestcaseError(f"Testsuite already contains a testcase with same name '{testcase._name}'.")
+
+		testcase._parent = self
+		self._testcases[testcase._name] = testcase
+
+	def AddTestcases(self, testcases: Iterable[Testcase]) -> None:
+		"""
+		Add testcases without a class to the testsuite.
+
+		:param testcases:   The testcases to add.
+		:raises ValueError: If parameter 'testcases' is None.
+		:raises TypeError:  If parameter 'testcases' is not iterable.
+		"""
+		if testcases is None:
+			raise ValueError("Parameter 'testcases' is None.")
+		elif not isinstance(testcases, Iterable):
+			ex = TypeError("Parameter 'testcases' is not iterable.")
+			ex.add_note(f"Got type '{getFullyQualifiedName(testcases)}'.")
+			raise ex
+
+		for testcase in testcases:
+			self.AddTestcase(testcase)
 
 	# def IterateTestsuites(self, scheme: IterationScheme = IterationScheme.TestsuiteDefault) -> Generator[TestsuiteType, None, None]:
 	# 	return self.Iterate(scheme)
@@ -971,28 +1053,31 @@ class Testsuite(TestsuiteBase):
 	def Aggregate(self, strict: bool = True) -> TestsuiteAggregateReturnType:
 		tests, skipped, errored, weak, failed, passed = super().Aggregate()
 
+		testcases = list(self._testcases.values())
 		for testclass in self._testclasses.values():
-			for testcase in  testclass._testcases.values():
-				_ = testcase.Aggregate()
+			testcases.extend(testclass._testcases.values())
 
-				tests += 1
-				status = testcase._status
-				if status is TestcaseStatus.Unknown:
-					raise UnittestError(f"Found testcase '{testcase._name}' with state 'Unknown'.")
-				elif status is TestcaseStatus.Skipped:
-					skipped += 1
-				elif status is TestcaseStatus.Errored:
-					errored += 1
-				elif status is TestcaseStatus.Passed:
-					passed += 1
-				elif status is TestcaseStatus.Failed:
-					failed += 1
-				elif status is TestcaseStatus.Weak:
-					weak += 1
-				elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
-					raise UnittestError(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
-				else:
-					raise UnittestError(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
+		for testcase in testcases:
+			_ = testcase.Aggregate()
+
+			tests += 1
+			status = testcase._status
+			if status is TestcaseStatus.Unknown:
+				raise UnittestError(f"Found testcase '{testcase._name}' with state 'Unknown'.")
+			elif status is TestcaseStatus.Skipped:
+				skipped += 1
+			elif status is TestcaseStatus.Errored:
+				errored += 1
+			elif status is TestcaseStatus.Passed:
+				passed += 1
+			elif status is TestcaseStatus.Failed:
+				failed += 1
+			elif status is TestcaseStatus.Weak:
+				weak += 1
+			elif status & TestcaseStatus.Mask is not TestcaseStatus.Unknown:
+				raise UnittestError(f"Found testcase '{testcase._name}' with unsupported state '{status}'.")
+			else:
+				raise UnittestError(f"Internal error for testcase '{testcase._name}', field '_status' is '{status}'.")
 
 		self._tests = tests
 		self._skipped = skipped
@@ -1031,7 +1116,7 @@ class Testsuite(TestsuiteBase):
 				yield self
 
 			if IterationScheme.IncludeTestcases in scheme:
-				for testcase in self._testclasses.values():
+				for testcase in self._testcases.values():
 					yield testcase
 
 		for testclass in self._testclasses.values():
@@ -1039,7 +1124,7 @@ class Testsuite(TestsuiteBase):
 
 		if IterationScheme.PostOrder in scheme:
 			if IterationScheme.IncludeTestcases in scheme:
-				for testcase in self._testclasses.values():
+				for testcase in self._testcases.values():
 					yield testcase
 
 			if IterationScheme.IncludeSelf | IterationScheme.IncludeTestsuites in scheme:
@@ -1065,6 +1150,9 @@ class Testsuite(TestsuiteBase):
 			ts = tc._parent
 			if ts is None:
 				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
+			elif ts is testsuite:
+				juTestsuite.AddTestcase(Testcase.FromTestcase(tc))
+				continue
 
 			classname = ts._name
 			ts = ts._parent
@@ -1089,6 +1177,7 @@ class Testsuite(TestsuiteBase):
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
+			testcases=(tc.ToTestcase() for tc in self._testcases.values())
 		)
 
 		for testclass in self._testclasses.values():
@@ -1111,7 +1200,10 @@ class Testsuite(TestsuiteBase):
 	def ToTree(self) -> Node:
 		node = Node(
 			value=self._name,
-			children=(cls.ToTree() for cls in self._testclasses.values())
+			children=(
+				*(tc.ToTree() for tc in self._testcases.values()),
+				*(cls.ToTree() for cls in self._testclasses.values())
+			)
 		)
 		node["startTime"] = self._startTime
 		node["duration"] = self._duration
@@ -1705,13 +1797,16 @@ class Document(TestsuiteSummary, ut_Document):
 		:param testcaseNode: The current XML element node representing a test case.
 		"""
 		className = self._ConvertClassname(testcaseNode)
-		testclass = self._FindOrCreateTestclass(parent, className)
+		if className == "":
+			testcaseParent = parent
+		else:
+			testcaseParent = self._FindOrCreateTestclass(parent, className)
 
 		newTestcase = self._TESTCASE(
 			self._ConvertName(testcaseNode, optional=False),
 			self._ConvertTime(testcaseNode, optional=True),
 			assertionCount=self._ConvertAssertions(testcaseNode),
-			parent=testclass
+			parent=testcaseParent
 		)
 
 		self._ConvertTestcaseChildren(testcaseNode, newTestcase)
@@ -1837,6 +1932,9 @@ class Document(TestsuiteSummary, ut_Document):
 		# 	testsuiteElement.attrib["assertions"] = f"{testsuite._assertionCount}"
 		if testsuite._hostname is not None:
 			testsuiteElement.attrib["hostname"] = testsuite._hostname
+
+		for tc in testsuite._testcases.values():
+			self._GenerateTestcase(tc, testsuiteElement)
 
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():

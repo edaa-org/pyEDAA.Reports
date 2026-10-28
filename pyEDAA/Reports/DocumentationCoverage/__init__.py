@@ -53,8 +53,6 @@ An item's :class:`CoverageState` says, whether it is documented, and whether it 
 
    :mod:`pyEDAA.Reports.DocumentationCoverage.Python`
       |rarr| The reader of Python source files.
-   :mod:`pyEDAA.Reports.DocumentationCoverage.DocStrCoverage`
-      |rarr| The converter of docstr_coverage's analysis.
 """
 from __future__            import annotations
 
@@ -624,11 +622,11 @@ class BaseWithPath(Base):
 
 		:param name:        Name of the directory or file: a path of one component.
 		:param parent:      The directory containing this one, or ``None``.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`~pathlib.Path`.
 		:raises ValueError: If parameter ``name`` is empty or ``.``.
 		:raises ValueError: If parameter ``name`` has more than one component.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Directory`.
 		"""
 		super().__init__(parent=parent)
 
@@ -690,11 +688,11 @@ class Directory(BaseWithPath):
 
 		:param name:                     Name of the directory: a path of one component.
 		:param parent:                   Optional, the directory containing this one. Default: ``None``.
-		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError:              If parameter ``name`` is ``None``.
 		:raises TypeError:               If parameter ``name`` isn't of type :class:`~pathlib.Path`.
 		:raises ValueError:              If parameter ``name`` is empty or ``.``.
 		:raises ValueError:              If parameter ``name`` has more than one component.
+		:raises TypeError:               If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises DuplicateDirectoryError: If the parent directory already contains a file or directory of this name.
 		"""
 		super().__init__(name, parent=parent)
@@ -949,11 +947,11 @@ class File(BaseWithPath):
 
 		:param name:                Name of the file: a path of one component.
 		:param parent:              Optional, the directory containing the file. Default: ``None``.
-		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises ValueError:         If parameter ``name`` is ``None``.
 		:raises TypeError:          If parameter ``name`` isn't of type :class:`~pathlib.Path`.
 		:raises ValueError:         If parameter ``name`` is empty or ``.``.
 		:raises ValueError:         If parameter ``name`` has more than one component.
+		:raises TypeError:          If parameter ``parent`` isn't of type :class:`Directory`.
 		:raises DuplicateFileError: If the directory already contains a file or directory of this name.
 		"""
 		super().__init__(name, parent=parent)
@@ -1039,7 +1037,6 @@ class Item(Base):
 		:param startLine:   Optional, the item's first line. Default: ``None``.
 		:param endLine:     Optional, the item's last line. Default: ``None``.
 		:param parent:      Optional, the item or report containing this item. Default: ``None``.
-		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Item` or :class:`DocumentationReport`.
 		:raises ValueError: If parameter ``name`` is ``None``.
 		:raises TypeError:  If parameter ``name`` isn't of type :class:`str`.
 		:raises ValueError: If parameter ``name`` is empty.
@@ -1053,6 +1050,7 @@ class Item(Base):
 		:raises ValueError: If parameter ``startLine`` is less than 1.
 		:raises TypeError:  If parameter ``endLine`` isn't of type :class:`int`.
 		:raises ValueError: If parameter ``endLine`` is before parameter ``startLine``, or less than 1.
+		:raises TypeError:  If parameter ``parent`` isn't of type :class:`Item` or :class:`DocumentationReport`.
 		"""
 		super().__init__(parent=parent)
 

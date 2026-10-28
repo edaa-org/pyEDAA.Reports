@@ -42,8 +42,8 @@ from pyTooling.Common                      import getResourceFile
 from pyTooling.Testing                     import Testcase
 
 from pyEDAA.Reports                        import Resources
-from pyEDAA.Reports.CodeCoverage           import Branch, Class, CodeCoverageError, CoverageSummary, Function
-from pyEDAA.Reports.CodeCoverage           import Line as cc_Line, LineCoverageStatus, Method, Module, Package
+from pyEDAA.Reports.CodeCoverage           import Branch, Class, CodeCoverageError, CoverageSummary, Function, \
+                                                  Line as cc_Line, LineCoverageStatus, Method, Module, Package
 from pyEDAA.Reports.CodeCoverage.Cobertura import READ_SCHEMA, STRICT_SCHEMA, Condition, Document, Line
 
 

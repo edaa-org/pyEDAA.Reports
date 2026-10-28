@@ -199,24 +199,34 @@ the mandatory dependencies too.
 Packaging (Optional)
 ********************
 
-Python packages needed for installation package generation. These packages are only needed for developers or on a CI
-server.
+Additional Python packages needed for installation package generation. These packages are only needed for developers or
+on a CI server.
 
-:file:`pyproject.toml` lists them as build requirements, so ``python3 -m build`` installs them itself.
+.. rubric:: Building an Installation Package
 
-.. list-table:: Dependencies for generating an installation package.
-   :header-rows: 1
-   :widths: 30 20 50
+:file:`pyproject.toml` lists them as build requirements (``[build-system]``), so ``build`` installs them into an
+isolated build environment itself.
 
-   * - Package
-     - Version
-     - License
-   * - `setuptools <https://GitHub.com/pypa/setuptools>`__
-     - ≥84.0
-     - `MIT <https://GitHub.com/pypa/setuptools/blob/main/LICENSE>`__
-   * - `pyTooling <https://GitHub.com/pyTooling/pyTooling>`__
-     - ≥10.0
-     - `Apache License, 2.0 <https://GitHub.com/pyTooling/pyTooling/blob/main/LICENSE.md>`__
+.. tab-set::
+
+   .. tab-item:: Linux/macOS
+      :sync: Linux
+
+      .. code-block:: bash
+
+         python3 -m build --wheel
+
+   .. tab-item:: Windows
+      :sync: Windows
+
+      .. code-block:: powershell
+
+         python -m build --wheel
+
+.. rubric:: Dependency List
+
+.. dependency-table:: packaging
+   :caption: Dependencies for generating an installation package.
 
 
 .. _DEP/publishing:

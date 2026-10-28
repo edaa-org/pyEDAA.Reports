@@ -49,11 +49,11 @@ from pyTooling.Common                 import firstValue
 from pyTooling.Decorators             import export, InheritDocString, DocStringMergeStrategy
 from pyTooling.Stopwatch              import Stopwatch
 
-from pyEDAA.Reports.Unittesting       import UnittestError, TestcaseStatus, TestsuiteKind
-from pyEDAA.Reports.Unittesting       import TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
-from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass
-from pyEDAA.Reports.Unittesting.JUnit import Testsuite as ju_Testsuite, TestsuiteSummary as ju_TestsuiteSummary
-from pyEDAA.Reports.Unittesting.JUnit import Document as ju_Document
+from pyEDAA.Reports.Unittesting       import UnittestError, TestcaseStatus, TestsuiteKind, \
+                                             TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite
+from pyEDAA.Reports.Unittesting.JUnit import Testcase as ju_Testcase, Testclass as ju_Testclass, \
+                                             Testsuite as ju_Testsuite, TestsuiteSummary as ju_TestsuiteSummary, \
+                                             Document as ju_Document
 
 
 @export
@@ -101,6 +101,9 @@ class Testsuite(ju_Testsuite):
 			ts = tc._parent
 			if ts is None:
 				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
+			elif ts is testsuite:
+				juTestsuite.AddTestcase(Testcase.FromTestcase(tc))
+				continue
 
 			classname = ts._name
 			ts = ts._parent
@@ -136,6 +139,7 @@ class Testsuite(ju_Testsuite):
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
+			testcases=(tc.ToTestcase() for tc in self._testcases.values())
 		)
 
 		for testclass in self._testclasses.values():
@@ -373,6 +377,9 @@ class Document(ju_Document):
 		testsuiteElement.attrib["package"] = testsuite._name
 
 		SubElement(testsuiteElement, "properties")
+
+		for tc in testsuite._testcases.values():
+			self._GenerateTestcase(tc, testsuiteElement)
 
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():

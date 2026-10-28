@@ -34,9 +34,8 @@ The CLI command ``coverage``: read a code coverage report of any supported forma
 """
 from __future__ import annotations
 
-from argparse import Namespace
-from pathlib  import Path
-from typing   import Dict, Type
+from argparse                                 import Namespace
+from typing                                   import Mapping
 
 from pyTooling.Attributes.ArgParse            import CommandHandler, splitFormat
 from pyTooling.Attributes.ArgParse.ValuedFlag import LongValuedFlag
@@ -44,24 +43,7 @@ from pyTooling.Common                         import StringEnum
 from pyTooling.Decorators                     import export
 from pyTooling.MetaClasses                    import ExtendedType
 
-from pyEDAA.Reports.CodeCoverage                                 import CodeCoverageError, CoverageSummary
-from pyEDAA.Reports.CodeCoverage                                 import Document as cc_Document
-from pyEDAA.Reports.CodeCoverage.AldecUCDB                       import Document as AldecUCDBDocument
-from pyEDAA.Reports.CodeCoverage.Cobertura                       import Document as CoberturaDocument
-from pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura   import Document as CoveragePyCoberturaDocument
-from pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura          import Document as NVCCoberturaDocument
-from pyEDAA.Reports.CodeCoverage.CoveragePy                      import Document as CoveragePyDocument
-from pyEDAA.Reports.CodeCoverage.Gcov                            import Document as GcovDocument
-from pyEDAA.Reports.CodeCoverage.GHDL                            import Document as GHDLDocument
-from pyEDAA.Reports.CodeCoverage.JaCoCo                          import Document as JaCoCoDocument
-from pyEDAA.Reports.CodeCoverage.LCOV                            import Document as LCOVDocument
-from pyEDAA.Reports.CodeCoverage.LLVM                            import Document as LLVMDocument
-from pyEDAA.Reports.CodeCoverage.QuestaSim                       import Document as QuestaSimDocument
-from pyEDAA.Reports.CodeCoverage.UCIS                            import Document as UCISDocument
-from pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS                     import Document as PyUCISDocument
-
-
-__all__ = ["INPUT_FORMATS"]
+from pyEDAA.Reports.CodeCoverage              import CodeCoverageError, CoverageSummary, Document as cc_Document
 
 
 @export
@@ -94,24 +76,6 @@ class OutputFormat(StringEnum):
 	DEFAULT = Cobertura      #: A file without format is written as Cobertura XML.
 
 
-#: The document class reading each input format.
-INPUT_FORMATS: Dict[InputFormat, Type[cc_Document]] = {
-	InputFormat.AldecUCDBXML:        AldecUCDBDocument,
-	InputFormat.AnyCobertura:        CoberturaDocument,
-	InputFormat.CoveragePyCobertura: CoveragePyCoberturaDocument,
-	InputFormat.CoveragePyJSON:      CoveragePyDocument,
-	InputFormat.GcovJSON:            GcovDocument,
-	InputFormat.GHDLJSON:            GHDLDocument,
-	InputFormat.JaCoCoXML:           JaCoCoDocument,
-	InputFormat.LCOV:                LCOVDocument,
-	InputFormat.LLVMJSON:            LLVMDocument,
-	InputFormat.NVCCobertura:        NVCCoberturaDocument,
-	InputFormat.PyUCISXML:           PyUCISDocument,
-	InputFormat.QuestaSimXML:        QuestaSimDocument,
-	InputFormat.UCISXML:             UCISDocument
-}
-
-
 @export
 class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 	"""A mixin-class adding the CLI command ``coverage``."""
@@ -131,6 +95,39 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 	)
 	def HandleCoverage(self, args: Namespace) -> None:
 		"""Handle program calls with command ``coverage``."""
+		from pyEDAA.Reports.CodeCoverage.AldecUCDB                     import Document as AldecUCDBDocument
+		from pyEDAA.Reports.CodeCoverage.Cobertura                     import Document as CoberturaDocument
+		from pyEDAA.Reports.CodeCoverage.Cobertura.CoveragePyCobertura import Document as CoveragePyCoberturaDocument
+		from pyEDAA.Reports.CodeCoverage.Cobertura.NVCCobertura        import Document as NVCCoberturaDocument
+		from pyEDAA.Reports.CodeCoverage.CoveragePy                    import Document as CoveragePyDocument
+		from pyEDAA.Reports.CodeCoverage.Gcov                          import Document as GcovDocument
+		from pyEDAA.Reports.CodeCoverage.GHDL                          import Document as GHDLDocument
+		from pyEDAA.Reports.CodeCoverage.JaCoCo                        import Document as JaCoCoDocument
+		from pyEDAA.Reports.CodeCoverage.LCOV                          import Document as LCOVDocument
+		from pyEDAA.Reports.CodeCoverage.LLVM                          import Document as LLVMDocument
+		from pyEDAA.Reports.CodeCoverage.QuestaSim                     import Document as QuestaSimDocument
+		from pyEDAA.Reports.CodeCoverage.UCIS                          import Document as UCISDocument
+		from pyEDAA.Reports.CodeCoverage.UCIS.PyUCIS                   import Document as PyUCISDocument
+
+		inputFormats = {
+			InputFormat.AldecUCDBXML:        AldecUCDBDocument,
+			InputFormat.AnyCobertura:        CoberturaDocument,
+			InputFormat.CoveragePyCobertura: CoveragePyCoberturaDocument,
+			InputFormat.CoveragePyJSON:      CoveragePyDocument,
+			InputFormat.GcovJSON:            GcovDocument,
+			InputFormat.GHDLJSON:            GHDLDocument,
+			InputFormat.JaCoCoXML:           JaCoCoDocument,
+			InputFormat.LCOV:                LCOVDocument,
+			InputFormat.LLVMJSON:            LLVMDocument,
+			InputFormat.NVCCobertura:        NVCCoberturaDocument,
+			InputFormat.PyUCISXML:           PyUCISDocument,
+			InputFormat.QuestaSimXML:        QuestaSimDocument,
+			InputFormat.UCISXML:             UCISDocument
+		}
+		outputFormats = {
+			OutputFormat.Cobertura: CoberturaDocument
+		}
+
 		self._PrintHeadline()
 
 		if args.input is None:
@@ -138,7 +135,7 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 			self.Exit(3)
 
 		try:
-			summary = self._ReadCoverage(args.input)
+			summary = self._ReadCoverage(args.input, inputFormats)
 		except CodeCoverageError as ex:
 			self.WriteFatal(str(ex), immediateExit=False)
 			for note in getattr(ex, "__notes__", ()):
@@ -156,15 +153,16 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 			self.WriteVerbose(f"  {file.Path.as_posix()}: {lines} lines ({file.LineCoverage:.1%})")
 
 		if args.output is not None:
-			self._WriteCoverage(summary, args.output)
+			self._WriteCoverage(summary, args.output, outputFormats)
 
 		self.ExitOnPreviousErrors()
 
-	def _ReadCoverage(self, task: str) -> CoverageSummary:
+	def _ReadCoverage(self, task: str, documentClasses: Mapping[InputFormat, type[cc_Document]]) -> CoverageSummary:
 		"""
 		Read a code coverage report and convert it to the common model.
 
 		:param task:               The option's value: ``[<Format>:]<File>``, e.g. ``Gcov-JSON:main.gcov.json.gz``.
+		:param documentClasses:    The document class reading each input format.
 		:returns:                  The report's summary in the common model.
 		:raises CodeCoverageError: If the format isn't supported. |br|
 		                           The exception notes the supported formats.
@@ -178,18 +176,24 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 			raise error from ex
 
 		self.WriteNormal(f"Reading code coverage report '{file}' ({inputFormat}) ...")
-		document = INPUT_FORMATS[inputFormat](file, analyzeAndConvert=True)
+		document = documentClasses[inputFormat](file, analyzeAndConvert=True)
 		return document.ToCoverageSummary()
 
-	def _WriteCoverage(self, summary: CoverageSummary, task: str) -> None:
+	def _WriteCoverage(
+		self,
+		summary: CoverageSummary,
+		task: str,
+		documentClasses: Mapping[OutputFormat, type[cc_Document]]
+	) -> None:
 		"""
 		Write the common model as a code coverage report.
 
-		:param summary: The summary to write.
-		:param task:    The option's value: ``[<Format>:]<File>``, e.g. ``Cobertura:coverage.xml``.
+		:param summary:         The summary to write.
+		:param task:            The option's value: ``[<Format>:]<File>``, e.g. ``Cobertura:coverage.xml``.
+		:param documentClasses: The document class writing each output format.
 		"""
 		try:
-			_, file = splitFormat(task, OutputFormat)
+			outputFormat, file = splitFormat(task, OutputFormat)
 		except ValueError:
 			self.WriteError(f"Unsupported code coverage format for output: '{task}'.")
 			formats = ", ".join(OutputFormat)
@@ -198,6 +202,6 @@ class CoverageHandlers(metaclass=ExtendedType, mixin=True):
 
 		self.WriteNormal(f"Writing Cobertura XML report '{file}' ...")
 		try:
-			CoberturaDocument.FromCoverageSummary(file, summary).Write(overwrite=True, regenerate=True)
+			documentClasses[outputFormat].FromCoverageSummary(file, summary).Write(overwrite=True, regenerate=True)
 		except CodeCoverageError as ex:
 			self.WriteError(str(ex))

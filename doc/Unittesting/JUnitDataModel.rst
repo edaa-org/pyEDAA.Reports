@@ -16,7 +16,8 @@ JUnit Data Model
             :ref:`UNITTEST/SpecificDataModel/JUnit/Testcase`
             ^^^
             A :dfn:`test case` is the leaf-element in the test entity hierarchy and describes an individual test run.
-            Test cases are grouped by test classes.
+            Test cases are grouped by test classes; a test case without a class (empty ``classname``) belongs to its
+            test suite directly.
 
          .. grid-item-card::
             :columns: 6
@@ -31,7 +32,8 @@ JUnit Data Model
 
             :ref:`UNITTEST/SpecificDataModel/JUnit/Testsuite`
             ^^^
-            A :dfn:`test suite` is a group of test classes. Test suites are grouped by a test suite summary.
+            A :dfn:`test suite` is a group of test classes and of test cases without a class. Test suites are grouped
+            by a test suite summary.
 
          .. grid-item-card::
             :columns: 6
@@ -713,6 +715,11 @@ pyTest JUnit
 
       The pyTest JUnit format written by `pyTest <https://github.com/pytest-dev/pytest>`__ uses ``<testsuites>`` as a
       root element.
+
+      A test module skipped while collecting (``pytest.skip(..., allow_module_level=True)``) is written as a
+      ``<testcase>`` with an empty ``classname``, named by the module, e.g. ``tests.unit.GHDLInDocker``. It is a test
+      case without a class, contained in the test suite directly - also in the unified data model - and counted like
+      any other skipped test case.
 
       A report is validated against :ref:`PyTest-JUnit.xsd <SCHEMAS/PyTest-JUnit>`.
 

@@ -90,8 +90,8 @@ from io                                            import BytesIO
 from pathlib                                       import Path
 from typing                                        import ClassVar, Generator, Optional as Nullable
 
-from lxml.etree                                    import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError
-from lxml.etree                                    import _Element, _ElementTree, parse
+from lxml.etree                                    import XMLParser, XMLSchema, XMLSchemaParseError, XMLSyntaxError, \
+                                                          _Element, _ElementTree, parse
 from pyTooling.Common                              import getFullyQualifiedName, getResourceFile, StringEnum
 from pyTooling.Decorators                          import export, readonly
 from pyTooling.Exceptions                          import ToolingException
@@ -99,9 +99,9 @@ from pyTooling.MetaClasses                         import ExtendedType
 from pyTooling.Stopwatch                           import Stopwatch
 
 from pyEDAA.Reports                                import Resources
-from pyEDAA.Reports.CodeCoverage                   import Branch as cc_Branch, CodeCoverageError, CoverageSummary
-from pyEDAA.Reports.CodeCoverage                   import Document as cc_Document, Line as cc_Line, LineCoverageStatus
-from pyEDAA.Reports.CodeCoverage                   import Module as cc_Module
+from pyEDAA.Reports.CodeCoverage                   import Branch as cc_Branch, CodeCoverageError, CoverageSummary, \
+                                                          Document as cc_Document, Line as cc_Line, \
+                                                          LineCoverageStatus, Module as cc_Module
 from pyEDAA.Reports.CodeCoverage.UCIS.Blocks       import Statement
 from pyEDAA.Reports.CodeCoverage.UCIS.Branches     import BranchStatement
 from pyEDAA.Reports.CodeCoverage.UCIS.HistoryNodes import HistoryNode

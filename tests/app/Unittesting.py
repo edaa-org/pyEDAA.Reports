@@ -144,6 +144,36 @@ class UnittestCommand(ApplicationTestcase):
 		self.assertIn("can not be written.", result.stdout)
 		self.assertNotIn("Output written to", result.stdout)
 
+	def test_ReduceDepth_TestcaseWithoutClass(self) -> None:
+		"""pytest's skipped test module (empty ``classname``) stays in the merged report after reducing the depth."""
+		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+		inputFile = OUTPUT_DIRECTORY / "module-skip.xml"
+		outputFile = OUTPUT_DIRECTORY / "module-skip.merged.xml"
+		with inputFile.open("w", encoding="utf-8") as file:
+			file.write(dedent("""\
+				<?xml version="1.0" encoding="utf-8"?>
+				<testsuites name="pytest tests">
+				  <testsuite name="pytest" errors="0" failures="0" skipped="1" tests="2" time="0.002"
+				             timestamp="2024-10-06T11:28:52.276577+00:00" hostname="localhost">
+				    <testcase classname="" name="tests.unit.Skipped" time="0.000">
+				      <skipped message="collection skipped">Skipped: needs a tool.</skipped>
+				    </testcase>
+				    <testcase classname="tests.unit.Module.Cls" name="test_A" time="0.001"/>
+				  </testsuite>
+				</testsuites>
+				"""))
+
+		result = self.RunEntrypoint(
+			"unittest", f"--merge=pyTest-JUnit:{inputFile}", "--pytest=rewrite-dunder-init;reduce-depth:pytest.tests.unit",
+			f"--output=pyTest-JUnit:{outputFile}", timeout=60.0
+		)
+
+		self.assertExitCode(result, 0)
+		content = outputFile.read_text(encoding="utf-8")
+		self.assertIn('tests="2"', content)
+		self.assertIn('skipped="1"', content)
+		self.assertIn('<testcase classname="" name="tests.unit.Skipped"', content)
+
 	def test_RewriteDunderInit_Duplicate(self) -> None:
 		"""A test class in a package's ``__init__`` and beside it: the rewrite raises, the program exits with code 1."""
 		OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
