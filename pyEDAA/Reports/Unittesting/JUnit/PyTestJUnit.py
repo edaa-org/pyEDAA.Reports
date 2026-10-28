@@ -103,6 +103,9 @@ class Testsuite(ju_Testsuite):
 			ts = tc._parent
 			if ts is None:
 				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
+			elif ts is testsuite:
+				juTestsuite.AddTestcase(Testcase.FromTestcase(tc))
+				continue
 
 			classname = ts._name
 			ts = ts._parent
@@ -317,6 +320,9 @@ class Document(ju_Document):
 		# 	testsuiteElement.attrib["assertions"] = f"{testsuite._assertionCount}"
 		if testsuite._hostname is not None:
 			testsuiteElement.attrib["hostname"] = testsuite._hostname
+
+		for tc in testsuite._testcases.values():
+			self._GenerateTestcase(tc, testsuiteElement)
 
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():

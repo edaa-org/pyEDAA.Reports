@@ -335,11 +335,16 @@ class UnittestingHandlers(metaclass=ExtendedType, mixin=True):
 			ts._parent = None
 			ts._kind = TestsuiteKind.Logical
 			testsuiteSummary.AddTestsuite(ts)
+		suite._testsuites.clear()
 
 		self.WriteDebug("    Deleting empty testsuites ...")
 		for clean in cleanups:
 			suite = clean
 			while suite is not testsuiteSummary:
+				if len(suite._testsuites) > 0 or len(suite._testcases) > 0:
+					self.WriteDebug(f"      keeping '{suite._name}': not empty")
+					break
+
 				name = suite._name
 				suite = suite._parent
 				if name in suite._testsuites:

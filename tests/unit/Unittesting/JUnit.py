@@ -30,6 +30,7 @@
 #
 from datetime import timedelta, datetime
 from pathlib  import Path
+from textwrap import dedent
 from unittest import TestCase as py_TestCase, mock
 
 from lxml.etree                       import XMLSchemaParseError
@@ -37,8 +38,8 @@ from lxml.etree                       import XMLSchemaParseError
 from pyEDAA.Reports.Unittesting       import TestcaseStatus, TestsuiteStatus, TestsuiteKind, \
                                              TestsuiteSummary as ut_TestsuiteSummary, Testsuite as ut_Testsuite, \
                                              Testcase as ut_Testcase
-from pyEDAA.Reports.Unittesting.JUnit import UnittestError, Testcase, Testclass, Testsuite, TestsuiteSummary, \
-                                             Document as JUnitDocument
+from pyEDAA.Reports.Unittesting.JUnit import UnittestError, AlreadyInTestsuiteError, DuplicateTestcaseError, Testcase, \
+                                             Testclass, Testsuite, TestsuiteSummary, Document as JUnitDocument
 
 from .                               import OUTPUT_DIRECTORY
 
@@ -235,6 +236,117 @@ class TestclassesInTestsuite(py_TestCase):
 			self.assertEqual(ts, testcase.Parent)
 
 
+class TestcasesInTestsuite(py_TestCase):
+	"""Test cases without a class (empty ``classname``) are contained in a test suite directly."""
+
+	def test_TestcaseConstructor(self) -> None:
+		ts = Testsuite("ts")
+		tc1 = Testcase("tc1", parent=ts)
+		tc2 = Testcase("tc2", parent=ts)
+
+		self.assertTupleEqual((tc1, tc2), tuple(ts.Testcases.values()))
+		self.assertEqual(2, ts.TestcaseCount)
+		self.assertEqual(0, ts.TestclassCount)
+		self.assertIs(ts, tc1.Parent)
+		self.assertEqual("", tc1.Classname)
+
+	def test_TestsuiteConstructor(self) -> None:
+		tc1 = Testcase("tc1")
+		tc2 = Testcase("tc2")
+
+		ts = Testsuite("ts", testcases=(tc1, tc2))
+		self.assertTupleEqual((tc1, tc2), tuple(ts.Testcases.values()))
+		for testcase in (tc1, tc2):
+			self.assertIs(ts, testcase.Parent)
+
+	def test_AddTestcase(self) -> None:
+		tc1 = Testcase("tc1")
+		tc2 = Testcase("tc2")
+
+		ts = Testsuite("ts")
+		ts.AddTestcase(tc1)
+		ts.AddTestcases((tc2,))
+
+		self.assertTupleEqual((tc1, tc2), tuple(ts.Testcases.values()))
+		for testcase in (tc1, tc2):
+			self.assertIs(ts, testcase.Parent)
+
+	def test_AddTestcase_AlreadyInHierarchy(self) -> None:
+		ts = Testsuite("ts")
+		tc = Testcase("tc", parent=Testclass("cls"))
+
+		with self.assertRaises(AlreadyInTestsuiteError) as context:
+			ts.AddTestcase(tc)
+
+		self.assertEqual("Testcase 'tc' is already part of a testsuite hierarchy.", str(context.exception))
+
+	def test_AddTestcase_Duplicate(self) -> None:
+		ts = Testsuite("ts")
+		Testcase("tc", parent=ts)
+
+		with self.assertRaises(DuplicateTestcaseError) as context:
+			ts.AddTestcase(Testcase("tc"))
+
+		self.assertEqual("Testsuite already contains a testcase with same name 'tc'.", str(context.exception))
+
+	def test_AddTestcase_None(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			Testsuite("ts").AddTestcase(None)
+
+		self.assertEqual("Parameter 'testcase' is None.", str(context.exception))
+
+	def test_AddTestcase_WrongType(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			Testsuite("ts").AddTestcase(Testclass("cls"))
+
+		self.assertEqual("Parameter 'testcase' is not of type 'Testcase'.", str(context.exception))
+
+	def test_AddTestcases_None(self) -> None:
+		with self.assertRaises(ValueError) as context:
+			Testsuite("ts").AddTestcases(None)
+
+		self.assertEqual("Parameter 'testcases' is None.", str(context.exception))
+
+	def test_AddTestcases_NotIterable(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			Testsuite("ts").AddTestcases(1)
+
+		self.assertEqual("Parameter 'testcases' is not iterable.", str(context.exception))
+
+	def test_TestsuiteConstructor_NotIterable(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Testsuite("ts", testcases=1)
+
+		self.assertEqual("Parameter 'testcases' is not iterable.", str(context.exception))
+
+	def test_TestsuiteConstructor_WrongElementType(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Testsuite("ts", testcases=(Testclass("cls"),))
+
+		self.assertEqual("Element of parameter 'testcases' is not of type 'Testcase'.", str(context.exception))
+
+	def test_Parent_WrongType(self) -> None:
+		with self.assertRaises(TypeError) as context:
+			_ = Testcase("tc", parent=TestsuiteSummary("tss"))
+
+		self.assertEqual("Parameter 'parent' is not of type 'Testclass' or 'Testsuite'.", str(context.exception))
+
+	def test_Aggregate(self) -> None:
+		"""Counters and assertions include the test cases without a class."""
+		ts = Testsuite("ts")
+		Testcase("tc1", status=TestcaseStatus.Skipped, assertionCount=2, parent=ts)
+		cls = Testclass("cls", parent=ts)
+		Testcase("tc2", status=TestcaseStatus.Passed, assertionCount=3, parent=cls)
+
+		tests, skipped, errored, weak, failed, passed = ts.Aggregate()
+
+		self.assertEqual(2, tests)
+		self.assertEqual(1, skipped)
+		self.assertEqual(1, passed)
+		self.assertEqual(2, ts.TestcaseCount)
+		self.assertEqual(5, ts.AssertionCount)
+
+
 class TestsuiteInTestsuiteSummary(py_TestCase):
 	def test_TestsuiteConstructor(self) -> None:
 		tss = TestsuiteSummary("tss")
@@ -407,6 +519,24 @@ class Conversion(py_TestCase):
 
 		self.assertEqual("ts", juTS.Name)
 
+	def test_TestsuiteToTestsuite_TestcaseWithoutClass(self) -> None:
+		"""A test case without a class belongs to the logical test suite of the unified model."""
+		juTS = Testsuite("ts")
+		Testcase("tests.unit.Module", status=TestcaseStatus.Skipped, parent=juTS)
+		ts = juTS.ToTestsuite()
+
+		self.assertIn("tests.unit.Module", ts.Testcases)
+		self.assertEqual(0, len(ts.Testsuites))
+
+	def test_FromTestsuite_TestcaseWithoutClass(self) -> None:
+		"""A test case directly in the converted test suite becomes a test case without a class."""
+		ts = ut_Testsuite("ts")
+		ut_Testcase("tests.unit.Module", status=TestcaseStatus.Skipped, parent=ts)
+		juTS = Testsuite.FromTestsuite(ts)
+
+		self.assertIn("tests.unit.Module", juTS.Testcases)
+		self.assertEqual(0, juTS.TestclassCount)
+
 	def test_FromTestsuiteSummary(self) -> None:
 		tss = ut_TestsuiteSummary("tss")
 		juTSS = TestsuiteSummary.FromTestsuiteSummary(tss)
@@ -480,6 +610,39 @@ class Document(py_TestCase):
 		doc = JUnitDocument(junitExampleFile, analyzeAndConvert=True)
 
 		doc.Write(self._outputDirectory / "ReadWrite.xml")
+
+	def test_TestcaseWithoutClass(self) -> None:
+		"""pytest writes a skipped test module with an empty ``classname``; it's read and written back as such."""
+		inputFile = self._outputDirectory / "TestcaseWithoutClass.xml"
+		with inputFile.open("w", encoding="utf-8") as file:
+			file.write(dedent("""\
+				<?xml version="1.0" encoding="utf-8"?>
+				<testsuites name="pytest tests">
+				  <testsuite name="pytest" errors="0" failures="0" skipped="1" tests="2" time="0.002"
+				             timestamp="2024-10-06T11:28:52.276577+00:00" hostname="localhost">
+				    <testcase classname="" name="tests.unit.Skipped" time="0.000">
+				      <skipped message="collection skipped">Skipped: needs a tool.</skipped>
+				    </testcase>
+				    <testcase classname="tests.unit.Cls" name="test_A" time="0.001"/>
+				  </testsuite>
+				</testsuites>
+				"""))
+
+		doc = JUnitDocument(inputFile, analyzeAndConvert=True)
+		doc.Aggregate()
+
+		testsuite = doc.Testsuites["pytest"]
+		self.assertIn("tests.unit.Skipped", testsuite.Testcases)
+		self.assertEqual(TestcaseStatus.Skipped, testsuite.Testcases["tests.unit.Skipped"].Status)
+		self.assertEqual(2, doc.TestcaseCount)
+		self.assertEqual(1, doc.Skipped)
+
+		summary = doc.ToTestsuiteSummary()
+		self.assertIn("tests.unit.Skipped", summary.Testsuites["pytest"].Testcases)
+
+		outputFile = self._outputDirectory / "TestcaseWithoutClass.written.xml"
+		doc.Write(outputFile, regenerate=True)
+		self.assertIn('<testcase classname="" name="tests.unit.Skipped"', outputFile.read_text(encoding="utf-8"))
 
 	def test_Generate(self) -> None:
 		print()
