@@ -34,12 +34,16 @@ Reading a report, writing it out again and reading the result: the dialects have
 A round trip is where a writer and a reader that disagree about the format show up - the merge pipelines in CI do
 exactly this, twice.
 """
+from datetime import timedelta
 from typing   import ClassVar
 from unittest import TestCase as ut_TestCase
 
-from pyTooling.Decorators import readonly
+from pyTooling.Decorators       import readonly
 
-from . import DIALECTS, OUTPUT_DIRECTORY, Dialect, collectTestcaseNames, countTestcases, readReference, writeAs
+from pyEDAA.Reports.Unittesting import Testcase as ut_Testcase, TestcaseStatus
+
+from .                          import DIALECTS, OUTPUT_DIRECTORY, Dialect, collectTestcaseNames, countTestcases, \
+                                       readReference, writeAs
 
 
 class RoundTripMixin:
@@ -125,6 +129,26 @@ class RoundTripMixin:
 			with self.subTest(file=referenceFile.name):
 				summary, _, rereadSummary = self._roundTrip(referenceFile)
 				self.assertEqual(collectTestcaseNames(summary), collectTestcaseNames(rereadSummary))
+
+	def test_TestcaseWithoutClass(self) -> None:
+		"""A test case directly in a test suite (empty ``classname``, pytest's skipped module) is written and read back."""
+		referenceFile = self.Dialect.ReferenceFiles[0]
+		summary = readReference(self.Dialect, referenceFile)
+		testsuite = next(iter(summary._testsuites.values()))
+		ut_Testcase("tests.unit.Skipped", testDuration=timedelta(), status=TestcaseStatus.Skipped, parent=testsuite)
+		summary.Aggregate()
+
+		outputFile = writeAs(
+			self.Dialect, summary, OUTPUT_DIRECTORY / self.Dialect.Name / self._testMethodName / referenceFile.name
+		)
+		self.Dialect.Schema().validate(str(outputFile))
+		rereadSummary = readReference(self.Dialect, outputFile)
+
+		rereadTestsuite = rereadSummary._testsuites[testsuite._name]
+		self.assertIn("tests.unit.Skipped", rereadTestsuite._testcases)
+		self.assertIs(TestcaseStatus.Skipped, rereadTestsuite._testcases["tests.unit.Skipped"]._status)
+		self.assertEqual(countTestcases(summary), countTestcases(rereadSummary))
+		self.assertEqual(summary.Skipped, rereadSummary.Skipped)
 
 	def test_HostnameSurvives(self) -> None:
 		for referenceFile in self.Dialect.ReferenceFiles:

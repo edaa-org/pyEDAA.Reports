@@ -97,6 +97,9 @@ class Testsuite(ju_Testsuite):
 			ts = tc._parent
 			if ts is None:
 				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
+			elif ts is testsuite:
+				juTestsuite.AddTestcase(Testcase.FromTestcase(tc))
+				continue
 
 			classname = ts._name
 			ts = ts._parent
@@ -130,7 +133,8 @@ class Testsuite(ju_Testsuite):
 			startTime=self._startTime,
 			totalDuration=self._duration,
 			status=self._status,
-			testsuites=(testclass.ToTestsuite() for testclass in self._testclasses.values())
+			testsuites=(testclass.ToTestsuite() for testclass in self._testclasses.values()),
+			testcases=(tc.ToTestcase() for tc in self._testcases.values())
 		)
 
 
@@ -344,8 +348,11 @@ class Document(ju_Document):
 			duration = sum(
 				(
 					testcase._duration
-					for testclass in testsuite._testclasses.values()
-					for testcase in testclass._testcases.values()
+					for testcases in (
+						testsuite._testcases,
+						*(testclass._testcases for testclass in testsuite._testclasses.values())
+					)
+					for testcase in testcases.values()
 					if testcase._duration is not None
 				),
 				timedelta()
@@ -353,6 +360,9 @@ class Document(ju_Document):
 		testsuiteElement.attrib["time"] = f"{duration.total_seconds():.6f}"
 		if testsuite._startTime is not None:
 			testsuiteElement.attrib["timestamp"] = f"{testsuite._startTime.isoformat()}"
+
+		for tc in testsuite._testcases.values():
+			self._GenerateTestcase(tc, testsuiteElement)
 
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():

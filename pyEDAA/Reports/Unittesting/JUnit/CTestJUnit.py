@@ -104,6 +104,9 @@ class Testsuite(ju_Testsuite):
 			ts = tc._parent
 			if ts is None:
 				raise UnittestError(f"Testcase '{tc._name}' is not part of a hierarchy.")
+			elif ts is testsuite:
+				juTestsuite.AddTestcase(Testcase.FromTestcase(tc))
+				continue
 
 			classname = ts._name
 			ts = ts._parent
@@ -306,6 +309,9 @@ class Document(ju_Document):
 		rootElement.attrib["hostname"] = testsuite._hostname if testsuite._hostname is not None else "unknownhost"
 
 		self._xmlDocument = ElementTree(rootElement)
+
+		for tc in testsuite._testcases.values():
+			self._GenerateTestcase(tc, rootElement)
 
 		for testclass in testsuite._testclasses.values():
 			for tc in testclass._testcases.values():
