@@ -6,13 +6,14 @@ News
 See :gh:`pyEDAA.Reports Release Pages <edaa-org/pyEDAA.Reports/releases>` for detail release notes on every release.
 
 
-Version 0.20 (2026)
-*******************
+Version 1.0 (2026)
+******************
 
-.. topic:: :gh:`v0.20.0 - unreleased <edaa-org/pyEDAA.Reports/releases/v0.20.0>`
+.. topic:: :gh:`v1.0.0 - unreleased <edaa-org/pyEDAA.Reports/releases/v1.0.0>`
 
-   Since v0.19.1, the package grew from 74 to 359 classes in 15 to 59 modules, and the testsuite from 132 to 1110
-   test methods. pyEDAA.Reports requires pyTooling 10.
+   Since v0.19.1, the package grew from 74 to 372 classes in 15 to 59 modules, and the testsuite from 161 to 1256
+   tests. v1.0.0 is the first stable release (development status *Production/Stable*). pyEDAA.Reports requires
+   pyTooling 10.1.
 
    .. rubric:: New Features
 
@@ -123,6 +124,22 @@ Version 0.20 (2026)
      :class:`~pyEDAA.Reports.RiskManagement.Risk` with probability, impact and state; implications and mitigations,
      shared by risks; links between risks of a kind; a risk's score and level, owner and next review.
 
+   * :mod:`pyEDAA.Reports.FunctionalCoverage` is a new tool-neutral data model of functional coverage, after
+     SystemVerilog covergroups and the Accellera UCIS standard: a
+     :class:`~pyEDAA.Reports.FunctionalCoverage.FunctionalCoverageReport` with
+     :class:`~pyEDAA.Reports.FunctionalCoverage.Covergroup`\ s and their
+     :class:`~pyEDAA.Reports.FunctionalCoverage.Coverpoint`\ s and
+     :class:`~pyEDAA.Reports.FunctionalCoverage.Cross`\ es, each holding bins of a
+     :class:`~pyEDAA.Reports.FunctionalCoverage.BinKind` with a count and an at-least count over
+     :class:`~pyEDAA.Reports.FunctionalCoverage.ValueRange`\ s; a weight and a goal per element, as
+     SystemVerilog's ``option.weight`` and ``option.goal`` or OSVVM's ``CovWeight`` and ``Goal``.
+     :meth:`FunctionalCoverageReport.Aggregate() <pyEDAA.Reports.FunctionalCoverage.FunctionalCoverageReport.Aggregate>`
+     computes the bin and hit counters and two ratios:
+     :attr:`~pyEDAA.Reports.FunctionalCoverage.BaseWithCoverage.BinCoverage` (SystemVerilog, UCIS) and
+     :attr:`~pyEDAA.Reports.FunctionalCoverage.BaseWithCoverage.HitCoverage` (OSVVM).
+     :class:`~pyEDAA.Reports.FunctionalCoverage.Document` is the abstract base of a functional coverage format
+     reader, as in the code coverage model.
+
    * :mod:`pyEDAA.Reports` holds what the data models share: :class:`~pyEDAA.Reports.Person` is a real person - user
      ID, name, e-mail address.
    * The data models' errors derive from pyTooling's common bases :exc:`~pyTooling.Exceptions.DuplicateElementError`,
@@ -142,6 +159,13 @@ Version 0.20 (2026)
    * :mod:`pyEDAA.Reports.Unittesting.JUnit`: the reader keeps the ``message`` attribute and the text of
      ``<failure>``, ``<error>`` and ``<skipped>``, and the text of ``<system-out>`` and ``<system-err>``, for every
      dialect; the writers emit them again.
+
+   * :mod:`pyEDAA.Reports.Unittesting.JUnit` and its dialects: a test case without a class (empty ``classname``)
+     belongs to its :class:`~pyEDAA.Reports.Unittesting.JUnit.Testsuite` directly - new parameter ``testcases``,
+     property :attr:`~pyEDAA.Reports.Unittesting.JUnit.Testsuite.Testcases`, methods
+     :meth:`~pyEDAA.Reports.Unittesting.JUnit.Testsuite.AddTestcase` and
+     :meth:`~pyEDAA.Reports.Unittesting.JUnit.Testsuite.AddTestcases`. Every dialect reads, converts and writes it
+     back with ``classname=""``.
 
    * New JUnit dialects, each read, validated by a new strict schema, converted and written, and available in
      :program:`pyedaa-reports` ``unittest``:
@@ -175,7 +199,7 @@ Version 0.20 (2026)
      :meth:`~pyEDAA.Reports.Unittesting.Document.Analyze` / :meth:`~pyEDAA.Reports.Unittesting.Document.Convert` ran,
      instead of ``timedelta(seconds=-1)``. Test for ``None`` instead of a negative duration.
 
-   * ⚠️ pyEDAA.Reports requires pyTooling 10: ``pyTooling[terminal] >= 10.0.0rc2, < 11.0``. The JUnit dialects
+   * ⚠️ pyEDAA.Reports requires pyTooling 10.1: ``pyTooling[terminal] >= 10.1.0, < 11.0``. The JUnit dialects
      merge their doc-strings with ``DocStringMergeStrategy.BaseLast``, as pyTooling 10 replaced
      ``InheritDocString``'s ``merge``.
 
@@ -231,6 +255,13 @@ Version 0.20 (2026)
      wrapper of docstr_coverage, are removed. Use :class:`~pyEDAA.Reports.DocumentationCoverage.Python.Analyzer`,
      which reads the source code itself.
 
+   * ⚠️ :mod:`pyEDAA.Reports.CLI`: ``Application.HeadLine`` is renamed to
+     :attr:`Application.HEADLINE <pyEDAA.Reports.CLI.Application.HEADLINE>`, as pyTooling 10 spells class constants
+     in upper case. Rename the attribute at every use; there is no alias.
+
+   * ⚠️ :mod:`pyEDAA.Reports.CLI`: ``Application.ISSUE_TRACKER_URL`` is removed, as pyTooling 10 removed
+     ``TerminalApplication.ISSUE_TRACKER_URL``. Read ``pyEDAA.Reports.__issue_tracker_url__`` instead.
+
    .. rubric:: Changes
 
    * ⚠️ :mod:`pyEDAA.Reports.DocumentationCoverage`: the class-per-construct model is replaced by the
@@ -254,8 +285,15 @@ Version 0.20 (2026)
      ``standardError`` follow ``keyValuePairs`` in :class:`~pyEDAA.Reports.Unittesting.Testcase`'s.
    * ⚠️ ``parent`` is a keyword-only parameter in every constructor taking one. A positional ``parent`` raises
      :exc:`TypeError` instead of landing in another parameter.
-   * ⚠️ Requirements: ``pyTooling[terminal] >= 10.0.0rc2, < 11.0`` instead of ``>= 9.0, < 10.0``. The build
-     requires ``pyTooling >= 10.0.0rc2, < 11.0``: pip ignores pre-releases unless a requirement names one.
+   * ⚠️ Requirements: ``pyTooling[terminal] >= 10.1.0, < 11.0`` instead of ``>= 9.0, < 10.0``. The build
+     requires ``setuptools >= 84.2.1`` and ``pyTooling >= 10.1.0, < 11.0``.
+   * ⚠️ :mod:`pyEDAA.Reports.CLI`: ``Application.HeadLine`` is renamed to
+     :attr:`Application.HEADLINE <pyEDAA.Reports.CLI.Application.HEADLINE>`, as ``TerminalApplication.HEADLINE`` in
+     pyTooling 10; :func:`~pyEDAA.Reports.CLI.main` formats its error messages with the palette
+     ``Application.FOREGROUND``.
+   * ⚠️ :mod:`pyEDAA.Reports.CLI`: :attr:`Application.DUNDER_MODULE <pyEDAA.Reports.CLI.Application.DUNDER_MODULE>`
+     is the package :mod:`pyEDAA.Reports`, whose ``__issue_tracker_url__`` the exception printers read;
+     ``ISSUE_TRACKER_URL`` is gone, as pyTooling 10's ``TerminalApplication`` expects.
    * :mod:`pyEDAA.Reports.CLI`: :func:`~pyEDAA.Reports.CLI.main` catches :exc:`~pyEDAA.Reports.ReportException`
      and reports it. Before, every error of this package but ``UnittestException`` was announced as *"an unknown or
      unhandled exception"* with an invitation to file a bug.
@@ -295,15 +333,15 @@ Version 0.20 (2026)
    * The ``test`` extra describes every test level: :file:`tests/requirements.txt` includes
      :file:`tests/app/requirements.txt`.
    * Python 3.15 is supported and listed in the classifiers.
-   * The report readers store a measured duration as a :class:`~datetime.timedelta`, as pyTooling's
-     :class:`~pyTooling.Stopwatch.Stopwatch` hands it out from pyTooling 10.0.0rc4 on; ``AnalysisDuration`` and
-     ``ModelConversionDuration`` return it unchanged instead of converting seconds. ⚠️ A duration not measured yet
-     is ``None`` instead of a negative :class:`~datetime.timedelta`.
-   * The data models - :mod:`~pyEDAA.Reports.Requirements`, :mod:`~pyEDAA.Reports.RiskManagement` and
-     :class:`~pyEDAA.Reports.Person` - attach key-value pairs with pyTooling's
-     :class:`~pyTooling.DataModel.KeyValuePairsMixin`, accessed with the dictionary syntax; a key is any hashable
-     value.
-   * Dependencies: ``wheel ~= 0.48.0``, ``lxml >= 6.1.3``, ``Coverage ~= 7.16``, ``mypy ~= 2.4``.
+   * The report readers store a measured duration as a :class:`~datetime.timedelta`, as pyTooling 10's
+     :class:`~pyTooling.Stopwatch.Stopwatch` hands it out; ``AnalysisDuration`` and ``ModelConversionDuration``
+     return it unchanged instead of converting seconds. ⚠️ A duration not measured yet is ``None`` instead of a
+     negative :class:`~datetime.timedelta`.
+   * The data models - :mod:`~pyEDAA.Reports.Requirements`, :mod:`~pyEDAA.Reports.RiskManagement`,
+     :mod:`~pyEDAA.Reports.FunctionalCoverage` and :class:`~pyEDAA.Reports.Person` - attach key-value pairs with
+     pyTooling's :class:`~pyTooling.DataModel.KeyValuePairsMixin`, accessed with the dictionary syntax; a key is any
+     hashable value.
+   * Dependencies: ``wheel ~= 0.48.0``, ``lxml >= 6.1.3``, ``Coverage ~= 7.17``, ``mypy ~= 2.4``.
    * ``ruamel.yaml`` isn't a requirement any more: no module imports it since the OSVVM YAML reader moved to
      pyEDAA.OSVVM. The documentation requires it, for the overrides file of the dependency tables.
 
@@ -320,6 +358,9 @@ Version 0.20 (2026)
        root element.
      * ``Document.Write()`` and the dialects' ``Write()`` truncated the file before serializing - a serialization
        error left an existing report empty. The document is serialized before the file is opened now.
+     * A ``<testcase>`` with an empty ``classname`` raised ``ValueError: Parameter 'name' is empty.``, so reading or
+       merging the report failed. pytest writes it for a test module skipped while collecting.
+     * ``Testsuite.Iterate()`` yielded the test classes for ``IncludeTestcases`` instead of the test cases.
 
    * :mod:`pyEDAA.Reports.Unittesting`:
 
@@ -339,6 +380,8 @@ Version 0.20 (2026)
    * :program:`pyedaa-reports` ``unittest``: an unreadable or missing input file crashed with a :exc:`TypeError`, a
      fatal error ended with exit code 0, an absolute file pattern raised :exc:`NotImplementedError`, and a failed
      write was announced as written. They end with a message and a non-zero exit code now.
+   * ``pyedaa-reports unittest --pytest=reduce-depth:<path>`` deleted the test suites along the path whether empty or
+     not; a test case directly in one of them was dropped without a message.
 
    .. rubric:: Documentation
 
@@ -349,12 +392,15 @@ Version 0.20 (2026)
      write. A new page explains why pyEDAA.Reports reads UCIS XML itself.
    * New section :ref:`SCHEMAS`: an overview and 26 schema pages, each with a download link, a validation command and
      the source.
-   * New toctree *Data Models* with the pages :ref:`REQ` and :ref:`RISK`.
+   * New toctree *Data Models* with the pages :ref:`FUNCCOV`, :ref:`REQ` and :ref:`RISK`. :ref:`FUNCCOV` describes
+     weights and goals and both coverage ratios, with an example.
    * :ref:`DOCCOV` describes the language-neutral data model and the Python reader.
-   * The JUnit data model has sections on the cargo-nextest, go-junit-report and JunitXml.TestLogger dialects. New
-     page on the Open Test Reporting data model.
+   * The JUnit data model has sections on the cargo-nextest, go-junit-report and JunitXml.TestLogger dialects, and on
+     the test case without a class, as pytest writes it for a skipped test module. New page on the Open Test
+     Reporting data model.
    * The :ref:`CLI reference <CLI>` renders the commands and options of :program:`pyedaa-reports`.
    * An optional parameter's doc-string description opens with *Optional,*.
+   * A ``:raises:`` field names one parameter, and the fields follow the parameter order of the signature.
    * The section labels of the dependency page follow the ``DEP/`` hierarchy.
 
    .. rubric:: Unit Tests
@@ -363,9 +409,21 @@ Version 0.20 (2026)
      reports are test fixtures.
    * The unit and application tests run with pytest-xdist workers.
 
+.. topic:: :gh:`v0.20.0-rc4 - 22.10.2026 <edaa-org/pyEDAA.Reports/releases/v0.20.0-rc4>`
+
+   Release candidate published on PyPI; its changes are listed in v1.0.0.
+
+.. topic:: :gh:`v0.20.0-rc3 - 20.10.2026 <edaa-org/pyEDAA.Reports/releases/v0.20.0-rc3>`
+
+   Release candidate published on PyPI; its changes are listed in v1.0.0.
+
+.. topic:: :gh:`v0.20.0-rc2 - 18.10.2026 <edaa-org/pyEDAA.Reports/releases/v0.20.0-rc2>`
+
+   Release candidate published on PyPI; its changes are listed in v1.0.0.
+
 .. topic:: :gh:`v0.20.0-rc1 - 17.10.2026 <edaa-org/pyEDAA.Reports/releases/v0.20.0-rc1>`
 
-   Release candidate published on PyPI; its changes are listed in v0.20.0.
+   Release candidate published on PyPI; its changes are listed in v1.0.0.
 
 
 Version 0.17.3 - 0.19.1 (2026)
