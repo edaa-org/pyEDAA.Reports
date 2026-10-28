@@ -51,7 +51,7 @@ with WarningCollector() as warnings:
 			classifiers=list(DEFAULT_CLASSIFIERS) + [
 				"Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
 			],
-			developmentStatus="beta",
+			developmentStatus="stable",
 			pythonVersions=("3.11", "3.12", "3.13", "3.14", "3.15"),
 			consoleScripts={
 				"pyedaa-reports": "pyEDAA.Reports.CLI:main"
