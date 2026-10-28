@@ -6,10 +6,10 @@ News
 See :gh:`pyEDAA.Reports Release Pages <edaa-org/pyEDAA.Reports/releases>` for detail release notes on every release.
 
 
-Version 1.0 (2026)
+Version 1.x (2026)
 ******************
 
-.. topic:: :gh:`v1.0.0 - unreleased <edaa-org/pyEDAA.Reports/releases/v1.0.0>`
+.. topic:: :gh:`v1.0.0 - 28.10.2026 <edaa-org/pyEDAA.Reports/releases/v1.0.0>`
 
    Since v0.19.1, the package grew from 74 to 372 classes in 15 to 59 modules, and the testsuite from 161 to 1256
    tests. v1.0.0 is the first stable release (development status *Production/Stable*). pyEDAA.Reports requires
@@ -408,22 +408,6 @@ Version 1.0 (2026)
    * Example projects in seven languages - Java, C++, Python, Rust, Go, C# and VHDL - run in the pipeline; their
      reports are test fixtures.
    * The unit and application tests run with pytest-xdist workers.
-
-.. topic:: :gh:`v0.20.0-rc4 - 22.10.2026 <edaa-org/pyEDAA.Reports/releases/v0.20.0-rc4>`
-
-   Release candidate published on PyPI; its changes are listed in v1.0.0.
-
-.. topic:: :gh:`v0.20.0-rc3 - 20.10.2026 <edaa-org/pyEDAA.Reports/releases/v0.20.0-rc3>`
-
-   Release candidate published on PyPI; its changes are listed in v1.0.0.
-
-.. topic:: :gh:`v0.20.0-rc2 - 18.10.2026 <edaa-org/pyEDAA.Reports/releases/v0.20.0-rc2>`
-
-   Release candidate published on PyPI; its changes are listed in v1.0.0.
-
-.. topic:: :gh:`v0.20.0-rc1 - 17.10.2026 <edaa-org/pyEDAA.Reports/releases/v0.20.0-rc1>`
-
-   Release candidate published on PyPI; its changes are listed in v1.0.0.
 
 
 Version 0.17.3 - 0.19.1 (2026)
