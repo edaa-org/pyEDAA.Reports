@@ -37,7 +37,7 @@ __author__ =            "Patrick Lehmann"
 __email__ =             "Paebbels@gmail.com"
 __copyright__ =         "2021-2026, Electronic Design Automation Abstraction (EDA²)"
 __license__ =           "Apache License, Version 2.0"
-__version__ =           "1.0.0"
+__version__ =           "1.0.1"
 __keywords__ =          [
 	"Reports", "Abstract Model", "Data Model", "Unit Testing", "Testcase", "Testsuite", "OSVVM", "XML"
 ]
