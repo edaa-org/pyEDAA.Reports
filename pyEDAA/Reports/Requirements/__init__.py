@@ -2229,7 +2229,7 @@ class HistoryEvent(Base):
 
 				involvedList.append(item)
 
-		if len(self._involved) == 0 and (kind == EventKind.Split or kind == EventKind.Merged):
+		if len(self._involved) == 0 and (kind is EventKind.Split or kind is EventKind.Merged):
 			raise ValueError(f"Parameter 'involved' names no item for a '{kind.name}' event.")
 
 		if description is None:

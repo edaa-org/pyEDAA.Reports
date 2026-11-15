@@ -654,7 +654,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		isContainer = parent._kind in (ItemKind.Package, ItemKind.Module, ItemKind.Class, ItemKind.Enumeration)
 		visit(body, isContainer and not inFunction, "")
 
-		if (parent._kind == ItemKind.Class or parent._kind == ItemKind.Enumeration) and not inFunction:
+		if (parent._kind is ItemKind.Class or parent._kind is ItemKind.Enumeration) and not inFunction:
 			for entry in [entry for entry in order if isinstance(entry, (FunctionDef, AsyncFunctionDef))]:
 				if entry.name == "__init__" and len(parameters := (*entry.args.posonlyargs, *entry.args.args)) > 0:
 					previous = entry
@@ -710,7 +710,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 			isinstance(decorator, Attribute) and decorator.attr in ("setter", "deleter")
 			for decorator in statement.decorator_list
 		)
-		isMember = parent._kind == ItemKind.Class or parent._kind == ItemKind.Enumeration
+		isMember = parent._kind is ItemKind.Class or parent._kind is ItemKind.Enumeration
 
 		if isAccessor or (isMember and not decorators.isdisjoint(("property", "readonly", "cached_property", "getter"))):
 			kind = ItemKind.Property
@@ -751,7 +751,7 @@ class Analyzer(metaclass=ExtendedType, slots=True):
 		:param documented: Whether a statement assigning or annotating the name documents it.
 		:param parent:     The class' or module's item.
 		"""
-		isField =        parent._kind == ItemKind.Class or parent._kind == ItemKind.Enumeration
+		isField =        parent._kind is ItemKind.Class or parent._kind is ItemKind.Enumeration
 		annotationName = self._BaseName(statement.annotation) if isinstance(statement, AnnAssign) else ""
 		callName =       self._BaseName(statement.value.func) if isinstance(getattr(statement, "value", None), Call) else ""
 

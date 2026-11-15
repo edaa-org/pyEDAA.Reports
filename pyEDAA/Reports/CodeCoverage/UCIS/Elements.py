@@ -111,9 +111,9 @@ class UserAttribute(metaclass=ExtendedType, slots=True):
 			ex.add_note(f"Got type '{getFullyQualifiedName(attributeType)}'.")
 			raise ex
 
-		if attributeType == UserAttributeType.Integer or attributeType == UserAttributeType.Integer64:
+		if attributeType is UserAttributeType.Integer or attributeType is UserAttributeType.Integer64:
 			valueType = int
-		elif attributeType == UserAttributeType.Float or attributeType == UserAttributeType.Double:
+		elif attributeType is UserAttributeType.Float or attributeType is UserAttributeType.Double:
 			valueType = float
 		else:
 			valueType = str
@@ -152,9 +152,9 @@ class UserAttribute(metaclass=ExtendedType, slots=True):
 		value: Nullable[int | float | str] = None
 		if text != "":
 			try:
-				if attributeType == UserAttributeType.Integer or attributeType == UserAttributeType.Integer64:
+				if attributeType is UserAttributeType.Integer or attributeType is UserAttributeType.Integer64:
 					value = int(text)
-				elif attributeType == UserAttributeType.Float or attributeType == UserAttributeType.Double:
+				elif attributeType is UserAttributeType.Float or attributeType is UserAttributeType.Double:
 					value = float(text)
 				else:
 					value = text

@@ -262,8 +262,8 @@ class BaseWithStatus(Base):
 				ex = ValueError("Parameter 'coverageCount' is negative.")
 				ex.add_note(f"Got value '{coverageCount}'.")
 				raise ex
-			elif (coverageCount == 0 and (status == LineCoverageStatus.Covered or \
-					status == LineCoverageStatus.PartiallyCovered)) or \
+			elif (coverageCount == 0 and (status is LineCoverageStatus.Covered or \
+					status is LineCoverageStatus.PartiallyCovered)) or \
 					(coverageCount > 0 and status is LineCoverageStatus.Uncovered):
 				ex = ValueError("Parameter 'coverageCount' contradicts parameter 'status'.")
 				ex.add_note(f"Got count '{coverageCount}' for status '{status.name}'.")

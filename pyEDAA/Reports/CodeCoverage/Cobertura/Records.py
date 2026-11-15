@@ -216,7 +216,7 @@ class Line(metaclass=ExtendedType, slots=True):
 
 		if line._coverageCount is not None:
 			hits = line._coverageCount
-		elif line._status == LineCoverageStatus.Covered or line._status == LineCoverageStatus.PartiallyCovered:
+		elif line._status is LineCoverageStatus.Covered or line._status is LineCoverageStatus.PartiallyCovered:
 			hits = 1
 		else:
 			hits = 0
