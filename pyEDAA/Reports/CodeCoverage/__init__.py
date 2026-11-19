@@ -262,7 +262,8 @@ class BaseWithStatus(Base):
 				ex = ValueError("Parameter 'coverageCount' is negative.")
 				ex.add_note(f"Got value '{coverageCount}'.")
 				raise ex
-			elif (coverageCount == 0 and status in (LineCoverageStatus.Covered, LineCoverageStatus.PartiallyCovered)) or \
+			elif (coverageCount == 0 and (status is LineCoverageStatus.Covered or \
+					status is LineCoverageStatus.PartiallyCovered)) or \
 					(coverageCount > 0 and status is LineCoverageStatus.Uncovered):
 				ex = ValueError("Parameter 'coverageCount' contradicts parameter 'status'.")
 				ex.add_note(f"Got count '{coverageCount}' for status '{status.name}'.")
@@ -643,7 +644,8 @@ class Directory(BaseWithPath):
 			ex.add_note(f"Got type '{getFullyQualifiedName(path)}'.")
 			raise ex
 
-		parts = [part for part in path.parts if part not in ("", ".", path.anchor)]
+		anchor = path.anchor
+		parts =  [part for part in path.parts if part != "" and part != "." and part != anchor]
 		if len(parts) == 0:
 			ex = ValueError("Parameter 'path' names no file.")
 			ex.add_note(f"Got path '{path}'.")

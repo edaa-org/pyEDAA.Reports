@@ -1,8 +1,7 @@
 -r ../requirements.txt
 
 # Enforce latest version on ReadTheDocs
-sphinx ~= 9.1
-docutils ~= 0.22.0
+sphinx ~= 9.2
 docutils_stubs ~= 0.0.22
 
 # ReadTheDocs Theme
@@ -12,10 +11,10 @@ sphinx_rtd_theme ~= 3.1
 sphinxcontrib-mermaid ~= 2.1
 sphinxcontrib-autoprogram ~= 0.1.9
 autoapi >= 2.0.1
-sphinx_design ~= 0.7.0
+sphinx_design ~= 0.8.0
 sphinx-copybutton >= 0.5.2
 sphinx_autodoc_typehints ~= 3.17
-pyTooling.Sphinx @ git+https://github.com/pyTooling/pyTooling.Sphinx.git@dev
+pyTooling.Sphinx ~= 1.1
 
 # Directive 'dependency-table': package overrides file (YAML)
 ruamel.yaml ~= 0.19.1
